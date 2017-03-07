@@ -13,10 +13,10 @@ public class ProceduralWorldsWindow : EditorWindow {
     List<int> windowsToAttach = new List<int>();
     List<int> attachedWindows = new List<int>();
 	
-	bool		leftBarResize = false;
-	float		splitNormalizedPosition = .5f;
-	Rect		availableRect;
 	GUIStyle	whiteText;
+
+	static HorizontalSplitView	h1;
+	static HorizontalSplitView	h2;
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
@@ -25,10 +25,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		CreateBackgroundTexture();
 
+		h1 = new HorizontalSplitView(resizeHandleTex);
+		h2 = new HorizontalSplitView(resizeHandleTex);
+
 		window.Show();
 	}
 
-	Vector2 leftBarScrollPos = Vector2.zero;
     void OnGUI()
     {
 		//text colors:
@@ -37,59 +39,39 @@ public class ProceduralWorldsWindow : EditorWindow {
 
         //background color:
 		if (backgroundTex == null)
-			CreateBackgroundTexture();
-       GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
+			Init();
+		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
-		GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-		{
-			DrawLeftBar();
-			DrawLeftSelector();
-	
-			DrawNodeGraph();
-		}
-		GUILayout.EndHorizontal();
+		h1.Begin();
+		h2.Begin();
+		DrawLeftBar();
+		h2.Split();
+		DrawNodeGraph();
+		h2.End();
+		h1.Split();
+		DrawLeftSelector();
+		h1.End();
 
-		if (leftBarResize)
-			Repaint();
+		Repaint();
     }
 
 	void DrawLeftBar()
 	{
-		Rect tmpRect = EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
-		{
-			if (tmpRect.width > 0f)
-				availableRect = tmpRect;
+		EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
 
-			Debug.Log(availableRect);
-			//left bar separation and resize:
-			Rect handleRect = new Rect(availableRect.width * splitNormalizedPosition, availableRect.y, 4f, availableRect.height);
-			Rect handleCatchRect = new Rect(availableRect.width * splitNormalizedPosition - 2, availableRect.y, 8f, availableRect.height);
-			GUI.DrawTexture(handleRect, resizeHandleTex);
-			EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
+		//draw preview view.
 
-            if (Event.current.type == EventType.mouseDown && handleCatchRect.Contains(Event.current.mousePosition))
-                leftBarResize = true;
-            if (leftBarResize)
-				splitNormalizedPosition = Event.current.mousePosition.x / availableRect.width;
-            if (Event.current.type == EventType.MouseUp)
-                leftBarResize = false;
-
-            GUILayout.BeginScrollView(leftBarScrollPos, GUILayout.Width(availableRect.width * splitNormalizedPosition));
-			{
-				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
-				
-				//draw preview view.
-
-				//draw infos / debug / global settings view
-			}
-			GUILayout.EndScrollView();
-		}
-		EditorGUILayout.EndVertical();
+		//draw infos / debug / global settings view
 	}
 
 	void DrawLeftSelector()
 	{
 		//TODO: PWNode selector for creation
+		//TODO: left selector background color:
+
+		EditorGUILayout.LabelField("list of components", whiteText);
+		
+		//TOTO: draw list of components
 	}
 
 	void DrawNodeGraph()
