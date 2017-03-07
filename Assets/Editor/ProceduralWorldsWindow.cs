@@ -13,10 +13,16 @@ public class ProceduralWorldsWindow : EditorWindow {
     List<int> windowsToAttach = new List<int>();
     List<int> attachedWindows = new List<int>();
 	
-	GUIStyle	whiteText;
+	static GUIStyle	whiteText;
+	static GUIStyle	splittedPanel;
 
 	static HorizontalSplitView	h1;
 	static HorizontalSplitView	h2;
+
+	Vector2	leftBarScrollPosition;
+	Vector2	selectorScrollPosition;
+
+	float		minWidth = 100;
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
@@ -25,8 +31,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		CreateBackgroundTexture();
 
-		h1 = new HorizontalSplitView(resizeHandleTex);
-		h2 = new HorizontalSplitView(resizeHandleTex);
+		h1 = new HorizontalSplitView(resizeHandleTex, 100);
+		h2 = new HorizontalSplitView(resizeHandleTex, 300); //TODO: winize.x - 100
+
+		splittedPanel = new GUIStyle();
+		splittedPanel.margin = new RectOffset(1, 0, 0, 0);
 
 		window.Show();
 	}
@@ -57,21 +66,48 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawLeftBar()
 	{
-		EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
-
-		//draw preview view.
-
-		//draw infos / debug / global settings view
+		leftBarScrollPosition = EditorGUILayout.BeginScrollView(leftBarScrollPosition, GUILayout.ExpandWidth(true));
+		{
+			EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
+	
+			//draw preview view.
+	
+			//draw infos / debug / global settings view
+		}
+		EditorGUILayout.EndScrollView();
 	}
 
+	string searchString = "";
 	void DrawLeftSelector()
 	{
-		//TODO: PWNode selector for creation
-		//TODO: left selector background color:
-
-		EditorGUILayout.LabelField("list of components", whiteText);
+		selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
+		{
+			EditorGUILayout.BeginVertical(splittedPanel);
+			{
+				EditorGUIUtility.labelWidth = 0;
+				EditorGUIUtility.fieldWidth = 0;
+				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
+				{
+					searchString = GUILayout.TextField(searchString, GUI.skin.FindStyle("ToolbarSeachTextField"));
+					if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
+					{
+						// Remove focus if cleared
+						searchString = "";
+						GUI.FocusControl(null);
+					}
+				}
+				GUILayout.EndHorizontal();
+				
+				//TODO: PWNode selector for creation
+				//TODO: left selector background color:
 		
-		//TOTO: draw list of components
+				EditorGUILayout.LabelField("list of components", whiteText);
+				
+				//TOTO: draw list of components
+			}
+			EditorGUILayout.EndVertical();
+		}
+		EditorGUILayout.EndScrollView();
 	}
 
 	void DrawNodeGraph()
