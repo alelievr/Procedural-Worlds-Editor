@@ -10,6 +10,8 @@ namespace PW
 	{
 		public string	name;
 
+		public Rect		rect;
+
 		string	_name; //internal unique name
 		Vector2	position;
 		int		computeOrder; //to define an order for computing result
@@ -22,23 +24,25 @@ namespace PW
 			_name = System.Guid.NewGuid().ToString();
 			position = Vector2.one * 100;
 			computeOrder = 0;
+			name = "basic node";
+			rect = new Rect(400, 400, 250, 400);
 			OnCreate();
 		}
 
-		public void OnCreate()
+		public virtual void OnCreate()
 		{
 		}
 
-		public virtual void OnGUI()
+		public virtual void OnGUI(int id)
 		{
+			GUI.DragWindow();
+			
 			//get input variables
-			Type	t = typeof(PWNode);
+			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
 
-			System.Reflection.MemberInfo[] mInfos = t.GetMembers();
-
-			foreach (var member in mInfos)
+			foreach (var field in fInfos)
 			{
-				System.Object[] attrs = member.GetCustomAttributes(true);
+				System.Object[] attrs = field.GetCustomAttributes(true);
 
 				foreach (var o in attrs)
 				{

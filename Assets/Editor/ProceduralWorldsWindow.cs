@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -9,9 +10,10 @@ public class ProceduralWorldsWindow : EditorWindow {
     private static Texture2D	backgroundTex;
 	private static Texture2D	resizeHandleTex;
 
-    List<Rect> windows = new List<Rect>();
-    List<int> windowsToAttach = new List<int>();
-    List<int> attachedWindows = new List<int>();
+	List< PWNode >				nodes = new List< PWNode >();
+    List<Rect>					windows = new List<Rect>();
+    List<int>					windowsToAttach = new List<int>();
+    List<int>					attachedWindows = new List<int>();
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	splittedPanel;
@@ -19,10 +21,29 @@ public class ProceduralWorldsWindow : EditorWindow {
 	static HorizontalSplitView	h1;
 	static HorizontalSplitView	h2;
 
+	[SerializeField]
 	Vector2	leftBarScrollPosition;
+	[SerializeField]
 	Vector2	selectorScrollPosition;
 
 	float		minWidth = 100;
+	
+	private class PWNodeStorage
+	{
+		public string		name;
+		public System.Type	nodeInstace;
+		
+		public PWNodeStorage(string n, System.Type instance)
+		{
+			name = n;
+			nodeInstace = instance;
+		}
+	}
+
+	List< PWNodeStorage > nodeList = new List< PWNodeStorage >()
+	{
+		new PWNodeStorage("Slider", typeof(PWNodeSlider))
+	};
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
@@ -31,11 +52,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		CreateBackgroundTexture();
 
-		h1 = new HorizontalSplitView(resizeHandleTex, 100);
-		h2 = new HorizontalSplitView(resizeHandleTex, 300); //TODO: winize.x - 100
+		h1 = new HorizontalSplitView(resizeHandleTex, window.position.width - 250, window.position.width / 2, window.position.width - 4);
+		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, window.position.width / 2);
 
 		splittedPanel = new GUIStyle();
-		splittedPanel.margin = new RectOffset(1, 0, 0, 0);
+		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
 		window.Show();
 	}
@@ -47,43 +68,55 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteText.normal.textColor = Color.white;
 
         //background color:
-		if (backgroundTex == null)
+		if (backgroundTex == null || h1 == null)
 			Init();
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
+		DrawNodeGraphCore();
+
 		h1.Begin();
-		h2.Begin();
-		DrawLeftBar();
+		Rect p1 = h2.Begin(backgroundTex);
+		DrawLeftBar(p1);
 		h2.Split();
-		DrawNodeGraph();
+		DrawNodeGraphHeader();
 		h2.End();
-		h1.Split();
-		DrawLeftSelector();
+		Rect p2 = h1.Split(backgroundTex);
+		DrawLeftSelector(p2);
 		h1.End();
 
 		Repaint();
     }
 
-	void DrawLeftBar()
+	void DrawLeftBar(Rect currentRect)
 	{
+		GUI.DrawTexture(currentRect, backgroundTex);
 		leftBarScrollPosition = EditorGUILayout.BeginScrollView(leftBarScrollPosition, GUILayout.ExpandWidth(true));
 		{
-			EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
-	
-			//draw preview view.
-	
-			//draw infos / debug / global settings view
+			EditorGUILayout.BeginVertical(splittedPanel);
+			{
+				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
+		
+				//draw preview view.
+		
+				//draw infos / debug / global settings view
+			}
+			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
 	}
 
 	string searchString = "";
-	void DrawLeftSelector()
+	void DrawLeftSelector(Rect currentRect)
 	{
+		GUI.DrawTexture(currentRect, backgroundTex);
 		selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
+				//apply background color:
+				GUI.DrawTexture(currentRect, backgroundTex);
+
+				//TODO: dynamic search
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUIUtility.fieldWidth = 0;
 				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
@@ -98,24 +131,51 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 				GUILayout.EndHorizontal();
 				
-				//TODO: PWNode selector for creation
-				//TODO: left selector background color:
-		
-				EditorGUILayout.LabelField("list of components", whiteText);
-				
-				//TOTO: draw list of components
+				foreach (var node in nodeList)
+				{
+					PWNode n = (PWNode)System.Activator.CreateInstance(node.nodeInstace);
+
+					Rect r = EditorGUILayout.GetControlRect();
+					EditorGUI.LabelField(r, n.name, whiteText);
+
+					r.height += 10;
+
+					if (Event.current.type == EventType.MouseDown && r.Contains(Event.current.mousePosition))
+					{
+						nodes.Add(n);
+						Debug.Log("added node of type: " + node.nodeInstace);
+					}
+				}
 			}
 			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
 	}
+	
+	void DrawNodeGraphHeader()
+	{
+		EditorGUILayout.BeginVertical(splittedPanel);
+		//if (GUILayout.Button("Create Node"))
+		//	windows.Add(new Rect(position.center.x, position.center.y, 150, 400));
+		EditorGUILayout.EndVertical();
+	}
 
-	void DrawNodeGraph()
+	string GetUniqueName(string name)
+	{
+		while (true)
+		{
+			if (!nodes.Any(p => p.name == name))
+				return name;
+			name += "*";
+		}
+	}
+
+	void DrawNodeGraphCore()
 	{
 		EditorGUILayout.BeginHorizontal();
 		{
 			//draw links (will be moved to PWNode.cs)
-			if (windowsToAttach.Count == 2)
+			/*if (windowsToAttach.Count == 2)
 			{
 				attachedWindows.Add(windowsToAttach[0]);
 				attachedWindows.Add(windowsToAttach[1]);
@@ -123,15 +183,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 			if (attachedWindows.Count >= 2)
 				for (int i = 0; i < attachedWindows.Count; i += 2)
-					DrawNodeCurve(windows[attachedWindows[i]], windows[attachedWindows[i + 1]]);
-	
-			//Window render (will also be moved to PWNode)
+					DrawNodeCurve(windows[attachedWindows[i]], windows[attachedWindows[i + 1]]);*/
+
 			BeginWindows();
-			if (GUILayout.Button("Create Node"))
-				windows.Add(new Rect(10, 10, 100, 100));
-	
-			for (int i = 0; i < windows.Count; i++)
-				windows[i] = GUI.Window(i, windows[i], DrawNodeWindow, "Window " + i);
+			for (int i = 0; i < nodes.Count; i++)
+				nodes[i].rect = GUI.Window(i, nodes[i].rect, nodes[i].OnGUI, nodes[i].name);
 			EndWindows();
 		}
 		EditorGUILayout.EndHorizontal();
@@ -165,13 +221,5 @@ public class ProceduralWorldsWindow : EditorWindow {
             Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);
 
         Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 1);
-    }
-
-    void DrawNodeWindow(int id)
-    {
-        if (GUILayout.Button("Attach"))
-            windowsToAttach.Add(id);
-
-        GUI.DragWindow();
     }
 }

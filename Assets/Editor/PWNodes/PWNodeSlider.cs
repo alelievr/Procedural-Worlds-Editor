@@ -11,11 +11,16 @@ public class PWNodeSlider : PWNode {
 	float	min = 0;
 	float	max = 1;
 
-	public override void OnGUI()
+	public override void OnCreate()
 	{
-		EditorGUILayout.Slider(value, min, max);
+		name = "slider";
+	}
+
+	public override void OnGUI(int id)
+	{
+		value = EditorGUILayout.Slider(value, min, max);
 
 		//do not forget this if you want the node links :)
-		base.OnGUI();
+		base.OnGUI(id);
 	}
 }
