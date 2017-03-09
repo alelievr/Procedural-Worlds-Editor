@@ -4,20 +4,21 @@ using UnityEngine;
 using PW;
 using UnityEditor;
 
+[System.SerializableAttribute]
 public class PWNodeSlider : PWNode {
 
-	[PWOutput]
-	public float	value = .5f;
+	[PWOutput("V")]
+	public float	value1 = .5f;
 	float	min = 0;
 	float	max = 1;
 
-	public override void OnCreate()
+	public override void OnNodeCreate()
 	{
 		name = "slider";
 	}
 
 	public override void OnNodeGUI()
 	{
-		value = EditorGUILayout.Slider(value, min, max);
+		value1 = EditorGUILayout.Slider(value1, min, max);
 	}
 }

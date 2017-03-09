@@ -17,9 +17,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	selectorCaseTitleBackgroundTex;
 
 	List< PWNode >				nodes = new List< PWNode >();
-    List<Rect>					windows = new List<Rect>();
-    List<int>					windowsToAttach = new List<int>();
-    List<int>					attachedWindows = new List<int>();
+    List< Rect >				windows = new List< Rect >();
+    List< int >					windowsToAttach = new List< int >();
+    List< int >					attachedWindows = new List< int >();
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
@@ -36,36 +36,26 @@ public class ProceduralWorldsWindow : EditorWindow {
 	Vector2			graphDecalPosition;
 	Vector2			lastMousePosition;
 	bool			dragginGraph = false;
+	bool			mouseAboveNodeAnchor = false;
 	
 	string			searchString = "";
 	
+	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
 		public string		name;
-		public System.Type	nodeInstace;
+		public System.Type	nodeType;
+		public PWNode		instance;
 		
-		public PWNodeStorage(string n, System.Type instance)
+		public PWNodeStorage(string n, System.Type type)
 		{
 			name = n;
-			nodeInstace = instance;
+			nodeType = type;
+			instance = ScriptableObject.CreateInstance(type) as PWNode;
 		}
 	}
 
-	List< PWNodeStorage > nodeList = new List< PWNodeStorage >()
-	{
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
-		new PWNodeStorage("Slider", typeof(PWNodeSlider))
-	};
+	List< PWNodeStorage > nodeList = new List< PWNodeStorage >();
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
@@ -74,6 +64,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		CreateBackgroundTexture();
 
+		//TODO: save the position of these separators:
 		h1 = new HorizontalSplitView(resizeHandleTex, window.position.width - 250, window.position.width / 2, window.position.width - 4);
 		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, window.position.width / 2);
 
@@ -83,6 +74,26 @@ public class ProceduralWorldsWindow : EditorWindow {
 		window.graphDecalPosition = Vector2.zero;
 
 		window.Show();
+	}
+
+	void OnEnable()
+	{
+		//instanciate all node type in the selector:
+		//setup nodeList:
+		nodeList.Clear();
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
 	}
 
     void OnGUI()
@@ -114,7 +125,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		DrawSelector(p2);
 		h1.End();
 
-		Repaint();
+		//if event, repaint
+		if (Event.current.type == EventType.mouseDown
+			|| Event.current.type == EventType.mouseDrag
+			|| Event.current.type == EventType.mouseUp
+			|| Event.current.type == EventType.scrollWheel)
+			Repaint();
     }
 
 	void DrawLeftBar(Rect currentRect)
@@ -185,14 +201,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawSelectorCase(ref r, "Values", true);
 				foreach (var node in nodeList)
 				{
-					PWNode n = (PWNode)System.Activator.CreateInstance(node.nodeInstace);
-
-					Rect clickableRect = DrawSelectorCase(ref r, n.name);
+					if (node.instance == null)
+					{
+						Debug.Log("Instanciate new type: " + node.nodeType);
+						node.instance = ScriptableObject.CreateInstance(node.nodeType) as PWNode;
+					}
+					Rect clickableRect = DrawSelectorCase(ref r, node.instance.name);
 
 					if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
 					{
-						nodes.Add(n);
-						Debug.Log("added node of type: " + node.nodeInstace);
+						nodes.Add(node.instance);
+						Debug.Log("added node of type: " + node.nodeType);
 					}
 				}
 			}
@@ -211,6 +230,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		#endif
 
 		if (Event.current.type == EventType.MouseDown //if event is mouse down
+			&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
 			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
 			&& !nodes.Any(n => PWUtils.DecalRect(n.rect, graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
 			dragginGraph = true;
@@ -251,17 +271,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 				for (int i = 0; i < attachedWindows.Count; i += 2)
 					DrawNodeCurve(windows[attachedWindows[i]], windows[attachedWindows[i + 1]]);*/
 
+			bool	mouseAboveAnchorLocal = false;
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				nodes[i].rect = PWUtils.DecalRect(nodes[i].rect, graphDecalPosition);
-				Rect decaledRect = GUI.Window(i, nodes[i].rect, nodes[i].OnGUI, nodes[i].name);
+				Rect decaledRect = GUI.Window(i, nodes[i].rect, nodes[i].OnWindowGUI, nodes[i].name);
 				//draw inputs and outputs anchor for the window:
-				nodes[i].RenderAnchors();
+				mouseAboveAnchorLocal = nodes[i].RenderAnchors(decaledRect) || mouseAboveAnchorLocal;
+				List< Link > links = nodes[i].GetLinks();
 				//TODO: retreive the list of links in the node and display links with window ids and props id
 				nodes[i].rect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 			}
 			EndWindows();
+			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 		}
 		EditorGUILayout.EndHorizontal();
 	}

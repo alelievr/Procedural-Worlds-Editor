@@ -6,11 +6,12 @@ using System;
 
 namespace PW
 {
-	public class PWNode
+	[System.SerializableAttribute]
+	public class PWNode : ScriptableObject
 	{
-		public string	name;
-
 		public Rect		rect;
+
+		static Color	defaultAnchorBackgroundColor = Color.white * .75f;
 
 		string	_name; //internal unique name
 		Vector2	position;
@@ -25,23 +26,33 @@ namespace PW
 			_name = System.Guid.NewGuid().ToString();
 			position = Vector2.one * 100;
 			computeOrder = 0;
-			name = "basic node";
 			rect = new Rect(400, 400, 200, 300);
 			viewHeight = 0;
-			OnCreate();
 		}
 
-		public virtual void OnCreate()
+		public void OnEnable()
+		{
+			name = "basic node";
+			OnNodeCreate();
+		}
+
+		public virtual void OnNodeCreate()
 		{
 		}
 
-		public virtual void OnGUI(int id)
+		public void OnGUI()
+		{
+			Debug.Log("You are on the wrong window");
+		}
+
+		public void OnWindowGUI(int id)
 		{
 			// set the header of the window as draggable:
 			GUI.DragWindow(new Rect(0, 0, rect.width, 20));
 
 			GUILayout.BeginVertical();
 			{
+				//set the singleLineHeight to 24
 				OnNodeGUI();
 			}
 			GUILayout.EndVertical();
@@ -51,7 +62,6 @@ namespace PW
 				viewHeight = viewH;
 
 			rect.height = viewHeight + 30; //add the window header and footer size
-			//TODO: get the scollView size and set it as new window size.
 		}
 	
 		public virtual void	OnNodeGUI()
@@ -59,31 +69,75 @@ namespace PW
 			EditorGUILayout.LabelField("empty node");
 		}
 
-		public void RenderAnchors()
+		public bool RenderAnchors(Rect screenWindowRect)
 		{
+			bool mouseAboveAnchor = false;
+			
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
 
+			int		anchorWidth = 40;
+			int		anchorHeight = 20;
+
+			Rect	inputAnchorRect = new Rect(screenWindowRect.xMin - anchorWidth + 2, screenWindowRect.y + 20, anchorWidth, anchorHeight);
+			Rect	outputAnchorRect = new Rect(screenWindowRect.xMax - 2, screenWindowRect.y + 20, anchorWidth, anchorHeight);
 			foreach (var field in fInfos)
 			{
 				System.Object[] attrs = field.GetCustomAttributes(true);
 
 				foreach (var o in attrs)
 				{
-					if (o as PWInput != null)
+					bool	drawAnchor = false;
+					Color	backgroundColor = defaultAnchorBackgroundColor;
+					Rect	anchorRect = new Rect();
+					string	fieldName = "NULL";
+
+					PWInput		input = o as PWInput;
+					PWOutput	output = o as PWOutput;
+					PWColor		color = o as PWColor;
+
+					if (input != null)
 					{
-						// Debug.Log("input: " + o);
+						drawAnchor = true;
+						fieldName = (input.name != null) ? input.name : field.Name;
+						anchorRect = inputAnchorRect;
 					}
-					if (o as PWOutput != null)
+					if (output != null)
 					{
-						// Debug.Log("output: " + o);
+						if (drawAnchor == true) //value is set in input and output -> error
+							continue ;
+						anchorRect = outputAnchorRect;
+						fieldName = (output.name != null) ? output.name : field.Name;
+						drawAnchor = true;
 					}
+					if (color != null)
+						backgroundColor = color.color;
+					if (drawAnchor)
+					{
+						Color savedBackground = GUI.backgroundColor;
+						GUI.backgroundColor = backgroundColor;
+						GUI.Box(anchorRect, (fieldName.Length > 4) ? fieldName.Substring(0, 4) : fieldName);
+						GUI.backgroundColor = savedBackground;
+						if (anchorRect.Contains(Event.current.mousePosition))
+							mouseAboveAnchor = true;
+					}
+					inputAnchorRect.y += 24;
+					outputAnchorRect.y += 24;
 				}
 			}
+			return mouseAboveAnchor;
+		}
+
+		public List< Link > GetLinks()
+		{
+			var links = new List< Link >();
+	
+			return links;
 		}
     }
 
-	struct Link
+	[System.SerializableAttribute]
+	public class Link
 	{
 		//distant link:
 		public string	windowName;
@@ -103,18 +157,43 @@ namespace PW
 	[System.AttributeUsage(System.AttributeTargets.Field)]
 	public class PWInput : System.Attribute
 	{
+		public string	name = null;
+		
 		public PWInput()
 		{
-
+		}
+		
+		public PWInput(string fieldName)
+		{
+			name = fieldName;
 		}
 	}
 	
 	[System.AttributeUsage(System.AttributeTargets.Field)]
 	public class PWOutput : System.Attribute
 	{
+		public string	name = null;
+
 		public PWOutput()
 		{
-			
+		}
+		
+		public PWOutput(string fieldName)
+		{
+			name = fieldName;
+		}
+	}
+
+	[System.AttributeUsage(System.AttributeTargets.Field)]
+	public class PWColor : System.Attribute
+	{
+		public Color		color;
+
+		public PWColor(float r, float g, float b)
+		{
+			color.r = r;
+			color.g = g;
+			color.b = b;
 		}
 	}
 }

@@ -42,6 +42,7 @@ public class HorizontalSplitView {
 		
 		//TODO: min width and background color.
 		//left bar separation and resize:
+		
 		Rect handleRect = new Rect(handlerPosition, availableRect.y, handleWidth, availableRect.height);
 		Rect handleCatchRect = new Rect(handlerPosition, availableRect.y, 8f, availableRect.height);
 		GUI.DrawTexture(handleRect, resizeHandleTex);
