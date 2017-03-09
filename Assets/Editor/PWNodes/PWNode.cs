@@ -15,7 +15,8 @@ namespace PW
 		string	_name; //internal unique name
 		Vector2	position;
 		int		computeOrder; //to define an order for computing result
-		Vector2	size = new Vector2(100, 150);
+		Vector2	scrollPos;
+		int		viewHeight;
 
 		List< int > links = new List< int >();
 
@@ -25,7 +26,8 @@ namespace PW
 			position = Vector2.one * 100;
 			computeOrder = 0;
 			name = "basic node";
-			rect = new Rect(400, 400, 250, 400);
+			rect = new Rect(400, 400, 200, 300);
+			viewHeight = 0;
 			OnCreate();
 		}
 
@@ -35,8 +37,30 @@ namespace PW
 
 		public virtual void OnGUI(int id)
 		{
-			GUI.DragWindow();
-			
+			// set the header of the window as draggable:
+			GUI.DragWindow(new Rect(0, 0, rect.width, 20));
+
+			GUILayout.BeginVertical();
+			{
+				OnNodeGUI();
+			}
+			GUILayout.EndVertical();
+
+			int	viewH = (int)GUILayoutUtility.GetLastRect().height;
+			if (viewH > 2)
+				viewHeight = viewH;
+
+			rect.height = viewHeight + 30; //add the window header and footer size
+			//TODO: get the scollView size and set it as new window size.
+		}
+	
+		public virtual void	OnNodeGUI()
+		{
+			EditorGUILayout.LabelField("empty node");
+		}
+
+		public void RenderAnchors()
+		{
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
 
@@ -48,11 +72,11 @@ namespace PW
 				{
 					if (o as PWInput != null)
 					{
-						Debug.Log("input: " + o);
+						// Debug.Log("input: " + o);
 					}
 					if (o as PWOutput != null)
 					{
-						Debug.Log("output: " + o);
+						// Debug.Log("output: " + o);
 					}
 				}
 			}

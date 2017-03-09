@@ -9,8 +9,9 @@ public class HorizontalSplitView {
 	float		handlerPosition;
 	bool		resize = false;
 	Rect		availableRect;
-	float			minWidth;
+	float		minWidth;
 	float		maxWidth;
+	float		lastMouseX = -1;
 
 	Texture2D	resizeHandleTex;
 
@@ -35,7 +36,6 @@ public class HorizontalSplitView {
 		return EditorGUILayout.BeginVertical(GUILayout.Width(handlerPosition), GUILayout.ExpandHeight(true));
 	}
 
-	float lastMouseX = Event.current.mousePosition.x;
 	public Rect Split(Texture2D background = null)
 	{
 		EditorGUILayout.EndVertical();
@@ -49,7 +49,7 @@ public class HorizontalSplitView {
 
 		if (Event.current.type == EventType.mouseDown && handleCatchRect.Contains(Event.current.mousePosition))
 			resize = true;
-		if (resize)
+		if (lastMouseX != -1 && resize)
 			handlerPosition += Event.current.mousePosition.x - lastMouseX;
 		if (Event.current.type == EventType.MouseUp)
 			resize = false;
@@ -57,6 +57,12 @@ public class HorizontalSplitView {
 		handlerPosition = Mathf.Clamp(handlerPosition, minWidth, maxWidth);
 
 		return new Rect(handlerPosition + 4, availableRect.y, availableRect.width - handlerPosition, availableRect.height);
+	}
+
+	public void UpdateMinMax(float min, float max)
+	{
+		minWidth = min;
+		maxWidth = max;
 	}
 
 	public void End()

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿// #define		DEBUG_GRAPH
+
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +11,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     private static Texture2D	backgroundTex;
 	private static Texture2D	resizeHandleTex;
+	private static Texture2D	selectorBackgroundTex;
+	private static Texture2D	debugTexture1;
+	private static Texture2D	selectorCaseBackgroundTex;
+	private static Texture2D	selectorCaseTitleBackgroundTex;
 
 	List< PWNode >				nodes = new List< PWNode >();
     List<Rect>					windows = new List<Rect>();
@@ -16,17 +22,22 @@ public class ProceduralWorldsWindow : EditorWindow {
     List<int>					attachedWindows = new List<int>();
 	
 	static GUIStyle	whiteText;
+	static GUIStyle	whiteBoldText;
 	static GUIStyle	splittedPanel;
 
 	static HorizontalSplitView	h1;
 	static HorizontalSplitView	h2;
 
 	[SerializeField]
-	Vector2	leftBarScrollPosition;
+	Vector2			leftBarScrollPosition;
 	[SerializeField]
-	Vector2	selectorScrollPosition;
+	Vector2			selectorScrollPosition;
 
-	float		minWidth = 100;
+	Vector2			graphDecalPosition;
+	Vector2			lastMousePosition;
+	bool			dragginGraph = false;
+	
+	string			searchString = "";
 	
 	private class PWNodeStorage
 	{
@@ -42,6 +53,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	List< PWNodeStorage > nodeList = new List< PWNodeStorage >()
 	{
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
+		new PWNodeStorage("Slider", typeof(PWNodeSlider)),
 		new PWNodeStorage("Slider", typeof(PWNodeSlider))
 	};
 
@@ -58,6 +80,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
+		window.graphDecalPosition = Vector2.zero;
+
 		window.Show();
 	}
 
@@ -66,6 +90,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
+		whiteBoldText = new GUIStyle();
+		whiteBoldText.fontStyle = FontStyle.Bold;
+		whiteBoldText.normal.textColor = Color.white;
 
         //background color:
 		if (backgroundTex == null || h1 == null)
@@ -74,14 +101,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		DrawNodeGraphCore();
 
+		h1.UpdateMinMax(position.width / 2, position.width - 4);
+		h2.UpdateMinMax(0, position.width / 2);
+
 		h1.Begin();
 		Rect p1 = h2.Begin(backgroundTex);
 		DrawLeftBar(p1);
-		h2.Split();
-		DrawNodeGraphHeader();
+		Rect g = h2.Split();
+		DrawNodeGraphHeader(g);
 		h2.End();
 		Rect p2 = h1.Split(backgroundTex);
-		DrawLeftSelector(p2);
+		DrawSelector(p2);
 		h1.End();
 
 		Repaint();
@@ -105,16 +135,36 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
-	string searchString = "";
-	void DrawLeftSelector(Rect currentRect)
+	Rect DrawSelectorCase(ref Rect r, string name, bool title = false)
 	{
-		GUI.DrawTexture(currentRect, backgroundTex);
+		//text box
+		Rect boxRect = new Rect(r);
+		boxRect.y += 2;
+		boxRect.height += 10;
+
+		if (title)
+			GUI.DrawTexture(boxRect, selectorCaseTitleBackgroundTex);
+		else
+			GUI.DrawTexture(boxRect, selectorCaseBackgroundTex);
+
+		boxRect.y += 6;
+		boxRect.x += 10;
+
+		EditorGUI.LabelField(boxRect, name, (title) ? whiteBoldText : whiteText);
+
+		r.y += 30;
+
+		return boxRect;
+	}
+
+	void DrawSelector(Rect currentRect)
+	{
+		GUI.DrawTexture(currentRect, selectorBackgroundTex);
 		selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
 				//apply background color:
-				GUI.DrawTexture(currentRect, backgroundTex);
 
 				//TODO: dynamic search
 				EditorGUIUtility.labelWidth = 0;
@@ -131,16 +181,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 				GUILayout.EndHorizontal();
 				
+				Rect r = EditorGUILayout.GetControlRect();
+				DrawSelectorCase(ref r, "Values", true);
 				foreach (var node in nodeList)
 				{
 					PWNode n = (PWNode)System.Activator.CreateInstance(node.nodeInstace);
 
-					Rect r = EditorGUILayout.GetControlRect();
-					EditorGUI.LabelField(r, n.name, whiteText);
+					Rect clickableRect = DrawSelectorCase(ref r, n.name);
 
-					r.height += 10;
-
-					if (Event.current.type == EventType.MouseDown && r.Contains(Event.current.mousePosition))
+					if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
 					{
 						nodes.Add(n);
 						Debug.Log("added node of type: " + node.nodeInstace);
@@ -152,11 +201,28 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 	
-	void DrawNodeGraphHeader()
+	void DrawNodeGraphHeader(Rect graphRect)
 	{
 		EditorGUILayout.BeginVertical(splittedPanel);
+
+		#if (DEBUG_GRAPH)
+		foreach (var node in nodes)
+			GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
+		#endif
+
+		if (Event.current.type == EventType.MouseDown //if event is mouse down
+			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
+			&& !nodes.Any(n => PWUtils.DecalRect(n.rect, graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
+			dragginGraph = true;
+		if (dragginGraph)
+			graphDecalPosition += Event.current.mousePosition - lastMousePosition;
+		if (Event.current.type == EventType.MouseUp)
+			dragginGraph = false;
+		// Debug.Log("graphDrag: " + dragginGraph);
+		// Debug.Log("graphDecal: " + graphDecalPosition);
 		//if (GUILayout.Button("Create Node"))
 		//	windows.Add(new Rect(position.center.x, position.center.y, 150, 400));
+		lastMousePosition = Event.current.mousePosition;
 		EditorGUILayout.EndVertical();
 	}
 
@@ -172,7 +238,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawNodeGraphCore()
 	{
-		EditorGUILayout.BeginHorizontal();
+		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
 			//draw links (will be moved to PWNode.cs)
 			/*if (windowsToAttach.Count == 2)
@@ -187,7 +253,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
-				nodes[i].rect = GUI.Window(i, nodes[i].rect, nodes[i].OnGUI, nodes[i].name);
+			{
+				nodes[i].rect = PWUtils.DecalRect(nodes[i].rect, graphDecalPosition);
+				Rect decaledRect = GUI.Window(i, nodes[i].rect, nodes[i].OnGUI, nodes[i].name);
+				//draw inputs and outputs anchor for the window:
+				nodes[i].RenderAnchors();
+				//TODO: retreive the list of links in the node and display links with window ids and props id
+				nodes[i].rect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
+			}
 			EndWindows();
 		}
 		EditorGUILayout.EndHorizontal();
@@ -195,18 +268,37 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	static void CreateBackgroundTexture()
 	{
-        Color backgroundColor = EditorGUIUtility.isProSkin
+        Color backgroundColor = new Color32(56, 56, 56, 255);
+		Color resizeHandleColor = EditorGUIUtility.isProSkin
 			? new Color32(56, 56, 56, 255)
-			: new Color32(56, 56, 56, 255);
+            : new Color32(130, 130, 130, 255);
+		Color selectorBackgroundColor = new Color32(80, 80, 80, 255);
+		Color selectorCaseBackgroundColor = new Color32(110, 110, 110, 255);
+		Color selectorCaseTitleBackgroundColor = new Color32(50, 50, 50, 255);
+		
 		backgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
 		backgroundTex.SetPixel(0, 0, backgroundColor);
 		backgroundTex.Apply();
-		Color resizeHandleColor = EditorGUIUtility.isProSkin
-			? new Color32(56, 56, 56, 255)
-            : new Color32(194, 194, 194, 255);
+
 		resizeHandleTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
 		resizeHandleTex.SetPixel(0, 0, resizeHandleColor);
 		resizeHandleTex.Apply();
+
+		selectorBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+		selectorBackgroundTex.SetPixel(0, 0, selectorBackgroundColor);
+		selectorBackgroundTex.Apply();
+
+		debugTexture1 = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+		debugTexture1.SetPixel(0, 0, new Color(1f, 0f, 0f, .3f));
+		debugTexture1.Apply();
+		
+		selectorCaseBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+		selectorCaseBackgroundTex.SetPixel(0, 0, selectorCaseBackgroundColor);
+		selectorCaseBackgroundTex.Apply();
+		
+		selectorCaseTitleBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+		selectorCaseTitleBackgroundTex.SetPixel(0, 0, selectorCaseTitleBackgroundColor);
+		selectorCaseTitleBackgroundTex.Apply();
 	}
 
     void DrawNodeCurve(Rect start, Rect end)
