@@ -11,7 +11,8 @@ namespace PW
 	{
 		public Rect		rect;
 
-		static Color	defaultAnchorBackgroundColor = Color.white * .75f;
+		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
+		static Texture2D disabledTexture = null;
 
 		string	_name; //internal unique name
 		Vector2	position;
@@ -20,6 +21,24 @@ namespace PW
 		int		viewHeight;
 
 		List< int > links = new List< int >();
+
+		Dictionary< string, PropMetadata >	propertyMetadatas = new Dictionary< string, PropMetadata >();
+
+		public class PropMetadata
+		{
+			public bool		enabled;
+			public Color	color;
+			public string	name;
+			public bool		visible;
+
+			public PropMetadata()
+			{
+				enabled = true;
+				visible = true;
+				name = null;
+				color = defaultAnchorBackgroundColor;
+			}
+		}
 
 		public PWNode()
 		{
@@ -33,6 +52,9 @@ namespace PW
 		public void OnEnable()
 		{
 			name = "basic node";
+			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
+			disabledTexture.Apply();
 			OnNodeCreate();
 		}
 
@@ -52,8 +74,10 @@ namespace PW
 
 			GUILayout.BeginVertical();
 			{
-				//set the singleLineHeight to 24
+				RectOffset savedmargin = GUI.skin.label.margin;
+				GUI.skin.label.margin = new RectOffset(2, 2, 5, 7);
 				OnNodeGUI();
+				GUI.skin.label.margin = savedmargin;
 			}
 			GUILayout.EndVertical();
 
@@ -76,22 +100,28 @@ namespace PW
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
 
-			int		anchorWidth = 40;
-			int		anchorHeight = 20;
+			int		anchorWidth = 38;
+			int		anchorHeight = 16;
 
 			Rect	inputAnchorRect = new Rect(screenWindowRect.xMin - anchorWidth + 2, screenWindowRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(screenWindowRect.xMax - 2, screenWindowRect.y + 20, anchorWidth, anchorHeight);
 			foreach (var field in fInfos)
 			{
 				System.Object[] attrs = field.GetCustomAttributes(true);
+				
+				if (!propertyMetadatas.ContainsKey(field.Name))
+					propertyMetadatas[field.Name] = new PropMetadata();
+
+				PropMetadata	metadata = propertyMetadatas[field.Name];
+				bool			drawAnchor = false;
+				Color			backgroundColor = defaultAnchorBackgroundColor;
+				Rect			anchorRect = new Rect();
+				string			fieldName = "NULL";
+				bool			visible = metadata.visible;
+				bool			enabled = metadata.enabled;
 
 				foreach (var o in attrs)
 				{
-					bool	drawAnchor = false;
-					Color	backgroundColor = defaultAnchorBackgroundColor;
-					Rect	anchorRect = new Rect();
-					string	fieldName = "NULL";
-
 					PWInput		input = o as PWInput;
 					PWOutput	output = o as PWOutput;
 					PWColor		color = o as PWColor;
@@ -112,17 +142,28 @@ namespace PW
 					}
 					if (color != null)
 						backgroundColor = color.color;
-					if (drawAnchor)
-					{
-						Color savedBackground = GUI.backgroundColor;
-						GUI.backgroundColor = backgroundColor;
-						GUI.Box(anchorRect, (fieldName.Length > 4) ? fieldName.Substring(0, 4) : fieldName);
-						GUI.backgroundColor = savedBackground;
-						if (anchorRect.Contains(Event.current.mousePosition))
-							mouseAboveAnchor = true;
-					}
-					inputAnchorRect.y += 24;
-					outputAnchorRect.y += 24;
+					if (o as HideInInspector != null)
+						visible = false;
+				}
+				//override property if metadata have been stored on the field:
+				if (metadata.color != defaultAnchorBackgroundColor)
+					backgroundColor = metadata.color;
+				if (metadata.name != null)
+					fieldName = metadata.name;
+
+				//draw anchor:
+				if (visible)
+				{
+					Color savedBackground = GUI.backgroundColor;
+					GUI.backgroundColor = backgroundColor;
+					GUI.Box(anchorRect, (fieldName.Length > 4) ? fieldName.Substring(0, 4) : fieldName);
+					GUI.backgroundColor = savedBackground;
+					if (anchorRect.Contains(Event.current.mousePosition))
+						mouseAboveAnchor = true;
+					if (!enabled)
+						GUI.DrawTexture(anchorRect, disabledTexture);
+					inputAnchorRect.y += 18;
+					outputAnchorRect.y += 18;
 				}
 			}
 			return mouseAboveAnchor;
@@ -133,6 +174,47 @@ namespace PW
 			var links = new List< Link >();
 	
 			return links;
+		}
+
+		/*Utils function to manipulate PWnode variables*/
+
+		void ForeachFieldAttribute(string propName, Action<PWOutput, PWInput> action)
+		{
+			foreach (var field in GetType().GetFields())
+				foreach (var attr in field.GetCustomAttributes(true))
+				{
+					PWOutput	output = attr as PWOutput;
+					PWInput		input = attr as PWInput;
+
+					if (output != null && field.Name == propName)
+						action(output, null);
+					if (input != null && field.Name == propName)
+						action(null, input);
+				}
+		}
+
+		public void UpdateEnabled(string propertyName, bool enabled)
+		{
+			if (propertyMetadatas.ContainsKey(propertyName))
+				propertyMetadatas[propertyName].enabled = true;
+		}
+
+		public void UpdateName(string propertyName, string newName)
+		{
+			if (propertyMetadatas.ContainsKey(propertyName))
+				propertyMetadatas[propertyName].name = newName;
+		}
+
+		public void UpdateBackgroundColor(string propertyName, Color newColor)
+		{
+			if (propertyMetadatas.ContainsKey(propertyName))
+				propertyMetadatas[propertyName].color = newColor;
+		}
+
+		public void UpdateVisible(string propertyName, bool visible)
+		{
+			if (propertyMetadatas.ContainsKey(propertyName))
+				propertyMetadatas[propertyName].visible = visible;
 		}
     }
 
@@ -194,6 +276,15 @@ namespace PW
 			color.r = r;
 			color.g = g;
 			color.b = b;
+			color.a = .7f;
+		}
+
+		public PWColor(float r, float g, float b, float a)
+		{
+			color.r = r;
+			color.g = g;
+			color.b = b;
+			color.a = a;
 		}
 	}
 }

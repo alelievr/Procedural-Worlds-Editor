@@ -38,6 +38,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool			dragginGraph = false;
 	bool			mouseAboveNodeAnchor = false;
 	
+	Vector2			startDragPosition;
+	bool			draggingLink = false;
+	
 	string			searchString = "";
 	
 	[System.SerializableAttribute]
@@ -281,8 +284,26 @@ public class ProceduralWorldsWindow : EditorWindow {
 				mouseAboveAnchorLocal = nodes[i].RenderAnchors(decaledRect) || mouseAboveAnchorLocal;
 				List< Link > links = nodes[i].GetLinks();
 				//TODO: retreive the list of links in the node and display links with window ids and props id
+
+				//TODO: render if there is, the current linking curve:
+				//if you press the mouse above an anchor, start the link drag
+				if (mouseAboveAnchorLocal && Event.current.type == EventType.mouseDown)
+				{
+					//TODO: use the center of the anchor instead of the mouse position;
+					startDragPosition = Event.current.mousePosition;
+					draggingLink = true;
+				}
 				nodes[i].rect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 			}
+
+			if (Event.current.type == EventType.mouseUp)
+				draggingLink = false;
+
+			if (draggingLink)
+				DrawNodeCurve(
+					new Rect((int)startDragPosition.x, (int)startDragPosition.y, 0, 0),
+					new Rect((int)Event.current.mousePosition.x, (int)Event.current.mousePosition.y, 0, 0)
+				);
 			EndWindows();
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 		}
