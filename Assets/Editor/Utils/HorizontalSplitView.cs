@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+[System.SerializableAttribute]
 public class HorizontalSplitView {
 
 	Vector2		scrollPosition = Vector2.zero;

@@ -8,7 +8,6 @@ using UnityEditor;
 public class PWNodeSlider : PWNode {
 
 	[PWOutput("V")]
-	[PWColor(1, 0, 0)]
 	public float	value1 = .5f;
 	float	min = 0;
 	float	max = 1;

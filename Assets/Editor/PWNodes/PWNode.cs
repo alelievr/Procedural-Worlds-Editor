@@ -9,12 +9,15 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
-		public Rect		rect;
+		public Rect		windowRect;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static Texture2D disabledTexture = null;
+		static GUIStyle	boxAnchorStyle = null;
 
-		string	_name; //internal unique name
+		static int		staticWindowID = 0;
+
+		int		windowID; //internal unique name
 		Vector2	position;
 		int		computeOrder; //to define an order for computing result
 		Vector2	scrollPos;
@@ -24,12 +27,38 @@ namespace PW
 
 		Dictionary< string, PropMetadata >	propertyMetadatas = new Dictionary< string, PropMetadata >();
 
-		public class PropMetadata
+		public class PWNodeAnchor
+		{
+			public Rect				anchorRect;
+			public NodeAnchorType	type;
+			public bool				mouseAbove;
+			public int				id;
+			public int				windowId;
+
+			public PWNodeAnchor(Rect anchorRect, NodeAnchorType type, bool mouseAbove, int anchorID, int windowId)
+			{
+				this.anchorRect = anchorRect;
+				this.type = type;
+				this.mouseAbove = mouseAbove;
+				this.id = anchorID;
+				this.windowId = windowId;
+			}
+		}
+
+		public enum NodeAnchorType
+		{
+			Input,
+			Output,
+			None,
+		}
+
+		private class PropMetadata
 		{
 			public bool		enabled;
 			public Color	color;
 			public string	name;
 			public bool		visible;
+			public bool		locked; //if prop is driven by external window output.
 
 			public PropMetadata()
 			{
@@ -42,10 +71,10 @@ namespace PW
 
 		public PWNode()
 		{
-			_name = System.Guid.NewGuid().ToString();
+			windowID = staticWindowID++;
 			position = Vector2.one * 100;
 			computeOrder = 0;
-			rect = new Rect(400, 400, 200, 300);
+			windowRect = new Rect(400, 400, 200, 300);
 			viewHeight = 0;
 		}
 
@@ -69,8 +98,14 @@ namespace PW
 
 		public void OnWindowGUI(int id)
 		{
+			if (boxAnchorStyle == null)
+			{
+				boxAnchorStyle =  new GUIStyle(GUI.skin.box);
+				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
+			}
+
 			// set the header of the window as draggable:
-			GUI.DragWindow(new Rect(0, 0, rect.width, 20));
+			GUI.DragWindow(new Rect(0, 0, windowRect.width, 20));
 
 			GUILayout.BeginVertical();
 			{
@@ -85,7 +120,7 @@ namespace PW
 			if (viewH > 2)
 				viewHeight = viewH;
 
-			rect.height = viewHeight + 30; //add the window header and footer size
+			windowRect.height = viewHeight + 30; //add the window header and footer size
 		}
 	
 		public virtual void	OnNodeGUI()
@@ -93,9 +128,9 @@ namespace PW
 			EditorGUILayout.LabelField("empty node");
 		}
 
-		public bool RenderAnchors(Rect screenWindowRect)
+		public PWNodeAnchor RenderAnchors(Rect screenWindowRect)
 		{
-			bool mouseAboveAnchor = false;
+			PWNodeAnchor ret = null;
 			
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
@@ -119,6 +154,7 @@ namespace PW
 				string			fieldName = "NULL";
 				bool			visible = metadata.visible;
 				bool			enabled = metadata.enabled;
+				NodeAnchorType	type = NodeAnchorType.None;
 
 				foreach (var o in attrs)
 				{
@@ -131,6 +167,7 @@ namespace PW
 						drawAnchor = true;
 						fieldName = (input.name != null) ? input.name : field.Name;
 						anchorRect = inputAnchorRect;
+						type = NodeAnchorType.Input;
 					}
 					if (output != null)
 					{
@@ -139,6 +176,7 @@ namespace PW
 						anchorRect = outputAnchorRect;
 						fieldName = (output.name != null) ? output.name : field.Name;
 						drawAnchor = true;
+						type = NodeAnchorType.Output;
 					}
 					if (color != null)
 						backgroundColor = color.color;
@@ -156,17 +194,22 @@ namespace PW
 				{
 					Color savedBackground = GUI.backgroundColor;
 					GUI.backgroundColor = backgroundColor;
-					GUI.Box(anchorRect, (fieldName.Length > 4) ? fieldName.Substring(0, 4) : fieldName);
+					GUI.Box(anchorRect, (fieldName.Length > 4) ? fieldName.Substring(0, 4) : fieldName, boxAnchorStyle);
 					GUI.backgroundColor = savedBackground;
 					if (anchorRect.Contains(Event.current.mousePosition))
-						mouseAboveAnchor = true;
+					{
+						//TODO: implement anchor id system
+						ret = new PWNodeAnchor(anchorRect, type, true, 0, windowID);
+					}
 					if (!enabled)
 						GUI.DrawTexture(anchorRect, disabledTexture);
-					inputAnchorRect.y += 18;
-					outputAnchorRect.y += 18;
+					if (type == NodeAnchorType.Input)
+						inputAnchorRect.y += 18;
+					else if (type == NodeAnchorType.Output)
+						outputAnchorRect.y += 18;
 				}
 			}
-			return mouseAboveAnchor;
+			return ret;
 		}
 
 		public List< Link > GetLinks()
@@ -174,6 +217,21 @@ namespace PW
 			var links = new List< Link >();
 	
 			return links;
+		}
+
+		public void	AttackLink(string externalWindow, int externalAnchor, int internalAnchor)
+		{
+			//TODO: attack link code
+		}
+
+		public void	hilightAllInputAnchor(Type inputType)
+		{
+			//TODO: hilight all input matching enabled input anchors
+		}
+
+		public void hilightAllOutputAnchor(Type outputType)
+		{
+			//TODO: hilight all output matching enabled input anchors
 		}
 
 		/*Utils function to manipulate PWnode variables*/

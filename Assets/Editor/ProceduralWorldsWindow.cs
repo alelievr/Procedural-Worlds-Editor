@@ -25,8 +25,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 	static GUIStyle	whiteBoldText;
 	static GUIStyle	splittedPanel;
 
-	static HorizontalSplitView	h1;
-	static HorizontalSplitView	h2;
+	[SerializeField]
+	HorizontalSplitView			h1;
+	[SerializeField]
+	HorizontalSplitView			h2;
 
 	[SerializeField]
 	Vector2			leftBarScrollPosition;
@@ -58,21 +60,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
-	List< PWNodeStorage > nodeList = new List< PWNodeStorage >();
+	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >()
+	{
+		{"Simple values", new List< PWNodeStorage >()},
+		{"Operations", new List< PWNodeStorage >()},
+		{"Noises", new List< PWNodeStorage >()},
+		{"Storage", new List< PWNodeStorage >()},
+		{"Visual", new List< PWNodeStorage >()},
+		{"Custom", new List< PWNodeStorage >()},
+	};
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
 		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
-
-		CreateBackgroundTexture();
-
-		//TODO: save the position of these separators:
-		h1 = new HorizontalSplitView(resizeHandleTex, window.position.width - 250, window.position.width / 2, window.position.width - 4);
-		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, window.position.width / 2);
-
-		splittedPanel = new GUIStyle();
-		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
 		window.graphDecalPosition = Vector2.zero;
 
@@ -81,22 +82,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void OnEnable()
 	{
-		//instanciate all node type in the selector:
+		CreateBackgroundTexture();
+		
+		splittedPanel = new GUIStyle();
+		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
+
+		h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
+		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
+
+		Debug.LogWarning("OnEnabled");
+
 		//setup nodeList:
-		nodeList.Clear();
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeList.Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeSelectorList["Simple values"].Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
+		nodeSelectorList["Operations"].Add(new PWNodeStorage("add", typeof(PWNodeAdd)));
 	}
 
     void OnGUI()
@@ -110,7 +108,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
         //background color:
 		if (backgroundTex == null || h1 == null)
-			Init();
+			OnEnable();
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
 		DrawNodeGraphCore();
@@ -145,9 +143,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
 		
-				//draw preview view.
+				//TODO: draw preview view.
 		
-				//draw infos / debug / global settings view
+				//TODO: draw infos / debug / global settings view
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -185,7 +183,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				//apply background color:
 
-				//TODO: dynamic search
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUIUtility.fieldWidth = 0;
 				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
@@ -201,20 +198,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUILayout.EndHorizontal();
 				
 				Rect r = EditorGUILayout.GetControlRect();
-				DrawSelectorCase(ref r, "Values", true);
-				foreach (var node in nodeList)
+				foreach (var nodeCategory in nodeSelectorList)
 				{
-					if (node.instance == null)
+					DrawSelectorCase(ref r, nodeCategory.Key, true);
+					foreach (var node in nodeCategory.Value.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
 					{
-						Debug.Log("Instanciate new type: " + node.nodeType);
-						node.instance = ScriptableObject.CreateInstance(node.nodeType) as PWNode;
-					}
-					Rect clickableRect = DrawSelectorCase(ref r, node.instance.name);
-
-					if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
-					{
-						nodes.Add(node.instance);
-						Debug.Log("added node of type: " + node.nodeType);
+						if (node.instance == null)
+							node.instance = ScriptableObject.CreateInstance(node.nodeType) as PWNode;
+						Rect clickableRect = DrawSelectorCase(ref r, node.instance.name);
+	
+						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
+						{
+							nodes.Add(node.instance);
+							Debug.Log("added node of type: " + node.nodeType);
+						}
 					}
 				}
 			}
@@ -235,7 +232,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (Event.current.type == EventType.MouseDown //if event is mouse down
 			&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
 			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
-			&& !nodes.Any(n => PWUtils.DecalRect(n.rect, graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
+			&& !nodes.Any(n => PWUtils.DecalRect(n.windowRect, graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
 			dragginGraph = true;
 		if (dragginGraph)
 			graphDecalPosition += Event.current.mousePosition - lastMousePosition;
@@ -278,26 +275,38 @@ public class ProceduralWorldsWindow : EditorWindow {
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
 			{
-				nodes[i].rect = PWUtils.DecalRect(nodes[i].rect, graphDecalPosition);
-				Rect decaledRect = GUI.Window(i, nodes[i].rect, nodes[i].OnWindowGUI, nodes[i].name);
-				//draw inputs and outputs anchor for the window:
-				mouseAboveAnchorLocal = nodes[i].RenderAnchors(decaledRect) || mouseAboveAnchorLocal;
-				List< Link > links = nodes[i].GetLinks();
-				//TODO: retreive the list of links in the node and display links with window ids and props id
+				nodes[i].windowRect = PWUtils.DecalRect(nodes[i].windowRect, graphDecalPosition);
+				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].name);
+				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 
-				//TODO: render if there is, the current linking curve:
+				//TOOD: if dragging: hilight possible achors:
+
+				//draw inputs and outputs anchor for the window:
+				var mouseAboveAnchor = nodes[i].RenderAnchors(decaledRect);
+				if (mouseAboveAnchor != null)
+					mouseAboveAnchorLocal = mouseAboveAnchor.mouseAbove || mouseAboveAnchorLocal;
+
+				//TODO: retreive the list of links in the node and display links with window ids and props id
+				List< Link > links = nodes[i].GetLinks();
+
 				//if you press the mouse above an anchor, start the link drag
 				if (mouseAboveAnchorLocal && Event.current.type == EventType.mouseDown)
 				{
-					//TODO: use the center of the anchor instead of the mouse position;
-					startDragPosition = Event.current.mousePosition;
+					startDragPosition = mouseAboveAnchor.anchorRect.center;
 					draggingLink = true;
 				}
-				nodes[i].rect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
+	
+				//end dragging:
+				if (Event.current.type == EventType.mouseUp && draggingLink == true)
+				{
+					draggingLink = false;
+					if (mouseAboveAnchorLocal)
+					{
+						//create node link:
+						// nodes[i].AttachLink()
+					}
+				}
 			}
-
-			if (Event.current.type == EventType.mouseUp)
-				draggingLink = false;
 
 			if (draggingLink)
 				DrawNodeCurve(
