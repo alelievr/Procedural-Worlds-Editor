@@ -287,11 +287,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (draggingLink && startDragAnchor.anchorType == NodeAnchorType.Output)
 					nodes[i].HighlightAllAnchors(NodeAnchorType.Input, startDragAnchor.type);
 
-				//TODO: retreive the list of links in the node and display links with window ids and props id
-				List< Link > links = nodes[i].GetLinks();
+				//draw links:
+				var links = nodes[i].GetLinks();
+				foreach (var link in links)
+				{
+					DrawNodeCurve(new Rect(), new Rect(), Color.black);
+				}
 
 				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchorLocal && Event.current.type == EventType.mouseDown)
+				if (mouseAboveAnchorLocal && mouseAboveAnchor != null && Event.current.type == EventType.MouseDown)
 				{
 					startDragAnchor = mouseAboveAnchor;
 					draggingLink = true;
@@ -304,7 +308,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					if (mouseAboveAnchorLocal)
 					{
 						//create node link:
-						nodes[i].AttachLink(startDragAnchor, mouseAboveAnchor);
+						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
 					}
 				}
 			}
@@ -312,7 +316,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (draggingLink)
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
-					new Rect((int)Event.current.mousePosition.x, (int)Event.current.mousePosition.y, 0, 0)
+					new Rect((int)Event.current.mousePosition.x, (int)Event.current.mousePosition.y, 0, 0),
+					startDragAnchor.color
 				);
 			EndWindows();
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
@@ -355,13 +360,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 		selectorCaseTitleBackgroundTex.Apply();
 	}
 
-    void DrawNodeCurve(Rect start, Rect end)
+    void DrawNodeCurve(Rect start, Rect end, Color c)
     {
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
-        Color shadowCol = new Color(0, 0, 1f, 0.05f);
+        Color shadowCol = c;
+		shadowCol.a = 0.05f;
 
         for (int i = 0; i < 3; i++)
             Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);

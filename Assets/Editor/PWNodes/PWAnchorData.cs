@@ -23,8 +23,15 @@ namespace PW
 		public Vector2			offset;
 		public int				id;
 		public Type				type;
-		public Rect				anchorRect;
+		public Rect				anchorRect { get {return anchorRects[0];} set {anchorRects[0] = value;}}
+		public Dictionary< int, Rect > anchorRects;
 		public int				windowId;
+
+		public bool				multiple;
+		public Type[]			allowedTypes;
+		public int				minMultipleValues;
+		public int				maxMultipleValues;
+		public PWValues			multipleValueInstance;
 
 		static int				propDataIDs = 0;
 
@@ -33,6 +40,8 @@ namespace PW
 			enabled = true;
 			visible = true;
 			locked = false;
+			multiple = false;
+			anchorRects = new Dictionary< int, Rect >(){{0, new Rect()}};
 			this.name = name;
 			id = propDataIDs++;
 		}

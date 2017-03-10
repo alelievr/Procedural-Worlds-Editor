@@ -14,7 +14,30 @@ namespace PW
 			r.y += decal.y;
 			return r;
 		}
-	
+
+		public static Vector2 Round(Vector2 v)
+		{
+			v.x = Mathf.Round(v.x);
+			v.y = Mathf.Round(v.y);
+			return v;
+		}
+		
+		public static Vector3 Round(Vector3 v)
+		{
+			v.x = Mathf.Round(v.x);
+			v.y = Mathf.Round(v.y);
+			v.z = Mathf.Round(v.z);
+			return v;
+		}
+		
+		public static Vector4 Round(Vector4 v)
+		{
+			v.x = Mathf.Round(v.x);
+			v.y = Mathf.Round(v.y);
+			v.z = Mathf.Round(v.z);
+			v.w = Mathf.Round(v.w);
+			return v;
+		}
 	}
 
 	[System.SerializableAttribute]

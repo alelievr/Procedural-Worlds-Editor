@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -26,7 +27,7 @@ namespace PW
 		int		viewHeight;
 		Vector2	graphDecal = Vector2.zero;
 
-		List< int > links = new List< int >();
+		List< PWLink > links = new List< PWLink >();
 
 		[System.NonSerializedAttribute]
 		Dictionary< string, PWAnchorData >	propertyDatas = new Dictionary< string, PWAnchorData >();
@@ -45,10 +46,20 @@ namespace PW
 			this.graphDecal = graphDecal;
 		}
 
-		void ForeachPWFields(Action< string, PWAnchorData > callback)
+		void ForeachPWAnchors(Action< string, PWAnchorData, int > callback)
 		{
 			foreach (var PWAnchorData in propertyDatas)
-				callback(PWAnchorData.Key, PWAnchorData.Value);
+			{
+				PWAnchorData data = PWAnchorData.Value;
+				if (data.multiple)
+				{
+					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueInstance.Count);
+					for (int i = 0; i < anchorCount; i++)
+						callback(PWAnchorData.Key, data, i);
+				}
+				else
+					callback(PWAnchorData.Key, data, -1);
+			}
 		}
 
 		void LoadFieldAttributes()
@@ -74,6 +85,7 @@ namespace PW
 					PWOutput	outputAttr = attr as PWOutput;
 					PWColor		colorAttr = attr as PWColor;
 					PWOffset	offsetAttr = attr as PWOffset;
+					PWMultiple	multipleAttr = attr as PWMultiple;
 
 					if (inputAttr != null)
 					{
@@ -91,6 +103,18 @@ namespace PW
 						backgroundColor = colorAttr.color;
 					if (offsetAttr != null)
 						offset = offsetAttr.offset;
+					if (multipleAttr != null)
+					{
+						//check if field is PWValues type otherwise do not implement multi-anchor
+						data.multipleValueInstance = field.GetValue(this) as PWValues;
+						if (data.multipleValueInstance != null)
+						{
+							data.multiple = true;
+							data.allowedTypes = multipleAttr.allowedTypes;
+							data.minMultipleValues = multipleAttr.minValues;
+							data.maxMultipleValues = multipleAttr.maxValues;
+						}
+					}
 					//get attributes values:
 				}
 				if (anchorType == NodeAnchorType.None) //field does not have a PW attribute
@@ -161,6 +185,35 @@ namespace PW
 			EditorGUILayout.LabelField("empty node");
 		}
 
+		void RenderAnchor(PWAnchorData data, ref Rect inputAnchorRect, ref Rect outputAnchorRect, ref PWAnchorData ret, int index = -1)
+		{
+			Rect anchorRect = (data.anchorType == NodeAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
+			anchorRect.position += graphDecal;
+
+			string anchorName = (data.name.Length > 4) ? data.name.Substring(0, 4) : data.name;
+			//if index != -1 then we are rendering a multi-anchor, the name will be incremented
+			if (index != -1)
+			{
+				//TODO: better
+				anchorName += index;
+				data.anchorRects[index] = anchorRect;
+			}
+			else
+				data.anchorRect = anchorRect;
+			Color savedBackground = GUI.backgroundColor;
+			GUI.backgroundColor = data.color;
+			GUI.Box(anchorRect, anchorName, boxAnchorStyle);
+			GUI.backgroundColor = savedBackground;
+			if (anchorRect.Contains(Event.current.mousePosition))
+				ret = data;
+			if (!data.enabled)
+				GUI.DrawTexture(anchorRect, disabledTexture);
+			if (data.anchorType == NodeAnchorType.Input)
+				inputAnchorRect.position += data.offset + Vector2.up * 18;
+			else if (data.anchorType == NodeAnchorType.Output)
+				outputAnchorRect.position += data.offset + Vector2.up * 18;
+		}
+
 		public PWAnchorData RenderAnchors()
 		{
 			PWAnchorData ret = null;
@@ -170,180 +223,88 @@ namespace PW
 
 			Rect	inputAnchorRect = new Rect(windowRect.xMin - anchorWidth + 2, windowRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(windowRect.xMax - 2, windowRect.y + 20, anchorWidth, anchorHeight);
-			ForeachPWFields((fieldName, data) => {
-				Rect anchorRect = (data.anchorType == NodeAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
-				anchorRect.position += graphDecal;
-
+			ForeachPWAnchors((fieldName, data, i) => {
 				//draw anchor:
 				if (data.visible)
-				{
-					Color savedBackground = GUI.backgroundColor;
-					GUI.backgroundColor = data.color;
-					GUI.Box(anchorRect, (data.name.Length > 4) ? data.name.Substring(0, 4) : data.name, boxAnchorStyle);
-					GUI.backgroundColor = savedBackground;
-					data.anchorRect = anchorRect;
-					if (anchorRect.Contains(Event.current.mousePosition))
-						ret = data;
-					if (!data.enabled)
-						GUI.DrawTexture(anchorRect, disabledTexture);
-					if (data.anchorType == NodeAnchorType.Input)
-						inputAnchorRect.position += data.offset + Vector2.up * 18;
-					else if (data.anchorType == NodeAnchorType.Output)
-						outputAnchorRect.position += data.offset + Vector2.up * 18;
-				}
+					RenderAnchor(data, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
 			});
 			return ret;
 		}
 
-		public List< Link > GetLinks()
+		public List< PWLink > GetLinks()
 		{
-			var links = new List< Link >();
-	
 			return links;
 		}
 
-		public void	AttachLink(PWAnchorData from, PWAnchorData to)
+		public void		AttachLink(PWAnchorData from, PWAnchorData to)
 		{
-			Debug.Log("Attach");
-			//TODO: attack link code
+			links.Add(new PWLink(to.windowId, to.id, from.id, from.color));
 		}
 
-		public void	HighlightAllAnchors(NodeAnchorType anchorType, Type inputType)
+		public void		RemoveLink(int anchorId)
 		{
-			ForeachPWFields((fieldName, data) => {
+			links.RemoveAll(l => l.localAnchorId == anchorId);
+		}
+
+		public Rect?	GetAnchorRect(int id)
+		{
+			var matches = propertyDatas.Where(o => o.Value.id == id);
+
+			if (matches.Count() == 0)
+				return null;
+			return matches.First().Value.anchorRect;
+		}
+
+		public void		HighlightAllAnchors(NodeAnchorType anchorType, Type inputType)
+		{
+			ForeachPWAnchors((fieldName, data, i) => {
 				if (data.anchorType == anchorType && data.type.IsAssignableFrom(inputType))
 				{
+					Rect	anchorRect = (data.multiple) ? data.anchorRects[i] : data.anchorRect;
+
 					//TODO: another color for locked anchors.
-					GUI.DrawTexture(data.anchorRect, highlightTexture);
+					if (data.visible)
+						GUI.DrawTexture(anchorRect, highlightTexture);
 				}
 			});
 		}
 
-		public void HighlighAnchor(PWAnchorData anchor)
+		public void		HighlighAnchor(PWAnchorData anchor)
 		{
 			GUI.DrawTexture(anchor.anchorRect, highlightTexture);
 		}
 
 		/* Utils function to manipulate PWnode variables */
 
-		public void UpdatePropEnabled(string propertyName, bool enabled)
+		public void		UpdatePropEnabled(string propertyName, bool enabled)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 				propertyDatas[propertyName].enabled = true;
 		}
 
-		public void UpdatePropName(string propertyName, string newName)
+		public void		UpdatePropName(string propertyName, string newName)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 				propertyDatas[propertyName].name = newName;
 		}
 
-		public void UpdatePropBackgroundColor(string propertyName, Color newColor)
+		public void		UpdatePropBackgroundColor(string propertyName, Color newColor)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 				propertyDatas[propertyName].color = newColor;
 		}
 
-		public void UpdatePropVisibility(string propertyName, bool visible)
+		public void		UpdatePropVisibility(string propertyName, bool visible)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 				propertyDatas[propertyName].visible = visible;
 		}
 
-		public bool IsPropLocked(string propertyName)
+		public bool		IsPropLocked(string propertyName)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 				return propertyDatas[propertyName].locked;
 			return false;
 		}
     }
-
-	[System.SerializableAttribute]
-	public class Link
-	{
-		//distant link:
-		public string	windowName;
-		public int		distantAnchorID;
-
-		//connected local property:
-		public int		localAnchorID;
-
-		public Link(string dWin, int dAttr, int lAttr)
-		{
-			windowName = dWin;
-			distantAnchorID = dAttr;
-			localAnchorID = lAttr;
-		}
-	}
-	
-	[System.AttributeUsage(System.AttributeTargets.Field)]
-	public class PWInput : System.Attribute
-	{
-		public string	name = null;
-		
-		public PWInput()
-		{
-		}
-		
-		public PWInput(string fieldName)
-		{
-			name = fieldName;
-		}
-	}
-	
-	[System.AttributeUsage(System.AttributeTargets.Field)]
-	public class PWOutput : System.Attribute
-	{
-		public string	name = null;
-
-		public PWOutput()
-		{
-		}
-		
-		public PWOutput(string fieldName)
-		{
-			name = fieldName;
-		}
-	}
-	
-	[System.AttributeUsage(System.AttributeTargets.Field)]
-	public class PWOffset : System.Attribute
-	{
-		public Vector2	offset;
-
-		public PWOffset(int x, int y)
-		{
-			offset.x = x;
-			offset.y = y;
-		}
-		
-		public PWOffset(int y)
-		{
-			offset.x = 0;
-			offset.y = y;
-		}
-	}
-	
-
-	[System.AttributeUsage(System.AttributeTargets.Field)]
-	public class PWColor : System.Attribute
-	{
-		public Color		color;
-
-		public PWColor(float r, float g, float b)
-		{
-			color.r = r;
-			color.g = g;
-			color.b = b;
-			color.a = .7f;
-		}
-
-		public PWColor(float r, float g, float b, float a)
-		{
-			color.r = r;
-			color.g = g;
-			color.b = b;
-			color.a = a;
-		}
-	}
 }
