@@ -21,7 +21,6 @@ namespace PW
 
 		static int		staticWindowId = 0;
 
-		Vector2	position;
 		int		computeOrder; //to define an order for computing result
 		Vector2	scrollPos;
 		int		viewHeight;
@@ -36,7 +35,6 @@ namespace PW
 		public PWNode()
 		{
 			windowId = staticWindowId++;
-			position = Vector2.one * 100;
 			computeOrder = 0;
 			windowRect = new Rect(400, 400, 200, 300);
 			viewHeight = 0;
@@ -47,7 +45,7 @@ namespace PW
 			this.graphDecal = graphDecal;
 		}
 
-		void ForeachPWAnchors(Action< string, PWAnchorData, int > callback)
+		void ForeachPWAnchors(Action< string, PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback)
 		{
 			foreach (var PWAnchorData in propertyDatas)
 			{
@@ -57,10 +55,15 @@ namespace PW
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueInstance.Count);
 					data.multipleRenderedAnchorNumber = anchorCount;
 					for (int i = 0; i < anchorCount; i++)
-						callback(PWAnchorData.Key, data, i);
+					{
+						//if multi-anchor instance does not exists, create it:
+						if (!data.multi.ContainsKey(i))
+							data.multi[i] = new PWAnchorData.PWAnchorMultiData(windowId, data.first.color);
+						callback(PWAnchorData.Key, data, data.multi[i], i);
+					}
 				}
 				else
-					callback(PWAnchorData.Key, data, -1);
+					callback(PWAnchorData.Key, data, data.first, 0);
 			}
 		}
 
@@ -115,6 +118,10 @@ namespace PW
 							data.allowedTypes = multipleAttr.allowedTypes;
 							data.minMultipleValues = multipleAttr.minValues;
 							data.maxMultipleValues = multipleAttr.maxValues;
+
+							//add minimum number of anchors to render:
+							for (int i = 1; i < data.minMultipleValues; i++)
+								data.multi[i] = new PWAnchorData.PWAnchorMultiData(windowId, backgroundColor);
 						}
 					}
 					//get attributes values:
@@ -123,12 +130,13 @@ namespace PW
 					propertyDatas.Remove(field.Name);
 				else
 				{
-					data.color = backgroundColor;
 					data.name = name;
 					data.anchorType = anchorType;
-					data.offset = offset;
-					data.windowId = windowId;
 					data.type = field.GetType();
+					data.first.color = backgroundColor;
+					data.first.name = name;
+					data.first.offset = offset;
+					data.first.windowId = windowId;
 				}
 			}
 		}
@@ -187,54 +195,52 @@ namespace PW
 			EditorGUILayout.LabelField("empty node");
 		}
 
-		void ProcessAnchor(PWAnchorData data, ref Rect inputAnchorRect, ref Rect outputAnchorRect, ref PWAnchorData ret, int index = -1)
+		void ProcessAnchor(
+			PWAnchorData data,
+			PWAnchorData.PWAnchorMultiData singleAnchor,
+			ref Rect inputAnchorRect,
+			ref Rect outputAnchorRect,
+			ref PWAnchorInfo ret,
+			int index = -1)
 		{
 			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
 			anchorRect.position += graphDecal;
 
-			//if index != -1 then we are rendering a multi-anchor, the name will be incremented
-			if (index != -1)
-			{
-				data.anchorRects[index] = anchorRect;
-				data.multipleId = index;
-			}
-			else
-				data.anchorRect = anchorRect;
+			singleAnchor.anchorRect = anchorRect;
+
+			if (!ret.mouseAbove)
+				ret = new PWAnchorInfo(anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id);
 			if (anchorRect.Contains(Event.current.mousePosition))
-			{
-				ret = data.Clone();
-				ret.anchorRect = anchorRect;
-			}
+				ret.mouseAbove = true;
 		}
 
-		public PWAnchorData ProcessAnchors()
+		public PWAnchorInfo ProcessAnchors()
 		{
-			PWAnchorData ret = null;
+			PWAnchorInfo ret = new PWAnchorInfo();
 			
 			int		anchorWidth = 38;
 			int		anchorHeight = 16;
 
 			Rect	inputAnchorRect = new Rect(windowRect.xMin - anchorWidth + 2, windowRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(windowRect.xMax - 2, windowRect.y + 20, anchorWidth, anchorHeight);
-			ForeachPWAnchors((fieldName, data, i) => {
+			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
 				//process anchor event and calcul rect position if visible
-				if (data.visibility != PWVisibility.Gone)
+				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
-					if (data.visibility == PWVisibility.Visible)
-						ProcessAnchor(data, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
+					if (singleAnchor.visibility == PWVisibility.Visible)
+						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
 					if (data.anchorType == PWAnchorType.Input)
-						inputAnchorRect.position += data.offset + Vector2.up * 18;
+						inputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
 					else if (data.anchorType == PWAnchorType.Output)
-						outputAnchorRect.position += data.offset + Vector2.up * 18;
+						outputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
 				}
 			});
 			return ret;
 		}
 		
-		void RenderAnchor(PWAnchorData data, int index = -1)
+		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
 			string anchorName = (data.name.Length > 4) ? data.name.Substring(0, 4) : data.name;
-			Rect anchorRect = (data.multiple) ? data.anchorRects[index] : data.anchorRect;
 
 			if (data.multiple)
 			{
@@ -242,30 +248,32 @@ namespace PW
 				anchorName += index;
 			}
 			Color savedBackground = GUI.backgroundColor;
-			GUI.backgroundColor = data.color;
-			GUI.Box(anchorRect, anchorName, boxAnchorStyle);
+			GUI.backgroundColor = singleAnchor.color;
+			GUI.Box(singleAnchor.anchorRect, anchorName, boxAnchorStyle);
 			GUI.backgroundColor = savedBackground;
-			if (!data.enabled)
-				GUI.DrawTexture(anchorRect, disabledTexture);
+			if (!singleAnchor.enabled)
+				GUI.DrawTexture(singleAnchor.anchorRect, disabledTexture);
 			else
-				switch (data.highlighMode)
+				switch (singleAnchor.highlighMode)
 				{
 					case PWAnchorHighlight.AttachNew:
-						GUI.DrawTexture(anchorRect, highlightTexture);
+						GUI.DrawTexture(singleAnchor.anchorRect, highlightTexture);
 						break ;
 				}
+			//reset the Highlight:
+			singleAnchor.highlighMode = PWAnchorHighlight.None;
 		}
 		
 		public void RenderAnchors()
 		{
-			ForeachPWAnchors((fieldName, data, i) => {
+			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
 				//draw anchor:
-				if (data.visibility != PWVisibility.Gone)
+				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
-					if (data.visibility == PWVisibility.Visible)
-						RenderAnchor(data, i);
-					if (data.visibility == PWVisibility.InvisibleWhenLinking && i == data.multipleRenderedAnchorNumber)
-						data.visibility = PWVisibility.Visible;
+					if (singleAnchor.visibility == PWVisibility.Visible)
+						RenderAnchor(data, singleAnchor, i);
+					if (singleAnchor.visibility == PWVisibility.InvisibleWhenLinking)
+						singleAnchor.visibility = PWVisibility.Visible;
 				}
 			});
 		}
@@ -275,9 +283,10 @@ namespace PW
 			return links;
 		}
 
-		public void		AttachLink(PWAnchorData from, PWAnchorData to)
+		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
-			links.Add(new PWLink(to.windowId, to.id, from.windowId, from.id, from.color));
+			Debug.Log("attached anchor: " + from.anchorId + " and " + to.anchorId);
+			links.Add(new PWLink(to.windowId, to.anchorId, from.windowId, from.anchorId, from.anchorColor));
 		}
 
 		public void		RemoveLink(int anchorId)
@@ -287,11 +296,14 @@ namespace PW
 
 		public Rect?	GetAnchorRect(int id)
 		{
-			var matches = propertyDatas.Where(o => o.Value.id == id);
+			var matches =	from p in propertyDatas
+							from p2 in p.Value.multi
+							where p2.Value.id == id
+							select p2.Value;
 
 			if (matches.Count() == 0)
 				return null;
-			return matches.First().Value.anchorRect;
+			return matches.First().anchorRect;
 		}
 
 		PWAnchorType	InverAnchorType(PWAnchorType type)
@@ -303,30 +315,23 @@ namespace PW
 			return PWAnchorType.None;
 		}
 
-		public void		HighlightLinkableAnchorsTo(PWAnchorData toLink)
+		public void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
 		{
 			PWAnchorType anchorType = InverAnchorType(toLink.anchorType);
 
-			ForeachPWAnchors((fieldName, data, i) => {
-				if (data.anchorType == anchorType && data.type.IsAssignableFrom(toLink.type))
+			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+				if (data.anchorType == anchorType && data.type.IsAssignableFrom(toLink.fieldType))
 				{
-					Rect anchorRect = (data.multiple) ? data.anchorRects[i] : data.anchorRect;
-
-					//TODO: another color for locked anchors.
-					if (anchorRect.Contains(Event.current.mousePosition))
-						if (data.visibility == PWVisibility.Visible)
+					if (singleAnchor.anchorRect.Contains(Event.current.mousePosition))
+						if (singleAnchor.visibility == PWVisibility.Visible)
 						{
-							data.highlighMode = PWAnchorHighlight.AttachNew;
+							//TODO: another color for locked anchors.
+							singleAnchor.highlighMode = PWAnchorHighlight.AttachNew;
 						}
 				}
-				else if (data.visibility == PWVisibility.Visible && data.id != toLink.id)
-					data.visibility = PWVisibility.InvisibleWhenLinking;
+				else if (singleAnchor.visibility == PWVisibility.Visible && singleAnchor.id != toLink.anchorId)
+					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
-		}
-
-		public void		HighlighAnchor(PWAnchorData anchor)
-		{
-			GUI.DrawTexture(anchor.anchorRect, highlightTexture);
 		}
 
 		/* Utils function to manipulate PWnode variables */
@@ -334,31 +339,31 @@ namespace PW
 		public void		UpdatePropEnabled(string propertyName, bool enabled)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].enabled = true;
+				propertyDatas[propertyName].first.enabled = true;
 		}
 
 		public void		UpdatePropName(string propertyName, string newName)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].name = newName;
+				propertyDatas[propertyName].first.name = newName;
 		}
 
 		public void		UpdatePropBackgroundColor(string propertyName, Color newColor)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].color = newColor;
+				propertyDatas[propertyName].first.color = newColor;
 		}
 
 		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].visibility = visibility;
+				propertyDatas[propertyName].first.visibility = visibility;
 		}
 
 		public bool		IsPropLocked(string propertyName)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				return propertyDatas[propertyName].locked;
+				return propertyDatas[propertyName].first.locked;
 			return false;
 		}
     }

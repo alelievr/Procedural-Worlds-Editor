@@ -18,9 +18,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	selectorCaseTitleBackgroundTex;
 
 	List< PWNode >				nodes = new List< PWNode >();
-    List< Rect >				windows = new List< Rect >();
-    List< int >					windowsToAttach = new List< int >();
-    List< int >					attachedWindows = new List< int >();
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
@@ -41,7 +38,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool			dragginGraph = false;
 	bool			mouseAboveNodeAnchor = false;
 	
-	PWAnchorData	startDragAnchor;
+	PWAnchorInfo	startDragAnchor;
 	bool			draggingLink = false;
 	
 	string			searchString = "";
@@ -142,6 +139,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.scrollWheel
 			|| Event.current.type == EventType.KeyDown
 			|| Event.current.type == EventType.KeyUp)
+			Repaint();
 			Repaint();
     }
 
@@ -289,11 +287,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				//process envent, state and position for node anchors:
 				var mouseAboveAnchor = nodes[i].ProcessAnchors();
-				if (mouseAboveAnchor != null)
+				if (mouseAboveAnchor.mouseAbove)
 					mouseAboveAnchorLocal = true;
 
+
 				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchorLocal && mouseAboveAnchor != null && Event.current.type == EventType.MouseDown)
+				if (mouseAboveAnchorLocal && mouseAboveAnchor.mouseAbove && Event.current.type == EventType.MouseDown)
 				{
 					startDragAnchor = mouseAboveAnchor;
 					draggingLink = true;
@@ -308,14 +307,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 				//end dragging:
 				if (Event.current.type == EventType.mouseUp && draggingLink == true)
-				{
-					draggingLink = false;
-					if (mouseAboveAnchorLocal)
+					if (mouseAboveAnchor.mouseAbove)
 					{
 						//create node link:
 						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
+						draggingLink = false;
 					}
-				}
 
 				//draw links:
 				var links = nodes[i].GetLinks();
@@ -341,7 +338,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
 					new Rect((int)Event.current.mousePosition.x, (int)Event.current.mousePosition.y, 0, 0),
-					startDragAnchor.color
+					startDragAnchor.anchorColor
 				);
 			EndWindows();
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
