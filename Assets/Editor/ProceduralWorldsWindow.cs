@@ -65,6 +65,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{"Noises", new List< PWNodeStorage >()},
 		{"Storage", new List< PWNodeStorage >()},
 		{"Visual", new List< PWNodeStorage >()},
+		{"Debug", new List< PWNodeStorage >()},
 		{"Custom", new List< PWNodeStorage >()},
 	};
 
@@ -85,6 +86,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
+		Action< string, string, Type > AddToSelector = (string key, string name, Type type) => {
+			if (nodeSelectorList.ContainsKey(key))
+				nodeSelectorList[key].Add(new PWNodeStorage(name, type));
+		};
+
 		//setup splitted panels:
 		h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
 		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
@@ -92,8 +98,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//setup nodeList:
 		foreach (var n in nodeSelectorList)
 			n.Value.Clear();
-		nodeSelectorList["Simple values"].Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
-		nodeSelectorList["Operations"].Add(new PWNodeStorage("add", typeof(PWNodeAdd)));
+		AddToSelector("Simple values", "Slider", typeof(PWNodeSlider));
+		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
+		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
 	}
 
     void OnGUI()
@@ -139,7 +146,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.scrollWheel
 			|| Event.current.type == EventType.KeyDown
 			|| Event.current.type == EventType.KeyUp)
-			Repaint();
 			Repaint();
     }
 
@@ -265,17 +271,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
-			//draw links (will be moved to PWNode.cs)
-			/*if (windowsToAttach.Count == 2)
-			{
-				attachedWindows.Add(windowsToAttach[0]);
-				attachedWindows.Add(windowsToAttach[1]);
-				windowsToAttach = new List<int>();
-			}
-			if (attachedWindows.Count >= 2)
-				for (int i = 0; i < attachedWindows.Count; i += 2)
-					DrawNodeCurve(windows[attachedWindows[i]], windows[attachedWindows[i + 1]]);*/
-
 			bool	mouseAboveAnchorLocal = false;
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
@@ -298,9 +293,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 					draggingLink = true;
 				}
 
-				//highlight all linkable anchors:
+				//highlight, hide, add all linkable anchors:
 				if (draggingLink)
 					nodes[i].HighlightLinkableAnchorsTo(startDragAnchor);
+				nodes[i].DisplayHiddenMultipleAnchors(draggingLink);
 
 				//render node anchors:
 				nodes[i].RenderAnchors();
@@ -309,8 +305,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (Event.current.type == EventType.mouseUp && draggingLink == true)
 					if (mouseAboveAnchor.mouseAbove)
 					{
-						//create node link:
+						//attach link to the node:
 						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
+						//TODO: find the node startDragAnchor.windowId and call AttachLink too
+						var win = nodes.FirstOrDefault(n => n.windowId == startDragAnchor.windowId);
+						if (win != null)
+							win.AttachLink(startDragAnchor, mouseAboveAnchor);
+						else
+							Debug.LogWarning("window id not found: " + startDragAnchor.windowId);
 						draggingLink = false;
 					}
 
@@ -333,6 +335,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 						DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
 				}
 			}
+			
+			//click up outside of an anchor, stop dragging
+			if (Event.current.type == EventType.mouseUp && draggingLink == true)
+				draggingLink = false;
 
 			if (draggingLink)
 				DrawNodeCurve(
@@ -383,12 +389,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void DrawNodeCurve(Rect start, Rect end, Color c)
     {
+		//swap start and end if they are inverted
+		if (start.xMax > end.xMax)
+			PWUtils.Swap< Rect >(ref start, ref end);
+
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
         Color shadowCol = c;
-		shadowCol.a = 0.05f;
+		shadowCol.a = 0.04f;
 
         for (int i = 0; i < 3; i++)
             Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);

@@ -53,12 +53,17 @@ namespace PW
 				if (data.multiple)
 				{
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueInstance.Count);
-					data.multipleRenderedAnchorNumber = anchorCount;
+					if (data.displayHiddenMultipleAnchors)
+						anchorCount++;
 					for (int i = 0; i < anchorCount; i++)
 					{
 						//if multi-anchor instance does not exists, create it:
 						if (!data.multi.ContainsKey(i))
 							data.multi[i] = new PWAnchorData.PWAnchorMultiData(windowId, data.first.color);
+						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
+							data.multi[i].additional = true;
+						else
+							data.multi[i].additional = false;
 						callback(PWAnchorData.Key, data, data.multi[i], i);
 					}
 				}
@@ -120,8 +125,8 @@ namespace PW
 							data.maxMultipleValues = multipleAttr.maxValues;
 
 							//add minimum number of anchors to render:
-							for (int i = 1; i < data.minMultipleValues; i++)
-								data.multi[i] = new PWAnchorData.PWAnchorMultiData(windowId, backgroundColor);
+							for (int i = 1; i <= data.minMultipleValues; i++)
+								data.AddNewAnchor(windowId, backgroundColor);
 						}
 					}
 					//get attributes values:
@@ -133,7 +138,7 @@ namespace PW
 					data.name = name;
 					data.anchorType = anchorType;
 					data.type = field.GetType();
-					data.first.color = backgroundColor;
+					data.first.color = (SerializableColor)backgroundColor;
 					data.first.name = name;
 					data.first.offset = offset;
 					data.first.windowId = windowId;
@@ -245,7 +250,10 @@ namespace PW
 			if (data.multiple)
 			{
 				//TODO: better
-				anchorName += index;
+				if (singleAnchor.additional)
+					anchorName = "+";
+				else
+					anchorName += index;
 			}
 			Color savedBackground = GUI.backgroundColor;
 			GUI.backgroundColor = singleAnchor.color;
@@ -285,8 +293,37 @@ namespace PW
 
 		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
-			Debug.Log("attached anchor: " + from.anchorId + " and " + to.anchorId);
-			links.Add(new PWLink(to.windowId, to.anchorId, from.windowId, from.anchorId, from.anchorColor));
+			//from is othen me and with an anchor type of Output.
+
+			Debug.Log("attached link form " + from.windowId + " to " + to.windowId);
+
+			//we store output links:
+			if (from.anchorType == PWAnchorType.Output)
+			{
+				links.Add(new PWLink(to.windowId, to.anchorId, from.windowId, from.anchorId, from.anchorColor));
+				//mark local output anchors as linked:
+				ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+					if (singleAnchor.id == from.anchorId)
+						singleAnchor.linkCount++;
+				});
+			}
+			else //input links are stored as depencencies:
+			{
+				ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+					if (singleAnchor.id == from.anchorId)
+					{
+						//if data was added to multi-anchor:
+						if (data.multiple)
+						{
+							if (i == data.multipleValueInstance.Count)
+							{
+								data.AddNewAnchor();
+							}
+						}
+					}
+				});
+				//TODO: create dependency for the window to.windowId (for fast computeOrder calcul)
+			}
 		}
 
 		public void		RemoveLink(int anchorId)
@@ -320,8 +357,14 @@ namespace PW
 			PWAnchorType anchorType = InverAnchorType(toLink.anchorType);
 
 			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+				//Hide anchors and highlight when mouse hover
 				if (data.anchorType == anchorType && data.type.IsAssignableFrom(toLink.fieldType))
 				{
+					if (data.multiple)
+					{
+						//display additional anchor to attach on next rendering
+						data.displayHiddenMultipleAnchors = true;
+					}
 					if (singleAnchor.anchorRect.Contains(Event.current.mousePosition))
 						if (singleAnchor.visibility == PWVisibility.Visible)
 						{
@@ -331,6 +374,14 @@ namespace PW
 				}
 				else if (singleAnchor.visibility == PWVisibility.Visible && singleAnchor.id != toLink.anchorId)
 					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
+			});
+		}
+
+		public void		DisplayHiddenMultipleAnchors(bool display = true)
+		{
+			ForeachPWAnchors((fieldName, data, singleAnchor, i)=> {
+				if (data.multiple)
+					data.displayHiddenMultipleAnchors = display;
 			});
 		}
 
@@ -351,7 +402,7 @@ namespace PW
 		public void		UpdatePropBackgroundColor(string propertyName, Color newColor)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].first.color = newColor;
+				propertyDatas[propertyName].first.color = (SerializableColor)newColor;
 		}
 
 		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility)

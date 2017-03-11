@@ -38,6 +38,13 @@ namespace PW
 			v.w = Mathf.Round(v.w);
 			return v;
 		}
+
+		public static void Swap< T >(ref T v1, ref T v2)
+		{
+			T tmp = v1;
+			v1 = v2;
+			v2 = tmp;
+		}
 	}
 
 	[System.SerializableAttribute]

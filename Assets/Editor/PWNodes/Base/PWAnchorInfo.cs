@@ -6,6 +6,7 @@ using PW;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public struct PWAnchorInfo {
 	
 		public Rect			anchorRect;

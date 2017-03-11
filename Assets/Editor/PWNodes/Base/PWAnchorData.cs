@@ -5,6 +5,7 @@ using System;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public enum PWAnchorType
 	{
 		Input,
@@ -12,6 +13,7 @@ namespace PW
 		None,
 	}
 
+	[System.SerializableAttribute]
 	public enum PWVisibility
 	{
 		Visible,
@@ -20,6 +22,7 @@ namespace PW
 		Gone,					//anchor is invisible and his size is ignored
 	}
 
+	[System.SerializableAttribute]
 	public enum PWAnchorHighlight
 	{
 		None,
@@ -28,6 +31,7 @@ namespace PW
 		AttachMultiple,			//link will be added to anchor links
 	}
 
+	[System.SerializableAttribute]
 	public class PWAnchorData
 	{
 		//name of the attached propery / name specified in PW I/O.
@@ -49,16 +53,17 @@ namespace PW
 		public int					maxMultipleValues;
 		public PWValues				multipleValueInstance;
 		//current number of rendered anchors:
-		public int					multipleRenderedAnchorNumber;
+		public bool					displayHiddenMultipleAnchors;
 
 		static int					propDataIDs = 0;
 
+		[System.SerializableAttribute]
 		public class PWAnchorMultiData
 		{
 			public PWAnchorHighlight	highlighMode;
 			public Rect					anchorRect;
 			public bool					enabled;
-			public Color				color;
+			public SerializableColor	color;
 			public string				name;
 			public PWVisibility			visibility;
 			//if prop is driven by external window output.
@@ -69,23 +74,29 @@ namespace PW
 			public int					id;
 			//window id of the anchor
 			public int					windowId;
+			//external link connected to this anchor
+			public int					linkCount;
+			//if anchor is an additional hidden anchor (only visible when creating a new link)
+			public bool					additional;
 
 			public PWAnchorMultiData(int windowId, Color color)
 			{
 				id = propDataIDs++;
 				locked = false;
+				additional = false;
 				enabled = true;
+				linkCount = 0;
 				highlighMode = PWAnchorHighlight.None;
 				visibility = PWVisibility.Visible;
 				this.windowId = windowId;
-				this.color = color;
+				this.color = (SerializableColor)color;
 			}
 		}
 
 		public PWAnchorData(string name)
 		{
 			multiple = false;
-			multipleRenderedAnchorNumber = -1;
+			displayHiddenMultipleAnchors = false;
 
 			multi = new Dictionary< int, PWAnchorMultiData >(){{0, new PWAnchorMultiData(0, Color.white)}};
 			multi[0].enabled = true;
@@ -95,28 +106,24 @@ namespace PW
 			multi[0].id = propDataIDs++;
 		}
 
-		/*public PWAnchorData Clone()
+		public int AddNewAnchor()
 		{
-			PWAnchorData ret = new PWAnchorData(name);
+			return AddNewAnchor(first.windowId, first.color);
+		}
 
-			ret.enabled = enabled;
-			ret.color = color;
-			ret.visibility = visibility;
-			ret.locked = locked;
-			ret.anchorType = anchorType;
-			ret.offset = offset;
-			ret.id = id;
-			ret.type = type;
-			ret.anchorRects = new Dictionary< int, Rect >{{0, anchorRect}};
-			ret.windowId = windowId;
-			ret.multiple = multiple;
-			ret.allowedTypes = allowedTypes;
-			ret.minMultipleValues = minMultipleValues;
-			ret.maxMultipleValues = maxMultipleValues;
-			ret.multipleValueInstance = multipleValueInstance;
-			ret.multipleId = multipleId;
-
-			return ret;
-		}*/
+		public int AddNewAnchor(int winId, Color c)
+		{
+			int		index = 1;
+			while (true)
+			{
+				if (!multi.ContainsKey(index))
+				{
+					multi[index] = new PWAnchorMultiData(winId, c);
+					multipleValueInstance.Add(null);
+					return index;
+				}
+				index++;
+			}
+		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class PWValues {
 	
 		List< object > values = new List< object >();
@@ -17,7 +18,7 @@ namespace PW
 	
 		public List< T > GetValues<T>(params T[] olol)
 		{
-			return values.Where(o => o.GetType().IsAssignableFrom(typeof(T))).Select(o => (T)o).ToList();
+			return values.Where(o => o != null && o.GetType().IsAssignableFrom(typeof(T))).Select(o => (T)o).ToList();
 		}
 	
 		public void Add(object val)

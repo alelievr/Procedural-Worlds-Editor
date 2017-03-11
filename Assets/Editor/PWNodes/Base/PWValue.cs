@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class PWValue {
 		
 		object	value;
