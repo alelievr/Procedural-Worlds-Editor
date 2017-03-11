@@ -108,6 +108,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
 
+		//esc key event:
+		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+		{
+			if (draggingLink)
+				draggingLink = false;
+		}
+
         //background color:
 		if (backgroundTex == null || h1 == null)
 			OnEnable();
@@ -132,7 +139,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (Event.current.type == EventType.mouseDown
 			|| Event.current.type == EventType.mouseDrag
 			|| Event.current.type == EventType.mouseUp
-			|| Event.current.type == EventType.scrollWheel)
+			|| Event.current.type == EventType.scrollWheel
+			|| Event.current.type == EventType.KeyDown
+			|| Event.current.type == EventType.KeyUp)
 			Repaint();
     }
 
@@ -278,16 +287,35 @@ public class ProceduralWorldsWindow : EditorWindow {
 				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].name);
 				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 
-				//draw inputs and outputs anchor for the window:
-				var mouseAboveAnchor = nodes[i].RenderAnchors();
+				//process envent, state and position for node anchors:
+				var mouseAboveAnchor = nodes[i].ProcessAnchors();
 				if (mouseAboveAnchor != null)
 					mouseAboveAnchorLocal = true;
 
-				//hilight all linkable anchors:
-				if (draggingLink && startDragAnchor.anchorType == PWAnchorType.Input)
-					nodes[i].HighlightAllAnchors(PWAnchorType.Output, startDragAnchor.type);
-				if (draggingLink && startDragAnchor.anchorType == PWAnchorType.Output)
-					nodes[i].HighlightAllAnchors(PWAnchorType.Input, startDragAnchor.type);
+				//if you press the mouse above an anchor, start the link drag
+				if (mouseAboveAnchorLocal && mouseAboveAnchor != null && Event.current.type == EventType.MouseDown)
+				{
+					startDragAnchor = mouseAboveAnchor;
+					draggingLink = true;
+				}
+
+				//highlight all linkable anchors:
+				if (draggingLink)
+					nodes[i].HighlightLinkableAnchorsTo(startDragAnchor);
+
+				//render node anchors:
+				nodes[i].RenderAnchors();
+	
+				//end dragging:
+				if (Event.current.type == EventType.mouseUp && draggingLink == true)
+				{
+					draggingLink = false;
+					if (mouseAboveAnchorLocal)
+					{
+						//create node link:
+						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
+					}
+				}
 
 				//draw links:
 				var links = nodes[i].GetLinks();
@@ -306,24 +334,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
 					if (fromAnchor != null && toAnchor != null)
 						DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
-				}
-
-				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchorLocal && mouseAboveAnchor != null && Event.current.type == EventType.MouseDown)
-				{
-					startDragAnchor = mouseAboveAnchor;
-					draggingLink = true;
-				}
-	
-				//end dragging:
-				if (Event.current.type == EventType.mouseUp && draggingLink == true)
-				{
-					draggingLink = false;
-					if (mouseAboveAnchorLocal)
-					{
-						//create node link:
-						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
-					}
 				}
 			}
 
