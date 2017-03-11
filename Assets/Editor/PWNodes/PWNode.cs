@@ -11,6 +11,7 @@ namespace PW
 	public class PWNode : ScriptableObject
 	{
 		public Rect		windowRect;
+		public int		windowId;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
@@ -20,13 +21,13 @@ namespace PW
 
 		static int		staticWindowId = 0;
 
-		int		windowId; //internal unique name
 		Vector2	position;
 		int		computeOrder; //to define an order for computing result
 		Vector2	scrollPos;
 		int		viewHeight;
 		Vector2	graphDecal = Vector2.zero;
 
+		[SerializeField]
 		List< PWLink > links = new List< PWLink >();
 
 		[System.NonSerializedAttribute]
@@ -74,7 +75,7 @@ namespace PW
 				
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = defaultAnchorBackgroundColor;
-				NodeAnchorType	anchorType = NodeAnchorType.None;
+				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = field.Name;
 				Vector2			offset = Vector2.zero;
 
@@ -89,13 +90,13 @@ namespace PW
 
 					if (inputAttr != null)
 					{
-						anchorType = NodeAnchorType.Input;
+						anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
 							name = inputAttr.name;
 					}
 					if (outputAttr != null)
 					{
-						anchorType = NodeAnchorType.Output;
+						anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
 							name = outputAttr.name;
 					}
@@ -117,7 +118,7 @@ namespace PW
 					}
 					//get attributes values:
 				}
-				if (anchorType == NodeAnchorType.None) //field does not have a PW attribute
+				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
 					propertyDatas.Remove(field.Name);
 				else
 				{
@@ -187,7 +188,7 @@ namespace PW
 
 		void RenderAnchor(PWAnchorData data, ref Rect inputAnchorRect, ref Rect outputAnchorRect, ref PWAnchorData ret, int index = -1)
 		{
-			Rect anchorRect = (data.anchorType == NodeAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
+			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
 			anchorRect.position += graphDecal;
 
 			string anchorName = (data.name.Length > 4) ? data.name.Substring(0, 4) : data.name;
@@ -205,13 +206,12 @@ namespace PW
 			GUI.Box(anchorRect, anchorName, boxAnchorStyle);
 			GUI.backgroundColor = savedBackground;
 			if (anchorRect.Contains(Event.current.mousePosition))
-				ret = data;
+			{
+				ret = data.Clone();
+				ret.anchorRect = anchorRect;
+			}
 			if (!data.enabled)
 				GUI.DrawTexture(anchorRect, disabledTexture);
-			if (data.anchorType == NodeAnchorType.Input)
-				inputAnchorRect.position += data.offset + Vector2.up * 18;
-			else if (data.anchorType == NodeAnchorType.Output)
-				outputAnchorRect.position += data.offset + Vector2.up * 18;
 		}
 
 		public PWAnchorData RenderAnchors()
@@ -225,8 +225,15 @@ namespace PW
 			Rect	outputAnchorRect = new Rect(windowRect.xMax - 2, windowRect.y + 20, anchorWidth, anchorHeight);
 			ForeachPWAnchors((fieldName, data, i) => {
 				//draw anchor:
-				if (data.visible)
-					RenderAnchor(data, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
+				if (data.visibility != PWVisibility.Gone)
+				{
+					if (data.visibility == PWVisibility.Visible)
+						RenderAnchor(data, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
+					if (data.anchorType == PWAnchorType.Input)
+						inputAnchorRect.position += data.offset + Vector2.up * 18;
+					else if (data.anchorType == PWAnchorType.Output)
+						outputAnchorRect.position += data.offset + Vector2.up * 18;
+				}
 			});
 			return ret;
 		}
@@ -238,7 +245,7 @@ namespace PW
 
 		public void		AttachLink(PWAnchorData from, PWAnchorData to)
 		{
-			links.Add(new PWLink(to.windowId, to.id, from.id, from.color));
+			links.Add(new PWLink(to.windowId, to.id, from.windowId, from.id, from.color));
 		}
 
 		public void		RemoveLink(int anchorId)
@@ -255,7 +262,7 @@ namespace PW
 			return matches.First().Value.anchorRect;
 		}
 
-		public void		HighlightAllAnchors(NodeAnchorType anchorType, Type inputType)
+		public void		HighlightAllAnchors(PWAnchorType anchorType, Type inputType)
 		{
 			ForeachPWAnchors((fieldName, data, i) => {
 				if (data.anchorType == anchorType && data.type.IsAssignableFrom(inputType))
@@ -263,9 +270,10 @@ namespace PW
 					Rect	anchorRect = (data.multiple) ? data.anchorRects[i] : data.anchorRect;
 
 					//TODO: another color for locked anchors.
-					if (data.visible)
+					if (data.visibility == PWVisibility.Visible)
 						GUI.DrawTexture(anchorRect, highlightTexture);
 				}
+				//TODO: mark as invisible all unmatched anchors.
 			});
 		}
 
@@ -294,10 +302,10 @@ namespace PW
 				propertyDatas[propertyName].color = newColor;
 		}
 
-		public void		UpdatePropVisibility(string propertyName, bool visible)
+		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].visible = visible;
+				propertyDatas[propertyName].visibility = visibility;
 		}
 
 		public bool		IsPropLocked(string propertyName)

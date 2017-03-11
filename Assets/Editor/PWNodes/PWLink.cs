@@ -8,19 +8,19 @@ namespace PW
 	public class PWLink
 	{
 		//distant link:
-		public int		windowId;
-		public int		distantAnchorId;
-		public Color	color;
+		public int					distantWindowId;
+		public int					distantAnchorId;
+		public int					localWindowId;
+		public int					localAnchorId;
+		public SerializableColor	color;
 	
-		//connected local property:
-		public int		localAnchorId;
-	
-		public PWLink(int dWin, int dAttr, int lAttr, Color c)
+		public PWLink(int dWin, int dAttr, int lWin, int lAttr, Color c)
 		{
-			windowId = dWin;
+			distantWindowId = dWin;
 			distantAnchorId = dAttr;
 			localAnchorId = lAttr;
-			color = c;
+			localWindowId = lWin;
+			color = (SerializableColor)c;
 		}
 	}
 }

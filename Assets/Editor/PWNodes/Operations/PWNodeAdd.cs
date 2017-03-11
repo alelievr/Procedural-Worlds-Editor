@@ -38,7 +38,7 @@ public class PWNodeAdd : PWNode {
 	void			HideOutputExcept(string propName)
 	{
 		foreach (var prop in new string[]{"fOutput", "v2Output", "v3Output", "v4Output"})
-			UpdatePropVisibility(prop, (prop == propName));
+			UpdatePropVisibility(prop, (prop == propName) ? PWVisibility.Visible : PWVisibility.Gone);
 	}
 
 	string			GetModeName()

@@ -93,6 +93,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
 
 		//setup nodeList:
+		foreach (var n in nodeSelectorList)
+			n.Value.Clear();
 		nodeSelectorList["Simple values"].Add(new PWNodeStorage("Slider", typeof(PWNodeSlider)));
 		nodeSelectorList["Operations"].Add(new PWNodeStorage("add", typeof(PWNodeAdd)));
 	}
@@ -282,16 +284,28 @@ public class ProceduralWorldsWindow : EditorWindow {
 					mouseAboveAnchorLocal = true;
 
 				//hilight all linkable anchors:
-				if (draggingLink && startDragAnchor.anchorType == NodeAnchorType.Input)
-					nodes[i].HighlightAllAnchors(NodeAnchorType.Output, startDragAnchor.type);
-				if (draggingLink && startDragAnchor.anchorType == NodeAnchorType.Output)
-					nodes[i].HighlightAllAnchors(NodeAnchorType.Input, startDragAnchor.type);
+				if (draggingLink && startDragAnchor.anchorType == PWAnchorType.Input)
+					nodes[i].HighlightAllAnchors(PWAnchorType.Output, startDragAnchor.type);
+				if (draggingLink && startDragAnchor.anchorType == PWAnchorType.Output)
+					nodes[i].HighlightAllAnchors(PWAnchorType.Input, startDragAnchor.type);
 
 				//draw links:
 				var links = nodes[i].GetLinks();
 				foreach (var link in links)
 				{
-					DrawNodeCurve(new Rect(), new Rect(), Color.black);
+					var fromWindow = nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
+					var toWindow = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+
+					if (fromWindow == null || toWindow == null) //invalid window ids
+					{
+						Debug.LogWarning("window not found: " + link.localWindowId + ", " + link.distantWindowId);
+						continue ;
+					}
+
+					Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
+					Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
+					if (fromAnchor != null && toAnchor != null)
+						DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
 				}
 
 				//if you press the mouse above an anchor, start the link drag
