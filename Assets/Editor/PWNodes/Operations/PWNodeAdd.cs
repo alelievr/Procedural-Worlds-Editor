@@ -31,8 +31,6 @@ namespace PW
 	
 		public override void OnNodeCreate()
 		{
-			name = "add";
-	
 			//override window width
 			windowRect.width = 150;
 		}

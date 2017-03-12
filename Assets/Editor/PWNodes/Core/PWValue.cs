@@ -7,6 +7,7 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWValue {
 		
+		[SerializeField]
 		object	value;
 
 		/// Use it to retreive the value of a non-nullable type

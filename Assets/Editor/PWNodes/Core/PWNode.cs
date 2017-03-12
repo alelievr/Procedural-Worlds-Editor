@@ -1,59 +1,111 @@
-﻿using System.Linq;
+﻿#define DEBUG_WINDOW
+
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Runtime.Serialization;
 
 namespace PW
 {
 	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
+		public string	nodeTypeName;
 		public Rect		windowRect;
 		public int		windowId;
+		public bool		renamable;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
 		
 		static Texture2D	disabledTexture = null;
-		static Texture2D	highlightTexture = null;
+		static Texture2D	highlightNewTexture = null;
+		static Texture2D	highlightReplaceTexture = null;
+		static Texture2D	highlightAddTexture = null;
 
 		static int		staticWindowId = 0;
 
+		[SerializeField]
 		int		computeOrder; //to define an order for computing result
-		Vector2	scrollPos;
+		[SerializeField]
 		int		viewHeight;
-		Vector2	graphDecal = Vector2.zero;
+		[SerializeField]
+		Vector2	graphDecal;
+		[SerializeField]
 		int		maxAnchorRenderHeight;
+		[SerializeField]
+		string	firstInitialization;
+
 		bool	windowShouldClose = false;
+		bool	firstRenderLoop;
 
 		[SerializeField]
 		List< PWLink > links = new List< PWLink >();
 
-		[System.NonSerializedAttribute]
-		Dictionary< string, PWAnchorData >	propertyDatas = new Dictionary< string, PWAnchorData >();
+		[System.SerializableAttribute]
+		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
+		[SerializeField]
+		PropertyDataDictionary propertyDatas = new PropertyDataDictionary();
 
-		public PWNode()
+		public void OnDestroy()
 		{
-			windowId = staticWindowId++;
-			computeOrder = 0;
-			windowRect = new Rect(400, 400, 200, 300);
-			viewHeight = 0;
+			Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 
 		public void UpdateGraphDecal(Vector2 graphDecal)
 		{
 			this.graphDecal = graphDecal;
 		}
+		
+		public void OnEnable()
+		{
+			hideFlags = HideFlags.HideAndDontSave;
 
-		void ForeachPWAnchors(Action< string, PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback)
+			firstRenderLoop = true;
+			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
+			disabledTexture.Apply();
+			highlightNewTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			highlightNewTexture.SetPixel(0, 0, new Color(0, .5f, 0, .4f));
+			highlightNewTexture.Apply();
+			highlightReplaceTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			highlightReplaceTexture.SetPixel(0, 0, new Color(.5f, .5f, 0, .4f));
+			highlightReplaceTexture.Apply();
+			highlightAddTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			highlightAddTexture.SetPixel(0, 0, new Color(0f, .0f, 0.5f, .4f));
+			highlightAddTexture.Apply();
+			LoadFieldAttributes();
+			
+			//this will be true only if the object instance does not came from a serialized object.
+			if (firstInitialization == null)
+			{
+				windowId = staticWindowId++;
+				computeOrder = 0;
+				windowRect = new Rect(400, 400, 200, 300);
+				viewHeight = 0;
+				renamable = false;
+				maxAnchorRenderHeight = 0;
+				
+				OnNodeCreate();
+
+				firstInitialization = "initialized";
+			}
+		}
+
+		public virtual void OnNodeCreate()
+		{
+		}
+
+		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback)
 		{
 			foreach (var PWAnchorData in propertyDatas)
 			{
-				PWAnchorData data = PWAnchorData.Value;
+				var data = PWAnchorData.Value;
 				if (data.multiple)
 				{
-					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueInstance.Count);
+					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
 					if (data.displayHiddenMultipleAnchors)
 						anchorCount++;
 					for (int i = 0; i < anchorCount; i++)
@@ -63,11 +115,11 @@ namespace PW
 							data.multi[i].additional = true;
 						else
 							data.multi[i].additional = false;
-						callback(PWAnchorData.Key, data, data.multi[i], i);
+						callback(data, data.multi[i], i);
 					}
 				}
 				else
-					callback(PWAnchorData.Key, data, data.first, 0);
+					callback(data, data.first, 0);
 			}
 		}
 
@@ -76,10 +128,22 @@ namespace PW
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
 
-			propertyDatas.Clear();
+			List< string > actualFields = new List< string >();
 			foreach (var field in fInfos)
 			{
-				propertyDatas[field.Name] = new PWAnchorData(field.Name);
+				bool	alreadyExists = false;
+				actualFields.Add(field.Name);
+				if (!propertyDatas.ContainsKey(field.Name))
+					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
+				else
+				{
+					Debug.Log("already loaded prop: " + field.Name);
+					if (propertyDatas[field.Name].multiple)
+					{
+						Debug.Log("multi-anchor count: " + propertyDatas[field.Name].multi.Count);
+					}
+					continue ;
+				}
 				
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = defaultAnchorBackgroundColor;
@@ -116,8 +180,8 @@ namespace PW
 					if (multipleAttr != null)
 					{
 						//check if field is PWValues type otherwise do not implement multi-anchor
-						data.multipleValueInstance = field.GetValue(this) as PWValues;
-						if (data.multipleValueInstance != null)
+						var multipleValueInstance = field.GetValue(this) as PWValues;
+						if (multipleValueInstance != null)
 						{
 							data.generic = true;
 							data.multiple = true;
@@ -126,8 +190,9 @@ namespace PW
 							data.maxMultipleValues = multipleAttr.maxValues;
 
 							//add minimum number of anchors to render:
-							for (int i = 1; i <= data.minMultipleValues; i++)
-								data.AddNewAnchor(backgroundColor);
+							if (data.multipleValueCount < data.minMultipleValues)
+								for (int i = 1; i <= data.minMultipleValues; i++)
+									data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i);
 						}
 					}
 					if (genericAttr != null)
@@ -147,31 +212,21 @@ namespace PW
 					}
 					data.name = name;
 					data.anchorType = anchorType;
-					data.type = field.FieldType;
+					data.type = (SerializableType)field.FieldType;
 					data.first.color = (SerializableColor)backgroundColor;
 					data.first.name = name;
 					data.first.offset = offset;
 					data.windowId = windowId;
 				}
 			}
-		}
 
-		public void OnEnable()
-		{
-			name = "basic node";
-			maxAnchorRenderHeight = 0;
-			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
-			disabledTexture.Apply();
-			highlightTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			highlightTexture.SetPixel(0, 0, new Color(0, .5f, 0, .4f));
-			highlightTexture.Apply();
-			OnNodeCreate();
-			LoadFieldAttributes();
-		}
-
-		public virtual void OnNodeCreate()
-		{
+			//remove inhexistants dictionary entries:
+			foreach (var kp in propertyDatas)
+				if (!actualFields.Contains(kp.Key))
+				{
+					Debug.Log("removed " + kp.Key);
+					propertyDatas.Remove(kp.Key);
+				}
 		}
 
 		public void OnGUI()
@@ -195,7 +250,12 @@ namespace PW
 				windowShouldClose = true;*/
 
 			// set the header of the window as draggable:
-			GUI.DragWindow(new Rect(0, 0, windowRect.width, 20));
+			Rect dragRect = new Rect(0, 0, windowRect.width, 20);
+			GUI.DragWindow(dragRect);
+
+			#if DEBUG_WINDOW
+			//TODO: debug window
+			#endif
 
 			GUILayout.BeginVertical();
 			{
@@ -210,7 +270,8 @@ namespace PW
 			if (viewH > 2)
 				viewHeight = viewH;
 
-			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
+			if (!firstRenderLoop)
+				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 			windowRect.height = viewHeight + 24; //add the window header and footer size
 		}
 	
@@ -247,16 +308,19 @@ namespace PW
 
 			Rect	inputAnchorRect = new Rect(windowRect.xMin - anchorWidth + 2, windowRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(windowRect.xMax - 2, windowRect.y + 20, anchorWidth, anchorHeight);
-			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+			ForeachPWAnchors((data, singleAnchor, i) => {
 				//process anchor event and calcul rect position if visible
 				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
 					if (singleAnchor.visibility == PWVisibility.Visible)
 						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
-					if (data.anchorType == PWAnchorType.Input)
-						inputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
-					else if (data.anchorType == PWAnchorType.Output)
-						outputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
+					if (singleAnchor.visibility != PWVisibility.Gone)
+					{
+						if (data.anchorType == PWAnchorType.Input)
+							inputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
+						else if (data.anchorType == PWAnchorType.Output)
+							outputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
+					}
 				}
 			});
 			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - windowRect.y - 20, outputAnchorRect.yMin - windowRect.y - 20);
@@ -285,16 +349,43 @@ namespace PW
 				switch (singleAnchor.highlighMode)
 				{
 					case PWAnchorHighlight.AttachNew:
-						GUI.DrawTexture(singleAnchor.anchorRect, highlightTexture);
+						GUI.DrawTexture(singleAnchor.anchorRect, highlightNewTexture);
+						break ;
+					case PWAnchorHighlight.AttachReplace:
+						GUI.DrawTexture(singleAnchor.anchorRect, highlightReplaceTexture);
+						break ;
+					case PWAnchorHighlight.AttachAdd:
+						GUI.DrawTexture(singleAnchor.anchorRect, highlightAddTexture);
 						break ;
 				}
 			//reset the Highlight:
 			singleAnchor.highlighMode = PWAnchorHighlight.None;
+
+			//if window is renamable, render a text input above the window:
+			if (renamable)
+			{
+				GUIStyle centeredText = new GUIStyle(GUI.skin.textField);
+				centeredText.alignment = TextAnchor.UpperCenter;
+				centeredText.margin.top += 2;
+
+				Rect renameRect = windowRect;
+				renameRect.position += graphDecal - Vector2.up * 18;
+				GUI.SetNextControlName("renameWindow");
+				name = GUI.TextField(renameRect, name, centeredText);
+
+				if (Event.current.type == EventType.MouseDown && !renameRect.Contains(Event.current.mousePosition))
+					GUI.FocusControl(null);
+				if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Escape))
+					GUI.FocusControl(null);
+			}
 		}
 		
 		public void RenderAnchors()
 		{
-			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+			if (highlightAddTexture == null)
+				OnEnable();
+			
+			ForeachPWAnchors((data, singleAnchor, i) => {
 				//draw anchor:
 				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
@@ -311,8 +402,10 @@ namespace PW
 			return links;
 		}
 		
-		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, Type[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
+		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
 		{
+			Debug.Log("allowedTypes: " + (fromAllowedTypes == null));
+			Debug.Log("to: " + (to.fieldType == null));
 			if (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object))
 			{
 				if (verbose)
@@ -381,20 +474,21 @@ namespace PW
 			{
 				links.Add(new PWLink(to.windowId, to.anchorId, from.windowId, from.anchorId, from.anchorColor));
 				//mark local output anchors as linked:
-				ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 						singleAnchor.linkCount++;
 				});
 			}
 			else //input links are stored as depencencies:
 			{
-				ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
+						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple)
-							if (i == data.multipleValueInstance.Count)
-								data.AddNewAnchor();
+							if (i == data.multipleValueCount)
+								data.AddNewAnchor(data.name.GetHashCode() + i);
 					}
 				});
 				//TODO: create dependency for the window to.windowId (for fast computeOrder calcul)
@@ -405,7 +499,7 @@ namespace PW
 		{
 			links.RemoveAll(l => l.localAnchorId == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			var data = GetAnchorData(anchorId, out singleAnchorData);
+			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount--;
 			//TODO: decrement the linkCount and update locked if needed.
 		}
@@ -415,7 +509,7 @@ namespace PW
 			PWAnchorData					ret = null;
 			PWAnchorData.PWAnchorMultiData	s = null;
 
-			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+			ForeachPWAnchors((data, singleAnchor, i) => {
 				if (singleAnchor.id == id)
 				{
 					s = singleAnchor;
@@ -430,8 +524,8 @@ namespace PW
 		{
 			var matches =	from p in propertyDatas
 							from p2 in p.Value.multi
-							where p2.Value.id == id
-							select p2.Value;
+							where p2.id == id
+							select p2;
 
 			if (matches.Count() == 0)
 				return null;
@@ -451,7 +545,7 @@ namespace PW
 		{
 			PWAnchorType anchorType = InverAnchorType(toLink.anchorType);
 
-			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+			ForeachPWAnchors((data, singleAnchor, i) => {
 				//Hide anchors and highlight when mouse hover
 				// Debug.Log(data.name + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
 				if (data.windowId != toLink.windowId
@@ -466,11 +560,20 @@ namespace PW
 					if (singleAnchor.anchorRect.Contains(Event.current.mousePosition))
 						if (singleAnchor.visibility == PWVisibility.Visible)
 						{
-							//TODO: another color for locked anchors.
 							singleAnchor.highlighMode = PWAnchorHighlight.AttachNew;
+							if (singleAnchor.linkCount > 0)
+							{
+								//if anchor is locked:
+								if (data.anchorType == PWAnchorType.Input)
+									singleAnchor.highlighMode = PWAnchorHighlight.AttachReplace;
+								else
+									singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
+							}
 						}
 				}
-				else if (singleAnchor.visibility == PWVisibility.Visible && singleAnchor.id != toLink.anchorId)
+				else if (singleAnchor.visibility == PWVisibility.Visible
+					&& singleAnchor.id != toLink.anchorId
+					&& singleAnchor.linkCount == 0)
 					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
 		}
@@ -482,7 +585,7 @@ namespace PW
 
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
 		{
-			ForeachPWAnchors((fieldName, data, singleAnchor, i)=> {
+			ForeachPWAnchors((data, singleAnchor, i)=> {
 				if (data.multiple)
 					data.displayHiddenMultipleAnchors = display;
 			});

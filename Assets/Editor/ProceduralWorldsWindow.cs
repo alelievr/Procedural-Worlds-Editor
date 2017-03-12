@@ -16,6 +16,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
 
+	[SerializeField]
 	List< PWNode >				nodes = new List< PWNode >();
 	
 	static GUIStyle	whiteText;
@@ -32,28 +33,35 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[SerializeField]
 	Vector2			selectorScrollPosition;
 
+	[SerializeField]
 	Vector2			graphDecalPosition;
+	[SerializeField]
 	Vector2			lastMousePosition;
+	[SerializeField]
 	bool			dragginGraph = false;
+	[SerializeField]
 	bool			mouseAboveNodeAnchor = false;
 	
+	[SerializeField]
 	PWAnchorInfo	startDragAnchor;
+	[SerializeField]
 	bool			draggingLink = false;
 	
+	[SerializeField]
 	string			searchString = "";
+
+	GameObject		proceduralWindowObject;
 	
 	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
 		public string		name;
 		public System.Type	nodeType;
-		public PWNode		instance;
 		
 		public PWNodeStorage(string n, System.Type type)
 		{
 			name = n;
 			nodeType = type;
-			instance = ScriptableObject.CreateInstance(type) as PWNode;
 		}
 	}
 
@@ -82,6 +90,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void OnEnable()
 	{
 		CreateBackgroundTexture();
+
+		if (proceduralWindowObject == null)
+			proceduralWindowObject = GameObject.Find("proceduralWindows");
+		if (proceduralWindowObject == null)
+			proceduralWindowObject = new GameObject("proceduralWindows");
 		
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
@@ -101,7 +114,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Simple values", "Slider", typeof(PWNodeSlider));
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
-		AddToSelector("Noise masks", "circle mask", typeof(PWNodeCircleNoiseMask));
+		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
 	}
 
     void OnGUI()
@@ -197,8 +210,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
-				//apply background color:
-
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUIUtility.fieldWidth = 0;
 				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
@@ -217,16 +228,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 				foreach (var nodeCategory in nodeSelectorList)
 				{
 					DrawSelectorCase(ref r, nodeCategory.Key, true);
-					foreach (var node in nodeCategory.Value.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
+					foreach (var nodeCase in nodeCategory.Value.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
 					{
-						if (node.instance == null)
-							node.instance = ScriptableObject.CreateInstance(node.nodeType) as PWNode;
-						Rect clickableRect = DrawSelectorCase(ref r, node.instance.name);
+						Rect clickableRect = DrawSelectorCase(ref r, nodeCase.name);
 	
 						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
 						{
-							nodes.Add(ScriptableObject.CreateInstance(node.nodeType) as PWNode);
-							Debug.Log("added node of type: " + node.nodeType);
+							PWNode newNode = ScriptableObject.CreateInstance(nodeCase.nodeType) as PWNode;
+							//center to the middle of the screen:
+							newNode.windowRect.position = -graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+							newNode.nodeTypeName = nodeCase.name;
+							nodes.Add(newNode);
+							Debug.Log("added node of type: " + nodeCase.nodeType);
 						}
 					}
 				}
@@ -279,7 +292,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//window:
 				nodes[i].UpdateGraphDecal(graphDecalPosition);
 				nodes[i].windowRect = PWUtils.DecalRect(nodes[i].windowRect, graphDecalPosition);
-				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].name);
+				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].nodeTypeName);
 				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 
 				//highlight, hide, add all linkable anchors:
@@ -321,6 +334,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var links = nodes[i].GetLinks();
 				foreach (var link in links)
 				{
+					Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
 					var fromWindow = nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
 					var toWindow = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
 

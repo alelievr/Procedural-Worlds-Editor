@@ -16,7 +16,6 @@ namespace PW
 	
 		public override void OnNodeCreate()
 		{
-			name = "slider";
 		}
 	
 		public override void OnNodeGUI()

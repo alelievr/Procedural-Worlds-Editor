@@ -10,7 +10,6 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			name = "Circle noise mask";
 		}
 
 		public override void OnNodeGUI()

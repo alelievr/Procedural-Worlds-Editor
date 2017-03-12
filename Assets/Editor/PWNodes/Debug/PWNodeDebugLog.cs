@@ -9,7 +9,8 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			name = "NodeDebugLog";
+			name = "Debug log node";
+			renamable = true;
 			obj = "null";
 		}
 

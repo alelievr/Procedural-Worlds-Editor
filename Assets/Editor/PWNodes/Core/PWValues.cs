@@ -6,10 +6,15 @@ using System.Linq;
 
 namespace PW
 {
-	[System.SerializableAttribute]
 	public class PWValues {
 	
 		List< object > values = new List< object >();
+
+		public PWValues()
+		{
+			if (values == null)
+				values = new List< object >();
+		}
 	
 		public int	Count
 		{

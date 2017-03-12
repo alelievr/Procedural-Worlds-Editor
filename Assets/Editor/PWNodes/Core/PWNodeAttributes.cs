@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace PW
@@ -76,27 +78,32 @@ namespace PW
 	[AttributeUsage(AttributeTargets.Field)]
 	public class PWMultiple : Attribute
 	{
-		public Type[]	allowedTypes;
+		public SerializableType[]	allowedTypes;
 		public int		minValues;
 		public int		maxValues;
 		
 		public PWMultiple(int min, int max, params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes;
+			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
 			minValues = min;
 			maxValues = max;
 		}
 
 		public PWMultiple(int min, params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes;
+			List< SerializableType > ts = new List< SerializableType >();
+			foreach (var t in allowedTypes)
+			{
+				ts.Add(new SerializableType(t));
+			}
+			this.allowedTypes = ts.ToArray();
 			minValues = min;
 			maxValues = 100;
 		}
 		
 		public PWMultiple(params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes;
+			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
 			minValues = 0;
 			maxValues = 100;
 		}
@@ -105,11 +112,11 @@ namespace PW
 	[AttributeUsage(AttributeTargets.Field)]
 	public class PWGeneric : Attribute
 	{
-		public Type[]	allowedTypes;
+		public SerializableType[]	allowedTypes;
 
 		public PWGeneric(params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes;
+			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
 		}
 	}
 }
