@@ -276,6 +276,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
 			{
+				//window:
 				nodes[i].UpdateGraphDecal(graphDecalPosition);
 				nodes[i].windowRect = PWUtils.DecalRect(nodes[i].windowRect, graphDecalPosition);
 				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].name);
@@ -308,7 +309,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					{
 						//attach link to the node:
 						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
-						//TODO: find the node startDragAnchor.windowId and call AttachLink too
 						var win = nodes.FirstOrDefault(n => n.windowId == startDragAnchor.windowId);
 						if (win != null)
 							win.AttachLink(startDragAnchor, mouseAboveAnchor);
@@ -335,6 +335,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 					if (fromAnchor != null && toAnchor != null)
 						DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
 				}
+
+				//check if user have pressed the close button of this window:
+				if (nodes[i].WindowShouldClose())
+					nodes.RemoveAt(i);
 			}
 			
 			//click up outside of an anchor, stop dragging

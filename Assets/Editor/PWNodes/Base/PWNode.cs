@@ -25,6 +25,7 @@ namespace PW
 		int		viewHeight;
 		Vector2	graphDecal = Vector2.zero;
 		int		maxAnchorRenderHeight;
+		bool	windowShouldClose = false;
 
 		[SerializeField]
 		List< PWLink > links = new List< PWLink >();
@@ -185,6 +186,13 @@ namespace PW
 				boxAnchorStyle =  new GUIStyle(GUI.skin.box);
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			}
+
+			//close cross render:
+			//too dangerouss:
+		/*	Rect closeCrossRect = new Rect(windowRect.width - 14, 2, 18, 18);
+			GUI.Box(closeCrossRect, "X", new GUIStyle());
+			if (Event.current.type == EventType.MouseUp && closeCrossRect.Contains(Event.current.mousePosition))
+				windowShouldClose = true;*/
 
 			// set the header of the window as draggable:
 			GUI.DragWindow(new Rect(0, 0, windowRect.width, 20));
@@ -465,6 +473,11 @@ namespace PW
 				else if (singleAnchor.visibility == PWVisibility.Visible && singleAnchor.id != toLink.anchorId)
 					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
+		}
+
+		public bool		WindowShouldClose()
+		{
+			return windowShouldClose;
 		}
 
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
