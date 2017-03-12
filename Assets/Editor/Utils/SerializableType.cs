@@ -30,7 +30,7 @@ public class SerializableType {
 		return Type.GetType(st.typeString);
 	}
 
-	public static implicit operator SerializableType(Type t)
+	public static explicit operator SerializableType(Type t)
 	{
 		return new SerializableType(t);
 	}

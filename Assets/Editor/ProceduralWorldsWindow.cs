@@ -41,6 +41,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool			dragginGraph = false;
 	[SerializeField]
 	bool			mouseAboveNodeAnchor = false;
+	[SerializeField]
+	int				localWindowIdCount;
+	[SerializeField]
+	string			firstInitialization;
 	
 	[SerializeField]
 	PWAnchorInfo	startDragAnchor;
@@ -49,8 +53,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 	[SerializeField]
 	string			searchString = "";
-
-	GameObject		proceduralWindowObject;
 	
 	[System.SerializableAttribute]
 	private class PWNodeStorage
@@ -86,23 +88,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		window.Show();
 	}
+	
+	void AddToSelector(string key, params object[] objs)
+	{
+		if (nodeSelectorList.ContainsKey(key))
+		{
+			for (int i = 0; i < objs.Length; i += 2)
+			nodeSelectorList[key].Add(new PWNodeStorage((string)objs[i], (Type)objs[i + 1]));
+		}
+	}
 
 	void OnEnable()
 	{
 		CreateBackgroundTexture();
-
-		if (proceduralWindowObject == null)
-			proceduralWindowObject = GameObject.Find("proceduralWindows");
-		if (proceduralWindowObject == null)
-			proceduralWindowObject = new GameObject("proceduralWindows");
 		
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
-
-		Action< string, string, Type > AddToSelector = (string key, string name, Type type) => {
-			if (nodeSelectorList.ContainsKey(key))
-				nodeSelectorList[key].Add(new PWNodeStorage(name, type));
-		};
 
 		//setup splitted panels:
 		h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
@@ -115,6 +116,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
 		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+
+		if (firstInitialization == null)
+		{
+			localWindowIdCount = 0;
+			firstInitialization = "initialized";
+		}
 	}
 
     void OnGUI()
@@ -237,6 +244,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 							PWNode newNode = ScriptableObject.CreateInstance(nodeCase.nodeType) as PWNode;
 							//center to the middle of the screen:
 							newNode.windowRect.position = -graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+							newNode.SetWindowId(localWindowIdCount++);
 							newNode.nodeTypeName = nodeCase.name;
 							nodes.Add(newNode);
 							Debug.Log("added node of type: " + nodeCase.nodeType);
@@ -334,7 +342,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var links = nodes[i].GetLinks();
 				foreach (var link in links)
 				{
-					Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
+					// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
 					var fromWindow = nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
 					var toWindow = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
 

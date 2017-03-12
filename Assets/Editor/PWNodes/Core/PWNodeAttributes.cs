@@ -93,9 +93,7 @@ namespace PW
 		{
 			List< SerializableType > ts = new List< SerializableType >();
 			foreach (var t in allowedTypes)
-			{
-				ts.Add(new SerializableType(t));
-			}
+				ts.Add((SerializableType)t);
 			this.allowedTypes = ts.ToArray();
 			minValues = min;
 			maxValues = 100;

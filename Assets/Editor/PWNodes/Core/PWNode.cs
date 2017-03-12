@@ -1,11 +1,10 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
-using System.Runtime.Serialization;
 
 namespace PW
 {
@@ -24,8 +23,6 @@ namespace PW
 		static Texture2D	highlightNewTexture = null;
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
-
-		static int		staticWindowId = 0;
 
 		[SerializeField]
 		int		computeOrder; //to define an order for computing result
@@ -81,7 +78,6 @@ namespace PW
 			//this will be true only if the object instance does not came from a serialized object.
 			if (firstInitialization == null)
 			{
-				windowId = staticWindowId++;
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 300);
 				viewHeight = 0;
@@ -131,19 +127,11 @@ namespace PW
 			List< string > actualFields = new List< string >();
 			foreach (var field in fInfos)
 			{
-				bool	alreadyExists = false;
 				actualFields.Add(field.Name);
 				if (!propertyDatas.ContainsKey(field.Name))
 					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
-				else
-				{
-					Debug.Log("already loaded prop: " + field.Name);
-					if (propertyDatas[field.Name].multiple)
-					{
-						Debug.Log("multi-anchor count: " + propertyDatas[field.Name].multi.Count);
-					}
+				else //TODO: implement reload values of existing anchor datas.
 					continue ;
-				}
 				
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = defaultAnchorBackgroundColor;
@@ -229,6 +217,14 @@ namespace PW
 				}
 		}
 
+		public void SetWindowId(int id)
+		{
+			windowId = id;
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				data.windowId = id;
+			});
+		}
+
 		public void OnGUI()
 		{
 			EditorGUILayout.LabelField("You are on the wrong window !");
@@ -253,8 +249,14 @@ namespace PW
 			Rect dragRect = new Rect(0, 0, windowRect.width, 20);
 			GUI.DragWindow(dragRect);
 
+			int	debugViewH = 0;
 			#if DEBUG_WINDOW
-			//TODO: debug window
+			GUIStyle debugstyle = new GUIStyle();
+			debugstyle.normal.background = highlightAddTexture;
+			EditorGUILayout.BeginVertical(debugstyle);
+			EditorGUILayout.LabelField("window id: " + windowId);
+			EditorGUILayout.EndVertical();
+			debugViewH = (int)GUILayoutUtility.GetLastRect().height;
 			#endif
 
 			GUILayout.BeginVertical();
@@ -266,13 +268,15 @@ namespace PW
 			}
 			GUILayout.EndVertical();
 
-			int	viewH = (int)GUILayoutUtility.GetLastRect().height;
+			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (viewH > 2)
-				viewHeight = viewH;
+				viewHeight = viewH + debugViewH;
 
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 			windowRect.height = viewHeight + 24; //add the window header and footer size
+
+			firstRenderLoop = false;
 		}
 	
 		public virtual void	OnNodeGUI()
@@ -404,8 +408,6 @@ namespace PW
 		
 		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
 		{
-			Debug.Log("allowedTypes: " + (fromAllowedTypes == null));
-			Debug.Log("to: " + (to.fieldType == null));
 			if (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object))
 			{
 				if (verbose)
@@ -419,14 +421,15 @@ namespace PW
 				{
 					if (verbose)
 						Debug.Log("Generic variable, check all allowed types:");
-					foreach (var t in fromAllowedTypes)
+					foreach (var st in fromAllowedTypes)
 					{
+						Type t = st;
 						if (verbose)
 							Debug.Log("check castable from " + to.fieldType + " to " + t);
 						if (to.fieldType.IsAssignableFrom(t))
 						{
 							if (verbose)
-								Debug.Log(fromType + " is castable from " + t);
+								Debug.Log(to.fieldType + " is castable from " + t);
 							return true;
 						}
 					}
@@ -436,8 +439,9 @@ namespace PW
 			{
 				if (to.generic)
 				{
-					foreach (var t in to.allowedTypes)
+					foreach (var st in to.allowedTypes)
 					{
+						Type t = st;
 						if (verbose)
 							Debug.Log("check castable from " + fromType + " to " + t);
 						if (fromType.IsAssignableFrom(t))
@@ -550,7 +554,7 @@ namespace PW
 				// Debug.Log(data.name + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
 				if (data.windowId != toLink.windowId
 					&& data.anchorType == anchorType
-					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink))
+					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
 				{
 					if (data.multiple)
 					{
