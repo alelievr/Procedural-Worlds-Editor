@@ -2,7 +2,6 @@
 
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -63,6 +62,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{"Simple values", new List< PWNodeStorage >()},
 		{"Operations", new List< PWNodeStorage >()},
 		{"Noises", new List< PWNodeStorage >()},
+		{"Noise masks", new List< PWNodeStorage >()},
 		{"Storage", new List< PWNodeStorage >()},
 		{"Visual", new List< PWNodeStorage >()},
 		{"Debug", new List< PWNodeStorage >()},
@@ -101,6 +101,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Simple values", "Slider", typeof(PWNodeSlider));
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
+		AddToSelector("Noise masks", "circle mask", typeof(PWNodeCircleNoiseMask));
 	}
 
     void OnGUI()
@@ -224,7 +225,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
 						{
-							nodes.Add(node.instance);
+							nodes.Add(ScriptableObject.CreateInstance(node.nodeType) as PWNode);
 							Debug.Log("added node of type: " + node.nodeType);
 						}
 					}
@@ -280,6 +281,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].name);
 				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 
+				//highlight, hide, add all linkable anchors:
+				if (draggingLink)
+					nodes[i].HighlightLinkableAnchorsTo(startDragAnchor);
+				nodes[i].DisplayHiddenMultipleAnchors(draggingLink);
+
 				//process envent, state and position for node anchors:
 				var mouseAboveAnchor = nodes[i].ProcessAnchors();
 				if (mouseAboveAnchor.mouseAbove)
@@ -292,11 +298,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					startDragAnchor = mouseAboveAnchor;
 					draggingLink = true;
 				}
-
-				//highlight, hide, add all linkable anchors:
-				if (draggingLink)
-					nodes[i].HighlightLinkableAnchorsTo(startDragAnchor);
-				nodes[i].DisplayHiddenMultipleAnchors(draggingLink);
 
 				//render node anchors:
 				nodes[i].RenderAnchors();

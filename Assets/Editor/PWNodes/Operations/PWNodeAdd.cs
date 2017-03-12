@@ -6,7 +6,6 @@ using PW;
 
 namespace PW
 {
-	[System.SerializableAttribute]
 	public class PWNodeAdd : PWNode {
 	
 		[PWMultiple(2, typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4))]

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace PW
@@ -101,6 +99,17 @@ namespace PW
 			this.allowedTypes = allowedTypes;
 			minValues = 0;
 			maxValues = 100;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class PWGeneric : Attribute
+	{
+		public Type[]	allowedTypes;
+
+		public PWGeneric(params Type[] allowedTypes)
+		{
+			this.allowedTypes = allowedTypes;
 		}
 	}
 }

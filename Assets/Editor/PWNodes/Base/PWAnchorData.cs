@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -36,12 +35,16 @@ namespace PW
 	{
 		//name of the attached propery / name specified in PW I/O.
 		public string				name;
+		//window id of the anchor
+		public int					windowId;
 		//anchor type (input / output)
 		public PWAnchorType			anchorType;
 		//anchor field type
 		public Type					type;
 		//if the anchor is rendered as multiple
 		public bool					multiple;
+		//if the type is generic of defined;
+		public bool					generic;
 		//list of rendered anchors:
 		public Dictionary< int, PWAnchorMultiData >	multi;
 		//accessor for the first anchor data:
@@ -72,14 +75,12 @@ namespace PW
 			public Vector2				offset;
 			//the id of the actual anchor
 			public int					id;
-			//window id of the anchor
-			public int					windowId;
 			//external link connected to this anchor
 			public int					linkCount;
 			//if anchor is an additional hidden anchor (only visible when creating a new link)
 			public bool					additional;
 
-			public PWAnchorMultiData(int windowId, Color color)
+			public PWAnchorMultiData(Color color)
 			{
 				id = propDataIDs++;
 				locked = false;
@@ -88,7 +89,6 @@ namespace PW
 				linkCount = 0;
 				highlighMode = PWAnchorHighlight.None;
 				visibility = PWVisibility.Visible;
-				this.windowId = windowId;
 				this.color = (SerializableColor)color;
 			}
 		}
@@ -96,9 +96,10 @@ namespace PW
 		public PWAnchorData(string name)
 		{
 			multiple = false;
+			generic = false;
 			displayHiddenMultipleAnchors = false;
 
-			multi = new Dictionary< int, PWAnchorMultiData >(){{0, new PWAnchorMultiData(0, Color.white)}};
+			multi = new Dictionary< int, PWAnchorMultiData >(){{0, new PWAnchorMultiData(Color.white)}};
 			multi[0].enabled = true;
 			multi[0].visibility = PWVisibility.Visible;
 			multi[0].locked = false;
@@ -108,17 +109,18 @@ namespace PW
 
 		public int AddNewAnchor()
 		{
-			return AddNewAnchor(first.windowId, first.color);
+			return AddNewAnchor(first.color);
 		}
 
-		public int AddNewAnchor(int winId, Color c)
+		public int AddNewAnchor(Color c)
 		{
 			int		index = 1;
 			while (true)
 			{
 				if (!multi.ContainsKey(index))
 				{
-					multi[index] = new PWAnchorMultiData(winId, c);
+					multi[index] = new PWAnchorMultiData(c);
+					multi[index].additional = true;
 					multipleValueInstance.Add(null);
 					return index;
 				}

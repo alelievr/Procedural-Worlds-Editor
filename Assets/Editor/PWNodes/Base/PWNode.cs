@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -25,6 +24,7 @@ namespace PW
 		Vector2	scrollPos;
 		int		viewHeight;
 		Vector2	graphDecal = Vector2.zero;
+		int		maxAnchorRenderHeight;
 
 		[SerializeField]
 		List< PWLink > links = new List< PWLink >();
@@ -58,8 +58,6 @@ namespace PW
 					for (int i = 0; i < anchorCount; i++)
 					{
 						//if multi-anchor instance does not exists, create it:
-						if (!data.multi.ContainsKey(i))
-							data.multi[i] = new PWAnchorData.PWAnchorMultiData(windowId, data.first.color);
 						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
 							data.multi[i].additional = true;
 						else
@@ -96,6 +94,7 @@ namespace PW
 					PWColor		colorAttr = attr as PWColor;
 					PWOffset	offsetAttr = attr as PWOffset;
 					PWMultiple	multipleAttr = attr as PWMultiple;
+					PWGeneric	genericAttr = attr as PWGeneric;
 
 					if (inputAttr != null)
 					{
@@ -119,6 +118,7 @@ namespace PW
 						data.multipleValueInstance = field.GetValue(this) as PWValues;
 						if (data.multipleValueInstance != null)
 						{
+							data.generic = true;
 							data.multiple = true;
 							data.allowedTypes = multipleAttr.allowedTypes;
 							data.minMultipleValues = multipleAttr.minValues;
@@ -126,22 +126,31 @@ namespace PW
 
 							//add minimum number of anchors to render:
 							for (int i = 1; i <= data.minMultipleValues; i++)
-								data.AddNewAnchor(windowId, backgroundColor);
+								data.AddNewAnchor(backgroundColor);
 						}
 					}
-					//get attributes values:
+					if (genericAttr != null)
+					{
+						data.allowedTypes = genericAttr.allowedTypes;
+						data.generic = true;
+					}
 				}
 				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
 					propertyDatas.Remove(field.Name);
 				else
 				{
+					if (anchorType == PWAnchorType.Output && data.multiple)
+					{
+						Debug.LogWarning("PWMultiple attribute is only valid on input variables");
+						data.multiple = false;
+					}
 					data.name = name;
 					data.anchorType = anchorType;
-					data.type = field.GetType();
+					data.type = field.FieldType;
 					data.first.color = (SerializableColor)backgroundColor;
 					data.first.name = name;
 					data.first.offset = offset;
-					data.first.windowId = windowId;
+					data.windowId = windowId;
 				}
 			}
 		}
@@ -149,6 +158,7 @@ namespace PW
 		public void OnEnable()
 		{
 			name = "basic node";
+			maxAnchorRenderHeight = 0;
 			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
 			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
 			disabledTexture.Apply();
@@ -165,7 +175,7 @@ namespace PW
 
 		public void OnGUI()
 		{
-			Debug.Log("You are on the wrong window");
+			EditorGUILayout.LabelField("You are on the wrong window !");
 		}
 
 		public void OnWindowGUI(int id)
@@ -192,7 +202,8 @@ namespace PW
 			if (viewH > 2)
 				viewHeight = viewH;
 
-			windowRect.height = viewHeight + 30; //add the window header and footer size
+			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
+			windowRect.height = viewHeight + 24; //add the window header and footer size
 		}
 	
 		public virtual void	OnNodeGUI()
@@ -214,7 +225,7 @@ namespace PW
 			singleAnchor.anchorRect = anchorRect;
 
 			if (!ret.mouseAbove)
-				ret = new PWAnchorInfo(anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id);
+				ret = new PWAnchorInfo(data.name, anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id, data.generic, data.allowedTypes);
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -240,6 +251,7 @@ namespace PW
 						outputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
 				}
 			});
+			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - windowRect.y - 20, outputAnchorRect.yMin - windowRect.y - 20);
 			return ret;
 		}
 		
@@ -290,12 +302,71 @@ namespace PW
 		{
 			return links;
 		}
+		
+		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, Type[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
+		{
+			if (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object))
+			{
+				if (verbose)
+					Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString());
+				return true;
+			}
+			
+			if (fromAnchorType == PWAnchorType.Input)
+			{
+				if (fromGeneric)
+				{
+					if (verbose)
+						Debug.Log("Generic variable, check all allowed types:");
+					foreach (var t in fromAllowedTypes)
+					{
+						if (verbose)
+							Debug.Log("check castable from " + to.fieldType + " to " + t);
+						if (to.fieldType.IsAssignableFrom(t))
+						{
+							if (verbose)
+								Debug.Log(fromType + " is castable from " + t);
+							return true;
+						}
+					}
+				}
+			}
+			else
+			{
+				if (to.generic)
+				{
+					foreach (var t in to.allowedTypes)
+					{
+						if (verbose)
+							Debug.Log("check castable from " + fromType + " to " + t);
+						if (fromType.IsAssignableFrom(t))
+						{
+							if (verbose)
+								Debug.Log(fromType + " is castable from " + t);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		bool			AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
+		{
+			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
+		}
 
 		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
 			//from is othen me and with an anchor type of Output.
 
-			Debug.Log("attached link form " + from.windowId + " to " + to.windowId);
+			//quit if types are not compatible
+			if (!AnchorAreAssignable(from, to))
+				return ;
+			if (from.anchorType == to.anchorType)
+				return ;
+			if (from.windowId == to.windowId)
+				return ;
 
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
@@ -314,12 +385,8 @@ namespace PW
 					{
 						//if data was added to multi-anchor:
 						if (data.multiple)
-						{
 							if (i == data.multipleValueInstance.Count)
-							{
 								data.AddNewAnchor();
-							}
-						}
 					}
 				});
 				//TODO: create dependency for the window to.windowId (for fast computeOrder calcul)
@@ -329,6 +396,26 @@ namespace PW
 		public void		RemoveLink(int anchorId)
 		{
 			links.RemoveAll(l => l.localAnchorId == anchorId);
+			PWAnchorData.PWAnchorMultiData singleAnchorData;
+			var data = GetAnchorData(anchorId, out singleAnchorData);
+			singleAnchorData.linkCount--;
+			//TODO: decrement the linkCount and update locked if needed.
+		}
+
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
+		{
+			PWAnchorData					ret = null;
+			PWAnchorData.PWAnchorMultiData	s = null;
+
+			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
+				if (singleAnchor.id == id)
+				{
+					s = singleAnchor;
+					ret = data;
+				}
+			});
+			singleAnchorData = s;
+			return ret;
 		}
 
 		public Rect?	GetAnchorRect(int id)
@@ -358,7 +445,10 @@ namespace PW
 
 			ForeachPWAnchors((fieldName, data, singleAnchor, i) => {
 				//Hide anchors and highlight when mouse hover
-				if (data.anchorType == anchorType && data.type.IsAssignableFrom(toLink.fieldType))
+				// Debug.Log(data.name + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
+				if (data.windowId != toLink.windowId
+					&& data.anchorType == anchorType
+					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink))
 				{
 					if (data.multiple)
 					{

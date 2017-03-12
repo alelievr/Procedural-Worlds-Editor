@@ -1,12 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using PW;
+﻿using UnityEditor;
 
 namespace PW
 {
-	[System.SerializableAttribute]
 	public class PWNodeDebugLog : PWNode {
 	
 		[PWInput("obj")]
