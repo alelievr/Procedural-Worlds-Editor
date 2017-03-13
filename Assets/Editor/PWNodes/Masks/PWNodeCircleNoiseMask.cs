@@ -16,5 +16,10 @@ namespace PW
 		{
 			EditorGUILayout.LabelField("pos: " + centerPosition);
 		}
+
+		public override void OnNodeProcess()
+		{
+			
+		}
 	}
 }

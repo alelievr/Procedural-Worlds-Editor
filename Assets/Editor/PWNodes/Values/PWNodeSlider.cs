@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using PW;
-using UnityEditor;
+﻿using UnityEditor;
 
 namespace PW
 {
@@ -14,13 +10,11 @@ namespace PW
 		float	min = 0;
 		float	max = 1;
 	
-		public override void OnNodeCreate()
-		{
-		}
-	
 		public override void OnNodeGUI()
 		{
 			value1 = EditorGUILayout.Slider(value1, min, max);
 		}
+
+		//no process needed, value is alrealy here with slider.
 	}
 }

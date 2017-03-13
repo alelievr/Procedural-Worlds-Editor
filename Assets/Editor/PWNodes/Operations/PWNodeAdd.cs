@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW;
 
 namespace PW
 {
@@ -51,6 +49,12 @@ namespace PW
 				return ("Vector2");
 			return ("float");
 		}
+
+		void DisplayResult< T >(T result)
+		{
+			EditorGUIUtility.labelWidth = 100;
+			EditorGUILayout.LabelField("result: " + result);
+		}
 	
 		public override void OnNodeGUI()
 		{
@@ -59,11 +63,29 @@ namespace PW
 			vec2s = values.GetValues< Vector2 >();
 			vec3s = values.GetValues< Vector3 >();
 			vec4s = values.GetValues< Vector4 >();
-	
+			
 			EditorGUILayout.LabelField("Mode: " + GetModeName());
 	
 			EditorGUIUtility.labelWidth = 100;
 			intify = EditorGUILayout.Toggle("Integer round", intify);
+
+			if (vec4s.Count != 0)
+				DisplayResult(v4Output);
+			else if (vec3s.Count != 0)
+				DisplayResult(v3Output);
+			else if (vec2s.Count != 0)
+				DisplayResult(v2Output);
+			else
+				DisplayResult(fOutput);
+		}
+
+		public override void OnNodeProcess()
+		{
+			ints = values.GetValues< int >();
+			floats = values.GetValues< float >();
+			vec2s = values.GetValues< Vector2 >();
+			vec3s = values.GetValues< Vector3 >();
+			vec4s = values.GetValues< Vector4 >();
 			
 			//check nominal type:
 	
@@ -82,8 +104,6 @@ namespace PW
 					v4Output += new Vector4(integer, integer, integer, integer);
 				if (intify)
 					v4Output = PWUtils.Round(v4Output);
-				EditorGUIUtility.labelWidth = 100;
-				EditorGUILayout.LabelField("result: " + v4Output);
 			}
 			else if (vec3s.Count != 0)
 			{
@@ -98,8 +118,6 @@ namespace PW
 					v3Output += new Vector3(integer, integer, integer);
 				if (intify)
 					v3Output = PWUtils.Round(v3Output);
-				EditorGUIUtility.labelWidth = 100;
-				EditorGUILayout.LabelField("result: " + v3Output);
 			}
 			else if (vec2s.Count != 0)
 			{
@@ -112,8 +130,6 @@ namespace PW
 					v2Output += new Vector2(integer, integer);
 				if (intify)
 					v2Output = PWUtils.Round(v2Output);
-				EditorGUIUtility.labelWidth = 100;
-				EditorGUILayout.LabelField("result: " + v2Output);
 			}
 			else //int and floats
 			{
@@ -124,8 +140,6 @@ namespace PW
 					fOutput += integer;
 				if (intify)
 					fOutput = Mathf.Round(fOutput);
-				EditorGUIUtility.labelWidth = 100;
-				EditorGUILayout.LabelField("result: " + fOutput);
 			}
 		}
 	}

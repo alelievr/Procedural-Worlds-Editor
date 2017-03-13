@@ -122,6 +122,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			localWindowIdCount = 0;
 			firstInitialization = "initialized";
 		}
+		
+		EvaluateComputeOrder();
 	}
 
     void OnGUI()
@@ -167,6 +169,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.scrollWheel
 			|| Event.current.type == EventType.KeyDown
 			|| Event.current.type == EventType.KeyUp)
+			;
 			Repaint();
     }
 
@@ -291,16 +294,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawNodeGraphCore()
 	{
+		Event e = Event.current;
+
 		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
 			bool	mouseAboveAnchorLocal = false;
+			PWNode.windowRenderOrder = 0;
 			BeginWindows();
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				//window:
+				GUI.depth = nodes[i].computeOrder;
 				nodes[i].UpdateGraphDecal(graphDecalPosition);
 				nodes[i].windowRect = PWUtils.DecalRect(nodes[i].windowRect, graphDecalPosition);
-				Rect decaledRect = GUI.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].nodeTypeName);
+				Rect decaledRect = GUILayout.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].nodeTypeName);
 				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
 
 				//highlight, hide, add all linkable anchors:
@@ -313,9 +320,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (mouseAboveAnchor.mouseAbove)
 					mouseAboveAnchorLocal = true;
 
-
 				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchorLocal && mouseAboveAnchor.mouseAbove && Event.current.type == EventType.MouseDown)
+				if (mouseAboveAnchorLocal && mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
 				{
 					startDragAnchor = mouseAboveAnchor;
 					draggingLink = true;
@@ -323,9 +329,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				//render node anchors:
 				nodes[i].RenderAnchors();
+				
+				//we render the window (it will also compute the result)
 	
 				//end dragging:
-				if (Event.current.type == EventType.mouseUp && draggingLink == true)
+				if (e.type == EventType.mouseUp && draggingLink == true)
 					if (mouseAboveAnchor.mouseAbove)
 					{
 						//attach link to the node:
@@ -335,6 +343,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 							win.AttachLink(startDragAnchor, mouseAboveAnchor);
 						else
 							Debug.LogWarning("window id not found: " + startDragAnchor.windowId);
+						
+						//Recalcul the compute order:
+						EvaluateComputeOrder();
+
 						draggingLink = false;
 					}
 
@@ -362,21 +374,101 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (nodes[i].WindowShouldClose())
 					nodes.RemoveAt(i);
 			}
+			EndWindows();
 			
+			if (e.type == EventType.Repaint)
+				foreach (var node in nodes)
+				{
+					node.OnNodeProcess();
+		
+					var links = node.GetLinks();
+
+					foreach (var link in links)
+					{
+						var target = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+
+						Debug.Log("target distant name: " + link.distantName);
+						if (target == null)
+							continue ;
+
+						//simple value set
+						//TODO: PWValues support AND OPTIMIZATION !!!!
+						var f = node.GetType().GetField(link.localName).GetValue(node);
+						var prop = target.GetType().GetField(link.distantName);
+						prop.SetValue(target, f);
+					}
+				}
+
 			//click up outside of an anchor, stop dragging
-			if (Event.current.type == EventType.mouseUp && draggingLink == true)
+			if (e.type == EventType.mouseUp && draggingLink == true)
 				draggingLink = false;
 
 			if (draggingLink)
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
-					new Rect((int)Event.current.mousePosition.x, (int)Event.current.mousePosition.y, 0, 0),
+					new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0),
 					startDragAnchor.anchorColor
 				);
-			EndWindows();
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 		}
 		EditorGUILayout.EndHorizontal();
+	}
+
+	//Dictionary< windowId, dependencyWeight >
+	Dictionary< int, int > nodeComputeOrderCount = new Dictionary< int, int >();
+	int EvaluateComputeOrder(bool first = true, int depth = 0, int windowId = -1)
+	{
+		//Recursively evaluate compute order for each nodes:
+		if (first)
+		{
+			nodeComputeOrderCount.Clear();
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				nodes[i].computeOrder = EvaluateComputeOrder(false, 1, nodes[i].windowId);
+				Debug.Log("computed order for node " + nodes[i].windowId + ": " + nodes[i].computeOrder);
+			}
+			//sort nodes for compute order:
+			nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
+		}
+
+		//check if we the node have already been computed:
+		if (nodeComputeOrderCount.ContainsKey(windowId))
+			return nodeComputeOrderCount[windowId];
+
+		var node = nodes.FirstOrDefault(n => n.windowId == windowId);
+		if (node == null)
+			return 0;
+
+		//compute dependency weight:
+		int	ret = 1;
+		foreach (var dep in node.GetDependencies())
+		{
+			Debug.Log("dependency for window " + windowId + ": " + dep);
+			ret += EvaluateComputeOrder(false, depth + 1, dep);
+		}
+
+		nodeComputeOrderCount[windowId] = ret;
+		return ret;
+
+		/*int i = 0;
+		var	dependenciesPerNodes =	(from node in nodes
+									select new { deps = node.GetDependencies(), windowId = node.windowId, index = i++})
+									.ToDictionary(x => x.windowId, x => x);
+		
+		foreach (var depKP in dependenciesPerNodes)
+		{
+			var dep = depKP.Value;
+			nodes[dep.index].computeOrder = dep.deps.Count;
+		}
+
+		for (i = 0; i < nodes.Count; i++)
+		{
+			foreach (var dep in dependenciesPerNodes[nodes[i].windowId].deps)
+			{
+				//add the compute order of the dependencies.
+				nodes[i].computeOrder += nodes[i].computeOrder;
+			}
+		}*/
 	}
 
 	static void CreateBackgroundTexture()

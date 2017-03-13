@@ -43,8 +43,8 @@ public class HorizontalSplitView {
 		//TODO: min width and background color.
 		//left bar separation and resize:
 		
-		Rect handleRect = new Rect(handlerPosition, availableRect.y, handleWidth, availableRect.height);
-		Rect handleCatchRect = new Rect(handlerPosition, availableRect.y, 8f, availableRect.height);
+		Rect handleRect = new Rect(handlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
+		Rect handleCatchRect = new Rect(handlerPosition - 2, availableRect.y, 6f, availableRect.height);
 		GUI.DrawTexture(handleRect, resizeHandleTex);
 		EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
 
@@ -57,7 +57,7 @@ public class HorizontalSplitView {
 		lastMouseX = Event.current.mousePosition.x;
 		handlerPosition = Mathf.Clamp(handlerPosition, minWidth, maxWidth);
 
-		return new Rect(handlerPosition + 4, availableRect.y, availableRect.width - handlerPosition, availableRect.height);
+		return new Rect(handlerPosition + 3, availableRect.y, availableRect.width - handlerPosition, availableRect.height);
 	}
 
 	public void UpdateMinMax(float min, float max)

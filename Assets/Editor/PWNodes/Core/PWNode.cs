@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace PW
 		public Rect		windowRect;
 		public int		windowId;
 		public bool		renamable;
+		public int		computeOrder;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
@@ -24,8 +25,6 @@ namespace PW
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
 
-		[SerializeField]
-		int		computeOrder; //to define an order for computing result
 		[SerializeField]
 		int		viewHeight;
 		[SerializeField]
@@ -38,8 +37,12 @@ namespace PW
 		bool	windowShouldClose = false;
 		bool	firstRenderLoop;
 
+		public static int	windowRenderOrder = 0;
+
 		[SerializeField]
 		List< PWLink > links = new List< PWLink >();
+		[SerializeField]
+		List< int >		depencendies = new List< int >();
 
 		[System.SerializableAttribute]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
@@ -198,7 +201,7 @@ namespace PW
 						Debug.LogWarning("PWMultiple attribute is only valid on input variables");
 						data.multiple = false;
 					}
-					data.name = name;
+					data.fieldName = field.Name;
 					data.anchorType = anchorType;
 					data.type = (SerializableType)field.FieldType;
 					data.first.color = (SerializableColor)backgroundColor;
@@ -239,7 +242,7 @@ namespace PW
 			}
 
 			//close cross render:
-			//too dangerouss:
+			//too dangerous:
 		/*	Rect closeCrossRect = new Rect(windowRect.width - 14, 2, 18, 18);
 			GUI.Box(closeCrossRect, "X", new GUIStyle());
 			if (Event.current.type == EventType.MouseUp && closeCrossRect.Contains(Event.current.mousePosition))
@@ -251,12 +254,14 @@ namespace PW
 
 			int	debugViewH = 0;
 			#if DEBUG_WINDOW
-			GUIStyle debugstyle = new GUIStyle();
-			debugstyle.normal.background = highlightAddTexture;
-			EditorGUILayout.BeginVertical(debugstyle);
-			EditorGUILayout.LabelField("window id: " + windowId);
-			EditorGUILayout.EndVertical();
-			debugViewH = (int)GUILayoutUtility.GetLastRect().height;
+				GUIStyle debugstyle = new GUIStyle();
+				debugstyle.normal.background = highlightAddTexture;
+
+				EditorGUILayout.BeginVertical(debugstyle);
+				EditorGUILayout.LabelField("Id: " + windowId + " | Compute order: " + computeOrder);
+				EditorGUILayout.LabelField("Render order: " + windowRenderOrder++);
+				EditorGUILayout.EndVertical();
+				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
 			#endif
 
 			GUILayout.BeginVertical();
@@ -284,6 +289,10 @@ namespace PW
 			EditorGUILayout.LabelField("empty node");
 		}
 
+		public virtual void OnNodeProcess()
+		{
+		}
+
 		void ProcessAnchor(
 			PWAnchorData data,
 			PWAnchorData.PWAnchorMultiData singleAnchor,
@@ -298,7 +307,7 @@ namespace PW
 			singleAnchor.anchorRect = anchorRect;
 
 			if (!ret.mouseAbove)
-				ret = new PWAnchorInfo(data.name, anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id, data.generic, data.allowedTypes);
+				ret = new PWAnchorInfo(data.fieldName, anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id, data.generic, data.allowedTypes);
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -333,7 +342,7 @@ namespace PW
 		
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
-			string anchorName = (data.name.Length > 4) ? data.name.Substring(0, 4) : data.name;
+			string anchorName = (singleAnchor.name.Length > 4) ? singleAnchor.name.Substring(0, 4) : singleAnchor.name;
 
 			if (data.multiple)
 			{
@@ -404,6 +413,11 @@ namespace PW
 		public List< PWLink > GetLinks()
 		{
 			return links;
+		}
+
+		public List< int >	GetDependencies()
+		{
+			return depencendies;
 		}
 		
 		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
@@ -476,7 +490,7 @@ namespace PW
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
 			{
-				links.Add(new PWLink(to.windowId, to.anchorId, from.windowId, from.anchorId, from.anchorColor));
+				links.Add(new PWLink(to.windowId, to.anchorId, to.name, from.windowId, from.anchorId, from.name, from.anchorColor));
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -492,9 +506,10 @@ namespace PW
 						//if data was added to multi-anchor:
 						if (data.multiple)
 							if (i == data.multipleValueCount)
-								data.AddNewAnchor(data.name.GetHashCode() + i);
+								data.AddNewAnchor(data.fieldName.GetHashCode() + i);
 					}
 				});
+				depencendies.Add(to.windowId);
 				//TODO: create dependency for the window to.windowId (for fast computeOrder calcul)
 			}
 		}
@@ -505,7 +520,6 @@ namespace PW
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount--;
-			//TODO: decrement the linkCount and update locked if needed.
 		}
 
 		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
@@ -621,11 +635,11 @@ namespace PW
 				propertyDatas[propertyName].first.visibility = visibility;
 		}
 
-		public bool		IsPropLocked(string propertyName)
+		public int		GetPropLinkCount(string propertyName)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				return propertyDatas[propertyName].first.locked;
-			return false;
+				return propertyDatas[propertyName].first.linkCount;
+			return -1;
 		}
     }
 }
