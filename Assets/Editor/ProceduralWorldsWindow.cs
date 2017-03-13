@@ -3,6 +3,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using PW;
@@ -67,6 +68,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
+	[System.NonSerializedAttribute]
 	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >()
 	{
 		{"Simple values", new List< PWNodeStorage >()},
@@ -78,6 +80,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{"Debug", new List< PWNodeStorage >()},
 		{"Custom", new List< PWNodeStorage >()},
 	};
+
+	[System.NonSerializedAttribute]
+	Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
 
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
@@ -116,6 +121,23 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
 		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+
+		//bake the fieldInfo types:
+		bakedNodeFields.Clear();
+		foreach (var nodeCat in nodeSelectorList)
+			foreach (var nodeClass in nodeCat.Value)
+			{
+				var dico = new Dictionary< string, FieldInfo >();
+				bakedNodeFields[nodeClass.nodeType.AssemblyQualifiedName] = dico;
+
+				foreach (var field in nodeClass.nodeType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+					dico[field.Name] = field;
+			}
+	
+		//clear the corrupted node:
+		for (int i = 0; i < nodes.Count; i++)
+			if (nodes[i] == null)
+				nodes.RemoveAt(i--);
 
 		if (firstInitialization == null)
 		{
@@ -387,15 +409,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 					{
 						var target = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
 
-						Debug.Log("target distant name: " + link.distantName);
 						if (target == null)
 							continue ;
 
-						//simple value set
-						//TODO: PWValues support AND OPTIMIZATION !!!!
-						var f = node.GetType().GetField(link.localName).GetValue(node);
-						var prop = target.GetType().GetField(link.distantName);
-						prop.SetValue(target, f);
+						var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
+						var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+						if (link.distantIndex == -1)
+							prop.SetValue(target, val);
+						else //multiple object data:
+						{
+							PWValues values = (PWValues)prop.GetValue(target);
+
+							if (values != null)
+								if (!values.AssignAt(link.distantIndex, val))
+									Debug.Log("failed to set distant indexed field value: " + link.distantName);
+						}
 					}
 				}
 
@@ -425,7 +453,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				nodes[i].computeOrder = EvaluateComputeOrder(false, 1, nodes[i].windowId);
-				Debug.Log("computed order for node " + nodes[i].windowId + ": " + nodes[i].computeOrder);
+				// Debug.Log("computed order for node " + nodes[i].windowId + ": " + nodes[i].computeOrder);
 			}
 			//sort nodes for compute order:
 			nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
@@ -442,33 +470,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//compute dependency weight:
 		int	ret = 1;
 		foreach (var dep in node.GetDependencies())
-		{
-			Debug.Log("dependency for window " + windowId + ": " + dep);
 			ret += EvaluateComputeOrder(false, depth + 1, dep);
-		}
 
 		nodeComputeOrderCount[windowId] = ret;
 		return ret;
-
-		/*int i = 0;
-		var	dependenciesPerNodes =	(from node in nodes
-									select new { deps = node.GetDependencies(), windowId = node.windowId, index = i++})
-									.ToDictionary(x => x.windowId, x => x);
-		
-		foreach (var depKP in dependenciesPerNodes)
-		{
-			var dep = depKP.Value;
-			nodes[dep.index].computeOrder = dep.deps.Count;
-		}
-
-		for (i = 0; i < nodes.Count; i++)
-		{
-			foreach (var dep in dependenciesPerNodes[nodes[i].windowId].deps)
-			{
-				//add the compute order of the dependencies.
-				nodes[i].computeOrder += nodes[i].computeOrder;
-			}
-		}*/
 	}
 
 	static void CreateBackgroundTexture()

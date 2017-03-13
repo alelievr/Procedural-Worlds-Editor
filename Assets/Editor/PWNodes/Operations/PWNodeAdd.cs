@@ -88,6 +88,11 @@ namespace PW
 			vec4s = values.GetValues< Vector4 >();
 			
 			//check nominal type:
+
+			fOutput = 0;
+			v2Output = Vector2.zero;
+			v3Output = Vector3.zero;
+			v4Output = Vector4.zero;
 	
 			if (vec4s.Count != 0)
 			{

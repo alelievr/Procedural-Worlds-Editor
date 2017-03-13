@@ -118,7 +118,7 @@ namespace PW
 					}
 				}
 				else
-					callback(data, data.first, 0);
+					callback(data, data.first, -1);
 			}
 		}
 
@@ -133,8 +133,6 @@ namespace PW
 				actualFields.Add(field.Name);
 				if (!propertyDatas.ContainsKey(field.Name))
 					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
-				else //TODO: implement reload values of existing anchor datas.
-					continue ;
 				
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = defaultAnchorBackgroundColor;
@@ -142,6 +140,7 @@ namespace PW
 				string			name = field.Name;
 				Vector2			offset = Vector2.zero;
 
+				data.anchorInstance = field.GetValue(this);
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
@@ -179,11 +178,6 @@ namespace PW
 							data.allowedTypes = multipleAttr.allowedTypes;
 							data.minMultipleValues = multipleAttr.minValues;
 							data.maxMultipleValues = multipleAttr.maxValues;
-
-							//add minimum number of anchors to render:
-							if (data.multipleValueCount < data.minMultipleValues)
-								for (int i = 1; i <= data.minMultipleValues; i++)
-									data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i);
 						}
 					}
 					if (genericAttr != null)
@@ -201,6 +195,7 @@ namespace PW
 						Debug.LogWarning("PWMultiple attribute is only valid on input variables");
 						data.multiple = false;
 					}
+					data.classAQName = GetType().AssemblyQualifiedName;
 					data.fieldName = field.Name;
 					data.anchorType = anchorType;
 					data.type = (SerializableType)field.FieldType;
@@ -208,6 +203,20 @@ namespace PW
 					data.first.name = name;
 					data.first.offset = offset;
 					data.windowId = windowId;
+
+					//add missing values to instance of list:
+					if (data.multiple)
+					{
+						//add minimum number of anchors to render:
+						if (data.multipleValueCount < data.minMultipleValues)
+							for (int i = data.multipleValueCount; i < data.minMultipleValues; i++)
+								data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i);
+
+						var PWValuesInstance = data.anchorInstance as PWValues;
+
+						while (PWValuesInstance.Count < data.multipleValueCount)
+							PWValuesInstance.Add(null);
+					}
 				}
 			}
 
@@ -279,7 +288,8 @@ namespace PW
 
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
-			windowRect.height = viewHeight + 24; //add the window header and footer size
+			if (Event.current.type == EventType.Layout)
+				windowRect.height = viewHeight + 24; //add the window header and footer size
 
 			firstRenderLoop = false;
 		}
@@ -307,7 +317,11 @@ namespace PW
 			singleAnchor.anchorRect = anchorRect;
 
 			if (!ret.mouseAbove)
-				ret = new PWAnchorInfo(data.fieldName, anchorRect, singleAnchor.color, data.type, data.anchorType, windowId, singleAnchor.id, data.generic, data.allowedTypes);
+				ret = new PWAnchorInfo(data.fieldName, anchorRect,
+					singleAnchor.color, data.type,
+					data.anchorType, windowId, singleAnchor.id,
+					data.classAQName, index,
+					data.generic, data.allowedTypes);
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -490,7 +504,10 @@ namespace PW
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
 			{
-				links.Add(new PWLink(to.windowId, to.anchorId, to.name, from.windowId, from.anchorId, from.name, from.anchorColor));
+				links.Add(new PWLink(
+					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
+					from.windowId, from.anchorId, from.name, from.classAQName, from.anchorColor)
+				);
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -510,7 +527,6 @@ namespace PW
 					}
 				});
 				depencendies.Add(to.windowId);
-				//TODO: create dependency for the window to.windowId (for fast computeOrder calcul)
 			}
 		}
 

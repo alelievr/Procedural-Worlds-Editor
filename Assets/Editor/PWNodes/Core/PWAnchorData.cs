@@ -45,6 +45,8 @@ namespace PW
 		public bool					multiple;
 		//if the type is generic of defined;
 		public bool					generic;
+		//the full name of the node class:
+		public string				classAQName;
 		//list of rendered anchors:
 		[SerializeField]
 		public List< PWAnchorMultiData >	multi;
@@ -57,6 +59,7 @@ namespace PW
 		public int					minMultipleValues;
 		public int					maxMultipleValues;
 		public int					multipleValueCount;
+		public object				anchorInstance;
 		//current number of rendered anchors:
 		public bool					displayHiddenMultipleAnchors;
 
@@ -110,14 +113,16 @@ namespace PW
 
 		public void AddNewAnchor(Color c, int id)
 		{
-			PWAnchorMultiData tmp = new PWAnchorMultiData(c);
+			PWAnchorMultiData	tmp = new PWAnchorMultiData(c);
+			PWValues			anchorValues = anchorInstance as PWValues;
 
 			tmp.name = first.name;
 			tmp.additional = true;
 			tmp.id = id;
-			multipleValueCount++;
-
-			Debug.Log("added new anchor: " + id);
+			if (anchorValues.Count == multipleValueCount)
+				multipleValueCount++;
+			//add an object to the PWValues list:
+			anchorValues.Add(null);
 
 			multi.Add(tmp);
 		}

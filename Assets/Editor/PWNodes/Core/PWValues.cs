@@ -30,5 +30,14 @@ namespace PW
 		{
 			values.Add(val);
 		}
+
+		public bool AssignAt(int index, object val)
+		{
+			if (index >= values.Count)
+				return false;
+
+			values[index] = val;
+			return true;
+		}
 	}
 }

@@ -21,19 +21,25 @@ namespace PW
 		public int					distantWindowId;
 		public int					distantAnchorId;
 		public string				distantName;
+		public string				distantClassAQName;
+		public int					distantIndex;
 		public int					localWindowId;
 		public int					localAnchorId;
 		public string				localName;
+		public string				localClassAQName;
 		public SerializableColor	color;
 		public PWLinkType			linkType;
 	
-		public PWLink(int dWin, int dAttr, string dName, int lWin, int lAttr, string lName, Color c)
+		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, Color c)
 		{
 			distantWindowId = dWin;
 			distantAnchorId = dAttr;
 			distantName = dName;
+			distantClassAQName = dCName;
+			distantIndex = dIndex;
 			localAnchorId = lAttr;
 			localWindowId = lWin;
+			localClassAQName = lCName;
 			localName = lName;
 			color = (SerializableColor)c;
 		}
