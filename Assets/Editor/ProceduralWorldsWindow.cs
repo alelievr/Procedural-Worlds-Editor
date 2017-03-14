@@ -1,6 +1,7 @@
 ﻿// #define		DEBUG_GRAPH
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
@@ -16,45 +17,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	debugTexture1;
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
-
-	[SerializeField]
-	List< PWNode >				nodes = new List< PWNode >();
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
 	static GUIStyle	splittedPanel;
 
-	[SerializeField]
-	HorizontalSplitView			h1;
-	[SerializeField]
-	HorizontalSplitView			h2;
+	int					currentPickerWindow;
 
 	[SerializeField]
-	Vector2			leftBarScrollPosition;
-	[SerializeField]
-	Vector2			selectorScrollPosition;
+	public PWNodeGraph	currentGraph;
 
-	[SerializeField]
-	Vector2			graphDecalPosition;
-	[SerializeField]
-	Vector2			lastMousePosition;
-	[SerializeField]
-	bool			dragginGraph = false;
-	[SerializeField]
-	bool			mouseAboveNodeAnchor = false;
-	[SerializeField]
-	int				localWindowIdCount;
-	[SerializeField]
-	string			firstInitialization;
-	
-	[SerializeField]
-	PWAnchorInfo	startDragAnchor;
-	[SerializeField]
-	bool			draggingLink = false;
-	
-	[SerializeField]
-	string			searchString = "";
-	
 	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
@@ -89,8 +61,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
 
-		window.graphDecalPosition = Vector2.zero;
-
 		window.Show();
 	}
 	
@@ -109,10 +79,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
-
-		//setup splitted panels:
-		h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
-		h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
 
 		//setup nodeList:
 		foreach (var n in nodeSelectorList)
@@ -133,23 +99,35 @@ public class ProceduralWorldsWindow : EditorWindow {
 				foreach (var field in nodeClass.nodeType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
 					dico[field.Name] = field;
 			}
-	
-		//clear the corrupted node:
-		for (int i = 0; i < nodes.Count; i++)
-			if (nodes[i] == null)
-				nodes.RemoveAt(i--);
-
-		if (firstInitialization == null)
+		
+		if (currentGraph == null)
+			currentGraph = new PWNodeGraph();
+			
+		//initialize graph the first time he was created
+		if (currentGraph.firstInitialization == null)
 		{
-			localWindowIdCount = 0;
-			firstInitialization = "initialized";
+			//setup splitted panels:
+			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
+			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
+
+			currentGraph.firstInitialization = "initialized";
+			currentGraph.localWindowIdCount = 0;
+
+			currentGraph.name = "New ProceduralWorld";
 		}
 		
+		//clear the corrupted node:
+		for (int i = 0; i < currentGraph.nodes.Count; i++)
+			if (currentGraph.nodes[i] == null)
+				currentGraph.nodes.RemoveAt(i--);
+
 		EvaluateComputeOrder();
 	}
 
     void OnGUI()
     {
+		EditorUtility.SetDirty(this);
+
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
@@ -160,29 +138,29 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
 		{
-			if (draggingLink)
-				draggingLink = false;
+			if (currentGraph.draggingLink)
+				currentGraph.draggingLink = false;
 		}
 
         //background color:
-		if (backgroundTex == null || h1 == null)
+		if (backgroundTex == null || currentGraph.h1 == null || resizeHandleTex == null)
 			OnEnable();
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
 		DrawNodeGraphCore();
 
-		h1.UpdateMinMax(position.width / 2, position.width - 4);
-		h2.UpdateMinMax(0, position.width / 2);
+		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 4);
+		currentGraph.h2.UpdateMinMax(0, position.width / 2);
 
-		h1.Begin();
-		Rect p1 = h2.Begin(backgroundTex);
+		currentGraph.h1.Begin();
+		Rect p1 = currentGraph.h2.Begin(backgroundTex);
 		DrawLeftBar(p1);
-		Rect g = h2.Split();
+		Rect g = currentGraph.h2.Split(resizeHandleTex);
 		DrawNodeGraphHeader(g);
-		h2.End();
-		Rect p2 = h1.Split(backgroundTex);
+		currentGraph.h2.End();
+		Rect p2 = currentGraph.h1.Split(resizeHandleTex);
 		DrawSelector(p2);
-		h1.End();
+		currentGraph.h1.End();
 
 		//if event, repaint
 		if (Event.current.type == EventType.mouseDown
@@ -191,19 +169,56 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.scrollWheel
 			|| Event.current.type == EventType.KeyDown
 			|| Event.current.type == EventType.KeyUp)
-			;
 			Repaint();
     }
 
 	void DrawLeftBar(Rect currentRect)
 	{
 		GUI.DrawTexture(currentRect, backgroundTex);
-		leftBarScrollPosition = EditorGUILayout.BeginScrollView(leftBarScrollPosition, GUILayout.ExpandWidth(true));
+		currentGraph.leftBarScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.leftBarScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
 				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
+
+				EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
 		
+				EditorGUILayout.BeginHorizontal();
+				if (GUILayout.Button("Load graph"))
+				{
+					UnityEngine.Object selected = null;
+					currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
+					EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
+                    if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
+                    {
+                    	selected = EditorGUIUtility.GetObjectPickerObject();
+						if (selected != null)
+							currentGraph = (PWNodeGraph)selected;
+                    }
+				}
+				else if (GUILayout.Button("Save this graph"))
+				{
+                    string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+                    if (path == "")
+                    {
+                        path = "Assets";
+                    }
+                    else if (Path.GetExtension(path) != "")
+                    {
+                        path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+                    }
+
+                    string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.name + ".asset");
+
+                    AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
+
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                    EditorUtility.FocusProjectWindow();
+                    Selection.activeObject = currentGraph;
+                }
+				EditorGUILayout.EndHorizontal();
+
 				//TODO: draw preview view.
 		
 				//TODO: draw infos / debug / global settings view
@@ -238,7 +253,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DrawSelector(Rect currentRect)
 	{
 		GUI.DrawTexture(currentRect, selectorBackgroundTex);
-		selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
+		currentGraph.selectorScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
@@ -246,11 +261,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 				EditorGUIUtility.fieldWidth = 0;
 				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
 				{
-					searchString = GUILayout.TextField(searchString, GUI.skin.FindStyle("ToolbarSeachTextField"));
+					currentGraph.searchString = GUILayout.TextField(currentGraph.searchString, GUI.skin.FindStyle("ToolbarSeachTextField"));
 					if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
 					{
 						// Remove focus if cleared
-						searchString = "";
+						currentGraph.searchString = "";
 						GUI.FocusControl(null);
 					}
 				}
@@ -260,7 +275,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				foreach (var nodeCategory in nodeSelectorList)
 				{
 					DrawSelectorCase(ref r, nodeCategory.Key, true);
-					foreach (var nodeCase in nodeCategory.Value.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
+					foreach (var nodeCase in nodeCategory.Value.Where(n => n.name.IndexOf(currentGraph.searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
 					{
 						Rect clickableRect = DrawSelectorCase(ref r, nodeCase.name);
 	
@@ -268,10 +283,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 						{
 							PWNode newNode = ScriptableObject.CreateInstance(nodeCase.nodeType) as PWNode;
 							//center to the middle of the screen:
-							newNode.windowRect.position = -graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
-							newNode.SetWindowId(localWindowIdCount++);
+							newNode.windowRect.position = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+							newNode.SetWindowId(currentGraph.localWindowIdCount++);
 							newNode.nodeTypeName = nodeCase.name;
-							nodes.Add(newNode);
+							currentGraph.nodes.Add(newNode);
 							Debug.Log("added node of type: " + nodeCase.nodeType);
 						}
 					}
@@ -295,15 +310,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 		#endif
 
 		if (Event.current.type == EventType.MouseDown //if event is mouse down
-			&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
+			&& !currentGraph.mouseAboveNodeAnchor //if mouse is not above a node anchor
 			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
-			&& !nodes.Any(n => PWUtils.DecalRect(n.windowRect, graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
-			dragginGraph = true;
-		if (dragginGraph)
-			graphDecalPosition += Event.current.mousePosition - lastMousePosition;
+			&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
+			currentGraph.dragginGraph = true;
+		if (currentGraph.dragginGraph)
+			currentGraph.graphDecalPosition += Event.current.mousePosition - currentGraph.lastMousePosition;
 		if (Event.current.type == EventType.MouseUp)
-			dragginGraph = false;
-		lastMousePosition = Event.current.mousePosition;
+			currentGraph.dragginGraph = false;
+		currentGraph.lastMousePosition = Event.current.mousePosition;
 		EditorGUILayout.EndVertical();
 	}
 
@@ -311,7 +326,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		while (true)
 		{
-			if (!nodes.Any(p => p.name == name))
+			if (!currentGraph.nodes.Any(p => p.name == name))
 				return name;
 			name += "*";
 		}
@@ -326,62 +341,62 @@ public class ProceduralWorldsWindow : EditorWindow {
 			bool	mouseAboveAnchorLocal = false;
 			PWNode.windowRenderOrder = 0;
 			BeginWindows();
-			for (int i = 0; i < nodes.Count; i++)
+			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
 				//window:
-				GUI.depth = nodes[i].computeOrder;
-				nodes[i].UpdateGraphDecal(graphDecalPosition);
-				nodes[i].windowRect = PWUtils.DecalRect(nodes[i].windowRect, graphDecalPosition);
-				Rect decaledRect = GUILayout.Window(i, nodes[i].windowRect, nodes[i].OnWindowGUI, nodes[i].nodeTypeName);
-				nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -graphDecalPosition);
+				GUI.depth =currentGraph. nodes[i].computeOrder;
+				currentGraph.nodes[i].UpdateGraphDecal(currentGraph.graphDecalPosition);
+				currentGraph.nodes[i].windowRect = PWUtils.DecalRect(currentGraph.nodes[i].windowRect, currentGraph.graphDecalPosition);
+				Rect decaledRect = GUILayout.Window(i, currentGraph.nodes[i].windowRect, currentGraph.nodes[i].OnWindowGUI, currentGraph.nodes[i].nodeTypeName);
+				currentGraph.nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 
 				//highlight, hide, add all linkable anchors:
-				if (draggingLink)
-					nodes[i].HighlightLinkableAnchorsTo(startDragAnchor);
-				nodes[i].DisplayHiddenMultipleAnchors(draggingLink);
+				if (currentGraph.draggingLink)
+					currentGraph.nodes[i].HighlightLinkableAnchorsTo(currentGraph.startDragAnchor);
+				currentGraph.nodes[i].DisplayHiddenMultipleAnchors(currentGraph.draggingLink);
 
 				//process envent, state and position for node anchors:
-				var mouseAboveAnchor = nodes[i].ProcessAnchors();
+				var mouseAboveAnchor = currentGraph.nodes[i].ProcessAnchors();
 				if (mouseAboveAnchor.mouseAbove)
 					mouseAboveAnchorLocal = true;
 
 				//if you press the mouse above an anchor, start the link drag
 				if (mouseAboveAnchorLocal && mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
 				{
-					startDragAnchor = mouseAboveAnchor;
-					draggingLink = true;
+					currentGraph.startDragAnchor = mouseAboveAnchor;
+					currentGraph.draggingLink = true;
 				}
 
 				//render node anchors:
-				nodes[i].RenderAnchors();
+				currentGraph.nodes[i].RenderAnchors();
 				
 				//we render the window (it will also compute the result)
 	
 				//end dragging:
-				if (e.type == EventType.mouseUp && draggingLink == true)
+				if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
 					if (mouseAboveAnchor.mouseAbove)
 					{
 						//attach link to the node:
-						nodes[i].AttachLink(mouseAboveAnchor, startDragAnchor);
-						var win = nodes.FirstOrDefault(n => n.windowId == startDragAnchor.windowId);
+						currentGraph.nodes[i].AttachLink(mouseAboveAnchor, currentGraph.startDragAnchor);
+						var win = currentGraph.nodes.FirstOrDefault(n => n.windowId == currentGraph.startDragAnchor.windowId);
 						if (win != null)
-							win.AttachLink(startDragAnchor, mouseAboveAnchor);
+							win.AttachLink(currentGraph.startDragAnchor, mouseAboveAnchor);
 						else
-							Debug.LogWarning("window id not found: " + startDragAnchor.windowId);
+							Debug.LogWarning("window id not found: " + currentGraph.startDragAnchor.windowId);
 						
 						//Recalcul the compute order:
 						EvaluateComputeOrder();
 
-						draggingLink = false;
+						currentGraph.draggingLink = false;
 					}
 
 				//draw links:
-				var links = nodes[i].GetLinks();
+				var links = currentGraph.nodes[i].GetLinks();
 				foreach (var link in links)
 				{
 					// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
-					var fromWindow = nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
-					var toWindow = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+					var fromWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
+					var toWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
 
 					if (fromWindow == null || toWindow == null) //invalid window ids
 					{
@@ -396,13 +411,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 				//check if user have pressed the close button of this window:
-				if (nodes[i].WindowShouldClose())
-					nodes.RemoveAt(i);
+				if (currentGraph.nodes[i].WindowShouldClose())
+					currentGraph.nodes.RemoveAt(i);
 			}
 			EndWindows();
 			
 			if (e.type == EventType.Repaint)
-				foreach (var node in nodes)
+				foreach (var node in currentGraph.nodes)
 				{
 					node.OnNodeProcess();
 		
@@ -410,7 +425,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 					foreach (var link in links)
 					{
-						var target = nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+						var target = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
 
 						if (target == null)
 							continue ;
@@ -431,16 +446,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 			//click up outside of an anchor, stop dragging
-			if (e.type == EventType.mouseUp && draggingLink == true)
-				draggingLink = false;
+			if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
+				currentGraph.draggingLink = false;
 
-			if (draggingLink)
+			if (currentGraph.draggingLink)
 				DrawNodeCurve(
-					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
+					new Rect((int)currentGraph.startDragAnchor.anchorRect.center.x, (int)currentGraph.startDragAnchor.anchorRect.center.y, 0, 0),
 					new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0),
-					startDragAnchor.anchorColor
+					currentGraph.startDragAnchor.anchorColor
 				);
-			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
+			currentGraph.mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 		}
 		EditorGUILayout.EndHorizontal();
 	}
@@ -453,20 +468,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (first)
 		{
 			nodeComputeOrderCount.Clear();
-			for (int i = 0; i < nodes.Count; i++)
+			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
-				nodes[i].computeOrder = EvaluateComputeOrder(false, 1, nodes[i].windowId);
+				currentGraph.nodes[i].computeOrder = EvaluateComputeOrder(false, 1, currentGraph.nodes[i].windowId);
 				// Debug.Log("computed order for node " + nodes[i].windowId + ": " + nodes[i].computeOrder);
 			}
 			//sort nodes for compute order:
-			nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
+			currentGraph.nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
 		}
 
 		//check if we the node have already been computed:
 		if (nodeComputeOrderCount.ContainsKey(windowId))
 			return nodeComputeOrderCount[windowId];
 
-		var node = nodes.FirstOrDefault(n => n.windowId == windowId);
+		var node = currentGraph.nodes.FirstOrDefault(n => n.windowId == windowId);
 		if (node == null)
 			return 0;
 

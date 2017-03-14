@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 [System.SerializableAttribute]
@@ -13,13 +11,10 @@ public class HorizontalSplitView {
 	float		maxWidth;
 	float		lastMouseX = -1;
 
-	Texture2D	resizeHandleTex;
-
 	int			handleWidth = 4;
 
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
 	{
-		resizeHandleTex = handleTex;
 		handlerPosition = hP;
 		minWidth = min;
 		maxWidth = max;
@@ -36,7 +31,7 @@ public class HorizontalSplitView {
 		return EditorGUILayout.BeginVertical(GUILayout.Width(handlerPosition), GUILayout.ExpandHeight(true));
 	}
 
-	public Rect Split(Texture2D background = null)
+	public Rect Split(Texture2D resizeHandleTex = null)
 	{
 		EditorGUILayout.EndVertical();
 		
