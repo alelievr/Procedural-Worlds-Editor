@@ -4,13 +4,20 @@ using UnityEditor;
 [System.SerializableAttribute]
 public class HorizontalSplitView {
 
+	[SerializeField]
 	float		handlerPosition;
+	[SerializeField]
 	bool		resize = false;
+	[SerializeField]
 	Rect		availableRect;
+	[SerializeField]
 	float		minWidth;
+	[SerializeField]
 	float		maxWidth;
+	[SerializeField]
 	float		lastMouseX = -1;
 
+	[SerializeField]
 	int			handleWidth = 4;
 
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
@@ -39,7 +46,7 @@ public class HorizontalSplitView {
 		//left bar separation and resize:
 		
 		Rect handleRect = new Rect(handlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
-		Rect handleCatchRect = new Rect(handlerPosition - 2, availableRect.y, 6f, availableRect.height);
+		Rect handleCatchRect = new Rect(handlerPosition - 1, availableRect.y, 6f, availableRect.height);
 		GUI.DrawTexture(handleRect, resizeHandleTex);
 		EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
 

@@ -21,22 +21,26 @@ namespace PW
 		public Vector2			selectorScrollPosition;
 	
 		[SerializeField]
+		public new string		name;
+		[SerializeField]
+		public string			saveName;
+		[SerializeField]
 		public Vector2			graphDecalPosition;
 		[SerializeField]
 		public Vector2			lastMousePosition;
 		[SerializeField]
-		public bool			dragginGraph = false;
+		public bool				dragginGraph = false;
 		[SerializeField]
-		public bool			mouseAboveNodeAnchor = false;
+		public bool				mouseAboveNodeAnchor = false;
 		[SerializeField]
 		public int				localWindowIdCount;
 		[SerializeField]
 		public string			firstInitialization;
 		
 		[SerializeField]
-		public PWAnchorInfo	startDragAnchor;
+		public PWAnchorInfo		startDragAnchor;
 		[SerializeField]
-		public bool			draggingLink = false;
+		public bool				draggingLink = false;
 		
 		[SerializeField]
 		public string			searchString = "";

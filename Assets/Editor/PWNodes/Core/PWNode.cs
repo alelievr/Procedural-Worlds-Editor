@@ -82,7 +82,7 @@ namespace PW
 			if (firstInitialization == null)
 			{
 				computeOrder = 0;
-				windowRect = new Rect(400, 400, 200, 300);
+				windowRect = new Rect(400, 400, 200, 50);
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
@@ -259,7 +259,8 @@ namespace PW
 
 			// set the header of the window as draggable:
 			Rect dragRect = new Rect(0, 0, windowRect.width, 20);
-			GUI.DragWindow(dragRect);
+			if (id != -1)
+				GUI.DragWindow(dragRect);
 
 			int	debugViewH = 0;
 			#if DEBUG_WINDOW
@@ -288,8 +289,8 @@ namespace PW
 
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
-			if (Event.current.type == EventType.Layout)
-				windowRect.height = viewHeight + 24; //add the window header and footer size
+
+			windowRect.height = viewHeight + 24; //add the window header and footer size
 
 			firstRenderLoop = false;
 		}

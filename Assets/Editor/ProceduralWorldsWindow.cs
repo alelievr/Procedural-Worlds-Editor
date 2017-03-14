@@ -107,8 +107,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.firstInitialization == null)
 		{
 			//setup splitted panels:
-			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width - 250, position.width / 2, position.width - 4);
-			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, 300, 0, position.width / 2);
+			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 3, position.width / 2, position.width - 4);
+			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .8f, 0, position.width / 2);
 
 			currentGraph.firstInitialization = "initialized";
 			currentGraph.localWindowIdCount = 0;
@@ -181,42 +181,46 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
 
-				EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
+				if (currentGraph == null)
+					OnEnable();
+				currentGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
 		
 				EditorGUILayout.BeginHorizontal();
 				if (GUILayout.Button("Load graph"))
 				{
-					UnityEngine.Object selected = null;
 					currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
 					EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
-                    if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
-                    {
-                    	selected = EditorGUIUtility.GetObjectPickerObject();
-						if (selected != null)
-							currentGraph = (PWNodeGraph)selected;
-                    }
 				}
 				else if (GUILayout.Button("Save this graph"))
 				{
+					if (currentGraph.saveName != null)
+						return ;
+						
                     string path = AssetDatabase.GetAssetPath(Selection.activeObject);
                     if (path == "")
-                    {
                         path = "Assets";
-                    }
                     else if (Path.GetExtension(path) != "")
-                    {
                         path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
-                    }
 
-                    string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.name + ".asset");
+					currentGraph.saveName = currentGraph.name;
+                    string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
 
                     AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
 
                     AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
-                    EditorUtility.FocusProjectWindow();
-                    Selection.activeObject = currentGraph;
                 }
+				
+				if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
+				{
+					UnityEngine.Object selected = null;
+					selected = EditorGUIUtility.GetObjectPickerObject();
+					if (selected != null)
+					{
+						Debug.Log("graph " + selected.name + " loaded");
+						currentGraph = (PWNodeGraph)selected;
+					}
+				}
 				EditorGUILayout.EndHorizontal();
 
 				//TODO: draw preview view.
