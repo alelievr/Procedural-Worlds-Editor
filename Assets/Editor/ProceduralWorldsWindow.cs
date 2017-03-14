@@ -286,6 +286,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		EditorGUILayout.BeginVertical(splittedPanel);
 
+		//remove 4 pixels for the separation bar
+		graphRect.size -= Vector2.right * 4;
+
 		#if (DEBUG_GRAPH)
 		foreach (var node in nodes)
 			GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);

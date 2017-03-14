@@ -210,7 +210,7 @@ namespace PW
 						//add minimum number of anchors to render:
 						if (data.multipleValueCount < data.minMultipleValues)
 							for (int i = data.multipleValueCount; i < data.minMultipleValues; i++)
-								data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i);
+								data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i + 1);
 
 						var PWValuesInstance = data.anchorInstance as PWValues;
 
@@ -405,6 +405,21 @@ namespace PW
 				if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Escape))
 					GUI.FocusControl(null);
 			}
+
+			#if DEBUG_WINDOW
+				Rect anchorSideRect = singleAnchor.anchorRect;
+				if (data.anchorType == PWAnchorType.Input)
+				{
+					anchorSideRect.position += Vector2.left * 90;
+					anchorSideRect.size += Vector2.right * 100;
+				}
+				else
+				{
+					anchorSideRect.position -= Vector2.left * 40;
+					anchorSideRect.size += Vector2.right * 100;
+				}
+				GUI.Label(anchorSideRect, "id: " + (long)singleAnchor.id);
+			#endif
 		}
 		
 		public void RenderAnchors()
@@ -523,7 +538,7 @@ namespace PW
 						//if data was added to multi-anchor:
 						if (data.multiple)
 							if (i == data.multipleValueCount)
-								data.AddNewAnchor(data.fieldName.GetHashCode() + i);
+								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
 					}
 				});
 				depencendies.Add(to.windowId);

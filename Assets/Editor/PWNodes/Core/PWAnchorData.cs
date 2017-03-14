@@ -121,6 +121,7 @@ namespace PW
 			tmp.id = id;
 			if (anchorValues.Count == multipleValueCount)
 				multipleValueCount++;
+			Debug.Log("new anchor with id: " + id);
 			//add an object to the PWValues list:
 			anchorValues.Add(null);
 
