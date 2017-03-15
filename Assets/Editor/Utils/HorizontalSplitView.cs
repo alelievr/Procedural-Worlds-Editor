@@ -18,6 +18,9 @@ public class HorizontalSplitView {
 	float		lastMouseX = -1;
 
 	[SerializeField]
+	Rect		savedBeginRect;
+
+	[SerializeField]
 	int			handleWidth = 4;
 
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
@@ -35,7 +38,10 @@ public class HorizontalSplitView {
 			availableRect = tmpRect;
 
 		Rect splittedPanelRect = new Rect(0, 0, availableRect.width, availableRect.height);
-		return EditorGUILayout.BeginVertical(GUILayout.Width(handlerPosition), GUILayout.ExpandHeight(true));
+		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(handlerPosition), GUILayout.ExpandHeight(true));
+		if (beginRect.width > 2)
+			savedBeginRect = beginRect;
+		return savedBeginRect;
 	}
 
 	public Rect Split(Texture2D resizeHandleTex = null)

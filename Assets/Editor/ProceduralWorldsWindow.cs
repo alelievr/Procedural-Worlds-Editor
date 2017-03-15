@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using PW;
+using UnityStandardAssets.ImageEffects;
 
 public class ProceduralWorldsWindow : EditorWindow {
 
@@ -25,6 +26,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
 	Vector2				lastMousePosition;
+
+	Camera				previewCamera;
+	GameObject			previewSceneRoot;
+	GameObject			previewCameraObject;
+	GameObject			previewTerrainObject;
+	RenderTexture		previewCameraRenderTexture;
 
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
@@ -109,12 +116,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.firstInitialization == null)
 		{
 			//setup splitted panels:
-			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 3, position.width / 2, position.width - 4);
-			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .8f, 0, position.width / 2);
+			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 0.85f, position.width / 2, position.width - 4);
+			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
 
 			currentGraph.firstInitialization = "initialized";
 			currentGraph.localWindowIdCount = 0;
 
+			currentGraph.saveName = null;
 			currentGraph.name = "New ProceduralWorld";
 		}
 		
@@ -149,6 +157,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			OnEnable();
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
+		ProcessPreviewScene();
+
 		DrawNodeGraphCore();
 
 		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 4);
@@ -172,18 +182,78 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.mouseUp
 			|| Event.current.type == EventType.scrollWheel
 			|| Event.current.type == EventType.KeyDown
+			|| Event.current.type == EventType.Repaint
 			|| Event.current.type == EventType.KeyUp)
 			Repaint();
     }
 
+	void ProcessPreviewScene()
+	{
+		const string		previewSceneRootName = "PWpreviewSceneRoot";
+		const string		previewCameraObjectName = "PWPreviewCamera";
+		const string		previewTerrainObjectName = "PWPreviewTerrain";
+		const string		previewLayerName = "PWPreviewLayer";
+
+		//initialize preview scene:
+		if (previewCamera == null)
+		{
+			previewCameraObject = GameObject.Find(previewCameraObjectName);
+			if (previewCameraObject)
+				previewCamera = previewCameraObject.GetComponent< Camera >();
+			if (previewCameraObject == null || previewCamera == null)
+			{
+				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
+				previewSceneRoot = GameObject.Find(previewSceneRootName);
+				if (previewSceneRoot == null)
+				{
+					previewSceneRoot = new GameObject(previewSceneRootName);
+					// previewSceneRoot.hideFlags = HideFlags.HideAndDontSave;
+				}
+				previewCameraObject = GameObject.Find(previewCameraObjectName);
+				if (previewCameraObject == null)
+				{
+					previewCameraObject = new GameObject(previewCameraObjectName);
+					previewCameraObject.transform.parent = previewSceneRoot.transform;
+					previewCameraObject.transform.position = new Vector3(-15, 21, -15);
+					previewCameraObject.transform.rotation = Quaternion.Euler(45, 45, 0);
+				}
+				//camera settings:
+				previewCamera = previewCameraObject.AddComponent< Camera >();
+				previewCamera.backgroundColor = Color.white;
+				previewCamera.clearFlags = CameraClearFlags.Color;
+				previewCamera.targetTexture = previewCameraRenderTexture;
+
+				//camera post processing:
+				previewCameraObject.AddComponent< Bloom >().bloomIntensity = .4f;
+				previewCameraObject.AddComponent< Antialiasing >();
+				previewCameraObject.AddComponent< DepthOfField >();
+
+				if (LayerMask.NameToLayer(previewLayerName) != -1)
+					previewCamera.cullingMask = LayerMask.NameToLayer(previewLayerName);
+				previewTerrainObject = GameObject.Find(previewTerrainObjectName);
+				if (previewTerrainObject == null)
+				{
+					previewTerrainObject = new GameObject(previewTerrainObjectName);
+					previewTerrainObject.transform.parent = previewSceneRoot.transform;
+					previewTerrainObject.transform.position = Vector3.zero;
+				}
+			}
+		}
+	}
+
 	void DrawLeftBar(Rect currentRect)
 	{
 		GUI.DrawTexture(currentRect, backgroundTex);
+
+		//add the texturepreviewRect size:
+		Rect previewRect = new Rect(0, 0, currentRect.width, currentRect.width);
 		currentGraph.leftBarScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.leftBarScrollPosition, GUILayout.ExpandWidth(true));
 		{
-			EditorGUILayout.BeginVertical(splittedPanel);
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(currentRect.width), GUILayout.ExpandHeight(true));
+			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.height - currentRect.width), GUILayout.ExpandWidth(true));
 			{
-				EditorGUILayout.LabelField("Procedural Worlds Editor", whiteText);
+				EditorGUILayout.LabelField("Procedural Worlds Editor !", whiteText);
 
 				if (currentGraph == null)
 					OnEnable();
@@ -228,6 +298,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				EditorGUILayout.EndHorizontal();
 
 				//TODO: draw preview view.
+				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
 		
 				//TODO: draw infos / debug / global settings view
 			}
