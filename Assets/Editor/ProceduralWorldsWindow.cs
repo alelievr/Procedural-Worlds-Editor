@@ -22,6 +22,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
 	static GUIStyle	splittedPanel;
+	static GUIStyle	nodeGraphWidowStyle;
 
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
@@ -82,12 +83,32 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
+	void InitializeNewGraph(PWNodeGraph graph)
+	{
+		//setup splitted panels:
+		graph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 0.85f, position.width / 2, position.width - 4);
+		graph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
+
+		Debug.Log("initialized outputnode");
+		graph.outputNode = ScriptableObject.CreateInstance< PWNodeGraphOutput >();
+		graph.outputNode.windowRect.position = -currentGraph.graphDecalPosition;
+
+		graph.firstInitialization = "initialized";
+		graph.localWindowIdCount = 0;
+
+		graph.saveName = null;
+		graph.name = "New ProceduralWorld";
+	}
+
 	void OnEnable()
 	{
 		CreateBackgroundTexture();
 		
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
+
+		nodeGraphWidowStyle = new GUIStyle();
+		nodeGraphWidowStyle.normal.background = backgroundTex;
 
 		//setup nodeList:
 		foreach (var n in nodeSelectorList)
@@ -112,20 +133,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph == null)
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 			
-		//initialize graph the first time he was created
-		if (currentGraph.firstInitialization == null)
-		{
-			//setup splitted panels:
-			currentGraph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 0.85f, position.width / 2, position.width - 4);
-			currentGraph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
-
-			currentGraph.firstInitialization = "initialized";
-			currentGraph.localWindowIdCount = 0;
-
-			currentGraph.saveName = null;
-			currentGraph.name = "New ProceduralWorld";
-		}
-		
 		//clear the corrupted node:
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
 			if (currentGraph.nodes[i] == null)
@@ -136,6 +143,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void OnGUI()
     {
+		//initialize graph the first time he was created
+		//function is in OnGUI cause in OnEnable, the position values are bad.
+		if (currentGraph.firstInitialization == null)
+			InitializeNewGraph(currentGraph);
+		
 		EditorUtility.SetDirty(this);
 
 		//text colors:
@@ -200,7 +212,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			previewCameraObject = GameObject.Find(previewCameraObjectName);
 			if (previewCameraObject)
 				previewCamera = previewCameraObject.GetComponent< Camera >();
-			if (previewCameraObject == null || previewCamera == null)
+			if (previewCameraObject == null || previewCamera == null || previewCameraRenderTexture == null)
 			{
 				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
 				previewSceneRoot = GameObject.Find(previewSceneRootName);
@@ -218,15 +230,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 					previewCameraObject.transform.rotation = Quaternion.Euler(45, 45, 0);
 				}
 				//camera settings:
-				previewCamera = previewCameraObject.AddComponent< Camera >();
+				if (previewCamera == null)
+					previewCamera = previewCameraObject.AddComponent< Camera >();
 				previewCamera.backgroundColor = Color.white;
 				previewCamera.clearFlags = CameraClearFlags.Color;
 				previewCamera.targetTexture = previewCameraRenderTexture;
 
 				//camera post processing:
-				previewCameraObject.AddComponent< Bloom >().bloomIntensity = .4f;
-				previewCameraObject.AddComponent< Antialiasing >();
-				previewCameraObject.AddComponent< DepthOfField >();
+				if (previewCameraObject.GetComponent< Bloom >() == null)
+					previewCameraObject.AddComponent< Bloom >().bloomIntensity = .4f;
+				if (previewCameraObject.GetComponent< Antialiasing >() == null)
+					previewCameraObject.AddComponent< Antialiasing >();
+				// previewCameraObject.AddComponent< DepthOfField >();
 
 				if (LayerMask.NameToLayer(previewLayerName) != -1)
 					previewCamera.cullingMask = LayerMask.NameToLayer(previewLayerName);
@@ -251,7 +266,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			EditorGUILayout.BeginHorizontal(GUILayout.Height(currentRect.width), GUILayout.ExpandHeight(true));
 			EditorGUILayout.EndHorizontal();
-			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.height - currentRect.width), GUILayout.ExpandWidth(true));
+			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.height - currentRect.width - 4), GUILayout.ExpandWidth(true));
 			{
 				EditorGUILayout.LabelField("Procedural Worlds Editor !", whiteText);
 
@@ -259,45 +274,47 @@ public class ProceduralWorldsWindow : EditorWindow {
 					OnEnable();
 				currentGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
 		
-				EditorGUILayout.BeginHorizontal();
-				if (GUILayout.Button("Load graph"))
+				if (currentGraph.parent == null)
 				{
-					currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
-					EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
-				}
-				else if (GUILayout.Button("Save this graph"))
-				{
-					if (currentGraph.saveName != null)
-						return ;
-
-                    string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-                    if (path == "")
-                        path = "Assets";
-                    else if (Path.GetExtension(path) != "")
-                        path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
-
-					currentGraph.saveName = currentGraph.name;
-                    string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
-
-                    AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
-
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                }
-				
-				if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
-				{
-					UnityEngine.Object selected = null;
-					selected = EditorGUIUtility.GetObjectPickerObject();
-					if (selected != null)
+					EditorGUILayout.BeginHorizontal();
+					if (GUILayout.Button("Load graph"))
 					{
-						Debug.Log("graph " + selected.name + " loaded");
-						currentGraph = (PWNodeGraph)selected;
+						currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
+						EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
 					}
+					else if (GUILayout.Button("Save this graph"))
+					{
+						if (currentGraph.saveName != null)
+							return ;
+	
+						string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+						if (path == "")
+							path = "Assets";
+						else if (Path.GetExtension(path) != "")
+							path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+	
+						currentGraph.saveName = currentGraph.name;
+						string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
+	
+						AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
+	
+						AssetDatabase.SaveAssets();
+						AssetDatabase.Refresh();
+					}
+					
+					if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
+					{
+						UnityEngine.Object selected = null;
+						selected = EditorGUIUtility.GetObjectPickerObject();
+						if (selected != null)
+						{
+							Debug.Log("graph " + selected.name + " loaded");
+							currentGraph = (PWNodeGraph)selected;
+						}
+					}
+					EditorGUILayout.EndHorizontal();
 				}
-				EditorGUILayout.EndHorizontal();
 
-				//TODO: draw preview view.
 				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
 		
 				//TODO: draw infos / debug / global settings view
@@ -371,28 +388,31 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DrawNodeGraphHeader(Rect graphRect)
 	{
 		EditorGUILayout.BeginVertical(splittedPanel);
-
-		//remove 4 pixels for the separation bar
-		graphRect.size -= Vector2.right * 4;
-
-		#if (DEBUG_GRAPH)
-		foreach (var node in nodes)
-			GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
-		#endif
-
-		if (Event.current.type == EventType.MouseDown //if event is mouse down
-			&& Event.current.button == 0
-			&& !currentGraph.mouseAboveNodeAnchor //if mouse is not above a node anchor
-			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
-			&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
-			currentGraph.dragginGraph = true;
-		if (Event.current.type == EventType.MouseUp)
-			currentGraph.dragginGraph = false;
-		if (Event.current.type == EventType.Layout)
 		{
-			if (currentGraph.dragginGraph)
-				currentGraph.graphDecalPosition += Event.current.mousePosition - lastMousePosition;
-			lastMousePosition = Event.current.mousePosition;
+			//TODO: render the breadcrumbs bar
+	
+			//remove 4 pixels for the separation bar
+			graphRect.size -= Vector2.right * 4;
+	
+			#if (DEBUG_GRAPH)
+			foreach (var node in nodes)
+				GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
+			#endif
+	
+			if (Event.current.type == EventType.MouseDown //if event is mouse down
+				&& Event.current.button == 0
+				&& !currentGraph.mouseAboveNodeAnchor //if mouse is not above a node anchor
+				&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
+				&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
+				currentGraph.dragginGraph = true;
+			if (Event.current.type == EventType.MouseUp)
+				currentGraph.dragginGraph = false;
+			if (Event.current.type == EventType.Layout)
+			{
+				if (currentGraph.dragginGraph)
+					currentGraph.graphDecalPosition += Event.current.mousePosition - lastMousePosition;
+				lastMousePosition = Event.current.mousePosition;
+			}
 		}
 		EditorGUILayout.EndVertical();
 	}
@@ -416,6 +436,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			bool	mouseAboveAnchorLocal = false;
 			mouseAboveNodeIndex = -1;
 			PWNode.windowRenderOrder = 0;
+			int		windowId = 0;
 			BeginWindows();
 			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
@@ -424,7 +445,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.depth = node.computeOrder;
 				node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 				node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-				Rect decaledRect = GUILayout.Window(i, node.windowRect, node.OnWindowGUI, node.nodeTypeName);
+				Rect decaledRect = GUILayout.Window(windowId++, node.windowRect, node.OnWindowGUI, node.nodeTypeName);
 				node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 
 				if (node.windowRect.Contains(e.mousePosition))
@@ -494,6 +515,26 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (node.WindowShouldClose())
 					currentGraph.nodes.RemoveAt(i);
 			}
+
+			//display graph sub-PWGraphs
+			foreach (var graph in currentGraph.subGraphs)
+			{
+				graph.outputNode.useExternalWinowRect = true;
+				PWUtils.DecalRect(graph.outputNode.externalWindowRect, currentGraph.graphDecalPosition);
+				Rect decalRect = GUILayout.Window(windowId++, graph.outputNode.externalWindowRect, graph.outputNode.OnWindowGUI, graph.name);
+				graph.outputNode.externalWindowRect = PWUtils.DecalRect(decalRect, -currentGraph.graphDecalPosition);
+				//TODO: rendering using GUIWindows and there anchors.
+				//TODO: create a new Dynamic node value system which works
+				//		with < type, name, value > and which can be added as
+				//		times you want to add input/output value to the node
+				//		(to facilitate input/output layer variables uses).
+			}
+
+			//display the upper graph reference:
+			if (currentGraph.parent != null)
+				GUILayout.Window(windowId++, currentGraph.inputNode.windowRect, currentGraph.inputNode.OnWindowGUI, "upper graph", nodeGraphWidowStyle);
+			GUILayout.Window(windowId++, currentGraph.outputNode.windowRect, currentGraph.outputNode.OnWindowGUI, "output", nodeGraphWidowStyle);
+
 			EndWindows();
 			
 			if (e.type == EventType.Repaint)
@@ -537,16 +578,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				);
 			currentGraph.mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 
-			//display graph sub-PWGraphs
-			foreach (var graph in currentGraph.subGraphs)
-			{
-				//TODO: rendering using GUIWindows and there anchors.
-				//TODO: create a new Dynamic node value system which works
-				//		with < type, name, value > and which can be added as
-				//		times you want to add input/output value to the node
-				//		(to facilitate input/output layer variables uses).
-			}
-
 		}
 		EditorGUILayout.EndHorizontal();
 	}
@@ -573,6 +604,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 		subgraph.externalGraphPosition = pos;
+		InitializeNewGraph(subgraph);
+		subgraph.parent = currentGraph;
+		subgraph.name = "PW sub-machine";
 		currentGraph.subGraphs.Add(subgraph);
 	}
 

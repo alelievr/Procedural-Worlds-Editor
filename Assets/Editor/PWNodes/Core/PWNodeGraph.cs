@@ -49,6 +49,12 @@ namespace PW
 
 		[SerializeField]
 		public List< PWNodeGraph >		subGraphs = new List< PWNodeGraph >();
+		[SerializeField]
 		public PWNodeGraph				parent = null;
+
+		[SerializeField]
+		public PWNode					inputNode;
+		[SerializeField]
+		public PWNode					outputNode;
 	}
 }

@@ -13,6 +13,8 @@ namespace PW
 	{
 		public string	nodeTypeName;
 		public Rect		windowRect;
+		public Rect		externalWindowRect;
+		public bool		useExternalWinowRect = false;
 		public int		windowId;
 		public bool		renamable;
 		public int		computeOrder;
@@ -83,6 +85,7 @@ namespace PW
 			{
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 50);
+				externalWindowRect = new Rect(400, 400, 200, 50);
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
@@ -251,7 +254,8 @@ namespace PW
 			}
 
 			// set the header of the window as draggable:
-			Rect dragRect = new Rect(0, 0, windowRect.width, 20);
+			int width = (int)((useExternalWinowRect) ? externalWindowRect.width : windowRect.width);
+			Rect dragRect = new Rect(0, 0, width, 20);
 			if (id != -1)
 				GUI.DragWindow(dragRect);
 
@@ -283,7 +287,10 @@ namespace PW
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 
-			windowRect.height = viewHeight + 24; //add the window header and footer size
+			if (useExternalWinowRect)
+				externalWindowRect.height = viewHeight + 24; //add the window header and footer size
+			else
+				windowRect.height = viewHeight + 24; //add the window header and footer size
 
 			firstRenderLoop = false;
 		}
@@ -327,8 +334,9 @@ namespace PW
 			int		anchorWidth = 38;
 			int		anchorHeight = 16;
 
-			Rect	inputAnchorRect = new Rect(windowRect.xMin - anchorWidth + 2, windowRect.y + 20, anchorWidth, anchorHeight);
-			Rect	outputAnchorRect = new Rect(windowRect.xMax - 2, windowRect.y + 20, anchorWidth, anchorHeight);
+			Rect	winRect = (useExternalWinowRect) ? externalWindowRect : windowRect;
+			Rect	inputAnchorRect = new Rect(winRect.xMin - anchorWidth + 2, winRect.y + 20, anchorWidth, anchorHeight);
+			Rect	outputAnchorRect = new Rect(winRect.xMax - 2, winRect.y + 20, anchorWidth, anchorHeight);
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//process anchor event and calcul rect position if visible
 				if (singleAnchor.visibility != PWVisibility.Gone)
@@ -344,7 +352,7 @@ namespace PW
 					}
 				}
 			});
-			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - windowRect.y - 20, outputAnchorRect.yMin - windowRect.y - 20);
+			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - winRect.y - 20, outputAnchorRect.yMin - windowRect.y - 20);
 			return ret;
 		}
 		
@@ -389,7 +397,7 @@ namespace PW
 				centeredText.alignment = TextAnchor.UpperCenter;
 				centeredText.margin.top += 2;
 
-				Rect renameRect = windowRect;
+				Rect renameRect = (useExternalWinowRect) ? externalWindowRect : windowRect;
 				renameRect.position += graphDecal - Vector2.up * 18;
 				GUI.SetNextControlName("renameWindow");
 				name = GUI.TextField(renameRect, name, centeredText);
