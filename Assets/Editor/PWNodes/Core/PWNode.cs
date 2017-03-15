@@ -250,13 +250,6 @@ namespace PW
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			}
 
-			//close cross render:
-			//too dangerous:
-		/*	Rect closeCrossRect = new Rect(windowRect.width - 14, 2, 18, 18);
-			GUI.Box(closeCrossRect, "X", new GUIStyle());
-			if (Event.current.type == EventType.MouseUp && closeCrossRect.Contains(Event.current.mousePosition))
-				windowShouldClose = true;*/
-
 			// set the header of the window as draggable:
 			Rect dragRect = new Rect(0, 0, windowRect.width, 20);
 			if (id != -1)

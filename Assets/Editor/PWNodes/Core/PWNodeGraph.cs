@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace PW
@@ -27,8 +26,6 @@ namespace PW
 		[SerializeField]
 		public Vector2			graphDecalPosition;
 		[SerializeField]
-		public Vector2			lastMousePosition;
-		[SerializeField]
 		public bool				dragginGraph = false;
 		[SerializeField]
 		public bool				mouseAboveNodeAnchor = false;
@@ -44,5 +41,14 @@ namespace PW
 		
 		[SerializeField]
 		public string			searchString = "";
+
+		[SerializeField]
+		public Vector2			externalGraphPosition;
+
+		//TODO: implement graph output and graph input variables:
+
+		[SerializeField]
+		public List< PWNodeGraph >		subGraphs = new List< PWNodeGraph >();
+		public PWNodeGraph				parent = null;
 	}
 }

@@ -23,6 +23,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	static GUIStyle	splittedPanel;
 
 	int					currentPickerWindow;
+	int					mouseAboveNodeIndex;
+	Vector2				lastMousePosition;
 
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
@@ -101,7 +103,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		
 		if (currentGraph == null)
-			currentGraph = new PWNodeGraph();
+			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 			
 		//initialize graph the first time he was created
 		if (currentGraph.firstInitialization == null)
@@ -162,6 +164,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		DrawSelector(p2);
 		currentGraph.h1.End();
 
+		DrawContextualMenu(g);
+
 		//if event, repaint
 		if (Event.current.type == EventType.mouseDown
 			|| Event.current.type == EventType.mouseDrag
@@ -195,7 +199,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				{
 					if (currentGraph.saveName != null)
 						return ;
-						
+
                     string path = AssetDatabase.GetAssetPath(Selection.activeObject);
                     if (path == "")
                         path = "Assets";
@@ -284,15 +288,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						Rect clickableRect = DrawSelectorCase(ref r, nodeCase.name);
 	
 						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
-						{
-							PWNode newNode = ScriptableObject.CreateInstance(nodeCase.nodeType) as PWNode;
-							//center to the middle of the screen:
-							newNode.windowRect.position = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
-							newNode.SetWindowId(currentGraph.localWindowIdCount++);
-							newNode.nodeTypeName = nodeCase.name;
-							currentGraph.nodes.Add(newNode);
-							Debug.Log("added node of type: " + nodeCase.nodeType);
-						}
+							CreateNewNode(nodeCase.nodeType);
 					}
 				}
 			}
@@ -314,15 +310,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 		#endif
 
 		if (Event.current.type == EventType.MouseDown //if event is mouse down
+			&& Event.current.button == 0
 			&& !currentGraph.mouseAboveNodeAnchor //if mouse is not above a node anchor
 			&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
 			&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
 			currentGraph.dragginGraph = true;
-		if (currentGraph.dragginGraph)
-			currentGraph.graphDecalPosition += Event.current.mousePosition - currentGraph.lastMousePosition;
 		if (Event.current.type == EventType.MouseUp)
 			currentGraph.dragginGraph = false;
-		currentGraph.lastMousePosition = Event.current.mousePosition;
+		if (Event.current.type == EventType.Layout)
+		{
+			if (currentGraph.dragginGraph)
+				currentGraph.graphDecalPosition += Event.current.mousePosition - lastMousePosition;
+			lastMousePosition = Event.current.mousePosition;
+		}
 		EditorGUILayout.EndVertical();
 	}
 
@@ -343,36 +343,41 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
 			bool	mouseAboveAnchorLocal = false;
+			mouseAboveNodeIndex = -1;
 			PWNode.windowRenderOrder = 0;
 			BeginWindows();
 			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
+				var node = currentGraph.nodes[i];
 				//window:
-				GUI.depth =currentGraph. nodes[i].computeOrder;
-				currentGraph.nodes[i].UpdateGraphDecal(currentGraph.graphDecalPosition);
-				currentGraph.nodes[i].windowRect = PWUtils.DecalRect(currentGraph.nodes[i].windowRect, currentGraph.graphDecalPosition);
-				Rect decaledRect = GUILayout.Window(i, currentGraph.nodes[i].windowRect, currentGraph.nodes[i].OnWindowGUI, currentGraph.nodes[i].nodeTypeName);
-				currentGraph.nodes[i].windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
+				GUI.depth = node.computeOrder;
+				node.UpdateGraphDecal(currentGraph.graphDecalPosition);
+				node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
+				Rect decaledRect = GUILayout.Window(i, node.windowRect, node.OnWindowGUI, node.nodeTypeName);
+				node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
+
+				if (node.windowRect.Contains(e.mousePosition))
+					mouseAboveNodeIndex = i;
 
 				//highlight, hide, add all linkable anchors:
 				if (currentGraph.draggingLink)
-					currentGraph.nodes[i].HighlightLinkableAnchorsTo(currentGraph.startDragAnchor);
-				currentGraph.nodes[i].DisplayHiddenMultipleAnchors(currentGraph.draggingLink);
+					node.HighlightLinkableAnchorsTo(currentGraph.startDragAnchor);
+				node.DisplayHiddenMultipleAnchors(currentGraph.draggingLink);
 
 				//process envent, state and position for node anchors:
-				var mouseAboveAnchor = currentGraph.nodes[i].ProcessAnchors();
+				var mouseAboveAnchor = node.ProcessAnchors();
 				if (mouseAboveAnchor.mouseAbove)
 					mouseAboveAnchorLocal = true;
 
 				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchorLocal && mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
+				if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
 				{
 					currentGraph.startDragAnchor = mouseAboveAnchor;
 					currentGraph.draggingLink = true;
 				}
 
 				//render node anchors:
-				currentGraph.nodes[i].RenderAnchors();
+				node.RenderAnchors();
 				
 				//we render the window (it will also compute the result)
 	
@@ -381,7 +386,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					if (mouseAboveAnchor.mouseAbove)
 					{
 						//attach link to the node:
-						currentGraph.nodes[i].AttachLink(mouseAboveAnchor, currentGraph.startDragAnchor);
+						node.AttachLink(mouseAboveAnchor, currentGraph.startDragAnchor);
 						var win = currentGraph.nodes.FirstOrDefault(n => n.windowId == currentGraph.startDragAnchor.windowId);
 						if (win != null)
 							win.AttachLink(currentGraph.startDragAnchor, mouseAboveAnchor);
@@ -395,7 +400,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					}
 
 				//draw links:
-				var links = currentGraph.nodes[i].GetLinks();
+				var links = node.GetLinks();
 				foreach (var link in links)
 				{
 					// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
@@ -415,7 +420,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 				//check if user have pressed the close button of this window:
-				if (currentGraph.nodes[i].WindowShouldClose())
+				if (node.WindowShouldClose())
 					currentGraph.nodes.RemoveAt(i);
 			}
 			EndWindows();
@@ -460,8 +465,74 @@ public class ProceduralWorldsWindow : EditorWindow {
 					currentGraph.startDragAnchor.anchorColor
 				);
 			currentGraph.mouseAboveNodeAnchor = mouseAboveAnchorLocal;
+
+			//display graph sub-PWGraphs
+			foreach (var graph in currentGraph.subGraphs)
+			{
+				//TODO: rendering using GUIWindows and there anchors.
+				//TODO: create a new Dynamic node value system which works
+				//		with < type, name, value > and which can be added as
+				//		times you want to add input/output value to the node
+				//		(to facilitate input/output layer variables uses).
+			}
+
 		}
 		EditorGUILayout.EndHorizontal();
+	}
+
+	void DeleteNode(object id)
+	{
+		currentGraph.nodes.RemoveAt((int)id);
+	}
+
+	void CreateNewNode(object type)
+	{
+		//TODO: if mouse is in the node graph, add the new node at the mouse position instead of the center of the window
+		Type t = (Type)type;
+		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
+		//center to the middle of the screen:
+		newNode.windowRect.position = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		newNode.SetWindowId(currentGraph.localWindowIdCount++);
+		newNode.nodeTypeName = t.ToString();
+		currentGraph.nodes.Add(newNode);
+	}
+
+	void CreatePWMachine()
+	{
+		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
+		subgraph.externalGraphPosition = pos;
+		currentGraph.subGraphs.Add(subgraph);
+	}
+
+	void DrawContextualMenu(Rect graphNodeRect)
+	{
+		Event	e = Event.current;
+        if (e.type == EventType.ContextClick)
+        {
+            Vector2 mousePos = e.mousePosition;
+            EditorGUI.DrawRect(graphNodeRect, Color.green);
+
+            if (graphNodeRect.Contains(mousePos))
+            {
+                // Now create the menu, add items and show it
+                GenericMenu menu = new GenericMenu();
+				if (mouseAboveNodeIndex != -1)
+					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
+				else
+					menu.AddDisabledItem(new GUIContent("Delete node"));
+                menu.AddSeparator("");
+				menu.AddItem(new GUIContent("New PWMachine"), false, CreatePWMachine);
+				foreach (var nodeCat in nodeSelectorList)
+				{
+					string menuString = "Create new/" + nodeCat.Key + "/";
+					foreach (var nodeClass in nodeCat.Value)
+						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
+				}
+                menu.ShowAsContext();
+                e.Use();
+            }
+        }
 	}
 
 	//Dictionary< windowId, dependencyWeight >
