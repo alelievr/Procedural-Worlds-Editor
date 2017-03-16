@@ -35,4 +35,24 @@ public class SerializableType {
 		return new SerializableType(t);
 	}
 
+	public static bool operator==(SerializableType st1, SerializableType st2)
+	{
+		return st1.typeString == st2.typeString;
+	}
+	
+	public static bool operator!=(SerializableType st1, SerializableType st2)
+	{
+		return st1.typeString != st2.typeString;
+	}
+
+	public override bool Equals(object st)
+	{
+		return ((SerializableType)st).typeString == typeString;
+	}
+
+	public override int GetHashCode()
+    {
+    	return typeString.GetHashCode();
+    }
+
 }

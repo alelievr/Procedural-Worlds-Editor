@@ -153,6 +153,7 @@ namespace PW
 					PWOffset	offsetAttr = attr as PWOffset;
 					PWMultiple	multipleAttr = attr as PWMultiple;
 					PWGeneric	genericAttr = attr as PWGeneric;
+					PWMirror	mirrorAttr = attr as PWMirror;
 
 					if (inputAttr != null)
 					{
@@ -188,6 +189,8 @@ namespace PW
 						data.allowedTypes = genericAttr.allowedTypes;
 						data.generic = true;
 					}
+					if (mirrorAttr != null)
+						data.mirroredField = mirrorAttr.fieldName;
 				}
 				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
 					propertyDatas.Remove(field.Name);
@@ -222,6 +225,23 @@ namespace PW
 					}
 				}
 			}
+
+			//Check mirrored fields compatibility:
+			foreach (var kp in propertyDatas)
+				if (kp.Value.mirroredField != null)
+				{
+					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
+					{
+						var type = propertyDatas[kp.Value.mirroredField].type;
+						if (type != kp.Value.type)
+						{
+							Debug.LogWarning("incompatible mirrored type in " + GetType());
+							kp.Value.mirroredField = null;
+						}
+					}
+					else
+						kp.Value.mirroredField = null;
+				}
 
 			//remove inhexistants dictionary entries:
 			foreach (var kp in propertyDatas)
@@ -281,7 +301,7 @@ namespace PW
 			GUILayout.EndVertical();
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
-			if (viewH > 2)
+			if (Event.current.type == EventType.Repaint)
 				viewHeight = viewH + debugViewH;
 
 			if (!firstRenderLoop)
@@ -298,6 +318,19 @@ namespace PW
 		public virtual void	OnNodeGUI()
 		{
 			EditorGUILayout.LabelField("empty node");
+		}
+
+		public void Process()
+		{
+			foreach (var kp in propertyDatas)
+				if (kp.Value.mirroredField != null)
+				{
+					var val = kp.Value.anchorInstance;
+					var mirroredProp = propertyDatas[kp.Value.mirroredField];
+					//TODO: optimize
+					((Type)kp.Value.type).GetField(mirroredProp.fieldName).SetValue(this, val);
+				}
+			OnNodeProcess();
 		}
 
 		public virtual void OnNodeProcess()
@@ -539,8 +572,18 @@ namespace PW
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple)
+						{
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
+						}
+						if (data.mirroredField != null)
+						{
+							//TODO: find the field and add a value to his PWValues if it's a PWValue type.
+
+							var mirroredProp = propertyDatas[data.mirroredField];
+							if ((Type)mirroredProp.type == typeof(PWValues))
+								mirroredProp.AddNewAnchor(mirroredProp.fieldName.GetHashCode() + i + 1);
+						}
 					}
 				});
 				depencendies.Add(to.windowId);
@@ -598,11 +641,12 @@ namespace PW
 
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//Hide anchors and highlight when mouse hover
-				// Debug.Log(data.name + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
+				// Debug.Log(data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
 				if (data.windowId != toLink.windowId
 					&& data.anchorType == anchorType
 					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
 				{
+					Debug.Log("olol");
 					if (data.multiple)
 					{
 						//display additional anchor to attach on next rendering

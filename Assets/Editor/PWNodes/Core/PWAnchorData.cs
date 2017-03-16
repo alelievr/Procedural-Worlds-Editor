@@ -59,7 +59,10 @@ namespace PW
 		public int					minMultipleValues;
 		public int					maxMultipleValues;
 		public int					multipleValueCount;
+		//instance of the field
 		public object				anchorInstance;
+		//field to copy values and anchor.
+		public string				mirroredField;
 		//current number of rendered anchors:
 		public bool					displayHiddenMultipleAnchors;
 
@@ -98,6 +101,7 @@ namespace PW
 			multiple = false;
 			generic = false;
 			displayHiddenMultipleAnchors = false;
+			mirroredField = null;
 
 			multi = new List< PWAnchorMultiData >(){new PWAnchorMultiData(Color.white)};
 			multi[0].id = id;
@@ -121,7 +125,7 @@ namespace PW
 			tmp.id = id;
 			if (anchorValues.Count == multipleValueCount)
 				multipleValueCount++;
-			Debug.Log("new anchor with id: " + id);
+			// Debug.Log("new anchor with id: " + id);
 			//add an object to the PWValues list:
 			anchorValues.Add(null);
 

@@ -117,4 +117,15 @@ namespace PW
 			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
 		}
 	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class PWMirror : Attribute
+	{
+		public string	fieldName;
+
+		public PWMirror(string fieldName)
+		{
+			this.fieldName = fieldName;
+		}
+	}
 }

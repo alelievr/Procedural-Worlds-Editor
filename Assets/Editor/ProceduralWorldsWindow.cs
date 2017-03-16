@@ -89,12 +89,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 0.85f, position.width / 2, position.width - 4);
 		graph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
 
-		Debug.Log("initialized outputnode");
+		graph.graphDecalPosition = Vector2.zero;
+
+		graph.localWindowIdCount = 0;
+		
 		graph.outputNode = ScriptableObject.CreateInstance< PWNodeGraphOutput >();
-		graph.outputNode.windowRect.position = -currentGraph.graphDecalPosition;
+		graph.outputNode.SetWindowId(currentGraph.localWindowIdCount++);
+		graph.outputNode.windowRect.position = new Vector2(position.width - 100, (int)(position.height / 2));
+
+		graph.inputNode = ScriptableObject.CreateInstance< PWNodeGraphInput >();
+		graph.inputNode.SetWindowId(currentGraph.localWindowIdCount++);
+		graph.inputNode.windowRect.position = new Vector2(50, (int)(position.height / 2));
 
 		graph.firstInitialization = "initialized";
-		graph.localWindowIdCount = 0;
 
 		graph.saveName = null;
 		graph.name = "New ProceduralWorld";
@@ -272,7 +279,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				if (currentGraph == null)
 					OnEnable();
+				GUI.SetNextControlName("PWName");
 				currentGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
+
+				if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.Ignore)
+					&& !GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition)
+					&& GUI.GetNameOfFocusedControl() == "PWName")
+					GUI.FocusControl(null);
 		
 				if (currentGraph.parent == null)
 				{
@@ -427,6 +440,87 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
+	void DisplayDecaledNode(int id, PWNode node, string name)
+	{
+		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
+		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name);
+		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
+	}
+
+	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal)
+	{
+		Event	e = Event.current;
+
+		GUI.depth = node.computeOrder;
+		DisplayDecaledNode(id, node, node.nodeTypeName);
+
+		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
+			mouseAboveNodeIndex = index;
+
+		//highlight, hide, add all linkable anchors:
+		if (currentGraph.draggingLink)
+			node.HighlightLinkableAnchorsTo(currentGraph.startDragAnchor);
+		node.DisplayHiddenMultipleAnchors(currentGraph.draggingLink);
+
+		//process envent, state and position for node anchors:
+		var mouseAboveAnchor = node.ProcessAnchors();
+		if (mouseAboveAnchor.mouseAbove)
+			mouseAboveAnchorLocal = true;
+
+		//if you press the mouse above an anchor, start the link drag
+		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
+		{
+			currentGraph.startDragAnchor = mouseAboveAnchor;
+			currentGraph.draggingLink = true;
+		}
+
+		//render node anchors:
+		node.RenderAnchors();
+
+		//end dragging:
+		if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
+			if (mouseAboveAnchor.mouseAbove)
+			{
+				//attach link to the node:
+				node.AttachLink(mouseAboveAnchor, currentGraph.startDragAnchor);
+				var win = currentGraph.nodes.FirstOrDefault(n => n.windowId == currentGraph.startDragAnchor.windowId);
+				if (win != null)
+					win.AttachLink(currentGraph.startDragAnchor, mouseAboveAnchor);
+				else
+					Debug.LogWarning("window id not found: " + currentGraph.startDragAnchor.windowId);
+				
+				//Recalcul the compute order:
+				EvaluateComputeOrder();
+
+				currentGraph.draggingLink = false;
+			}
+
+		//draw links:
+		var links = node.GetLinks();
+		foreach (var link in links)
+		{
+			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
+			var fromWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
+			var toWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+
+			if (fromWindow == null || toWindow == null) //invalid window ids
+			{
+				Debug.LogWarning("window not found: " + link.localWindowId + ", " + link.distantWindowId);
+				continue ;
+			}
+
+			Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
+			Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
+			if (fromAnchor != null && toAnchor != null)
+				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
+		}
+
+		//check if user have pressed the close button of this window:
+		if (node.WindowShouldClose())
+			currentGraph.nodes.RemoveAt(index);
+	}
+
 	void DrawNodeGraphCore()
 	{
 		Event e = Event.current;
@@ -441,88 +535,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
 				var node = currentGraph.nodes[i];
+				RenderNode(windowId++, node, node.name, i, ref mouseAboveAnchorLocal);
 				//window:
-				GUI.depth = node.computeOrder;
-				node.UpdateGraphDecal(currentGraph.graphDecalPosition);
-				node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-				Rect decaledRect = GUILayout.Window(windowId++, node.windowRect, node.OnWindowGUI, node.nodeTypeName);
-				node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
-
-				if (node.windowRect.Contains(e.mousePosition))
-					mouseAboveNodeIndex = i;
-
-				//highlight, hide, add all linkable anchors:
-				if (currentGraph.draggingLink)
-					node.HighlightLinkableAnchorsTo(currentGraph.startDragAnchor);
-				node.DisplayHiddenMultipleAnchors(currentGraph.draggingLink);
-
-				//process envent, state and position for node anchors:
-				var mouseAboveAnchor = node.ProcessAnchors();
-				if (mouseAboveAnchor.mouseAbove)
-					mouseAboveAnchorLocal = true;
-
-				//if you press the mouse above an anchor, start the link drag
-				if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown)
-				{
-					currentGraph.startDragAnchor = mouseAboveAnchor;
-					currentGraph.draggingLink = true;
-				}
-
-				//render node anchors:
-				node.RenderAnchors();
-				
-				//we render the window (it will also compute the result)
-	
-				//end dragging:
-				if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
-					if (mouseAboveAnchor.mouseAbove)
-					{
-						//attach link to the node:
-						node.AttachLink(mouseAboveAnchor, currentGraph.startDragAnchor);
-						var win = currentGraph.nodes.FirstOrDefault(n => n.windowId == currentGraph.startDragAnchor.windowId);
-						if (win != null)
-							win.AttachLink(currentGraph.startDragAnchor, mouseAboveAnchor);
-						else
-							Debug.LogWarning("window id not found: " + currentGraph.startDragAnchor.windowId);
-						
-						//Recalcul the compute order:
-						EvaluateComputeOrder();
-
-						currentGraph.draggingLink = false;
-					}
-
-				//draw links:
-				var links = node.GetLinks();
-				foreach (var link in links)
-				{
-					// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
-					var fromWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
-					var toWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
-
-					if (fromWindow == null || toWindow == null) //invalid window ids
-					{
-						Debug.LogWarning("window not found: " + link.localWindowId + ", " + link.distantWindowId);
-						continue ;
-					}
-
-					Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
-					Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
-					if (fromAnchor != null && toAnchor != null)
-						DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
-				}
-
-				//check if user have pressed the close button of this window:
-				if (node.WindowShouldClose())
-					currentGraph.nodes.RemoveAt(i);
 			}
 
 			//display graph sub-PWGraphs
 			foreach (var graph in currentGraph.subGraphs)
 			{
 				graph.outputNode.useExternalWinowRect = true;
-				PWUtils.DecalRect(graph.outputNode.externalWindowRect, currentGraph.graphDecalPosition);
-				Rect decalRect = GUILayout.Window(windowId++, graph.outputNode.externalWindowRect, graph.outputNode.OnWindowGUI, graph.name);
-				graph.outputNode.externalWindowRect = PWUtils.DecalRect(decalRect, -currentGraph.graphDecalPosition);
+				DisplayDecaledNode(windowId++, graph.outputNode, graph.name);
 				//TODO: rendering using GUIWindows and there anchors.
 				//TODO: create a new Dynamic node value system which works
 				//		with < type, name, value > and which can be added as
@@ -532,15 +553,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			//display the upper graph reference:
 			if (currentGraph.parent != null)
-				GUILayout.Window(windowId++, currentGraph.inputNode.windowRect, currentGraph.inputNode.OnWindowGUI, "upper graph", nodeGraphWidowStyle);
-			GUILayout.Window(windowId++, currentGraph.outputNode.windowRect, currentGraph.outputNode.OnWindowGUI, "output", nodeGraphWidowStyle);
+				RenderNode(windowId++, currentGraph.inputNode, "upper graph", -1, ref mouseAboveAnchorLocal);
+			RenderNode(windowId++, currentGraph.outputNode, "output", -1, ref mouseAboveAnchorLocal);
 
 			EndWindows();
 			
 			if (e.type == EventType.Repaint)
 				foreach (var node in currentGraph.nodes)
 				{
-					node.OnNodeProcess();
+					node.Process();
 		
 					var links = node.GetLinks();
 
@@ -560,7 +581,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 							PWValues values = (PWValues)prop.GetValue(target);
 
 							if (values != null)
-								if (!values.AssignAt(link.distantIndex, val))
+								if (!values.AssignAt(link.distantIndex, val, link.distantName))
 									Debug.Log("failed to set distant indexed field value: " + link.distantName);
 						}
 					}
