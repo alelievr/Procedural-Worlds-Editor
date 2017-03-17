@@ -24,6 +24,8 @@ namespace PW
 	
 		public List< T > GetValues<T>()
 		{
+			if (typeof(T) == typeof(object))
+				return values.Cast< T >().ToList();
 			return values.Where(o => o != null && o.GetType().IsAssignableFrom(typeof(T))).Select(o => (T)o).ToList();
 		}
 
@@ -35,7 +37,7 @@ namespace PW
 			{
 				if (values[i] == null)
 					continue ;
-				if (values[i].GetType().IsAssignableFrom(typeof(T)))
+				if (typeof(T) == typeof(object) || values[i].GetType().IsAssignableFrom(typeof(T)))
 					ret.Add(names[i]);
 			}
 			return (ret);

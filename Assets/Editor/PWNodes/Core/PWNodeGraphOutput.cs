@@ -6,7 +6,8 @@ namespace PW
 	public class PWNodeGraphOutput : PWNode {
 
 		[PWMultiple(1, typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4))]
-		[PWInput]
+		[PWInput("in")]
+		[PWOffset(0, 20)]
 		public PWValues		inputValues = new PWValues();
 
 		public override void OnNodeCreate()
@@ -17,17 +18,23 @@ namespace PW
 		public override void OnNodeGUI()
 		{
 			var names = inputValues.GetNames< object >();
-			foreach (var name in names)
+			var values = inputValues.GetValues< object >();
+
+			EditorGUILayout.LabelField("names: [" + names.Count + "]");
+			for (int i = 0; i < names.Count; i++)
 			{
-				if (name != null)
-					EditorGUILayout.LabelField(name);
+				if (names[i] != null)
+					EditorGUILayout.LabelField(names[i] + " <" + values[i].GetType() + ": " + values[i] + ">");
+				else
+					EditorGUILayout.LabelField("null");
 			}
 			EditorGUILayout.Space();
+
+			//TODO: dynamically remove unlinked nodes.
 		}
 
 		public override void OnNodeProcess()
 		{
-
 		}
 	}
 }

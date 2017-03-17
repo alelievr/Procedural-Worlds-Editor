@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -207,7 +207,7 @@ namespace PW
 					data.type = (SerializableType)field.FieldType;
 					data.first.color = (SerializableColor)backgroundColor;
 					data.first.name = name;
-					data.first.offset = offset;
+					data.offset = offset;
 					data.windowId = windowId;
 
 					//add missing values to instance of list:
@@ -307,10 +307,13 @@ namespace PW
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 
-			if (useExternalWinowRect)
-				externalWindowRect.height = viewHeight + 24; //add the window header and footer size
-			else
-				windowRect.height = viewHeight + 24; //add the window header and footer size
+			if (Event.current.type == EventType.Repaint)
+			{
+				if (useExternalWinowRect)
+					externalWindowRect.height = viewHeight + 24; //add the window header and footer size
+				else
+					windowRect.height = viewHeight + 24; //add the window header and footer size
+			}
 
 			firstRenderLoop = false;
 		}
@@ -374,14 +377,21 @@ namespace PW
 				//process anchor event and calcul rect position if visible
 				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
+					if (singleAnchor.visibility != PWVisibility.Gone && i <= 0)
+					{
+						if (data.anchorType == PWAnchorType.Input)
+							inputAnchorRect.position += data.offset;
+						else if (data.anchorType == PWAnchorType.Output)
+							outputAnchorRect.position += data.offset;
+					}
 					if (singleAnchor.visibility == PWVisibility.Visible)
 						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
 					if (singleAnchor.visibility != PWVisibility.Gone)
 					{
 						if (data.anchorType == PWAnchorType.Input)
-							inputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
+							inputAnchorRect.position += Vector2.up * 18;
 						else if (data.anchorType == PWAnchorType.Output)
-							outputAnchorRect.position += singleAnchor.offset + Vector2.up * 18;
+							outputAnchorRect.position += Vector2.up * 18;
 					}
 				}
 			});
@@ -598,6 +608,23 @@ namespace PW
 			singleAnchorData.linkCount--;
 		}
 
+		public void		RemoveDependency(int windowId)
+		{
+			depencendies.RemoveAll(d => d == windowId);
+		}
+		
+		public void		RemoveLinkByWindowTarget(int targetWindowId)
+		{
+			for (int i = 0; i < links.Count; i++)
+				if (links[i].distantWindowId == targetWindowId)
+					links.RemoveAt(i--);
+		}
+
+		public void		RemoveAllLinks()
+		{
+			links.Clear();
+		}
+
 		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
 		{
 			PWAnchorData					ret = null;
@@ -646,7 +673,6 @@ namespace PW
 					&& data.anchorType == anchorType
 					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
 				{
-					Debug.Log("olol");
 					if (data.multiple)
 					{
 						//display additional anchor to attach on next rendering
@@ -688,35 +714,72 @@ namespace PW
 
 		/* Utils function to manipulate PWnode variables */
 
-		public void		UpdatePropEnabled(string propertyName, bool enabled)
+		public void		UpdatePropEnabled(string propertyName, bool enabled, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].first.enabled = true;
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return ;
+				anchors[index].enabled = true;
+			}
 		}
 
-		public void		UpdatePropName(string propertyName, string newName)
+		public void		UpdatePropName(string propertyName, string newName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].first.name = newName;
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return ;
+				anchors[index].name = newName;
+			}
 		}
 
-		public void		UpdatePropBackgroundColor(string propertyName, Color newColor)
+		public void		UpdatePropBackgroundColor(string propertyName, Color newColor, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].first.color = (SerializableColor)newColor;
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return ;
+				anchors[index].color = (SerializableColor)newColor;
+			}
 		}
 
-		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility)
+		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				propertyDatas[propertyName].first.visibility = visibility;
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return ;
+				anchors[index].visibility = visibility;
+			}
 		}
 
-		public int		GetPropLinkCount(string propertyName)
+		public int		GetPropLinkCount(string propertyName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
-				return propertyDatas[propertyName].first.linkCount;
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return -1;
+				return anchors[index].linkCount;
+			}
 			return -1;
+		}
+
+		public Rect?	GetAnchorRect(string propertyName, int index = 0)
+		{
+			if (propertyDatas.ContainsKey(propertyName))
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return null;
+				return anchors[index].anchorRect;
+			}
+			return null;
 		}
     }
 }

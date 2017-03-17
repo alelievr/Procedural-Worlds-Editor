@@ -47,6 +47,8 @@ namespace PW
 		public bool					generic;
 		//the full name of the node class:
 		public string				classAQName;
+		//the visual offset of the anchor
+		public Vector2				offset;
 		//list of rendered anchors:
 		[SerializeField]
 		public List< PWAnchorMultiData >	multi;
@@ -75,8 +77,6 @@ namespace PW
 			public SerializableColor	color;
 			public string				name;
 			public PWVisibility			visibility;
-			//the visual offset of the anchor
-			public Vector2				offset;
 			//the id of the actual anchor
 			public int					id;
 			//external link connected to this anchor

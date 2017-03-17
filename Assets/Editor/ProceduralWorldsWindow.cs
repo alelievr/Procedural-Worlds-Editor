@@ -107,6 +107,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.name = "New ProceduralWorld";
 	}
 
+	void BakeNode(Type t)
+	{
+		var dico = new Dictionary< string, FieldInfo >();
+		bakedNodeFields[t.AssemblyQualifiedName] = dico;
+
+		foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+			dico[field.Name] = field;
+	}
+
 	void OnEnable()
 	{
 		CreateBackgroundTexture();
@@ -129,13 +138,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		bakedNodeFields.Clear();
 		foreach (var nodeCat in nodeSelectorList)
 			foreach (var nodeClass in nodeCat.Value)
-			{
-				var dico = new Dictionary< string, FieldInfo >();
-				bakedNodeFields[nodeClass.nodeType.AssemblyQualifiedName] = dico;
-
-				foreach (var field in nodeClass.nodeType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-					dico[field.Name] = field;
-			}
+				BakeNode(nodeClass.nodeType);
+		BakeNode(typeof(PWNodeGraphOutput));
+		BakeNode(typeof(PWNodeGraphInput));
 		
 		if (currentGraph == null)
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
@@ -143,9 +148,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//clear the corrupted node:
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
 			if (currentGraph.nodes[i] == null)
-				currentGraph.nodes.RemoveAt(i--);
-
-		EvaluateComputeOrder();
+				DeleteNode(i--);
 	}
 
     void OnGUI()
@@ -474,7 +477,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Event	e = Event.current;
 
 		GUI.depth = node.computeOrder;
-		DisplayDecaledNode(id, node, node.nodeTypeName);
+		DisplayDecaledNode(id, node, name);
 
 		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
 			mouseAboveNodeIndex = index;
@@ -539,7 +542,37 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//check if user have pressed the close button of this window:
 		if (node.WindowShouldClose())
-			currentGraph.nodes.RemoveAt(index);
+			DeleteNode(index);
+	}
+
+	void ProcessNodeAndLinks(PWNode node)
+	{
+		node.Process();
+
+		var links = node.GetLinks();
+
+		foreach (var link in links)
+		{
+			var target = FindNodeByWindowId(link.distantWindowId);
+
+			if (target == null)
+				continue ;
+
+			var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
+			var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+			if (link.distantIndex == -1)
+				prop.SetValue(target, val);
+			else //multiple object data:
+			{
+				PWValues values = (PWValues)prop.GetValue(target);
+
+				if (values != null)
+				{
+					if (!values.AssignAt(link.distantIndex, val, link.localName))
+						Debug.Log("failed to set distant indexed field value: " + link.distantName);
+				}
+			}
+		}
 	}
 
 	void DrawNodeGraphCore()
@@ -556,7 +589,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			for (int i = 0; i < currentGraph.nodes.Count; i++)
 			{
 				var node = currentGraph.nodes[i];
-				RenderNode(windowId++, node, node.name, i, ref mouseAboveAnchorLocal);
+				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
+				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal);
 				//window:
 			}
 
@@ -565,11 +599,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				graph.outputNode.useExternalWinowRect = true;
 				DisplayDecaledNode(windowId++, graph.outputNode, graph.name);
-				//TODO: rendering using GUIWindows and there anchors.
-				//TODO: create a new Dynamic node value system which works
-				//		with < type, name, value > and which can be added as
-				//		times you want to add input/output value to the node
-				//		(to facilitate input/output layer variables uses).
 			}
 
 			//display the upper graph reference:
@@ -581,32 +610,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 			
 			if (e.type == EventType.Repaint)
 				foreach (var node in currentGraph.nodes)
-				{
-					node.Process();
-		
-					var links = node.GetLinks();
-
-					foreach (var link in links)
-					{
-						var target = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
-
-						if (target == null)
-							continue ;
-
-						var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
-						var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
-						if (link.distantIndex == -1)
-							prop.SetValue(target, val);
-						else //multiple object data:
-						{
-							PWValues values = (PWValues)prop.GetValue(target);
-
-							if (values != null)
-								if (!values.AssignAt(link.distantIndex, val, link.distantName))
-									Debug.Log("failed to set distant indexed field value: " + link.distantName);
-						}
-					}
-				}
+					ProcessNodeAndLinks(node);
+			if (currentGraph.parent != null)
+				ProcessNodeAndLinks(currentGraph.inputNode);
+			ProcessNodeAndLinks(currentGraph.outputNode);
 
 			//click up outside of an anchor, stop dragging
 			if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
@@ -624,9 +631,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndHorizontal();
 	}
 
-	void DeleteNode(object id)
+	void DeleteNode(object oid)
 	{
-		currentGraph.nodes.RemoveAt((int)id);
+		int	id = (int)oid;
+
+		//remove all input links for each node links:
+		foreach (var link in currentGraph.nodes[id].GetLinks())
+		{
+			var node = FindNodeByWindowId(link.distantWindowId);
+			if (node != null)
+				node.RemoveDependency(link.localWindowId);
+		}
+		//remove all links for node dependencies
+		foreach (var deps in currentGraph.nodes[id].GetDependencies())
+		{
+			var node = FindNodeByWindowId(deps);
+			if (node != null)
+				node.RemoveLinkByWindowTarget(deps);
+		}
+
+		//remove the node
+		currentGraph.nodes.RemoveAt(id);
 	}
 
 	void CreateNewNode(object type)
