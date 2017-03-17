@@ -448,6 +448,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
+	PWNode FindNodeByWindowId(int id)
+	{
+		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
+
+		if (ret != null)
+			return ret;
+		var gInput = currentGraph.subGraphs.FirstOrDefault(g => g.inputNode.windowId == id);
+		if (gInput != null && gInput.inputNode != null)
+			return gInput.inputNode;
+		var gOutput = currentGraph.subGraphs.FirstOrDefault(g => g.outputNode.windowId == id);
+		if (gOutput != null && gOutput.outputNode != null)
+			return gOutput.outputNode;
+
+		if (currentGraph.inputNode.windowId == id)
+			return currentGraph.inputNode;
+		if (currentGraph.outputNode.windowId == id)
+			return currentGraph.outputNode;
+
+		return null;
+	}
+
 	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal)
 	{
 		Event	e = Event.current;
@@ -501,8 +522,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var link in links)
 		{
 			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
-			var fromWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.localWindowId);
-			var toWindow = currentGraph.nodes.FirstOrDefault(n => n.windowId == link.distantWindowId);
+			var fromWindow = FindNodeByWindowId(link.localWindowId);
+			var toWindow = FindNodeByWindowId(link.distantWindowId);
 
 			if (fromWindow == null || toWindow == null) //invalid window ids
 			{
@@ -682,7 +703,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (nodeComputeOrderCount.ContainsKey(windowId))
 			return nodeComputeOrderCount[windowId];
 
-		var node = currentGraph.nodes.FirstOrDefault(n => n.windowId == windowId);
+		var node = FindNodeByWindowId(windowId);
 		if (node == null)
 			return 0;
 
