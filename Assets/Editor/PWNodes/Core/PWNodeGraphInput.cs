@@ -6,11 +6,11 @@ namespace PW
 
 		[PWMultiple(0)]
 		[PWInput]
-		public PWValues		inputValues;
+		public PWValues		inputValues = new PWValues();
 		
 		[PWOutput]
 		[PWMirror("inputValues")]
-		public PWValues		outputValues;
+		public PWValues		outputValues = new PWValues();
 
 		public override void OnNodeCreate()
 		{

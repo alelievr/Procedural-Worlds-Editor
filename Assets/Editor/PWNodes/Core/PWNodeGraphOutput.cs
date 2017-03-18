@@ -20,6 +20,15 @@ namespace PW
 			var names = inputValues.GetNames< object >();
 			var values = inputValues.GetValues< object >();
 
+			//if the output node is displayed for an upper layer:
+			if (useExternalWinowRect)
+			{
+				if (GUILayout.Button("go into machine"))
+					specialButtonClick = true;
+				else
+					specialButtonClick = false;
+			}
+
 			EditorGUILayout.LabelField("names: [" + names.Count + "]");
 			for (int i = 0; i < names.Count; i++)
 			{
@@ -28,7 +37,6 @@ namespace PW
 				else
 					EditorGUILayout.LabelField("null");
 			}
-			EditorGUILayout.Space();
 
 			//TODO: dynamically remove unlinked nodes.
 		}

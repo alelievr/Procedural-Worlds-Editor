@@ -18,6 +18,8 @@ namespace PW
 		public int		windowId;
 		public bool		renamable;
 		public int		computeOrder;
+		public int		viewHeight;
+		public bool		specialButtonClick = false;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
@@ -27,8 +29,6 @@ namespace PW
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
 
-		[SerializeField]
-		int		viewHeight;
 		[SerializeField]
 		Vector2	graphDecal;
 		[SerializeField]
@@ -86,6 +86,7 @@ namespace PW
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 50);
 				externalWindowRect = new Rect(400, 400, 200, 50);
+				useExternalWinowRect = false;
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
@@ -237,6 +238,7 @@ namespace PW
 						{
 							Debug.LogWarning("incompatible mirrored type in " + GetType());
 							kp.Value.mirroredField = null;
+							continue ;
 						}
 					}
 					else
@@ -306,14 +308,9 @@ namespace PW
 
 			if (!firstRenderLoop)
 				viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
-
+				
 			if (Event.current.type == EventType.Repaint)
-			{
-				if (useExternalWinowRect)
-					externalWindowRect.height = viewHeight + 24; //add the window header and footer size
-				else
-					windowRect.height = viewHeight + 24; //add the window header and footer size
-			}
+				viewHeight += 24;
 
 			firstRenderLoop = false;
 		}
@@ -331,7 +328,7 @@ namespace PW
 					var val = kp.Value.anchorInstance;
 					var mirroredProp = propertyDatas[kp.Value.mirroredField];
 					//TODO: optimize
-					((Type)kp.Value.type).GetField(mirroredProp.fieldName).SetValue(this, val);
+					GetType().GetField(mirroredProp.fieldName).SetValue(this, val);
 				}
 			OnNodeProcess();
 		}

@@ -447,7 +447,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name);
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, GUILayout.Height(node.viewHeight));
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
@@ -591,14 +591,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var node = currentGraph.nodes[i];
 				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
 				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal);
-				//window:
 			}
 
 			//display graph sub-PWGraphs
 			foreach (var graph in currentGraph.subGraphs)
 			{
 				graph.outputNode.useExternalWinowRect = true;
-				DisplayDecaledNode(windowId++, graph.outputNode, graph.name);
+				RenderNode(windowId++, graph.outputNode, graph.name, -1, ref mouseAboveAnchorLocal);
 			}
 
 			//display the upper graph reference:
@@ -609,11 +608,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 			EndWindows();
 			
 			if (e.type == EventType.Repaint)
+			{
+				if (currentGraph.parent != null)
+					ProcessNodeAndLinks(currentGraph.inputNode);
 				foreach (var node in currentGraph.nodes)
 					ProcessNodeAndLinks(node);
-			if (currentGraph.parent != null)
-				ProcessNodeAndLinks(currentGraph.inputNode);
-			ProcessNodeAndLinks(currentGraph.outputNode);
+				foreach (var graph in currentGraph.subGraphs)
+					ProcessNodeAndLinks(graph.outputNode);
+				ProcessNodeAndLinks(currentGraph.outputNode);
+			}
+
+			//submachine enter button click management:
+			foreach (var graph in currentGraph.subGraphs)
+			{
+				if (graph.outputNode.specialButtonClick)
+				{
+					//enter to subgraph:
+					currentGraph.draggingLink = false;
+					graph.outputNode.useExternalWinowRect = false;
+					currentGraph = graph;
+				}
+			}
 
 			//click up outside of an anchor, stop dragging
 			if (e.type == EventType.mouseUp && currentGraph.draggingLink == true)
