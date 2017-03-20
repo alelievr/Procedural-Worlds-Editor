@@ -18,6 +18,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	debugTexture1;
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
+
+	private static Texture2D	preset2DSideViewTexture;
+	private static Texture2D	preset2DTopDownViewTexture;
+	private static Texture2D	preset3DPlaneTexture;
+	private static Texture2D	preset3DSphericalTexture;
+	private static Texture2D	preset3DCubicTexture;
+	private static Texture2D	preset1DDensityFieldTexture;
+	private static Texture2D	preset2DDensityFieldTexture;
+	private static Texture2D	preset3DDensityFieldTexture;
+	private static Texture2D	presetMeshTetxure;
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
@@ -91,6 +101,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		graph.graphDecalPosition = Vector2.zero;
 
+		graph.presetChoosed = false;
+		
 		graph.localWindowIdCount = 0;
 		
 		graph.outputNode = ScriptableObject.CreateInstance< PWNodeGraphOutput >();
@@ -157,15 +169,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
 			InitializeNewGraph(currentGraph);
-		
-		EditorUtility.SetDirty(this);
-
+			
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
 		whiteBoldText = new GUIStyle();
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
+		
+		if (currentGraph.firstInitialization != "initialized")
+			return ;
+
+		if (!currentGraph.presetChoosed)
+		{
+			DrawPresetPanel();
+			return ;
+		}
+
+		EditorUtility.SetDirty(this);
 
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
@@ -208,6 +229,51 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.KeyUp)
 			Repaint();
     }
+
+	void DrawPresetLine(Texture2D tex, string description, Action callback)
+	{
+		EditorGUILayout.BeginHorizontal();
+		{
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button(tex, GUILayout.Width(100), GUILayout.Height(100)))
+				callback();
+			EditorGUILayout.LabelField(description, whiteText);
+			GUILayout.FlexibleSpace();
+		}
+		EditorGUILayout.EndHorizontal();
+
+	}
+
+	void DrawPresetPanel()
+	{
+		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), backgroundTex);
+		EditorGUILayout.BeginHorizontal();
+		{
+			GUILayout.FlexibleSpace();
+			EditorGUILayout.BeginVertical();
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.BeginVertical();
+			{
+				GUILayout.FlexibleSpace();
+				//TODO: lines
+				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
+				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {});
+				DrawPresetLine(preset3DPlaneTexture, "3D plane procedural terrain", () => {});
+				DrawPresetLine(preset3DSphericalTexture, "3D spherical procedural terrain", () => {});
+				DrawPresetLine(preset3DCubicTexture, "3D cubic procedural terrain", () => {});
+				DrawPresetLine(preset1DDensityFieldTexture, "1D float density field", () => {});
+				DrawPresetLine(preset2DDensityFieldTexture, "2D float density field", () => {});
+				DrawPresetLine(preset3DDensityFieldTexture, "3D float density field", () => {});
+				DrawPresetLine(presetMeshTetxure, "mesh", () => {});
+				GUILayout.FlexibleSpace();
+			}
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.BeginVertical();
+			EditorGUILayout.EndVertical();
+			GUILayout.FlexibleSpace();
+		}
+		EditorGUILayout.EndHorizontal();
+	}
 
 	void ProcessPreviewScene()
 	{
@@ -758,6 +824,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	static void CreateBackgroundTexture()
 	{
+		Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
+			Texture2D	ret;
+			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			ret.SetPixel(0, 0, c);
+			ret.Apply();
+			return ret;
+		};
+
+		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
+			return AssetDatabase.LoadAssetAtPath< Texture2D >(ressourcePath);
+        };
+
         Color backgroundColor = new Color32(56, 56, 56, 255);
 		Color resizeHandleColor = EditorGUIUtility.isProSkin
 			? new Color32(56, 56, 56, 255)
@@ -766,29 +844,23 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Color selectorCaseBackgroundColor = new Color32(110, 110, 110, 255);
 		Color selectorCaseTitleBackgroundColor = new Color32(50, 50, 50, 255);
 		
-		backgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		backgroundTex.SetPixel(0, 0, backgroundColor);
-		backgroundTex.Apply();
+		backgroundTex = CreateTexture2DColor(backgroundColor);
+		resizeHandleTex = CreateTexture2DColor(resizeHandleColor);
+		selectorBackgroundTex = CreateTexture2DColor(selectorBackgroundColor);
+		debugTexture1 = CreateTexture2DColor(new Color(1f, 0f, 0f, .3f));
+		selectorCaseBackgroundTex = CreateTexture2DColor(selectorCaseBackgroundColor);
+		selectorCaseTitleBackgroundTex = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
 
-		resizeHandleTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		resizeHandleTex.SetPixel(0, 0, resizeHandleColor);
-		resizeHandleTex.Apply();
-
-		selectorBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		selectorBackgroundTex.SetPixel(0, 0, selectorBackgroundColor);
-		selectorBackgroundTex.Apply();
-
-		debugTexture1 = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		debugTexture1.SetPixel(0, 0, new Color(1f, 0f, 0f, .3f));
-		debugTexture1.Apply();
-		
-		selectorCaseBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		selectorCaseBackgroundTex.SetPixel(0, 0, selectorCaseBackgroundColor);
-		selectorCaseBackgroundTex.Apply();
-		
-		selectorCaseTitleBackgroundTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-		selectorCaseTitleBackgroundTex.SetPixel(0, 0, selectorCaseTitleBackgroundColor);
-		selectorCaseTitleBackgroundTex.Apply();
+		string dir = "Assets/Editor/Ressources/";
+		preset2DSideViewTexture = CreateTexture2DFromFile(dir + "preview2DSideView.png");
+		preset2DTopDownViewTexture = CreateTexture2DFromFile(dir + "preview2DTopDownView.png");
+		preset3DPlaneTexture = CreateTexture2DFromFile(dir + "preview3DPlane.png");
+		preset3DSphericalTexture = CreateTexture2DFromFile(dir + "preview3DSpherical.png");
+		preset3DCubicTexture = CreateTexture2DFromFile(dir + "preview3DCubic.png");
+		presetMeshTetxure = CreateTexture2DFromFile(dir + "previewMesh.png");
+		preset1DDensityFieldTexture= CreateTexture2DFromFile(dir + "preview1DDensityField.png");
+		preset2DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview2DDensityField.png");
+		preset3DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview3DDensityField.png");
 	}
 
     void DrawNodeCurve(Rect start, Rect end, Color c)

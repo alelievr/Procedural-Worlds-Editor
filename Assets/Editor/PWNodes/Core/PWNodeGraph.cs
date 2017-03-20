@@ -45,7 +45,8 @@ namespace PW
 		[SerializeField]
 		public Vector2			externalGraphPosition;
 
-		//TODO: implement graph output and graph input variables:
+		[SerializeField]
+		public bool				presetChoosed;
 
 		[SerializeField]
 		public List< PWNodeGraph >		subGraphs = new List< PWNodeGraph >();
