@@ -8,13 +8,6 @@ using System;
 
 namespace PW
 {
-	public enum PWOutputType
-	{
-		SIDE_2D,
-		TOPDOWN_2D,
-
-	}
-
 	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
@@ -27,6 +20,11 @@ namespace PW
 		public int		computeOrder;
 		public int		viewHeight;
 		public bool		specialButtonClick = false;
+		public Vector3	chunkPosition = Vector3.zero;
+		public int		chunkSize = 16;
+		public int		seed;
+		public bool		seedHasChanged = false;
+		public bool		positionHasChanged = false;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
@@ -45,6 +43,9 @@ namespace PW
 
 		bool	windowShouldClose = false;
 		bool	firstRenderLoop;
+
+		Vector3	oldChunkPosition;
+		int		oldSeed;
 
 		public static int	windowRenderOrder = 0;
 
@@ -329,6 +330,10 @@ namespace PW
 
 		public void Process()
 		{
+			if (oldSeed != seed)
+				seedHasChanged = true;
+			if (oldChunkPosition != chunkPosition)
+				positionHasChanged = true;
 			foreach (var kp in propertyDatas)
 				if (kp.Value.mirroredField != null)
 				{
@@ -338,6 +343,10 @@ namespace PW
 					GetType().GetField(mirroredProp.fieldName).SetValue(this, val);
 				}
 			OnNodeProcess();
+			oldSeed = seed;
+			oldChunkPosition = chunkPosition;
+			seedHasChanged = false;
+			positionHasChanged = false;
 		}
 
 		public virtual void OnNodeProcess()
@@ -602,6 +611,30 @@ namespace PW
 				});
 				depencendies.Add(to.windowId);
 			}
+		}
+
+		public void AttachLink(string myAnchor, PWNode target, string targetAnchor)
+		{
+			if (!propertyDatas.ContainsKey(myAnchor) || !target.propertyDatas.ContainsKey(targetAnchor))
+				return ;
+
+			PWAnchorData fromAnchor = propertyDatas[myAnchor];
+			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
+
+			PWAnchorInfo from = new PWAnchorInfo(
+					fromAnchor.fieldName, new Rect(), Color.white,
+					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
+					0, fromAnchor.classAQName,
+					0, fromAnchor.generic, fromAnchor.allowedTypes
+			);
+			PWAnchorInfo to = new PWAnchorInfo(
+				toAnchor.fieldName, new Rect(), Color.white,
+				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
+				0, toAnchor.classAQName,
+				0, toAnchor.generic, toAnchor.allowedTypes
+			);
+
+			AttachLink(from, to);
 		}
 
 		public void		RemoveLink(int anchorId)

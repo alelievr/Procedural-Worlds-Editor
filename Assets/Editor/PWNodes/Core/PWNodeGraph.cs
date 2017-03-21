@@ -46,6 +46,11 @@ namespace PW
 		public bool				presetChoosed;
 
 		[SerializeField]
+		public int				chunkSize;
+		[SerializeField]
+		public int				seed;
+		
+		[SerializeField]
 		public List< PWNodeGraph >		subGraphs = new List< PWNodeGraph >();
 		[SerializeField]
 		public PWNodeGraph				parent = null;

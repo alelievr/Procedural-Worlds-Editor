@@ -63,17 +63,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	}
 
 	[System.NonSerializedAttribute]
-	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >()
-	{
-		{"Simple values", new List< PWNodeStorage >()},
-		{"Operations", new List< PWNodeStorage >()},
-		{"Noises", new List< PWNodeStorage >()},
-		{"Noise masks", new List< PWNodeStorage >()},
-		{"Storage", new List< PWNodeStorage >()},
-		{"Visual", new List< PWNodeStorage >()},
-		{"Debug", new List< PWNodeStorage >()},
-		{"Custom", new List< PWNodeStorage >()},
-	};
+	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
 
 	[System.NonSerializedAttribute]
 	Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
@@ -84,15 +74,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
 
 		window.Show();
-	}
-	
-	void AddToSelector(string key, params object[] objs)
-	{
-		if (nodeSelectorList.ContainsKey(key))
-		{
-			for (int i = 0; i < objs.Length; i += 2)
-			nodeSelectorList[key].Add(new PWNodeStorage((string)objs[i], (Type)objs[i + 1]));
-		}
 	}
 
 	void InitializeNewGraph(PWNodeGraph graph)
@@ -106,6 +87,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.presetChoosed = false;
 		
 		graph.localWindowIdCount = 0;
+
+		graph.chunkSize = 16;
 		
 		graph.outputNode = ScriptableObject.CreateInstance< PWNodeGraphOutput >();
 		graph.outputNode.SetWindowId(currentGraph.localWindowIdCount++);
@@ -129,6 +112,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
 			dico[field.Name] = field;
 	}
+	
+	void AddToSelector(string key, params object[] objs)
+	{
+		if (!nodeSelectorList.ContainsKey(key))
+			nodeSelectorList[key] = new List< PWNodeStorage >();
+		for (int i = 0; i < objs.Length; i += 2)
+			nodeSelectorList[key].Add(new PWNodeStorage((string)objs[i], (Type)objs[i + 1]));
+	}
 
 	void OnEnable()
 	{
@@ -147,6 +138,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
 		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+		AddToSelector("Noises", "Perlin noise 2D", typeof(PWNodePerlinNoise2D));
+		AddToSelector("Materializers", "SideView 2D terrain", typeof(PWNode2DSideViewTerrain));
+		AddToSelector("Storages");
+		AddToSelector("Custom");
 
 		//bake the fieldInfo types:
 		bakedNodeFields.Clear();
@@ -283,12 +278,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//3 DrawPresetLine per line + 1 header:
 				EditorGUILayout.BeginHorizontal();
 				DrawPresetLineHeader("2D");
-				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {
-					CreateNewNode(typeof(PWNodeAdd));
-					//TODO: link the added node and the output node.
-				});
+				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
-
+					CreateNewNode(typeof(PWNodePerlinNoise2D));
+					PWNode perlin = currentGraph.nodes.Last();
+					CreateNewNode(typeof(PWNode2DSideViewTerrain));
+					PWNode terrain = currentGraph.nodes.Last();
+					perlin.AttachLink("output", terrain, "texture");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();
@@ -450,6 +446,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
 		
 				//TODO: draw infos / debug / global settings view
+
+				if (currentGraph.parent == null)
+				{
+					EditorGUI.BeginChangeCheck();
+					currentGraph.seed = EditorGUILayout.IntField("Seed", currentGraph.seed);
+					if (EditorGUI.EndChangeCheck())
+						ForeachAllNodes((p) => p.seed = currentGraph.seed, true, true);
+					
+					//chunk size:
+					EditorGUI.BeginChangeCheck();
+					currentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", currentGraph.chunkSize);
+					if (EditorGUI.EndChangeCheck())
+						ForeachAllNodes((p) => p.chunkSize = currentGraph.chunkSize, true, true);
+				}
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -645,7 +655,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		var links = node.GetLinks();
 		foreach (var link in links)
 		{
-			Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
+			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
 			var fromWindow = FindNodeByWindowId(link.localWindowId);
 			var toWindow = FindNodeByWindowId(link.distantWindowId);
 
@@ -804,6 +814,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.windowRect.position = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
 		newNode.nodeTypeName = t.ToString();
+		newNode.chunkSize = currentGraph.chunkSize;
 		currentGraph.nodes.Add(newNode);
 	}
 
@@ -933,6 +944,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset1DDensityFieldTexture= CreateTexture2DFromFile(dir + "preview1DDensityField.png");
 		preset2DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview2DDensityField.png");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview3DDensityField.png");
+	}
+
+	void ForeachAllNodes(Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
+	{
+		if (graph == null)
+			graph = currentGraph;
+		foreach (var node in graph.nodes)
+			callback(node);
+		if (graphInputAndOutput)
+		{
+			callback(graph.inputNode);
+			callback(graph.outputNode);
+		}
+		if (recursive)
+			foreach (var subgraph in graph.subGraphs)
+				ForeachAllNodes(callback, recursive, graphInputAndOutput, subgraph);
 	}
 
     void DrawNodeCurve(Rect start, Rect end, Color c)
