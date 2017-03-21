@@ -39,6 +39,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	int					mouseAboveSubmachineIndex;
 	Vector2				lastMousePosition;
 	Vector2				presetScrollPos;
+	Vector2				windowSize;
 
 	Camera				previewCamera;
 	GameObject			previewSceneRoot;
@@ -139,7 +140,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
 		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
 		AddToSelector("Noises", "Perlin noise 2D", typeof(PWNodePerlinNoise2D));
-		AddToSelector("Materializers", "SideView 2D terrain", typeof(PWNode2DSideViewTerrain));
+		AddToSelector("Materializers", "SideView 2D terrain", typeof(PWNodeSideView2DTerrain));
+		AddToSelector("Materializers", "TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
 		AddToSelector("Storages");
 		AddToSelector("Custom");
 
@@ -162,6 +164,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void OnGUI()
     {
+		EditorUtility.SetDirty(this);
+
 		//initialize graph the first time he was created
 		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
@@ -187,7 +191,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			return ;
 		}
 
-		EditorUtility.SetDirty(this);
+		if (windowSize != Vector2.zero && windowSize != position.size)
+			OnWindowResize();
 
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
@@ -198,7 +203,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
-		ProcessPreviewScene();
+		ProcessPreviewScene(currentGraph.outputType);
 
 		DrawNodeGraphCore();
 
@@ -226,6 +231,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.Repaint
 			|| Event.current.type == EventType.KeyUp)
 			Repaint();
+		windowSize = position.size;
     }
 
 	void DrawPresetLineHeader(string header)
@@ -280,10 +286,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawPresetLineHeader("2D");
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
+					currentGraph.outputType = PWOutputType.TOPDOWNVIEW_2D;
 					CreateNewNode(typeof(PWNodePerlinNoise2D));
 					PWNode perlin = currentGraph.nodes.Last();
 					perlin.windowRect.position += Vector2.left * 400;
-					CreateNewNode(typeof(PWNode2DSideViewTerrain));
+					CreateNewNode(typeof(PWNodeTopDown2DTerrain));
 					PWNode terrain = currentGraph.nodes.Last();
 
 					perlin.AttachLink("output", terrain, "texture");
@@ -325,7 +332,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
-	void ProcessPreviewScene()
+	void ProcessPreviewScene(PWOutputType outputType)
 	{
 		const string		previewSceneRootName = "PWpreviewSceneRoot";
 		const string		previewCameraObjectName = "PWPreviewCamera";
@@ -716,6 +723,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
+			if (Event.current.type == EventType.Layout)
+				ForeachAllNodes(p => p.BeginFrameUpdate());
+			//We run the calcul the nodes:
+			if (e.type == EventType.Layout)
+				currentGraph.ProcessGraph();
+
 			bool	mouseAboveAnchorLocal = false;
 			mouseAboveNodeIndex = -1;
 			mouseAboveSubmachineIndex = -1;
@@ -747,7 +760,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			
 			if (e.type == EventType.Repaint)
 			{
-				currentGraph.ProcessGraph();
 				if (currentGraph.parent != null)
 					RenderNodeLinks(currentGraph.inputNode);
 				foreach (var node in currentGraph.nodes)
@@ -756,7 +768,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					RenderNodeLinks(graph.outputNode);
 				RenderNodeLinks(currentGraph.outputNode);
 			}
-
+			
 			//submachine enter button click management:
 			foreach (var graph in currentGraph.subGraphs)
 			{
@@ -781,8 +793,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 				);
 			currentGraph.mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 
+			if (Event.current.type == EventType.Layout)
+				ForeachAllNodes(p => p.EndFrameUpdate());
 		}
 		EditorGUILayout.EndHorizontal();
+	}
+
+	void OnWindowResize()
+	{
+
 	}
 
 	void DeleteNode(object oid)

@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace PW
 {
@@ -10,22 +11,50 @@ namespace PW
 		[PWOutput("OUT")]
 		public Sampler2D	output;
 
+		Texture2D			previewTex;
+
 		public override void OnNodeCreate()
 		{
 			name = "Perlin noise 2D";
+			output = new Sampler2D(chunkSize);
+			previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 		}
 
 		public override void OnNodeGUI()
 		{
+			EditorGUIUtility.labelWidth = 70;
 			persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
 			octaves = EditorGUILayout.IntSlider("Octaves", octaves, 0, 32);
+
+			if (chunkSizeHasChanged)
+			{
+				output.Resize(chunkSize);
+				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
+				OnNodeProcess();
+			}
+
+			//TODO: shader preview here
+
+			//redraw the texture:
+			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
+			{
+				output.Foreach((x, y, val) => {
+					previewTex.SetPixel(x, y, Color.white * val / 2);
+				});
+				previewTex.Apply();
+			}
+			GUILayout.Label(previewTex, GUILayout.Width(100), GUILayout.Height(100));
 		}
 
 		public override void OnNodeProcess()
 		{
-			if (seedHasChanged || positionHasChanged)
+			//recalcul perlin noise values with new seed / position.
+			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{
-				//recalcul perlin noise values with new seed / position.
+				output.Foreach((x, y) => {
+					float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
+					return val;
+				});
 			}
 		}
 	}

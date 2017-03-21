@@ -3,41 +3,44 @@ using UnityEngine;
 
 namespace PW
 {
-	public class PWNodeSideView2DTerrain : PWNode {
+	public class PWNodeTopDown2DTerrain : PWNode {
 	
 		[PWInput("TEX")]
 		public Sampler2D		texture;
 
 		[PWOutput("MAP")]
-		public SideView2DData	terrainOutput;
+		public TopDown2DData	terrainOutput;
 
 		private Texture2D		samplerTexture;
 
 		public override void OnNodeCreate()
 		{
-			name = "2D SideView terrain";
+			name = "2D TopDown terrain";
 			samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 			texture = new Sampler2D(chunkSize);
+			terrainOutput = new TopDown2DData();
 		}
 
 		public override void OnNodeGUI()
 		{
 			EditorGUILayout.LabelField("MAP:");
-			
-			if (chunkSizeHasChanged)
-			{
-				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-				texture = new Sampler2D(chunkSize);
-			}
-			
-			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
-				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
+
+			GUILayout.Label(samplerTexture, GUILayout.Width(100), GUILayout.Height(100));
 		}
 
 		public override void OnNodeProcess()
 		{
+			if (chunkSizeHasChanged)
+			{
+				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
+			}
+			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
+			{
+				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
+				samplerTexture.Apply();
+			}
 			terrainOutput.size = Vector2.one * chunkSize;
-			// terrainOutput.texture = samplerTexture;
+			terrainOutput.texture = samplerTexture;
 		}
 
 	}

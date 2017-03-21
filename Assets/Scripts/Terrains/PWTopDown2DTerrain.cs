@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using PW;
 
-public class PWSideView2DTerrain : PWTerrainBase< SideView2DData > {
+public class PWTopDown2DTerrain : PWTerrainBase< TopDown2DData > {
 
-	ChunkStorage< SideView2DData > chunks = new ChunkStorage< SideView2DData >();
+	ChunkStorage< TopDown2DData > chunks = new ChunkStorage< TopDown2DData >();
 
 	Vector3		pos = Vector3.zero;
 
@@ -18,10 +18,11 @@ public class PWSideView2DTerrain : PWTerrainBase< SideView2DData > {
 	void Update () {
 		if (!chunks.isLoaded(pos))
 		{
+			Debug.LogWarning("loading chunk: " + pos);
 			var data = chunks.AddChunk(pos, RequestChunk(pos, 42));
 
 			GameObject g = GameObject.CreatePrimitive(PrimitiveType.Quad);
-			g.SetActive(true);
+			g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", data.texture);
 		}
 	}
 }

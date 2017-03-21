@@ -23,5 +23,7 @@ namespace PW
 			graph.ProcessGraph();
 			return (T)graphOutput.inputValues.At(0);
 		}
+
+		//TODO: function to know if we are in preview mode.
 	}
 }

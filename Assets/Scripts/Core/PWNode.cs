@@ -26,6 +26,7 @@ namespace PW
 
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
+		public bool		chunkSizeHasChanged = false;
 		public bool		inputHasChanged = false;
 		public bool		outputHasChanged = false;
 
@@ -49,6 +50,7 @@ namespace PW
 
 		Vector3	oldChunkPosition;
 		int		oldSeed;
+		int		oldChunkSize;
 
 		public static int	windowRenderOrder = 0;
 
@@ -91,6 +93,9 @@ namespace PW
 			highlightAddTexture.Apply();
 			LoadFieldAttributes();
 			
+			OnNodeAwake();
+			OnNodeCreate();
+			
 			//this will be true only if the object instance does not came from a serialized object.
 			if (firstInitialization == null)
 			{
@@ -101,15 +106,33 @@ namespace PW
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
-				
-				OnNodeCreate();
+
+				OnNodeCreateOnce();
 
 				firstInitialization = "initialized";
 			}
 		}
 
+		public virtual void OnNodeAwake()
+		{
+		}
+
 		public virtual void OnNodeCreate()
 		{
+		}
+
+		public virtual void OnNodeCreateOnce()
+		{
+		}
+
+		public void BeginFrameUpdate()
+		{
+			if (oldSeed != seed)
+				seedHasChanged = true;
+			if (oldChunkPosition != chunkPosition)
+				positionHasChanged = true;
+			if (oldChunkSize != chunkSize)
+				chunkSizeHasChanged = true;
 		}
 
 		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback)
@@ -333,10 +356,6 @@ namespace PW
 
 		public void Process()
 		{
-			if (oldSeed != seed)
-				seedHasChanged = true;
-			if (oldChunkPosition != chunkPosition)
-				positionHasChanged = true;
 			foreach (var kp in propertyDatas)
 				if (kp.Value.mirroredField != null)
 				{
@@ -345,13 +364,8 @@ namespace PW
 					//TODO: optimize
 					GetType().GetField(mirroredProp.fieldName).SetValue(this, val);
 				}
+
 			OnNodeProcess();
-			oldSeed = seed;
-			oldChunkPosition = chunkPosition;
-			seedHasChanged = false;
-			positionHasChanged = false;
-			inputHasChanged = false;
-			outputHasChanged = false;
 		}
 
 		public virtual void OnNodeProcess()
@@ -633,13 +647,13 @@ namespace PW
 					fromAnchor.fieldName, new Rect(), Color.white,
 					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
 					fromAnchor.first.id, fromAnchor.classAQName,
-					0, fromAnchor.generic, fromAnchor.allowedTypes
+					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
 				toAnchor.fieldName, new Rect(), Color.white,
 				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
 				toAnchor.first.id, toAnchor.classAQName,
-				0, toAnchor.generic, toAnchor.allowedTypes
+				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes
 			);
 
 			AttachLink(from, to);
@@ -742,6 +756,22 @@ namespace PW
 					&& singleAnchor.linkCount == 0)
 					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
+		}
+
+		public void		EndFrameUpdate()
+		{
+			//reset values at the end of the frame
+			if (Event.current.type == EventType.Layout)
+			{
+				oldSeed = seed;
+				oldChunkPosition = chunkPosition;
+				oldChunkSize = chunkSize;
+				seedHasChanged = false;
+				positionHasChanged = false;
+				chunkSizeHasChanged = false;
+				inputHasChanged = false;
+				outputHasChanged = false;
+			}
 		}
 
 		public bool		WindowShouldClose()
