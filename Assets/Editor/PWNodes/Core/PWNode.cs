@@ -8,6 +8,13 @@ using System;
 
 namespace PW
 {
+	public enum PWOutputType
+	{
+		SIDE_2D,
+		TOPDOWN_2D,
+
+	}
+
 	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
@@ -42,7 +49,7 @@ namespace PW
 		public static int	windowRenderOrder = 0;
 
 		[SerializeField]
-		List< PWLink > links = new List< PWLink >();
+		List< PWLink >	links = new List< PWLink >();
 		[SerializeField]
 		List< int >		depencendies = new List< int >();
 

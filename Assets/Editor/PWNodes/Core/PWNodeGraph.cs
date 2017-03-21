@@ -43,9 +43,6 @@ namespace PW
 		public string			searchString = "";
 
 		[SerializeField]
-		public Vector2			externalGraphPosition;
-
-		[SerializeField]
 		public bool				presetChoosed;
 
 		[SerializeField]

@@ -36,7 +36,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
+	int					mouseAboveSubmachineIndex;
 	Vector2				lastMousePosition;
+	Vector2				presetScrollPos;
 
 	Camera				previewCamera;
 	GameObject			previewSceneRoot;
@@ -176,6 +178,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText = new GUIStyle();
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
+
+        //background color:
+		if (backgroundTex == null || currentGraph.h1 == null || resizeHandleTex == null)
+			OnEnable();
 		
 		if (currentGraph.firstInitialization != "initialized")
 			return ;
@@ -195,9 +201,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				currentGraph.draggingLink = false;
 		}
 
-        //background color:
-		if (backgroundTex == null || currentGraph.h1 == null || resizeHandleTex == null)
-			OnEnable();
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
 		ProcessPreviewScene();
@@ -230,23 +233,44 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Repaint();
     }
 
-	void DrawPresetLine(Texture2D tex, string description, Action callback)
+	void DrawPresetLineHeader(string header)
 	{
-		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.BeginVertical();
+		GUILayout.FlexibleSpace();
+		EditorGUI.indentLevel = 5;
+		EditorGUILayout.LabelField(header, whiteText);
+		EditorGUI.indentLevel = 0;
+		GUILayout.FlexibleSpace();
+		EditorGUILayout.EndVertical();
+	}
+
+	void DrawPresetLine(Texture2D tex, string description, Action callback, bool disabled = true)
+	{
+		EditorGUILayout.BeginVertical();
 		{
 			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(tex, GUILayout.Width(100), GUILayout.Height(100)))
-				callback();
+			EditorGUI.BeginDisabledGroup(disabled);
+			if (tex != null)
+				if (GUILayout.Button(tex, GUILayout.Width(100), GUILayout.Height(100)))
+				{
+					currentGraph.presetChoosed = true;
+					callback();
+				}
 			EditorGUILayout.LabelField(description, whiteText);
+			EditorGUI.EndDisabledGroup();
 			GUILayout.FlexibleSpace();
 		}
-		EditorGUILayout.EndHorizontal();
-
+		EditorGUILayout.EndVertical();
 	}
 
 	void DrawPresetPanel()
 	{
 		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), backgroundTex);
+
+		presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
+
+		EditorGUILayout.LabelField("Procedural Worlds");
+
 		EditorGUILayout.BeginHorizontal();
 		{
 			GUILayout.FlexibleSpace();
@@ -255,16 +279,41 @@ public class ProceduralWorldsWindow : EditorWindow {
 			EditorGUILayout.BeginVertical();
 			{
 				GUILayout.FlexibleSpace();
-				//TODO: lines
-				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
-				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {});
+
+				//3 DrawPresetLine per line + 1 header:
+				EditorGUILayout.BeginHorizontal();
+				DrawPresetLineHeader("2D");
+				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {
+					CreateNewNode(typeof(PWNodeAdd));
+					//TODO: link the added node and the output node.
+				});
+				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
+
+				}, false);
+				DrawPresetLine(null, "", () => {});
+				EditorGUILayout.EndHorizontal();
+
+				EditorGUILayout.BeginHorizontal();
+				DrawPresetLineHeader("3D");
 				DrawPresetLine(preset3DPlaneTexture, "3D plane procedural terrain", () => {});
 				DrawPresetLine(preset3DSphericalTexture, "3D spherical procedural terrain", () => {});
 				DrawPresetLine(preset3DCubicTexture, "3D cubic procedural terrain", () => {});
+				EditorGUILayout.EndHorizontal();
+
+				EditorGUILayout.BeginHorizontal();
+				DrawPresetLineHeader("Density fields");
 				DrawPresetLine(preset1DDensityFieldTexture, "1D float density field", () => {});
 				DrawPresetLine(preset2DDensityFieldTexture, "2D float density field", () => {});
 				DrawPresetLine(preset3DDensityFieldTexture, "3D float density field", () => {});
+				EditorGUILayout.EndHorizontal();
+
+				EditorGUILayout.BeginHorizontal();
+				DrawPresetLineHeader("Others");
 				DrawPresetLine(presetMeshTetxure, "mesh", () => {});
+				DrawPresetLine(null, "", () => {});
+				DrawPresetLine(null, "", () => {});
+				EditorGUILayout.EndHorizontal();
+				
 				GUILayout.FlexibleSpace();
 			}
 			EditorGUILayout.EndVertical();
@@ -273,6 +322,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			GUILayout.FlexibleSpace();
 		}
 		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.EndScrollView();
 	}
 
 	void ProcessPreviewScene()
@@ -538,7 +588,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		return null;
 	}
 
-	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal)
+	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, bool submachine = false)
 	{
 		Event	e = Event.current;
 
@@ -546,7 +596,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		DisplayDecaledNode(id, node, name);
 
 		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
-			mouseAboveNodeIndex = index;
+		{
+			if (submachine)
+				mouseAboveSubmachineIndex = index;
+			else
+				mouseAboveNodeIndex = index;
+		}
 
 		//highlight, hide, add all linkable anchors:
 		if (currentGraph.draggingLink)
@@ -590,12 +645,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		var links = node.GetLinks();
 		foreach (var link in links)
 		{
-			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
+			Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
 			var fromWindow = FindNodeByWindowId(link.localWindowId);
 			var toWindow = FindNodeByWindowId(link.distantWindowId);
 
-			if (fromWindow == null || toWindow == null) //invalid window ids
+			if (toWindow == null) //invalid window ids
 			{
+				node.RemoveLinkByWindowTarget(link.distantWindowId);
 				Debug.LogWarning("window not found: " + link.localWindowId + ", " + link.distantWindowId);
 				continue ;
 			}
@@ -643,16 +699,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawNodeGraphCore()
 	{
-		Event e = Event.current;
+		Event	e = Event.current;
+		int		i;
 
 		Rect graphRect = EditorGUILayout.BeginHorizontal();
 		{
 			bool	mouseAboveAnchorLocal = false;
 			mouseAboveNodeIndex = -1;
+			mouseAboveSubmachineIndex = -1;
 			PWNode.windowRenderOrder = 0;
 			int		windowId = 0;
 			BeginWindows();
-			for (int i = 0; i < currentGraph.nodes.Count; i++)
+			for (i = 0; i < currentGraph.nodes.Count; i++)
 			{
 				var node = currentGraph.nodes[i];
 				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
@@ -660,10 +718,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 
 			//display graph sub-PWGraphs
+			i = 0;
 			foreach (var graph in currentGraph.subGraphs)
 			{
 				graph.outputNode.useExternalWinowRect = true;
-				RenderNode(windowId++, graph.outputNode, graph.name, -1, ref mouseAboveAnchorLocal);
+				RenderNode(windowId++, graph.outputNode, graph.name, i, ref mouseAboveAnchorLocal, true);
+				i++;
 			}
 
 			//display the upper graph reference:
@@ -747,12 +807,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.nodes.Add(newNode);
 	}
 
+	void DeleteSubmachine(object oid)
+	{
+		int id = (int)oid;
+
+		if (id < currentGraph.subGraphs.Count && id >= 0)
+			currentGraph.subGraphs.RemoveAt(id);
+	}
+
 	void CreatePWMachine()
 	{
 		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
-		subgraph.externalGraphPosition = pos;
 		InitializeNewGraph(subgraph);
+		subgraph.presetChoosed = true;
+		subgraph.inputNode.useExternalWinowRect = true;
+		subgraph.inputNode.windowRect.position = pos;
 		subgraph.parent = currentGraph;
 		subgraph.name = "PW sub-machine";
 		currentGraph.subGraphs.Add(subgraph);
@@ -772,6 +842,8 @@ public class ProceduralWorldsWindow : EditorWindow {
                 GenericMenu menu = new GenericMenu();
 				if (mouseAboveNodeIndex != -1)
 					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
+				else if (mouseAboveSubmachineIndex != -1)
+					menu.AddItem(new GUIContent("Delete submachine"), false, DeleteSubmachine, mouseAboveSubmachineIndex);
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
                 menu.AddSeparator("");
