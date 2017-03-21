@@ -23,8 +23,11 @@ namespace PW
 		public Vector3	chunkPosition = Vector3.zero;
 		public int		chunkSize = 16;
 		public int		seed;
+
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
+		public bool		inputHasChanged = false;
+		public bool		outputHasChanged = false;
 
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
@@ -347,6 +350,8 @@ namespace PW
 			oldChunkPosition = chunkPosition;
 			seedHasChanged = false;
 			positionHasChanged = false;
+			inputHasChanged = false;
+			outputHasChanged = false;
 		}
 
 		public virtual void OnNodeProcess()
@@ -577,6 +582,7 @@ namespace PW
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
 			{
+				outputHasChanged = true;
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
 					from.windowId, from.anchorId, from.name, from.classAQName, from.anchorColor)
@@ -589,6 +595,7 @@ namespace PW
 			}
 			else //input links are stored as depencencies:
 			{
+				inputHasChanged = true;
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
@@ -601,8 +608,6 @@ namespace PW
 						}
 						if (data.mirroredField != null)
 						{
-							//TODO: find the field and add a value to his PWValues if it's a PWValue type.
-
 							var mirroredProp = propertyDatas[data.mirroredField];
 							if ((Type)mirroredProp.type == typeof(PWValues))
 								mirroredProp.AddNewAnchor(mirroredProp.fieldName.GetHashCode() + i + 1);
@@ -616,7 +621,10 @@ namespace PW
 		public void AttachLink(string myAnchor, PWNode target, string targetAnchor)
 		{
 			if (!propertyDatas.ContainsKey(myAnchor) || !target.propertyDatas.ContainsKey(targetAnchor))
+			{
+				Debug.LogWarning("property not found: \"" + targetAnchor + "\" in " + target);
 				return ;
+			}
 
 			PWAnchorData fromAnchor = propertyDatas[myAnchor];
 			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
@@ -624,13 +632,13 @@ namespace PW
 			PWAnchorInfo from = new PWAnchorInfo(
 					fromAnchor.fieldName, new Rect(), Color.white,
 					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
-					0, fromAnchor.classAQName,
+					fromAnchor.first.id, fromAnchor.classAQName,
 					0, fromAnchor.generic, fromAnchor.allowedTypes
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
 				toAnchor.fieldName, new Rect(), Color.white,
 				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
-				0, toAnchor.classAQName,
+				toAnchor.first.id, toAnchor.classAQName,
 				0, toAnchor.generic, toAnchor.allowedTypes
 			);
 

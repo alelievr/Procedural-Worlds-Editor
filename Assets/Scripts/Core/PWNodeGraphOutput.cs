@@ -5,7 +5,8 @@ namespace PW
 {
 	public class PWNodeGraphOutput : PWNode {
 
-		[PWMultiple(1, typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4))]
+		//Mark all possible output types:
+		[PWMultiple(1, typeof(SideView2DData))]
 		[PWInput("in")]
 		[PWOffset(0, 20)]
 		public PWValues		inputValues = new PWValues();

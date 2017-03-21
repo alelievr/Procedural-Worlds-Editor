@@ -282,9 +282,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
 					CreateNewNode(typeof(PWNodePerlinNoise2D));
 					PWNode perlin = currentGraph.nodes.Last();
+					perlin.windowRect.position += Vector2.left * 400;
 					CreateNewNode(typeof(PWNode2DSideViewTerrain));
 					PWNode terrain = currentGraph.nodes.Last();
+
 					perlin.AttachLink("output", terrain, "texture");
+					terrain.AttachLink("texture", perlin, "output");
+					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();
@@ -677,10 +681,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			DeleteNode(index);
 	}
 
-	void ProcessNodeAndLinks(PWNode node)
+	void RenderNodeLinks(PWNode node)
 	{
-		node.Process();
-
 		var links = node.GetLinks();
 
 		foreach (var link in links)
@@ -745,13 +747,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 			
 			if (e.type == EventType.Repaint)
 			{
+				currentGraph.ProcessGraph();
 				if (currentGraph.parent != null)
-					ProcessNodeAndLinks(currentGraph.inputNode);
+					RenderNodeLinks(currentGraph.inputNode);
 				foreach (var node in currentGraph.nodes)
-					ProcessNodeAndLinks(node);
+					RenderNodeLinks(node);
 				foreach (var graph in currentGraph.subGraphs)
-					ProcessNodeAndLinks(graph.outputNode);
-				ProcessNodeAndLinks(currentGraph.outputNode);
+					RenderNodeLinks(graph.outputNode);
+				RenderNodeLinks(currentGraph.outputNode);
 			}
 
 			//submachine enter button click management:

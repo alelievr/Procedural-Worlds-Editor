@@ -42,6 +42,13 @@ namespace PW
 			}
 			return (ret);
 		}
+
+		public object At(int index)
+		{
+			if (index < 0 || index >= values.Count)
+				return null;
+			return values[index];
+		}
 	
 		public void Add(object val)
 		{
