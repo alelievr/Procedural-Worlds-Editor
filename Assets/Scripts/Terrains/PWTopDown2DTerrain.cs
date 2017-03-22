@@ -1,28 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using PW;
 
-public class PWTopDown2DTerrain : PWTerrainBase< TopDown2DData > {
+public class PWTopDown2DTerrain : PWTerrainBase {
 
-	ChunkStorage< TopDown2DData > chunks = new ChunkStorage< TopDown2DData >();
-
-	Vector3		pos = Vector3.zero;
-
-	// Use this for initialization
 	void Start () {
 		InitGraph();
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		if (!chunks.isLoaded(pos))
-		{
-			Debug.LogWarning("loading chunk: " + pos);
-			var data = chunks.AddChunk(pos, RequestChunk(pos, 42));
+	public override void RenderChunk(object chunkData, Vector3 pos)
+	{
+		TopDown2DData	chunk = (TopDown2DData)chunkData;
 
-			GameObject g = GameObject.CreatePrimitive(PrimitiveType.Quad);
-			g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", data.texture);
-		}
+		GameObject g = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		g.name = "chunk-" + pos;
+		g.transform.parent = terrainRoot.transform;
+		g.transform.position = pos;
+		g.transform.localScale = Vector3.one * 10;
+		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
 	}
 }

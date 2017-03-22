@@ -47,6 +47,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	GameObject			previewTerrainObject;
 	RenderTexture		previewCameraRenderTexture;
 
+	PWTerrainBase		terrainMaterializer;
+
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
 
@@ -69,6 +71,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[System.NonSerializedAttribute]
 	Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
 
+	[System.NonSerializedAttribute]
+	Dictionary< PWOutputType, Type > terrainRenderers = new Dictionary< PWOutputType, Type >()
+	{
+		{PWOutputType.SIDEVIEW_2D, typeof(PWSideView2DTerrain)},
+		{PWOutputType.TOPDOWNVIEW_2D, typeof(PWTopDown2DTerrain)},
+	};
+
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
@@ -84,6 +93,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
 
 		graph.graphDecalPosition = Vector2.zero;
+
+		graph.realMode = false;
 
 		graph.presetChoosed = false;
 		
@@ -204,6 +215,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
 		ProcessPreviewScene(currentGraph.outputType);
+
+		if (terrainMaterializer == null)
+		{
+			terrainMaterializer = GameObject.Find("PWPreviewTerrain").GetComponent< PWTerrainBase >();
+		}
 
 		DrawNodeGraphCore();
 
@@ -332,6 +348,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
+	void LambdaIfNotNull< T >(T obj, Action< T > callback)
+	{
+		if (obj != null)
+			callback(obj);
+	}
+
 	void ProcessPreviewScene(PWOutputType outputType)
 	{
 		const string		previewSceneRootName = "PWpreviewSceneRoot";
@@ -339,15 +361,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 		const string		previewTerrainObjectName = "PWPreviewTerrain";
 		const string		previewLayerName = "PWPreviewLayer";
 
+		bool				preview2D = false;
+
+		switch (outputType)
+		{
+			case PWOutputType.SIDEVIEW_2D:
+			case PWOutputType.DENSITY_2D:
+			case PWOutputType.TOPDOWNVIEW_2D:
+				preview2D = true;
+				break ;
+		}
+
 		//initialize preview scene:
 		if (previewCamera == null)
 		{
 			previewCameraObject = GameObject.Find(previewCameraObjectName);
 			if (previewCameraObject)
 				previewCamera = previewCameraObject.GetComponent< Camera >();
-			if (previewCameraObject == null || previewCamera == null || previewCameraRenderTexture == null)
-			{
+			if (previewCameraRenderTexture == null)
 				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
+			if (previewCameraObject == null || previewCamera == null)
+			{
 				previewSceneRoot = GameObject.Find(previewSceneRootName);
 				if (previewSceneRoot == null)
 				{
@@ -359,8 +393,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 				{
 					previewCameraObject = new GameObject(previewCameraObjectName);
 					previewCameraObject.transform.parent = previewSceneRoot.transform;
-					previewCameraObject.transform.position = new Vector3(-15, 21, -15);
-					previewCameraObject.transform.rotation = Quaternion.Euler(45, 45, 0);
+					if (preview2D)
+					{
+						previewCameraObject.transform.position = new Vector3(0, 21, 0);
+						previewCameraObject.transform.rotation = Quaternion.Euler(90, 0, 0);
+					}
+					else
+					{
+						previewCameraObject.transform.position = new Vector3(-15, 21, -15);
+						previewCameraObject.transform.rotation = Quaternion.Euler(45, 45, 0);
+					}
 				}
 				//camera settings:
 				if (previewCamera == null)
@@ -376,6 +418,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 					previewCameraObject.AddComponent< Antialiasing >();
 				// previewCameraObject.AddComponent< DepthOfField >();
 
+				previewCameraObject.GetComponent< Antialiasing >().mode = AAMode.FXAA3Console;
+				previewCameraObject.GetComponent< Antialiasing >().enabled = false;
+				previewCameraObject.GetComponent< Antialiasing >().enabled = true;
+
 				if (LayerMask.NameToLayer(previewLayerName) != -1)
 					previewCamera.cullingMask = LayerMask.NameToLayer(previewLayerName);
 				previewTerrainObject = GameObject.Find(previewTerrainObjectName);
@@ -384,6 +430,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 					previewTerrainObject = new GameObject(previewTerrainObjectName);
 					previewTerrainObject.transform.parent = previewSceneRoot.transform;
 					previewTerrainObject.transform.position = Vector3.zero;
+
+					//add the terrain materializer if it exists:
+					if (terrainRenderers.ContainsKey(outputType))
+					{
+						var materializer = previewTerrainObject.AddComponent(terrainRenderers[outputType]) as PWTerrainBase;
+
+						materializer.InitGraph(currentGraph);
+
+						Debug.Log("init callback !");
+					}
 				}
 			}
 		}
@@ -727,7 +783,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 				ForeachAllNodes(p => p.BeginFrameUpdate());
 			//We run the calcul the nodes:
 			if (e.type == EventType.Layout)
+			{
 				currentGraph.ProcessGraph();
+
+				terrainMaterializer.UpdateChunks();
+			}
 
 			bool	mouseAboveAnchorLocal = false;
 			mouseAboveNodeIndex = -1;

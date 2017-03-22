@@ -46,6 +46,8 @@ namespace PW
 		public int							localWindowIdCount;
 		[SerializeField]
 		public string						firstInitialization;
+		[SerializeField]
+		public bool							realMode;
 		
 		[SerializeField]
 		public PWAnchorInfo					startDragAnchor;

@@ -34,6 +34,7 @@ public class HorizontalSplitView {
 	{
 		Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 		
+		handlerPosition = (int)handlerPosition;
 		if (tmpRect.width > 0f)
 			availableRect = tmpRect;
 
@@ -48,7 +49,6 @@ public class HorizontalSplitView {
 	{
 		EditorGUILayout.EndVertical();
 		
-		//TODO: min width and background color.
 		//left bar separation and resize:
 		
 		Rect handleRect = new Rect(handlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
@@ -63,7 +63,7 @@ public class HorizontalSplitView {
 		if (Event.current.type == EventType.MouseUp)
 			resize = false;
 		lastMouseX = Event.current.mousePosition.x;
-		handlerPosition = Mathf.Clamp(handlerPosition, minWidth, maxWidth);
+		handlerPosition = (int)Mathf.Clamp(handlerPosition, minWidth, maxWidth);
 
 		return new Rect(handlerPosition + 3, availableRect.y, availableRect.width - handlerPosition, availableRect.height);
 	}
