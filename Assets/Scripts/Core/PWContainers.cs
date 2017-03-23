@@ -135,7 +135,9 @@ namespace PW
 	[System.SerializableAttribute]
 	public class Pair< T, U >
 	{
+		[SerializeField]
 		public T	first;
+		[SerializeField]
 		public U	second;
 
 		public Pair(T f, U s)

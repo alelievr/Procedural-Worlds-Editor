@@ -176,6 +176,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
 			if (currentGraph.nodes[i] == null)
 				DeleteNode(i--);
+		currentGraph.unserializeInitialized = true;
 	}
 
     void OnGUI()
@@ -320,6 +321,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					perlin.AttachLink("output", terrain, "texture");
 					terrain.AttachLink("texture", perlin, "output");
 					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
+					currentGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();
@@ -575,6 +577,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 	void DrawNodeGraphHeader(Rect graphRect)
 	{
+		Event	e = Event.current;
 		EditorGUILayout.BeginVertical(splittedPanel);
 		{
 			//TODO: render the breadcrumbs bar
@@ -587,19 +590,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
 			#endif
 	
-			if (Event.current.type == EventType.MouseDown //if event is mouse down
-				&& Event.current.button == 0
+			if (e.type == EventType.MouseDown //if event is mouse down
+				&& (e.button == 0 || e.button == 2)
 				&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
-				&& graphRect.Contains(Event.current.mousePosition) //and mouse position is in graph
-				&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(Event.current.mousePosition))) //and mouse is not above a window
+				&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
+				&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(e.mousePosition))) //and mouse is not above a window
 				draggingGraph = true;
-			if (Event.current.type == EventType.MouseUp)
+			if (e.type == EventType.MouseUp)
 				draggingGraph = false;
-			if (Event.current.type == EventType.Layout)
+			if (e.type == EventType.Layout)
 			{
 				if (draggingGraph)
-					currentGraph.graphDecalPosition += Event.current.mousePosition - lastMousePosition;
-				lastMousePosition = Event.current.mousePosition;
+					currentGraph.graphDecalPosition += e.mousePosition - lastMousePosition;
+				lastMousePosition = e.mousePosition;
 			}
 		}
 		EditorGUILayout.EndVertical();
@@ -669,25 +672,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (mouseAboveAnchor.mouseAbove)
 			mouseAboveAnchorLocal = true;
 
-		//if you press the mouse above an anchor, start the link drag
-		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown && e.button == 0)
-		{
-			startDragAnchor = mouseAboveAnchor;
-			draggingLink = true;
-		}
-		if (mouseAboveAnchor.mouseAbove)
-			mouseAboveAnchorInfo = mouseAboveAnchor;
-
 		//render node anchors:
 		node.RenderAnchors();
 
 		//end dragging:
-		if (e.type == EventType.mouseUp && draggingLink == true)
+		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
+				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
 			if (mouseAboveAnchor.mouseAbove)
 			{
 				//attach link to the node:
 				node.AttachLink(mouseAboveAnchor, startDragAnchor);
-				var win = currentGraph.nodes.FirstOrDefault(n => n.windowId == startDragAnchor.windowId);
+				var win = FindNodeByWindowId(startDragAnchor.windowId);
 				if (win != null)
 					win.AttachLink(startDragAnchor, mouseAboveAnchor);
 				else
@@ -698,6 +693,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				draggingLink = false;
 			}
+			
+		//if you press the mouse above an anchor, start the link drag
+		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown && e.button == 0)
+		{
+			startDragAnchor = mouseAboveAnchor;
+			draggingLink = true;
+		}
+		if (mouseAboveAnchor.mouseAbove)
+			mouseAboveAnchorInfo = mouseAboveAnchor;
 
 		//draw links:
 		var links = node.GetLinks();
@@ -710,7 +714,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (toWindow == null) //invalid window ids
 			{
 				node.RemoveLinkByWindowTarget(link.distantWindowId);
-				Debug.LogWarning("window not found: " + link.localWindowId + ", " + link.distantWindowId);
+				Debug.LogWarning("window not found: " + link.distantWindowId);
 				continue ;
 			}
 
@@ -857,9 +861,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//remove all links for node dependencies
 		foreach (var deps in currentGraph.nodes[id].GetDependencies())
 		{
-			var node = FindNodeByWindowId(deps.first);
+			var node = FindNodeByWindowId(deps.windowId);
 			if (node != null)
-				node.RemoveLinkByWindowTarget(deps.first);
+				node.RemoveLinkByWindowTarget(deps.windowId);
 		}
 
 		//remove the node
@@ -915,6 +919,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (node == null)
 			return ;
 		var anchorConnections = node.GetAnchorConnections(mouseAboveAnchorInfo.anchorId);
+		Debug.Log("dep length: " + anchorConnections.Count);
 		foreach (var ac in anchorConnections)
 		{
 			var n = FindNodeByWindowId(ac);
@@ -996,7 +1001,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//compute dependency weight:
 		int	ret = 1;
 		foreach (var dep in node.GetDependencies())
-			ret += EvaluateComputeOrder(false, depth + 1, dep.first);
+			ret += EvaluateComputeOrder(false, depth + 1, dep.windowId);
 
 		nodeComputeOrderCount[windowId] = ret;
 		return ret;

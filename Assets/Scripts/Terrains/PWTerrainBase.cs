@@ -31,6 +31,8 @@ namespace PW
 		{
 			if (graph != null)
 				this.graph = graph;
+			if (graph == null)
+				return ;
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			if (!graph.realMode)
 				terrainRoot = GameObject.Find("PWPreviewTerrain");

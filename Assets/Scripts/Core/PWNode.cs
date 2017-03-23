@@ -62,7 +62,7 @@ namespace PW
 		List< PWLink >	links = new List< PWLink >();
 		[SerializeField]
 		//List< windowId, anchorId >
-		List< Pair< int, int > >		depencendies = new List< Pair< int, int > >();
+		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >();
 
 		[System.SerializableAttribute]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
@@ -531,7 +531,7 @@ namespace PW
 			return links;
 		}
 
-		public List< Pair< int, int > >	GetDependencies()
+		public List< PWNodeDependency >	GetDependencies()
 		{
 			return depencendies;
 		}
@@ -638,7 +638,7 @@ namespace PW
 						}
 					}
 				});
-				depencendies.Add(new Pair< int, int >(to.windowId, to.anchorId));
+				depencendies.Add(new PWNodeDependency(to.windowId, to.anchorId, from.anchorId));
 			}
 		}
 
@@ -650,6 +650,7 @@ namespace PW
 				return ;
 			}
 
+			Debug.Log("attach link from " + windowId + " to " + target.windowId);
 			PWAnchorData fromAnchor = propertyDatas[myAnchor];
 			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
 
@@ -672,7 +673,7 @@ namespace PW
 		public void		RemoveLink(int anchorId)
 		{
 			links.RemoveAll(l => l.localAnchorId == anchorId);
-			depencendies.RemoveAll(d => d.second == anchorId);
+			depencendies.RemoveAll(d => d.connectedAnchorId == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount--;
@@ -680,7 +681,7 @@ namespace PW
 
 		public void		RemoveDependency(int windowId)
 		{
-			depencendies.RemoveAll(d => d.first == windowId);
+			depencendies.RemoveAll(d => d.windowId == windowId);
 		}
 		
 		public void		RemoveLinkByWindowTarget(int targetWindowId)
@@ -698,11 +699,7 @@ namespace PW
 
 		public List< int >	GetAnchorConnections(int anchorId)
 		{
-			Debug.Log("depencencies length: " + depencendies.Count);
-			Debug.Log("dep for " + name + ":");
-			foreach (var d in depencendies)
-				Debug.Log(d.first + " - " + d.second);
-			return depencendies.Where(d => d.second == anchorId).Select(d => d.first).ToList();
+			return depencendies.Where(d => d.connectedAnchorId == anchorId).Select(d => d.windowId).ToList();
 		}
 
 		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)

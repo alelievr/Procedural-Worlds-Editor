@@ -6,7 +6,7 @@ using PW;
 public class PWSideView2DTerrain : PWTerrainBase {
 
 	void Start () {
-		InitGraph();
+		InitGraph(graph);
 	}
 	
 	public override object RenderChunk(object chunkData, Vector3 pos)
