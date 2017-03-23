@@ -41,10 +41,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	Vector2				presetScrollPos;
 	Vector2				windowSize;
 
+	GameObject			previewScene;
 	Camera				previewCamera;
-	GameObject			previewSceneRoot;
-	GameObject			previewCameraObject;
-	GameObject			previewTerrainObject;
 	RenderTexture		previewCameraRenderTexture;
 
 	PWTerrainBase		terrainMaterializer;
@@ -214,12 +212,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
 
-		ProcessPreviewScene(currentGraph.outputType);
+		if (Event.current.type == EventType.Layout)
+			ProcessPreviewScene(currentGraph.outputType);
 
 		if (terrainMaterializer == null)
-		{
 			terrainMaterializer = GameObject.Find("PWPreviewTerrain").GetComponent< PWTerrainBase >();
-		}
 
 		DrawNodeGraphCore();
 
@@ -356,93 +353,35 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void ProcessPreviewScene(PWOutputType outputType)
 	{
-		const string		previewSceneRootName = "PWpreviewSceneRoot";
-		const string		previewCameraObjectName = "PWPreviewCamera";
-		const string		previewTerrainObjectName = "PWPreviewTerrain";
-		const string		previewLayerName = "PWPreviewLayer";
-
-		bool				preview2D = false;
-
-		switch (outputType)
+		if (previewScene == null)
 		{
-			case PWOutputType.SIDEVIEW_2D:
-			case PWOutputType.DENSITY_2D:
-			case PWOutputType.TOPDOWNVIEW_2D:
-				preview2D = true;
-				break ;
-		}
-
-		//initialize preview scene:
-		if (previewCamera == null)
-		{
-			previewCameraObject = GameObject.Find(previewCameraObjectName);
-			if (previewCameraObject)
-				previewCamera = previewCameraObject.GetComponent< Camera >();
-			if (previewCameraRenderTexture == null)
-				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
-			if (previewCameraObject == null || previewCamera == null)
+			//TODO: try find the previewScene by name
+			//delete it if outputType does not match the preewview scene type.
+			switch (outputType)
 			{
-				previewSceneRoot = GameObject.Find(previewSceneRootName);
-				if (previewSceneRoot == null)
-				{
-					previewSceneRoot = new GameObject(previewSceneRootName);
-					// previewSceneRoot.hideFlags = HideFlags.HideAndDontSave;
-				}
-				previewCameraObject = GameObject.Find(previewCameraObjectName);
-				if (previewCameraObject == null)
-				{
-					previewCameraObject = new GameObject(previewCameraObjectName);
-					previewCameraObject.transform.parent = previewSceneRoot.transform;
-					if (preview2D)
-					{
-						previewCameraObject.transform.position = new Vector3(0, 21, 0);
-						previewCameraObject.transform.rotation = Quaternion.Euler(90, 0, 0);
-					}
-					else
-					{
-						previewCameraObject.transform.position = new Vector3(-15, 21, -15);
-						previewCameraObject.transform.rotation = Quaternion.Euler(45, 45, 0);
-					}
-				}
-				//camera settings:
-				if (previewCamera == null)
-					previewCamera = previewCameraObject.AddComponent< Camera >();
-				previewCamera.backgroundColor = Color.white;
-				previewCamera.clearFlags = CameraClearFlags.Color;
-				previewCamera.targetTexture = previewCameraRenderTexture;
-
-				//camera post processing:
-				if (previewCameraObject.GetComponent< Bloom >() == null)
-					previewCameraObject.AddComponent< Bloom >().bloomIntensity = .4f;
-				if (previewCameraObject.GetComponent< Antialiasing >() == null)
-					previewCameraObject.AddComponent< Antialiasing >();
-				// previewCameraObject.AddComponent< DepthOfField >();
-
-				previewCameraObject.GetComponent< Antialiasing >().mode = AAMode.FXAA3Console;
-				previewCameraObject.GetComponent< Antialiasing >().enabled = false;
-				previewCameraObject.GetComponent< Antialiasing >().enabled = true;
-
-				if (LayerMask.NameToLayer(previewLayerName) != -1)
-					previewCamera.cullingMask = LayerMask.NameToLayer(previewLayerName);
-				previewTerrainObject = GameObject.Find(previewTerrainObjectName);
-				if (previewTerrainObject == null)
-				{
-					previewTerrainObject = new GameObject(previewTerrainObjectName);
-					previewTerrainObject.transform.parent = previewSceneRoot.transform;
-					previewTerrainObject.transform.position = Vector3.zero;
-
-					//add the terrain materializer if it exists:
-					if (terrainRenderers.ContainsKey(outputType))
-					{
-						var materializer = previewTerrainObject.AddComponent(terrainRenderers[outputType]) as PWTerrainBase;
-
-						materializer.InitGraph(currentGraph);
-
-						Debug.Log("init callback !");
-					}
-				}
+				case PWOutputType.DENSITY_2D:
+				case PWOutputType.SIDEVIEW_2D:
+					previewScene = Instantiate(Resources.Load("PWPreviewSideView2D", typeof(GameObject)) as GameObject);
+					break ;
+				case PWOutputType.TOPDOWNVIEW_2D:
+					previewScene = Instantiate(Resources.Load("PWPreviewTopDown2D", typeof(GameObject)) as GameObject);
+					break ;
+				default: //for 3d previewScenes:
+					previewScene = Instantiate(Resources.Load("PWPreview3D", typeof(GameObject)) as GameObject);
+					break ;
 			}
 		}
+
+		if (previewCamera == null)
+			previewCamera = previewScene.GetComponentInChildren< Camera >();
+		if (previewCameraRenderTexture == null)
+			previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
+		if (previewCamera != null && previewCameraRenderTexture != null)
+			previewCamera.targetTexture = previewCameraRenderTexture;
+		if (terrainMaterializer == null)
+			terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
+		if (terrainMaterializer.initialized == false)
+			terrainMaterializer.InitGraph(currentGraph);
 	}
 
 	void DrawLeftBar(Rect currentRect)
@@ -998,7 +937,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		};
 
 		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-			return AssetDatabase.LoadAssetAtPath< Texture2D >(ressourcePath);
+			return Resources.Load< Texture2D >(ressourcePath);
         };
 
         Color backgroundColor = new Color32(56, 56, 56, 255);
@@ -1016,16 +955,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 		selectorCaseBackgroundTex = CreateTexture2DColor(selectorCaseBackgroundColor);
 		selectorCaseTitleBackgroundTex = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
 
-		string dir = "Assets/Editor/Ressources/";
-		preset2DSideViewTexture = CreateTexture2DFromFile(dir + "preview2DSideView.png");
-		preset2DTopDownViewTexture = CreateTexture2DFromFile(dir + "preview2DTopDownView.png");
-		preset3DPlaneTexture = CreateTexture2DFromFile(dir + "preview3DPlane.png");
-		preset3DSphericalTexture = CreateTexture2DFromFile(dir + "preview3DSpherical.png");
-		preset3DCubicTexture = CreateTexture2DFromFile(dir + "preview3DCubic.png");
-		presetMeshTetxure = CreateTexture2DFromFile(dir + "previewMesh.png");
-		preset1DDensityFieldTexture= CreateTexture2DFromFile(dir + "preview1DDensityField.png");
-		preset2DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview2DDensityField.png");
-		preset3DDensityFieldTexture = CreateTexture2DFromFile(dir + "preview3DDensityField.png");
+		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
+		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
+		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
+		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
+		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
+		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
+		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
+		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
+		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 	}
 
 	void ForeachAllNodes(Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)

@@ -86,7 +86,8 @@ namespace PW
 			if (parent != null)
 				inputNode.Process();
 			foreach (var node in nodes)
-				node.Process();
+				if (node != null)
+					node.Process();
 			foreach (var graph in subGraphs)
 				graph.outputNode.Process();
 		}

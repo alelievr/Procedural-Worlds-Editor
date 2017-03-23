@@ -15,6 +15,7 @@ namespace PW
 		public PWChunkLoadMode	loadMode;
 		public PWNodeGraph		graph;
 		public GameObject		terrainRoot;
+		public bool				initialized {get {return graph != null && terrainRoot != null;}}
 		
 		private ChunkStorage< object > loadedChunks = new ChunkStorage< object >();
 		private PWNodeGraphOutput	graphOutput;
