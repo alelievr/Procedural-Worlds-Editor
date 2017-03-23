@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿ #define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -61,7 +61,8 @@ namespace PW
 		[SerializeField]
 		List< PWLink >	links = new List< PWLink >();
 		[SerializeField]
-		List< int >		depencendies = new List< int >();
+		//List< windowId, anchorId >
+		List< Pair< int, int > >		depencendies = new List< Pair< int, int > >();
 
 		[System.SerializableAttribute]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
@@ -70,7 +71,7 @@ namespace PW
 
 		public void OnDestroy()
 		{
-			
+
 			Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 
@@ -530,7 +531,7 @@ namespace PW
 			return links;
 		}
 
-		public List< int >	GetDependencies()
+		public List< Pair< int, int > >	GetDependencies()
 		{
 			return depencendies;
 		}
@@ -637,7 +638,7 @@ namespace PW
 						}
 					}
 				});
-				depencendies.Add(to.windowId);
+				depencendies.Add(new Pair< int, int >(to.windowId, to.anchorId));
 			}
 		}
 
@@ -671,6 +672,7 @@ namespace PW
 		public void		RemoveLink(int anchorId)
 		{
 			links.RemoveAll(l => l.localAnchorId == anchorId);
+			depencendies.RemoveAll(d => d.second == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount--;
@@ -678,7 +680,7 @@ namespace PW
 
 		public void		RemoveDependency(int windowId)
 		{
-			depencendies.RemoveAll(d => d == windowId);
+			depencendies.RemoveAll(d => d.first == windowId);
 		}
 		
 		public void		RemoveLinkByWindowTarget(int targetWindowId)
@@ -691,6 +693,16 @@ namespace PW
 		public void		RemoveAllLinks()
 		{
 			links.Clear();
+			depencendies.Clear();
+		}
+
+		public List< int >	GetAnchorConnections(int anchorId)
+		{
+			Debug.Log("depencencies length: " + depencendies.Count);
+			Debug.Log("dep for " + name + ":");
+			foreach (var d in depencendies)
+				Debug.Log(d.first + " - " + d.second);
+			return depencendies.Where(d => d.second == anchorId).Select(d => d.first).ToList();
 		}
 
 		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)

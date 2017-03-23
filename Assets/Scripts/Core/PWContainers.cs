@@ -9,10 +9,15 @@ namespace PW
 		public float[,]		map;
 		public int			size;
 		public float		step;
+		
+		public float this[int x, int y]
+		{
+			get {return map[x, y];}
+			set {map[x, y] = value;}
+		}
 
 		public Sampler2D(int size, float step = 1)
 		{
-			Debug.Log("sampler requested size: " + size);
 			this.map = new float[size, size];
 			this.step = step;
 			this.size = size;
@@ -31,6 +36,13 @@ namespace PW
 					map[x, y] = callback(x, y);
 		}
 		
+		public void Foreach(Func< int, int, float, float > callback)
+		{
+			for (int x = 0; x < size; x++)
+				for (int y = 0; y < size; y++)
+					map[x, y] = callback(x, y, map[x, y]);
+		}
+		
 		public void Foreach(Action< int, int, float > callback)
 		{
 			for (int x = 0; x < size; x++)
@@ -45,6 +57,12 @@ namespace PW
 		public float[,,]	map;
 		public int			size;
 		public float		step;
+
+		public float this[int x, int y, int z]
+		{
+			get {return map[x, y, z];}
+			set {map[x, y, z] = value;}
+		}
 		
 		public void Foreach(Func< int, int, int, float > callback)
 		{
@@ -52,6 +70,14 @@ namespace PW
 				for (int y = 0; y < size; y++)
 					for (int z = 0; z < size; z++)
 						map[x, y, z] = callback(x, y, z);
+		}
+		
+		public void Foreach(Func< int, int, int, float, float > callback)
+		{
+			for (int x = 0; x < size; x++)
+				for (int y = 0; y < size; y++)
+					for (int z = 0; z < size; z++)
+						map[x, y, z] = callback(x, y, z, map[x, y, z]);
 		}
 		
 		public void Foreach(Action< int, int, int, float > callback)

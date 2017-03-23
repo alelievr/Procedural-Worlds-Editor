@@ -24,12 +24,13 @@ namespace PW
 		private ChunkStorage< object, object > loadedChunks = new ChunkStorage< object, object >();
 		[SerializeField]
 		private PWNodeGraphOutput	graphOutput = null;
+
+		private	int				oldSeed = 0;
 	
 		public void InitGraph(PWNodeGraph graph = null)
 		{
 			if (graph != null)
 				this.graph = graph;
-			Debug.Log("initgraph graph: " + graph);
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			if (!graph.realMode)
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
@@ -46,13 +47,16 @@ namespace PW
 
 		public object RequestChunk(Vector3 pos, int seed)
 		{
-			//TODO: set current seed / position for the graph:
-			//graph.SetSeed() and graph.SetPosition();
+			if (seed != oldSeed)
+				graph.UpdateSeed(seed);
+
+			graph.UpdateChunkPosition(pos);
 			
 			graph.ProcessGraph();
-			Debug.Log("graph output: " + graphOutput);
-			Debug.Log("graph output after processing: " + graphOutput.inputValues);
-			return graphOutput.inputValues.At(0);
+
+			oldSeed = seed;
+			//TODO: add the possibility to retreive in Terrain materializers others output.
+			return graphOutput.inputValues.At(0); //return the first value of output
 		}
 
 		public virtual object RenderChunk(object chunkData, Vector3 pos)

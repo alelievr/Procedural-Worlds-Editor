@@ -40,20 +40,11 @@ namespace PW
 		[SerializeField]
 		public Vector2						graphDecalPosition;
 		[SerializeField]
-		public bool							dragginGraph = false;
-		[SerializeField]
-		public bool							mouseAboveNodeAnchor = false;
-		[SerializeField]
 		public int							localWindowIdCount;
 		[SerializeField]
 		public string						firstInitialization;
 		[SerializeField]
 		public bool							realMode;
-		
-		[SerializeField]
-		public PWAnchorInfo					startDragAnchor;
-		[SerializeField]
-		public bool							draggingLink = false;
 		
 		[SerializeField]
 		public string						searchString = "";
@@ -96,5 +87,37 @@ namespace PW
 		}
 
 		//TODO here browse on nodes and setSeed / setPosition.
+		public void	UpdateSeed(int seed)
+		{
+			this.seed = seed;
+			ForeachAllNodes((n) => n.seed = seed, true, true);
+		}
+
+		public void UpdateChunkPosition(Vector3 chunkPos)
+		{
+			ForeachAllNodes((n) => n.chunkPosition = chunkPos, true, true);
+		}
+
+		public void UpdateChunkSize(int chunkSize)
+		{
+			this.chunkSize = chunkSize;
+			ForeachAllNodes((n) => n.chunkSize = chunkSize, true, true);
+		}
+
+		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
+		{
+			if (graph == null)
+				graph = this;
+			foreach (var node in graph.nodes)
+				callback(node);
+			if (graphInputAndOutput)
+			{
+				callback(graph.inputNode);
+				callback(graph.outputNode);
+			}
+			if (recursive)
+				foreach (var subgraph in graph.subGraphs)
+					ForeachAllNodes(callback, recursive, graphInputAndOutput, subgraph);
+		}
 	}
 }

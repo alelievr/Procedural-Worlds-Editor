@@ -31,9 +31,7 @@ namespace PW
 		public override void OnNodeProcess()
 		{
 			if (chunkSizeHasChanged)
-			{
 				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-			}
 			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{
 				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
