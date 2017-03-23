@@ -5,6 +5,7 @@ namespace PW
 {
 	public enum	PWOutputType
 	{
+		NONE,
 		SIDEVIEW_2D,
 		TOPDOWNVIEW_2D,
 		PLANE_3D,
@@ -78,6 +79,8 @@ namespace PW
 		[SerializeField]
 		public PWNode						outputNode;
 
+		[System.NonSerializedAttribute]
+		public bool							unserializeInitialized = false;
 
 		public void ProcessGraph()
 		{
@@ -91,5 +94,7 @@ namespace PW
 			foreach (var graph in subGraphs)
 				graph.outputNode.Process();
 		}
+
+		//TODO here browse on nodes and setSeed / setPosition.
 	}
 }

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class Sampler2D
 	{
 		public float[,]		map;
@@ -12,6 +12,7 @@ namespace PW
 
 		public Sampler2D(int size, float step = 1)
 		{
+			Debug.Log("sampler requested size: " + size);
 			this.map = new float[size, size];
 			this.step = step;
 			this.size = size;
@@ -38,6 +39,7 @@ namespace PW
 		}
 	}
 
+	[System.SerializableAttribute]
 	public class Sampler3D
 	{
 		public float[,,]	map;
@@ -72,6 +74,7 @@ namespace PW
 		public Texture2D	texture;
 	}
 
+	[System.SerializableAttribute]
 	public struct Vector3i
 	{
 		public int	x;
@@ -103,19 +106,57 @@ namespace PW
 		}
 	}
 
-	public class ChunkStorage<T>
+	[System.SerializableAttribute]
+	public class Pair< T, U >
 	{
-		Dictionary< Vector3i, T > chunks = new Dictionary< Vector3i, T >();
+		public T	first;
+		public U	second;
+
+		public Pair(T f, U s)
+		{
+			first = f;
+			second = s;
+		}
+	}
+
+	[System.SerializableAttribute]
+	public class ChunkStorage< T, U > where T : class where U : class
+	{
+		[System.SerializableAttribute]
+		public class ChunkDictionary : SerializableDictionary< Vector3i, Pair< T, U > > {}
+		[SerializeField]
+		ChunkDictionary chunks = new ChunkDictionary();
 
 		public bool isLoaded(Vector3i pos)
 		{
 			return chunks.ContainsKey(pos);
 		}
 		
-		public T	AddChunk(Vector3i pos, T chunk)
+		public T	AddChunk(Vector3i pos, T chunk, U userChunkDatas)
 		{
-			chunks[pos] = chunk;
+			chunks[pos] = new Pair< T, U >(chunk, userChunkDatas);
 			return chunk;
+		}
+
+		public T	GetChunkDatas(Vector3i pos)
+		{
+			if (chunks.ContainsKey(pos))
+				return chunks[pos].first;
+			return null;
+		}
+
+		public U	GetChunkUserDatas(Vector3i pos)
+		{
+			if (chunks.ContainsKey(pos))
+				return chunks[pos].second;
+			return null;
+		}
+
+		public Pair< T, U > this[Vector3i pos]
+		{
+			get {
+				return chunks[pos];
+			}
 		}
 	}
 }

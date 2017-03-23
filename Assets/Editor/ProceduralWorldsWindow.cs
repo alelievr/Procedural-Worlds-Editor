@@ -163,7 +163,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		BakeNode(typeof(PWNodeGraphInput));
 		
 		if (currentGraph == null)
+		{
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
+			currentGraph.hideFlags = HideFlags.HideAndDontSave;
+		}
 			
 		//clear the corrupted node:
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
@@ -174,6 +177,7 @@ public class ProceduralWorldsWindow : EditorWindow {
     void OnGUI()
     {
 		EditorUtility.SetDirty(this);
+		EditorUtility.SetDirty(currentGraph);
 
 		//initialize graph the first time he was created
 		//function is in OnGUI cause in OnEnable, the position values are bad.
@@ -188,7 +192,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.normal.textColor = Color.white;
 
         //background color:
-		if (backgroundTex == null || currentGraph.h1 == null || resizeHandleTex == null)
+		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
 			OnEnable();
 		
 		if (currentGraph.firstInitialization != "initialized")
@@ -202,6 +206,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		if (windowSize != Vector2.zero && windowSize != position.size)
 			OnWindowResize();
+
+		//initialize unserialized fields in node:
+		ForeachAllNodes((n) => { if (!n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
 
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
@@ -345,29 +352,57 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
-	void LambdaIfNotNull< T >(T obj, Action< T > callback)
+	GameObject GetLoadedPreviewScene(params PWOutputType[] allowedTypes)
 	{
-		if (obj != null)
-			callback(obj);
+		GameObject		ret;
+
+		Func< string, PWOutputType, GameObject >	TestSceneNametype = (string name, PWOutputType type) =>
+		{
+			ret = GameObject.Find(name);
+			if (ret == null)
+				return null;
+			foreach (var at in allowedTypes)
+				if (type == at)
+					return ret;
+			return null;
+		};
+		ret = TestSceneNametype(PWConstants.previewSideViewSceneName, PWOutputType.SIDEVIEW_2D);
+		if (ret != null)
+			return ret;
+		ret = TestSceneNametype(PWConstants.previewTopDownSceneName, PWOutputType.TOPDOWNVIEW_2D);
+		if (ret != null)
+			return ret;
+		ret = TestSceneNametype(PWConstants.preview3DSceneName, PWOutputType.PLANE_3D);
+		if (ret != null)
+			return ret;
+		return null;
 	}
 
 	void ProcessPreviewScene(PWOutputType outputType)
 	{
 		if (previewScene == null)
 		{
-			//TODO: try find the previewScene by name
-			//delete it if outputType does not match the preewview scene type.
+			//TODO: do the preview for Density field 1D
 			switch (outputType)
 			{
 				case PWOutputType.DENSITY_2D:
 				case PWOutputType.SIDEVIEW_2D:
-					previewScene = Instantiate(Resources.Load("PWPreviewSideView2D", typeof(GameObject)) as GameObject);
+					previewScene = GetLoadedPreviewScene(PWOutputType.DENSITY_2D, PWOutputType.SIDEVIEW_2D);
+					if (previewScene == null)
+						previewScene = Instantiate(Resources.Load(PWConstants.previewSideViewSceneName, typeof(GameObject)) as GameObject);
+					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
 				case PWOutputType.TOPDOWNVIEW_2D:
-					previewScene = Instantiate(Resources.Load("PWPreviewTopDown2D", typeof(GameObject)) as GameObject);
+					previewScene = GetLoadedPreviewScene(PWOutputType.TOPDOWNVIEW_2D);
+					if (previewScene == null)
+						previewScene = Instantiate(Resources.Load(PWConstants.previewTopDownSceneName, typeof(GameObject)) as GameObject);
+					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
 				default: //for 3d previewScenes:
-					previewScene = Instantiate(Resources.Load("PWPreview3D", typeof(GameObject)) as GameObject);
+					previewScene = GetLoadedPreviewScene(PWOutputType.CUBIC_3D, PWOutputType.DENSITY_3D, PWOutputType.PLANE_3D, PWOutputType.SPHERICAL_3D);
+					if (previewScene == null)
+						previewScene = Instantiate(Resources.Load(PWConstants.preview3DSceneName, typeof(GameObject)) as GameObject);
+					previewScene.name = PWConstants.preview3DSceneName;
 					break ;
 			}
 		}
@@ -380,7 +415,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			previewCamera.targetTexture = previewCameraRenderTexture;
 		if (terrainMaterializer == null)
 			terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
-		if (terrainMaterializer.initialized == false)
+		if (terrainMaterializer.initialized == false || terrainMaterializer.graph != currentGraph)
 			terrainMaterializer.InitGraph(currentGraph);
 	}
 
@@ -463,6 +498,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					//chunk size:
 					EditorGUI.BeginChangeCheck();
 					currentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", currentGraph.chunkSize);
+					currentGraph.chunkSize = Mathf.Clamp(currentGraph.chunkSize, 1, 1024);
 					if (EditorGUI.EndChangeCheck())
 						ForeachAllNodes((p) => p.chunkSize = currentGraph.chunkSize, true, true);
 				}
@@ -724,7 +760,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (e.type == EventType.Layout)
 			{
 				currentGraph.ProcessGraph();
-
+				//TODO: check if graph has changed / is time-dependent and reload if it is.
 				terrainMaterializer.UpdateChunks();
 			}
 
@@ -836,6 +872,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
+		newNode.seed = currentGraph.seed;
+		newNode.OnNodeAwake();
+		newNode.OnNodeCreate();
 		currentGraph.nodes.Add(newNode);
 	}
 

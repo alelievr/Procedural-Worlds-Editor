@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class PWNodeGraphOutput : PWNode {
 
 		//Mark all possible output types:

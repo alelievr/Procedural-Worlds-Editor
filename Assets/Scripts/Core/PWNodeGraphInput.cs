@@ -2,6 +2,7 @@
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class PWNodeGraphInput : PWNode {
 
 		[PWMultiple(0)]

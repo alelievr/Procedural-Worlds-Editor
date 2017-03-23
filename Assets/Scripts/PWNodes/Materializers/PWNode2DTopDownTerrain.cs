@@ -39,6 +39,7 @@ namespace PW
 				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
 				samplerTexture.Apply();
 			}
+
 			terrainOutput.size = Vector2.one * chunkSize;
 			terrainOutput.texture = samplerTexture;
 		}

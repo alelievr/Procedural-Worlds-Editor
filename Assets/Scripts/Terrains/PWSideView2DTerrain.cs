@@ -9,7 +9,7 @@ public class PWSideView2DTerrain : PWTerrainBase {
 		InitGraph();
 	}
 	
-	public override void RenderChunk(object chunkData, Vector3 pos)
+	public override object RenderChunk(object chunkData, Vector3 pos)
 	{
 		SideView2DData	chunk = (SideView2DData)chunkData;
 
@@ -19,5 +19,7 @@ public class PWSideView2DTerrain : PWTerrainBase {
 		g.transform.position = pos;
 		g.transform.localScale = Vector3.one * 10;
 		// g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
+
+		return g;
 	}
 }

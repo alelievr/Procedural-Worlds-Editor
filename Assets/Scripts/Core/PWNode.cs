@@ -30,6 +30,9 @@ namespace PW
 		public bool		inputHasChanged = false;
 		public bool		outputHasChanged = false;
 
+		[System.NonSerializedAttribute]
+		public bool		unserializeInitialized = false;
+
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
 		
@@ -46,6 +49,7 @@ namespace PW
 		string	firstInitialization;
 
 		bool	windowShouldClose = false;
+		//TODO: remove if it works ?
 		bool	firstRenderLoop;
 
 		Vector3	oldChunkPosition;
@@ -66,6 +70,7 @@ namespace PW
 
 		public void OnDestroy()
 		{
+			
 			Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 
@@ -93,9 +98,6 @@ namespace PW
 			highlightAddTexture.Apply();
 			LoadFieldAttributes();
 			
-			OnNodeAwake();
-			OnNodeCreate();
-			
 			//this will be true only if the object instance does not came from a serialized object.
 			if (firstInitialization == null)
 			{
@@ -111,6 +113,13 @@ namespace PW
 
 				firstInitialization = "initialized";
 			}
+		}
+
+		public void RunNodeAwake()
+		{
+			OnNodeAwake();
+			OnNodeCreate();
+			unserializeInitialized = true;
 		}
 
 		public virtual void OnNodeAwake()

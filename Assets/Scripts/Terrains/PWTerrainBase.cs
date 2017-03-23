@@ -9,21 +9,27 @@ namespace PW
 		// PRIORITY_CIRCLE,
 	}
 
+	[System.SerializableAttribute]
 	public abstract class PWTerrainBase : MonoBehaviour {
 		public Vector3			position;
 		public int				viewDistance;
+		[SerializeField]
 		public PWChunkLoadMode	loadMode;
+		[SerializeField]
 		public PWNodeGraph		graph;
 		public GameObject		terrainRoot;
-		public bool				initialized {get {return graph != null && terrainRoot != null;}}
+		public bool				initialized {get {return graph != null && terrainRoot != null && graphOutput != null;}}
 		
-		private ChunkStorage< object > loadedChunks = new ChunkStorage< object >();
-		private PWNodeGraphOutput	graphOutput;
+		[SerializeField]
+		private ChunkStorage< object, object > loadedChunks = new ChunkStorage< object, object >();
+		[SerializeField]
+		private PWNodeGraphOutput	graphOutput = null;
 	
 		public void InitGraph(PWNodeGraph graph = null)
 		{
 			if (graph != null)
 				this.graph = graph;
+			Debug.Log("initgraph graph: " + graph);
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			if (!graph.realMode)
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
@@ -36,33 +42,47 @@ namespace PW
 					terrainRoot.transform.position = Vector3.zero;
 				}
 			}
-			//TODO: initialize graph for computing.
 		}
 
 		public object RequestChunk(Vector3 pos, int seed)
 		{
 			//TODO: set current seed / position for the graph:
+			//graph.SetSeed() and graph.SetPosition();
 			
 			graph.ProcessGraph();
+			Debug.Log("graph output: " + graphOutput);
+			Debug.Log("graph output after processing: " + graphOutput.inputValues);
 			return graphOutput.inputValues.At(0);
 		}
 
-		public virtual void RenderChunk(object chunkData, Vector3 pos)
+		public virtual object RenderChunk(object chunkData, Vector3 pos)
 		{
 			//do nothing here, the inherited function will render it.
+			return null;
+		}
+
+		public virtual void UpdateChunkRender(object chunkData, object userStoredObject, Vector3 pos)
+		{
+			//do nothing here, the inherited function will update render.
 		}
 	
+		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks()
 		{
-			//TODO: load current chunk (no render distance for the moment)
+			//TODO: view distance loading algorithm.
 
 			if (!loadedChunks.isLoaded(position))
 			{
 				var data = RequestChunk(position, 42);
 				if (data == null)
 					return ;
-				loadedChunks.AddChunk(position, data);
-				RenderChunk(data, position);
+				var userChunkData = RenderChunk(data, position);
+				loadedChunks.AddChunk(position, data, userChunkData);
+			}
+			else
+			{
+				var chunk = loadedChunks[position];
+				UpdateChunkRender(chunk.first, chunk.second, position);
 			}
 		}
 	}
