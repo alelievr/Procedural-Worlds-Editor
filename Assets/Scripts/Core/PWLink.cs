@@ -34,7 +34,6 @@ namespace PW
 	
 		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, Color c)
 		{
-			Debug.Log("new PWLInk !");
 			distantWindowId = dWin;
 			distantAnchorId = dAttr;
 			distantName = dName;

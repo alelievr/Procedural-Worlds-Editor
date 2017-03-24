@@ -870,7 +870,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			var node = FindNodeByWindowId(link.distantWindowId);
 			if (node != null)
-				node.RemoveDependency(link.localWindowId);
+				node.RemoveDependenciesByWindowTarget(link.localWindowId);
 		}
 		//remove all links for node dependencies
 		foreach (var deps in currentGraph.nodes[id].GetDependencies())
@@ -933,14 +933,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (node == null)
 			return ;
 		var anchorConnections = node.GetAnchorConnections(mouseAboveAnchorInfo.anchorId);
-		Debug.Log("dep length: " + anchorConnections.Count);
 		foreach (var ac in anchorConnections)
 		{
-			var n = FindNodeByWindowId(ac);
-			Debug.Log("deleting link to window: " + n.name);
-			n.RemoveLinkByWindowTarget(mouseAboveAnchorInfo.windowId);
+			var n = FindNodeByWindowId(ac.first);
+			if (n != null)
+			{
+				if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output)
+					n.RemoveDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
+				else
+					n.RemoveLink(ac.second, node, mouseAboveAnchorInfo.anchorId);
+			}
 		}
-		Debug.Log("anchorID: " + mouseAboveAnchorInfo.anchorId + ", window id: " + mouseAboveAnchorInfo.windowId);
 		node.RemoveAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
 	}
 
@@ -952,7 +955,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		var to = FindNodeByWindowId(link.distantWindowId);
 
 		from.RemoveLink(link.localAnchorId, to, link.distantAnchorId);
-		to.RemoveLink(link.localAnchorId, to, link.distantAnchorId);
+		to.RemoveLink(link.distantAnchorId, from, link.localAnchorId);
 	}
 
 	void DrawContextualMenu(Rect graphNodeRect)
@@ -1079,6 +1082,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link, bool forceSelected = false)
     {
+		Event e = Event.current;
 		//swap start and end if they are inverted
 		if (start.xMax > end.xMax)
 			PWUtils.Swap< Rect >(ref start, ref end);
@@ -1096,10 +1100,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		if (link != null)
 		{
-			switch (Event.current.GetTypeForControl(id))
+			switch (e.GetTypeForControl(id))
 			{
 				case EventType.MouseDown:
-					if (HandleUtility.nearestControl == id && Event.current.button == 0)
+					if (HandleUtility.nearestControl == id && (e.button == 0) || e.button == 1)
 					{
 						GUIUtility.hotControl = id;
 						//unselect all others links:
@@ -1116,8 +1120,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		}
 
-		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(Event.current.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
-		if (Event.current.type == EventType.Repaint)
+		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(e.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
+		if (e.type == EventType.Repaint)
 		{
 			bool s = (link != null) ? (link.selected || forceSelected) : false;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
