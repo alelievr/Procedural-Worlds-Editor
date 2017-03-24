@@ -114,11 +114,6 @@ namespace PW
 			}
 		}
 
-		public void OnDestroy()
-		{
-			Debug.Log("OMG i'm desepearing !");
-		}
-
 		public void	DestroyAllChunks()
 		{
 			if (terrainStorage == null)
@@ -127,6 +122,59 @@ namespace PW
 				OnChunkDestroy(terrainData, userData, (Vector3)pos);
 				terrainStorage.RemoveAt(pos);
 			});
+		}
+
+		/* Utils function to simplify the downstream scripting: */
+
+		string				PositionToChunkName(Vector3i pos)
+		{
+			return "chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
+		}
+
+		GameObject			TryFrinExistingGameobjectByName(string name)
+		{
+			Transform t = terrainRoot.transform.FindChild(name);
+			if (t != null)
+				return t.gameObject;
+			return null;
+		}
+
+		public GameObject	CreateChunkObject(Vector3 pos)
+		{
+			string		name = PositionToChunkName(pos);
+			GameObject	ret;
+
+			ret = TryFrinExistingGameobjectByName(name);
+			if (ret != null && ret.GetComponent< MeshRenderer >() == null)
+				return ret;
+			else if (ret != null)
+				GameObject.DestroyImmediate(ret);
+			
+			ret = new GameObject(name);
+			ret.transform.parent = terrainRoot.transform;
+			ret.transform.position = pos;
+			//TODO: implement Sampler* scale (step) in the scale of the object.
+
+			return ret;
+		}
+
+		public GameObject	CreateChunkObject(Vector3 pos, PrimitiveType prim)
+		{
+			string		name = PositionToChunkName(pos);
+			GameObject	ret;
+
+			ret = TryFrinExistingGameobjectByName(name);
+			if (ret != null && ret.GetComponent< MeshRenderer >() != null)
+				return ret;
+			else if (ret != null)
+				GameObject.DestroyImmediate(ret);
+
+			ret = GameObject.CreatePrimitive(prim);
+			ret.name = name;
+			ret.transform.parent = terrainRoot.transform;
+			ret.transform.position = pos;
+
+			return ret;
 		}
 	}
 }

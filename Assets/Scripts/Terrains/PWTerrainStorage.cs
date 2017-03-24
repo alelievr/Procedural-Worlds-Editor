@@ -23,6 +23,7 @@ namespace PW
 	}
 
 	[System.SerializableAttribute]
+	[CreateAssetMenuAttribute()]
 	public class PWTerrainStorage : ScriptableObject {
 		
 		[System.SerializableAttribute]
@@ -43,19 +44,17 @@ namespace PW
 		}
 
 		public PWStorageMode	storeMode = PWStorageMode.FILE;
+		public string			storageFolder = null;
+		public bool				editorMode;
 
-		[System.SerializableAttribute]
-		public class ChunkDictionary : SerializableDictionary< Vector3i, Chunk > {}
-		[SerializeField]
-		ChunkDictionary chunks;
+		[NonSerializedAttribute]
+		Dictionary< Vector3i, Chunk > chunks = new Dictionary< Vector3i, Chunk >();
 
 		public void OnEnable()
 		{
-			hideFlags = HideFlags.HideAndDontSave;
-			if (chunks == null)
-				chunks = new ChunkDictionary();
+			storageFolder = Application.dataPath + "/Levels/";
 		}
-		
+
 		public int Count {get {return chunks.Count;} }
 
 		public bool isLoaded(Vector3i pos)
@@ -77,6 +76,10 @@ namespace PW
 		{
 			if (chunks.ContainsKey(pos))
 				return chunks[pos].terrainData;
+			else if (storeMode == PWStorageMode.FILE)
+			{
+				//TODO: check if file at pos exists and load it if exists.
+			}
 			return null;
 		}
 

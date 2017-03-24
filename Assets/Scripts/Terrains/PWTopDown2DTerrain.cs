@@ -11,10 +11,7 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 	{
 		TopDown2DData	chunk = (TopDown2DData)cd;
 
-		GameObject g = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		g.name = "chunk-" + pos;
-		g.transform.parent = terrainRoot.transform;
-		g.transform.position = pos;
+		GameObject g = CreateChunkObject(pos, PrimitiveType.Quad);
 		g.transform.rotation = Quaternion.Euler(90, 0, 0);
 		g.transform.localScale = Vector3.one * 10;
 		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
