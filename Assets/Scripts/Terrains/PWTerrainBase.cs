@@ -13,20 +13,18 @@ namespace PW
 	public abstract class PWTerrainBase : MonoBehaviour {
 		public Vector3			position;
 		public int				viewDistance;
-		[SerializeField]
 		public PWChunkLoadMode	loadMode;
-		[SerializeField]
 		public PWNodeGraph		graph;
+		public PWTerrainStorage	terrainStorage;
+		
 		public GameObject		terrainRoot;
 		public bool				initialized {get {return graph != null && terrainRoot != null && graphOutput != null;}}
 		
 		[SerializeField]
-		private ChunkStorage< object, object > loadedChunks = new ChunkStorage< object, object >();
-		[SerializeField]
 		private PWNodeGraphOutput	graphOutput = null;
 
 		private	int				oldSeed = 0;
-	
+
 		public void InitGraph(PWNodeGraph graph = null)
 		{
 			if (graph != null)
@@ -47,7 +45,7 @@ namespace PW
 			}
 		}
 
-		public object RequestChunk(Vector3 pos, int seed)
+		public ChunkData RequestChunk(Vector3 pos, int seed)
 		{
 			if (seed != oldSeed)
 				graph.UpdateSeed(seed);
@@ -58,18 +56,40 @@ namespace PW
 
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.
-			return graphOutput.inputValues.At(0); //return the first value of output
+			//TODO: force the first output of graphOutput to be a ChunkData inherited class.
+			return (ChunkData)graphOutput.inputValues.At(0); //return the first value of output
 		}
 
-		public virtual object RenderChunk(object chunkData, Vector3 pos)
+		public virtual object OnChunkCreate(ChunkData terrainData, Vector3 pos)
 		{
 			//do nothing here, the inherited function will render it.
 			return null;
 		}
 
-		public virtual void UpdateChunkRender(object chunkData, object userStoredObject, Vector3 pos)
+		public virtual void OnChunkRender(ChunkData terrainData, object userStoredObject, Vector3 pos)
 		{
 			//do nothing here, the inherited function will update render.
+		}
+
+		public virtual void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		{
+
+		}
+
+		public virtual void OnChunkHide(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		{
+
+		}
+
+		public void RequestCreate(ChunkData terrainData, Vector3 pos)
+		{
+			var userData = OnChunkCreate(terrainData, pos);
+			if (terrainStorage == null)
+				return;
+			if (terrainStorage.isLoaded(pos))
+				terrainStorage[pos].userData = userData;
+			else
+				terrainStorage.AddChunk(pos, terrainData, userData);
 		}
 	
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
@@ -77,19 +97,36 @@ namespace PW
 		{
 			//TODO: view distance loading algorithm.
 
-			if (!loadedChunks.isLoaded(position))
+			if (terrainStorage == null)
+				return ;
+			if (!terrainStorage.isLoaded(position))
 			{
 				var data = RequestChunk(position, 42);
 				if (data == null)
 					return ;
-				var userChunkData = RenderChunk(data, position);
-				loadedChunks.AddChunk(position, data, userChunkData);
+				var userChunkData = OnChunkCreate(data, position);
+				terrainStorage.AddChunk(position, data, userChunkData);
 			}
 			else
 			{
-				var chunk = loadedChunks[position];
-				UpdateChunkRender(chunk.first, chunk.second, position);
+				var chunk = terrainStorage[position];
+				OnChunkRender(chunk.terrainData, chunk.userData, position);
 			}
+		}
+
+		public void OnDestroy()
+		{
+			Debug.Log("OMG i'm desepearing !");
+		}
+
+		public void	DestroyAllChunks()
+		{
+			if (terrainStorage == null)
+				return ;
+			terrainStorage.Foreach((pos, terrainData, userData) => {
+				OnChunkDestroy(terrainData, userData, (Vector3)pos);
+				terrainStorage.RemoveAt(pos);
+			});
 		}
 	}
 }

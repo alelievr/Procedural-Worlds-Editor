@@ -7,7 +7,7 @@ public class PWSideView2DTerrain : PWTerrainBase {
 		InitGraph(graph);
 	}
 	
-	public override object RenderChunk(object chunkData, Vector3 pos)
+	public override object OnChunkCreate(ChunkData chunkData, Vector3 pos)
 	{
 		// SideView2DData	chunk = (SideView2DData)chunkData;
 

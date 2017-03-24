@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using PW;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class ProceduralWorldsWindow : EditorWindow {
 
@@ -771,7 +772,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				currentGraph.ProcessGraph();
 				//TODO: check if graph has changed / is time-dependent and reload if it is.
+				//TODO: if critical changes have been done, DestroyAllChunks();
 				terrainMaterializer.UpdateChunks();
+			}
+			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
+			{
+				Debug.Log("S");
+				string folder = Path.GetDirectoryName("Editor/olol.tmp");
+				if (!Directory.Exists(folder))
+					Directory.CreateDirectory(folder);
+				{
+					BinaryFormatter bf = new BinaryFormatter();
+					FileStream f = File.Open("Editor/olol.tmp", FileMode.OpenOrCreate, FileAccess.Write);
+					bf.Serialize(f, terrainMaterializer);
+					f.Close();
+				}
 			}
 
 			bool	mouseAboveAnchorLocal = false;

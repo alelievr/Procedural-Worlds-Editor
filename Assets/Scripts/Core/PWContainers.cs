@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace PW
 {
@@ -89,16 +91,26 @@ namespace PW
 		}
 	}
 
-	public class SideView2DData
+	[System.SerializableAttribute]
+	public class ChunkData
 	{
-		public Vector2		size;
+		public Vector3		size;
+	}
+
+	[System.SerializableAttribute]
+	public class SideView2DData : ChunkData
+	{
 	}
 	
-	public class TopDown2DData
+	[System.SerializableAttribute]
+	public class TopDown2DData : ChunkData
 	{
-		public Vector2		size;
+		//TODO for chunk saving to file: encode image to png and store path.
+		[System.NonSerializedAttribute]
 		public Texture2D	texture;
 	}
+
+	//TODO: other storage classes
 
 	[System.SerializableAttribute]
 	public struct Vector3i
@@ -144,47 +156,6 @@ namespace PW
 		{
 			first = f;
 			second = s;
-		}
-	}
-
-	[System.SerializableAttribute]
-	public class ChunkStorage< T, U > where T : class where U : class
-	{
-		[System.SerializableAttribute]
-		public class ChunkDictionary : SerializableDictionary< Vector3i, Pair< T, U > > {}
-		[SerializeField]
-		ChunkDictionary chunks = new ChunkDictionary();
-
-		public bool isLoaded(Vector3i pos)
-		{
-			return chunks.ContainsKey(pos);
-		}
-		
-		public T	AddChunk(Vector3i pos, T chunk, U userChunkDatas)
-		{
-			chunks[pos] = new Pair< T, U >(chunk, userChunkDatas);
-			return chunk;
-		}
-
-		public T	GetChunkDatas(Vector3i pos)
-		{
-			if (chunks.ContainsKey(pos))
-				return chunks[pos].first;
-			return null;
-		}
-
-		public U	GetChunkUserDatas(Vector3i pos)
-		{
-			if (chunks.ContainsKey(pos))
-				return chunks[pos].second;
-			return null;
-		}
-
-		public Pair< T, U > this[Vector3i pos]
-		{
-			get {
-				return chunks[pos];
-			}
 		}
 	}
 }

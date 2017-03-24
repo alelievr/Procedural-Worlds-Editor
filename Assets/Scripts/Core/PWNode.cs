@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -83,7 +83,7 @@ namespace PW
 			hideFlags = HideFlags.HideAndDontSave;
 
 			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			
+
 			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
 			disabledTexture.Apply();
 			highlightNewTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
