@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -347,6 +347,12 @@ namespace PW
 				EditorGUILayout.BeginVertical(debugstyle);
 				EditorGUILayout.LabelField("Id: " + windowId + " | Compute order: " + computeOrder);
 				EditorGUILayout.LabelField("Render order: " + windowRenderOrder++);
+				EditorGUILayout.LabelField("Dependencies:");
+				foreach (var dep in depencendies)
+					EditorGUILayout.LabelField("    " + dep.windowId + " : " + dep.anchorId);
+				EditorGUILayout.LabelField("Links:");
+				foreach (var l in links)
+					EditorGUILayout.LabelField("    " + l.distantWindowId + " : " + l.distantAnchorId);
 				EditorGUILayout.EndVertical();
 				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
 			#endif
@@ -512,15 +518,15 @@ namespace PW
 				Rect anchorSideRect = singleAnchor.anchorRect;
 				if (data.anchorType == PWAnchorType.Input)
 				{
-					anchorSideRect.position += Vector2.left * 90;
-					anchorSideRect.size += Vector2.right * 100;
+					anchorSideRect.position += Vector2.left * 140;
+					anchorSideRect.size += Vector2.right * 150;
 				}
 				else
 				{
 					anchorSideRect.position -= Vector2.left * 40;
-					anchorSideRect.size += Vector2.right * 100;
+					anchorSideRect.size += Vector2.right * 150;
 				}
-				GUI.Label(anchorSideRect, "id: " + (long)singleAnchor.id);
+				GUI.Label(anchorSideRect, "id: " + (long)singleAnchor.id + " | links: " + singleAnchor.linkCount);
 			#endif
 		}
 		
@@ -665,7 +671,6 @@ namespace PW
 				return ;
 			}
 
-			Debug.Log("attach link from " + windowId + " to " + target.windowId);
 			PWAnchorData fromAnchor = propertyDatas[myAnchor];
 			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
 
@@ -687,13 +692,29 @@ namespace PW
 			AttachLink(from, to);
 		}
 
-		public void		RemoveLink(int anchorId)
+		public void		RemoveAllLinkOnAnchor(int anchorId)
 		{
 			links.RemoveAll(l => l.localAnchorId == anchorId);
 			depencendies.RemoveAll(d => d.connectedAnchorId == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
-			singleAnchorData.linkCount--;
+			singleAnchorData.linkCount = 0;
+		}
+
+		public void		RemoveLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
+		{
+			foreach (var l in links)
+			{
+				Debug.Log("localAnchorId: " + l.localAnchorId + ", distantWindowId: " + l.distantWindowId + ", distantAnchorId: " + l.distantAnchorId);
+				Debug.Log("requested to delete: localAnchorId: " + myAnchorId + ", distantWindowId: " + distantWindow.windowId + ", distantAnchorId: " + distantAnchorId);
+			}
+			links.RemoveAll(l => l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId);
+			depencendies.RemoveAll(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == distantAnchorId && d.anchorId == myAnchorId);
+
+			PWAnchorData.PWAnchorMultiData singleAnchorData;
+			GetAnchorData(myAnchorId, out singleAnchorData);
+			if (singleAnchorData != null)
+				singleAnchorData.linkCount--;
 		}
 
 		public void		RemoveDependency(int windowId)

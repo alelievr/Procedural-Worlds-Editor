@@ -41,6 +41,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingLink = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
+
 	Vector2				lastMousePosition;
 	Vector2				presetScrollPos;
 	Vector2				windowSize;
@@ -48,6 +49,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	GameObject			previewScene;
 	Camera				previewCamera;
 	RenderTexture		previewCameraRenderTexture;
+
+	int					linkIndex;
+	List< PWLink >		currentLinks = new List< PWLink >();
 
 	PWTerrainBase		terrainMaterializer;
 
@@ -164,7 +168,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 			currentGraph.hideFlags = HideFlags.HideAndDontSave;
 		}
-			
+
 		//clear the corrupted node:
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
 			if (currentGraph.nodes[i] == null)
@@ -179,8 +183,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//initialize graph the first time he was created
 		//function is in OnGUI cause in OnEnable, the position values are bad.
-		if (currentGraph.firstInitialization == null)
-			InitializeNewGraph(currentGraph);
 			
 		//text colors:
 		whiteText = new GUIStyle();
@@ -192,10 +194,9 @@ public class ProceduralWorldsWindow : EditorWindow {
         //background color:
 		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
 			OnEnable();
+		if (currentGraph.firstInitialization == null)
+			InitializeNewGraph(currentGraph);
 		
-		if (currentGraph.firstInitialization != "initialized")
-			return ;
-
 		if (!currentGraph.presetChoosed)
 		{
 			DrawPresetPanel();
@@ -698,6 +699,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//draw links:
 		var links = node.GetLinks();
+		int		i = 0;
 		foreach (var link in links)
 		{
 			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
@@ -710,11 +712,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 				Debug.LogWarning("window not found: " + link.distantWindowId);
 				continue ;
 			}
-
 			Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
 			Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
 			if (fromAnchor != null && toAnchor != null)
-				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black, link.linkType);
+			{
+				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, i++, link);
+				if (currentLinks.Count <= linkIndex)
+					currentLinks.Add(link);
+				else
+					currentLinks[linkIndex] = link;
+				linkIndex++;
+			}
 		}
 
 		//check if user have pressed the close button of this window:
@@ -767,10 +775,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 
 			bool	mouseAboveAnchorLocal = false;
+			int		windowId = 0;
+			linkIndex = 0;
+
 			mouseAboveNodeIndex = -1;
 			mouseAboveSubmachineIndex = -1;
+
 			PWNode.windowRenderOrder = 0;
-			int		windowId = 0;
+
+			//reset the link hover:
+			foreach (var l in currentLinks)
+				l.hover = false;
+
 			BeginWindows();
 			for (i = 0; i < currentGraph.nodes.Count; i++)
 			{
@@ -805,7 +821,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					RenderNodeLinks(graph.outputNode);
 				RenderNodeLinks(currentGraph.outputNode);
 			}
-			
+
 			//submachine enter button click management:
 			foreach (var graph in currentGraph.subGraphs)
 			{
@@ -826,10 +842,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
 					new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0),
-					startDragAnchor.anchorColor,
-					startDragAnchor.linkType
+					-1,
+					null
 				);
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
+			
+			if (e.type == EventType.MouseDown && !currentLinks.Any(l => l.hover) && draggingGraph == false)
+				foreach (var l in currentLinks)
+					l.selected = false;
 
 			currentGraph.ForeachAllNodes(p => p.EndFrameUpdate());
 		}
@@ -921,7 +941,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 			n.RemoveLinkByWindowTarget(mouseAboveAnchorInfo.windowId);
 		}
 		Debug.Log("anchorID: " + mouseAboveAnchorInfo.anchorId + ", window id: " + mouseAboveAnchorInfo.windowId);
-		node.RemoveLink(mouseAboveAnchorInfo.anchorId);
+		node.RemoveAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
+	}
+
+	void DeleteLink(object l)
+	{
+		PWLink	link = l  as PWLink;
+
+		var from = FindNodeByWindowId(link.localWindowId);
+		var to = FindNodeByWindowId(link.distantWindowId);
+
+		from.RemoveLink(link.localAnchorId, to, link.distantAnchorId);
+		to.RemoveLink(link.localAnchorId, to, link.distantAnchorId);
 	}
 
 	void DrawContextualMenu(Rect graphNodeRect)
@@ -954,6 +985,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 					menu.AddDisabledItem(new GUIContent("New Link"));
 					menu.AddDisabledItem(new GUIContent("Delete all links"));
 				}
+				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
+				if (hoveredLink != null)
+					menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
+				else
+					menu.AddDisabledItem(new GUIContent("Delete link"));
                 menu.AddSeparator("");
 				if (mouseAboveNodeIndex != -1)
 					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
@@ -1041,57 +1077,79 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 	}
 
-    bool DrawNodeCurve(Rect start, Rect end, Color c, PWLinkType type)
+    void DrawNodeCurve(Rect start, Rect end, int index, PWLink link, bool forceSelected = false)
     {
-		bool	selected = false;
-
 		//swap start and end if they are inverted
 		if (start.xMax > end.xMax)
 			PWUtils.Swap< Rect >(ref start, ref end);
 
-		int		id = GUIUtility.GetControlID(start.GetHashCode(), FocusType.Passive);
+		int		id;
+		if (link == null)
+			id = -1;
+		else
+			id = GUIUtility.GetControlID((link.localName + link.distantName + index).GetHashCode(), FocusType.Passive);
 
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
 
-		switch (Event.current.GetTypeForControl(id))
+		if (link != null)
 		{
-			case EventType.MouseDown:
-				if (HandleUtility.nearestControl == id && Event.current.button == 0)
-				{
-					GUIUtility.hotControl = id;
-					Debug.Log("selected link id: " + id);
-					selected = true;
-				}
-				break ;
+			switch (Event.current.GetTypeForControl(id))
+			{
+				case EventType.MouseDown:
+					if (HandleUtility.nearestControl == id && Event.current.button == 0)
+					{
+						GUIUtility.hotControl = id;
+						//unselect all others links:
+						foreach (var l in currentLinks)
+							l.selected = false;
+						link.selected = true;
+					}
+					break ;
+			}
+			if (HandleUtility.nearestControl == id)
+			{
+				GUIUtility.hotControl = id;
+				link.hover = true;
+			}
 		}
 
-		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(Event.current.mousePosition, startPos, endPos, startTan, endTan));
-		switch (type)
+		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(Event.current.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
+		if (Event.current.type == EventType.Repaint)
 		{
-			case PWLinkType.Sampler2D:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 6);
-				break ;
-			case PWLinkType.Sampler3D:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 8);
-				break ;
-			case PWLinkType.ThreeChannel:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), null, 1);
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), null, 3);
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), null, 5);
-				break ;
-			case PWLinkType.FourChannel:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), null, 1);
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), null, 3);
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), null, 5);
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 7);
-				break ;
-			default:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 4);
-				break ;
+			bool s = (link != null) ? (link.selected || forceSelected) : false;
+			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
+			{
+				case PWLinkType.Sampler2D:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 6, s);
+					break ;
+				case PWLinkType.Sampler3D:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s);
+					break ;
+				case PWLinkType.ThreeChannel:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s);
+					break ;
+				case PWLinkType.FourChannel:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 7, s);
+					break ;
+				default:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 4, s);
+					break ;
+			}
 		}
-		return selected;
     }
+
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, bool selected)
+	{
+		if (selected)
+			Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, 1f, .7f), null, width + 2);
+		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
+	}
 }
