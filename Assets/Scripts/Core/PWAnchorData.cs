@@ -77,6 +77,8 @@ namespace PW
 			public SerializableColor	color;
 			public string				name;
 			public PWVisibility			visibility;
+			//link type for visual bezier curve style
+			public PWLinkType			linkType = PWLinkType.BasicData;
 			//the id of the actual anchor
 			public int					id;
 			//external link connected to this anchor

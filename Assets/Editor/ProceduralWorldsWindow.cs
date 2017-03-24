@@ -73,13 +73,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[System.NonSerializedAttribute]
 	Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
 
-	[System.NonSerializedAttribute]
-	Dictionary< PWOutputType, Type > terrainRenderers = new Dictionary< PWOutputType, Type >()
-	{
-		{PWOutputType.SIDEVIEW_2D, typeof(PWSideView2DTerrain)},
-		{PWOutputType.TOPDOWNVIEW_2D, typeof(PWTopDown2DTerrain)},
-	};
-
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
@@ -721,7 +714,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
 			Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
 			if (fromAnchor != null && toAnchor != null)
-				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black);
+				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, Color.black, link.linkType);
 		}
 
 		//check if user have pressed the close button of this window:
@@ -833,7 +826,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
 					new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0),
-					startDragAnchor.anchorColor
+					startDragAnchor.anchorColor,
+					startDragAnchor.linkType
 				);
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 
@@ -1047,22 +1041,57 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 	}
 
-    void DrawNodeCurve(Rect start, Rect end, Color c)
+    bool DrawNodeCurve(Rect start, Rect end, Color c, PWLinkType type)
     {
+		bool	selected = false;
+
 		//swap start and end if they are inverted
 		if (start.xMax > end.xMax)
 			PWUtils.Swap< Rect >(ref start, ref end);
+
+		int		id = GUIUtility.GetControlID(start.GetHashCode(), FocusType.Passive);
 
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
-        Color shadowCol = c;
-		shadowCol.a = 0.04f;
 
-        for (int i = 0; i < 3; i++)
-            Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);
+		switch (Event.current.GetTypeForControl(id))
+		{
+			case EventType.MouseDown:
+				if (HandleUtility.nearestControl == id && Event.current.button == 0)
+				{
+					GUIUtility.hotControl = id;
+					Debug.Log("selected link id: " + id);
+					selected = true;
+				}
+				break ;
+		}
 
-        Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 1);
+		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(Event.current.mousePosition, startPos, endPos, startTan, endTan));
+		switch (type)
+		{
+			case PWLinkType.Sampler2D:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 6);
+				break ;
+			case PWLinkType.Sampler3D:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 8);
+				break ;
+			case PWLinkType.ThreeChannel:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), null, 1);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), null, 3);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), null, 5);
+				break ;
+			case PWLinkType.FourChannel:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), null, 1);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), null, 3);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), null, 5);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 7);
+				break ;
+			default:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), null, 4);
+				break ;
+		}
+		return selected;
     }
 }

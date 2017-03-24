@@ -1,4 +1,4 @@
-﻿ #define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using System.Linq;
 using System.Collections.Generic;
@@ -251,6 +251,7 @@ namespace PW
 					data.anchorType = anchorType;
 					data.type = (SerializableType)field.FieldType;
 					data.first.color = (SerializableColor)backgroundColor;
+					data.first.linkType = GetLinkTypeFromType(field.FieldType);
 					data.first.name = name;
 					data.offset = offset;
 					data.windowId = windowId;
@@ -296,6 +297,19 @@ namespace PW
 					Debug.Log("removed " + kp.Key);
 					propertyDatas.Remove(kp.Key);
 				}
+		}
+
+		public static PWLinkType GetLinkTypeFromType(Type fieldType)
+		{
+			if (fieldType == typeof(Sampler2D))
+				return PWLinkType.Sampler2D;
+			if (fieldType == typeof(Sampler3D))
+				return PWLinkType.Sampler3D;
+			if (fieldType == typeof(Vector3) || fieldType == typeof(Vector3i))
+				return PWLinkType.ThreeChannel;
+			if (fieldType == typeof(Vector4))
+				return PWLinkType.FourChannel;
+			return PWLinkType.BasicData;
 		}
 
 		public void SetWindowId(int id)
@@ -400,7 +414,8 @@ namespace PW
 					singleAnchor.color, data.type,
 					data.anchorType, windowId, singleAnchor.id,
 					data.classAQName, index,
-					data.generic, data.allowedTypes);
+					data.generic, data.allowedTypes,
+					singleAnchor.linkType);
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -658,13 +673,15 @@ namespace PW
 					fromAnchor.fieldName, new Rect(), Color.white,
 					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
 					fromAnchor.first.id, fromAnchor.classAQName,
-					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes
+					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes,
+					fromAnchor.first.linkType
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
 				toAnchor.fieldName, new Rect(), Color.white,
 				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
 				toAnchor.first.id, toAnchor.classAQName,
-				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes
+				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes,
+				fromAnchor.first.linkType
 			);
 
 			AttachLink(from, to);
