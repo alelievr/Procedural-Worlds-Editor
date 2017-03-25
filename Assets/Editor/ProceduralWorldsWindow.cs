@@ -18,7 +18,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	debugTexture1;
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
-	private static Texture2D	errorIcon;
 
 	private static Texture2D	preset2DSideViewTexture;
 	private static Texture2D	preset2DTopDownViewTexture;
@@ -902,6 +901,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//remove the node
 		currentGraph.nodes.RemoveAt(id);
+
+		EvaluateComputeOrder();
 	}
 
 	void CreateNewNode(object type)
@@ -924,8 +925,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		int id = (int)oid;
 
+		//TODO: remove all dependencies and links from the output and input machine.
+
 		if (id < currentGraph.subGraphs.Count && id >= 0)
 			currentGraph.subGraphs.RemoveAt(id);
+		EvaluateComputeOrder();
 	}
 
 	void CreatePWMachine()
@@ -965,6 +969,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		}
 		node.DeleteAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
+		
+		EvaluateComputeOrder();
 	}
 
 	void DeleteLink(object l)
@@ -976,6 +982,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 		to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
+		
+		EvaluateComputeOrder();
 	}
 
 	void DrawContextualMenu(Rect graphNodeRect)
@@ -1034,13 +1042,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (first)
 		{
 			nodeComputeOrderCount.Clear();
-			for (int i = 0; i < currentGraph.nodes.Count; i++)
-			{
-				currentGraph.nodes[i].computeOrder = EvaluateComputeOrder(false, 1, currentGraph.nodes[i].windowId);
-				// Debug.Log("computed order for node " + nodes[i].windowId + ": " + nodes[i].computeOrder);
-			}
+			currentGraph.inputNode.computeOrder = 0;
+			foreach (var gNode in currentGraph.nodes)
+				gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.windowId);
+			currentGraph.outputNode.computeOrder = EvaluateComputeOrder(false, 1, currentGraph.outputNode.windowId);
 			//sort nodes for compute order:
 			currentGraph.nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
+			return 0;
 		}
 
 		//check if we the node have already been computed:
@@ -1051,10 +1059,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (node == null)
 			return 0;
 
+		//check if the window have all these inputs to work:
+		if (!node.CheckRequiredAnchorLink())
+			return -1;
+
 		//compute dependency weight:
 		int	ret = 1;
 		foreach (var dep in node.GetDependencies())
-			ret += EvaluateComputeOrder(false, depth + 1, dep.windowId);
+		{
+			int d = EvaluateComputeOrder(false, depth + 1, dep.windowId);
+
+			//if dependency does not have enought datas to compute result, abort calculus.
+			if (d == -1)
+			{
+				ret = -1;
+				break ;
+			}
+			ret += d;
+		}
 
 		nodeComputeOrderCount[windowId] = ret;
 		return ret;
@@ -1098,8 +1120,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
 		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
-
-		errorIcon = CreateTexture2DFromFile("error");
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link, bool forceSelected = false)

@@ -1,10 +1,11 @@
 ﻿// #define DEBUG_WINDOW
 
-using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace PW
 {
@@ -40,6 +41,7 @@ namespace PW
 		static Texture2D	highlightNewTexture = null;
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
+		static Texture2D	errorIcon = null;
 
 		[SerializeField]
 		Vector2	graphDecal;
@@ -67,6 +69,9 @@ namespace PW
 		[SerializeField]
 		PropertyDataDictionary propertyDatas = new PropertyDataDictionary();
 
+		[NonSerializedAttribute]
+		public Dictionary< string, FieldInfo > bakedNodeFields = new Dictionary< string, FieldInfo >();
+
 		public void OnDestroy()
 		{
 
@@ -80,22 +85,30 @@ namespace PW
 		
 		public void OnEnable()
 		{
+			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
+				return Resources.Load< Texture2D >(ressourcePath);
+			};
+				
+			Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
+				Texture2D	ret;
+				ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+				ret.SetPixel(0, 0, c);
+				ret.Apply();
+				return ret;
+			};
+
 			hideFlags = HideFlags.HideAndDontSave;
 
-			disabledTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			disabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
+			highlightNewTexture = CreateTexture2DColor(new Color(0, .5f, 0, .4f));
+			highlightReplaceTexture = CreateTexture2DColor(new Color(.5f, .5f, 0, .4f));
+			highlightAddTexture = CreateTexture2DColor(new Color(0f, .0f, 0.5f, .4f));
 
-			disabledTexture.SetPixel(0, 0, new Color(.4f, .4f, .4f, .5f));
-			disabledTexture.Apply();
-			highlightNewTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			highlightNewTexture.SetPixel(0, 0, new Color(0, .5f, 0, .4f));
-			highlightNewTexture.Apply();
-			highlightReplaceTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			highlightReplaceTexture.SetPixel(0, 0, new Color(.5f, .5f, 0, .4f));
-			highlightReplaceTexture.Apply();
-			highlightAddTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			highlightAddTexture.SetPixel(0, 0, new Color(0f, .0f, 0.5f, .4f));
-			highlightAddTexture.Apply();
+			errorIcon = CreateTexture2DFromFile("error");
+
 			LoadFieldAttributes();
+
+			BakeNodeFields();
 			
 			//this will be true only if the object instance does not came from a serialized object.
 			if (firstInitialization == null)
@@ -166,6 +179,15 @@ namespace PW
 				else
 					callback(data, data.first, -1);
 			}
+		}
+
+		void BakeNodeFields()
+		{
+			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+
+			bakedNodeFields.Clear();
+			foreach (var fInfo in fInfos)
+				bakedNodeFields[fInfo.Name] = fInfo;
 		}
 
 		void LoadFieldAttributes()
@@ -247,6 +269,8 @@ namespace PW
 						Debug.LogWarning("PWMultiple attribute is only valid on input variables");
 						data.multiple = false;
 					}
+					if (data.required && anchorType == PWAnchorType.Output)
+						data.required = false;
 					data.classAQName = GetType().AssemblyQualifiedName;
 					data.fieldName = field.Name;
 					data.anchorType = anchorType;
@@ -389,10 +413,8 @@ namespace PW
 				{
 					var val = kp.Value.anchorInstance;
 					var mirroredProp = propertyDatas[kp.Value.mirroredField];
-					//TODO: optimize
-					GetType().GetField(mirroredProp.fieldName).SetValue(this, val);
+					bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
 				}
-
 			OnNodeProcess();
 		}
 
@@ -493,6 +515,16 @@ namespace PW
 				}
 			//reset the Highlight:
 			singleAnchor.highlighMode = PWAnchorHighlight.None;
+
+			if (data.required && singleAnchor.linkCount == 0
+				&& (!data.multiple || (data.multiple && index < data.minMultipleValues)))
+			{
+				Rect errorIconRect = new Rect(singleAnchor.anchorRect);
+				errorIconRect.size = Vector2.one * 17;
+				errorIconRect.position += new Vector2(-10, -10);
+				GUI.DrawTexture(errorIconRect, errorIcon);
+			}
+
 
 			//if window is renamable, render a text input above the window:
 			if (renamable)
@@ -692,6 +724,35 @@ namespace PW
 			AttachLink(from, to);
 		}
 
+		int DeleteDependencies(Func< PWNodeDependency, bool > pred)
+		{
+			PWAnchorData.PWAnchorMultiData	singleAnchor;
+			PWAnchorData					data;
+			int								index;
+			int								nDeleted = 0;
+
+			depencendies.RemoveAll(d => {
+				bool delete = pred(d);
+				if (delete)
+				{
+					data = GetAnchorData(d.connectedAnchorId, out singleAnchor, out index);
+					if (data == null)
+						return delete;
+					if (data.multiple)
+					{
+						PWValues vals = bakedNodeFields[data.fieldName].GetValue(this) as PWValues;
+						vals.AssignAt(index, null, null);
+					}
+					else
+						bakedNodeFields[data.fieldName].SetValue(this, null);
+					singleAnchor.linkCount--;
+					nDeleted++;
+				}
+				return delete;
+			});
+			return nDeleted;
+		}
+
 		public void		DeleteAllLinkOnAnchor(int anchorId)
 		{
 			links.RemoveAll(l => {
@@ -700,7 +761,7 @@ namespace PW
 					OnNodeAnchorUnlink(l.localName, l.localIndex);
 				return delete;
 			});
-			depencendies.RemoveAll(d => d.connectedAnchorId == anchorId);
+			DeleteDependencies(d => d.connectedAnchorId == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount = 0;
@@ -709,31 +770,24 @@ namespace PW
 		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
 		{
 			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId
+				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId;
 				if (delete)
 					OnNodeAnchorUnlink(l.localName, l.localIndex);
 				return delete;
 			});
-			depencendies.RemoveAll(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId);
-
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			GetAnchorData(myAnchorId, out singleAnchorData);
-			if (singleAnchorData != null)
-				singleAnchorData.linkCount--;
+			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
+			if (DeleteDependencies(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
+			{
+				PWAnchorData.PWAnchorMultiData singleAnchorData;
+				GetAnchorData(myAnchorId, out singleAnchorData);
+				if (singleAnchorData != null)
+					singleAnchorData.linkCount--;
+			}
 		}
 
 		public void		DeleteDependency(int targetWindowId, int distantAnchorId)
 		{
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			for (int i = 0; i < depencendies.Count; i++)
-				if (depencendies[i].windowId == targetWindowId && depencendies[i].anchorId == distantAnchorId)
-				{
-					GetAnchorData(depencendies[i].connectedAnchorId, out singleAnchorData);
-					if (singleAnchorData == null)
-						continue ;
-					singleAnchorData.linkCount--;
-					depencendies.RemoveAt(i--);
-				}
+			DeleteDependencies(d => d.windowId == targetWindowId && d.anchorId == distantAnchorId);
 		}
 		
 		public void		DeleteLinkByWindowTarget(int targetWindowId)
@@ -742,6 +796,7 @@ namespace PW
 			for (int i = 0; i < links.Count; i++)
 				if (links[i].distantWindowId == targetWindowId)
 				{
+					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
 					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
 					singleAnchorData.linkCount--;
 					links.RemoveAt(i--);
@@ -750,16 +805,7 @@ namespace PW
 
 		public void		RemoveDependenciesByWindowTarget(int targetWindowId)
 		{
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			for (int i = 0; i < depencendies.Count; i++)
-				if (depencendies[i].windowId == targetWindowId)
-				{
-					GetAnchorData(depencendies[i].connectedAnchorId, out singleAnchorData);
-					if (singleAnchorData == null)
-						continue ;
-					singleAnchorData.linkCount--;
-					depencendies.RemoveAt(i--);
-				}
+			DeleteDependencies(d => d.windowId == targetWindowId);
 		}
 
 		public void		DeleteAllLinks()
@@ -781,16 +827,26 @@ namespace PW
 
 		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
 		{
+			int				index;
+			
+			return GetAnchorData(id, out singleAnchorData, out index);
+		}
+
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
+		{
 			PWAnchorData					ret = null;
 			PWAnchorData.PWAnchorMultiData	s = null;
+			int								retIndex = 0;
 
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				if (singleAnchor.id == id)
 				{
 					s = singleAnchor;
 					ret = data;
+					retIndex = i;
 				}
 			});
+			index = retIndex;
 			singleAnchorData = s;
 			return ret;
 		}
@@ -805,6 +861,18 @@ namespace PW
 			if (matches.Count() == 0)
 				return null;
 			return matches.First().anchorRect;
+		}
+
+		public bool		CheckRequiredAnchorLink()
+		{
+			bool	ret = true;
+
+			ForeachPWAnchors((data, singleAnchor, i) => {
+			if (data.required && singleAnchor.linkCount == 0
+					&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
+				ret = false;
+			});
+			return ret;
 		}
 
 		PWAnchorType	InverAnchorType(PWAnchorType type)
