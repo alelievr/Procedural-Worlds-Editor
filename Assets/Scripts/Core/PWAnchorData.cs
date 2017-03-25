@@ -67,6 +67,8 @@ namespace PW
 		public string				mirroredField;
 		//current number of rendered anchors:
 		public bool					displayHiddenMultipleAnchors;
+		//if the anchor value is required to compute result:
+		public bool					required;
 
 		[System.SerializableAttribute]
 		public class PWAnchorMultiData
@@ -102,6 +104,7 @@ namespace PW
 		{
 			multiple = false;
 			generic = false;
+			required = true;
 			displayHiddenMultipleAnchors = false;
 			mirroredField = null;
 

@@ -34,7 +34,7 @@ namespace PW
 				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{
-				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
+				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, new Color(0, 0, val));});
 				samplerTexture.Apply();
 			}
 

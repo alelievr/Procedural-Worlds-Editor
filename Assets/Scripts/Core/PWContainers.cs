@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace PW
 {
-	[System.SerializableAttribute]
+	/*
+		Graph calculus storage classes (must not be serialized)
+	*/
+
 	public class Sampler2D
 	{
+		[NonSerializedAttribute]
 		public float[,]		map;
+		[NonSerializedAttribute]
 		public int			size;
+		[NonSerializedAttribute]
 		public float		step;
 		
 		public float this[int x, int y]
@@ -56,8 +60,11 @@ namespace PW
 	[System.SerializableAttribute]
 	public class Sampler3D
 	{
+		[NonSerializedAttribute]
 		public float[,,]	map;
+		[NonSerializedAttribute]
 		public int			size;
+		[NonSerializedAttribute]
 		public float		step;
 
 		public float this[int x, int y, int z]
@@ -91,6 +98,10 @@ namespace PW
 		}
 	}
 
+	/*
+		Terrain storage classes:
+	*/
+
 	[System.SerializableAttribute]
 	public class ChunkData
 	{
@@ -111,6 +122,10 @@ namespace PW
 	}
 
 	//TODO: other storage classes
+
+	/*
+		Utils
+	*/
 
 	[System.SerializableAttribute]
 	public struct Vector3i

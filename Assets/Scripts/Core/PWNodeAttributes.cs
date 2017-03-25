@@ -128,4 +128,10 @@ namespace PW
 			this.fieldName = fieldName;
 		}
 	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class PWNotRequired : Attribute
+	{
+		public PWNotRequired() {}
+	}
 }

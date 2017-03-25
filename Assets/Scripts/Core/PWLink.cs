@@ -26,13 +26,14 @@ namespace PW
 		public int					localAnchorId;
 		public string				localName;
 		public string				localClassAQName;
+		public int					localIndex;
 		//link datas:
 		public SerializableColor	color;
 		public PWLinkType			linkType;
 		public bool					hover;
 		public bool					selected;
 	
-		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, Color c)
+		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, int lIndex, Color c)
 		{
 			distantWindowId = dWin;
 			distantAnchorId = dAttr;
@@ -42,6 +43,7 @@ namespace PW
 			localAnchorId = lAttr;
 			localWindowId = lWin;
 			localClassAQName = lCName;
+			localIndex = lIndex;
 			localName = lName;
 			color = (SerializableColor)c;
 		}

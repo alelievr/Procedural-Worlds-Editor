@@ -39,7 +39,7 @@ namespace PW
 			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{
 				output.Foreach((x, y, val) => {
-					previewTex.SetPixel(x, y, Color.white * val / 2);
+					previewTex.SetPixel(x, y, new Color(val, val, val));
 				});
 				previewTex.Apply();
 			}

@@ -190,13 +190,14 @@ namespace PW
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
-					PWInput		inputAttr = attr as PWInput;
-					PWOutput	outputAttr = attr as PWOutput;
-					PWColor		colorAttr = attr as PWColor;
-					PWOffset	offsetAttr = attr as PWOffset;
-					PWMultiple	multipleAttr = attr as PWMultiple;
-					PWGeneric	genericAttr = attr as PWGeneric;
-					PWMirror	mirrorAttr = attr as PWMirror;
+					PWInput			inputAttr = attr as PWInput;
+					PWOutput		outputAttr = attr as PWOutput;
+					PWColor			colorAttr = attr as PWColor;
+					PWOffset		offsetAttr = attr as PWOffset;
+					PWMultiple		multipleAttr = attr as PWMultiple;
+					PWGeneric		genericAttr = attr as PWGeneric;
+					PWMirror		mirrorAttr = attr as PWMirror;
+					PWNotRequired	notRequiredAttr = attr as PWNotRequired;
 
 					if (inputAttr != null)
 					{
@@ -234,6 +235,8 @@ namespace PW
 					}
 					if (mirrorAttr != null)
 						data.mirroredField = mirrorAttr.fieldName;
+					if (notRequiredAttr != null)
+						data.required = false;
 				}
 				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
 					propertyDatas.Remove(field.Name);
@@ -625,8 +628,9 @@ namespace PW
 				outputHasChanged = true;
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
-					from.windowId, from.anchorId, from.name, from.classAQName, from.anchorColor)
+					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor)
 				);
+				OnNodeAnchorLink(from.name, from.propIndex);
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -639,6 +643,7 @@ namespace PW
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
+						OnNodeAnchorLink(from.name, from.propIndex);
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple)
@@ -687,18 +692,28 @@ namespace PW
 			AttachLink(from, to);
 		}
 
-		public void		RemoveAllLinkOnAnchor(int anchorId)
+		public void		DeleteAllLinkOnAnchor(int anchorId)
 		{
-			links.RemoveAll(l => l.localAnchorId == anchorId);
+			links.RemoveAll(l => {
+				bool delete = l.localAnchorId == anchorId;
+				if (delete)
+					OnNodeAnchorUnlink(l.localName, l.localIndex);
+				return delete;
+			});
 			depencendies.RemoveAll(d => d.connectedAnchorId == anchorId);
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			GetAnchorData(anchorId, out singleAnchorData);
 			singleAnchorData.linkCount = 0;
 		}
 
-		public void		RemoveLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
+		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
 		{
-			links.RemoveAll(l => l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId);
+			links.RemoveAll(l => {
+				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId
+				if (delete)
+					OnNodeAnchorUnlink(l.localName, l.localIndex);
+				return delete;
+			});
 			depencendies.RemoveAll(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId);
 
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
@@ -707,7 +722,7 @@ namespace PW
 				singleAnchorData.linkCount--;
 		}
 
-		public void		RemoveDependency(int targetWindowId, int distantAnchorId)
+		public void		DeleteDependency(int targetWindowId, int distantAnchorId)
 		{
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			for (int i = 0; i < depencendies.Count; i++)
@@ -721,7 +736,7 @@ namespace PW
 				}
 		}
 		
-		public void		RemoveLinkByWindowTarget(int targetWindowId)
+		public void		DeleteLinkByWindowTarget(int targetWindowId)
 		{
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			for (int i = 0; i < links.Count; i++)
@@ -747,8 +762,10 @@ namespace PW
 				}
 		}
 
-		public void		RemoveAllLinks()
+		public void		DeleteAllLinks()
 		{
+			foreach (var l in links)
+				OnNodeAnchorUnlink(l.localName, l.localIndex);
 			links.Clear();
 			depencendies.Clear();
 		}
@@ -850,6 +867,16 @@ namespace PW
 				inputHasChanged = false;
 				outputHasChanged = false;
 			}
+		}
+
+		public virtual void	OnNodeAnchorLink(string propName, int index)
+		{
+
+		}
+
+		public virtual void OnNodeAnchorUnlink(string propName, int index)
+		{
+
 		}
 
 		public bool		WindowShouldClose()

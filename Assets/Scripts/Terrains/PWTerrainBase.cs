@@ -174,6 +174,9 @@ namespace PW
 			ret.transform.parent = terrainRoot.transform;
 			ret.transform.position = pos;
 
+			if (prim == PrimitiveType.Quad || prim == PrimitiveType.Plane)
+				ret.GetComponent< MeshRenderer >().sharedMaterial = Resources.Load< Material >("preview2DMaterial");
+
 			return ret;
 		}
 	}

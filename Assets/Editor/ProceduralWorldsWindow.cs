@@ -18,6 +18,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	debugTexture1;
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
+	private static Texture2D	errorIcon;
 
 	private static Texture2D	preset2DSideViewTexture;
 	private static Texture2D	preset2DTopDownViewTexture;
@@ -223,7 +224,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 			ProcessPreviewScene(currentGraph.outputType);
 
 		if (terrainMaterializer == null)
-			terrainMaterializer = GameObject.Find("PWPreviewTerrain").GetComponent< PWTerrainBase >();
+		{
+			GameObject gtm = GameObject.Find("PWPreviewTerrain");
+			if (gtm != null)
+				terrainMaterializer = gtm.GetComponent< PWTerrainBase >();
+		}
 
 		DrawNodeGraphCore();
 
@@ -709,7 +714,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			if (toWindow == null) //invalid window ids
 			{
-				node.RemoveLinkByWindowTarget(link.distantWindowId);
+				node.DeleteLinkByWindowTarget(link.distantWindowId);
 				Debug.LogWarning("window not found: " + link.distantWindowId);
 				continue ;
 			}
@@ -892,7 +897,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			var node = FindNodeByWindowId(deps.windowId);
 			if (node != null)
-				node.RemoveLinkByWindowTarget(deps.windowId);
+				node.DeleteLinkByWindowTarget(deps.windowId);
 		}
 
 		//remove the node
@@ -954,12 +959,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (n != null)
 			{
 				if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output)
-					n.RemoveDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
+					n.DeleteDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
 				else
-					n.RemoveLink(ac.second, node, mouseAboveAnchorInfo.anchorId);
+					n.DeleteLink(ac.second, node, mouseAboveAnchorInfo.anchorId);
 			}
 		}
-		node.RemoveAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
+		node.DeleteAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
 	}
 
 	void DeleteLink(object l)
@@ -969,8 +974,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		var from = FindNodeByWindowId(link.localWindowId);
 		var to = FindNodeByWindowId(link.distantWindowId);
 
-		from.RemoveLink(link.localAnchorId, to, link.distantAnchorId);
-		to.RemoveLink(link.distantAnchorId, from, link.localAnchorId);
+		from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
+		to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 	}
 
 	void DrawContextualMenu(Rect graphNodeRect)
@@ -1093,6 +1098,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
 		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+
+		errorIcon = CreateTexture2DFromFile("error");
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link, bool forceSelected = false)
