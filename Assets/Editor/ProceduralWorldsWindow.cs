@@ -781,16 +781,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
-				Debug.Log("S");
-				string folder = Path.GetDirectoryName("Editor/olol.tmp");
-				if (!Directory.Exists(folder))
-					Directory.CreateDirectory(folder);
-				{
-					BinaryFormatter bf = new BinaryFormatter();
-					FileStream f = File.Open("Editor/olol.tmp", FileMode.OpenOrCreate, FileAccess.Write);
-					bf.Serialize(f, terrainMaterializer);
-					f.Close();
-				}
+				Debug.Log("TODO: serialization");
 			}
 
 			bool	mouseAboveAnchorLocal = false;
@@ -868,7 +859,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 			
 			if (e.type == EventType.MouseDown && !currentLinks.Any(l => l.hover) && draggingGraph == false)
 				foreach (var l in currentLinks)
+				{
 					l.selected = false;
+					l.linkHighlight = PWLinkHighlight.None;
+				}
 
 			currentGraph.ForeachAllNodes(p => p.EndFrameUpdate());
 		}
@@ -1122,7 +1116,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 	}
 
-    void DrawNodeCurve(Rect start, Rect end, int index, PWLink link, bool forceSelected = false)
+    void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
     {
 		Event e = Event.current;
 		//swap start and end if they are inverted
@@ -1152,6 +1146,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						foreach (var l in currentLinks)
 							l.selected = false;
 						link.selected = true;
+						link.linkHighlight = PWLinkHighlight.Selected;
 					}
 					break ;
 			}
@@ -1165,7 +1160,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(e.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
 		if (e.type == EventType.Repaint)
 		{
-			bool s = (link != null) ? (link.selected || forceSelected) : false;
+			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
 				case PWLinkType.Sampler2D:
@@ -1192,10 +1187,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
     }
 
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, bool selected)
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight)
 	{
-		if (selected)
-			Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, 1f, .7f), null, width + 2);
+		switch (linkHighlight)
+		{
+			case PWLinkHighlight.Selected:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, 1f, .7f), null, width + 2);
+				break;
+			case PWLinkHighlight.Delete:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .1f, .1f, .7f), null, width + 2);
+				break ;
+		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 	}
 }

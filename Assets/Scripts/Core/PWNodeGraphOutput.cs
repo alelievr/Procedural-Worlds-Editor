@@ -35,7 +35,7 @@ namespace PW
 			for (int i = 0; i < names.Count; i++)
 			{
 				if (names[i] != null && values[i] != null)
-					EditorGUILayout.LabelField(names[i] + " <" + values[i].GetType() + ": " + values[i] + ">");
+					EditorGUILayout.LabelField(names[i] + " <" /*+ values[i].GetType() + ": "*/ + values[i] + ">");
 				else
 					EditorGUILayout.LabelField("null");
 			}

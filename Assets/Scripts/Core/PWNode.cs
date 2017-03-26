@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using UnityEngine;
 using UnityEditor;
@@ -156,7 +156,7 @@ namespace PW
 				chunkSizeHasChanged = true;
 		}
 
-		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback)
+		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
 		{
 			foreach (var PWAnchorData in propertyDatas)
 			{
@@ -164,7 +164,7 @@ namespace PW
 				if (data.multiple)
 				{
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
-					if (data.displayHiddenMultipleAnchors)
+					if (data.displayHiddenMultipleAnchors || showAdditional)
 						anchorCount++;
 					for (int i = 0; i < anchorCount; i++)
 					{
@@ -727,6 +727,7 @@ namespace PW
 		int DeleteDependencies(Func< PWNodeDependency, bool > pred)
 		{
 			PWAnchorData.PWAnchorMultiData	singleAnchor;
+			PWAnchorData.PWAnchorMultiData	multiAnchor;
 			PWAnchorData					data;
 			int								index;
 			int								nDeleted = 0;
@@ -738,15 +739,29 @@ namespace PW
 					data = GetAnchorData(d.connectedAnchorId, out singleAnchor, out index);
 					if (data == null)
 						return delete;
+					singleAnchor.linkCount--;
+					nDeleted++;
 					if (data.multiple)
 					{
 						PWValues vals = bakedNodeFields[data.fieldName].GetValue(this) as PWValues;
 						vals.AssignAt(index, null, null);
+						for (int i = vals.Count - 1; i != 0 && i >= data.minMultipleValues ; i--)
+						{
+							int id = data.fieldName.GetHashCode() + i;
+							if (GetAnchorData(id, out multiAnchor) != null && multiAnchor.linkCount == 0)
+							{
+								vals.RemoveAt(i);
+								data.multi.RemoveAt(i);
+								data.multipleValueCount--;
+								if (GetAnchorData(id + 1, out multiAnchor) != null)
+									multiAnchor.id--;
+							}
+							else if (GetAnchorData(id, out multiAnchor) != null)
+								break ;
+						}
 					}
 					else
 						bakedNodeFields[data.fieldName].SetValue(this, null);
-					singleAnchor.linkCount--;
-					nDeleted++;
 				}
 				return delete;
 			});
@@ -761,10 +776,12 @@ namespace PW
 					OnNodeAnchorUnlink(l.localName, l.localIndex);
 				return delete;
 			});
-			DeleteDependencies(d => d.connectedAnchorId == anchorId);
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			GetAnchorData(anchorId, out singleAnchorData);
-			singleAnchorData.linkCount = 0;
+			if (DeleteDependencies(d => d.connectedAnchorId == anchorId) == 0)
+			{
+				PWAnchorData.PWAnchorMultiData singleAnchorData;
+				GetAnchorData(anchorId, out singleAnchorData);
+				singleAnchorData.linkCount = 0;
+			}
 		}
 
 		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
@@ -845,7 +862,7 @@ namespace PW
 					ret = data;
 					retIndex = i;
 				}
-			});
+			}, true);
 			index = retIndex;
 			singleAnchorData = s;
 			return ret;

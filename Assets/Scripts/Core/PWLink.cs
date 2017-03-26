@@ -13,6 +13,14 @@ namespace PW
 	}
 
 	[System.SerializableAttribute]
+	public enum PWLinkHighlight
+	{
+		None,
+		Selected,
+		Delete,
+	}
+
+	[System.SerializableAttribute]
 	public class PWLink
 	{
 		//distant datas:
@@ -30,6 +38,7 @@ namespace PW
 		//link datas:
 		public SerializableColor	color;
 		public PWLinkType			linkType;
+		public PWLinkHighlight		linkHighlight;
 		public bool					hover;
 		public bool					selected;
 	
@@ -46,6 +55,7 @@ namespace PW
 			localIndex = lIndex;
 			localName = lName;
 			color = (SerializableColor)c;
+			linkHighlight = PWLinkHighlight.None;
 		}
 	}
 }
