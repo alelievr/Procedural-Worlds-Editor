@@ -41,6 +41,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
 	bool				updateGraph = true;
+	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
 
@@ -409,8 +410,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 			terrainMaterializer.InitGraph(currentGraph);
 	}
 
+	void MovePreviewCamera(Vector2 move)
+	{
+		previewCamera.gameObject.transform.position += new Vector3(move.x, 0, move.y);
+	}
+
 	void DrawLeftBar(Rect currentRect)
 	{
+		Event	e = Event.current;
 		GUI.DrawTexture(currentRect, backgroundTex);
 
 		//add the texturepreviewRect size:
@@ -428,8 +435,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.SetNextControlName("PWName");
 				currentGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
 
-				if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.Ignore)
-					&& !GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition)
+				//TODO: FIXME !
+				if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
+					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
 					&& GUI.GetNameOfFocusedControl() == "PWName")
 					GUI.FocusControl(null);
 		
@@ -461,7 +469,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						AssetDatabase.Refresh();
 					}
 					
-					if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
+					if (e.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
 					{
 						UnityEngine.Object selected = null;
 						selected = EditorGUIUtility.GetObjectPickerObject();
@@ -474,7 +482,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 					EditorGUILayout.EndHorizontal();
 				}
 
+				//preview texture:
 				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
+
+				//preview controls:
+				if (e.type == EventType.MouseDown && previewRect.Contains(e.mousePosition))
+					previewMouseDrag = true;
+
+				if (e.type == EventType.Layout && previewMouseDrag)
+				{
+					//mouse controls:
+					Vector2 move = e.mousePosition - lastMousePosition;
+
+					MovePreviewCamera(new Vector2(-move.x / 16, move.y / 16));
+				}
 
 				if (currentGraph.parent == null)
 				{
@@ -579,7 +600,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 				&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(e.mousePosition))) //and mouse is not above a window
 				draggingGraph = true;
 			if (e.type == EventType.MouseUp)
+			{
 				draggingGraph = false;
+				previewMouseDrag = false;
+			}
 			if (e.type == EventType.Layout)
 			{
 				if (draggingGraph)
