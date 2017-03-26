@@ -20,25 +20,26 @@ namespace PW
 		public int			propIndex;
 		public SerializableType[]		allowedTypes;
 		public PWLinkType	linkType;
+		public int			linkCount;
 	
 		public PWAnchorInfo(string name, Rect anchorRect, Color anchorColor,
 			Type fieldType, PWAnchorType anchorType,
 			int windowId, int anchorId,
 			string classAQName, int propIndex,
 			bool generic, Type[] allowedTypes,
-			PWLinkType linkType) : this(name, anchorRect,
+			PWLinkType linkType, int linkCount) : this(name, anchorRect,
 				anchorColor, fieldType,
 				anchorType, windowId,
 				anchorId, classAQName, propIndex,
 				generic, allowedTypes.Cast< SerializableType >().ToArray(),
-				linkType) {}
+				linkType, linkCount) {}
 		
 		public PWAnchorInfo(string name, Rect anchorRect, Color anchorColor,
 			Type fieldType, PWAnchorType anchorType,
 			int windowId, int anchorId,
 			string classAQName, int propIndex,
 			bool generic, SerializableType[] allowedTypes,
-			PWLinkType linkType)
+			PWLinkType linkType, int linkCount)
 		{
 			this.name = name;
 			this.anchorRect = anchorRect;
@@ -53,6 +54,7 @@ namespace PW
 			this.classAQName = classAQName;
 			this.propIndex = propIndex;
 			this.linkType = linkType;
+			this.linkCount = linkCount;
 		}
 	}
 }

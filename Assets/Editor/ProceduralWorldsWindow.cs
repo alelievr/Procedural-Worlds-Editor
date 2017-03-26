@@ -75,9 +75,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[System.NonSerializedAttribute]
 	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
 
-	[System.NonSerializedAttribute]
-	Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
-
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
@@ -116,15 +113,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.name = "New ProceduralWorld";
 	}
 
-	void BakeNode(Type t)
-	{
-		var dico = new Dictionary< string, FieldInfo >();
-		bakedNodeFields[t.AssemblyQualifiedName] = dico;
-
-		foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-			dico[field.Name] = field;
-	}
-	
 	void AddToSelector(string key, params object[] objs)
 	{
 		if (!nodeSelectorList.ContainsKey(key))
@@ -156,14 +144,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Storages");
 		AddToSelector("Custom");
 
-		//bake the fieldInfo types:
-		bakedNodeFields.Clear();
-		foreach (var nodeCat in nodeSelectorList)
-			foreach (var nodeClass in nodeCat.Value)
-				BakeNode(nodeClass.nodeType);
-		BakeNode(typeof(PWNodeGraphOutput));
-		BakeNode(typeof(PWNodeGraphInput));
-		
 		if (currentGraph == null)
 		{
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
@@ -214,7 +194,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
 		{
 			if (draggingLink)
-				draggingLink = false;
+				StopDragLink(false);
 		}
 
 		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
@@ -490,8 +470,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
-		
-				//TODO: draw infos / debug / global settings view
 
 				if (currentGraph.parent == null)
 				{
@@ -627,6 +605,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	PWNode FindNodeByWindowId(int id)
 	{
+		if (currentGraph.nodesDictionary.ContainsKey(id))
+			return currentGraph.nodesDictionary[id];
 		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
 
 		if (ret != null)
@@ -690,17 +670,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//Recalcul the compute order:
 				EvaluateComputeOrder();
 
-				draggingLink = false;
+				StopDragLink(true);
 			}
+
+		if (mouseAboveAnchor.mouseAbove)
+			mouseAboveAnchorInfo = mouseAboveAnchor;
 			
 		//if you press the mouse above an anchor, start the link drag
 		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown && e.button == 0)
-		{
-			startDragAnchor = mouseAboveAnchor;
-			draggingLink = true;
-		}
-		if (mouseAboveAnchor.mouseAbove)
-			mouseAboveAnchorInfo = mouseAboveAnchor;
+			BeginDragLink();
+		
+		if (mouseAboveAnchor.mouseAbove
+				&& draggingLink
+				&& startDragAnchor.anchorId != mouseAboveAnchorInfo.anchorId
+				&& mouseAboveAnchor.anchorType == PWAnchorType.Input)
+			HighlightDeleteAnchor(mouseAboveAnchor);
 
 		//draw links:
 		var links = node.GetLinks();
@@ -733,34 +717,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//check if user have pressed the close button of this window:
 		if (node.WindowShouldClose())
 			DeleteNode(index);
-	}
-
-	void RenderNodeLinks(PWNode node)
-	{
-		var links = node.GetLinks();
-
-		foreach (var link in links)
-		{
-			var target = FindNodeByWindowId(link.distantWindowId);
-
-			if (target == null)
-				continue ;
-
-			var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
-			var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
-			if (link.distantIndex == -1)
-				prop.SetValue(target, val);
-			else //multiple object data:
-			{
-				PWValues values = (PWValues)prop.GetValue(target);
-
-				if (values != null)
-				{
-					if (!values.AssignAt(link.distantIndex, val, link.localName))
-						Debug.Log("failed to set distant indexed field value: " + link.distantName);
-				}
-			}
-		}
 	}
 
 	void DrawNodeGraphCore()
@@ -821,32 +777,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			EndWindows();
 			
-			if (e.type == EventType.Repaint)
-			{
-				if (currentGraph.parent != null)
-					RenderNodeLinks(currentGraph.inputNode);
-				foreach (var node in currentGraph.nodes)
-					RenderNodeLinks(node);
-				foreach (var graph in currentGraph.subGraphs)
-					RenderNodeLinks(graph.outputNode);
-				RenderNodeLinks(currentGraph.outputNode);
-			}
-
 			//submachine enter button click management:
 			foreach (var graph in currentGraph.subGraphs)
 			{
 				if (graph.outputNode.specialButtonClick)
 				{
 					//enter to subgraph:
-					draggingLink = false;
+					StopDragLink(false);
 					graph.outputNode.useExternalWinowRect = false;
 					currentGraph = graph;
 				}
 			}
 
 			//click up outside of an anchor, stop dragging
-			if (e.type == EventType.mouseUp && draggingLink == true)
-				draggingLink = false;
+			if (e.type == EventType.mouseUp && draggingLink)
+				StopDragLink(false);
 
 			if (draggingLink)
 				DrawNodeCurve(
@@ -859,10 +804,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 			
 			if (e.type == EventType.MouseDown && !currentLinks.Any(l => l.hover) && draggingGraph == false)
 				foreach (var l in currentLinks)
-				{
-					l.selected = false;
-					l.linkHighlight = PWLinkHighlight.None;
-				}
+					if (l.selected)
+					{
+						l.selected = false;
+						l.linkHighlight = PWLinkHighlight.None;
+					}
 
 			currentGraph.ForeachAllNodes(p => p.EndFrameUpdate());
 		}
@@ -913,6 +859,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.OnNodeAwake();
 		newNode.OnNodeCreate();
 		currentGraph.nodes.Add(newNode);
+		currentGraph.nodesDictionary[newNode.windowId] = newNode;
 	}
 
 	void DeleteSubmachine(object oid)
@@ -928,21 +875,113 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void CreatePWMachine()
 	{
+		int	subgraphLocalWindowIdCount = 0;
+		
+		//calculate the subgraph starting window id count:
+		int i = 0;
+		PWNodeGraph g = currentGraph;
+		while (g != null)
+		{
+			i++;
+			g = g.parent;
+		}
+		subgraphLocalWindowIdCount = i * 1000000 + (currentGraph.localWindowIdCount++ * 10000);
+
 		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 		InitializeNewGraph(subgraph);
+		subgraph.localWindowIdCount = subgraphLocalWindowIdCount;
 		subgraph.presetChoosed = true;
 		subgraph.inputNode.useExternalWinowRect = true;
-		subgraph.inputNode.windowRect.position = pos;
+		subgraph.inputNode.externalWindowRect.position = pos;
 		subgraph.parent = currentGraph;
 		subgraph.name = "PW sub-machine";
 		currentGraph.subGraphs.Add(subgraph);
+
+		currentGraph.nodesDictionary[subgraph.inputNode.windowId] = subgraph.inputNode;
+		currentGraph.nodesDictionary[subgraph.outputNode.windowId] = subgraph.outputNode;
+	}
+
+	void HighlightDeleteAnchor(PWAnchorInfo anchor)
+	{
+		//anchor is input type.
+		PWLink link = FindLinkFromAnchor(anchor);
+
+		if (link != null)
+			link.linkHighlight = PWLinkHighlight.DeleteAndReset;
 	}
 
 	void BeginDragLink()
 	{
 		startDragAnchor = mouseAboveAnchorInfo;
 		draggingLink = true;
+		if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input)
+		{
+			if (mouseAboveAnchorInfo.linkCount != 0)
+			{
+				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
+
+				if (link != null)
+					link.linkHighlight = PWLinkHighlight.Delete;
+			}
+		}
+	}
+
+	void StopDragLink(bool linked)
+	{
+		draggingLink = false;
+
+		if (linked)
+		{
+			//if we are linking to an input:
+			if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input)
+			{
+				//TODO: delete all previously linked to the mouseAboveAnchorInfo anchor.
+			}
+			else //or an output
+			{
+				//TODO: delete all previously linked to the startDragAnchor anchor.
+			}
+		}
+		else if (startDragAnchor.anchorType == PWAnchorType.Input)
+		{
+			PWLink link = FindLinkFromAnchor(startDragAnchor);
+
+			//displable delete highlight for link
+			if (link != null)
+				link.linkHighlight = PWLinkHighlight.None;
+		}
+	}
+
+	PWLink FindLinkFromAnchor(PWAnchorInfo anchor)
+	{
+		if (anchor.anchorType == PWAnchorType.Input)
+		{
+			//find the anchor node
+			var node = FindNodeByWindowId(anchor.windowId);
+			if (node == null)
+				return null;
+
+			//get dependencies of this anchor
+			var deps = node.GetDependencies(anchor.anchorId);
+			if (deps.Count == 0)
+				return null;
+
+			//get the linked window from the dependency
+			var linkNode = FindNodeByWindowId(deps[0].windowId);
+			if (linkNode == null)
+				return null;
+
+			//find the link of the first dependency
+			var links = linkNode.GetLinks(deps[0].anchorId);
+			if (links.Count != 0)
+				return links[0];
+			return null;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	void DeleteAllAnchorLinks()
@@ -1139,6 +1178,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			switch (e.GetTypeForControl(id))
 			{
 				case EventType.MouseDown:
+					if (link.linkHighlight == PWLinkHighlight.Delete)
+						break ;
 					if (HandleUtility.nearestControl == id && (e.button == 0) || e.button == 1)
 					{
 						GUIUtility.hotControl = id;
@@ -1184,6 +1225,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 4, s);
 					break ;
 			}
+			if (link != null && link.linkHighlight == PWLinkHighlight.DeleteAndReset)
+				link.linkHighlight = PWLinkHighlight.None;
 		}
     }
 
@@ -1195,7 +1238,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, 1f, .7f), null, width + 2);
 				break;
 			case PWLinkHighlight.Delete:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .1f, .1f, .7f), null, width + 2);
+			case PWLinkHighlight.DeleteAndReset:
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .1f, .1f, .85f), null, width + 2);
 				break ;
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);

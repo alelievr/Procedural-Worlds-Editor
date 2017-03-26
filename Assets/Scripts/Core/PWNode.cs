@@ -101,7 +101,7 @@ namespace PW
 
 			disabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
 			highlightNewTexture = CreateTexture2DColor(new Color(0, .5f, 0, .4f));
-			highlightReplaceTexture = CreateTexture2DColor(new Color(.5f, .5f, 0, .4f));
+			highlightReplaceTexture = CreateTexture2DColor(new Color(1f, 0f, 0, .4f));
 			highlightAddTexture = CreateTexture2DColor(new Color(0f, .0f, 0.5f, .4f));
 
 			errorIcon = CreateTexture2DFromFile("error");
@@ -441,7 +441,7 @@ namespace PW
 					data.anchorType, windowId, singleAnchor.id,
 					data.classAQName, index,
 					data.generic, data.allowedTypes,
-					singleAnchor.linkType);
+					singleAnchor.linkType, singleAnchor.linkCount);
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -582,9 +582,19 @@ namespace PW
 			return links;
 		}
 
+		public List< PWLink > GetLinks(int anchorId)
+		{
+			return links.Where(l => l.localAnchorId == anchorId).ToList();
+		}
+
 		public List< PWNodeDependency >	GetDependencies()
 		{
 			return depencendies;
+		}
+
+		public List< PWNodeDependency > GetDependencies(int anchorId)
+		{
+			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
 		}
 		
 		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
@@ -711,14 +721,14 @@ namespace PW
 					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
 					fromAnchor.first.id, fromAnchor.classAQName,
 					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes,
-					fromAnchor.first.linkType
+					fromAnchor.first.linkType, fromAnchor.first.linkCount
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
 				toAnchor.fieldName, new Rect(), Color.white,
 				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
 				toAnchor.first.id, toAnchor.classAQName,
 				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes,
-				fromAnchor.first.linkType
+				toAnchor.first.linkType, toAnchor.first.linkCount
 			);
 
 			AttachLink(from, to);

@@ -18,6 +18,7 @@ namespace PW
 		None,
 		Selected,
 		Delete,
+		DeleteAndReset,
 	}
 
 	[System.SerializableAttribute]

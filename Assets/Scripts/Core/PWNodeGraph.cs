@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
+using System;
 
 namespace PW
 {
@@ -73,20 +75,105 @@ namespace PW
 		[System.NonSerializedAttribute]
 		public bool							unserializeInitialized = false;
 
+		[System.NonSerializedAttribute]
+		public Dictionary< int, PWNode > nodesDictionary = new Dictionary< int, PWNode >();
+
+		[System.NonSerializedAttribute]
+		Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
+
+		[System.NonSerializedAttribute]
+		List< Type > allNodeTypeList = new List< Type >{
+			typeof(PWNodeSlider),
+			typeof(PWNodeAdd),
+			typeof(PWNodeDebugLog),
+			typeof(PWNodeCircleNoiseMask),
+			typeof(PWNodePerlinNoise2D),
+			typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
+			typeof(PWNodeGraphInput),
+			typeof(PWNodeGraphOutput),
+		};
+
+		void BakeNode(Type t)
+		{
+			var dico = new Dictionary< string, FieldInfo >();
+			bakedNodeFields[t.AssemblyQualifiedName] = dico;
+	
+			foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+				dico[field.Name] = field;
+		}
+	
+		public void OnEnable()
+		{
+			//bake node fields to accelerate data transfer from node to node.
+			bakedNodeFields.Clear();
+			foreach (var nodeType in allNodeTypeList)
+				BakeNode(nodeType);
+			
+			//add all existing nodes to the nodesDictionary
+			foreach (var node in nodes)
+				nodesDictionary[node.windowId] = node;
+			foreach (var subgraph in subGraphs)
+			{
+				nodesDictionary[subgraph.inputNode.windowId] = subgraph.inputNode;
+				nodesDictionary[subgraph.outputNode.windowId] = subgraph.outputNode;
+			}
+			if (inputNode != null)
+				nodesDictionary.Add(inputNode.windowId, inputNode);
+			if (outputNode != null)
+				nodesDictionary.Add(outputNode.windowId, outputNode);
+		}
+		
+		void ProcessNodeLinks(PWNode node)
+		{
+			var links = node.GetLinks();
+	
+			foreach (var link in links)
+			{
+				var target = nodesDictionary[link.distantWindowId];
+	
+				if (target == null)
+					continue ;
+	
+				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
+				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+				if (link.distantIndex == -1)
+					prop.SetValue(target, val);
+				else //multiple object data:
+				{
+					PWValues values = (PWValues)prop.GetValue(target);
+	
+					if (values != null)
+					{
+						if (!values.AssignAt(link.distantIndex, val, link.localName))
+							Debug.Log("failed to set distant indexed field value: " + link.distantName);
+					}
+				}
+			}
+		}
+
 		public void ProcessGraph()
 		{
 			//here nodes are sorted by compute-order
 			//TODO: rework this to get a working in-depth node process call
+
 			if (parent != null)
+			{
 				inputNode.Process();
+				ProcessNodeLinks(inputNode);
+			}
 			foreach (var node in nodes)
 				if (node != null && node.computeOrder != -1)
+				{
 					node.Process();
+					ProcessNodeLinks(node);
+				}
 			foreach (var graph in subGraphs)
+			{
 				graph.outputNode.Process();
+				ProcessNodeLinks(graph.outputNode);
+			}
 		}
 
-		//TODO here browse on nodes and setSeed / setPosition.
 		public void	UpdateSeed(int seed)
 		{
 			this.seed = seed;
