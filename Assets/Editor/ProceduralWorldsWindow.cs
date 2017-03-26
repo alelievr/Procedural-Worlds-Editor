@@ -40,6 +40,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				mouseAboveNodeAnchor;
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
+	bool				updateGraph = true;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
 
@@ -102,10 +103,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.outputNode = ScriptableObject.CreateInstance< PWNodeGraphOutput >();
 		graph.outputNode.SetWindowId(currentGraph.localWindowIdCount++);
 		graph.outputNode.windowRect.position = new Vector2(position.width - 100, (int)(position.height / 2));
+		graph.nodesDictionary.Add(graph.outputNode.windowId, graph.outputNode);
 
 		graph.inputNode = ScriptableObject.CreateInstance< PWNodeGraphInput >();
 		graph.inputNode.SetWindowId(currentGraph.localWindowIdCount++);
 		graph.inputNode.windowRect.position = new Vector2(50, (int)(position.height / 2));
+		graph.nodesDictionary.Add(graph.inputNode.windowId, graph.inputNode);
 
 		graph.firstInitialization = "initialized";
 
@@ -235,7 +238,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.Repaint
 			|| Event.current.type == EventType.KeyUp)
 			Repaint();
+
 		windowSize = position.size;
+		updateGraph = false;
     }
 
 	void DrawPresetLineHeader(string header)
@@ -659,6 +664,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
 			if (mouseAboveAnchor.mouseAbove)
 			{
+				StopDragLink(true);
+
 				//attach link to the node:
 				node.AttachLink(mouseAboveAnchor, startDragAnchor);
 				var win = FindNodeByWindowId(startDragAnchor.windowId);
@@ -669,8 +676,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				
 				//Recalcul the compute order:
 				EvaluateComputeOrder();
-
-				StopDragLink(true);
 			}
 
 		if (mouseAboveAnchor.mouseAbove)
@@ -820,27 +825,30 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	}
 
-	void DeleteNode(object oid)
+	void DeleteNode(object oNodeIndex)
 	{
-		int	id = (int)oid;
+		var node = currentGraph.nodes[(int)oNodeIndex];
 
 		//remove all input links for each node links:
-		foreach (var link in currentGraph.nodes[id].GetLinks())
+		foreach (var link in node.GetLinks())
 		{
-			var node = FindNodeByWindowId(link.distantWindowId);
-			if (node != null)
-				node.RemoveDependenciesByWindowTarget(link.localWindowId);
+			var n = FindNodeByWindowId(link.distantWindowId);
+			if (n != null)
+				n.DeleteDependenciesByWindowTarget(link.localWindowId);
 		}
 		//remove all links for node dependencies
-		foreach (var deps in currentGraph.nodes[id].GetDependencies())
+		foreach (var deps in node.GetDependencies())
 		{
-			var node = FindNodeByWindowId(deps.windowId);
-			if (node != null)
-				node.DeleteLinkByWindowTarget(deps.windowId);
+			var n = FindNodeByWindowId(deps.windowId);
+			if (n != null)
+			{
+				Debug.Log("deleting link to " + deps.windowId + " on window: " + n.windowId);
+				n.DeleteLinkByWindowTarget(node.windowId);
+			}
 		}
 
 		//remove the node
-		currentGraph.nodes.RemoveAt(id);
+		currentGraph.nodes.RemoveAt((int)oNodeIndex);
 
 		EvaluateComputeOrder();
 	}
@@ -856,8 +864,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
-		newNode.OnNodeAwake();
-		newNode.OnNodeCreate();
+		newNode.RunNodeAwake();
 		currentGraph.nodes.Add(newNode);
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
 	}
@@ -934,11 +941,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (linked)
 		{
 			//if we are linking to an input:
-			if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input)
+			if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input && mouseAboveAnchorInfo.linkCount != 0)
 			{
+				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
+
+				var from = FindNodeByWindowId(link.localWindowId);
+				var to = FindNodeByWindowId(link.distantWindowId);
+				
+				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
+				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
+
 				//TODO: delete all previously linked to the mouseAboveAnchorInfo anchor.
 			}
-			else //or an output
+			else if (startDragAnchor.linkCount != 0)//or an output
 			{
 				//TODO: delete all previously linked to the startDragAnchor anchor.
 			}
@@ -973,15 +988,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 				return null;
 
 			//find the link of the first dependency
-			var links = linkNode.GetLinks(deps[0].anchorId);
+			var links = linkNode.GetLinks(deps[0].anchorId, node.windowId, deps[0].connectedAnchorId);
 			if (links.Count != 0)
 				return links[0];
 			return null;
 		}
 		else
-		{
 			return null;
-		}
 	}
 
 	void DeleteAllAnchorLinks()
@@ -1226,6 +1239,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 					break ;
 			}
 			if (link != null && link.linkHighlight == PWLinkHighlight.DeleteAndReset)
+				link.linkHighlight = PWLinkHighlight.None;
+			if (link != null && !link.selected && link.linkHighlight == PWLinkHighlight.Selected)
 				link.linkHighlight = PWLinkHighlight.None;
 		}
     }

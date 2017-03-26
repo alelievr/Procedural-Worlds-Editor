@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using UnityEngine;
 using UnityEditor;
@@ -582,9 +582,11 @@ namespace PW
 			return links;
 		}
 
-		public List< PWLink > GetLinks(int anchorId)
+		public List< PWLink > GetLinks(int anchorId, int targetWindowId, int targetAnchorId)
 		{
-			return links.Where(l => l.localAnchorId == anchorId).ToList();
+			return links.Where(l => l.localAnchorId == anchorId
+				&& l.distantWindowId == targetWindowId
+				&& l.distantAnchorId == targetAnchorId).ToList();
 		}
 
 		public List< PWNodeDependency >	GetDependencies()
@@ -830,7 +832,7 @@ namespace PW
 				}
 		}
 
-		public void		RemoveDependenciesByWindowTarget(int targetWindowId)
+		public void		DeleteDependenciesByWindowTarget(int targetWindowId)
 		{
 			DeleteDependencies(d => d.windowId == targetWindowId);
 		}
