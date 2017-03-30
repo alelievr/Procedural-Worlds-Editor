@@ -1,7 +1,6 @@
 ﻿// #define DEBUG_WINDOW
-
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -350,6 +349,7 @@ namespace PW
 			EditorGUILayout.LabelField("You are on the wrong window !");
 		}
 
+		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
 		{
 			if (boxAnchorStyle == null)
@@ -400,6 +400,7 @@ namespace PW
 			if (Event.current.type == EventType.Repaint)
 				viewHeight += 24;
 		}
+		#endif
 	
 		public virtual void	OnNodeGUI()
 		{

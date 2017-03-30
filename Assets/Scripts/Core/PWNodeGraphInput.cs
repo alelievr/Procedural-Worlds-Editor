@@ -32,7 +32,7 @@ namespace PW
 		{
 			//done by PWNode when mirrored.
 			/*var values = inputValues.GetValues< object >();
-			var names = inputValues.GetNames< object >();
+			var names = inputValuesGetNames< object >();
 
 			for (int i = 0; i < values.Count; i++)
 				outputValues.AssignAt(i, values[i], names[i]);*/

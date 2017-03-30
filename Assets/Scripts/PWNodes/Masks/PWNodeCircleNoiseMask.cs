@@ -29,6 +29,7 @@ namespace PW
 			mask = new Sampler2D(chunkSize);
 		}
 
+		//do not use inputs here, their values may be null.
 		void	CreateNoiseMask()
 		{
 			Debug.Log("not null + " + Event.current.type);
