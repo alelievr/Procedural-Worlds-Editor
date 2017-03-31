@@ -26,15 +26,8 @@ namespace PW
 			persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
 			octaves = EditorGUILayout.IntSlider("Octaves", octaves, 0, 32);
 
-			if (chunkSizeHasChanged)
-			{
-				output.Resize(chunkSize);
-				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-				OnNodeProcess();
-			}
-
 			//TODO: shader preview here
-
+			
 			//redraw the texture:
 			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{
@@ -48,6 +41,12 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
+			if (chunkSizeHasChanged)
+			{
+				output.Resize(chunkSize);
+				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
+			}
+
 			//recalcul perlin noise values with new seed / position.
 			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
 			{

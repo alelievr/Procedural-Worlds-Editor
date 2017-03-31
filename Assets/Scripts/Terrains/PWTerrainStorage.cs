@@ -101,7 +101,7 @@ namespace PW
 		{
 			foreach (var kp in chunks)
 			{
-				if (kp.Value.visibility == ChunkVisibility.NONE || kp.Value.visibility == filter)
+				if (filter == ChunkVisibility.NONE || kp.Value.visibility == filter)
 					callback(kp.Key, kp.Value.terrainData, kp.Value.userData);
 			}
 		}
@@ -109,6 +109,11 @@ namespace PW
 		public void Foreach(Action<Vector3i, ChunkData, object> callback)
 		{
 			Foreach(ChunkVisibility.NONE, callback);
+		}
+
+		public void Clear()
+		{
+			chunks.Clear();
 		}
 
 		public bool	RemoveAt(Vector3i pos)

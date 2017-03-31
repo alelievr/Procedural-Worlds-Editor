@@ -54,6 +54,7 @@ namespace PW
 		Vector3	oldChunkPosition;
 		int		oldSeed;
 		int		oldChunkSize;
+		Pair< string, int >	lastAttachedLink = null;
 
 		public static int	windowRenderOrder = 0;
 
@@ -416,6 +417,14 @@ namespace PW
 					var mirroredProp = propertyDatas[kp.Value.mirroredField];
 					bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
 				}
+				
+			//send anchor connection events:
+			if (lastAttachedLink != null)
+			{
+				OnNodeAnchorLink(lastAttachedLink.first, lastAttachedLink.second);
+				lastAttachedLink = null;
+			}
+
 			OnNodeProcess();
 		}
 
@@ -675,7 +684,7 @@ namespace PW
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
 					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor)
 				);
-				OnNodeAnchorLink(from.name, from.propIndex);
+				lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -688,7 +697,7 @@ namespace PW
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
-						OnNodeAnchorLink(from.name, from.propIndex);
+						lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple)
@@ -969,12 +978,10 @@ namespace PW
 
 		public virtual void	OnNodeAnchorLink(string propName, int index)
 		{
-
 		}
 
 		public virtual void OnNodeAnchorUnlink(string propName, int index)
 		{
-
 		}
 
 		public bool		WindowShouldClose()

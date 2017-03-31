@@ -38,7 +38,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				mouseAboveNodeAnchor;
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
-	bool				updateGraph = true;
+	bool				graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
@@ -239,7 +239,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Repaint();
 
 		windowSize = position.size;
-		updateGraph = false;
     }
 
 	void DrawPresetLineHeader(string header)
@@ -500,14 +499,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 					EditorGUI.BeginChangeCheck();
 					currentGraph.seed = EditorGUILayout.IntField("Seed", currentGraph.seed);
 					if (EditorGUI.EndChangeCheck())
+					{
 						currentGraph.UpdateSeed(currentGraph.seed);
+						graphNeedReload = true;
+					}
 					
 					//chunk size:
 					EditorGUI.BeginChangeCheck();
 					currentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", currentGraph.chunkSize);
 					currentGraph.chunkSize = Mathf.Clamp(currentGraph.chunkSize, 1, 1024);
 					if (EditorGUI.EndChangeCheck())
+					{
 						currentGraph.UpdateChunkSize(currentGraph.chunkSize);
+						graphNeedReload = true;
+					}
 				}
 			}
 			EditorGUILayout.EndVertical();
@@ -692,7 +697,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 				node.AttachLink(mouseAboveAnchor, startDragAnchor);
 				var win = FindNodeByWindowId(startDragAnchor.windowId);
 				if (win != null)
+				{
 					win.AttachLink(startDragAnchor, mouseAboveAnchor);
+					graphNeedReload = true;
+				}
 				else
 					Debug.LogWarning("window id not found: " + startDragAnchor.windowId);
 				
@@ -757,9 +765,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			//We run the calcul the nodes:
 			if (e.type == EventType.Layout)
 			{
-				currentGraph.ProcessGraph();
-				//TODO: check if graph has changed / is time-dependent and reload if it is.
-				//TODO: if critical changes have been done, DestroyAllChunks();
+				if (graphNeedReload)
+					terrainMaterializer.DestroyAllChunks();
+				//updateChunks will update and generate new chunks if needed.
 				terrainMaterializer.UpdateChunks();
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
@@ -851,6 +859,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		var node = currentGraph.nodes[(int)oNodeIndex];
 
+		graphNeedReload = true;
 		//remove all input links for each node links:
 		foreach (var link in node.GetLinks())
 		{
@@ -886,6 +895,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
+		newNode.computeOrder = -1;
 		newNode.RunNodeAwake();
 		currentGraph.nodes.Add(newNode);
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
@@ -894,6 +904,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DeleteSubmachine(object oid)
 	{
 		int id = (int)oid;
+
+		graphNeedReload = true;
 
 		//TODO: remove all dependencies and links from the output and input machine.
 

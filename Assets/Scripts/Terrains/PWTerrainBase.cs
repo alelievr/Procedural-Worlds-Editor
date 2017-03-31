@@ -120,8 +120,8 @@ namespace PW
 				return ;
 			terrainStorage.Foreach((pos, terrainData, userData) => {
 				OnChunkDestroy(terrainData, userData, (Vector3)pos);
-				terrainStorage.RemoveAt(pos);
 			});
+			terrainStorage.Clear();
 		}
 
 		/* Utils function to simplify the downstream scripting: */
