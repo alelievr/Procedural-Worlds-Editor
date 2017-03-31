@@ -1,4 +1,5 @@
 ﻿// #define DEBUG_WINDOW
+
 using UnityEditor;
 using UnityEngine;
 using System;
@@ -29,6 +30,10 @@ namespace PW
 		public bool		chunkSizeHasChanged = false;
 		public bool		inputHasChanged = false;
 		public bool		outputHasChanged = false;
+		public bool		justReloaded = false;
+		public bool		notifyDataChanged = false;
+		public bool		reloadRequested = false;
+		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
 
 		[System.NonSerializedAttribute]
 		public bool		unserializeInitialized = false;
@@ -125,6 +130,8 @@ namespace PW
 
 				firstInitialization = "initialized";
 			}
+
+			justReloaded = true;
 		}
 
 		public void RunNodeAwake()
@@ -545,6 +552,7 @@ namespace PW
 
 				Rect renameRect = (useExternalWinowRect) ? externalWindowRect : windowRect;
 				renameRect.position += graphDecal - Vector2.up * 18;
+				renameRect.size = new Vector2(renameRect.size.x, 30);
 				GUI.SetNextControlName("renameWindow");
 				name = GUI.TextField(renameRect, name, centeredText);
 
@@ -973,6 +981,8 @@ namespace PW
 				chunkSizeHasChanged = false;
 				inputHasChanged = false;
 				outputHasChanged = false;
+				reloadRequested = false;
+				justReloaded = false;
 			}
 		}
 

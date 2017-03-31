@@ -65,20 +65,28 @@ namespace PW
 			}
 
 			EditorGUIUtility.labelWidth = 70;
-			blur = EditorGUILayout.Slider("blur", blur, 0, 1);
 			EditorGUI.BeginChangeCheck();
-			radius = EditorGUILayout.Slider("radius", radius, 0, 1);
+			{
+				blur = EditorGUILayout.Slider("blur", blur, 0, 1);
+				radius = EditorGUILayout.Slider("radius", radius, 0, 1);
+			}
 			if (EditorGUI.EndChangeCheck())
+			{
 				CreateNoiseMask();
+				notifyDataChanged = true;
+			}
 			
 			GUILayout.Label(maskTexture);
+
 		}
 
 		public override void OnNodeProcess()
 		{
-			if (chunkSizeHasChanged)
+			if (needUpdate)
+			{
 				CreateNoiseMask();
-			samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
+				samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
+			}
 			output = samp;
 		}
 	}

@@ -30,7 +30,7 @@ namespace PW
 				texture = new Sampler2D(chunkSize);
 			}
 			
-			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
+			if (needUpdate)
 				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, Color.blue * val);});
 		}
 

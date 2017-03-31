@@ -38,7 +38,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				mouseAboveNodeAnchor;
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
-	bool				graphNeedReload = false;
+	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
@@ -156,6 +156,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
 			if (currentGraph.nodes[i] == null)
 				DeleteNode(i--);
+
+		//force graph to reload all chunks (just after compiled)
+		graphNeedReload = true;
+
 		currentGraph.unserializeInitialized = true;
 	}
 
@@ -263,6 +267,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				{
 					currentGraph.presetChoosed = true;
 					callback();
+					EvaluateComputeOrder();
 				}
 			EditorGUILayout.LabelField(description, whiteText);
 			EditorGUI.EndDisabledGroup();
@@ -432,7 +437,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.SetNextControlName("PWName");
 				currentGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
 
-				//TODO: FIXME !
 				if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
 					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
 					&& GUI.GetNameOfFocusedControl() == "PWName")
@@ -600,7 +604,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				&& (e.button == 0 || e.button == 2)
 				&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
 				&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
-				&& !currentGraph.nodes.Any(n => PWUtils.DecalRect(n.windowRect,currentGraph. graphDecalPosition, true).Contains(e.mousePosition))) //and mouse is not above a window
+				&& mouseAboveNodeIndex == -1
+				&& mouseAboveSubmachineIndex == -1)
 				draggingGraph = true;
 			if (e.type == EventType.MouseUp)
 			{
@@ -766,12 +771,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (e.type == EventType.Layout)
 			{
 				if (graphNeedReload)
+				{
 					terrainMaterializer.DestroyAllChunks();
+					graphNeedReload = false;
+				}
 				//updateChunks will update and generate new chunks if needed.
 				terrainMaterializer.UpdateChunks();
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
+				graphNeedReload = true;
 				Debug.Log("TODO: serialization");
 			}
 
@@ -807,8 +816,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			//display the upper graph reference:
 			if (currentGraph.parent != null)
-				RenderNode(windowId++, currentGraph.inputNode, "upper graph", -1, ref mouseAboveAnchorLocal);
-			RenderNode(windowId++, currentGraph.outputNode, "output", -1, ref mouseAboveAnchorLocal);
+				RenderNode(windowId++, currentGraph.inputNode, "upper graph", -2, ref mouseAboveAnchorLocal);
+			RenderNode(windowId++, currentGraph.outputNode, "output", -2, ref mouseAboveAnchorLocal);
 
 			EndWindows();
 			
@@ -845,7 +854,25 @@ public class ProceduralWorldsWindow : EditorWindow {
 						l.linkHighlight = PWLinkHighlight.None;
 					}
 
-			currentGraph.ForeachAllNodes(p => p.EndFrameUpdate());
+			bool reloadRequested = false;
+			currentGraph.ForeachAllNodes(p => {
+				p.EndFrameUpdate();
+				if (e.type == EventType.Layout)
+					if (p.notifyDataChanged)
+					{
+						graphNeedReload = true;
+						p.notifyDataChanged = false;
+						reloadRequested = true;
+					}
+			}, true, true);
+
+			//TODO: optimize this: set reloadRequested to true only on the needed nodes.
+			if (reloadRequested)
+			{
+				currentGraph.ForeachAllNodes(n => {
+					n.reloadRequested = true;
+				}, true, true);
+			}
 		}
 		EditorGUILayout.EndHorizontal();
 	}

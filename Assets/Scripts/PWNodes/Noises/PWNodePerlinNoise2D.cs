@@ -29,7 +29,7 @@ namespace PW
 			//TODO: shader preview here
 			
 			//redraw the texture:
-			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
+			if (needUpdate)
 			{
 				output.Foreach((x, y, val) => {
 					previewTex.SetPixel(x, y, new Color(val, val, val));
@@ -48,7 +48,7 @@ namespace PW
 			}
 
 			//recalcul perlin noise values with new seed / position.
-			if (seedHasChanged || positionHasChanged || chunkSizeHasChanged)
+			if (needUpdate)
 			{
 				output.Foreach((x, y) => {
 					float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
