@@ -77,7 +77,6 @@ namespace PW
 			}
 			
 			GUILayout.Label(maskTexture);
-
 		}
 
 		public override void OnNodeProcess()

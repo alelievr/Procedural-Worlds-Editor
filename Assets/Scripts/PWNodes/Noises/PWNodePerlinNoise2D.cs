@@ -23,20 +23,33 @@ namespace PW
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 70;
-			persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
-			octaves = EditorGUILayout.IntSlider("Octaves", octaves, 0, 32);
+
+			EditorGUI.BeginChangeCheck();
+			{
+				persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
+				octaves = EditorGUILayout.IntSlider("Octaves", octaves, 0, 32);
+			}
+			if (EditorGUI.EndChangeCheck())
+			{
+				UpdateNoise();
+				notifyDataChanged = true;
+			}
 
 			//TODO: shader preview here
 			
-			//redraw the texture:
-			if (needUpdate)
-			{
-				output.Foreach((x, y, val) => {
-					previewTex.SetPixel(x, y, new Color(val, val, val));
-				});
-				previewTex.Apply();
-			}
 			GUILayout.Label(previewTex, GUILayout.Width(100), GUILayout.Height(100));
+		}
+
+		void UpdateNoise()
+		{
+			output.Foreach((x, y) => {
+				float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
+				for (int i = 0; i < octaves; i++)
+					val *= 1.2f;
+				previewTex.SetPixel(x, y, new Color(val, val, val));
+				return val;
+			});
+			previewTex.Apply();
 		}
 
 		public override void OnNodeProcess()
@@ -49,12 +62,7 @@ namespace PW
 
 			//recalcul perlin noise values with new seed / position.
 			if (needUpdate)
-			{
-				output.Foreach((x, y) => {
-					float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
-					return val;
-				});
-			}
+				UpdateNoise();
 		}
 	}
 }

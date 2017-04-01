@@ -10,7 +10,7 @@ namespace PW
 		[PWMultiple(1, typeof(SideView2DData), typeof(TopDown2DData))]
 		[PWInput("in")]
 		[PWOffset(0, 20)]
-		public PWValues		inputValues = new PWValues();
+		public PWValues		outputValues = new PWValues();
 
 		public override void OnNodeCreate()
 		{
@@ -19,17 +19,8 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-			var names = inputValues.GetNames< object >();
-			var values = inputValues.GetValues< object >();
-
-			//if the output node is displayed for an upper layer:
-			if (useExternalWinowRect)
-			{
-				if (GUILayout.Button("go into machine"))
-					specialButtonClick = true;
-				else
-					specialButtonClick = false;
-			}
+			var names = outputValues.GetNames< object >();
+			var values = outputValues.GetValues< object >();
 
 			EditorGUILayout.LabelField("names: [" + names.Count + "]");
 			for (int i = 0; i < names.Count; i++)

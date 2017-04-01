@@ -14,13 +14,12 @@ namespace PW
 	{
 		public string	nodeTypeName;
 		public Rect		windowRect;
-		public Rect		externalWindowRect;
-		public bool		useExternalWinowRect = false;
 		public int		windowId;
 		public bool		renamable;
 		public int		computeOrder;
 		public int		viewHeight;
 		public bool		specialButtonClick = false;
+		public bool		isDragged = false;
 		public Vector3	chunkPosition = Vector3.zero;
 		public int		chunkSize = 16;
 		public int		seed;
@@ -120,8 +119,6 @@ namespace PW
 			{
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 50);
-				externalWindowRect = new Rect(400, 400, 200, 50);
-				useExternalWinowRect = false;
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
@@ -200,7 +197,7 @@ namespace PW
 		void LoadFieldAttributes()
 		{
 			//get input variables
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields();
+			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
 			List< string > actualFields = new List< string >();
 			foreach (var field in fInfos)
@@ -367,8 +364,12 @@ namespace PW
 			}
 
 			// set the header of the window as draggable:
-			int width = (int)((useExternalWinowRect) ? externalWindowRect.width : windowRect.width);
+			int width = (int) windowRect.width;
 			Rect dragRect = new Rect(0, 0, width, 20);
+			if (Event.current.type == EventType.MouseDown && dragRect.Contains(Event.current.mousePosition))
+				isDragged = true;
+			if (Event.current.type == EventType.MouseUp)
+				isDragged = false;
 			if (id != -1)
 				GUI.DragWindow(dragRect);
 
@@ -470,7 +471,7 @@ namespace PW
 			int		anchorWidth = 38;
 			int		anchorHeight = 16;
 
-			Rect	winRect = (useExternalWinowRect) ? externalWindowRect : windowRect;
+			Rect	winRect = windowRect;
 			Rect	inputAnchorRect = new Rect(winRect.xMin - anchorWidth + 2, winRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(winRect.xMax - 2, winRect.y + 20, anchorWidth, anchorHeight);
 			ForeachPWAnchors((data, singleAnchor, i) => {
@@ -550,7 +551,7 @@ namespace PW
 				centeredText.alignment = TextAnchor.UpperCenter;
 				centeredText.margin.top += 2;
 
-				Rect renameRect = (useExternalWinowRect) ? externalWindowRect : windowRect;
+				Rect renameRect = windowRect;
 				renameRect.position += graphDecal - Vector2.up * 18;
 				renameRect.size = new Vector2(renameRect.size.x, 30);
 				GUI.SetNextControlName("renameWindow");
@@ -632,11 +633,12 @@ namespace PW
 				{
 					if (verbose)
 						Debug.Log("Generic variable, check all allowed types:");
-					foreach (var st in fromAllowedTypes)
+					foreach (Type t in fromAllowedTypes)
 					{
-						Type t = st;
 						if (verbose)
 							Debug.Log("check castable from " + to.fieldType + " to " + t);
+						if (t == typeof(object))
+							return true;
 						if (to.fieldType.IsAssignableFrom(t))
 						{
 							if (verbose)
@@ -650,11 +652,12 @@ namespace PW
 			{
 				if (to.generic)
 				{
-					foreach (var st in to.allowedTypes)
+					foreach (Type t in to.allowedTypes)
 					{
-						Type t = st;
 						if (verbose)
 							Debug.Log("check castable from " + fromType + " to " + t);
+						if (t == typeof(object))
+							return true;
 						if (fromType.IsAssignableFrom(t))
 						{
 							if (verbose)

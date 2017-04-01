@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using PW;
 
 public class PerlinNoise2D : Noise {
@@ -9,8 +7,10 @@ public class PerlinNoise2D : Noise {
 	{
 	}
 
-	public void ComputeZone(Bounds bounds)
+	public Sampler2D ComputeSampler(Bounds bounds, Sampler2D samp = null)
 	{
+		if (samp == null)
+			samp = new Sampler2D((int)bounds.size.x);
 		if (hasGraphicAcceleration)
 		{
 			//compute shader here
@@ -19,6 +19,7 @@ public class PerlinNoise2D : Noise {
 		{
 			//use conventional threaded way
 		}
+		return samp;
 	}
 
 	public float GetValueAt(Vector3 pos)

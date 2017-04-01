@@ -38,6 +38,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				mouseAboveNodeAnchor;
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
+	bool				draggingNode = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
@@ -266,6 +267,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (GUILayout.Button(tex, GUILayout.Width(100), GUILayout.Height(100)))
 				{
 					currentGraph.presetChoosed = true;
+					graphNeedReload = true;
 					callback();
 					EvaluateComputeOrder();
 				}
@@ -307,8 +309,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 					perlin.AttachLink("output", terrain, "texture");
 					terrain.AttachLink("texture", perlin, "output");
-					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
-					currentGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
+					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "outputValues");
+					currentGraph.outputNode.AttachLink("outputValues", terrain, "terrainOutput");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();
@@ -644,16 +646,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		if (currentGraph.nodesDictionary.ContainsKey(id))
 			return currentGraph.nodesDictionary[id];
-		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
 
+		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
 		if (ret != null)
 			return ret;
-		var gInput = currentGraph.subGraphs.FirstOrDefault(g => g.inputNode.windowId == id);
-		if (gInput != null && gInput.inputNode != null)
-			return gInput.inputNode;
-		var gOutput = currentGraph.subGraphs.FirstOrDefault(g => g.outputNode.windowId == id);
-		if (gOutput != null && gOutput.outputNode != null)
-			return gOutput.outputNode;
+
+		var gExternalNode = currentGraph.subGraphs.FirstOrDefault(g => g.externalGraphNode.windowId == id);
+		if (gExternalNode != null && gExternalNode.externalGraphNode != null)
+			return gExternalNode.externalGraphNode;
 
 		if (currentGraph.inputNode.windowId == id)
 			return currentGraph.inputNode;
@@ -663,7 +663,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		return null;
 	}
 
-	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, bool submachine = false)
+	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, ref bool mouseDraggingWindowLocal, bool submachine = false)
 	{
 		Event	e = Event.current;
 
@@ -687,6 +687,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		var mouseAboveAnchor = node.ProcessAnchors();
 		if (mouseAboveAnchor.mouseAbove)
 			mouseAboveAnchorLocal = true;
+
+		if (!mouseDraggingWindowLocal)
+			if (node.isDragged)
+				mouseDraggingWindowLocal = true;
 
 		//render node anchors:
 		node.RenderAnchors();
@@ -785,6 +789,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 
 			bool	mouseAboveAnchorLocal = false;
+			bool	draggingNodeLocal = false;
 			int		windowId = 0;
 			linkIndex = 0;
 
@@ -802,33 +807,31 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				var node = currentGraph.nodes[i];
 				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
-				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal);
+				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 			}
 
 			//display graph sub-PWGraphs
 			i = 0;
 			foreach (var graph in currentGraph.subGraphs)
 			{
-				graph.outputNode.useExternalWinowRect = true;
-				RenderNode(windowId++, graph.outputNode, graph.name, i, ref mouseAboveAnchorLocal, true);
+				RenderNode(windowId++, graph.externalGraphNode, graph.name, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
 				i++;
 			}
 
 			//display the upper graph reference:
 			if (currentGraph.parent != null)
-				RenderNode(windowId++, currentGraph.inputNode, "upper graph", -2, ref mouseAboveAnchorLocal);
-			RenderNode(windowId++, currentGraph.outputNode, "output", -2, ref mouseAboveAnchorLocal);
+				RenderNode(windowId++, currentGraph.inputNode, "upper graph", -2, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
+			RenderNode(windowId++, currentGraph.outputNode, "output", -2, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 
 			EndWindows();
 			
 			//submachine enter button click management:
 			foreach (var graph in currentGraph.subGraphs)
 			{
-				if (graph.outputNode.specialButtonClick)
+				if (graph.externalGraphNode.specialButtonClick)
 				{
 					//enter to subgraph:
 					StopDragLink(false);
-					graph.outputNode.useExternalWinowRect = false;
 					currentGraph = graph;
 				}
 			}
@@ -845,6 +848,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					null
 				);
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
+			draggingNode = draggingNodeLocal;
 			
 			if (e.type == EventType.MouseDown && !currentLinks.Any(l => l.hover) && draggingGraph == false)
 				foreach (var l in currentLinks)
@@ -854,7 +858,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 						l.linkHighlight = PWLinkHighlight.None;
 					}
 
-			bool reloadRequested = false;
+			bool	reloadRequested = false;
+			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {
 				p.EndFrameUpdate();
 				if (e.type == EventType.Layout)
@@ -863,14 +868,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 						graphNeedReload = true;
 						p.notifyDataChanged = false;
 						reloadRequested = true;
+						reloadWeight = p.computeOrder;
 					}
 			}, true, true);
 
-			//TODO: optimize this: set reloadRequested to true only on the needed nodes.
+			//TODO: subgraph dependencies management.
 			if (reloadRequested)
 			{
 				currentGraph.ForeachAllNodes(n => {
-					n.reloadRequested = true;
+					if (n.computeOrder >= reloadWeight)
+						n.reloadRequested = true;
 				}, true, true);
 			}
 		}
@@ -914,18 +921,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void CreateNewNode(object type)
 	{
 		//TODO: if mouse is in the node graph, add the new node at the mouse position instead of the center of the window
-		Type t = (Type)type;
+		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		PWNode newNode = CreateNewNode((Type)type, pos);
+		currentGraph.nodes.Add(newNode);
+	}
+
+	PWNode	CreateNewNode(Type t, Vector2 position)
+	{
 		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
+
 		//center to the middle of the screen:
-		newNode.windowRect.position = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		newNode.windowRect.position = position;
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
 		newNode.computeOrder = -1;
 		newNode.RunNodeAwake();
-		currentGraph.nodes.Add(newNode);
+		
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
+		
+		return newNode;
 	}
 
 	void DeleteSubmachine(object oid)
@@ -958,10 +974,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 		InitializeNewGraph(subgraph);
+		subgraph.externalGraphNode = CreateNewNode(typeof(PWNodeGraphExternal), pos);
+		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphInAndOut(subgraph.inputNode, subgraph.outputNode);
 		subgraph.localWindowIdCount = subgraphLocalWindowIdCount;
 		subgraph.presetChoosed = true;
-		subgraph.inputNode.useExternalWinowRect = true;
-		subgraph.inputNode.externalWindowRect.position = pos;
 		subgraph.parent = currentGraph;
 		subgraph.name = "PW sub-machine";
 		currentGraph.subGraphs.Add(subgraph);
@@ -1247,7 +1263,7 @@ public class ProceduralWorldsWindow : EditorWindow {
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
 
-		if (link != null)
+		if (link != null && !draggingGraph && !draggingNode)
 		{
 			switch (e.GetTypeForControl(id))
 			{

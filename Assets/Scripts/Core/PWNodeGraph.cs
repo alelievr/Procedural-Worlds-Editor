@@ -71,6 +71,8 @@ namespace PW
 		public PWNode						inputNode;
 		[SerializeField]
 		public PWNode						outputNode;
+		[SerializeField]
+		public PWNode						externalGraphNode;
 
 		[System.NonSerializedAttribute]
 		public bool							unserializeInitialized = false;
@@ -89,8 +91,7 @@ namespace PW
 			typeof(PWNodeCircleNoiseMask),
 			typeof(PWNodePerlinNoise2D),
 			typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
-			typeof(PWNodeGraphInput),
-			typeof(PWNodeGraphOutput),
+			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeGraphExternal),
 		};
 
 		void BakeNode(Type t)
@@ -113,14 +114,14 @@ namespace PW
 			foreach (var node in nodes)
 				nodesDictionary[node.windowId] = node;
 			foreach (var subgraph in subGraphs)
-			{
-				nodesDictionary[subgraph.inputNode.windowId] = subgraph.inputNode;
-				nodesDictionary[subgraph.outputNode.windowId] = subgraph.outputNode;
-			}
+				if (subgraph.externalGraphNode != null)
+					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
+			if (externalGraphNode != null)
+				nodesDictionary[externalGraphNode.windowId] = externalGraphNode;
 			if (inputNode != null)
-				nodesDictionary.Add(inputNode.windowId, inputNode);
+				nodesDictionary[inputNode.windowId] = inputNode;
 			if (outputNode != null)
-				nodesDictionary.Add(outputNode.windowId, outputNode);
+				nodesDictionary[outputNode.windowId] = outputNode;
 		}
 		
 		void ProcessNodeLinks(PWNode node)
@@ -155,6 +156,7 @@ namespace PW
 		{
 			//here nodes are sorted by compute-order
 			//TODO: rework this to get a working in-depth node process call
+			//AND integrate notifyDataChanged in this todo.
 
 			if (parent != null)
 			{
