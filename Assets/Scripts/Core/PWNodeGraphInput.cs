@@ -5,12 +5,7 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWNodeGraphInput : PWNode {
 
-		[PWMultiple(0)]
-		[PWInput]
-		public PWValues		inputValues = new PWValues();
-		
 		[PWOutput]
-		[PWMirror("inputValues")]
 		public PWValues		outputValues = new PWValues();
 
 		public override void OnNodeCreate()
@@ -20,12 +15,14 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-			var names = inputValues.GetNames< object >();
-			foreach (var name in names)
-			{
-				if (name != null)
-					EditorGUILayout.LabelField(name);
-			}
+			EditorGUILayout.LabelField("inputs:");
+			var names = outputValues.GetNames< object >();
+			if (names != null)
+				foreach (var name in names)
+				{
+					if (name != null)
+						EditorGUILayout.LabelField(name);
+				}
 		}
 
 		public override void OnNodeProcess()

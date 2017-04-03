@@ -21,22 +21,22 @@ namespace PW
 		{
 			Debug.Log("graphInput: " + graphInput);
 			if (graphInput != null)
-				input = (graphInput as PWNodeGraphInput).inputValues;
+				input = (graphInput as PWNodeGraphInput).outputValues;
 			if (graphOutput != null)
-				output = (graphOutput as PWNodeGraphOutput).outputValues;
+				output = (graphOutput as PWNodeGraphOutput).inputValues;
 		}
 
 		public override void OnNodeGUI()
-		{				
+		{
 			if (GUILayout.Button("go into machine"))
 				specialButtonClick = true;
 			else
 				specialButtonClick = false;
 			
 			if (graphInput != null)
-				input = (graphInput as PWNodeGraphInput).inputValues;
+				input = (graphInput as PWNodeGraphInput).outputValues;
 			if (graphOutput != null)
-				output = (graphOutput as PWNodeGraphOutput).outputValues;
+				output = (graphOutput as PWNodeGraphOutput).inputValues;
 				
 			if (input == null || output == null)
 				return ;
@@ -54,9 +54,6 @@ namespace PW
 		{
 			graphInput = @in;
 			graphOutput = @out;
-
-			if (input != null)
-				Debug.Log("assigned input hashCode: " + input.GetHashCode());
 		}
 	}
 }

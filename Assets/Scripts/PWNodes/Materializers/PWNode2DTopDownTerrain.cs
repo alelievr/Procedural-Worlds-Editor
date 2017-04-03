@@ -15,7 +15,6 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			Debug.Log("Created new texture !");
 			name = "2D TopDown terrain";
 			samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 			texture = new Sampler2D(chunkSize);
@@ -31,7 +30,6 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("texture: " + samplerTexture);
 			if (chunkSizeHasChanged)
 				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 			if (needUpdate)

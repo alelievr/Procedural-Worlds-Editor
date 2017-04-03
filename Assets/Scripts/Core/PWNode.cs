@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -71,10 +71,10 @@ namespace PW
 		[System.SerializableAttribute]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
 		[SerializeField]
-		PropertyDataDictionary propertyDatas = new PropertyDataDictionary();
+		protected PropertyDataDictionary propertyDatas = new PropertyDataDictionary();
 
 		[NonSerializedAttribute]
-		public Dictionary< string, FieldInfo > bakedNodeFields = new Dictionary< string, FieldInfo >();
+		protected Dictionary< string, FieldInfo > bakedNodeFields = new Dictionary< string, FieldInfo >();
 
 		public void OnDestroy()
 		{
@@ -172,10 +172,7 @@ namespace PW
 					{
 						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
 						if (data.anchorInstance == null)
-						{
-							Debug.Log("prop null value: " + data.fieldName);
 							continue ;
-						}
 					}
 
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
@@ -193,6 +190,15 @@ namespace PW
 				}
 				else
 					callback(data, data.first, -1);
+			}
+		}
+
+		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
+		{
+			foreach (var data in propertyDatas)
+			{
+				if (data.Value != null)
+					callback(data.Value);
 			}
 		}
 
@@ -238,16 +244,12 @@ namespace PW
 
 					if (inputAttr != null)
 					{
-						if (GetType() == typeof(PWNodeGraphExternal))
-							Debug.Log("input field detected: " + field.Name);
 						anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
 							name = inputAttr.name;
 					}
 					if (outputAttr != null)
 					{
-						if (GetType() == typeof(PWNodeGraphExternal))
-							Debug.Log("output field detected: " + field.Name);
 						anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
 							name = outputAttr.name;
@@ -331,6 +333,7 @@ namespace PW
 					else
 						kp.Value.mirroredField = null;
 				}
+
 
 			//remove inhexistants dictionary entries:
 			foreach (var kp in propertyDatas)
@@ -1018,7 +1021,7 @@ namespace PW
 
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
 		{
-			ForeachPWAnchors((data, singleAnchor, i)=> {
+			ForeachPWAnchorDatas((data)=> {
 				if (data.multiple)
 					data.displayHiddenMultipleAnchors = display;
 			});

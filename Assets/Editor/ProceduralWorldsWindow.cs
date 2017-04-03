@@ -14,7 +14,7 @@ public class ProceduralWorldsWindow : EditorWindow {
     private static Texture2D	backgroundTex;
 	private static Texture2D	resizeHandleTex;
 	private static Texture2D	selectorBackgroundTex;
-	private static Texture2D	debugTexture1;
+	// private static Texture2D	debugTexture1;
 	private static Texture2D	selectorCaseBackgroundTex;
 	private static Texture2D	selectorCaseTitleBackgroundTex;
 
@@ -110,7 +110,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.inputNode.SetWindowId(currentGraph.localWindowIdCount++);
 		graph.inputNode.windowRect.position = new Vector2(50, (int)(position.height / 2));
 		graph.nodesDictionary.Add(graph.inputNode.windowId, graph.inputNode);
-		Debug.Log("created input values hash: " + (graph.inputNode as PWNodeGraphInput).inputValues.GetHashCode());
 
 		graph.firstInitialization = "initialized";
 
@@ -311,8 +310,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 					perlin.AttachLink("output", terrain, "texture");
 					terrain.AttachLink("texture", perlin, "output");
-					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "outputValues");
-					currentGraph.outputNode.AttachLink("outputValues", terrain, "terrainOutput");
+					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
+					currentGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();
@@ -770,19 +769,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Event	e = Event.current;
 		int		i;
 
-		Rect graphRect = EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.BeginHorizontal();
 		{
 			currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
 			//We run the calcul the nodes:
-			if (e.type == EventType.Layout)
+			//if we are on the mother graph, render the terrain
+			if (currentGraph.parent == null)
 			{
-				if (graphNeedReload)
+				if (e.type == EventType.Layout)
 				{
-					terrainMaterializer.DestroyAllChunks();
-					graphNeedReload = false;
+					if (graphNeedReload)
+					{
+						terrainMaterializer.DestroyAllChunks();
+						graphNeedReload = false;
+					}
+					//updateChunks will update and generate new chunks if needed.
+					terrainMaterializer.UpdateChunks();
 				}
-				//updateChunks will update and generate new chunks if needed.
-				terrainMaterializer.UpdateChunks();
+			}
+			else
+			{
+				//TODO: other preview type for graph outputs in function of graph output type.
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
@@ -834,11 +841,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			foreach (var graph in currentGraph.subGraphs)
 			{
 				if (graph.externalGraphNode.specialButtonClick)
-				{
-					//enter to subgraph:
-					StopDragLink(false);
-					currentGraph = graph;
-				}
+					SwitchGraph(graph);
 			}
 
 			//click up outside of an anchor, stop dragging
@@ -1120,6 +1123,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EvaluateComputeOrder();
 	}
 
+	void SwitchGraph(PWNodeGraph graph)
+	{
+		if (graph == null)
+			return ;
+		StopDragLink(false);
+		currentGraph = graph;
+	}
+
 	void DrawContextualMenu(Rect graphNodeRect)
 	{
 		Event	e = Event.current;
@@ -1162,6 +1173,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 					menu.AddItem(new GUIContent("Delete submachine"), false, DeleteSubmachine, mouseAboveSubmachineIndex);
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
+				menu.AddSeparator("");
+				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(currentGraph.parent));
+
                 menu.ShowAsContext();
                 e.Use();
             }
@@ -1241,7 +1255,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		backgroundTex = CreateTexture2DColor(backgroundColor);
 		resizeHandleTex = CreateTexture2DColor(resizeHandleColor);
 		selectorBackgroundTex = CreateTexture2DColor(selectorBackgroundColor);
-		debugTexture1 = CreateTexture2DColor(new Color(1f, 0f, 0f, .3f));
+		// debugTexture1 = CreateTexture2DColor(new Color(1f, 0f, 0f, .3f));
 		selectorCaseBackgroundTex = CreateTexture2DColor(selectorCaseBackgroundColor);
 		selectorCaseTitleBackgroundTex = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
 

@@ -124,7 +124,6 @@ namespace PW
 			PWAnchorMultiData	tmp = new PWAnchorMultiData(c);
 			PWValues			anchorValues = anchorInstance as PWValues;
 
-			Debug.Log("ADDED STUPID ANCHOR");
 			tmp.name = first.name;
 			tmp.additional = true;
 			tmp.id = id;
