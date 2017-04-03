@@ -11,30 +11,36 @@ namespace PW
 		public PWNode	graphOutput;
 
 		[PWInput("in")]
-		[PWMultiple(1, typeof(object))]
-		public PWValues	input = new PWValues();
+		[PWMultiple(0, typeof(object))] //accept all entering connections
+		public PWValues	input;
 
 		[PWOutput("out")]
-		public PWValues	output = new PWValues();
+		public PWValues	output;
+
+		public override void OnNodeCreate()
+		{
+			Debug.Log("graphInput: " + graphInput);
+			if (graphInput != null)
+				input = (graphInput as PWNodeGraphInput).inputValues;
+			if (graphOutput != null)
+				output = (graphOutput as PWNodeGraphOutput).outputValues;
+		}
 
 		public override void OnNodeGUI()
-		{
-			if (graphInput != null)
-			{
-				input = (graphInput as PWNodeGraphInput).inputValues;
-				Debug.Log("assigned input");
-			}
-			if (graphOutput != null)
-			{
-				Debug.Log("assigned output");
-				output = (graphOutput as PWNodeGraphOutput).outputValues;
-			}
-				
+		{				
 			if (GUILayout.Button("go into machine"))
 				specialButtonClick = true;
 			else
 				specialButtonClick = false;
+			
+			if (graphInput != null)
+				input = (graphInput as PWNodeGraphInput).inputValues;
+			if (graphOutput != null)
+				output = (graphOutput as PWNodeGraphOutput).outputValues;
 				
+			if (input == null || output == null)
+				return ;
+
 			EditorGUILayout.LabelField("inputs:");
 			var names = input.GetNames< object >();
 			foreach (var name in names)
@@ -48,6 +54,9 @@ namespace PW
 		{
 			graphInput = @in;
 			graphOutput = @out;
+
+			if (input != null)
+				Debug.Log("assigned input hashCode: " + input.GetHashCode());
 		}
 	}
 }

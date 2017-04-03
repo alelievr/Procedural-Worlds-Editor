@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -167,6 +167,17 @@ namespace PW
 				var data = PWAnchorData.Value;
 				if (data.multiple)
 				{
+					//update anchor instance if null:
+					if (data.anchorInstance == null)
+					{
+						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
+						if (data.anchorInstance == null)
+						{
+							Debug.Log("prop null value: " + data.fieldName);
+							continue ;
+						}
+					}
+
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
 					if (data.displayHiddenMultipleAnchors || showAdditional)
 						anchorCount++;
@@ -227,12 +238,16 @@ namespace PW
 
 					if (inputAttr != null)
 					{
+						if (GetType() == typeof(PWNodeGraphExternal))
+							Debug.Log("input field detected: " + field.Name);
 						anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
 							name = inputAttr.name;
 					}
 					if (outputAttr != null)
 					{
+						if (GetType() == typeof(PWNodeGraphExternal))
+							Debug.Log("output field detected: " + field.Name);
 						anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
 							name = outputAttr.name;
@@ -245,14 +260,11 @@ namespace PW
 					{
 						//check if field is PWValues type otherwise do not implement multi-anchor
 						var multipleValueInstance = field.GetValue(this) as PWValues;
-						if (multipleValueInstance != null)
-						{
-							data.generic = true;
-							data.multiple = true;
-							data.allowedTypes = multipleAttr.allowedTypes;
-							data.minMultipleValues = multipleAttr.minValues;
-							data.maxMultipleValues = multipleAttr.maxValues;
-						}
+						data.generic = true;
+						data.multiple = true;
+						data.allowedTypes = multipleAttr.allowedTypes;
+						data.minMultipleValues = multipleAttr.minValues;
+						data.maxMultipleValues = multipleAttr.maxValues;
 					}
 					if (genericAttr != null)
 					{
@@ -286,7 +298,7 @@ namespace PW
 					data.windowId = windowId;
 
 					//add missing values to instance of list:
-					if (data.multiple)
+					if (data.multiple && data.anchorInstance != null)
 					{
 						//add minimum number of anchors to render:
 						if (data.multipleValueCount < data.minMultipleValues)
@@ -295,8 +307,9 @@ namespace PW
 
 						var PWValuesInstance = data.anchorInstance as PWValues;
 
-						while (PWValuesInstance.Count < data.multipleValueCount)
-							PWValuesInstance.Add(null);
+						if (PWValuesInstance != null)
+							while (PWValuesInstance.Count < data.multipleValueCount)
+								PWValuesInstance.Add(null);
 					}
 				}
 			}
@@ -711,13 +724,14 @@ namespace PW
 						lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
-						if (data.multiple)
+						if (data.multiple && data.anchorInstance != null)
 						{
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
 						}
 						if (data.mirroredField != null)
 						{
+							//no need to check if anchorInstance is null because is is assigned from mirrored property.
 							var mirroredProp = propertyDatas[data.mirroredField];
 							if ((Type)mirroredProp.type == typeof(PWValues))
 								mirroredProp.AddNewAnchor(mirroredProp.fieldName.GetHashCode() + i + 1);
@@ -940,7 +954,7 @@ namespace PW
 
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//Hide anchors and highlight when mouse hover
-				// Debug.Log(data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
+				// Debug.Log(data.windowId + ":" + data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
 				if (data.windowId != toLink.windowId
 					&& data.anchorType == anchorType
 					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))

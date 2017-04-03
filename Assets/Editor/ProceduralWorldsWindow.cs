@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Runtime.Serialization.Formatters.Binary;
 using PW;
 
 public class ProceduralWorldsWindow : EditorWindow {
@@ -109,6 +110,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.inputNode.SetWindowId(currentGraph.localWindowIdCount++);
 		graph.inputNode.windowRect.position = new Vector2(50, (int)(position.height / 2));
 		graph.nodesDictionary.Add(graph.inputNode.windowId, graph.inputNode);
+		Debug.Log("created input values hash: " + (graph.inputNode as PWNodeGraphInput).inputValues.GetHashCode());
 
 		graph.firstInitialization = "initialized";
 
@@ -786,6 +788,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				graphNeedReload = true;
 				Debug.Log("TODO: serialization");
+				BinaryFormatter bf = new BinaryFormatter();
+				FileStream tmp = new FileStream("/tmp/o.blob", FileMode.Create);
+				bf.Serialize(tmp, currentGraph);
 			}
 
 			bool	mouseAboveAnchorLocal = false;
@@ -914,6 +919,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//remove the node
 		currentGraph.nodes.RemoveAt((int)oNodeIndex);
+		DestroyImmediate(node);
 
 		EvaluateComputeOrder();
 	}
@@ -948,12 +954,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		int id = (int)oid;
 
+		var subGraph = currentGraph.subGraphs.ElementAt(id);
+
 		graphNeedReload = true;
 
 		//TODO: remove all dependencies and links from the output and input machine.
 
 		if (id < currentGraph.subGraphs.Count && id >= 0)
 			currentGraph.subGraphs.RemoveAt(id);
+
+		DestroyImmediate(subGraph);
+
 		EvaluateComputeOrder();
 	}
 
