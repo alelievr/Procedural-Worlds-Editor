@@ -78,7 +78,6 @@ namespace PW
 
 		public void OnDestroy()
 		{
-
 			Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 

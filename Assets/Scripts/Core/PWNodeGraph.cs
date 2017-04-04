@@ -19,6 +19,7 @@ namespace PW
 		MESH,
 	}
 
+	[CreateAssetMenu(fileName = "New ProceduralWorld", menuName = "Procedural World", order = 1)]
 	[System.SerializableAttribute]
 	public class PWNodeGraph : ScriptableObject {
 	
@@ -208,5 +209,5 @@ namespace PW
 				foreach (var subgraph in graph.subGraphs)
 					ForeachAllNodes(callback, recursive, graphInputAndOutput, subgraph);
 		}
-	}
+    }
 }

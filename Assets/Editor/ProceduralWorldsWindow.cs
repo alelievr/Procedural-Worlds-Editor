@@ -6,7 +6,6 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Runtime.Serialization.Formatters.Binary;
 using PW;
 
 public class ProceduralWorldsWindow : EditorWindow {
@@ -82,6 +81,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
 
+		window.SaveNewGraph();
+
 		window.Show();
 	}
 
@@ -149,10 +150,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Custom");
 
 		if (currentGraph == null)
-		{
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
-			currentGraph.hideFlags = HideFlags.HideAndDontSave;
-		}
 
 		//clear the corrupted node:
 		for (int i = 0; i < currentGraph.nodes.Count; i++)
@@ -165,10 +163,37 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.unserializeInitialized = true;
 	}
 
+	//If this function is called, it means there is not yet a saved instance of currentGraph
+	void SaveNewGraph()
+	{
+		if (currentGraph.saveName != null)
+			return ;
+
+		string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+		if (path == "")
+			path = "Assets";
+		else if (Path.GetExtension(path) != "")
+			path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+
+		currentGraph.saveName = "New ProceduralWorld";
+		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
+
+		Debug.Log("assetPath: " + assetPathAndName);
+
+		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
+
+		AssetDatabase.SaveAssets();
+
+		AssetDatabase.Refresh();
+	}
+
     void OnGUI()
     {
-		EditorUtility.SetDirty(this);
-		EditorUtility.SetDirty(currentGraph);
+		if (GUI.changed)
+		{
+			EditorUtility.SetDirty(this);
+			EditorUtility.SetDirty(currentGraph);
+		}
 
 		//initialize graph the first time he was created
 		//function is in OnGUI cause in OnEnable, the position values are bad.
@@ -195,8 +220,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (windowSize != Vector2.zero && windowSize != position.size)
 			OnWindowResize();
 
-		//initialize unserialized fields in node:
-		currentGraph.ForeachAllNodes((n) => { if (!n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
+		// initialize unserialized fields in node:
+		currentGraph.ForeachAllNodes((n) => { if (n != null && !n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
 
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
@@ -286,6 +311,28 @@ public class ProceduralWorldsWindow : EditorWindow {
 		presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
 
 		EditorGUILayout.LabelField("Procedural Worlds");
+		
+		//Load graph button:
+		EditorGUILayout.BeginHorizontal();
+		{
+			if (GUILayout.Button("Load graph"))
+			{
+				currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
+				EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
+			}
+			
+			if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
+			{
+				UnityEngine.Object selected = null;
+				selected = EditorGUIUtility.GetObjectPickerObject();
+				if (selected != null)
+				{
+					Debug.Log("graph " + selected.name + " loaded");
+					currentGraph = (PWNodeGraph)selected;
+				}
+			}
+		}
+		EditorGUILayout.EndHorizontal();
 
 		EditorGUILayout.BeginHorizontal();
 		{
@@ -444,47 +491,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
 					&& GUI.GetNameOfFocusedControl() == "PWName")
 					GUI.FocusControl(null);
-		
-				if (currentGraph.parent == null)
-				{
-					EditorGUILayout.BeginHorizontal();
-					if (GUILayout.Button("Load graph"))
-					{
-						currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
-						EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
-					}
-					else if (GUILayout.Button("Save this graph"))
-					{
-						if (currentGraph.saveName != null)
-							return ;
-	
-						string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-						if (path == "")
-							path = "Assets";
-						else if (Path.GetExtension(path) != "")
-							path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
-	
-						currentGraph.saveName = currentGraph.name;
-						string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
-	
-						AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
-	
-						AssetDatabase.SaveAssets();
-						AssetDatabase.Refresh();
-					}
-					
-					if (e.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
-					{
-						UnityEngine.Object selected = null;
-						selected = EditorGUIUtility.GetObjectPickerObject();
-						if (selected != null)
-						{
-							Debug.Log("graph " + selected.name + " loaded");
-							currentGraph = (PWNodeGraph)selected;
-						}
-					}
-					EditorGUILayout.EndHorizontal();
-				}
 
 				//preview texture:
 				GUI.DrawTexture(previewRect, previewCameraRenderTexture);
@@ -792,13 +798,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//TODO: other preview type for graph outputs in function of graph output type.
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
-			{
 				graphNeedReload = true;
-				Debug.Log("TODO: serialization");
-				BinaryFormatter bf = new BinaryFormatter();
-				FileStream tmp = new FileStream("/tmp/o.blob", FileMode.Create);
-				bf.Serialize(tmp, currentGraph);
-			}
 
 			bool	mouseAboveAnchorLocal = false;
 			bool	draggingNodeLocal = false;
@@ -995,6 +995,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		subgraph.parent = currentGraph;
 		subgraph.name = "PW sub-machine";
 		currentGraph.subGraphs.Add(subgraph);
+
+		AssetDatabase.AddObjectToAsset(subgraph, currentGraph);
+		AssetDatabase.SaveAssets();
 
 		currentGraph.nodesDictionary[subgraph.inputNode.windowId] = subgraph.inputNode;
 		currentGraph.nodesDictionary[subgraph.outputNode.windowId] = subgraph.outputNode;
