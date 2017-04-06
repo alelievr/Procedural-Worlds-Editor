@@ -37,7 +37,9 @@ namespace PW
 		public Vector2						selectorScrollPosition;
 	
 		[SerializeField]
-		public new string					name;
+		public string						externalName;
+		[SerializeField]
+		public string						assetName;
 		[SerializeField]
 		public string						saveName;
 		[SerializeField]
@@ -64,9 +66,9 @@ namespace PW
 		public PWOutputType					outputType;
 
 		[SerializeField]
-		public List< PWNodeGraph >			subGraphs = new List< PWNodeGraph >();
+		public List< string >				PWNodeSubGraphs = new List< string >();
 		[SerializeField]
-		public PWNodeGraph					parent = null;
+		public string						PWNodeGraphParent = null;
 
 		[SerializeField]
 		public PWNode						inputNode;
@@ -110,13 +112,19 @@ namespace PW
 			bakedNodeFields.Clear();
 			foreach (var nodeType in allNodeTypeList)
 				BakeNode(nodeType);
+		
+			//TODO: a Dictionary of PWNodeGraph
 			
 			//add all existing nodes to the nodesDictionary
 			foreach (var node in nodes)
 				nodesDictionary[node.windowId] = node;
-			foreach (var subgraph in subGraphs)
+			foreach (var subgraphName in PWNodeSubGraphs)
+			{
+				var subgraph = FindGraphByName(subgraphName);
+
 				if (subgraph.externalGraphNode != null)
 					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
+			}
 			if (externalGraphNode != null)
 				nodesDictionary[externalGraphNode.windowId] = externalGraphNode;
 			if (inputNode != null)
@@ -159,7 +167,7 @@ namespace PW
 			//TODO: rework this to get a working in-depth node process call
 			//AND integrate notifyDataChanged in this todo.
 
-			if (parent != null)
+			if (PWNodeGraphParent != null)
 			{
 				inputNode.Process();
 				ProcessNodeLinks(inputNode);
@@ -170,11 +178,11 @@ namespace PW
 					node.Process();
 					ProcessNodeLinks(node);
 				}
-			foreach (var graph in subGraphs)
+		/*	foreach (var graph in PWNodeSubGraphs)
 			{
 				graph.outputNode.Process();
 				ProcessNodeLinks(graph.outputNode);
-			}
+			}*/
 		}
 
 		public void	UpdateSeed(int seed)
@@ -194,8 +202,19 @@ namespace PW
 			ForeachAllNodes((n) => n.chunkSize = chunkSize, true, true);
 		}
 
-		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
+		public PWNodeGraph FindGraphByName(string name = null)
 		{
+			if (name == null)
+				return this;
+			
+			//TODO: find a solution to load assetBundle at runtime 
+
+			return null;
+		}
+
+		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, string graphName = null)
+		{
+			var graph = FindGraphByName(graphName);
 			if (graph == null)
 				graph = this;
 			foreach (var node in graph.nodes)
@@ -206,7 +225,7 @@ namespace PW
 				callback(graph.outputNode);
 			}
 			if (recursive)
-				foreach (var subgraph in graph.subGraphs)
+				foreach (var subgraph in graph.PWNodeSubGraphs)
 					ForeachAllNodes(callback, recursive, graphInputAndOutput, subgraph);
 		}
     }

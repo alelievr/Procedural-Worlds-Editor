@@ -19,7 +19,6 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			Debug.Log("graphInput: " + graphInput);
 			if (graphInput != null)
 				input = (graphInput as PWNodeGraphInput).outputValues;
 			if (graphOutput != null)
