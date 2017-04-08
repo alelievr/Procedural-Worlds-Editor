@@ -100,8 +100,6 @@ namespace PW
 				return ret;
 			};
 
-			hideFlags = HideFlags.HideAndDontSave;
-
 			disabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
 			highlightNewTexture = CreateTexture2DColor(new Color(0, .5f, 0, .4f));
 			highlightReplaceTexture = CreateTexture2DColor(new Color(1f, 0f, 0, .4f));
@@ -517,6 +515,10 @@ namespace PW
 		
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
+			//if anchor have not been processed:
+			if (singleAnchor == null)
+				return ;
+
 			string anchorName = (singleAnchor.name.Length > 4) ? singleAnchor.name.Substring(0, 4) : singleAnchor.name;
 
 			if (data.multiple)

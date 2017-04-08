@@ -45,13 +45,16 @@ namespace PW
 		[SerializeField]
 		public Vector2						graphDecalPosition;
 		[SerializeField]
+		[HideInInspector]
 		public int							localWindowIdCount;
 		[SerializeField]
-		public string						firstInitialization;
+		[HideInInspector]
+		public string						firstInitialization = null;
 		[SerializeField]
 		public bool							realMode;
 		
 		[SerializeField]
+		[HideInInspector]
 		public string						searchString = "";
 
 		[SerializeField]
@@ -66,9 +69,9 @@ namespace PW
 		public PWOutputType					outputType;
 
 		[SerializeField]
-		public List< string >				PWNodeSubGraphs = new List< string >();
+		public List< PWNodeGraphReference >	subgraphReferences = new List< PWNodeGraphReference >();
 		[SerializeField]
-		public string						PWNodeGraphParent = null;
+		public PWNodeGraphReference			parentReference;
 
 		[SerializeField]
 		public PWNode						inputNode;
@@ -81,13 +84,13 @@ namespace PW
 		public bool							unserializeInitialized = false;
 
 		[System.NonSerializedAttribute]
-		public Dictionary< int, PWNode > nodesDictionary = new Dictionary< int, PWNode >();
+		public Dictionary< int, PWNode >	nodesDictionary = new Dictionary< int, PWNode >();
 
 		[System.NonSerializedAttribute]
 		Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
 
 		[System.NonSerializedAttribute]
-		List< Type > allNodeTypeList = new List< Type >{
+		List< Type > allNodeTypeList = new List< Type > {
 			typeof(PWNodeSlider),
 			typeof(PWNodeAdd),
 			typeof(PWNodeDebugLog),
@@ -112,15 +115,15 @@ namespace PW
 			bakedNodeFields.Clear();
 			foreach (var nodeType in allNodeTypeList)
 				BakeNode(nodeType);
-		
+
 			//TODO: a Dictionary of PWNodeGraph
 			
 			//add all existing nodes to the nodesDictionary
 			foreach (var node in nodes)
 				nodesDictionary[node.windowId] = node;
-			foreach (var subgraphName in PWNodeSubGraphs)
+			foreach (var subgraphRef in subgraphReferences)
 			{
-				var subgraph = FindGraphByName(subgraphName);
+				var subgraph = subgraphRef.GetGraph();
 
 				if (subgraph.externalGraphNode != null)
 					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
@@ -139,6 +142,9 @@ namespace PW
 	
 			foreach (var link in links)
 			{
+				if (!nodesDictionary.ContainsKey(link.distantWindowId))
+					continue;
+
 				var target = nodesDictionary[link.distantWindowId];
 	
 				if (target == null)
@@ -167,7 +173,7 @@ namespace PW
 			//TODO: rework this to get a working in-depth node process call
 			//AND integrate notifyDataChanged in this todo.
 
-			if (PWNodeGraphParent != null)
+			if (parentReference != null)
 			{
 				inputNode.Process();
 				ProcessNodeLinks(inputNode);
@@ -178,7 +184,7 @@ namespace PW
 					node.Process();
 					ProcessNodeLinks(node);
 				}
-		/*	foreach (var graph in PWNodeSubGraphs)
+		/*	foreach (var graph in subgraphReferences)
 			{
 				graph.outputNode.Process();
 				ProcessNodeLinks(graph.outputNode);
@@ -204,17 +210,13 @@ namespace PW
 
 		public PWNodeGraph FindGraphByName(string name = null)
 		{
-			if (name == null)
-				return this;
-			
 			//TODO: find a solution to load assetBundle at runtime 
 
 			return null;
 		}
 
-		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, string graphName = null)
+		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
 		{
-			var graph = FindGraphByName(graphName);
 			if (graph == null)
 				graph = this;
 			foreach (var node in graph.nodes)
@@ -225,8 +227,33 @@ namespace PW
 				callback(graph.outputNode);
 			}
 			if (recursive)
-				foreach (var subgraph in graph.PWNodeSubGraphs)
-					ForeachAllNodes(callback, recursive, graphInputAndOutput, subgraph);
+				foreach (var subgraph in graph.subgraphReferences)
+				{
+					var g = subgraph.GetGraph();
+					if (g != null)
+						ForeachAllNodes(callback, recursive, graphInputAndOutput, g);
+				}
 		}
     }
+
+	[System.SerializableAttribute]
+	public class PWNodeGraphReference
+	{
+		public string		name;
+	
+		public PWNodeGraphReference(string name)
+		{
+			this.name = name;
+		}
+
+		public PWNodeGraphReference()
+		{
+			this.name = null;
+		}
+	
+		public PWNodeGraph		GetGraph()
+		{
+			return null;
+		}
+	}
 }

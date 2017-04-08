@@ -27,4 +27,9 @@ public class PWNodeGraphEditor : Editor {
 	{
 		
 	}
+
+	public override void OnInspectorGUI()
+	{
+
+	}
 }

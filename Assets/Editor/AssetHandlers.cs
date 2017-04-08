@@ -15,7 +15,6 @@ public class NewBehaviourScript {
 			//open PWNodeGraph window:
 			ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow(typeof(ProceduralWorldsWindow));
 			window.currentGraph = instance as PWNodeGraph;
-			Debug.Log(instance.name + " opened");
 		}
 		return false;
 	}

@@ -17,10 +17,12 @@ namespace PW
 		public PWNodeGraph		graph;
 		public PWTerrainStorage	terrainStorage;
 		
+		[HideInInspector]
 		public GameObject		terrainRoot;
 		public bool				initialized {get {return graph != null && terrainRoot != null && graphOutput != null;}}
 		
 		[SerializeField]
+		[HideInInspector]
 		private PWNodeGraphOutput	graphOutput = null;
 
 		private	int				oldSeed = 0;
