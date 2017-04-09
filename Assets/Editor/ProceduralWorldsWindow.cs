@@ -39,6 +39,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
 	bool				draggingNode = false;
+	bool				graphLoaded = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
@@ -168,7 +169,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					if (graphInstancies.ContainsKey(graph.name))
 						continue ;
 					graphInstancies.Add(graph.name, graph as PWNodeGraph);
-					Debug.Log("loaded graph: " + graph.name);
 				}
 			}
 		}
@@ -196,8 +196,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.name = currentGraph.saveName;
 		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
 
-		Debug.Log("assetPath: " + assetPathAndName);
-
 		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
 
 		AssetDatabase.SaveAssets();
@@ -207,9 +205,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void OnGUI()
     {
-		//initialize graph the first time he was created
-		//function is in OnGUI cause in OnEnable, the position values are bad.
-			
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
@@ -224,9 +219,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
 			currentGraph.parentReference = null;
 			
+		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
 			InitializeNewGraph(currentGraph);
 		
+		graphLoaded = true;
 		if (!currentGraph.presetChoosed)
 		{
 			DrawPresetPanel();
@@ -628,12 +625,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				breadcrumbsRect.yMin -= 1;
 				breadcrumbsRect.xMin -= 1;
-				GUILayout.Button("fewg");
-				GUILayout.Button("fewg");
-				GUILayout.Button("fewg");
 				if (e.type == EventType.Repaint)
-				//TODO: breadcrumbs background color
 					GUI.DrawTexture(breadcrumbsRect, selectorBackgroundTex);
+				
+				PWNodeGraph g = currentGraph;
+				var breadcrumbsList = new List< string >();
+				while (g != null)
+				{
+					breadcrumbsList.Add(g.name);
+					g = FindGraphByName(g.parentReference);
+				}
+				breadcrumbsList.Reverse();
+				foreach (var b in breadcrumbsList)
+					if (GUILayout.Button(b, GUILayout.MaxWidth(100)))
+						SwitchGraph(FindGraphByName(b));
 			}
 			EditorGUILayout.EndHorizontal();
 	
@@ -870,6 +875,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			for (i = 0; i < currentGraph.nodes.Count; i++)
 			{
 				var node = currentGraph.nodes[i];
+				if (node == null)
+					continue ;
 				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
 				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 			}
@@ -879,7 +886,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			foreach (var graphName in currentGraph.subgraphReferences)
 			{
 				var graph = FindGraphByName(graphName);
-				Debug.Log("graphRef: " + graphName + ", instance: " + graph);
 				if (graph)
 					RenderNode(windowId++, graph.externalGraphNode, graph.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
 				i++;
