@@ -125,7 +125,7 @@ namespace PW
 			{
 				var subgraph = subgraphRef.GetGraph();
 
-				if (subgraph.externalGraphNode != null)
+				if (subgraph != null && subgraph.externalGraphNode != null)
 					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
 			}
 			if (externalGraphNode != null)

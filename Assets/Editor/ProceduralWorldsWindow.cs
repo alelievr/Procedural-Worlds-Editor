@@ -57,6 +57,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	PWTerrainBase		terrainMaterializer;
 
+	//store all subgraphs instances to fast-access to them.
+	Dictionary< string, PWNodeGraph >	graphInstancies = new Dictionary< string, PWNodeGraph >();
+
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
 
@@ -144,13 +147,35 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Storages");
 		AddToSelector("Custom");
 
+		//current PWNodeGraph file have been deleted
 		if (currentGraph == null)
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 
 		//force graph to reload all chunks (just after compiled)
 		graphNeedReload = true;
 
+		string assetPath = AssetDatabase.GetAssetPath(currentGraph);
+		if (!String.IsNullOrEmpty(assetPath))
+		{
+			int		resourceIndex = assetPath.IndexOf("Resources");
+			if (resourceIndex != -1)
+			{
+				string resourcePath = Path.ChangeExtension(assetPath.Substring(resourceIndex + 10), null);
+				var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
+				foreach (var graph in graphs)
+				{
+					graphInstancies.Add(graph.name, graph as PWNodeGraph);
+					Debug.Log("loaded graph: " + graph.name);
+				}
+			}
+		}
+
 		currentGraph.unserializeInitialized = true;
+	}
+
+	void OnDestroy()
+	{
+		AssetDatabase.SaveAssets();
 	}
 
 	//If this function is called, it means there is not yet a saved instance of currentGraph
@@ -159,11 +184,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.saveName != null)
 			return ;
 
-		string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-		if (path == "")
-			path = "Assets";
-		else if (Path.GetExtension(path) != "")
-			path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+		string path = "Assets/ProceduralWorlds/Resources/";
+		
+		if (!Directory.Exists(path))
+			Directory.CreateDirectory(path);
 
 		currentGraph.saveName = "New ProceduralWorld";
 		currentGraph.name = currentGraph.saveName;
