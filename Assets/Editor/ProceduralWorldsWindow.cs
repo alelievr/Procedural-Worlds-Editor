@@ -154,6 +154,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//force graph to reload all chunks (just after compiled)
 		graphNeedReload = true;
 
+		//load all available graph instancies in the AssetDatabase:
 		string assetPath = AssetDatabase.GetAssetPath(currentGraph);
 		if (!String.IsNullOrEmpty(assetPath))
 		{
@@ -164,6 +165,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
 				foreach (var graph in graphs)
 				{
+					if (graphInstancies.ContainsKey(graph.name))
+						continue ;
 					graphInstancies.Add(graph.name, graph as PWNodeGraph);
 					Debug.Log("loaded graph: " + graph.name);
 				}
@@ -218,7 +221,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
 			OnEnable();
 			
-		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference.name))
+		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
 			currentGraph.parentReference = null;
 			
 		if (currentGraph.firstInitialization == null)
@@ -621,6 +624,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.BeginVertical(splittedPanel);
 		{
 			//TODO: render the breadcrumbs bar
+			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
+			{
+				breadcrumbsRect.yMin -= 1;
+				breadcrumbsRect.xMin -= 1;
+				GUILayout.Button("fewg");
+				GUILayout.Button("fewg");
+				GUILayout.Button("fewg");
+				if (e.type == EventType.Repaint)
+				//TODO: breadcrumbs background color
+					GUI.DrawTexture(breadcrumbsRect, selectorBackgroundTex);
+			}
+			EditorGUILayout.EndHorizontal();
 	
 			//remove 4 pixels for the separation bar
 			graphRect.size -= Vector2.right * 4;
@@ -679,13 +694,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (ret != null)
 			return ret;
 
-		var gExternalNodeRef = currentGraph.subgraphReferences.FirstOrDefault(gRef => {
-			var g = gRef.GetGraph();
+		string gExternalNodeName = currentGraph.subgraphReferences.FirstOrDefault(gName => {
+			var g = FindGraphByName(gName);
 			return g && g.externalGraphNode.windowId == id;
 		});
-		if (gExternalNodeRef != null)
+		if (gExternalNodeName != null)
 		{
-			var gExternalNode = gExternalNodeRef.GetGraph();
+			var gExternalNode = FindGraphByName(gExternalNodeName);
 			if(gExternalNode.externalGraphNode != null)
 				return gExternalNode.externalGraphNode;
 		}
@@ -695,6 +710,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.outputNode.windowId == id)
 			return currentGraph.outputNode;
 
+		return null;
+	}
+
+	PWNodeGraph	FindGraphByName(string name)
+	{
+		if (name == null)
+			return null;
+		if (graphInstancies.ContainsKey(name))
+			return graphInstancies[name];
 		return null;
 	}
 
@@ -852,9 +876,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			//display graph sub-PWGraphs
 			i = 0;
-			foreach (var graphRef in currentGraph.subgraphReferences)
+			foreach (var graphName in currentGraph.subgraphReferences)
 			{
-				var graph = graphRef.GetGraph();
+				var graph = FindGraphByName(graphName);
+				Debug.Log("graphRef: " + graphName + ", instance: " + graph);
 				if (graph)
 					RenderNode(windowId++, graph.externalGraphNode, graph.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
 				i++;
@@ -868,9 +893,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			EndWindows();
 			
 			//submachine enter button click management:
-			foreach (var graphRef in currentGraph.subgraphReferences)
+			foreach (var graphName in currentGraph.subgraphReferences)
 			{
-				var graph = graphRef.GetGraph();
+				var graph = FindGraphByName(graphName);
 
 				if (!graph || !graph.externalGraphNode)
 					continue ;
@@ -969,8 +994,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void CreateNewNode(object type)
 	{
-		//TODO: if mouse is in the node graph, add the new node at the mouse position instead of the center of the window
-		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		Vector2 pos = -currentGraph.graphDecalPosition + Event.current.mousePosition;
 		PWNode newNode = CreateNewNode((Type)type, pos);
 		currentGraph.nodes.Add(newNode);
 	}
@@ -1002,54 +1026,77 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		int id = (int)oid;
 
-	/*	var subGraph = currentGraph.subGraphs.ElementAt(id);*/
+		var subGraphName = currentGraph.subgraphReferences.ElementAt(id);
 
-		graphNeedReload = true;
+		if (subGraphName == null)
+			return ;
+
+		var subGraph = FindGraphByName(subGraphName);
 
 		//TODO: remove all dependencies and links from the output and input machine.
 
-	/*	if (id < currentGraph.subGraphs.Count && id >= 0)
-			currentGraph.subGraphs.RemoveAt(id);*/
+		if (id < currentGraph.subgraphReferences.Count && id >= 0)
+			currentGraph.subgraphReferences.RemoveAt(id);
 
-	/*	DestroyImmediate(subGraph, true);*/
+		DeleteSubmachine(subGraph);
+
+		graphNeedReload = true;
+
+		AssetDatabase.SaveAssets();
 
 		EvaluateComputeOrder();
 	}
 
-	void CreatePWMachine()
+	void DeleteSubmachine(PWNodeGraph submachine)
+	{
+		//remove all its nodes:
+		foreach (var subgraphNode in submachine.nodes)
+			DestroyImmediate(subgraphNode, true);
+
+		//remove input and output:
+		if (submachine.inputNode != null)
+			DestroyImmediate(submachine.inputNode, true);
+		if (submachine.outputNode != null)
+			DestroyImmediate(submachine.outputNode, true);
+
+		//remove inner submachines:
+		foreach (var subsubgraph in submachine.subgraphReferences)
+			DeleteSubmachine(subsubgraph);
+
+		//and finaly destroy the submachine:
+		DestroyImmediate(submachine, true);
+	}
+
+	void CreatePWMachine(object mousePosition)
 	{
 		int	subgraphLocalWindowIdCount = 0;
 		
 		//calculate the subgraph starting window id count:
 		int i = 0;
 		PWNodeGraph g = currentGraph;
-		/*while (g != null)
+		while (g != null)
 		{
 			i++;
-			g = g.FindGraphByName(g.PWNodeGraphParent);
-		}*/
+			g = FindGraphByName(g.parentReference);
+		}
 		subgraphLocalWindowIdCount = i * 1000000 + (currentGraph.localWindowIdCount++ * 10000);
 
-		Vector2 pos = -currentGraph.graphDecalPosition + new Vector2((int)(position.width / 2), (int)(position.height / 2));
+		Vector2 pos = -currentGraph.graphDecalPosition + (Vector2)mousePosition;
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 		InitializeNewGraph(subgraph);
 		subgraph.externalGraphNode = CreateNewNode(typeof(PWNodeGraphExternal), pos);
 		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphInAndOut(subgraph.inputNode, subgraph.outputNode);
 		subgraph.localWindowIdCount = subgraphLocalWindowIdCount;
 		subgraph.presetChoosed = true;
-		subgraph.parentReference = new PWNodeGraphReference(currentGraph.name);
+		subgraph.parentReference = currentGraph.name;
 		subgraph.externalName = "PW sub-machine";
-
-		currentGraph.subgraphReferences.Add(new PWNodeGraphReference(subgraph.name));
 
 		subgraph.name = "sub" + currentGraph.localWindowIdCount + "-" + currentGraph.externalName;
 		AssetDatabase.AddObjectToAsset(subgraph, currentGraph);
 		AssetDatabase.SaveAssets();
 
-		var objs = Resources.LoadAll(currentGraph.name, typeof(PWNodeGraph));
-
-		foreach (var obj in objs)
-			Debug.Log("loaded object: " + obj);
+		currentGraph.subgraphReferences.Add(subgraph.name);
+		graphInstancies.Add(subgraph.name, subgraph);
 
 		AssetDatabase.Refresh();
 
@@ -1200,7 +1247,7 @@ public class ProceduralWorldsWindow : EditorWindow {
             {
                 // Now create the menu, add items and show it
                 GenericMenu menu = new GenericMenu();
-				menu.AddItem(new GUIContent("New PWMachine"), false, CreatePWMachine);
+				menu.AddItem(new GUIContent("New PWMachine"), false, CreatePWMachine, e.mousePosition);
 				foreach (var nodeCat in nodeSelectorList)
 				{
 					string menuString = "Create new/" + nodeCat.Key + "/";
@@ -1231,7 +1278,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
 				menu.AddSeparator("");
-				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(currentGraph.parentReference.GetGraph()));
+				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(FindGraphByName(currentGraph.parentReference)));
 
                 menu.ShowAsContext();
                 e.Use();

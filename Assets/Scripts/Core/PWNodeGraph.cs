@@ -69,9 +69,9 @@ namespace PW
 		public PWOutputType					outputType;
 
 		[SerializeField]
-		public List< PWNodeGraphReference >	subgraphReferences = new List< PWNodeGraphReference >();
+		public List< string >				subgraphReferences = new List< string >();
 		[SerializeField]
-		public PWNodeGraphReference			parentReference;
+		public string						parentReference;
 
 		[SerializeField]
 		public PWNode						inputNode;
@@ -121,9 +121,9 @@ namespace PW
 			//add all existing nodes to the nodesDictionary
 			foreach (var node in nodes)
 				nodesDictionary[node.windowId] = node;
-			foreach (var subgraphRef in subgraphReferences)
+			foreach (var subgraphName in subgraphReferences)
 			{
-				var subgraph = subgraphRef.GetGraph();
+				var subgraph = FindGraphByName(subgraphName);
 
 				if (subgraph != null && subgraph.externalGraphNode != null)
 					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
@@ -210,7 +210,7 @@ namespace PW
 
 		public PWNodeGraph FindGraphByName(string name = null)
 		{
-			//TODO: find a solution to load assetBundle at runtime 
+			//TODO: Resource load all, stored in dico.
 
 			return null;
 		}
@@ -227,33 +227,12 @@ namespace PW
 				callback(graph.outputNode);
 			}
 			if (recursive)
-				foreach (var subgraph in graph.subgraphReferences)
+				foreach (var subgraphName in graph.subgraphReferences)
 				{
-					var g = subgraph.GetGraph();
+					var g = FindGraphByName(subgraphName);
 					if (g != null)
 						ForeachAllNodes(callback, recursive, graphInputAndOutput, g);
 				}
 		}
     }
-
-	[System.SerializableAttribute]
-	public class PWNodeGraphReference
-	{
-		public string		name;
-	
-		public PWNodeGraphReference(string name)
-		{
-			this.name = name;
-		}
-
-		public PWNodeGraphReference()
-		{
-			this.name = null;
-		}
-	
-		public PWNodeGraph		GetGraph()
-		{
-			return null;
-		}
-	}
 }
