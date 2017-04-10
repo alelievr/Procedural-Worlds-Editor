@@ -15,6 +15,7 @@ namespace PW
 		public PWValues	input;
 
 		[PWOutput("out")]
+		[PWGeneric(typeof(object))]
 		public PWValues	output;
 
 		public override void OnNodeCreate()
@@ -39,6 +40,8 @@ namespace PW
 				
 			if (input == null || output == null)
 				return ;
+
+			Debug.Log("input count: " + input.Count + " for " + GetHashCode());
 
 			EditorGUILayout.LabelField("inputs:");
 			var names = input.GetNames< object >();

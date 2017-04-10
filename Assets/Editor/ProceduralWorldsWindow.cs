@@ -39,7 +39,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
 	bool				draggingNode = false;
-	bool				graphLoaded = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
@@ -223,7 +222,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.firstInitialization == null)
 			InitializeNewGraph(currentGraph);
 		
-		graphLoaded = true;
 		if (!currentGraph.presetChoosed)
 		{
 			DrawPresetPanel();
@@ -967,8 +965,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		var node = currentGraph.nodes[(int)oNodeIndex];
 
-		Debug.Log("deleting node at index: " + (int)oNodeIndex);
-
 		if (node == null)
 			return ;
 
@@ -985,15 +981,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			var n = FindNodeByWindowId(deps.windowId);
 			if (n != null)
-			{
-				Debug.Log("deleting link to " + deps.windowId + " on window: " + n.windowId);
 				n.DeleteLinkByWindowTarget(node.windowId);
-			}
 		}
 
 		//remove the node
 		currentGraph.nodes.RemoveAt((int)oNodeIndex);
-		DestroyImmediate(node);
+		DestroyImmediate(node, true);
 
 		EvaluateComputeOrder();
 	}

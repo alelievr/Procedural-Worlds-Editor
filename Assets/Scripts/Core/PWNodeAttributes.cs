@@ -114,7 +114,9 @@ namespace PW
 
 		public PWGeneric(params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
+			this.allowedTypes = new SerializableType[allowedTypes.Length];
+			for (int i = 0; i < allowedTypes.Length; i++)
+				this.allowedTypes[i] = (SerializableType)allowedTypes[i];
 		}
 	}
 

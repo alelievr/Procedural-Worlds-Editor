@@ -637,52 +637,47 @@ namespace PW
 		
 		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
 		{
-			if (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object))
+			if ((fromType != typeof(PWValues) && to.fieldType != typeof(PWValues)) //exclude PWValues to simple assignation (we need to check with allowedTypes)
+				&& (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object)))
 			{
 				if (verbose)
 					Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString());
 				return true;
 			}
-			
-			if (fromAnchorType == PWAnchorType.Input)
+
+			if (fromGeneric || to.generic)
 			{
-				if (fromGeneric)
-				{
-					if (verbose)
-						Debug.Log("Generic variable, check all allowed types:");
-					foreach (Type t in fromAllowedTypes)
+				if (verbose)
+					Debug.Log("from type is generic");
+				SerializableType[] types = (fromGeneric) ? fromAllowedTypes : to.allowedTypes;
+				Type secondType = (fromGeneric) ? to.fieldType : fromType;
+				foreach (Type firstT in types)
+					if (fromGeneric && to.generic)
 					{
 						if (verbose)
-							Debug.Log("check castable from " + to.fieldType + " to " + t);
-						if (t == typeof(object))
-							return true;
-						if (to.fieldType.IsAssignableFrom(t))
+							Debug.Log("to type is generic");
+						foreach (Type toT in to.allowedTypes)
 						{
 							if (verbose)
-								Debug.Log(to.fieldType + " is castable from " + t);
-							return true;
+								Debug.Log("checking assignable from " + firstT + " to " + toT);
+							if (firstT.IsAssignableFrom(toT))
+								return true;
 						}
 					}
-				}
+					else
+					{
+						if (verbose)
+							Debug.Log("checking assignable from " + firstT + " to " + secondType);
+						if (firstT.IsAssignableFrom(secondType))
+							return true;
+					}
 			}
 			else
 			{
-				if (to.generic)
-				{
-					foreach (Type t in to.allowedTypes)
-					{
-						if (verbose)
-							Debug.Log("check castable from " + fromType + " to " + t);
-						if (t == typeof(object))
-							return true;
-						if (fromType.IsAssignableFrom(t))
-						{
-							if (verbose)
-								Debug.Log(fromType + " is castable from " + t);
-							return true;
-						}
-					}
-				}
+				if (verbose)
+					Debug.Log("checking assignable from " + fromType + " to " + to.fieldType);
+				if (fromType.IsAssignableFrom(to.fieldType))
+					return true;
 			}
 			return false;
 		}
@@ -730,6 +725,7 @@ namespace PW
 						//if data was added to multi-anchor:
 						if (data.multiple && data.anchorInstance != null)
 						{
+							Debug.Log("added new anchor at PWValues: " + data.anchorInstance.GetHashCode());
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
 						}

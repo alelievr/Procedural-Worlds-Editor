@@ -12,7 +12,10 @@ namespace PW
 	
 		public override void OnNodeGUI()
 		{
+			EditorGUI.BeginChangeCheck();
 			value1 = EditorGUILayout.Slider(value1, min, max);
+			if (EditorGUI.EndChangeCheck())
+				notifyDataChanged = true;
 		}
 
 		//no process needed, value is alrealy here with slider.

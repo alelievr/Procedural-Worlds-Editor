@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using UnityEngine;
+using UnityEditor;
 
 namespace PW
 {
@@ -6,6 +7,7 @@ namespace PW
 	public class PWNodeGraphInput : PWNode {
 
 		[PWOutput]
+		[PWGeneric(typeof(object))]
 		public PWValues		outputValues = new PWValues();
 
 		public override void OnNodeCreate()
@@ -23,6 +25,7 @@ namespace PW
 					if (name != null)
 						EditorGUILayout.LabelField(name);
 				}
+			Debug.Log("input node input count: " + outputValues.Count);
 		}
 
 		public override void OnNodeProcess()

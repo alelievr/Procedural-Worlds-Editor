@@ -1,17 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace PW
 {
+	[System.SerializableAttribute]
 	public class PWValues {
+		
+		[SerializeField]
+		public int		valuesCount;
 	
-		List< object > values = new List< object >();
-		List< string > names = new List< string >();
+		List< object > values;
+		List< string > names;
 
 		public PWValues()
 		{
 			if (values == null)
 				values = new List< object >();
+			if (names == null)
+				names = new List< string >();
+			while (values.Count < valuesCount)
+				Add(null);
+			Debug.Log("created new PWValues: " + GetHashCode());
 		}
 	
 		public int	Count
@@ -49,6 +59,7 @@ namespace PW
 	
 		public void Add(object val)
 		{
+			valuesCount++;
 			values.Add(val);
 			names.Add(null);
 		}
@@ -68,6 +79,7 @@ namespace PW
 			if (index >= values.Count)
 				return false;
 
+			valuesCount--;
 			values.RemoveAt(index);
 			names.RemoveAt(index);
 			return true;
