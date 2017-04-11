@@ -83,15 +83,16 @@ namespace PW
 
 		}
 
-		public void RequestCreate(ChunkData terrainData, Vector3 pos)
+		public object RequestCreate(ChunkData terrainData, Vector3 pos)
 		{
 			var userData = OnChunkCreate(terrainData, pos);
 			if (terrainStorage == null)
-				return;
+				return userData;
 			if (terrainStorage.isLoaded(pos))
 				terrainStorage[pos].userData = userData;
 			else
 				terrainStorage.AddChunk(pos, terrainData, userData);
+			return userData;
 		}
 	
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)

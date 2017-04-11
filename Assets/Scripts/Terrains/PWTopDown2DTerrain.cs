@@ -24,7 +24,10 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		TopDown2DData	chunk = (TopDown2DData)cd;
 
 		if (g == null) //if gameobject have been destroyed by user and reference was lost.
-			RequestCreate(cd, pos);
+		{
+			chunkGameObject = RequestCreate(cd, pos);
+			g = chunkGameObject as GameObject;
+		}
 		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
 	}
 }

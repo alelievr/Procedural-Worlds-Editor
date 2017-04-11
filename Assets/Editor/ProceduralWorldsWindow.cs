@@ -57,11 +57,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	PWTerrainBase		terrainMaterializer;
 
-	//store all subgraphs instances to fast-access to them.
-	Dictionary< string, PWNodeGraph >	graphInstancies = new Dictionary< string, PWNodeGraph >();
-
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
+	[SerializeField]
+	public PWNodeGraph	parentGraph;
 
 	[System.SerializableAttribute]
 	private class PWNodeStorage
@@ -98,15 +97,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.graphDecalPosition = Vector2.zero;
 
 		graph.realMode = false;
-
 		graph.presetChoosed = false;
 		
 		graph.localWindowIdCount = 0;
-
 		graph.chunkSize = 16;
 		
 		graph.parentReference = null;
-
 		graph.outputNode = CreateNewNode(typeof(PWNodeGraphOutput), new Vector2(position.width - 100, (int)(position.height / 2)));
 		graph.inputNode = CreateNewNode(typeof(PWNodeGraphInput), new Vector2(50, (int)(position.height / 2)));
 
@@ -154,24 +150,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//force graph to reload all chunks (just after compiled)
 		graphNeedReload = true;
 
-		//load all available graph instancies in the AssetDatabase:
-		string assetPath = AssetDatabase.GetAssetPath(currentGraph);
-		if (!String.IsNullOrEmpty(assetPath))
-		{
-			int		resourceIndex = assetPath.IndexOf("Resources");
-			if (resourceIndex != -1)
-			{
-				string resourcePath = Path.ChangeExtension(assetPath.Substring(resourceIndex + 10), null);
-				var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
-				foreach (var graph in graphs)
-				{
-					if (graphInstancies.ContainsKey(graph.name))
-						continue ;
-					graphInstancies.Add(graph.name, graph as PWNodeGraph);
-				}
-			}
-		}
-
 		currentGraph.unserializeInitialized = true;
 	}
 
@@ -196,10 +174,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
 
 		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
-
 		AssetDatabase.SaveAssets();
-
 		AssetDatabase.Refresh();
+		EditorGUIUtility.PingObject(currentGraph);
 	}
 
     void OnGUI()
@@ -221,6 +198,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
 			InitializeNewGraph(currentGraph);
+			
+		if (parentGraph == null)
+		{
+			parentGraph = AssetDatabase.LoadAssetAtPath< PWNodeGraph >(AssetDatabase.GetAssetPath(currentGraph));
+			Debug.Log("loaded parent graph: " + parentGraph.name);
+		}
 		
 		if (!currentGraph.presetChoosed)
 		{
@@ -281,6 +264,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Repaint();
 
 		windowSize = position.size;
+
+		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
 		
 		if (GUI.changed && Event.current.type == EventType.Layout)
 		{
@@ -631,12 +616,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 				while (g != null)
 				{
 					breadcrumbsList.Add(g.name);
-					g = FindGraphByName(g.parentReference);
+					g = parentGraph.FindGraphByName(g.parentReference);
 				}
 				breadcrumbsList.Reverse();
 				foreach (var b in breadcrumbsList)
-					if (GUILayout.Button(b, GUILayout.MaxWidth(100)))
-						SwitchGraph(FindGraphByName(b));
+					if (GUILayout.Button(b, GUILayout.MaxWidth(150)))
+						SwitchGraph(parentGraph.FindGraphByName(b));
 			}
 			EditorGUILayout.EndHorizontal();
 	
@@ -698,12 +683,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 			return ret;
 
 		string gExternalNodeName = currentGraph.subgraphReferences.FirstOrDefault(gName => {
-			var g = FindGraphByName(gName);
+			var g = parentGraph.FindGraphByName(gName);
 			return g && g.externalGraphNode.windowId == id;
 		});
 		if (gExternalNodeName != null)
 		{
-			var gExternalNode = FindGraphByName(gExternalNodeName);
+			var gExternalNode = parentGraph.FindGraphByName(gExternalNodeName);
 			if(gExternalNode.externalGraphNode != null)
 				return gExternalNode.externalGraphNode;
 		}
@@ -713,15 +698,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph.outputNode.windowId == id)
 			return currentGraph.outputNode;
 
-		return null;
-	}
-
-	PWNodeGraph	FindGraphByName(string name)
-	{
-		if (name == null)
-			return null;
-		if (graphInstancies.ContainsKey(name))
-			return graphInstancies[name];
 		return null;
 	}
 
@@ -883,7 +859,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			i = 0;
 			foreach (var graphName in currentGraph.subgraphReferences)
 			{
-				var graph = FindGraphByName(graphName);
+				var graph = parentGraph.FindGraphByName(graphName);
 				if (graph)
 					RenderNode(windowId++, graph.externalGraphNode, graph.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
 				i++;
@@ -899,7 +875,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			//submachine enter button click management:
 			foreach (var graphName in currentGraph.subgraphReferences)
 			{
-				var graph = FindGraphByName(graphName);
+				var graph = parentGraph.FindGraphByName(graphName);
 
 				if (!graph || !graph.externalGraphNode)
 					continue ;
@@ -1030,7 +1006,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (subGraphName == null)
 			return ;
 
-		var subGraph = FindGraphByName(subGraphName);
+		var subGraph = parentGraph.FindGraphByName(subGraphName);
 
 		//TODO: remove all dependencies and links from the output and input machine.
 
@@ -1076,7 +1052,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		while (g != null)
 		{
 			i++;
-			g = FindGraphByName(g.parentReference);
+			g = parentGraph.FindGraphByName(g.parentReference);
 		}
 		subgraphLocalWindowIdCount = i * 1000000 + (currentGraph.localWindowIdCount++ * 10000);
 
@@ -1095,7 +1071,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AssetDatabase.SaveAssets();
 
 		currentGraph.subgraphReferences.Add(subgraph.name);
-		graphInstancies.Add(subgraph.name, subgraph);
+		parentGraph.graphInstancies[subgraph.name] = subgraph;
 
 		AssetDatabase.Refresh();
 
@@ -1277,7 +1253,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
 				menu.AddSeparator("");
-				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(FindGraphByName(currentGraph.parentReference)));
+				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(parentGraph.FindGraphByName(currentGraph.parentReference)));
 
                 menu.ShowAsContext();
                 e.Use();

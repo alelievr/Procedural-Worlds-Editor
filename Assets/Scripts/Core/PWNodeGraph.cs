@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using System;
@@ -41,6 +42,8 @@ namespace PW
 		[SerializeField]
 		public string						assetName;
 		[SerializeField]
+		public string						assetPath;
+		[SerializeField]
 		public string						saveName;
 		[SerializeField]
 		public Vector2						graphDecalPosition;
@@ -80,9 +83,14 @@ namespace PW
 		[SerializeField]
 		public PWNode						externalGraphNode;
 
+
+		[System.NonSerializedAttribute]
+		private bool						graphInstanciesLoaded = false;
 		[System.NonSerializedAttribute]
 		public bool							unserializeInitialized = false;
 
+		[System.NonSerializedAttribute]
+		public Dictionary< string, PWNodeGraph > graphInstancies = new Dictionary< string, PWNodeGraph >();
 		[System.NonSerializedAttribute]
 		public Dictionary< int, PWNode >	nodesDictionary = new Dictionary< int, PWNode >();
 
@@ -116,7 +124,7 @@ namespace PW
 			foreach (var nodeType in allNodeTypeList)
 				BakeNode(nodeType);
 
-			//TODO: a Dictionary of PWNodeGraph
+			LoadGraphInstances();
 			
 			//add all existing nodes to the nodesDictionary
 			foreach (var node in nodes)
@@ -208,10 +216,35 @@ namespace PW
 			ForeachAllNodes((n) => n.chunkSize = chunkSize, true, true);
 		}
 
-		public PWNodeGraph FindGraphByName(string name = null)
+		void LoadGraphInstances()
 		{
-			//TODO: Resource load all, stored in dico.
+			//load all available graph instancies in the AssetDatabase:
+			if (!String.IsNullOrEmpty(assetPath))
+			{
+				int		resourceIndex = assetPath.IndexOf("Resources");
+				if (resourceIndex != -1)
+				{
+					string resourcePath = Path.ChangeExtension(assetPath.Substring(resourceIndex + 10), null);
+					var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
+					foreach (var graph in graphs)
+					{
+						if (graphInstancies.ContainsKey(graph.name))
+							continue ;
+						Debug.Log("loaded graph: " + graph.name);
+						graphInstancies.Add(graph.name, graph as PWNodeGraph);
+					}
+				}
+			}
+		}
 
+		public PWNodeGraph FindGraphByName(string name)
+		{
+			PWNodeGraph		ret;
+				
+			if (name == null)
+				return null;
+			if (graphInstancies.TryGetValue(name, out ret))
+				return ret;
 			return null;
 		}
 
