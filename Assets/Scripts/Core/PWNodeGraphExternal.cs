@@ -6,13 +6,11 @@ namespace PW
 	public class PWNodeGraphExternal : PWNode {
 
 		[SerializeField]
-		public PWNode	graphInput;
-		[SerializeField]
 		public PWNode	graphOutput;
 
 		[PWInput("in")]
 		[PWMultiple(0, typeof(object))] //accept all entering connections
-		public PWValues	input;
+		public PWValues	input = new PWValues();
 
 		[PWOutput("out")]
 		[PWGeneric(typeof(object))]
@@ -20,42 +18,42 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			if (graphInput != null)
-				input = (graphInput as PWNodeGraphInput).outputValues;
 			if (graphOutput != null)
 				output = (graphOutput as PWNodeGraphOutput).inputValues;
 		}
 
 		public override void OnNodeGUI()
 		{
+			if (graphOutput != null)
+				output = (graphOutput as PWNodeGraphOutput).inputValues;
+				
+			if (output == null)
+				return ;
+
 			if (GUILayout.Button("go into machine"))
 				specialButtonClick = true;
 			else
 				specialButtonClick = false;
-			
-			if (graphInput != null)
-				input = (graphInput as PWNodeGraphInput).outputValues;
-			if (graphOutput != null)
-				output = (graphOutput as PWNodeGraphOutput).inputValues;
-				
-			if (input == null || output == null)
-				return ;
 
-			Debug.Log("input count: " + input.Count + " for " + GetHashCode());
-			Debug.Log("input anchor hashcode: " + GetAnchorData("input").anchorInstance.GetHashCode());
-
-			EditorGUILayout.LabelField("inputs:");
-			var names = input.GetNames< object >();
-			foreach (var name in names)
+			var inputNames = input.GetNames< object >();
+			var outputNames = output.GetNames< object >();
+			for (int i = 0; i < inputNames.Count || i < outputNames.Count; i++)
 			{
-				if (name != null)
-					EditorGUILayout.LabelField(name);
+				EditorGUILayout.BeginHorizontal();
+				if (i < input.Count && inputNames[i] != null)
+					EditorGUILayout.LabelField(inputNames[i], GUILayout.MaxWidth(100));
+				else
+					EditorGUILayout.LabelField("");
+				if (i < outputNames.Count && outputNames[i] != null)
+					EditorGUILayout.LabelField(outputNames[i], GUILayout.MaxWidth(100));
+				else
+					EditorGUILayout.LabelField("");
+				EditorGUILayout.EndHorizontal();
 			}
 		}
 
-		public void InitGraphInAndOut(PWNode @in, PWNode @out)
+		public void InitGraphOut(PWNode @out)
 		{
-			graphInput = @in;
 			graphOutput = @out;
 		}
 	}

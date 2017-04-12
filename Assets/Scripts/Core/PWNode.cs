@@ -166,12 +166,6 @@ namespace PW
 				{
 					//update anchor instance if null:
 					data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
-					if (GetType() == typeof(PWNodeGraphExternal))
-					{
-						Debug.Log("get anchor instance value: " + data.anchorInstance.GetHashCode());
-						if (data.anchorInstance != null)
-							Debug.Log((data.anchorInstance as PWValues).AssignAt(0, "olol", "test"));
-					}
 					if (data.anchorInstance == null)
 					{
 						if (data.anchorInstance == null)

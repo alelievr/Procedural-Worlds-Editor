@@ -8,7 +8,10 @@ namespace PW
 
 		[PWOutput]
 		[PWGeneric(typeof(object))]
-		public PWValues		outputValues = new PWValues();
+		public PWValues				outputValues = null;
+		
+		[SerializeField]
+		public PWNodeGraphExternal	externalGraphNode;
 
 		public override void OnNodeCreate()
 		{
@@ -17,6 +20,8 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
+			outputValues = externalGraphNode.input;
+			
 			EditorGUILayout.LabelField("inputs:");
 			var names = outputValues.GetNames< object >();
 			if (names != null)
@@ -25,7 +30,6 @@ namespace PW
 					if (name != null)
 						EditorGUILayout.LabelField(name);
 				}
-			Debug.Log("input node input count: " + outputValues.Count);
 		}
 
 		public override void OnNodeProcess()

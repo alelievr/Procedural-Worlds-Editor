@@ -463,7 +463,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (terrainMaterializer == null)
 			terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
 		if (terrainMaterializer.initialized == false || terrainMaterializer.graph != currentGraph)
-			terrainMaterializer.InitGraph(currentGraph);
+			terrainMaterializer.InitGraph(parentGraph);
 	}
 
 	void MovePreviewCamera(Vector2 move)
@@ -511,25 +511,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 					MovePreviewCamera(new Vector2(-move.x / 16, move.y / 16));
 				}
 
-				if (currentGraph.parentReference == null)
+				EditorGUI.BeginChangeCheck();
+				parentGraph.seed = EditorGUILayout.IntField("Seed", parentGraph.seed);
+				if (EditorGUI.EndChangeCheck())
 				{
-					EditorGUI.BeginChangeCheck();
-					currentGraph.seed = EditorGUILayout.IntField("Seed", currentGraph.seed);
-					if (EditorGUI.EndChangeCheck())
-					{
-						currentGraph.UpdateSeed(currentGraph.seed);
-						graphNeedReload = true;
-					}
-					
-					//chunk size:
-					EditorGUI.BeginChangeCheck();
-					currentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", currentGraph.chunkSize);
-					currentGraph.chunkSize = Mathf.Clamp(currentGraph.chunkSize, 1, 1024);
-					if (EditorGUI.EndChangeCheck())
-					{
-						currentGraph.UpdateChunkSize(currentGraph.chunkSize);
-						graphNeedReload = true;
-					}
+					parentGraph.UpdateSeed(parentGraph.seed);
+					graphNeedReload = true;
+				}
+				
+				//chunk size:
+				EditorGUI.BeginChangeCheck();
+				parentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", parentGraph.chunkSize);
+				parentGraph.chunkSize = Mathf.Clamp(parentGraph.chunkSize, 1, 1024);
+				if (EditorGUI.EndChangeCheck())
+				{
+					parentGraph.UpdateChunkSize(parentGraph.chunkSize);
+					graphNeedReload = true;
 				}
 			}
 			EditorGUILayout.EndVertical();
@@ -811,22 +808,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
 			//We run the calcul the nodes:
 			//if we are on the mother graph, render the terrain
-			if (currentGraph.parentReference == null)
+			//TODO: other preview type for graph outputs in function of graph output type.
+			if (e.type == EventType.Layout)
 			{
-				if (e.type == EventType.Layout)
+				if (graphNeedReload)
 				{
-					if (graphNeedReload)
-					{
-						terrainMaterializer.DestroyAllChunks();
-						graphNeedReload = false;
-					}
-					//updateChunks will update and generate new chunks if needed.
-					terrainMaterializer.UpdateChunks();
+					terrainMaterializer.DestroyAllChunks();
+					graphNeedReload = false;
 				}
-			}
-			else
-			{
-				//TODO: other preview type for graph outputs in function of graph output type.
+				//updateChunks will update and generate new chunks if needed.
+				terrainMaterializer.UpdateChunks();
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 				graphNeedReload = true;
@@ -1060,7 +1051,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 		InitializeNewGraph(subgraph);
 		subgraph.externalGraphNode = CreateNewNode(typeof(PWNodeGraphExternal), pos);
-		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphInAndOut(subgraph.inputNode, subgraph.outputNode);
+		//link external and internal nodes:
+		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphOut(subgraph.outputNode);
+		(subgraph.inputNode as PWNodeGraphInput).externalGraphNode = subgraph.externalGraphNode as PWNodeGraphExternal;
 		subgraph.localWindowIdCount = subgraphLocalWindowIdCount;
 		subgraph.presetChoosed = true;
 		subgraph.parentReference = currentGraph.name;
