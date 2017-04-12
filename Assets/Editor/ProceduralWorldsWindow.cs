@@ -62,6 +62,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[SerializeField]
 	public PWNodeGraph	parentGraph;
 
+	[System.NonSerializedAttribute]
+	Vector2				currentMousePosition;
+
 	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
@@ -266,6 +269,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		windowSize = position.size;
 
 		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
+		currentMousePosition = Event.current.mousePosition;
 		
 		if (GUI.changed && Event.current.type == EventType.Layout)
 		{
@@ -960,7 +964,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void CreateNewNode(object type)
 	{
-		Vector2 pos = -currentGraph.graphDecalPosition + Event.current.mousePosition;
+		Vector2 pos = -currentGraph.graphDecalPosition + currentMousePosition;
 		PWNode newNode = CreateNewNode((Type)type, pos);
 		currentGraph.nodes.Add(newNode);
 	}
@@ -1068,8 +1072,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		AssetDatabase.Refresh();
 
-		currentGraph.nodesDictionary[subgraph.inputNode.windowId] = subgraph.inputNode;
-		currentGraph.nodesDictionary[subgraph.outputNode.windowId] = subgraph.outputNode;
+		currentGraph.nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.inputNode;
 	}
 
 	void HighlightDeleteAnchor(PWAnchorInfo anchor)
@@ -1263,11 +1266,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			nodeComputeOrderCount.Clear();
 			currentGraph.inputNode.computeOrder = 0;
+
 			foreach (var gNode in currentGraph.nodes)
 				gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.windowId);
+			foreach (var subGraphName in currentGraph.subgraphReferences)
+			{
+				PWNodeGraph g = parentGraph.FindGraphByName(subGraphName);
+				if (g != null)
+					g.externalGraphNode.computeOrder = EvaluateComputeOrder(false, 1, g.externalGraphNode.windowId);
+			}
+
 			currentGraph.outputNode.computeOrder = EvaluateComputeOrder(false, 1, currentGraph.outputNode.windowId);
-			//sort nodes for compute order:
-			currentGraph.nodes.Sort((n1, n2) => { return n1.computeOrder.CompareTo(n2.computeOrder); });
+
+			currentGraph.UpdateComputeOrder();
+			
 			return 0;
 		}
 
@@ -1288,6 +1300,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var dep in node.GetDependencies())
 		{
 			int d = EvaluateComputeOrder(false, depth + 1, dep.windowId);
+			Debug.Log("compute order of node " + dep.windowId + ": " + d);
 
 			//if dependency does not have enought datas to compute result, abort calculus.
 			if (d == -1)

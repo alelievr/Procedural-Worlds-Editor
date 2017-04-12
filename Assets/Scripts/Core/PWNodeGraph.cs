@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using System.Linq;
 using System;
 
 namespace PW
@@ -83,6 +84,8 @@ namespace PW
 		[SerializeField]
 		public PWNode						externalGraphNode;
 
+		[System.NonSerializedAttribute]
+		IOrderedEnumerable< PWNodeComputeInfo > computeOrderSortedNodes = null;
 
 		[System.NonSerializedAttribute]
 		private bool						graphInstanciesLoaded = false;
@@ -143,7 +146,36 @@ namespace PW
 			if (outputNode != null)
 				nodesDictionary[outputNode.windowId] = outputNode;
 		}
-		
+
+		private class PWNodeComputeInfo
+		{
+			public PWNode node;
+			public string graphName;
+
+			public PWNodeComputeInfo(PWNode n, string g) {
+				node = n;
+				graphName = g;
+			}
+		}
+
+		public void	UpdateComputeOrder()
+		{
+			computeOrderSortedNodes = nodesDictionary
+					//select all nodes building an object with node value and graph name (if needed)
+					.Select(kp => new PWNodeComputeInfo(kp.Value,
+						//if node is an external node, find the name of his graph
+						(kp.Value.GetType() == typeof(PWNodeGraphExternal)
+							? subgraphReferences.FirstOrDefault(gName => {
+								var g = FindGraphByName(gName);
+								if (g.externalGraphNode.windowId == kp.Value.windowId)
+									return true;
+								return false;
+								})
+					: null)))
+					//sort the resulting list by computeOrder:
+					.OrderBy(n => n.node.computeOrder);
+		}
+
 		void ProcessNodeLinks(PWNode node)
 		{
 			var links = node.GetLinks();
@@ -160,6 +192,8 @@ namespace PW
 	
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
 				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+				Debug.Log("distant info: " + link.distantClassAQName + " | " + link.distantName + " | " + link.distantIndex);
+				Debug.Log("local info: " + link.localClassAQName + " | "  + link.localName + " | " + link.localIndex);
 				if (link.distantIndex == -1)
 					prop.SetValue(target, val);
 				else //multiple object data:
@@ -181,22 +215,22 @@ namespace PW
 			//TODO: rework this to get a working in-depth node process call
 			//AND integrate notifyDataChanged in this todo.
 
-			if (parentReference != null)
+			if (computeOrderSortedNodes == null)
+				UpdateComputeOrder();
+			
+			foreach (var nodeInfo in computeOrderSortedNodes)
 			{
-				inputNode.Process();
-				ProcessNodeLinks(inputNode);
-			}
-			foreach (var node in nodes)
-				if (node != null && node.computeOrder != -1)
+				if (nodeInfo.graphName != null)
 				{
-					node.Process();
-					ProcessNodeLinks(node);
+					PWNodeGraph g = FindGraphByName(nodeInfo.graphName);
+					g.ProcessGraph();
 				}
-		/*	foreach (var graph in subgraphReferences)
-			{
-				graph.outputNode.Process();
-				ProcessNodeLinks(graph.outputNode);
-			}*/
+				else
+				{
+					nodeInfo.node.Process();
+					ProcessNodeLinks(nodeInfo.node);
+				}
+			}
 		}
 
 		public void	UpdateSeed(int seed)

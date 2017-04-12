@@ -21,7 +21,6 @@ namespace PW
 				names = new List< string >();
 			while (values.Count < valuesCount)
 				Add(null);
-			Debug.Log("created new PWValues: " + GetHashCode());
 		}
 	
 		public int	Count

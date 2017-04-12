@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -279,11 +279,6 @@ namespace PW
 					propertyDatas.Remove(field.Name);
 				else
 				{
-					if (anchorType == PWAnchorType.Output && data.multiple)
-					{
-						Debug.LogWarning("PWMultiple attribute is only valid on input variables");
-						data.multiple = false;
-					}
 					if (data.required && anchorType == PWAnchorType.Output)
 						data.required = false;
 					data.classAQName = GetType().AssemblyQualifiedName;
@@ -310,6 +305,7 @@ namespace PW
 							while (PWValuesInstance.Count < data.multipleValueCount)
 								PWValuesInstance.Add(null);
 					}
+					Debug.Log("loaded field: " + data.fieldName + ", multi: " + data.multiple);
 				}
 			}
 
@@ -474,7 +470,10 @@ namespace PW
 					data.generic, data.allowedTypes,
 					singleAnchor.linkType, singleAnchor.linkCount);
 			if (anchorRect.Contains(Event.current.mousePosition))
+			{
 				ret.mouseAbove = true;
+				Debug.Log("prop index: " + index);
+			}
 		}
 
 		public PWAnchorInfo ProcessAnchors()
@@ -725,7 +724,6 @@ namespace PW
 						//if data was added to multi-anchor:
 						if (data.multiple && data.anchorInstance != null)
 						{
-							Debug.Log("added new anchor at PWValues: " + data.anchorInstance.GetHashCode());
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
 						}

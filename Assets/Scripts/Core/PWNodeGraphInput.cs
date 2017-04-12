@@ -7,7 +7,7 @@ namespace PW
 	public class PWNodeGraphInput : PWNode {
 
 		[PWOutput]
-		[PWGeneric(typeof(object))]
+		[PWMultiple(0, typeof(object))]
 		public PWValues				outputValues = null;
 		
 		[SerializeField]
@@ -30,16 +30,6 @@ namespace PW
 					if (name != null)
 						EditorGUILayout.LabelField(name);
 				}
-		}
-
-		public override void OnNodeProcess()
-		{
-			//done by PWNode when mirrored.
-			/*var values = inputValues.GetValues< object >();
-			var names = inputValuesGetNames< object >();
-
-			for (int i = 0; i < values.Count; i++)
-				outputValues.AssignAt(i, values[i], names[i]);*/
 		}
 	}
 }
