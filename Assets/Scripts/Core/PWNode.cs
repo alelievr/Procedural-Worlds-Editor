@@ -165,9 +165,15 @@ namespace PW
 				if (data.multiple)
 				{
 					//update anchor instance if null:
+					data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
+					if (GetType() == typeof(PWNodeGraphExternal))
+					{
+						Debug.Log("get anchor instance value: " + data.anchorInstance.GetHashCode());
+						if (data.anchorInstance != null)
+							Debug.Log((data.anchorInstance as PWValues).AssignAt(0, "olol", "test"));
+					}
 					if (data.anchorInstance == null)
 					{
-						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
 						if (data.anchorInstance == null)
 							continue ;
 					}
@@ -1091,6 +1097,13 @@ namespace PW
 					return null;
 				return anchors[index].anchorRect;
 			}
+			return null;
+		}
+
+		public PWAnchorData	GetAnchorData(string propName)
+		{
+			if (propertyDatas.ContainsKey(propName))
+				return propertyDatas[propName];
 			return null;
 		}
     }

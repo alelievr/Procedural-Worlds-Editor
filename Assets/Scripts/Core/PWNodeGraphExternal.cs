@@ -41,7 +41,8 @@ namespace PW
 			if (input == null || output == null)
 				return ;
 
-			// Debug.Log("input count: " + input.Count + " for " + GetHashCode());
+			Debug.Log("input count: " + input.Count + " for " + GetHashCode());
+			Debug.Log("input anchor hashcode: " + GetAnchorData("input").anchorInstance.GetHashCode());
 
 			EditorGUILayout.LabelField("inputs:");
 			var names = input.GetNames< object >();
