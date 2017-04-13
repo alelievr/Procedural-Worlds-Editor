@@ -164,17 +164,20 @@ namespace PW
 				var data = PWAnchorData.Value;
 				if (data.multiple)
 				{
-					//update anchor instance if null:
-					data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
 					if (data.anchorInstance == null)
 					{
+						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
+						Debug.Log("getting value of: " + GetType());
 						if (data.anchorInstance == null)
 							continue ;
+						else
+							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
 					}
 
 					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
-					if (data.displayHiddenMultipleAnchors || showAdditional)
-						anchorCount++;
+					if (data.anchorType == PWAnchorType.Input)
+						if (data.displayHiddenMultipleAnchors || showAdditional)
+							anchorCount++;
 					for (int i = 0; i < anchorCount; i++)
 					{
 						//if multi-anchor instance does not exists, create it:
@@ -292,6 +295,7 @@ namespace PW
 					data.windowId = windowId;
 
 					//add missing values to instance of list:
+
 					if (data.multiple && data.anchorInstance != null)
 					{
 						//add minimum number of anchors to render:
@@ -305,7 +309,7 @@ namespace PW
 							while (PWValuesInstance.Count < data.multipleValueCount)
 								PWValuesInstance.Add(null);
 					}
-					Debug.Log("loaded field: " + data.fieldName + ", multi: " + data.multiple);
+					Debug.Log("loaded field: " + data.fieldName + ", multi: " + data.multiple + ", instance: " + data.anchorInstance);
 				}
 			}
 

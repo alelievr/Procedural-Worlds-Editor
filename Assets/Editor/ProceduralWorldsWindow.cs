@@ -590,7 +590,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						Rect clickableRect = DrawSelectorCase(ref r, nodeCase.name);
 	
 						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
-							CreateNewNode(nodeCase.nodeType);
+							CreateNewNode(nodeCase.nodeType, -currentGraph.graphDecalPosition + position.size / 2, true);
 					}
 				}
 			}
@@ -956,6 +956,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 
 		//remove the node
+		currentGraph.nodesDictionary.Remove(node.windowId);
 		currentGraph.nodes.RemoveAt((int)oNodeIndex);
 		DestroyImmediate(node, true);
 
@@ -965,16 +966,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void CreateNewNode(object type)
 	{
 		Vector2 pos = -currentGraph.graphDecalPosition + currentMousePosition;
-		PWNode newNode = CreateNewNode((Type)type, pos);
-		currentGraph.nodes.Add(newNode);
+		PWNode newNode = CreateNewNode((Type)type, pos, true);
 	}
 
-	PWNode	CreateNewNode(Type t, Vector2 position)
+	PWNode	CreateNewNode(Type t, Vector2 position, bool addToNodeList = false)
 	{
 		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
 
 		//center to the middle of the screen:
 		newNode.windowRect.position = position;
+		Debug.Log("created new node at: " + position);
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
@@ -987,6 +988,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		AssetDatabase.AddObjectToAsset(newNode, currentGraph);
 		
+		currentGraph.nodes.Add(newNode);
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
 		
 		return newNode;
@@ -1249,7 +1251,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
 				menu.AddSeparator("");
-				menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(parentGraph.FindGraphByName(currentGraph.parentReference)));
+				if (currentGraph.parentReference != null)
+					menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(parentGraph.FindGraphByName(currentGraph.parentReference)));
+				else
+					menu.AddDisabledItem(new GUIContent("Go to parent"));
 
                 menu.ShowAsContext();
                 e.Use();
@@ -1279,7 +1284,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.outputNode.computeOrder = EvaluateComputeOrder(false, 1, currentGraph.outputNode.windowId);
 
 			currentGraph.UpdateComputeOrder();
-			
+
 			return 0;
 		}
 

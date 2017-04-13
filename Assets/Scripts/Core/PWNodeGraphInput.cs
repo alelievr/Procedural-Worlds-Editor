@@ -8,6 +8,7 @@ namespace PW
 
 		[PWOutput]
 		[PWMultiple(0, typeof(object))]
+		[System.NonSerializedAttribute]
 		public PWValues				outputValues = null;
 		
 		[SerializeField]
@@ -20,8 +21,6 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-			outputValues = externalGraphNode.input;
-			
 			EditorGUILayout.LabelField("inputs:");
 			var names = outputValues.GetNames< object >();
 			if (names != null)
@@ -30,6 +29,12 @@ namespace PW
 					if (name != null)
 						EditorGUILayout.LabelField(name);
 				}
+		}
+
+		public override void OnNodeProcess()
+		{
+			if (externalGraphNode != null) //for the highest graph
+				outputValues = externalGraphNode.input;
 		}
 	}
 }

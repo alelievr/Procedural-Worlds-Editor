@@ -14,7 +14,7 @@ namespace PW
 
 		[PWOutput("out")]
 		[PWGeneric(typeof(object))]
-		public PWValues	output;
+		public PWValues	output = null;
 
 		public override void OnNodeCreate()
 		{

@@ -180,6 +180,8 @@ namespace PW
 		{
 			var links = node.GetLinks();
 	
+			Debug.Log("computed node: " + node.GetType() + " - " + node.name);
+
 			foreach (var link in links)
 			{
 				if (!nodesDictionary.ContainsKey(link.distantWindowId))
@@ -191,12 +193,13 @@ namespace PW
 					continue ;
 	
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
+				if (val == null)
+					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);
 				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
-				Debug.Log("distant info: " + link.distantClassAQName + " | " + link.distantName + " | " + link.distantIndex);
-				Debug.Log("local info: " + link.localClassAQName + " | "  + link.localName + " | " + link.localIndex);
-				if (link.distantIndex == -1)
+				//simple assignation, without multi-anchor
+				if (link.distantIndex == -1 && link.localIndex == -1)
 					prop.SetValue(target, val);
-				else //multiple object data:
+				else if (link.distantIndex != -1 && link.localIndex == -1) //distant link is a multi-anchor
 				{
 					PWValues values = (PWValues)prop.GetValue(target);
 	
@@ -206,15 +209,29 @@ namespace PW
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
 				}
+				else if (link.distantIndex == -1 && link.localIndex != -1 && val != null) //local link is a multi-anchor
+				{
+					object localVal = ((PWValues)val).At(link.localIndex);
+
+					Debug.Log("assigning value: " + localVal);
+					prop.SetValue(target, localVal);
+				}
+				else if (val != null) // both are multi-anchors
+				{
+					PWValues values = (PWValues)prop.GetValue(target);
+					object localVal = ((PWValues)val).At(link.localIndex);
+	
+					if (values != null)
+					{
+						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
+							Debug.Log("failed to set distant indexed field value: " + link.distantName);
+					}
+				}
 			}
 		}
 
 		public void ProcessGraph()
 		{
-			//here nodes are sorted by compute-order
-			//TODO: rework this to get a working in-depth node process call
-			//AND integrate notifyDataChanged in this todo.
-
 			if (computeOrderSortedNodes == null)
 				UpdateComputeOrder();
 			
@@ -227,6 +244,9 @@ namespace PW
 				}
 				else
 				{
+					//ignore unlink nodes
+					if (nodeInfo.node.computeOrder < 0)
+						continue ;
 					nodeInfo.node.Process();
 					ProcessNodeLinks(nodeInfo.node);
 				}
