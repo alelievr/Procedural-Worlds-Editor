@@ -164,6 +164,8 @@ namespace PW
 				var data = PWAnchorData.Value;
 				if (data.multiple)
 				{
+					if (GetType() == typeof(PWNodeGraphInput))
+						Debug.Log("here ?");
 					if (data.anchorInstance == null)
 					{
 						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
@@ -174,7 +176,7 @@ namespace PW
 							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
 					}
 
-					int anchorCount = Mathf.Max(data.minMultipleValues, data.multipleValueCount);
+					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
 					if (data.anchorType == PWAnchorType.Input)
 						if (data.displayHiddenMultipleAnchors || showAdditional)
 							anchorCount++;
@@ -393,7 +395,7 @@ namespace PW
 
 				EditorGUILayout.BeginVertical(debugstyle);
 				EditorGUILayout.LabelField("Id: " + windowId + " | Compute order: " + computeOrder);
-				EditorGUILayout.LabelField("Render order: " + windowRenderOrder++);
+				EditorGUILayout.LabelField("type: " + GetType());
 				EditorGUILayout.LabelField("Dependencies:");
 				foreach (var dep in depencendies)
 					EditorGUILayout.LabelField("    " + dep.windowId + " : " + dep.anchorId);
@@ -474,10 +476,7 @@ namespace PW
 					data.generic, data.allowedTypes,
 					singleAnchor.linkType, singleAnchor.linkCount);
 			if (anchorRect.Contains(Event.current.mousePosition))
-			{
 				ret.mouseAbove = true;
-				Debug.Log("prop index: " + index);
-			}
 		}
 
 		public PWAnchorInfo ProcessAnchors()
@@ -604,7 +603,15 @@ namespace PW
 			if (highlightAddTexture == null)
 				OnEnable();
 			
+			if (GetType() == typeof(PWNodeGraphInput))
+			{
+				Debug.Log("outpuValues hashcode: " + propertyDatas["outputValues"].anchorInstance.GetHashCode());
+				Debug.Log("ACount: " + ((PWValues)propertyDatas["outputValues"].anchorInstance).Count);
+			}
 			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (GetType() == typeof(PWNodeGraphInput))
+					Debug.Log("anchor: " + data.fieldName);
+
 				//draw anchor:
 				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
@@ -706,6 +713,7 @@ namespace PW
 			if (from.anchorType == PWAnchorType.Output)
 			{
 				outputHasChanged = true;
+				Debug.Log("attached nodes: " + from.windowId + " -> " + to.windowId);
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
 					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor)

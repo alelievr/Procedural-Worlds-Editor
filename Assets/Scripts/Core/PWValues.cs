@@ -55,6 +55,13 @@ namespace PW
 				return null;
 			return values[index];
 		}
+		
+		public string NameAt(int index)
+		{
+			if (index < 0 || index >= names.Count)
+				return null;
+			return names[index];
+		}
 	
 		public void Add(object val)
 		{
@@ -63,10 +70,20 @@ namespace PW
 			names.Add(null);
 		}
 
-		public bool AssignAt(int index, object val, string name)
+		public bool AssignAt(int index, object val, string name, bool force = false)
 		{
 			if (index >= values.Count)
-				return false;
+			{
+				if (force)
+				{
+					while (index >= values.Count)
+						values.Add(null);
+					while (index >= names.Count)
+						names.Add(null);
+				}
+				else
+					return false;
+			}
 
 			values[index] = val;
 			names[index] = name;

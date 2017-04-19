@@ -42,6 +42,8 @@ namespace PW
 
 		void UpdateNoise()
 		{
+			//TODO: remove this protection !
+			if (output != null && previewTex != null)
 			output.Foreach((x, y) => {
 				float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
 				for (int i = 0; i < octaves; i++)

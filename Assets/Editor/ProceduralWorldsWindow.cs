@@ -182,8 +182,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUIUtility.PingObject(currentGraph);
 	}
 
+	float zoomScale = 1;
+
     void OnGUI()
     {
+ 
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
@@ -191,17 +194,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
 
+		if (Event.current.type == EventType.scrollWheel)
+			zoomScale *= 1 + 0.1f * Mathf.Sign(Event.current.delta.y);
+
         //background color:
 		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
 			OnEnable();
 			
 		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
 			currentGraph.parentReference = null;
-			
+
 		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
 			InitializeNewGraph(currentGraph);
-			
+		
 		if (parentGraph == null)
 		{
 			parentGraph = AssetDatabase.LoadAssetAtPath< PWNodeGraph >(AssetDatabase.GetAssetPath(currentGraph));
@@ -238,7 +244,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (gtm != null)
 				terrainMaterializer = gtm.GetComponent< PWTerrainBase >();
 		}
-
+	
 		DrawNodeGraphCore();
 
 		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 4);
@@ -973,6 +979,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
 
+		position.x = Mathf.RoundToInt(position.x);
+		position.y = Mathf.RoundToInt(position.y);
+		
 		//center to the middle of the screen:
 		newNode.windowRect.position = position;
 		Debug.Log("created new node at: " + position);
@@ -988,7 +997,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		AssetDatabase.AddObjectToAsset(newNode, currentGraph);
 		
-		currentGraph.nodes.Add(newNode);
+		if (addToNodeList)
+			currentGraph.nodes.Add(newNode);
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
 		
 		return newNode;
@@ -1058,8 +1068,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		InitializeNewGraph(subgraph);
 		subgraph.externalGraphNode = CreateNewNode(typeof(PWNodeGraphExternal), pos);
 		//link external and internal nodes:
-		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphOut(subgraph.outputNode);
-		(subgraph.inputNode as PWNodeGraphInput).externalGraphNode = subgraph.externalGraphNode as PWNodeGraphExternal;
+		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphOut(subgraph.inputNode, subgraph.outputNode);
+		(subgraph.outputNode as PWNodeGraphOutput).InitExternalNode(subgraph.externalGraphNode);
 		subgraph.localWindowIdCount = subgraphLocalWindowIdCount;
 		subgraph.presetChoosed = true;
 		subgraph.parentReference = currentGraph.name;
@@ -1074,7 +1084,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		AssetDatabase.Refresh();
 
-		currentGraph.nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.inputNode;
+		currentGraph.nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
 	}
 
 	void HighlightDeleteAnchor(PWAnchorInfo anchor)
@@ -1305,7 +1315,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var dep in node.GetDependencies())
 		{
 			int d = EvaluateComputeOrder(false, depth + 1, dep.windowId);
-			Debug.Log("compute order of node " + dep.windowId + ": " + d);
 
 			//if dependency does not have enought datas to compute result, abort calculus.
 			if (d == -1)

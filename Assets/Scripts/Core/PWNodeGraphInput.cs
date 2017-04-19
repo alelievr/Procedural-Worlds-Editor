@@ -8,12 +8,8 @@ namespace PW
 
 		[PWOutput]
 		[PWMultiple(0, typeof(object))]
-		[System.NonSerializedAttribute]
-		public PWValues				outputValues = null;
+		public PWValues				outputValues = new PWValues();
 		
-		[SerializeField]
-		public PWNodeGraphExternal	externalGraphNode;
-
 		public override void OnNodeCreate()
 		{
 
@@ -21,6 +17,8 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
+			Debug.Log("outputValues hash: " + outputValues.GetHashCode());
+			Debug.Log("count: " + outputValues.Count);
 			EditorGUILayout.LabelField("inputs:");
 			var names = outputValues.GetNames< object >();
 			if (names != null)
@@ -31,10 +29,6 @@ namespace PW
 				}
 		}
 
-		public override void OnNodeProcess()
-		{
-			if (externalGraphNode != null) //for the highest graph
-				outputValues = externalGraphNode.input;
-		}
+		//no need to process this graph, datas are assigned form PWNodeGraphExternal
 	}
 }

@@ -187,11 +187,16 @@ namespace PW
 				if (!nodesDictionary.ContainsKey(link.distantWindowId))
 					continue;
 
+				Debug.Log("link: " + link.localWindowId + " -> " + link.distantWindowId);
+
 				var target = nodesDictionary[link.distantWindowId];
 	
 				if (target == null)
 					continue ;
 	
+				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.windowId);
+				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.windowId);
+				
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
 				if (val == null)
 					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);
@@ -237,18 +242,17 @@ namespace PW
 			
 			foreach (var nodeInfo in computeOrderSortedNodes)
 			{
+				//ignore unlink nodes
+				if (nodeInfo.node.computeOrder < 0)
+					continue ;
+				nodeInfo.node.Process();
+				ProcessNodeLinks(nodeInfo.node);
+
+				//if node was an external node, compute his subgraph
 				if (nodeInfo.graphName != null)
 				{
 					PWNodeGraph g = FindGraphByName(nodeInfo.graphName);
 					g.ProcessGraph();
-				}
-				else
-				{
-					//ignore unlink nodes
-					if (nodeInfo.node.computeOrder < 0)
-						continue ;
-					nodeInfo.node.Process();
-					ProcessNodeLinks(nodeInfo.node);
 				}
 			}
 		}

@@ -59,6 +59,8 @@ namespace PW
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.
 			//TODO: force the first output of graphOutput to be a ChunkData inherited class.
+			if (graphOutput.inputValues.At(0) != null)
+				Debug.Log("output type: " + graphOutput.inputValues.At(0).GetType());
 			return (ChunkData)graphOutput.inputValues.At(0); //return the first value of output
 		}
 

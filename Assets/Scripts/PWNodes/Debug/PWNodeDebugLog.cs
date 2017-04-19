@@ -17,7 +17,20 @@ namespace PW
 		public override void OnNodeGUI()
 		{
 			if (obj != null)
+			{
 				EditorGUILayout.LabelField(obj.ToString());
+				if (obj.GetType() == typeof(PWValues))
+				{
+					var pwv = obj as PWValues;
+
+					for (int i = 0; i < pwv.Count; i++)
+					{
+						EditorGUILayout.BeginHorizontal();
+						EditorGUILayout.LabelField("[" + i + "] " + pwv.NameAt(i) + ": " + pwv.At(i));
+						EditorGUILayout.EndHorizontal();
+					}
+				}
+			}
 			else
 				EditorGUILayout.LabelField("null");
 		}
