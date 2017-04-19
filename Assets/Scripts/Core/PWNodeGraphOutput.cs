@@ -46,7 +46,10 @@ namespace PW
 			if (upperNode != null)
 			{
 				for (int i = 0; i < inputValues.Count; i++)
+				{
+					Debug.Log("set output value to: " + inputValues.At(i) + ": " + inputValues.At(i).GetType());
 					upperNode.output.AssignAt(i, inputValues.At(i), inputValues.NameAt(i), true);
+				}
 			}
 		}
 

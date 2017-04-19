@@ -55,6 +55,11 @@ namespace PW
 				for (int y = 0; y < size; y++)
 					callback(x, y, map[x, y]);
 		}
+		
+		public override string ToString()
+		{
+			return "Samp2D(" + size + ")";
+		}
 	}
 
 	[System.SerializableAttribute]
@@ -96,6 +101,11 @@ namespace PW
 					for (int z = 0; z < size; z++)
 						callback(x, y, z, map[x, y, z]);
 		}
+
+		public override string ToString()
+		{
+			return "Samp3D(" + size + ")";
+		}
 	}
 
 	/*
@@ -106,6 +116,11 @@ namespace PW
 	public class ChunkData
 	{
 		public Vector3		size;
+
+		public override string ToString()
+		{
+			return GetType().Name + "(" + size + ")";
+		}
 	}
 
 	[System.SerializableAttribute]

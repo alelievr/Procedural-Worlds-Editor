@@ -164,12 +164,9 @@ namespace PW
 				var data = PWAnchorData.Value;
 				if (data.multiple)
 				{
-					if (GetType() == typeof(PWNodeGraphInput))
-						Debug.Log("here ?");
 					if (data.anchorInstance == null)
 					{
 						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
-						Debug.Log("getting value of: " + GetType());
 						if (data.anchorInstance == null)
 							continue ;
 						else
@@ -603,15 +600,7 @@ namespace PW
 			if (highlightAddTexture == null)
 				OnEnable();
 			
-			if (GetType() == typeof(PWNodeGraphInput))
-			{
-				Debug.Log("outpuValues hashcode: " + propertyDatas["outputValues"].anchorInstance.GetHashCode());
-				Debug.Log("ACount: " + ((PWValues)propertyDatas["outputValues"].anchorInstance).Count);
-			}
 			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (GetType() == typeof(PWNodeGraphInput))
-					Debug.Log("anchor: " + data.fieldName);
-
 				//draw anchor:
 				if (singleAnchor.visibility != PWVisibility.Gone)
 				{
@@ -998,19 +987,16 @@ namespace PW
 		public void		EndFrameUpdate()
 		{
 			//reset values at the end of the frame
-			if (Event.current.type == EventType.Layout)
-			{
-				oldSeed = seed;
-				oldChunkPosition = chunkPosition;
-				oldChunkSize = chunkSize;
-				seedHasChanged = false;
-				positionHasChanged = false;
-				chunkSizeHasChanged = false;
-				inputHasChanged = false;
-				outputHasChanged = false;
-				reloadRequested = false;
-				justReloaded = false;
-			}
+			oldSeed = seed;
+			oldChunkPosition = chunkPosition;
+			oldChunkSize = chunkSize;
+			seedHasChanged = false;
+			positionHasChanged = false;
+			chunkSizeHasChanged = false;
+			inputHasChanged = false;
+			outputHasChanged = false;
+			reloadRequested = false;
+			justReloaded = false;
 		}
 
 		public virtual void	OnNodeAnchorLink(string propName, int index)

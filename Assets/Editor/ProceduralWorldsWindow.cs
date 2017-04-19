@@ -526,6 +526,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (EditorGUI.EndChangeCheck())
 				{
 					parentGraph.UpdateSeed(parentGraph.seed);
+					Debug.Log("updated seed for graph: " + parentGraph.name);
 					graphNeedReload = true;
 				}
 				
@@ -910,8 +911,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			bool	reloadRequested = false;
 			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {
-				p.EndFrameUpdate();
 				if (e.type == EventType.Layout)
+				{
+					p.EndFrameUpdate();
 					if (p.notifyDataChanged)
 					{
 						graphNeedReload = true;
@@ -919,6 +921,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						reloadRequested = true;
 						reloadWeight = p.computeOrder;
 					}
+				}
 			}, true, true);
 
 			//TODO: subgraph dependencies management.
@@ -981,7 +984,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		position.x = Mathf.RoundToInt(position.x);
 		position.y = Mathf.RoundToInt(position.y);
-		
+
 		//center to the middle of the screen:
 		newNode.windowRect.position = position;
 		Debug.Log("created new node at: " + position);

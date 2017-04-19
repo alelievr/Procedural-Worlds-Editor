@@ -31,26 +31,24 @@ namespace PW
 			}
 			if (EditorGUI.EndChangeCheck())
 			{
-				UpdateNoise();
+				UpdateNoisePreview();
 				notifyDataChanged = true;
 			}
+
+			if (needUpdate)
+				UpdateNoisePreview();
 
 			//TODO: shader preview here
 			
 			GUILayout.Label(previewTex, GUILayout.Width(100), GUILayout.Height(100));
 		}
 
-		void UpdateNoise()
+		void UpdateNoisePreview()
 		{
-			//TODO: remove this protection !
-			if (output != null && previewTex != null)
-			output.Foreach((x, y) => {
-				float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
-				for (int i = 0; i < octaves; i++)
-					val *= 1.2f;
-				previewTex.SetPixel(x, y, new Color(val, val, val));
-				return val;
-			});
+			if (needUpdate)
+				output.Foreach((x, y, val) => {
+					previewTex.SetPixel(x, y, new Color(val, val, val));
+				});
 			previewTex.Apply();
 		}
 
@@ -64,7 +62,14 @@ namespace PW
 
 			//recalcul perlin noise values with new seed / position.
 			if (needUpdate)
-				UpdateNoise();
+			{
+				output.Foreach((x, y) => {
+					float val = Mathf.PerlinNoise((float)x / 20f + seed, (float)y / 20f + seed);
+					for (int i = 0; i < octaves; i++)
+						val *= 1.2f;
+					return val;
+				});
+			}
 		}
 	}
 }

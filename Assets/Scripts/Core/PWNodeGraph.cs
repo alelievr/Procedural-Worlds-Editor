@@ -187,8 +187,6 @@ namespace PW
 				if (!nodesDictionary.ContainsKey(link.distantWindowId))
 					continue;
 
-				Debug.Log("link: " + link.localWindowId + " -> " + link.distantWindowId);
-
 				var target = nodesDictionary[link.distantWindowId];
 	
 				if (target == null)
@@ -210,6 +208,7 @@ namespace PW
 	
 					if (values != null)
 					{
+						Debug.Log("assigned value: " + val);
 						if (!values.AssignAt(link.distantIndex, val, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
@@ -218,7 +217,7 @@ namespace PW
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
-					Debug.Log("assigning value: " + localVal);
+					Debug.Log("assigned value: " + localVal);
 					prop.SetValue(target, localVal);
 				}
 				else if (val != null) // both are multi-anchors
@@ -228,6 +227,7 @@ namespace PW
 	
 					if (values != null)
 					{
+						Debug.Log("assigned value: " + localVal);
 						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
@@ -245,7 +245,9 @@ namespace PW
 				//ignore unlink nodes
 				if (nodeInfo.node.computeOrder < 0)
 					continue ;
+				nodeInfo.node.BeginFrameUpdate();
 				nodeInfo.node.Process();
+				nodeInfo.node.EndFrameUpdate();
 				ProcessNodeLinks(nodeInfo.node);
 
 				//if node was an external node, compute his subgraph

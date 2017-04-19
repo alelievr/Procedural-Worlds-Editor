@@ -58,10 +58,10 @@ namespace PW
 
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.
-			//TODO: force the first output of graphOutput to be a ChunkData inherited class.
-			if (graphOutput.inputValues.At(0) != null)
-				Debug.Log("output type: " + graphOutput.inputValues.At(0).GetType());
-			return (ChunkData)graphOutput.inputValues.At(0); //return the first value of output
+			object firstOutput = graphOutput.inputValues.At(0);
+			if (firstOutput.GetType() == typeof(PWValues))
+				firstOutput = (firstOutput as PWValues).At(0);
+			return (ChunkData)firstOutput; //return the first value of output
 		}
 
 		public virtual object OnChunkCreate(ChunkData terrainData, Vector3 pos)
