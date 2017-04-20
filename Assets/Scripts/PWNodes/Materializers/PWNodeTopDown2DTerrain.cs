@@ -28,6 +28,12 @@ namespace PW
 			GUILayout.Label(samplerTexture, GUILayout.Width(100), GUILayout.Height(100));
 		}
 
+		public override void OnNodeAnchorLink(string propName, int index)
+		{
+			if (propName == "texture")
+				samplerTexture = new Texture2D(texture.size, texture.size, TextureFormat.ARGB32, false, false);
+		}
+
 		public override void OnNodeProcess()
 		{
 			if (chunkSizeHasChanged)

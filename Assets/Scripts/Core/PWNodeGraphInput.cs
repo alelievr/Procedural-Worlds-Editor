@@ -28,13 +28,6 @@ namespace PW
 			}
 		}
 
-		public override void OnNodeProcess()
-		{
-			Debug.Log("input graph vals: ");
-			for (int i = 0; i < outputValues.Count; i++)
-				Debug.Log("input: " + outputValues.At(i));
-		}
-
 		//no need to process this graph, datas are assigned form PWNodeGraphExternal
 	}
 }

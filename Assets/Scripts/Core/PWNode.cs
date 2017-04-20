@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -23,6 +23,7 @@ namespace PW
 		public Vector3	chunkPosition = Vector3.zero;
 		public int		chunkSize = 16;
 		public int		seed;
+		public float	processTime = 0f;
 
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
@@ -260,7 +261,6 @@ namespace PW
 					if (multipleAttr != null)
 					{
 						//check if field is PWValues type otherwise do not implement multi-anchor
-						var multipleValueInstance = field.GetValue(this) as PWValues;
 						data.generic = true;
 						data.multiple = true;
 						data.allowedTypes = multipleAttr.allowedTypes;
@@ -308,7 +308,6 @@ namespace PW
 							while (PWValuesInstance.Count < data.multipleValueCount)
 								PWValuesInstance.Add(null);
 					}
-					Debug.Log("loaded field: " + data.fieldName + ", multi: " + data.multiple + ", instance: " + data.anchorInstance);
 				}
 			}
 

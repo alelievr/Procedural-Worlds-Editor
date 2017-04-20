@@ -35,20 +35,21 @@ namespace PW
 				notifyDataChanged = true;
 			}
 
+			//TODO: shader preview here
+			if (chunkSizeHasChanged)
+				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
+
 			if (needUpdate)
 				UpdateNoisePreview();
 
-			//TODO: shader preview here
-			
 			GUILayout.Label(previewTex, GUILayout.Width(100), GUILayout.Height(100));
 		}
 
 		void UpdateNoisePreview()
 		{
-			if (needUpdate)
-				output.Foreach((x, y, val) => {
-					previewTex.SetPixel(x, y, new Color(val, val, val));
-				});
+			output.Foreach((x, y, val) => {
+				previewTex.SetPixel(x, y, new Color(val, val, val));
+			});
 			previewTex.Apply();
 		}
 
@@ -57,7 +58,6 @@ namespace PW
 			if (chunkSizeHasChanged)
 			{
 				output.Resize(chunkSize);
-				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 			}
 
 			//recalcul perlin noise values with new seed / position.

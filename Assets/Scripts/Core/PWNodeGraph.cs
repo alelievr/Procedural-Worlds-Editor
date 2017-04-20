@@ -93,12 +93,15 @@ namespace PW
 		public bool							unserializeInitialized = false;
 
 		[System.NonSerializedAttribute]
-		public Dictionary< string, PWNodeGraph > graphInstancies = new Dictionary< string, PWNodeGraph >();
+		public Dictionary< string, PWNodeGraph >	graphInstancies = new Dictionary< string, PWNodeGraph >();
 		[System.NonSerializedAttribute]
-		public Dictionary< int, PWNode >	nodesDictionary = new Dictionary< int, PWNode >();
+		public Dictionary< int, PWNode >			nodesDictionary = new Dictionary< int, PWNode >();
 
 		[System.NonSerializedAttribute]
 		Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
+
+		[System.NonSerializedAttribute]
+		public bool			isVisibleInEditor = false;
 
 		[System.NonSerializedAttribute]
 		List< Type > allNodeTypeList = new List< Type > {
@@ -179,8 +182,6 @@ namespace PW
 		void ProcessNodeLinks(PWNode node)
 		{
 			var links = node.GetLinks();
-	
-			Debug.Log("computed node: " + node.GetType() + " - " + node.name);
 
 			foreach (var link in links)
 			{
@@ -208,7 +209,6 @@ namespace PW
 	
 					if (values != null)
 					{
-						Debug.Log("assigned value: " + val);
 						if (!values.AssignAt(link.distantIndex, val, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
@@ -217,7 +217,6 @@ namespace PW
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
-					Debug.Log("assigned value: " + localVal);
 					prop.SetValue(target, localVal);
 				}
 				else if (val != null) // both are multi-anchors
@@ -227,7 +226,6 @@ namespace PW
 	
 					if (values != null)
 					{
-						Debug.Log("assigned value: " + localVal);
 						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
@@ -245,9 +243,11 @@ namespace PW
 				//ignore unlink nodes
 				if (nodeInfo.node.computeOrder < 0)
 					continue ;
-				nodeInfo.node.BeginFrameUpdate();
+				if (realMode || !isVisibleInEditor)
+					nodeInfo.node.BeginFrameUpdate();
 				nodeInfo.node.Process();
-				nodeInfo.node.EndFrameUpdate();
+				if (realMode || !isVisibleInEditor)
+					nodeInfo.node.EndFrameUpdate();
 				ProcessNodeLinks(nodeInfo.node);
 
 				//if node was an external node, compute his subgraph
@@ -290,7 +290,6 @@ namespace PW
 					{
 						if (graphInstancies.ContainsKey(graph.name))
 							continue ;
-						Debug.Log("loaded graph: " + graph.name);
 						graphInstancies.Add(graph.name, graph as PWNodeGraph);
 					}
 				}

@@ -159,6 +159,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void OnDestroy()
 	{
 		AssetDatabase.SaveAssets();
+		currentGraph.isVisibleInEditor = false;
 	}
 
 	//If this function is called, it means there is not yet a saved instance of currentGraph
@@ -186,7 +187,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void OnGUI()
     {
- 
+		currentGraph.isVisibleInEditor = true;
+
 		//text colors:
 		whiteText = new GUIStyle();
 		whiteText.normal.textColor = Color.white;
@@ -526,7 +528,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (EditorGUI.EndChangeCheck())
 				{
 					parentGraph.UpdateSeed(parentGraph.seed);
-					Debug.Log("updated seed for graph: " + parentGraph.name);
 					graphNeedReload = true;
 				}
 				
@@ -816,12 +817,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		EditorGUILayout.BeginHorizontal();
 		{
-			currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
 			//We run the calcul the nodes:
 			//if we are on the mother graph, render the terrain
 			//TODO: other preview type for graph outputs in function of graph output type.
 			if (e.type == EventType.Layout)
 			{
+				currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
 				if (graphNeedReload)
 				{
 					terrainMaterializer.DestroyAllChunks();
@@ -831,7 +832,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				terrainMaterializer.UpdateChunks();
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
-				graphNeedReload = true;
+				AssetDatabase.SaveAssets();
 
 			bool	mouseAboveAnchorLocal = false;
 			bool	draggingNodeLocal = false;
@@ -975,7 +976,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void CreateNewNode(object type)
 	{
 		Vector2 pos = -currentGraph.graphDecalPosition + currentMousePosition;
-		PWNode newNode = CreateNewNode((Type)type, pos, true);
+		CreateNewNode((Type)type, pos, true);
 	}
 
 	PWNode	CreateNewNode(Type t, Vector2 position, bool addToNodeList = false)
@@ -1217,8 +1218,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		if (graph == null)
 			return ;
+		currentGraph.isVisibleInEditor = false;
 		StopDragLink(false);
 		currentGraph = graph;
+		currentGraph.isVisibleInEditor = true;
 	}
 
 	void DrawContextualMenu(Rect graphNodeRect)

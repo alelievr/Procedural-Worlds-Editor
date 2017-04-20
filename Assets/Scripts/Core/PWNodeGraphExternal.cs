@@ -50,13 +50,9 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("processed data push !");
 			//push input values to the subgraph's input node:
 			for (int i = 0; i < input.Count; i++)
-			{
-				Debug.Log("assigned " + input.At(i));
 				graphInput.outputValues.AssignAt(i, input.At(i), input.NameAt(i), true);
-			}
 		}
 
 		public void InitGraphOut(PWNode @in, PWNode @out)
