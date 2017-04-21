@@ -26,6 +26,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	preset2DDensityFieldTexture;
 	private static Texture2D	preset3DDensityFieldTexture;
 	private static Texture2D	presetMeshTetxure;
+
+	private static Gradient		greenRedGradient;
 	
 	static GUIStyle	whiteText;
 	static GUIStyle	whiteBoldText;
@@ -81,6 +83,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[System.NonSerializedAttribute]
 	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
 
+#region Initialization and data baking
+
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
@@ -125,7 +129,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void OnEnable()
 	{
-		CreateBackgroundTexture();
+		GeneratePWAssets();
 		
 		splittedPanel = new GUIStyle();
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
@@ -156,34 +160,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.unserializeInitialized = true;
 	}
 
-	void OnDestroy()
-	{
-		AssetDatabase.SaveAssets();
-		currentGraph.isVisibleInEditor = false;
-	}
+#endregion
 
-	//If this function is called, it means there is not yet a saved instance of currentGraph
-	void SaveNewGraph()
-	{
-		if (currentGraph.saveName != null)
-			return ;
-
-		string path = "Assets/ProceduralWorlds/Resources/";
-		
-		if (!Directory.Exists(path))
-			Directory.CreateDirectory(path);
-
-		currentGraph.saveName = "New ProceduralWorld";
-		currentGraph.name = currentGraph.saveName;
-		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
-
-		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
-		AssetDatabase.SaveAssets();
-		AssetDatabase.Refresh();
-		EditorGUIUtility.PingObject(currentGraph);
-	}
-
-	float zoomScale = 1;
+#region Global GUI rendering
 
     void OnGUI()
     {
@@ -196,10 +175,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
 
-		if (Event.current.type == EventType.scrollWheel)
-			zoomScale *= 1 + 0.1f * Mathf.Sign(Event.current.delta.y);
-
-        //background color:
+ 		//background color:
 		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
 			OnEnable();
 			
@@ -226,7 +202,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			OnWindowResize();
 
 		// initialize unserialized fields in node:
-		currentGraph.ForeachAllNodes((n) => { if (n != null && !n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
+		parentGraph.ForeachAllNodes((n) => { if (n != null && !n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
 
 		//esc key event:
 		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
@@ -287,6 +263,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Debug.Log("saved all assets !");
 		}
     }
+
+#endregion
+
+#region Preset panel (first screen)
 
 	void DrawPresetLineHeader(string header)
 	{
@@ -411,6 +391,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
+#endregion
+
+#region Noise preview processing and rendering
+
 	GameObject GetLoadedPreviewScene(params PWOutputType[] allowedTypes)
 	{
 		GameObject		ret;
@@ -483,6 +467,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		previewCamera.gameObject.transform.position += new Vector3(move.x, 0, move.y);
 	}
 
+#endregion
+
+#region Left bar rendering
+
 	void DrawLeftBar(Rect currentRect)
 	{
 		Event	e = Event.current;
@@ -524,6 +512,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 				EditorGUI.BeginChangeCheck();
+				GUI.SetNextControlName("seed");
 				parentGraph.seed = EditorGUILayout.IntField("Seed", parentGraph.seed);
 				if (EditorGUI.EndChangeCheck())
 				{
@@ -533,6 +522,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				
 				//chunk size:
 				EditorGUI.BeginChangeCheck();
+				GUI.SetNextControlName("chunk size");
 				parentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", parentGraph.chunkSize);
 				parentGraph.chunkSize = Mathf.Clamp(parentGraph.chunkSize, 1, 1024);
 				if (EditorGUI.EndChangeCheck())
@@ -540,11 +530,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 					parentGraph.UpdateChunkSize(parentGraph.chunkSize);
 					graphNeedReload = true;
 				}
+
 			}
 			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
+		
+		//free focus of the selected fields
+		if (e.type == EventType.MouseDown)
+			GUI.FocusControl(null);
 	}
+
+#endregion
+
+#region Right node selector rendering
 
 	Rect DrawSelectorCase(ref Rect r, string name, bool title = false)
 	{
@@ -606,6 +605,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		EditorGUILayout.EndScrollView();
 	}
+
+#endregion
+
+#region Node graph header (breadcrumbs bar)
 	
 	void DrawNodeGraphHeader(Rect graphRect)
 	{
@@ -664,15 +667,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndVertical();
 	}
 
-	string GetUniqueName(string name)
-	{
-		while (true)
-		{
-			if (!currentGraph.nodes.Any(p => p.name == name))
-				return name;
-			name += "*";
-		}
-	}
+#endregion
+
+#region Node rendering
 
 	void DisplayDecaledNode(int id, PWNode node, string name)
 	{
@@ -682,39 +679,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
-	PWNode FindNodeByWindowId(int id)
-	{
-		if (currentGraph.nodesDictionary.ContainsKey(id))
-			return currentGraph.nodesDictionary[id];
-
-		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
-		if (ret != null)
-			return ret;
-
-		string gExternalNodeName = currentGraph.subgraphReferences.FirstOrDefault(gName => {
-			var g = parentGraph.FindGraphByName(gName);
-			return g && g.externalGraphNode.windowId == id;
-		});
-		if (gExternalNodeName != null)
-		{
-			var gExternalNode = parentGraph.FindGraphByName(gExternalNodeName);
-			if(gExternalNode.externalGraphNode != null)
-				return gExternalNode.externalGraphNode;
-		}
-
-		if (currentGraph.inputNode.windowId == id)
-			return currentGraph.inputNode;
-		if (currentGraph.outputNode.windowId == id)
-			return currentGraph.outputNode;
-
-		return null;
-	}
-
 	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, ref bool mouseDraggingWindowLocal, bool submachine = false)
 	{
 		Event	e = Event.current;
 
-		GUI.depth = node.computeOrder;
 		DisplayDecaledNode(id, node, name);
 
 		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
@@ -805,10 +773,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		}
 
+		//display the process time of the window (if not 0)
+		if (node.processTime > Mathf.Epsilon)
+		{
+			GUIStyle gs = new GUIStyle();
+			Rect msRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
+			msRect.position += new Vector2(msRect.size.x / 2 - 10, msRect.size.y + 5);
+			gs.normal.textColor = greenRedGradient.Evaluate(node.processTime / 20); //20ms ok, after is red
+			GUI.Box(msRect, node.processTime + " ms", gs);
+		}
+
 		//check if user have pressed the close button of this window:
 		if (node.WindowShouldClose())
 			DeleteNode(index);
 	}
+
+#endregion
+
+#region Graph core rendering
 
 	void DrawNodeGraphCore()
 	{
@@ -937,6 +919,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.EndHorizontal();
 	}
 
+#endregion
+
+#region Node And Submachine Utils
+
 	void OnWindowResize()
 	{
 
@@ -949,6 +935,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (node == null)
 			return ;
 
+		currentGraph.nodes.RemoveAt((int)oNodeIndex);
+
+		DeleteNode(node);
+
+		EvaluateComputeOrder();
+	}
+
+	void DeleteNode(PWNode node)
+	{
 		graphNeedReload = true;
 		//remove all input links for each node links:
 		foreach (var link in node.GetLinks())
@@ -967,10 +962,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//remove the node
 		currentGraph.nodesDictionary.Remove(node.windowId);
-		currentGraph.nodes.RemoveAt((int)oNodeIndex);
 		DestroyImmediate(node, true);
-
-		EvaluateComputeOrder();
 	}
 
 	void CreateNewNode(object type)
@@ -1022,7 +1014,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//TODO: remove all dependencies and links from the output and input machine.
 
 		if (id < currentGraph.subgraphReferences.Count && id >= 0)
+		{
 			currentGraph.subgraphReferences.RemoveAt(id);
+		}
 
 		DeleteSubmachine(subGraph);
 
@@ -1035,19 +1029,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DeleteSubmachine(PWNodeGraph submachine)
 	{
+		if (submachine == null)
+			return ;
+		
 		//remove all its nodes:
 		foreach (var subgraphNode in submachine.nodes)
-			DestroyImmediate(subgraphNode, true);
+			DeleteNode(subgraphNode);
 
 		//remove input and output:
 		if (submachine.inputNode != null)
-			DestroyImmediate(submachine.inputNode, true);
+			DeleteNode(submachine.inputNode);
 		if (submachine.outputNode != null)
-			DestroyImmediate(submachine.outputNode, true);
+			DeleteNode(submachine.outputNode);
+		if (submachine.externalGraphNode != null)
+			DeleteNode(submachine.externalGraphNode);
 
 		//remove inner submachines:
 		foreach (var subsubgraph in submachine.subgraphReferences)
-			DeleteSubmachine(subsubgraph);
+			DeleteSubmachine(parentGraph.FindGraphByName(subsubgraph));
 
 		//and finaly destroy the submachine:
 		DestroyImmediate(submachine, true);
@@ -1090,6 +1089,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		currentGraph.nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
 	}
+
+#endregion
+
+#region Anchor and Links utils
 
 	void HighlightDeleteAnchor(PWAnchorInfo anchor)
 	{
@@ -1214,15 +1217,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EvaluateComputeOrder();
 	}
 
-	void SwitchGraph(PWNodeGraph graph)
-	{
-		if (graph == null)
-			return ;
-		currentGraph.isVisibleInEditor = false;
-		StopDragLink(false);
-		currentGraph = graph;
-		currentGraph.isVisibleInEditor = true;
-	}
+#endregion
+
+#region Contextual menu rendering
 
 	void DrawContextualMenu(Rect graphNodeRect)
 	{
@@ -1277,6 +1274,10 @@ public class ProceduralWorldsWindow : EditorWindow {
             }
         }
 	}
+
+#endregion
+	
+#region Utils and miscellaneous
 
 	//Dictionary< windowId, dependencyWeight >
 	Dictionary< int, int > nodeComputeOrderCount = new Dictionary< int, int >();
@@ -1334,8 +1335,88 @@ public class ProceduralWorldsWindow : EditorWindow {
 		nodeComputeOrderCount[windowId] = ret;
 		return ret;
 	}
+	
 
-	static void CreateBackgroundTexture()
+	string GetUniqueName(string name)
+	{
+		while (true)
+		{
+			if (!currentGraph.nodes.Any(p => p.name == name))
+				return name;
+			name += "*";
+		}
+	}
+
+	PWNode FindNodeByWindowId(int id)
+	{
+		if (currentGraph.nodesDictionary.ContainsKey(id))
+			return currentGraph.nodesDictionary[id];
+
+		var ret = currentGraph.nodes.FirstOrDefault(n => n.windowId == id);
+		if (ret != null)
+			return ret;
+
+		string gExternalNodeName = currentGraph.subgraphReferences.FirstOrDefault(gName => {
+			var g = parentGraph.FindGraphByName(gName);
+			return g && g.externalGraphNode.windowId == id;
+		});
+		if (gExternalNodeName != null)
+		{
+			var gExternalNode = parentGraph.FindGraphByName(gExternalNodeName);
+			if(gExternalNode.externalGraphNode != null)
+				return gExternalNode.externalGraphNode;
+		}
+
+		if (currentGraph.inputNode.windowId == id)
+			return currentGraph.inputNode;
+		if (currentGraph.outputNode.windowId == id)
+			return currentGraph.outputNode;
+
+		return null;
+	}
+
+	void OnDestroy()
+	{
+		AssetDatabase.SaveAssets();
+		currentGraph.isVisibleInEditor = false;
+	}
+
+	//If this function is called, it means there is not yet a saved instance of currentGraph
+	void SaveNewGraph()
+	{
+		if (currentGraph.saveName != null)
+			return ;
+
+		string path = "Assets/ProceduralWorlds/Resources/";
+		
+		if (!Directory.Exists(path))
+			Directory.CreateDirectory(path);
+
+		currentGraph.saveName = "New ProceduralWorld";
+		currentGraph.name = currentGraph.saveName;
+		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
+
+		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
+		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
+		EditorGUIUtility.PingObject(currentGraph);
+	}
+
+	void SwitchGraph(PWNodeGraph graph)
+	{
+		if (graph == null)
+			return ;
+		currentGraph.isVisibleInEditor = false;
+		StopDragLink(false);
+		currentGraph = graph;
+		currentGraph.isVisibleInEditor = true;
+	}
+
+#endregion
+
+#region Draw utils functions and Ressource generation
+
+	static void GeneratePWAssets()
 	{
 		Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
 			Texture2D	ret;
@@ -1373,6 +1454,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
 		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+
+        GradientColorKey[] gck;
+        GradientAlphaKey[] gak;
+        greenRedGradient = new Gradient();
+        gck = new GradientColorKey[2];
+        gck[0].color = Color.green;
+        gck[0].time = 0.0F;
+        gck[1].color = Color.red;
+        gck[1].time = 1.0F;
+        gak = new GradientAlphaKey[2];
+        gak[0].alpha = 1.0F;
+        gak[0].time = 0.0F;
+        gak[1].alpha = 1.0F;
+        gak[1].time = 1.0F;
+        greenRedGradient.SetKeys(gck, gak);
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
@@ -1393,7 +1489,7 @@ public class ProceduralWorldsWindow : EditorWindow {
         Vector3 startTan = startPos + Vector3.right * 100;
         Vector3 endTan = endPos + Vector3.left * 100;
 
-		if (link != null && !draggingGraph && !draggingNode)
+		if (link != null && !draggingGraph &&  String.IsNullOrEmpty(GUI.GetNameOfFocusedControl()))
 		{
 			switch (e.GetTypeForControl(id))
 			{
@@ -1466,4 +1562,5 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 	}
+#endregion
 }

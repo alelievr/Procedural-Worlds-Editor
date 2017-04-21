@@ -22,8 +22,6 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-			EditorGUIUtility.labelWidth = 70;
-
 			EditorGUI.BeginChangeCheck();
 			{
 				persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
@@ -56,9 +54,7 @@ namespace PW
 		public override void OnNodeProcess()
 		{
 			if (chunkSizeHasChanged)
-			{
 				output.Resize(chunkSize);
-			}
 
 			//recalcul perlin noise values with new seed / position.
 			if (needUpdate)

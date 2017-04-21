@@ -79,7 +79,7 @@ namespace PW
 
 		public void OnDestroy()
 		{
-			Debug.Log("node " + nodeTypeName + " detroyed !");
+			// Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 
 		public void UpdateGraphDecal(Vector2 graphDecal)
@@ -370,7 +370,7 @@ namespace PW
 		{
 			if (boxAnchorStyle == null)
 			{
-				boxAnchorStyle =  new GUIStyle(GUI.skin.box);
+				boxAnchorStyle = new GUIStyle(GUI.skin.box);
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			}
 
@@ -406,7 +406,9 @@ namespace PW
 			{
 				RectOffset savedmargin = GUI.skin.label.margin;
 				GUI.skin.label.margin = new RectOffset(2, 2, 5, 7);
+				var savedLabelWidth = EditorGUIUtility.labelWidth;
 				OnNodeGUI();
+				EditorGUIUtility.labelWidth = savedLabelWidth;
 				GUI.skin.label.margin = savedmargin;
 			}
 			GUILayout.EndVertical();
@@ -514,7 +516,7 @@ namespace PW
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
 			//if anchor have not been processed:
-			if (singleAnchor == null)
+			if (singleAnchor == null || boxAnchorStyle == null)
 				return ;
 
 			string anchorName = (singleAnchor.name.Length > 4) ? singleAnchor.name.Substring(0, 4) : singleAnchor.name;
@@ -557,7 +559,6 @@ namespace PW
 				errorIconRect.position += new Vector2(-10, -10);
 				GUI.DrawTexture(errorIconRect, errorIcon);
 			}
-
 
 			//if window is renamable, render a text input above the window:
 			if (renamable)

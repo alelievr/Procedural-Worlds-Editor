@@ -32,12 +32,11 @@ namespace PW
 
 			var inputNames = input.GetNames< object >();
 			var outputNames = output.GetNames< object >();
-			var inputValues = input.GetValues< object >();
 			for (int i = 0; i < inputNames.Count || i < outputNames.Count; i++)
 			{
 				EditorGUILayout.BeginHorizontal();
 				if (i < input.Count && inputNames[i] != null)
-					EditorGUILayout.LabelField(inputNames[i] + ":" + inputValues[i], GUILayout.MaxWidth(200));
+					EditorGUILayout.LabelField(inputNames[i], GUILayout.MaxWidth(100));
 				else
 					EditorGUILayout.LabelField("");
 				if (i < outputNames.Count && outputNames[i] != null)

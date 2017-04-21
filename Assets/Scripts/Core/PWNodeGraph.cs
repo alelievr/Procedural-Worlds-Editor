@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
 using System;
+using Debug = UnityEngine.Debug;
 
 namespace PW
 {
@@ -245,7 +247,19 @@ namespace PW
 					continue ;
 				if (realMode || !isVisibleInEditor)
 					nodeInfo.node.BeginFrameUpdate();
-				nodeInfo.node.Process();
+				
+				//if you are in editor mode, update the process time of the node
+				if (!realMode)
+				{
+					Stopwatch	st = new Stopwatch();
+					st.Start();
+					nodeInfo.node.Process();
+					st.Stop();
+					nodeInfo.node.processTime = st.ElapsedMilliseconds;
+				}
+				else
+					nodeInfo.node.Process();
+
 				if (realMode || !isVisibleInEditor)
 					nodeInfo.node.EndFrameUpdate();
 				ProcessNodeLinks(nodeInfo.node);
