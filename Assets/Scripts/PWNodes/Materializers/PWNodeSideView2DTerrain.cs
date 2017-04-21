@@ -36,7 +36,7 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			terrainOutput.size = Vector2.one * chunkSize;
+			terrainOutput.size = chunkSize;
 			// terrainOutput.texture = samplerTexture;
 		}
 

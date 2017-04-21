@@ -113,9 +113,9 @@ namespace PW
 	*/
 
 	[System.SerializableAttribute]
-	public class ChunkData
+	public abstract class ChunkData
 	{
-		public Vector3		size;
+		public int			size;
 
 		public override string ToString()
 		{

@@ -114,12 +114,12 @@ namespace PW
 			// Debug.Log("created anchor with id: " + multi[0].id);
 		}
 
-		public void AddNewAnchor(int id)
+		public void AddNewAnchor(int id, bool affectValues = true)
 		{
-			AddNewAnchor(first.color, id);
+			AddNewAnchor(first.color, id, affectValues);
 		}
 
-		public void AddNewAnchor(Color c, int id)
+		public void AddNewAnchor(Color c, int id, bool affectValues = true)
 		{
 			PWAnchorMultiData	tmp = new PWAnchorMultiData(c);
 			PWValues			anchorValues = anchorInstance as PWValues;
@@ -131,7 +131,8 @@ namespace PW
 				multipleValueCount++;
 			// Debug.Log("new anchor with id: " + id);
 			//add an object to the PWValues list:
-			anchorValues.Add(null);
+			if (affectValues)
+				anchorValues.Add(null);
 
 			multi.Add(tmp);
 		}

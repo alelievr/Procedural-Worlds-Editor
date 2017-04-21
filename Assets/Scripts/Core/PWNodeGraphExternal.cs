@@ -13,7 +13,7 @@ namespace PW
 		public PWValues	input = new PWValues();
 
 		[PWOutput("out")]
-		[PWGeneric(typeof(object))]
+		[PWMultiple(0, typeof(object))]
 		public PWValues	output = null;
 
 		public override void OnNodeCreate()
@@ -49,6 +49,9 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
+			while (input.Count < graphInput.outputValues.Count)
+				graphInput.outputValues.RemoveAt(0);
+
 			//push input values to the subgraph's input node:
 			for (int i = 0; i < input.Count; i++)
 				graphInput.outputValues.AssignAt(i, input.At(i), input.NameAt(i), true);

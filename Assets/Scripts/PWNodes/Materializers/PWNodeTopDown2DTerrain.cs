@@ -44,7 +44,7 @@ namespace PW
 				samplerTexture.Apply();
 			}
 
-			terrainOutput.size = Vector2.one * chunkSize;
+			terrainOutput.size = chunkSize;
 			terrainOutput.texture = samplerTexture;
 		}
 	}

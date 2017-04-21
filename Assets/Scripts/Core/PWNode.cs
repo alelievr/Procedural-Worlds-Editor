@@ -487,6 +487,16 @@ namespace PW
 			Rect	winRect = windowRect;
 			Rect	inputAnchorRect = new Rect(winRect.xMin - anchorWidth + 2, winRect.y + 20, anchorWidth, anchorHeight);
 			Rect	outputAnchorRect = new Rect(winRect.xMax - 2, winRect.y + 20, anchorWidth, anchorHeight);
+
+			//if there is more values in PWValues than the available anchor count, create new anchors:
+			ForeachPWAnchorDatas((data) => {
+				if (data.multiple)
+				{
+					if (((PWValues)data.anchorInstance).Count >= data.multi.Count)
+						data.AddNewAnchor(data.fieldName.GetHashCode() + data.multi.Count, false);
+				}
+			});
+
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//process anchor event and calcul rect position if visible
 				if (singleAnchor.visibility != PWVisibility.Gone)

@@ -219,6 +219,7 @@ namespace PW
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
+					Debug.Log("assigned from " + link.localName + " to " + link.distantName);
 					prop.SetValue(target, localVal);
 				}
 				else if (val != null) // both are multi-anchors
@@ -228,6 +229,7 @@ namespace PW
 	
 					if (values != null)
 					{
+						Debug.Log("assigned total multi");
 						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
@@ -235,8 +237,10 @@ namespace PW
 			}
 		}
 
-		public void ProcessGraph()
+		public float ProcessGraph()
 		{
+			float		calculTime = 0f;
+
 			if (computeOrderSortedNodes == null)
 				UpdateComputeOrder();
 			
@@ -256,6 +260,7 @@ namespace PW
 					nodeInfo.node.Process();
 					st.Stop();
 					nodeInfo.node.processTime = st.ElapsedMilliseconds;
+					calculTime += nodeInfo.node.processTime;
 				}
 				else
 					nodeInfo.node.Process();
@@ -268,9 +273,12 @@ namespace PW
 				if (nodeInfo.graphName != null)
 				{
 					PWNodeGraph g = FindGraphByName(nodeInfo.graphName);
-					g.ProcessGraph();
+					float time = g.ProcessGraph();
+					if (!realMode)
+						nodeInfo.node.processTime = time;
 				}
 			}
+			return calculTime;
 		}
 
 		public void	UpdateSeed(int seed)
