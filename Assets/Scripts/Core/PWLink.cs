@@ -6,10 +6,12 @@ namespace PW
 	public enum PWLinkType
 	{
 		BasicData,
+		TwoChannel,
 		ThreeChannel,
 		FourChannel,
 		Sampler2D,
 		Sampler3D,
+		ChunkData,
 	}
 
 	[System.SerializableAttribute]
@@ -43,7 +45,7 @@ namespace PW
 		public bool					hover;
 		public bool					selected;
 	
-		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, int lIndex, Color c)
+		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, int lIndex, Color c, PWLinkType lt)
 		{
 			distantWindowId = dWin;
 			distantAnchorId = dAttr;
@@ -57,6 +59,7 @@ namespace PW
 			localName = lName;
 			color = (SerializableColor)c;
 			linkHighlight = PWLinkHighlight.None;
+			linkType = lt;
 		}
 	}
 }

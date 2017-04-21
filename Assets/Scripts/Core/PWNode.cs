@@ -696,6 +696,25 @@ namespace PW
 			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
 		}
 
+		PWLinkType		GetLinkType(Type from, Type to)
+		{
+			if (from == typeof(Sampler2D) || to == typeof(Sampler2D))
+				return PWLinkType.Sampler2D;
+			if (from == typeof(Sampler3D) || to == typeof(Sampler3D))
+				return PWLinkType.Sampler3D;
+			if (from == typeof(float) || to == typeof(float))
+				return PWLinkType.BasicData;
+			if (from.IsSubclassOf(typeof(ChunkData)) || to.IsSubclassOf(typeof(ChunkData)))
+				return PWLinkType.ChunkData;
+			if (from == typeof(Vector2) || to == typeof(Vector2))
+				return PWLinkType.TwoChannel;
+			if (from == typeof(Vector3) || to == typeof(Vector3))
+				return PWLinkType.ThreeChannel;
+			if (from == typeof(Vector4) || to == typeof(Vector4))
+				return PWLinkType.FourChannel;
+			return PWLinkType.BasicData;
+		}
+
 		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
 			//from is othen me and with an anchor type of Output.
@@ -715,7 +734,8 @@ namespace PW
 				Debug.Log("attached nodes: " + from.windowId + " -> " + to.windowId);
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
-					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor)
+					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor,
+					GetLinkType(from.fieldType, to.fieldType))
 				);
 				lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
 				//mark local output anchors as linked:

@@ -1523,6 +1523,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 				case PWLinkType.Sampler2D:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 6, s);
 					break ;
+				case PWLinkType.ChunkData:
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.5f, .3f, .7f), 8, s);
+					break ;
 				case PWLinkType.Sampler3D:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s);
 					break ;
