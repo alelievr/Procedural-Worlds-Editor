@@ -78,6 +78,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	preset3DDensityFieldTexture;
 	private static Texture2D	presetMeshTetxure;
 
+	private static Texture2D	rencenterIconTexture;
+
 	private static Gradient		greenRedGradient;
 	
 	static GUIStyle		whiteText;
@@ -553,6 +555,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 			}
+			if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(50), GUILayout.Height(50)))
+				currentGraph.graphDecalPosition = Vector2.zero;
 			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
@@ -1494,6 +1498,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
 		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+
+		//icons and utils
+		rencenterIconTexture = CreateTexture2DFromFile("recenter");
 
 		//generating green-red gradient
         GradientColorKey[] gck;
