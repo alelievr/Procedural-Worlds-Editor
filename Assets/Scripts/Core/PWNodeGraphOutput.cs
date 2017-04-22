@@ -45,11 +45,10 @@ namespace PW
 			//if there is no upper graph, datas will be automatically pull-out
 			if (upperNode != null)
 			{
+				while (upperNode.output.Count > inputValues.Count)
+					upperNode.output.RemoveAt(0);
 				for (int i = 0; i < inputValues.Count; i++)
-				{
-					Debug.Log("pushed up field: " + inputValues.At(i));
 					upperNode.output.AssignAt(i, inputValues.At(i), inputValues.NameAt(i), true);
-				}
 			}
 		}
 

@@ -490,7 +490,7 @@ namespace PW
 
 			//if there is more values in PWValues than the available anchor count, create new anchors:
 			ForeachPWAnchorDatas((data) => {
-				if (data.multiple)
+				if (data.multiple && data.anchorInstance != null)
 				{
 					if (((PWValues)data.anchorInstance).Count >= data.multi.Count)
 						data.AddNewAnchor(data.fieldName.GetHashCode() + data.multi.Count, false);
@@ -717,8 +717,6 @@ namespace PW
 
 		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
-			//from is othen me and with an anchor type of Output.
-
 			//quit if types are not compatible
 			if (!AnchorAreAssignable(from, to))
 				return ;

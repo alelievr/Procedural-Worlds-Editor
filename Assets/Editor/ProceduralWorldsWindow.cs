@@ -10,30 +10,6 @@ using PW;
 
 public class ProceduralWorldsWindow : EditorWindow {
 
-    private static Texture2D	backgroundTex;
-	private static Texture2D	resizeHandleTex;
-	private static Texture2D	selectorBackgroundTex;
-	// private static Texture2D	debugTexture1;
-	private static Texture2D	selectorCaseBackgroundTex;
-	private static Texture2D	selectorCaseTitleBackgroundTex;
-
-	private static Texture2D	preset2DSideViewTexture;
-	private static Texture2D	preset2DTopDownViewTexture;
-	private static Texture2D	preset3DPlaneTexture;
-	private static Texture2D	preset3DSphericalTexture;
-	private static Texture2D	preset3DCubicTexture;
-	private static Texture2D	preset1DDensityFieldTexture;
-	private static Texture2D	preset2DDensityFieldTexture;
-	private static Texture2D	preset3DDensityFieldTexture;
-	private static Texture2D	presetMeshTetxure;
-
-	private static Gradient		greenRedGradient;
-	
-	static GUIStyle	whiteText;
-	static GUIStyle	whiteBoldText;
-	static GUIStyle	splittedPanel;
-	static GUIStyle	nodeGraphWidowStyle;
-
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
 	int					mouseAboveSubmachineIndex;
@@ -67,6 +43,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	[System.NonSerializedAttribute]
 	Vector2				currentMousePosition;
 
+	[System.NonSerializedAttribute]
+	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
+
 	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
@@ -80,8 +59,44 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
-	[System.NonSerializedAttribute]
-	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
+#region Internal editor styles and textures
+
+    private static Texture2D	backgroundTexture;
+	private static Texture2D	resizeHandleTexture;
+	private static Texture2D	selectorBackgroundTexture;
+	private static Texture2D	selectorCaseBackgroundTexture;
+	private static Texture2D	selectorCaseTitleBackgroundTexture;
+	private static Texture2D	nodeEditorBackgroundTexture;
+
+	private static Texture2D	preset2DSideViewTexture;
+	private static Texture2D	preset2DTopDownViewTexture;
+	private static Texture2D	preset3DPlaneTexture;
+	private static Texture2D	preset3DSphericalTexture;
+	private static Texture2D	preset3DCubicTexture;
+	private static Texture2D	preset1DDensityFieldTexture;
+	private static Texture2D	preset2DDensityFieldTexture;
+	private static Texture2D	preset3DDensityFieldTexture;
+	private static Texture2D	presetMeshTetxure;
+
+	private static Gradient		greenRedGradient;
+	
+	static GUIStyle		whiteText;
+	static GUIStyle		whiteBoldText;
+	static GUIStyle		splittedPanel;
+	static GUIStyle		nodeGraphWidowStyle;
+
+	static GUISkin		PWGUISkin;
+
+	public GUIStyle breadcrumbsButtonStyle;
+	public GUIStyle	breadcrumbsButtonLeftStyle;
+	public GUIStyle toolbarSearchCancelButtonStyle;
+	public GUIStyle toolbarSearchTextStyle;
+	public GUIStyle toolbarStyle;
+
+	public GUIStyle blueNodeWindow;
+	public GUIStyle blueNodeWindowSelected;
+
+#endregion
 
 #region Initialization and data baking
 
@@ -98,8 +113,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void InitializeNewGraph(PWNodeGraph graph)
 	{
 		//setup splitted panels:
-		graph.h1 = new HorizontalSplitView(resizeHandleTex, position.width * 0.85f, position.width / 2, position.width - 4);
-		graph.h2 = new HorizontalSplitView(resizeHandleTex, position.width * .25f, 0, position.width / 2);
+		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
+		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * .25f, 0, position.width / 2);
 
 		graph.graphDecalPosition = Vector2.zero;
 
@@ -135,11 +150,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
 		nodeGraphWidowStyle = new GUIStyle();
-		nodeGraphWidowStyle.normal.background = backgroundTex;
+		nodeGraphWidowStyle.normal.background = backgroundTexture;
 
 		//setup nodeList:
 		foreach (var n in nodeSelectorList)
 			n.Value.Clear();
+			
 		AddToSelector("Simple values", "Slider", typeof(PWNodeSlider));
 		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
 		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
@@ -154,6 +170,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (currentGraph == null)
 			currentGraph = ScriptableObject.CreateInstance< PWNodeGraph >();
 
+		if (parentGraph != null)
+			parentGraph.ForeachAllNodes((n) => { if (n != null) n.RunNodeAwake(); }, true, true);
+
 		//force graph to reload all chunks (just after compiled)
 		graphNeedReload = true;
 
@@ -167,6 +186,9 @@ public class ProceduralWorldsWindow : EditorWindow {
     void OnGUI()
     {
 		currentGraph.isVisibleInEditor = true;
+		//TODO: put this if to load custom styles once
+		// if (breadcrumbsButtonStyle == null)
+			LoadCustomStyles();
 
 		//text colors:
 		whiteText = new GUIStyle();
@@ -176,9 +198,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.normal.textColor = Color.white;
 
  		//background color:
-		if (backgroundTex == null || !currentGraph.unserializeInitialized || resizeHandleTex == null)
+		if (backgroundTexture == null || !currentGraph.unserializeInitialized || resizeHandleTexture == null)
 			OnEnable();
-			
+
 		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
 			currentGraph.parentReference = null;
 
@@ -211,8 +233,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				StopDragLink(false);
 		}
 
-		GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTex, ScaleMode.StretchToFill);
-
 		if (Event.current.type == EventType.Layout)
 			ProcessPreviewScene(currentGraph.outputType);
 
@@ -229,12 +249,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.h2.UpdateMinMax(0, position.width / 2);
 
 		currentGraph.h1.Begin();
-		Rect p1 = currentGraph.h2.Begin(backgroundTex);
+		Rect p1 = currentGraph.h2.Begin(backgroundTexture);
 		DrawLeftBar(p1);
-		Rect g = currentGraph.h2.Split(resizeHandleTex);
+		Rect g = currentGraph.h2.Split(resizeHandleTexture);
 		DrawNodeGraphHeader(g);
 		currentGraph.h2.End();
-		Rect p2 = currentGraph.h1.Split(resizeHandleTex);
+		Rect p2 = currentGraph.h1.Split(resizeHandleTexture);
 		DrawSelector(p2);
 		currentGraph.h1.End();
 
@@ -302,7 +322,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawPresetPanel()
 	{
-		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), backgroundTex);
+		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), backgroundTexture);
 
 		presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
 
@@ -474,7 +494,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DrawLeftBar(Rect currentRect)
 	{
 		Event	e = Event.current;
-		GUI.DrawTexture(currentRect, backgroundTex);
+		GUI.DrawTexture(currentRect, backgroundTexture);
 
 		//add the texturepreviewRect size:
 		Rect previewRect = new Rect(0, 0, currentRect.width, currentRect.width);
@@ -488,8 +508,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				if (currentGraph == null)
 					OnEnable();
+
 				GUI.SetNextControlName("PWName");
-				currentGraph.externalName = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.name);
+				currentGraph.externalName = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.externalName);
 
 				if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
 					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
@@ -553,9 +574,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		boxRect.height += 10;
 
 		if (title)
-			GUI.DrawTexture(boxRect, selectorCaseTitleBackgroundTex);
+			GUI.DrawTexture(boxRect, selectorCaseTitleBackgroundTexture);
 		else
-			GUI.DrawTexture(boxRect, selectorCaseBackgroundTex);
+			GUI.DrawTexture(boxRect, selectorCaseBackgroundTexture);
 
 		boxRect.y += 6;
 		boxRect.x += 10;
@@ -569,17 +590,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawSelector(Rect currentRect)
 	{
-		GUI.DrawTexture(currentRect, selectorBackgroundTex);
+		GUI.DrawTexture(currentRect, selectorBackgroundTexture);
 		currentGraph.selectorScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
 			{
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUIUtility.fieldWidth = 0;
-				GUILayout.BeginHorizontal(GUI.skin.FindStyle("Toolbar"));
+				GUILayout.BeginHorizontal(toolbarStyle);
 				{
-					currentGraph.searchString = GUILayout.TextField(currentGraph.searchString, GUI.skin.FindStyle("ToolbarSeachTextField"));
-					if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
+					currentGraph.searchString = GUILayout.TextField(currentGraph.searchString, toolbarSearchTextStyle);
+					if (GUILayout.Button("", toolbarSearchCancelButtonStyle))
 					{
 						// Remove focus if cleared
 						currentGraph.searchString = "";
@@ -621,7 +642,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				breadcrumbsRect.yMin -= 1;
 				breadcrumbsRect.xMin -= 1;
 				if (e.type == EventType.Repaint)
-					GUI.DrawTexture(breadcrumbsRect, selectorBackgroundTex);
+					GUI.DrawTexture(breadcrumbsRect, selectorBackgroundTexture);
 				
 				PWNodeGraph g = currentGraph;
 				var breadcrumbsList = new List< string >();
@@ -631,9 +652,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 					g = parentGraph.FindGraphByName(g.parentReference);
 				}
 				breadcrumbsList.Reverse();
+				bool first = true;
 				foreach (var b in breadcrumbsList)
-					if (GUILayout.Button(b, GUILayout.MaxWidth(150)))
+				{
+					if (GUILayout.Button(b, (first) ? breadcrumbsButtonLeftStyle : breadcrumbsButtonStyle, GUILayout.MaxWidth(150)))
 						SwitchGraph(parentGraph.FindGraphByName(b));
+					first = false;
+				}
 			}
 			EditorGUILayout.EndHorizontal();
 	
@@ -675,7 +700,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, GUILayout.Height(node.viewHeight));
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, blueNodeWindow, GUILayout.Height(node.viewHeight));
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
@@ -748,6 +773,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//draw links:
 		var links = node.GetLinks();
 		int		i = 0;
+		Handles.BeginGUI();
 		foreach (var link in links)
 		{
 			// Debug.Log("link: " + link.localWindowId + ":" + link.localAnchorId + " to " + link.distantWindowId + ":" + link.distantAnchorId);
@@ -772,6 +798,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				linkIndex++;
 			}
 		}
+		Handles.EndGUI();
 
 		//display the process time of the window (if not 0)
 		if (node.processTime > Mathf.Epsilon)
@@ -796,8 +823,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		Event	e = Event.current;
 		int		i;
+		
+		float	scale = 2f;
 
-		EditorGUILayout.BeginHorizontal();
+		GUI.DrawTextureWithTexCoords(
+			new Rect(currentGraph.graphDecalPosition.x % 128 - 128, currentGraph.graphDecalPosition.y % 128 - 128, maxSize.x, maxSize.y),
+			nodeEditorBackgroundTexture, new Rect(0, 0, (maxSize.x / nodeEditorBackgroundTexture.width) * scale,
+			(maxSize.y / nodeEditorBackgroundTexture.height) * scale)
+		);
+
+		Rect graphCoreRect = EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
 			//if we are on the mother graph, render the terrain
@@ -1421,6 +1456,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
 			Texture2D	ret;
 			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			ret.wrapMode = TextureWrapMode.Repeat;
 			ret.SetPixel(0, 0, c);
 			ret.Apply();
 			return ret;
@@ -1430,7 +1466,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			return Resources.Load< Texture2D >(ressourcePath);
         };
 
-        Color backgroundColor = new Color32(56, 56, 56, 255);
+		//generate background colors:
+        Color backgroundColor = new Color32(57, 57, 57, 255);
 		Color resizeHandleColor = EditorGUIUtility.isProSkin
 			? new Color32(56, 56, 56, 255)
             : new Color32(130, 130, 130, 255);
@@ -1438,13 +1475,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Color selectorCaseBackgroundColor = new Color32(110, 110, 110, 255);
 		Color selectorCaseTitleBackgroundColor = new Color32(50, 50, 50, 255);
 		
-		backgroundTex = CreateTexture2DColor(backgroundColor);
-		resizeHandleTex = CreateTexture2DColor(resizeHandleColor);
-		selectorBackgroundTex = CreateTexture2DColor(selectorBackgroundColor);
+		//load backgrounds and colors as texture
+		backgroundTexture = CreateTexture2DColor(backgroundColor);
+		resizeHandleTexture = CreateTexture2DColor(resizeHandleColor);
+		selectorBackgroundTexture = CreateTexture2DColor(selectorBackgroundColor);
 		// debugTexture1 = CreateTexture2DColor(new Color(1f, 0f, 0f, .3f));
-		selectorCaseBackgroundTex = CreateTexture2DColor(selectorCaseBackgroundColor);
-		selectorCaseTitleBackgroundTex = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
+		selectorCaseBackgroundTexture = CreateTexture2DColor(selectorCaseBackgroundColor);
+		selectorCaseTitleBackgroundTexture = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
+		nodeEditorBackgroundTexture = CreateTexture2DFromFile("nodeEditorBackground");
 
+		//loading preset panel images
 		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
 		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
 		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
@@ -1455,6 +1495,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 
+		//generating green-red gradient
         GradientColorKey[] gck;
         GradientAlphaKey[] gak;
         greenRedGradient = new Gradient();
@@ -1469,6 +1510,27 @@ public class ProceduralWorldsWindow : EditorWindow {
         gak[1].alpha = 1.0F;
         gak[1].time = 1.0F;
         greenRedGradient.SetKeys(gck, gak);
+
+		//loading GUI skin:
+		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
+	}
+
+	void LoadCustomStyles()
+	{
+		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
+
+		breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
+		breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
+
+		toolbarStyle = new GUIStyle("Toolbar");
+		toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
+		toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
+
+		blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
+		blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
+		
+		//set the custom style for the editor
+		GUI.skin = PWGUISkin;
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
