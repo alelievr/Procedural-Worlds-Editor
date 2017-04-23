@@ -77,16 +77,7 @@ namespace PW
 		[NonSerializedAttribute]
 		protected Dictionary< string, FieldInfo > bakedNodeFields = new Dictionary< string, FieldInfo >();
 
-		public void OnDestroy()
-		{
-			// Debug.Log("node " + nodeTypeName + " detroyed !");
-		}
-
-		public void UpdateGraphDecal(Vector2 graphDecal)
-		{
-			this.graphDecal = graphDecal;
-		}
-		
+#region OnEnable, data initialization and baking
 		public void OnEnable()
 		{
 			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
@@ -128,80 +119,7 @@ namespace PW
 
 			justReloaded = true;
 		}
-
-		public void RunNodeAwake()
-		{
-			OnNodeAwake();
-			OnNodeCreate();
-			unserializeInitialized = true;
-		}
-
-		public virtual void OnNodeAwake()
-		{
-		}
-
-		public virtual void OnNodeCreate()
-		{
-		}
-
-		public virtual void OnNodeCreateOnce()
-		{
-		}
-
-		public void BeginFrameUpdate()
-		{
-			if (oldSeed != seed)
-				seedHasChanged = true;
-			if (oldChunkPosition != chunkPosition)
-				positionHasChanged = true;
-			if (oldChunkSize != chunkSize)
-				chunkSizeHasChanged = true;
-		}
-
-		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
-		{
-			foreach (var PWAnchorData in propertyDatas)
-			{
-				var data = PWAnchorData.Value;
-				if (data.multiple)
-				{
-					if (data.anchorInstance == null)
-					{
-						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
-						if (data.anchorInstance == null)
-							continue ;
-						else
-							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
-					}
-
-					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
-					if (data.anchorType == PWAnchorType.Input)
-						if (data.displayHiddenMultipleAnchors || showAdditional)
-							anchorCount++;
-					for (int i = 0; i < anchorCount; i++)
-					{
-						//if multi-anchor instance does not exists, create it:
-						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
-							data.multi[i].additional = true;
-						else
-							data.multi[i].additional = false;
-						callback(data, data.multi[i], i);
-					}
-				}
-				else
-					callback(data, data.first, -1);
-			}
-		}
-
-		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
-		{
-			foreach (var data in propertyDatas)
-			{
-				if (data.Value != null)
-					callback(data.Value);
-			}
-		}
-
+		
 		void BakeNodeFields()
 		{
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
@@ -339,6 +257,82 @@ namespace PW
 				}
 		}
 
+#endregion
+
+#region inheritence virtual API
+
+		public virtual void OnNodeAwake()
+		{
+		}
+
+		public virtual void OnNodeCreate()
+		{
+		}
+
+		public virtual void OnNodeCreateOnce()
+		{
+		}
+
+		public virtual void OnNodeProcess()
+		{
+		}
+
+		public virtual void	OnNodeAnchorLink(string propName, int index)
+		{
+		}
+
+		public virtual void OnNodeAnchorUnlink(string propName, int index)
+		{
+		}
+
+#endregion
+
+#region Utils and Miscellaneous
+
+		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
+		{
+			foreach (var PWAnchorData in propertyDatas)
+			{
+				var data = PWAnchorData.Value;
+				if (data.multiple)
+				{
+					if (data.anchorInstance == null)
+					{
+						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
+						if (data.anchorInstance == null)
+							continue ;
+						else
+							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
+					}
+
+					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
+					if (data.anchorType == PWAnchorType.Input)
+						if (data.displayHiddenMultipleAnchors || showAdditional)
+							anchorCount++;
+					for (int i = 0; i < anchorCount; i++)
+					{
+						//if multi-anchor instance does not exists, create it:
+						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
+							data.multi[i].additional = true;
+						else
+							data.multi[i].additional = false;
+						callback(data, data.multi[i], i);
+					}
+				}
+				else
+					callback(data, data.first, -1);
+			}
+		}
+
+		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
+		{
+			foreach (var data in propertyDatas)
+			{
+				if (data.Value != null)
+					callback(data.Value);
+			}
+		}
+
 		public static PWLinkType GetLinkTypeFromType(Type fieldType)
 		{
 			if (fieldType == typeof(Sampler2D))
@@ -352,18 +346,44 @@ namespace PW
 			return PWLinkType.BasicData;
 		}
 
-		public void SetWindowId(int id)
+		PWAnchorType	InverAnchorType(PWAnchorType type)
 		{
-			windowId = id;
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				data.windowId = id;
-			});
+			if (type == PWAnchorType.Input)
+				return PWAnchorType.Output;
+			else if (type == PWAnchorType.Output)
+				return PWAnchorType.Input;
+			return PWAnchorType.None;
 		}
 
-		public void OnGUI()
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
 		{
-			EditorGUILayout.LabelField("You are on the wrong window !");
+			int				index;
+			
+			return GetAnchorData(id, out singleAnchorData, out index);
 		}
+
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
+		{
+			PWAnchorData					ret = null;
+			PWAnchorData.PWAnchorMultiData	s = null;
+			int								retIndex = 0;
+
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (singleAnchor.id == id)
+				{
+					s = singleAnchor;
+					ret = data;
+					retIndex = i;
+				}
+			}, true);
+			index = retIndex;
+			singleAnchorData = s;
+			return ret;
+		}
+
+#endregion
+
+#region Node rendering and processing
 
 		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
@@ -423,7 +443,7 @@ namespace PW
 				viewHeight += 24;
 		}
 		#endif
-	
+
 		public virtual void	OnNodeGUI()
 		{
 			EditorGUILayout.LabelField("empty node");
@@ -449,9 +469,9 @@ namespace PW
 			OnNodeProcess();
 		}
 
-		public virtual void OnNodeProcess()
-		{
-		}
+#endregion
+
+#region Anchor rendering and processing
 
 		void ProcessAnchor(
 			PWAnchorData data,
@@ -467,12 +487,14 @@ namespace PW
 			singleAnchor.anchorRect = anchorRect;
 
 			if (!ret.mouseAbove)
+			{
 				ret = new PWAnchorInfo(data.fieldName, anchorRect,
 					singleAnchor.color, data.type,
 					data.anchorType, windowId, singleAnchor.id,
 					data.classAQName, index,
 					data.generic, data.allowedTypes,
 					singleAnchor.linkType, singleAnchor.linkCount);
+			}
 			if (anchorRect.Contains(Event.current.mousePosition))
 				ret.mouseAbove = true;
 		}
@@ -622,6 +644,10 @@ namespace PW
 			});
 		}
 
+#endregion
+		
+#region Links management and utils
+
 		public List< PWLink > GetLinks()
 		{
 			return links;
@@ -632,68 +658,6 @@ namespace PW
 			return links.Where(l => l.localAnchorId == anchorId
 				&& l.distantWindowId == targetWindowId
 				&& l.distantAnchorId == targetAnchorId).ToList();
-		}
-
-		public List< PWNodeDependency >	GetDependencies()
-		{
-			return depencendies;
-		}
-
-		public List< PWNodeDependency > GetDependencies(int anchorId)
-		{
-			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
-		}
-		
-		bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
-		{
-			if ((fromType != typeof(PWValues) && to.fieldType != typeof(PWValues)) //exclude PWValues to simple assignation (we need to check with allowedTypes)
-				&& (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object)))
-			{
-				if (verbose)
-					Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString());
-				return true;
-			}
-
-			if (fromGeneric || to.generic)
-			{
-				if (verbose)
-					Debug.Log("from type is generic");
-				SerializableType[] types = (fromGeneric) ? fromAllowedTypes : to.allowedTypes;
-				Type secondType = (fromGeneric) ? to.fieldType : fromType;
-				foreach (Type firstT in types)
-					if (fromGeneric && to.generic)
-					{
-						if (verbose)
-							Debug.Log("to type is generic");
-						foreach (Type toT in to.allowedTypes)
-						{
-							if (verbose)
-								Debug.Log("checking assignable from " + firstT + " to " + toT);
-							if (firstT.IsAssignableFrom(toT))
-								return true;
-						}
-					}
-					else
-					{
-						if (verbose)
-							Debug.Log("checking assignable from " + firstT + " to " + secondType);
-						if (firstT.IsAssignableFrom(secondType))
-							return true;
-					}
-			}
-			else
-			{
-				if (verbose)
-					Debug.Log("checking assignable from " + fromType + " to " + to.fieldType);
-				if (fromType.IsAssignableFrom(to.fieldType))
-					return true;
-			}
-			return false;
-		}
-
-		bool			AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
-		{
-			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
 		}
 
 		PWLinkType		GetLinkType(Type from, Type to)
@@ -797,6 +761,65 @@ namespace PW
 
 			AttachLink(from, to);
 		}
+		
+		public void		DeleteAllLinkOnAnchor(int anchorId)
+		{
+			links.RemoveAll(l => {
+				bool delete = l.localAnchorId == anchorId;
+				if (delete)
+					OnNodeAnchorUnlink(l.localName, l.localIndex);
+				return delete;
+			});
+			if (DeleteDependencies(d => d.connectedAnchorId == anchorId) == 0)
+			{
+				PWAnchorData.PWAnchorMultiData singleAnchorData;
+				GetAnchorData(anchorId, out singleAnchorData);
+				singleAnchorData.linkCount = 0;
+			}
+		}
+
+		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
+		{
+			links.RemoveAll(l => {
+				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId;
+				if (delete)
+					OnNodeAnchorUnlink(l.localName, l.localIndex);
+				return delete;
+			});
+			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
+			if (DeleteDependencies(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
+			{
+				PWAnchorData.PWAnchorMultiData singleAnchorData;
+				GetAnchorData(myAnchorId, out singleAnchorData);
+				if (singleAnchorData != null)
+					singleAnchorData.linkCount--;
+			}
+		}
+		
+		public void		DeleteLinkByWindowTarget(int targetWindowId)
+		{
+			PWAnchorData.PWAnchorMultiData singleAnchorData;
+			for (int i = 0; i < links.Count; i++)
+				if (links[i].distantWindowId == targetWindowId)
+				{
+					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
+					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
+					singleAnchorData.linkCount--;
+					links.RemoveAt(i--);
+				}
+		}
+		
+		public void		DeleteAllLinks()
+		{
+			foreach (var l in links)
+				OnNodeAnchorUnlink(l.localName, l.localIndex);
+			links.Clear();
+			depencendies.Clear();
+		}
+
+#endregion
+
+#region dependencies management and utils
 
 		int DeleteDependencies(Func< PWNodeDependency, bool > pred)
 		{
@@ -842,71 +865,16 @@ namespace PW
 			return nDeleted;
 		}
 
-		public void		DeleteAllLinkOnAnchor(int anchorId)
-		{
-			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == anchorId;
-				if (delete)
-					OnNodeAnchorUnlink(l.localName, l.localIndex);
-				return delete;
-			});
-			if (DeleteDependencies(d => d.connectedAnchorId == anchorId) == 0)
-			{
-				PWAnchorData.PWAnchorMultiData singleAnchorData;
-				GetAnchorData(anchorId, out singleAnchorData);
-				singleAnchorData.linkCount = 0;
-			}
-		}
-
-		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
-		{
-			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId;
-				if (delete)
-					OnNodeAnchorUnlink(l.localName, l.localIndex);
-				return delete;
-			});
-			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
-			if (DeleteDependencies(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
-			{
-				PWAnchorData.PWAnchorMultiData singleAnchorData;
-				GetAnchorData(myAnchorId, out singleAnchorData);
-				if (singleAnchorData != null)
-					singleAnchorData.linkCount--;
-			}
-		}
-
 		public void		DeleteDependency(int targetWindowId, int distantAnchorId)
 		{
 			DeleteDependencies(d => d.windowId == targetWindowId && d.anchorId == distantAnchorId);
-		}
-		
-		public void		DeleteLinkByWindowTarget(int targetWindowId)
-		{
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			for (int i = 0; i < links.Count; i++)
-				if (links[i].distantWindowId == targetWindowId)
-				{
-					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
-					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
-					singleAnchorData.linkCount--;
-					links.RemoveAt(i--);
-				}
 		}
 
 		public void		DeleteDependenciesByWindowTarget(int targetWindowId)
 		{
 			DeleteDependencies(d => d.windowId == targetWindowId);
 		}
-
-		public void		DeleteAllLinks()
-		{
-			foreach (var l in links)
-				OnNodeAnchorUnlink(l.localName, l.localIndex);
-			links.Clear();
-			depencendies.Clear();
-		}
-
+		
 		public List< Pair < int, int > >	GetAnchorConnections(int anchorId)
 		{
 			return depencendies.Where(d => d.connectedAnchorId == anchorId)
@@ -916,63 +884,70 @@ namespace PW
 					).ToList();
 		}
 
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
+		public List< PWNodeDependency >	GetDependencies()
 		{
-			int				index;
-			
-			return GetAnchorData(id, out singleAnchorData, out index);
+			return depencendies;
 		}
 
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
+		public List< PWNodeDependency > GetDependencies(int anchorId)
 		{
-			PWAnchorData					ret = null;
-			PWAnchorData.PWAnchorMultiData	s = null;
-			int								retIndex = 0;
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (singleAnchor.id == id)
-				{
-					s = singleAnchor;
-					ret = data;
-					retIndex = i;
-				}
-			}, true);
-			index = retIndex;
-			singleAnchorData = s;
-			return ret;
+			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
 		}
 
-		public Rect?	GetAnchorRect(int id)
-		{
-			var matches =	from p in propertyDatas
-							from p2 in p.Value.multi
-							where p2.id == id
-							select p2;
+#endregion
 
-			if (matches.Count() == 0)
-				return null;
-			return matches.First().anchorRect;
+#region Editor utils
+
+		static bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
+		{
+			if ((fromType != typeof(PWValues) && to.fieldType != typeof(PWValues)) //exclude PWValues to simple assignation (we need to check with allowedTypes)
+				&& (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object)))
+			{
+				if (verbose)
+					Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString());
+				return true;
+			}
+
+			if (fromGeneric || to.generic)
+			{
+				if (verbose)
+					Debug.Log("from type is generic");
+				SerializableType[] types = (fromGeneric) ? fromAllowedTypes : to.allowedTypes;
+				Type secondType = (fromGeneric) ? to.fieldType : fromType;
+				foreach (Type firstT in types)
+					if (fromGeneric && to.generic)
+					{
+						if (verbose)
+							Debug.Log("to type is generic");
+						foreach (Type toT in to.allowedTypes)
+						{
+							if (verbose)
+								Debug.Log("checking assignable from " + firstT + " to " + toT);
+							if (firstT.IsAssignableFrom(toT))
+								return true;
+						}
+					}
+					else
+					{
+						if (verbose)
+							Debug.Log("checking assignable from " + firstT + " to " + secondType);
+						if (firstT.IsAssignableFrom(secondType))
+							return true;
+					}
+			}
+			else
+			{
+				if (verbose)
+					Debug.Log("checking assignable from " + fromType + " to " + to.fieldType);
+				if (fromType.IsAssignableFrom(to.fieldType))
+					return true;
+			}
+			return false;
 		}
 
-		public bool		CheckRequiredAnchorLink()
+		public static bool		AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
 		{
-			bool	ret = true;
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-			if (data.required && singleAnchor.linkCount == 0
-					&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
-				ret = false;
-			});
-			return ret;
-		}
-
-		PWAnchorType	InverAnchorType(PWAnchorType type)
-		{
-			if (type == PWAnchorType.Input)
-				return PWAnchorType.Output;
-			else if (type == PWAnchorType.Output)
-				return PWAnchorType.Input;
-			return PWAnchorType.None;
+			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
 		}
 
 		public void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
@@ -1012,6 +987,16 @@ namespace PW
 			});
 		}
 
+		public void BeginFrameUpdate()
+		{
+			if (oldSeed != seed)
+				seedHasChanged = true;
+			if (oldChunkPosition != chunkPosition)
+				positionHasChanged = true;
+			if (oldChunkSize != chunkSize)
+				chunkSizeHasChanged = true;
+		}
+
 		public void		EndFrameUpdate()
 		{
 			//reset values at the end of the frame
@@ -1026,20 +1011,7 @@ namespace PW
 			reloadRequested = false;
 			justReloaded = false;
 		}
-
-		public virtual void	OnNodeAnchorLink(string propName, int index)
-		{
-		}
-
-		public virtual void OnNodeAnchorUnlink(string propName, int index)
-		{
-		}
-
-		public bool		WindowShouldClose()
-		{
-			return windowShouldClose;
-		}
-
+		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
 		{
 			ForeachPWAnchorDatas((data)=> {
@@ -1047,6 +1019,59 @@ namespace PW
 					data.displayHiddenMultipleAnchors = display;
 			});
 		}
+
+		public bool		WindowShouldClose()
+		{
+			return windowShouldClose;
+		}
+
+		public bool		CheckRequiredAnchorLink()
+		{
+			bool	ret = true;
+
+			ForeachPWAnchors((data, singleAnchor, i) => {
+			if (data.required && singleAnchor.linkCount == 0
+					&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
+				ret = false;
+			});
+			return ret;
+		}
+
+		public void		SetWindowId(int id)
+		{
+			windowId = id;
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				data.windowId = id;
+			});
+		}
+
+		public Rect?	GetAnchorRect(int id)
+		{
+			var matches =	from p in propertyDatas
+							from p2 in p.Value.multi
+							where p2.id == id
+							select p2;
+
+			if (matches.Count() == 0)
+				return null;
+			return matches.First().anchorRect;
+		}
+
+		public void RunNodeAwake()
+		{
+			OnNodeAwake();
+			OnNodeCreate();
+			unserializeInitialized = true;
+		}
+
+		public void UpdateGraphDecal(Vector2 graphDecal)
+		{
+			this.graphDecal = graphDecal;
+		}
+
+#endregion
+
+#region Node property / anchor API
 
 		/* Utils function to manipulate PWnode variables */
 
@@ -1124,5 +1149,24 @@ namespace PW
 				return propertyDatas[propName];
 			return null;
 		}
+
+#endregion
+
+#region Unused (for the moment) overrided functions
+		public void OnDestroy()
+		{
+			// Debug.Log("node " + nodeTypeName + " detroyed !");
+		}
+
+		public void OnGUI()
+		{
+			EditorGUILayout.LabelField("You are on the wrong window !");
+		}
+		
+		public void OnInspectorGUI()
+		{
+			EditorGUILayout.LabelField("nope !");
+		}
+#endregion
     }
 }

@@ -640,8 +640,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Event	e = Event.current;
 		EditorGUILayout.BeginVertical(splittedPanel);
 		{
-			//TODO: render the breadcrumbs bar
-			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
+			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(splittedPanel, GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
 			{
 				breadcrumbsRect.yMin -= 1;
 				breadcrumbsRect.xMin -= 1;
@@ -702,6 +701,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DisplayDecaledNode(int id, PWNode node, string name)
 	{
+		bool 	Mac = SystemInfo.operatingSystem.Contains("Mac");
+
+		if (node.isDragged && ((!Mac && Event.current.control) || (Mac && Event.current.command)))
+		{
+			Vector2 pos = node.windowRect.position;
+			float	snapPixels = 25.6f;
+
+			pos.x = Mathf.RoundToInt(pos.x / snapPixels) * snapPixels;
+			pos.y = Mathf.RoundToInt(pos.y / snapPixels) * snapPixels;
+			node.windowRect.position = pos;
+		}
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, blueNodeWindow, GUILayout.Height(node.viewHeight));
@@ -912,10 +922,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (e.type == EventType.mouseUp && draggingLink)
 				StopDragLink(false);
 
+			Rect snappedToAnchorMouseRect = new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0);
+
+			if (mouseAboveNodeAnchor)
+			{
+				if (startDragAnchor.fieldType != null && mouseAboveAnchorInfo.fieldType != null)
+					if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo))
+						snappedToAnchorMouseRect = mouseAboveAnchorInfo.anchorRect;
+			}
+
 			if (draggingLink)
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
-					new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0),
+					snappedToAnchorMouseRect,
 					-1,
 					null
 				);
