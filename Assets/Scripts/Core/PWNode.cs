@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -41,12 +41,12 @@ namespace PW
 		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static GUIStyle	boxAnchorStyle = null;
 		
-		static Texture2D	disabledTexture = null;
 		static Texture2D	highlightNewTexture = null;
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
 		static Texture2D	errorIcon = null;
-		static Texture2D	anchorImage = null;
+		static Texture2D	anchorTexture = null;
+		static Texture2D	anchorDisabledTexture = null;
 
 		[SerializeField]
 		Vector2	graphDecal;
@@ -95,7 +95,7 @@ namespace PW
 				return ret;
 			};
 
-			disabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
+			anchorDisabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
 			highlightNewTexture = CreateTexture2DColor(new Color(0, .5f, 0, .4f));
 			highlightReplaceTexture = CreateTexture2DColor(new Color(1f, 0f, 0, .4f));
 			highlightAddTexture = CreateTexture2DColor(new Color(0f, .0f, 0.5f, .4f));
@@ -167,13 +167,19 @@ namespace PW
 					{
 						anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
+						{
 							name = inputAttr.name;
+							data.anchorName = inputAttr.name;
+						}
 					}
 					if (outputAttr != null)
 					{
 						anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
+						{
 							name = outputAttr.name;
+							data.anchorName = outputAttr.name;
+						}
 					}
 					if (colorAttr != null)
 						backgroundColor = colorAttr.color;
@@ -395,7 +401,8 @@ namespace PW
 				boxAnchorStyle = new GUIStyle(GUI.skin.box);
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			}
-			anchorImage = GUI.skin.box.normal.background;
+			anchorTexture = GUI.skin.box.normal.background;
+			anchorDisabledTexture = GUI.skin.box.active.background;
 
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
@@ -549,7 +556,7 @@ namespace PW
 					}
 				}
 			});
-			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - windowRect.size.y - 20, outputAnchorRect.yMin - windowRect.size.y - 20);
+			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.position.y - 20, outputAnchorRect.position.y - 20);
 			anchorUnderMouse = ret;
 		}
 
@@ -564,25 +571,36 @@ namespace PW
 			if (singleAnchor == null || boxAnchorStyle == null)
 				return ;
 
-			string anchorName = (singleAnchor.name.Length > 4) ? singleAnchor.name.Substring(0, 4) : singleAnchor.name;
+			string anchorName = (data.multiple) ? "" : data.anchorName;
 
 			if (data.multiple)
 			{
-				//TODO: better
 				if (singleAnchor.additional)
 					anchorName = "+";
 				else
 					anchorName += index;
 			}
+
 			Color savedBackground = GUI.backgroundColor;
 			GUI.backgroundColor = singleAnchor.color;
-			//TODO: put the name after 
-			GUI.color = Color.blue;
-			GUI.DrawTexture(singleAnchor.anchorRect, anchorImage, ScaleMode.ScaleToFit);
+			GUI.color = singleAnchor.color;
+			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
 			GUI.color = Color.white;
 			GUI.backgroundColor = savedBackground;
+
+			if (anchorName != null)
+			{
+				Rect	anchorNameRect = singleAnchor.anchorRect;
+				if (data.anchorType == PWAnchorType.Input)
+					anchorNameRect.position += new Vector2(20, -4);
+				else
+					anchorNameRect.position += new Vector2(-30, -4);
+				anchorNameRect.size = new Vector2(windowRect.size.x / 2 - 10, 18);
+				GUI.Label(anchorNameRect, anchorName);
+			}
+			
 			if (!singleAnchor.enabled)
-				GUI.DrawTexture(singleAnchor.anchorRect, disabledTexture);
+				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);
 			else
 				switch (singleAnchor.highlighMode)
 				{
@@ -596,6 +614,7 @@ namespace PW
 						GUI.DrawTexture(singleAnchor.anchorRect, highlightAddTexture);
 						break ;
 				}
+
 			//reset the Highlight:
 			singleAnchor.highlighMode = PWAnchorHighlight.None;
 
@@ -709,7 +728,6 @@ namespace PW
 			if (from.anchorType == PWAnchorType.Output)
 			{
 				outputHasChanged = true;
-				Debug.Log("attached nodes: " + from.windowId + " -> " + to.windowId);
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
 					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor,

@@ -68,6 +68,8 @@ namespace PW
 		public bool					displayHiddenMultipleAnchors;
 		//if the anchor value is required to compute result:
 		public bool					required;
+		//anchor name if specified in PWInput or PWOutput else null
+		public string				anchorName;
 
 		[System.SerializableAttribute]
 		public class PWAnchorMultiData

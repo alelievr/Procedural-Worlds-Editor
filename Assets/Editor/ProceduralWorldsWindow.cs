@@ -245,10 +245,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			InitializeNewGraph(currentGraph);
 		
 		if (parentGraph == null)
-		{
 			parentGraph = AssetDatabase.LoadAssetAtPath< PWNodeGraph >(AssetDatabase.GetAssetPath(currentGraph));
-			Debug.Log("loaded parent graph: " + parentGraph.name);
-		}
 		
 		if (!currentGraph.presetChoosed)
 		{
@@ -812,7 +809,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (mouseAboveAnchor.mouseAbove
 				&& draggingLink
 				&& startDragAnchor.anchorId != mouseAboveAnchorInfo.anchorId
-				&& mouseAboveAnchor.anchorType == PWAnchorType.Input)
+				&& PWNode.AnchorAreAssignable(mouseAboveAnchor, startDragAnchor))
 			HighlightDeleteAnchor(mouseAboveAnchor);
 
 		//draw links:
@@ -1202,7 +1199,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		draggingLink = true;
 		if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input)
 		{
-			if (mouseAboveAnchorInfo.linkCount != 0)
+			if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo))
 			{
 				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
 
@@ -1716,11 +1713,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		switch (linkHighlight)
 		{
 			case PWLinkHighlight.Selected:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, 1f, .7f), null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, GUI.skin.settings.selectionColor, null, width + 2);
 				break;
 			case PWLinkHighlight.Delete:
 			case PWLinkHighlight.DeleteAndReset:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, GUI.skin.settings.selectionColor, null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.8f, .1f, .1f, 1), null, width + 2);
 				break ;
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
