@@ -61,6 +61,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 #region Internal editor styles and textures
 
+	public static Dictionary< string, Color > colorPallete = new Dictionary< string, Color >{
+		{"blueNode", HexToColor(0x5848ef)},
+		{"greenNode", HexToColor(0x30b030)},
+		{"yellowNode", HexToColor(0xe8ed55)},
+		{"orangeNode", HexToColor(0xff9e4f)},
+		{"redNode", HexToColor(0xde4747)},
+		{"cyanNode", HexToColor(0x55efea)},
+		{"purpleNode", HexToColor(0x7b51ed)},
+		{"pinkNode", HexToColor(0xf659d7)},
+		{"greyNode", HexToColor(0x646464)},
+		{"whiteNode", HexToColor(0xFFFFFF)},
+		{"nodeSelected", HexToColor(0x101868)},
+		{"nodeBorder", HexToColor(0x777777)}
+	};
+
     private static Texture2D	backgroundTexture;
 	private static Texture2D	resizeHandleTexture;
 	private static Texture2D	selectorBackgroundTexture;
@@ -95,8 +110,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle toolbarSearchTextStyle;
 	public GUIStyle toolbarStyle;
 
+	public GUIStyle	testNodeWinow;
 	public GUIStyle blueNodeWindow;
 	public GUIStyle blueNodeWindowSelected;
+	public GUIStyle greenNodeWindow;
+	public GUIStyle greenNodeWindowSelected;
+	public GUIStyle yellowNodeWindow;
+	public GUIStyle yellowNodeWindowSelected;
+	public GUIStyle orangeNodeWindow;
+	public GUIStyle orangeNodeWindowSelected;
+	public GUIStyle redNodeWindow;
+	public GUIStyle redNodeWindowSelected;
+	public GUIStyle cyanNodeWindow;
+	public GUIStyle cyanNodeWindowSelected;
+	public GUIStyle purpleNodeWindow;
+	public GUIStyle purpleNodeWindowSelected;
+	public GUIStyle pinkNodeWindow;
+	public GUIStyle pinkNodeWindowSelected;
+	public GUIStyle greyNodeWindow;
+	public GUIStyle greyNodeWindowSelected;
+	public GUIStyle whiteNodeWindow;
+	public GUIStyle whiteNodeWindowSelected;
 
 #endregion
 
@@ -708,13 +742,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Vector2 pos = node.windowRect.position;
 			float	snapPixels = 25.6f;
 
-			pos.x = Mathf.RoundToInt(pos.x / snapPixels) * snapPixels;
-			pos.y = Mathf.RoundToInt(pos.y / snapPixels) * snapPixels;
+			pos.x = Mathf.RoundToInt(Mathf.RoundToInt(pos.x / snapPixels) * snapPixels);
+			pos.y = Mathf.RoundToInt(Mathf.RoundToInt(pos.y / snapPixels) * snapPixels);
 			node.windowRect.position = pos;
 		}
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, blueNodeWindow, GUILayout.Height(node.viewHeight));
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, testNodeWinow, GUILayout.Height(node.viewHeight));
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
@@ -738,16 +772,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.DisplayHiddenMultipleAnchors(draggingLink);
 
 		//process envent, state and position for node anchors:
-		var mouseAboveAnchor = node.ProcessAnchors();
+		var mouseAboveAnchor = node.GetAnchorUnderMouse();
 		if (mouseAboveAnchor.mouseAbove)
 			mouseAboveAnchorLocal = true;
 
 		if (!mouseDraggingWindowLocal)
 			if (node.isDragged)
 				mouseDraggingWindowLocal = true;
-
-		//render node anchors:
-		node.RenderAnchors();
 
 		//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
@@ -846,7 +877,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			(maxSize.y / nodeEditorBackgroundTexture.height) * scale)
 		);
 
-		Rect graphCoreRect = EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
 			//if we are on the mother graph, render the terrain
@@ -983,7 +1014,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void OnWindowResize()
 	{
+		//calcul the ratio for the window move:
+		float r = position.size.x / windowSize.x;
 
+		currentGraph.h1.handlerPosition *= r;
+		currentGraph.h2.handlerPosition *= r;
 	}
 
 	void DeleteNode(object oNodeIndex)
@@ -1470,6 +1505,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.isVisibleInEditor = true;
 	}
 
+	static Color	HexToColor(int color)
+	{
+		byte alpha = (byte)((color >> 24) & 0xFF);
+		if (alpha == 0x00)
+			alpha = 0xFF;
+		
+		return new Color32(
+			(byte)(color & 0xFF),
+			(byte)((color >>  8) & 0xFF),
+			(byte)((color >> 16) & 0xFF),
+			alpha);
+	}
+
 #endregion
 
 #region Draw utils functions and Ressource generation
@@ -1552,8 +1600,29 @@ public class ProceduralWorldsWindow : EditorWindow {
 		toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
 		toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
 
+
+		testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
+
 		blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
 		blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
+		greenNodeWindow = PWGUISkin.FindStyle("GreenNodeWindow");
+		greenNodeWindowSelected = PWGUISkin.FindStyle("GreenNodeWindowSelected");
+		yellowNodeWindow = PWGUISkin.FindStyle("YellowNodeWindow");
+		yellowNodeWindowSelected = PWGUISkin.FindStyle("YellowNodeWindowSelected");
+		orangeNodeWindow = PWGUISkin.FindStyle("OrangeNodeWindow");
+		orangeNodeWindowSelected = PWGUISkin.FindStyle("OrangeNodeWindowSelected");
+		redNodeWindow = PWGUISkin.FindStyle("RedNodeWindow");
+		redNodeWindowSelected = PWGUISkin.FindStyle("RedNodeWindowSelected");
+		cyanNodeWindow = PWGUISkin.FindStyle("CyanNodeWindow");
+		cyanNodeWindowSelected = PWGUISkin.FindStyle("CyanNodeWindowSelected");
+		purpleNodeWindow = PWGUISkin.FindStyle("PurpleNodeWindow");
+		purpleNodeWindowSelected = PWGUISkin.FindStyle("PurpleNodeWindowSelected");
+		pinkNodeWindow = PWGUISkin.FindStyle("PinkNodeWindow");
+		pinkNodeWindowSelected = PWGUISkin.FindStyle("PinkNodeWindowSelected");
+		greyNodeWindow = PWGUISkin.FindStyle("GreyNodeWindow");
+		greyNodeWindowSelected = PWGUISkin.FindStyle("GreyNodeWindowSelected");
+		whiteNodeWindow = PWGUISkin.FindStyle("WhiteNodeWindow");
+		whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
 		
 		//set the custom style for the editor
 		GUI.skin = PWGUISkin;
@@ -1562,9 +1631,6 @@ public class ProceduralWorldsWindow : EditorWindow {
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
     {
 		Event e = Event.current;
-		//swap start and end if they are inverted
-		if (start.xMax > end.xMax)
-			PWUtils.Swap< Rect >(ref start, ref end);
 
 		int		id;
 		if (link == null)
@@ -1574,10 +1640,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
-        Vector3 startTan = startPos + Vector3.right * 100;
-        Vector3 endTan = endPos + Vector3.left * 100;
+		
+		Vector3 startDir = Vector3.right;;
+		Vector3 endDir = Vector3.left;;
 
-		if (link != null && !draggingGraph &&  String.IsNullOrEmpty(GUI.GetNameOfFocusedControl()))
+		float	tanPower = 50;
+
+        Vector3 startTan = startPos + startDir * tanPower;
+        Vector3 endTan = endPos + endDir * tanPower;
+
+		if (link != null && !draggingNode && String.IsNullOrEmpty(GUI.GetNameOfFocusedControl()))
 		{
 			switch (e.GetTypeForControl(id))
 			{
@@ -1648,7 +1720,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				break;
 			case PWLinkHighlight.Delete:
 			case PWLinkHighlight.DeleteAndReset:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .1f, .1f, .85f), null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, GUI.skin.settings.selectionColor, null, width + 2);
 				break ;
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);

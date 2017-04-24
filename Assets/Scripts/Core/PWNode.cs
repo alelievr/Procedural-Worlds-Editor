@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
 
 using UnityEditor;
 using UnityEngine;
@@ -46,6 +46,7 @@ namespace PW
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
 		static Texture2D	errorIcon = null;
+		static Texture2D	anchorImage = null;
 
 		[SerializeField]
 		Vector2	graphDecal;
@@ -62,6 +63,8 @@ namespace PW
 		Pair< string, int >	lastAttachedLink = null;
 
 		public static int	windowRenderOrder = 0;
+
+		PWAnchorInfo		anchorUnderMouse;
 
 		[SerializeField]
 		List< PWLink >	links = new List< PWLink >();
@@ -247,7 +250,6 @@ namespace PW
 						kp.Value.mirroredField = null;
 				}
 
-
 			//remove inhexistants dictionary entries:
 			foreach (var kp in propertyDatas)
 				if (!actualFields.Contains(kp.Key))
@@ -393,6 +395,7 @@ namespace PW
 				boxAnchorStyle = new GUIStyle(GUI.skin.box);
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			}
+			anchorImage = GUI.skin.box.normal.background;
 
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
@@ -441,6 +444,9 @@ namespace PW
 				
 			if (Event.current.type == EventType.Repaint)
 				viewHeight += 24;
+			
+			ProcessAnchors();
+			RenderAnchors();
 		}
 		#endif
 
@@ -455,8 +461,11 @@ namespace PW
 				if (kp.Value.mirroredField != null)
 				{
 					var val = kp.Value.anchorInstance;
-					var mirroredProp = propertyDatas[kp.Value.mirroredField];
-					bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
+					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
+					{
+						var mirroredProp = propertyDatas[kp.Value.mirroredField];
+						bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
+					}
 				}
 				
 			//send anchor connection events:
@@ -482,13 +491,12 @@ namespace PW
 			int index = -1)
 		{
 			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
-			anchorRect.position += graphDecal;
 
 			singleAnchor.anchorRect = anchorRect;
 
 			if (!ret.mouseAbove)
 			{
-				ret = new PWAnchorInfo(data.fieldName, anchorRect,
+				ret = new PWAnchorInfo(data.fieldName, PWUtils.DecalRect(singleAnchor.anchorRect, graphDecal + windowRect.position),
 					singleAnchor.color, data.type,
 					data.anchorType, windowId, singleAnchor.id,
 					data.classAQName, index,
@@ -499,16 +507,16 @@ namespace PW
 				ret.mouseAbove = true;
 		}
 
-		public PWAnchorInfo ProcessAnchors()
+		void ProcessAnchors()
 		{
 			PWAnchorInfo ret = new PWAnchorInfo();
 			
-			int		anchorWidth = 38;
-			int		anchorHeight = 16;
+			int		anchorWidth = 13;
+			int		anchorHeight = 13;
+			int		anchorMargin = 2;
 
-			Rect	winRect = windowRect;
-			Rect	inputAnchorRect = new Rect(winRect.xMin - anchorWidth + 2, winRect.y + 20, anchorWidth, anchorHeight);
-			Rect	outputAnchorRect = new Rect(winRect.xMax - 2, winRect.y + 20, anchorWidth, anchorHeight);
+			Rect	inputAnchorRect = new Rect(3, 20 + anchorMargin, anchorWidth, anchorHeight);
+			Rect	outputAnchorRect = new Rect(windowRect.size.x - anchorWidth - 3, 20 + anchorMargin, anchorWidth, anchorHeight);
 
 			//if there is more values in PWValues than the available anchor count, create new anchors:
 			ForeachPWAnchorDatas((data) => {
@@ -535,14 +543,19 @@ namespace PW
 					if (singleAnchor.visibility != PWVisibility.Gone)
 					{
 						if (data.anchorType == PWAnchorType.Input)
-							inputAnchorRect.position += Vector2.up * 18;
+							inputAnchorRect.position += Vector2.up * (18 + anchorMargin);
 						else if (data.anchorType == PWAnchorType.Output)
-							outputAnchorRect.position += Vector2.up * 18;
+							outputAnchorRect.position += Vector2.up * (18 + anchorMargin);
 					}
 				}
 			});
-			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - winRect.y - 20, outputAnchorRect.yMin - windowRect.y - 20);
-			return ret;
+			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.yMin - windowRect.size.y - 20, outputAnchorRect.yMin - windowRect.size.y - 20);
+			anchorUnderMouse = ret;
+		}
+
+		public PWAnchorInfo GetAnchorUnderMouse()
+		{
+			return anchorUnderMouse;
 		}
 		
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
@@ -563,7 +576,10 @@ namespace PW
 			}
 			Color savedBackground = GUI.backgroundColor;
 			GUI.backgroundColor = singleAnchor.color;
-			GUI.Box(singleAnchor.anchorRect, anchorName, boxAnchorStyle);
+			//TODO: put the name after 
+			GUI.color = Color.blue;
+			GUI.DrawTexture(singleAnchor.anchorRect, anchorImage, ScaleMode.ScaleToFit);
+			GUI.color = Color.white;
 			GUI.backgroundColor = savedBackground;
 			if (!singleAnchor.enabled)
 				GUI.DrawTexture(singleAnchor.anchorRect, disabledTexture);
@@ -587,8 +603,8 @@ namespace PW
 				&& (!data.multiple || (data.multiple && index < data.minMultipleValues)))
 			{
 				Rect errorIconRect = new Rect(singleAnchor.anchorRect);
-				errorIconRect.size = Vector2.one * 17;
-				errorIconRect.position += new Vector2(-10, -10);
+				errorIconRect.size = Vector2.one * 15;
+				errorIconRect.position += new Vector2(-1, -10);
 				GUI.DrawTexture(errorIconRect, errorIcon);
 			}
 
@@ -1045,18 +1061,6 @@ namespace PW
 			});
 		}
 
-		public Rect?	GetAnchorRect(int id)
-		{
-			var matches =	from p in propertyDatas
-							from p2 in p.Value.multi
-							where p2.id == id
-							select p2;
-
-			if (matches.Count() == 0)
-				return null;
-			return matches.First().anchorRect;
-		}
-
 		public void RunNodeAwake()
 		{
 			OnNodeAwake();
@@ -1138,9 +1142,22 @@ namespace PW
 				var anchors = propertyDatas[propertyName].multi;
 				if (anchors.Count <= index)
 					return null;
-				return anchors[index].anchorRect;
+				return PWUtils.DecalRect(anchors[index].anchorRect, graphDecal + windowRect.position);
 			}
 			return null;
+		}
+
+		public Rect?	GetAnchorRect(int id)
+		{
+			var matches =	from p in propertyDatas
+							from p2 in p.Value.multi
+							where p2.id == id
+							select p2;
+
+			if (matches.Count() == 0)
+				return null;
+			Rect r = matches.First().anchorRect;
+			return PWUtils.DecalRect(r, graphDecal + windowRect.position);
 		}
 
 		public PWAnchorData	GetAnchorData(string propName)
@@ -1168,5 +1185,6 @@ namespace PW
 			EditorGUILayout.LabelField("nope !");
 		}
 #endregion
+
     }
 }

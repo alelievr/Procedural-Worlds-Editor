@@ -5,23 +5,25 @@ using UnityEditor;
 public class HorizontalSplitView {
 
 	[SerializeField]
-	float		handlerPosition;
+	public float	handlerPosition;
 	[SerializeField]
-	bool		resize = false;
+	int				internHandlerPosition;
 	[SerializeField]
-	Rect		availableRect;
+	bool			resize = false;
 	[SerializeField]
-	float		minWidth;
+	Rect			availableRect;
 	[SerializeField]
-	float		maxWidth;
+	float			minWidth;
 	[SerializeField]
-	float		lastMouseX = -1;
+	float			maxWidth;
+	[SerializeField]
+	float			lastMouseX = -1;
 
 	[SerializeField]
-	Rect		savedBeginRect;
+	Rect			savedBeginRect;
 
 	[SerializeField]
-	int			handleWidth = 4;
+	int				handleWidth = 4;
 
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
 	{
@@ -34,12 +36,12 @@ public class HorizontalSplitView {
 	{
 		Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 		
-		handlerPosition = (int)handlerPosition;
+		internHandlerPosition = (int)handlerPosition;
 		if (tmpRect.width > 0f)
 			availableRect = tmpRect;
 
 		Rect splittedPanelRect = new Rect(0, 0, availableRect.width, availableRect.height);
-		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(handlerPosition), GUILayout.ExpandHeight(true));
+		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition), GUILayout.ExpandHeight(true));
 		if (beginRect.width > 2)
 			savedBeginRect = beginRect;
 		return savedBeginRect;
@@ -51,8 +53,8 @@ public class HorizontalSplitView {
 		
 		//left bar separation and resize:
 		
-		Rect handleRect = new Rect(handlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
-		Rect handleCatchRect = new Rect(handlerPosition - 1, availableRect.y, 6f, availableRect.height);
+		Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
+		Rect handleCatchRect = new Rect(internHandlerPosition - 1, availableRect.y, 6f, availableRect.height);
 		GUI.DrawTexture(handleRect, resizeHandleTex);
 		EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
 
@@ -63,9 +65,9 @@ public class HorizontalSplitView {
 		if (Event.current.type == EventType.MouseUp)
 			resize = false;
 		lastMouseX = Event.current.mousePosition.x;
-		handlerPosition = (int)Mathf.Clamp(handlerPosition, minWidth, maxWidth);
+		internHandlerPosition = (int)Mathf.Clamp(handlerPosition, minWidth, maxWidth);
 
-		return new Rect(handlerPosition + 3, availableRect.y, availableRect.width - handlerPosition, availableRect.height);
+		return new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
 	}
 
 	public void UpdateMinMax(float min, float max)
