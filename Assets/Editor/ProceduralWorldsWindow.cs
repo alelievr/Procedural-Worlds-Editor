@@ -247,15 +247,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (parentGraph == null)
 			parentGraph = AssetDatabase.LoadAssetAtPath< PWNodeGraph >(AssetDatabase.GetAssetPath(currentGraph));
 		
+		if (windowSize != Vector2.zero && windowSize != position.size)
+			OnWindowResize();
+		
+		windowSize = position.size;
+		
 		if (!currentGraph.presetChoosed)
 		{
 			DrawPresetPanel();
 			return ;
 		}
 		
-		if (windowSize != Vector2.zero && windowSize != position.size)
-			OnWindowResize();
-
 		// initialize unserialized fields in node:
 		parentGraph.ForeachAllNodes((n) => { if (n != null && !n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
 
@@ -302,8 +304,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			|| Event.current.type == EventType.Repaint
 			|| Event.current.type == EventType.KeyUp)
 			Repaint();
-
-		windowSize = position.size;
 
 		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
 		currentMousePosition = Event.current.mousePosition;
@@ -732,9 +732,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DisplayDecaledNode(int id, PWNode node, string name)
 	{
+		var		e = Event.current;
 		bool 	Mac = SystemInfo.operatingSystem.Contains("Mac");
+		
+		//if you are editing the node name, hide the current name.
+		if (node.windowNameEdit)
+			name = "";
 
-		if (node.isDragged && ((!Mac && Event.current.control) || (Mac && Event.current.command)))
+		if (node.isDragged && ((!Mac && e.control) || (Mac && e.command)))
 		{
 			Vector2 pos = node.windowRect.position;
 			float	snapPixels = 25.6f;
@@ -746,6 +751,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, testNodeWinow, GUILayout.Height(node.viewHeight));
+		if (e.type == EventType.MouseDown)
+			node.OnClickedOutside();
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
@@ -913,7 +920,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var node = currentGraph.nodes[i];
 				if (node == null)
 					continue ;
-				string nodeName = (string.IsNullOrEmpty(node.name)) ? node.nodeTypeName : node.name;
+				string nodeName = (string.IsNullOrEmpty(node.externalName)) ? node.nodeTypeName : node.externalName;
 				RenderNode(windowId++, node, nodeName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 			}
 
@@ -923,7 +930,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				var graph = parentGraph.FindGraphByName(graphName);
 				if (graph)
-					RenderNode(windowId++, graph.externalGraphNode, graph.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
+					RenderNode(windowId++, graph.externalGraphNode, graph.externalGraphNode.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
 				i++;
 			}
 
@@ -1078,8 +1085,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.computeOrder = -1;
 		newNode.RunNodeAwake();
 
-		if (String.IsNullOrEmpty(newNode.name))
+		if (String.IsNullOrEmpty(newNode.externalName))
+		{
+			newNode.externalName = t.Name;
 			newNode.name = t.Name;
+		}
 
 		AssetDatabase.AddObjectToAsset(newNode, currentGraph);
 		
@@ -1169,6 +1179,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		subgraph.externalName = "PW sub-machine";
 
 		subgraph.name = "sub" + currentGraph.localWindowIdCount + "-" + currentGraph.externalName;
+		subgraph.externalGraphNode.externalName = subgraph.name;
 		AssetDatabase.AddObjectToAsset(subgraph, currentGraph);
 		AssetDatabase.SaveAssets();
 

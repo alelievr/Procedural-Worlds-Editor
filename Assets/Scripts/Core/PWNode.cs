@@ -24,6 +24,7 @@ namespace PW
 		public int		chunkSize = 16;
 		public int		seed;
 		public float	processTime = 0f;
+		public string	externalName;
 
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
@@ -38,13 +39,15 @@ namespace PW
 		[System.NonSerializedAttribute]
 		public bool		unserializeInitialized = false;
 
-		static Color	defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
-		static GUIStyle	boxAnchorStyle = null;
+		static Color		defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
+		static GUIStyle		boxAnchorStyle = null;
+		static GUIStyle 	renameNodeTextFieldStyle;
 		
 		static Texture2D	highlightNewTexture = null;
 		static Texture2D	highlightReplaceTexture = null;
 		static Texture2D	highlightAddTexture = null;
 		static Texture2D	errorIcon = null;
+		static Texture2D	editIcon = null;
 		static Texture2D	anchorTexture = null;
 		static Texture2D	anchorDisabledTexture = null;
 
@@ -61,6 +64,8 @@ namespace PW
 		int		oldSeed;
 		int		oldChunkSize;
 		Pair< string, int >	lastAttachedLink = null;
+
+		public bool			windowNameEdit = false;
 
 		public static int	windowRenderOrder = 0;
 
@@ -100,7 +105,8 @@ namespace PW
 			highlightReplaceTexture = CreateTexture2DColor(new Color(1f, 0f, 0, .4f));
 			highlightAddTexture = CreateTexture2DColor(new Color(0f, .0f, 0.5f, .4f));
 
-			errorIcon = CreateTexture2DFromFile("error");
+			errorIcon = CreateTexture2DFromFile("ic_error");
+			editIcon = CreateTexture2DFromFile("ic_edit");
 
 			LoadFieldAttributes();
 
@@ -112,6 +118,7 @@ namespace PW
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 50);
 				viewHeight = 0;
+				Debug.Log("OnEnable, reanmabled false");
 				renamable = false;
 				maxAnchorRenderHeight = 0;
 
@@ -295,102 +302,6 @@ namespace PW
 
 #endregion
 
-#region Utils and Miscellaneous
-
-		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
-		{
-			foreach (var PWAnchorData in propertyDatas)
-			{
-				var data = PWAnchorData.Value;
-				if (data.multiple)
-				{
-					if (data.anchorInstance == null)
-					{
-						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
-						if (data.anchorInstance == null)
-							continue ;
-						else
-							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
-					}
-
-					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
-					if (data.anchorType == PWAnchorType.Input)
-						if (data.displayHiddenMultipleAnchors || showAdditional)
-							anchorCount++;
-					for (int i = 0; i < anchorCount; i++)
-					{
-						//if multi-anchor instance does not exists, create it:
-						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
-							data.multi[i].additional = true;
-						else
-							data.multi[i].additional = false;
-						callback(data, data.multi[i], i);
-					}
-				}
-				else
-					callback(data, data.first, -1);
-			}
-		}
-
-		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
-		{
-			foreach (var data in propertyDatas)
-			{
-				if (data.Value != null)
-					callback(data.Value);
-			}
-		}
-
-		public static PWLinkType GetLinkTypeFromType(Type fieldType)
-		{
-			if (fieldType == typeof(Sampler2D))
-				return PWLinkType.Sampler2D;
-			if (fieldType == typeof(Sampler3D))
-				return PWLinkType.Sampler3D;
-			if (fieldType == typeof(Vector3) || fieldType == typeof(Vector3i))
-				return PWLinkType.ThreeChannel;
-			if (fieldType == typeof(Vector4))
-				return PWLinkType.FourChannel;
-			return PWLinkType.BasicData;
-		}
-
-		PWAnchorType	InverAnchorType(PWAnchorType type)
-		{
-			if (type == PWAnchorType.Input)
-				return PWAnchorType.Output;
-			else if (type == PWAnchorType.Output)
-				return PWAnchorType.Input;
-			return PWAnchorType.None;
-		}
-
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
-		{
-			int				index;
-			
-			return GetAnchorData(id, out singleAnchorData, out index);
-		}
-
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
-		{
-			PWAnchorData					ret = null;
-			PWAnchorData.PWAnchorMultiData	s = null;
-			int								retIndex = 0;
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (singleAnchor.id == id)
-				{
-					s = singleAnchor;
-					ret = data;
-					retIndex = i;
-				}
-			}, true);
-			index = retIndex;
-			singleAnchorData = s;
-			return ret;
-		}
-
-#endregion
-
 #region Node rendering and processing
 
 		#if UNITY_EDITOR
@@ -400,9 +311,10 @@ namespace PW
 			{
 				boxAnchorStyle = new GUIStyle(GUI.skin.box);
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
+				anchorTexture = GUI.skin.box.normal.background;
+				anchorDisabledTexture = GUI.skin.box.active.background;
+				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("renameNodetextField"));
 			}
-			anchorTexture = GUI.skin.box.normal.background;
-			anchorDisabledTexture = GUI.skin.box.active.background;
 
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
@@ -411,7 +323,7 @@ namespace PW
 				isDragged = true;
 			if (Event.current.type == EventType.MouseUp)
 				isDragged = false;
-			if (id != -1)
+			if (id != -1 && Event.current.isMouse && Event.current.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 
 			int	debugViewH = 0;
@@ -596,7 +508,7 @@ namespace PW
 				else
 					anchorNameRect.position += new Vector2(-30, -4);
 				anchorNameRect.size = new Vector2(windowRect.size.x / 2 - 10, 18);
-				GUI.Label(anchorNameRect, anchorName);
+				GUI.Label(anchorNameRect, anchorName, GUI.skin.label);
 			}
 			
 			if (!singleAnchor.enabled)
@@ -627,25 +539,6 @@ namespace PW
 				GUI.DrawTexture(errorIconRect, errorIcon);
 			}
 
-			//if window is renamable, render a text input above the window:
-			if (renamable)
-			{
-				GUIStyle centeredText = new GUIStyle(GUI.skin.textField);
-				centeredText.alignment = TextAnchor.UpperCenter;
-				centeredText.margin.top += 2;
-
-				Rect renameRect = windowRect;
-				renameRect.position += graphDecal - Vector2.up * 18;
-				renameRect.size = new Vector2(renameRect.size.x, 30);
-				GUI.SetNextControlName("renameWindow");
-				name = GUI.TextField(renameRect, name, centeredText);
-
-				if (Event.current.type == EventType.MouseDown && !renameRect.Contains(Event.current.mousePosition))
-					GUI.FocusControl(null);
-				if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Escape))
-					GUI.FocusControl(null);
-			}
-
 			#if DEBUG_WINDOW
 				Rect anchorSideRect = singleAnchor.anchorRect;
 				if (data.anchorType == PWAnchorType.Input)
@@ -664,9 +557,12 @@ namespace PW
 		
 		public void RenderAnchors()
 		{
+			var e = Event.current;
+
 			if (highlightAddTexture == null)
 				OnEnable();
 			
+			//rendering anchors
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//draw anchor:
 				if (singleAnchor.visibility != PWVisibility.Gone)
@@ -677,6 +573,50 @@ namespace PW
 						singleAnchor.visibility = PWVisibility.Visible;
 				}
 			});
+			
+			//rendering node rename field	
+			if (renamable)
+			{
+				Vector2	winSize = windowRect.size;
+				Rect	renameRect = new Rect(0, 0, winSize.x, 18);
+				Rect	renameIconRect = new Rect(winSize.x - 28, 3, 12, 12);
+				string	renameNodeField = "renameWindow";
+
+				GUI.color = Color.black * .9f;
+				GUI.DrawTexture(renameIconRect, editIcon);
+				GUI.color = Color.white;
+
+				if (renameIconRect.Contains(e.mousePosition))
+				{
+					if (e.type == EventType.Used) //used by drag
+					{
+						windowNameEdit = true;
+						GUI.FocusControl(renameNodeField);
+					}
+					else if (e.type == EventType.MouseDown)
+						windowNameEdit = false;
+				}
+
+				if (windowNameEdit)
+				{
+					GUI.SetNextControlName(renameNodeField);
+					externalName = GUI.TextField(renameRect, externalName, renameNodeTextFieldStyle);
+	
+					if (e.type == EventType.MouseDown && !renameRect.Contains(e.mousePosition))
+					{
+						windowNameEdit = false;
+						GUI.FocusControl(null);
+					}
+					if (GUI.GetNameOfFocusedControl() == renameNodeField)
+					{
+						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Escape)
+						{
+							windowNameEdit = false;
+							GUI.FocusControl(null);
+						}
+					}
+				}
+			}
 		}
 
 #endregion
@@ -1091,6 +1031,15 @@ namespace PW
 			this.graphDecal = graphDecal;
 		}
 
+		public void OnClickedOutside()
+		{
+			if (Event.current.button == 0)
+			{
+				windowNameEdit = false;
+				GUI.FocusControl(null);
+			}
+		}
+
 #endregion
 
 #region Node property / anchor API
@@ -1202,6 +1151,102 @@ namespace PW
 		{
 			EditorGUILayout.LabelField("nope !");
 		}
+#endregion
+
+#region Utils and Miscellaneous
+
+		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
+		{
+			foreach (var PWAnchorData in propertyDatas)
+			{
+				var data = PWAnchorData.Value;
+				if (data.multiple)
+				{
+					if (data.anchorInstance == null)
+					{
+						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
+						if (data.anchorInstance == null)
+							continue ;
+						else
+							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
+					}
+
+					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
+					if (data.anchorType == PWAnchorType.Input)
+						if (data.displayHiddenMultipleAnchors || showAdditional)
+							anchorCount++;
+					for (int i = 0; i < anchorCount; i++)
+					{
+						//if multi-anchor instance does not exists, create it:
+						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
+							data.multi[i].additional = true;
+						else
+							data.multi[i].additional = false;
+						callback(data, data.multi[i], i);
+					}
+				}
+				else
+					callback(data, data.first, -1);
+			}
+		}
+
+		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
+		{
+			foreach (var data in propertyDatas)
+			{
+				if (data.Value != null)
+					callback(data.Value);
+			}
+		}
+
+		public static PWLinkType GetLinkTypeFromType(Type fieldType)
+		{
+			if (fieldType == typeof(Sampler2D))
+				return PWLinkType.Sampler2D;
+			if (fieldType == typeof(Sampler3D))
+				return PWLinkType.Sampler3D;
+			if (fieldType == typeof(Vector3) || fieldType == typeof(Vector3i))
+				return PWLinkType.ThreeChannel;
+			if (fieldType == typeof(Vector4))
+				return PWLinkType.FourChannel;
+			return PWLinkType.BasicData;
+		}
+
+		PWAnchorType	InverAnchorType(PWAnchorType type)
+		{
+			if (type == PWAnchorType.Input)
+				return PWAnchorType.Output;
+			else if (type == PWAnchorType.Output)
+				return PWAnchorType.Input;
+			return PWAnchorType.None;
+		}
+
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
+		{
+			int				index;
+			
+			return GetAnchorData(id, out singleAnchorData, out index);
+		}
+
+		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
+		{
+			PWAnchorData					ret = null;
+			PWAnchorData.PWAnchorMultiData	s = null;
+			int								retIndex = 0;
+
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (singleAnchor.id == id)
+				{
+					s = singleAnchor;
+					ret = data;
+					retIndex = i;
+				}
+			}, true);
+			index = retIndex;
+			singleAnchorData = s;
+			return ret;
+		}
+
 #endregion
 
     }
