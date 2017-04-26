@@ -5,10 +5,10 @@ namespace PW
 {
 	public class PWNodeCircleNoiseMask : PWNode {
 	
-		[PWInput("MAP")]
+		[PWInput]
 		public Sampler2D	samp;
 
-		[PWOutput("OUT")]
+		[PWOutput]
 		public Sampler2D	output;
 
 		[SerializeField]

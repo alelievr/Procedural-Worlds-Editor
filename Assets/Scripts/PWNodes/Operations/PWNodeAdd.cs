@@ -7,7 +7,7 @@ namespace PW
 	public class PWNodeAdd : PWNode {
 	
 		[PWMultiple(2, typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4))]
-		[PWInput("A")]
+		[PWInput]
 		public PWValues	values = new PWValues();
 	
 		[PWOutput("flt")]

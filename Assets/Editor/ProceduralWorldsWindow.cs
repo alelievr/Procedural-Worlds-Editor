@@ -47,44 +47,47 @@ public class ProceduralWorldsWindow : EditorWindow {
 	Vector2				currentMousePosition;
 
 	[System.NonSerializedAttribute]
-	Dictionary< string, List< PWNodeStorage > > nodeSelectorList = new Dictionary< string, List< PWNodeStorage > >();
+	Dictionary< string, PWNodeStorageCategory > nodeSelectorList = new Dictionary< string, PWNodeStorageCategory >();
+
+	[System.SerializableAttribute]
+	private class PWNodeStorageCategory
+	{
+		public string					color;
+		public List< PWNodeStorage >	nodes;
+
+		public PWNodeStorageCategory(string color) : this()
+		{
+			this.color = color;
+		}
+
+		public PWNodeStorageCategory()
+		{
+			nodes = new List< PWNodeStorage >();
+		}
+	}
 
 	[System.SerializableAttribute]
 	private class PWNodeStorage
 	{
 		public string		name;
 		public System.Type	nodeType;
+		public GUIStyle		windowStyle;
+		public GUIStyle		windowSelectedStyle;
 		
-		public PWNodeStorage(string n, System.Type type)
+		public PWNodeStorage(string n, System.Type type, GUIStyle ws, GUIStyle wss)
 		{
 			name = n;
 			nodeType = type;
+			windowStyle = ws;
+			windowSelectedStyle = wss;
 		}
 	}
 
 #region Internal editor styles and textures
 
-	public static Dictionary< string, Color > colorPallete = new Dictionary< string, Color >{
-		{"blueNode", HexToColor(0x5848ef)},
-		{"greenNode", HexToColor(0x30b030)},
-		{"yellowNode", HexToColor(0xe8ed55)},
-		{"orangeNode", HexToColor(0xff9e4f)},
-		{"redNode", HexToColor(0xde4747)},
-		{"cyanNode", HexToColor(0x55efea)},
-		{"purpleNode", HexToColor(0x7b51ed)},
-		{"pinkNode", HexToColor(0xf659d7)},
-		{"greyNode", HexToColor(0x646464)},
-		{"whiteNode", HexToColor(0xFFFFFF)},
-		{"nodeSelected", HexToColor(0x101868)},
-		{"nodeBorder", HexToColor(0x777777)}
-	};
-
-    private static Texture2D	backgroundTexture;
 	private static Texture2D	resizeHandleTexture;
-	private static Texture2D	selectorBackgroundTexture;
-	private static Texture2D	selectorCaseBackgroundTexture;
-	private static Texture2D	selectorCaseTitleBackgroundTexture;
 	private static Texture2D	nodeEditorBackgroundTexture;
+	private static Texture2D	defaultBackgroundTexture;
 
 	private static Texture2D	preset2DSideViewTexture;
 	private static Texture2D	preset2DTopDownViewTexture;
@@ -97,6 +100,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	presetMeshTetxure;
 
 	private static Texture2D	rencenterIconTexture;
+	private static Texture2D	fileIconTexture;
 
 	private static Gradient		greenRedGradient;
 	
@@ -112,6 +116,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle toolbarSearchCancelButtonStyle;
 	public GUIStyle toolbarSearchTextStyle;
 	public GUIStyle toolbarStyle;
+	public GUIStyle nodeSelectorTitleStyle;
+	public GUIStyle	nodeSelectorCaseStyle;
 
 	public GUIStyle	testNodeWinow;
 	public GUIStyle blueNodeWindow;
@@ -149,6 +155,36 @@ public class ProceduralWorldsWindow : EditorWindow {
 		window.Show();
 	}
 
+	void AddToSelector(string key, string color, GUIStyle windowColor, GUIStyle windowColorSelected, params object[] objs)
+	{
+		if (!nodeSelectorList.ContainsKey(key))
+			nodeSelectorList[key] = new PWNodeStorageCategory(color);
+		for (int i = 0; i < objs.Length; i += 2)
+			nodeSelectorList[key].nodes.Add(new PWNodeStorage((string)objs[i], (Type)objs[i + 1], windowColor, windowColorSelected));
+	}
+	
+	void InitializeNodeSelector()
+	{
+		//setup nodeList:
+		foreach (var n in nodeSelectorList)
+			n.Value.nodes.Clear();
+		
+		AddToSelector("Simple values", "redNode", redNodeWindow, redNodeWindowSelected,
+			"Slider", typeof(PWNodeSlider));
+		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
+			"Add", typeof(PWNodeAdd));
+		AddToSelector("Debug", "orangeNode", orangeNodeWindow, orangeNodeWindowSelected,
+			"DebugLog", typeof(PWNodeDebugLog));
+		AddToSelector("Noise masks", "greenNode", greenNodeWindow, greenNodeWindowSelected,
+			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+		AddToSelector("Noises", "blueNode", blueNodeWindow, blueNodeWindowSelected,
+			"Perlin noise 2D", typeof(PWNodePerlinNoise2D));
+		AddToSelector("Materializers", "purpleNode", purpleNodeWindow, purpleNodeWindowSelected,
+			"SideView 2D terrain", typeof(PWNodeSideView2DTerrain),
+			"TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
+		AddToSelector("Custom", "whiteNode", whiteNodeWindow, whiteNodeWindowSelected);
+	}
+
 	void InitializeNewGraph(PWNodeGraph graph)
 	{
 		//setup splitted panels:
@@ -173,14 +209,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.externalName = "New ProceduralWorld";
 	}
 
-	void AddToSelector(string key, params object[] objs)
-	{
-		if (!nodeSelectorList.ContainsKey(key))
-			nodeSelectorList[key] = new List< PWNodeStorage >();
-		for (int i = 0; i < objs.Length; i += 2)
-			nodeSelectorList[key].Add(new PWNodeStorage((string)objs[i], (Type)objs[i + 1]));
-	}
-
 	void OnEnable()
 	{
 		GeneratePWAssets();
@@ -189,21 +217,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
 
 		nodeGraphWidowStyle = new GUIStyle();
-		nodeGraphWidowStyle.normal.background = backgroundTexture;
-
-		//setup nodeList:
-		foreach (var n in nodeSelectorList)
-			n.Value.Clear();
-			
-		AddToSelector("Simple values", "Slider", typeof(PWNodeSlider));
-		AddToSelector("Operations", "Add", typeof(PWNodeAdd));
-		AddToSelector("Debug", "DebugLog", typeof(PWNodeDebugLog));
-		AddToSelector("Noise masks", "Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
-		AddToSelector("Noises", "Perlin noise 2D", typeof(PWNodePerlinNoise2D));
-		AddToSelector("Materializers", "SideView 2D terrain", typeof(PWNodeSideView2DTerrain));
-		AddToSelector("Materializers", "TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
-		AddToSelector("Storages");
-		AddToSelector("Custom");
+		nodeGraphWidowStyle.normal.background = defaultBackgroundTexture;
 
 		//current PWNodeGraph file have been deleted
 		if (currentGraph == null)
@@ -225,9 +239,7 @@ public class ProceduralWorldsWindow : EditorWindow {
     void OnGUI()
     {
 		currentGraph.isVisibleInEditor = true;
-		//TODO: put this if to load custom styles once
-		// if (breadcrumbsButtonStyle == null)
-			LoadCustomStyles();
+		LoadCustomStyles();
 
 		//text colors:
 		whiteText = new GUIStyle();
@@ -237,7 +249,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		whiteBoldText.normal.textColor = Color.white;
 
  		//background color:
-		if (backgroundTexture == null || !currentGraph.unserializeInitialized || resizeHandleTexture == null)
+		if (defaultBackgroundTexture == null || !currentGraph.unserializeInitialized || resizeHandleTexture == null)
 			OnEnable();
 
 		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
@@ -287,7 +299,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.h2.UpdateMinMax(0, position.width / 2);
 
 		currentGraph.h1.Begin();
-		Rect p1 = currentGraph.h2.Begin(backgroundTexture);
+		Rect p1 = currentGraph.h2.Begin(defaultBackgroundTexture);
 		DrawLeftBar(p1);
 		Rect g = currentGraph.h2.Split(resizeHandleTexture);
 		DrawNodeGraphHeader(g);
@@ -358,7 +370,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawPresetPanel()
 	{
-		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), backgroundTexture);
+		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), defaultBackgroundTexture);
 
 		presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
 
@@ -530,7 +542,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DrawLeftBar(Rect currentRect)
 	{
 		Event	e = Event.current;
-		GUI.DrawTexture(currentRect, backgroundTexture);
+		GUI.DrawTexture(currentRect, defaultBackgroundTexture);
 
 		//add the texturepreviewRect size:
 		Rect previewRect = new Rect(0, 0, currentRect.width, currentRect.width);
@@ -591,6 +603,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 			if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(50), GUILayout.Height(50)))
 				currentGraph.graphDecalPosition = Vector2.zero;
+			if (GUILayout.Button(fileIconTexture, GUILayout.Width(50), GUILayout.Height(50)))
+				EditorGUIUtility.PingObject(currentGraph);
 			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
@@ -604,31 +618,23 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 #region Right node selector rendering
 
-	Rect DrawSelectorCase(ref Rect r, string name, bool title = false)
+	Rect DrawSelectorCase(string name, string color, bool title = false)
 	{
-		//text box
-		Rect boxRect = new Rect(r);
-		boxRect.y += 2;
-		boxRect.height += 10;
-
 		if (title)
-			GUI.DrawTexture(boxRect, selectorCaseTitleBackgroundTexture);
+		{
+			GUI.color = PWColorPalette.GetColor(color);
+			GUILayout.Label(name, nodeSelectorTitleStyle);
+			GUI.color = Color.white;
+		}
 		else
-			GUI.DrawTexture(boxRect, selectorCaseBackgroundTexture);
+			GUILayout.Label(name, nodeSelectorCaseStyle);
 
-		boxRect.y += 6;
-		boxRect.x += 10;
-
-		EditorGUI.LabelField(boxRect, name, (title) ? whiteBoldText : whiteText);
-
-		r.y += 30;
-
-		return boxRect;
+		return GUILayoutUtility.GetLastRect();
 	}
 
 	void DrawSelector(Rect currentRect)
 	{
-		GUI.DrawTexture(currentRect, selectorBackgroundTexture);
+		GUI.DrawTexture(currentRect, defaultBackgroundTexture);
 		currentGraph.selectorScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginVertical(splittedPanel);
@@ -647,13 +653,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 				GUILayout.EndHorizontal();
 				
-				Rect r = EditorGUILayout.GetControlRect();
 				foreach (var nodeCategory in nodeSelectorList)
 				{
-					DrawSelectorCase(ref r, nodeCategory.Key, true);
-					foreach (var nodeCase in nodeCategory.Value.Where(n => n.name.IndexOf(currentGraph.searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
+					DrawSelectorCase(nodeCategory.Key, nodeCategory.Value.color, true);
+					foreach (var nodeCase in nodeCategory.Value.nodes.Where(n => n.name.IndexOf(currentGraph.searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
 					{
-						Rect clickableRect = DrawSelectorCase(ref r, nodeCase.name);
+						Rect clickableRect = DrawSelectorCase(nodeCase.name, nodeCategory.Value.color);
 	
 						if (Event.current.type == EventType.MouseDown && clickableRect.Contains(Event.current.mousePosition))
 							CreateNewNode(nodeCase.nodeType, -currentGraph.graphDecalPosition + position.size / 2, true);
@@ -679,7 +684,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				breadcrumbsRect.yMin -= 1;
 				breadcrumbsRect.xMin -= 1;
 				if (e.type == EventType.Repaint)
-					GUI.DrawTexture(breadcrumbsRect, selectorBackgroundTexture);
+					GUI.DrawTexture(breadcrumbsRect, defaultBackgroundTexture);
 				
 				PWNodeGraph g = currentGraph;
 				var breadcrumbsList = new List< string >();
@@ -753,7 +758,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, testNodeWinow, GUILayout.Height(node.viewHeight));
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
 		if (node.windowRect.Contains(e.mousePosition))
 			mouseAboveNode = node;
 		else if (e.type == EventType.MouseDown)
@@ -1098,6 +1103,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
 		newNode.computeOrder = -1;
+		GetWindowStyleFromType(t, out newNode.windowStyle, out newNode.windowSelectedStyle);
 		newNode.RunNodeAwake();
 
 		if (String.IsNullOrEmpty(newNode.externalName))
@@ -1353,7 +1359,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				foreach (var nodeCat in nodeSelectorList)
 				{
 					string menuString = "Create new/" + nodeCat.Key + "/";
-					foreach (var nodeClass in nodeCat.Value)
+					foreach (var nodeClass in nodeCat.Value.nodes)
 						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
 				}
                 menu.AddSeparator("");
@@ -1528,17 +1534,28 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.isVisibleInEditor = true;
 	}
 
-	static Color	HexToColor(int color)
+	void GetWindowStyleFromType(Type t, out GUIStyle windowStyle, out GUIStyle windowSelectedStyle)
 	{
-		byte alpha = (byte)((color >> 24) & 0xFF);
-		if (alpha == 0x00)
-			alpha = 0xFF;
-		
-		return new Color32(
-			(byte)(color & 0xFF),
-			(byte)((color >>  8) & 0xFF),
-			(byte)((color >> 16) & 0xFF),
-			alpha);
+		if (t == typeof(PWNodeGraphExternal) || t == typeof(PWNodeGraphInput) || t == typeof(PWNodeGraphOutput))
+		{
+			windowStyle = whiteNodeWindow;
+			windowSelectedStyle = whiteNodeWindowSelected;
+			return ;
+		}
+		foreach (var nodeCat in nodeSelectorList)
+		{
+			foreach (var nodeInfo in nodeCat.Value.nodes)
+			{
+				if (t == nodeInfo.nodeType)
+				{
+					windowStyle = nodeInfo.windowStyle;
+					windowSelectedStyle = nodeInfo.windowSelectedStyle;
+					return ;
+				}
+			}
+		}
+		windowStyle = greyNodeWindow;
+		windowSelectedStyle = greyNodeWindowSelected;
 	}
 
 #endregion
@@ -1561,21 +1578,14 @@ public class ProceduralWorldsWindow : EditorWindow {
         };
 
 		//generate background colors:
-        Color backgroundColor = new Color32(57, 57, 57, 255);
+        Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
 		Color resizeHandleColor = EditorGUIUtility.isProSkin
 			? new Color32(56, 56, 56, 255)
             : new Color32(130, 130, 130, 255);
-		Color selectorBackgroundColor = new Color32(80, 80, 80, 255);
-		Color selectorCaseBackgroundColor = new Color32(110, 110, 110, 255);
-		Color selectorCaseTitleBackgroundColor = new Color32(50, 50, 50, 255);
 		
 		//load backgrounds and colors as texture
-		backgroundTexture = CreateTexture2DColor(backgroundColor);
 		resizeHandleTexture = CreateTexture2DColor(resizeHandleColor);
-		selectorBackgroundTexture = CreateTexture2DColor(selectorBackgroundColor);
-		// debugTexture1 = CreateTexture2DColor(new Color(1f, 0f, 0f, .3f));
-		selectorCaseBackgroundTexture = CreateTexture2DColor(selectorCaseBackgroundColor);
-		selectorCaseTitleBackgroundTexture = CreateTexture2DColor(selectorCaseTitleBackgroundColor);
+		defaultBackgroundTexture = CreateTexture2DColor(defaultBackgroundColor);
 		nodeEditorBackgroundTexture = CreateTexture2DFromFile("nodeEditorBackground");
 
 		//loading preset panel images
@@ -1590,7 +1600,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
 
 		//icons and utils
-		rencenterIconTexture = CreateTexture2DFromFile("recenter");
+		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
+		fileIconTexture = CreateTexture2DFromFile("ic_file");
 
 		//generating green-red gradient
         GradientColorKey[] gck;
@@ -1607,46 +1618,52 @@ public class ProceduralWorldsWindow : EditorWindow {
         gak[1].alpha = 1.0F;
         gak[1].time = 1.0F;
         greenRedGradient.SetKeys(gck, gak);
-
-		//loading GUI skin:
-		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 	}
 
 	void LoadCustomStyles()
 	{
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
-		breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
-		breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
+		//initialize if null
+		//TODO: remove
+		// if (breadcrumbsButtonStyle == null)
+		{
+			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
+			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
+	
+			toolbarStyle = new GUIStyle("Toolbar");
+			toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
+			toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
 
-		toolbarStyle = new GUIStyle("Toolbar");
-		toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
-		toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
+			nodeSelectorTitleStyle = PWGUISkin.FindStyle("NodeSelectorTitle");
+			nodeSelectorCaseStyle = PWGUISkin.FindStyle("NodeSelectorCase");
+	
+			testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
+	
+			blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
+			blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
+			greenNodeWindow = PWGUISkin.FindStyle("GreenNodeWindow");
+			greenNodeWindowSelected = PWGUISkin.FindStyle("GreenNodeWindowSelected");
+			yellowNodeWindow = PWGUISkin.FindStyle("YellowNodeWindow");
+			yellowNodeWindowSelected = PWGUISkin.FindStyle("YellowNodeWindowSelected");
+			orangeNodeWindow = PWGUISkin.FindStyle("OrangeNodeWindow");
+			orangeNodeWindowSelected = PWGUISkin.FindStyle("OrangeNodeWindowSelected");
+			redNodeWindow = PWGUISkin.FindStyle("RedNodeWindow");
+			redNodeWindowSelected = PWGUISkin.FindStyle("RedNodeWindowSelected");
+			cyanNodeWindow = PWGUISkin.FindStyle("CyanNodeWindow");
+			cyanNodeWindowSelected = PWGUISkin.FindStyle("CyanNodeWindowSelected");
+			purpleNodeWindow = PWGUISkin.FindStyle("PurpleNodeWindow");
+			purpleNodeWindowSelected = PWGUISkin.FindStyle("PurpleNodeWindowSelected");
+			pinkNodeWindow = PWGUISkin.FindStyle("PinkNodeWindow");
+			pinkNodeWindowSelected = PWGUISkin.FindStyle("PinkNodeWindowSelected");
+			greyNodeWindow = PWGUISkin.FindStyle("GreyNodeWindow");
+			greyNodeWindowSelected = PWGUISkin.FindStyle("GreyNodeWindowSelected");
+			whiteNodeWindow = PWGUISkin.FindStyle("WhiteNodeWindow");
+			whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
+		}
+		if (nodeSelectorList.Count == 0)
+			InitializeNodeSelector();
 
-
-		testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
-
-		blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
-		blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
-		greenNodeWindow = PWGUISkin.FindStyle("GreenNodeWindow");
-		greenNodeWindowSelected = PWGUISkin.FindStyle("GreenNodeWindowSelected");
-		yellowNodeWindow = PWGUISkin.FindStyle("YellowNodeWindow");
-		yellowNodeWindowSelected = PWGUISkin.FindStyle("YellowNodeWindowSelected");
-		orangeNodeWindow = PWGUISkin.FindStyle("OrangeNodeWindow");
-		orangeNodeWindowSelected = PWGUISkin.FindStyle("OrangeNodeWindowSelected");
-		redNodeWindow = PWGUISkin.FindStyle("RedNodeWindow");
-		redNodeWindowSelected = PWGUISkin.FindStyle("RedNodeWindowSelected");
-		cyanNodeWindow = PWGUISkin.FindStyle("CyanNodeWindow");
-		cyanNodeWindowSelected = PWGUISkin.FindStyle("CyanNodeWindowSelected");
-		purpleNodeWindow = PWGUISkin.FindStyle("PurpleNodeWindow");
-		purpleNodeWindowSelected = PWGUISkin.FindStyle("PurpleNodeWindowSelected");
-		pinkNodeWindow = PWGUISkin.FindStyle("PinkNodeWindow");
-		pinkNodeWindowSelected = PWGUISkin.FindStyle("PinkNodeWindowSelected");
-		greyNodeWindow = PWGUISkin.FindStyle("GreyNodeWindow");
-		greyNodeWindowSelected = PWGUISkin.FindStyle("GreyNodeWindowSelected");
-		whiteNodeWindow = PWGUISkin.FindStyle("WhiteNodeWindow");
-		whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
-		
 		//set the custom style for the editor
 		GUI.skin = PWGUISkin;
 	}
@@ -1679,7 +1696,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				case EventType.MouseDown:
 					if (link.linkHighlight == PWLinkHighlight.Delete)
 						break ;
-					if (HandleUtility.nearestControl == id && (e.button == 0) || e.button == 1)
+					if (!draggingLink && HandleUtility.nearestControl == id && (e.button == 0 || e.button == 1))
 					{
 						GUIUtility.hotControl = id;
 						//unselect all others links:
@@ -1703,12 +1720,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
-				case PWLinkType.Sampler2D:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 6, s);
-					break ;
-				case PWLinkType.ChunkData:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.5f, .3f, .7f), 8, s);
-					break ;
 				case PWLinkType.Sampler3D:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s);
 					break ;
@@ -1724,7 +1735,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 7, s);
 					break ;
 				default:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 4, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s);
 					break ;
 			}
 			if (link != null && link.linkHighlight == PWLinkHighlight.DeleteAndReset)
@@ -1739,7 +1750,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		switch (linkHighlight)
 		{
 			case PWLinkHighlight.Selected:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, GUI.skin.settings.selectionColor, null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorPalette.GetColor("selectedNode"), null, width + 2);
 				break;
 			case PWLinkHighlight.Delete:
 			case PWLinkHighlight.DeleteAndReset:

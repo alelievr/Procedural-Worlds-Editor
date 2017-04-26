@@ -5,10 +5,10 @@ namespace PW
 {
 	public class PWNodeTopDown2DTerrain : PWNode {
 	
-		[PWInput("TEX")]
+		[PWInput]
 		public Sampler2D		texture;
 
-		[PWOutput("MAP")]
+		[PWOutput]
 		public TopDown2DData	terrainOutput;
 
 		private Texture2D		samplerTexture;

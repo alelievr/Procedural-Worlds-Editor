@@ -48,7 +48,6 @@ namespace PW
 		static Texture2D	anchorTexture = null;
 		static Texture2D	anchorDisabledTexture = null;
 
-		static Color		defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
 		static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
 		static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
 		static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
@@ -88,6 +87,10 @@ namespace PW
 		public bool		unserializeInitialized = false;
 
 		public bool		windowNameEdit = false;
+		public bool		selected = false;
+
+		public GUIStyle	windowStyle;
+		public GUIStyle windowSelectedStyle;
 
 	#endregion
 
@@ -131,6 +134,20 @@ namespace PW
 				bakedNodeFields[fInfo.Name] = fInfo;
 		}
 
+		public static Color GetAnchorColorByType(Type t)
+		{
+			if (t == typeof(float) || t == typeof(Vector2) || t == typeof(Vector3) || t == typeof(Vector4))
+				return PWColorPalette.GetColor("yellowAnchor");
+			else if (t.IsSubclassOf(typeof(ChunkData)))
+				return PWColorPalette.GetColor("blueAnchor");
+			else if (t == typeof(Sampler2D) || t == typeof(Sampler3D))
+				return PWColorPalette.GetColor("greenAnchor");
+			else if (t == typeof(PWValues) || t == typeof(PWValue))
+				return PWColorPalette.GetColor("whiteAnchor");
+			else
+				return PWColorPalette.GetColor("defaultAnchor");
+		}
+
 		void LoadFieldAttributes()
 		{
 			//get input variables
@@ -142,9 +159,9 @@ namespace PW
 				actualFields.Add(field.Name);
 				if (!propertyDatas.ContainsKey(field.Name))
 					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
-				
+					
 				PWAnchorData	data = propertyDatas[field.Name];
-				Color			backgroundColor = defaultAnchorBackgroundColor;
+				Color			backgroundColor = GetAnchorColorByType(field.FieldType);
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = field.Name;
 				Vector2			offset = Vector2.zero;
@@ -305,7 +322,7 @@ namespace PW
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 				anchorTexture = GUI.skin.box.normal.background;
 				anchorDisabledTexture = GUI.skin.box.active.background;
-				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("renameNodetextField"));
+				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("RenameNodetextField"));
 			}
 
 			// set the header of the window as draggable:
@@ -485,7 +502,6 @@ namespace PW
 					anchorName += index;
 			}
 
-			GUI.color = singleAnchor.color;
 			switch (singleAnchor.highlighMode)
 			{
 				case PWAnchorHighlight.AttachAdd:
@@ -660,7 +676,7 @@ namespace PW
 				outputHasChanged = true;
 				links.Add(new PWLink(
 					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
-					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, from.anchorColor,
+					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
 					GetLinkType(from.fieldType, to.fieldType))
 				);
 				lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
@@ -709,14 +725,14 @@ namespace PW
 			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
 
 			PWAnchorInfo from = new PWAnchorInfo(
-					fromAnchor.fieldName, new Rect(), Color.white,
+					fromAnchor.fieldName, new Rect(), fromAnchor.first.color,
 					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
 					fromAnchor.first.id, fromAnchor.classAQName,
 					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes,
 					fromAnchor.first.linkType, fromAnchor.first.linkCount
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
-				toAnchor.fieldName, new Rect(), Color.white,
+				toAnchor.fieldName, new Rect(), toAnchor.first.color,
 				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
 				toAnchor.first.id, toAnchor.classAQName,
 				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes,
@@ -1253,6 +1269,15 @@ namespace PW
 			index = retIndex;
 			singleAnchorData = s;
 			return ret;
+		}
+
+		Color GetAnchorDominantColor(PWAnchorInfo from, PWAnchorInfo to)
+		{
+			if (from.anchorColor == PWColorPalette.GetColor("greyAnchor") || from.anchorColor == PWColorPalette.GetColor("whiteAnchor"))
+				return to.anchorColor;
+			if (to.anchorColor == PWColorPalette.GetColor("greyAnchor") || to.anchorColor == PWColorPalette.GetColor("whiteAnchor"))
+				return from.anchorColor;
+			return to.anchorColor;
 		}
 
 	#endregion

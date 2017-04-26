@@ -8,7 +8,7 @@ namespace PW
 		public float		persistance;
 		public int			octaves;
 
-		[PWOutput("OUT")]
+		[PWOutput]
 		public Sampler2D	output;
 
 		Texture2D			previewTex;
