@@ -90,9 +90,7 @@ namespace PW
 		IOrderedEnumerable< PWNodeComputeInfo > computeOrderSortedNodes = null;
 
 		[System.NonSerializedAttribute]
-		private bool						graphInstanciesLoaded = false;
-		[System.NonSerializedAttribute]
-		public bool							unserializeInitialized = false;
+		public bool								unserializeInitialized = false;
 
 		[System.NonSerializedAttribute]
 		public Dictionary< string, PWNodeGraph >	graphInstancies = new Dictionary< string, PWNodeGraph >();

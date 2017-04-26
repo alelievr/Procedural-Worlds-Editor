@@ -12,6 +12,8 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
+		public static int	windowRenderOrder = 0;
+
 		public string	nodeTypeName;
 		public Rect		windowRect;
 		public int		windowId;
@@ -26,6 +28,7 @@ namespace PW
 		public float	processTime = 0f;
 		public string	externalName;
 
+		//useful state bools
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
 		public bool		chunkSizeHasChanged = false;
@@ -36,75 +39,65 @@ namespace PW
 		public bool		reloadRequested = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
 
-		[System.NonSerializedAttribute]
-		public bool		unserializeInitialized = false;
-
-		static Color		defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
+	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
 		static GUIStyle 	renameNodeTextFieldStyle;
 		
-		static Texture2D	highlightNewTexture = null;
-		static Texture2D	highlightReplaceTexture = null;
-		static Texture2D	highlightAddTexture = null;
 		static Texture2D	errorIcon = null;
 		static Texture2D	editIcon = null;
 		static Texture2D	anchorTexture = null;
 		static Texture2D	anchorDisabledTexture = null;
 
-		[SerializeField]
-		Vector2	graphDecal;
-		[SerializeField]
-		int		maxAnchorRenderHeight;
-		[SerializeField]
-		string	firstInitialization;
+		static Color		defaultAnchorBackgroundColor = new Color(.75f, .75f, .75f, 1);
+		static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
+		static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
+		static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
-		bool	windowShouldClose = false;
+		[SerializeField]
+		Vector2				graphDecal;
+		[SerializeField]
+		int					maxAnchorRenderHeight;
+		[SerializeField]
+		string				firstInitialization;
 
-		Vector3	oldChunkPosition;
-		int		oldSeed;
-		int		oldChunkSize;
+		bool				windowShouldClose = false;
+
+		Vector3				oldChunkPosition;
+		int					oldSeed;
+		int					oldChunkSize;
 		Pair< string, int >	lastAttachedLink = null;
-
-		public bool			windowNameEdit = false;
-
-		public static int	windowRenderOrder = 0;
 
 		PWAnchorInfo		anchorUnderMouse;
 
+		//node links and deps
 		[SerializeField]
-		List< PWLink >	links = new List< PWLink >();
+		List< PWLink >					links = new List< PWLink >();
 		[SerializeField]
-		//List< windowId, anchorId >
-		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >();
+		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >(); //List< windowId, anchorId >
 
+		//backed datas about properties and nodes
 		[System.SerializableAttribute]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
 		[SerializeField]
-		protected PropertyDataDictionary propertyDatas = new PropertyDataDictionary();
+		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
 
 		[NonSerializedAttribute]
-		protected Dictionary< string, FieldInfo > bakedNodeFields = new Dictionary< string, FieldInfo >();
+		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
 
-#region OnEnable, data initialization and baking
+		[System.NonSerializedAttribute]
+		public bool		unserializeInitialized = false;
+
+		public bool		windowNameEdit = false;
+
+	#endregion
+
+	#region OnEnable, data initialization and baking
 		public void OnEnable()
 		{
 			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
 				return Resources.Load< Texture2D >(ressourcePath);
 			};
 				
-			Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
-				Texture2D	ret;
-				ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-				ret.SetPixel(0, 0, c);
-				ret.Apply();
-				return ret;
-			};
-
-			anchorDisabledTexture = CreateTexture2DColor(new Color(.4f, .4f, .4f, .5f));
-			highlightNewTexture = CreateTexture2DColor(new Color(0, .5f, 0, .4f));
-			highlightReplaceTexture = CreateTexture2DColor(new Color(1f, 0f, 0, .4f));
-			highlightAddTexture = CreateTexture2DColor(new Color(0f, .0f, 0.5f, .4f));
-
 			errorIcon = CreateTexture2DFromFile("ic_error");
 			editIcon = CreateTexture2DFromFile("ic_edit");
 
@@ -118,7 +111,6 @@ namespace PW
 				computeOrder = 0;
 				windowRect = new Rect(400, 400, 200, 50);
 				viewHeight = 0;
-				Debug.Log("OnEnable, reanmabled false");
 				renamable = false;
 				maxAnchorRenderHeight = 0;
 
@@ -272,9 +264,9 @@ namespace PW
 				}
 		}
 
-#endregion
+	#endregion
 
-#region inheritence virtual API
+	#region inheritence virtual API
 
 		public virtual void OnNodeAwake()
 		{
@@ -300,9 +292,9 @@ namespace PW
 		{
 		}
 
-#endregion
+	#endregion
 
-#region Node rendering and processing
+	#region Node rendering and processing
 
 		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
@@ -397,9 +389,9 @@ namespace PW
 			OnNodeProcess();
 		}
 
-#endregion
+	#endregion
 
-#region Anchor rendering and processing
+	#region Anchor rendering and processing
 
 		void ProcessAnchor(
 			PWAnchorData data,
@@ -493,12 +485,26 @@ namespace PW
 					anchorName += index;
 			}
 
-			Color savedBackground = GUI.backgroundColor;
-			GUI.backgroundColor = singleAnchor.color;
 			GUI.color = singleAnchor.color;
+			switch (singleAnchor.highlighMode)
+			{
+				case PWAnchorHighlight.AttachAdd:
+					GUI.color = anchorAttachAddColor;
+					break ;
+				case PWAnchorHighlight.AttachNew:
+					GUI.color = anchorAttachNewColor;
+					break ;
+				case PWAnchorHighlight.AttachReplace:
+					GUI.color = anchorAttachReplaceColor;
+					break ;
+				case PWAnchorHighlight.None:
+				default:
+					GUI.color = singleAnchor.color;
+					break ;
+
+			}
 			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
 			GUI.color = Color.white;
-			GUI.backgroundColor = savedBackground;
 
 			if (anchorName != null)
 			{
@@ -513,19 +519,6 @@ namespace PW
 			
 			if (!singleAnchor.enabled)
 				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);
-			else
-				switch (singleAnchor.highlighMode)
-				{
-					case PWAnchorHighlight.AttachNew:
-						GUI.DrawTexture(singleAnchor.anchorRect, highlightNewTexture);
-						break ;
-					case PWAnchorHighlight.AttachReplace:
-						GUI.DrawTexture(singleAnchor.anchorRect, highlightReplaceTexture);
-						break ;
-					case PWAnchorHighlight.AttachAdd:
-						GUI.DrawTexture(singleAnchor.anchorRect, highlightAddTexture);
-						break ;
-				}
 
 			//reset the Highlight:
 			singleAnchor.highlighMode = PWAnchorHighlight.None;
@@ -559,9 +552,6 @@ namespace PW
 		{
 			var e = Event.current;
 
-			if (highlightAddTexture == null)
-				OnEnable();
-			
 			//rendering anchors
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//draw anchor:
@@ -619,9 +609,9 @@ namespace PW
 			}
 		}
 
-#endregion
-		
-#region Links management and utils
+	#endregion
+	
+	#region Links management and utils
 
 		public List< PWLink > GetLinks()
 		{
@@ -791,9 +781,9 @@ namespace PW
 			depencendies.Clear();
 		}
 
-#endregion
+	#endregion
 
-#region dependencies management and utils
+	#region dependencies management and utils
 
 		int DeleteDependencies(Func< PWNodeDependency, bool > pred)
 		{
@@ -868,9 +858,9 @@ namespace PW
 			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
 		}
 
-#endregion
+	#endregion
 
-#region Editor utils
+	#region Editor utils
 
 		static bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
 		{
@@ -921,6 +911,8 @@ namespace PW
 
 		public static bool		AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
 		{
+			if (from.windowId == to.windowId && from.anchorType == to.anchorType)
+				return false;
 			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
 		}
 
@@ -1040,9 +1032,25 @@ namespace PW
 			}
 		}
 
-#endregion
+		public void AnchorBeingLinked(int anchorId)
+		{
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (singleAnchor.id == anchorId)
+				{
+					if (singleAnchor.linkCount == 0)
+						singleAnchor.highlighMode = PWAnchorHighlight.AttachNew;
+					else
+						if (data.anchorType == PWAnchorType.Input)
+							singleAnchor.highlighMode = PWAnchorHighlight.AttachReplace;
+						else
+							singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
+				}
+			});
+		}
 
-#region Node property / anchor API
+	#endregion
+
+	#region Node property / anchor API
 
 		/* Utils function to manipulate PWnode variables */
 
@@ -1134,9 +1142,9 @@ namespace PW
 			return null;
 		}
 
-#endregion
+	#endregion
 
-#region Unused (for the moment) overrided functions
+	#region Unused (for the moment) overrided functions
 		public void OnDestroy()
 		{
 			// Debug.Log("node " + nodeTypeName + " detroyed !");
@@ -1151,9 +1159,9 @@ namespace PW
 		{
 			EditorGUILayout.LabelField("nope !");
 		}
-#endregion
+	#endregion
 
-#region Utils and Miscellaneous
+	#region Utils and Miscellaneous
 
 		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
 		{
@@ -1247,7 +1255,7 @@ namespace PW
 			return ret;
 		}
 
-#endregion
+	#endregion
 
     }
 }

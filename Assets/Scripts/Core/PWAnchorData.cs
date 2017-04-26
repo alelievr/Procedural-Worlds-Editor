@@ -126,6 +126,8 @@ namespace PW
 			PWAnchorMultiData	tmp = new PWAnchorMultiData(c);
 			PWValues			anchorValues = anchorInstance as PWValues;
 
+			if (c == new Color(0, 0, 0, 0))
+				c = Color.white;
 			tmp.name = first.name;
 			tmp.additional = true;
 			tmp.id = id;

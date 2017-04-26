@@ -35,6 +35,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	PWTerrainBase		terrainMaterializer;
 
+	[System.NonSerializedAttribute]
+	PWNode				mouseAboveNode;
+
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
 	[SerializeField]
@@ -751,7 +754,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, testNodeWinow, GUILayout.Height(node.viewHeight));
-		if (e.type == EventType.MouseDown)
+		if (node.windowRect.Contains(e.mousePosition))
+			mouseAboveNode = node;
+		else if (e.type == EventType.MouseDown)
 			node.OnClickedOutside();
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
@@ -959,11 +964,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			Rect snappedToAnchorMouseRect = new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0);
 
-			if (mouseAboveNodeAnchor)
+			if (mouseAboveNodeAnchor && draggingLink)
 			{
 				if (startDragAnchor.fieldType != null && mouseAboveAnchorInfo.fieldType != null)
 					if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo))
+					{
+						if (mouseAboveNode != null)
+							mouseAboveNode.AnchorBeingLinked(mouseAboveAnchorInfo.anchorId);
 						snappedToAnchorMouseRect = mouseAboveAnchorInfo.anchorRect;
+					}
 			}
 
 			if (draggingLink)
@@ -1027,12 +1036,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DeleteNode(object oNodeIndex)
 	{
-		var node = currentGraph.nodes[(int)oNodeIndex];
+		int	id = (int)oNodeIndex;
+		if (id < 0 || id > currentGraph.nodes.Count)
+		{
+			Debug.LogWarning("cant remove this node !");
+			return ;
+		}
+
+		var node = currentGraph.nodes[id];
 
 		if (node == null)
 			return ;
 
-		currentGraph.nodes.RemoveAt((int)oNodeIndex);
+		currentGraph.nodes.RemoveAt(id);
 
 		DeleteNode(node);
 
@@ -1077,7 +1093,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//center to the middle of the screen:
 		newNode.windowRect.position = position;
-		Debug.Log("created new node at: " + position);
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
