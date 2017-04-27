@@ -340,7 +340,6 @@ namespace PW
 			int	debugViewH = 0;
 			#if DEBUG_WINDOW
 				GUIStyle debugstyle = new GUIStyle();
-				debugstyle.normal.background = highlightAddTexture;
 
 				EditorGUILayout.BeginVertical(debugstyle);
 				EditorGUILayout.LabelField("Id: " + windowId + " | Compute order: " + computeOrder);
@@ -379,7 +378,7 @@ namespace PW
 			RenderAnchors();
 
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
-			if (e.type == EventType.MouseDown && selectRect.Contains(e.mousePosition))
+			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				selected = !selected;
 		}
 		#endif

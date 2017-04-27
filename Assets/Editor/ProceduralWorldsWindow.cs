@@ -19,6 +19,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingLink = false;
 	bool				draggingNode = false;
 	bool				draggingSelectedNodes = false;
+	bool				draggingSelectedNodesFromContextMenu = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
@@ -745,6 +746,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				selecting = false;
 				draggingGraph = false;
 				previewMouseDrag = false;
+				draggingSelectedNodes = false;
+				draggingSelectedNodesFromContextMenu = false;
 			}
 			if (e.type == EventType.Layout)
 			{
@@ -814,7 +817,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		if (!mouseDraggingWindowLocal)
 			if (node.isDragged)
+			{
+				int	selectedNodeCount = 0;
+
+				currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; }, false, true);
+				if (selectedNodeCount != 0)
+					draggingSelectedNodes = true;
 				mouseDraggingWindowLocal = true;
+			}
 
 		//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
@@ -924,6 +934,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(n => n.selected = decaledSelectionRect.Overlaps(n.windowRect), false, true);
 		}
 
+		//multiple window drag:
+		if (draggingSelectedNodes)
+		{
+				currentGraph.ForeachAllNodes(n => {
+				if (n.selected)
+					n.windowRect.position += e.mousePosition - lastMousePosition;
+				}, false, true);
+		}
+
 		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
@@ -948,6 +967,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			int		windowId = 0;
 			linkIndex = 0;
 
+			if (!draggingSelectedNodesFromContextMenu)
+				draggingSelectedNodes = false;
 			mouseAboveNodeIndex = -1;
 			mouseAboveSubmachineIndex = -1;
 
@@ -1272,6 +1293,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void MoveSelectedNodes()
 	{
+		draggingSelectedNodesFromContextMenu = true;
 		draggingSelectedNodes = true;
 	}
 
@@ -1292,15 +1314,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		startDragAnchor = mouseAboveAnchorInfo;
 		draggingLink = true;
-		if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input)
+		if (startDragAnchor.anchorType == PWAnchorType.Input)
 		{
-			if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo))
-			{
-				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
+			var links = FindLinksFromAnchor(startDragAnchor);
 
-				if (link != null)
+			if (links != null)
+				foreach (var link in links)
 					link.linkHighlight = PWLinkHighlight.Delete;
-			}
 		}
 	}
 
@@ -1321,18 +1341,29 @@ public class ProceduralWorldsWindow : EditorWindow {
 				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 			}
+			else if (mouseAboveAnchorInfo.linkCount != 0)
+			{
+				var outputNode = FindNodeByWindowId(mouseAboveAnchorInfo.windowId);
+				var inputNode = FindNodeByWindowId(startDragAnchor.windowId);
+
+				//delete links:
+				outputNode.DeleteAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
+
+				//delete dependencies:
+				inputNode.DeleteDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
+			}
 		}
 		else if (startDragAnchor.anchorType == PWAnchorType.Input)
 		{
 			PWLink link = FindLinkFromAnchor(startDragAnchor);
 
-			//displable delete highlight for link
+			//disable delete highlight for link
 			if (link != null)
 				link.linkHighlight = PWLinkHighlight.None;
 		}
 	}
 
-	PWLink FindLinkFromAnchor(PWAnchorInfo anchor)
+	IEnumerable< PWLink > FindLinksFromAnchor(PWAnchorInfo anchor)
 	{
 		if (anchor.anchorType == PWAnchorType.Input)
 		{
@@ -1351,14 +1382,23 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (linkNode == null)
 				return null;
 
-			//find the link of the first dependency
-			var links = linkNode.GetLinks(deps[0].anchorId, node.windowId, deps[0].connectedAnchorId);
-			if (links.Count != 0)
-				return links[0];
-			return null;
+			//find the link of each dependency
+			IEnumerable< PWLink > links = new List< PWLink >();
+			foreach (var dep in deps)
+				links = links.Concat(linkNode.GetLinks(dep.anchorId, node.windowId, dep.connectedAnchorId));
+			return links;
 		}
 		else
 			return null;
+	}
+
+	PWLink FindLinkFromAnchor(PWAnchorInfo anchor)
+	{
+		var links = FindLinksFromAnchor(anchor);
+
+		if (links == null || links.Count() == 0)
+			return null;
+		return links.First();
 	}
 
 	void DeleteAllAnchorLinks()
