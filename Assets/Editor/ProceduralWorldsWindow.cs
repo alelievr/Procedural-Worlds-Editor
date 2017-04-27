@@ -10,6 +10,7 @@ using PW;
 
 public class ProceduralWorldsWindow : EditorWindow {
 
+	//graph, node, anchors and links control and 
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
 	int					mouseAboveSubmachineIndex;
@@ -17,35 +18,46 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
 	bool				draggingNode = false;
+	bool				draggingSelectedNodes = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
+	[System.NonSerializedAttribute]
+	PWNode				mouseAboveNode;
+	
+	//list of all links
+	int					linkIndex;
+	List< PWLink >		currentLinks = new List< PWLink >();
 
+	//events fields
 	Vector2				lastMousePosition;
 	Vector2				presetScrollPos;
 	Vector2				windowSize;
+	[System.NonSerializedAttribute]
+	Vector2				currentMousePosition;
 
+	//preview fields
 	GameObject			previewScene;
 	Camera				previewCamera;
 	RenderTexture		previewCameraRenderTexture;
 
-	int					linkIndex;
-	List< PWLink >		currentLinks = new List< PWLink >();
-
+	//terrain materializer
 	PWTerrainBase		terrainMaterializer;
 
+	//multi-node selection
 	[System.NonSerializedAttribute]
-	PWNode				mouseAboveNode;
+	Rect				selectionRect;
+	[System.NonSerializedAttribute]
+	bool				selecting = false;
 
+	//current and parent graph
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
 	[SerializeField]
 	public PWNodeGraph	parentGraph;
 
-	[System.NonSerializedAttribute]
-	Vector2				currentMousePosition;
-
+	//node selector and his subclasses
 	[System.NonSerializedAttribute]
 	Dictionary< string, PWNodeStorageCategory > nodeSelectorList = new Dictionary< string, PWNodeStorageCategory >();
 
@@ -106,7 +118,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 	static GUIStyle		whiteText;
 	static GUIStyle		whiteBoldText;
-	static GUIStyle		splittedPanel;
+	static GUIStyle		navBarBackgroundStyle;
+	static GUIStyle		panelBackgroundStyle;
 	static GUIStyle		nodeGraphWidowStyle;
 
 	static GUISkin		PWGUISkin;
@@ -118,6 +131,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle toolbarStyle;
 	public GUIStyle nodeSelectorTitleStyle;
 	public GUIStyle	nodeSelectorCaseStyle;
+	public GUIStyle	selectionStyle;
 
 	public GUIStyle	testNodeWinow;
 	public GUIStyle blueNodeWindow;
@@ -213,9 +227,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		GeneratePWAssets();
 		
-		splittedPanel = new GUIStyle();
-		splittedPanel.margin = new RectOffset(5, 0, 0, 0);
-
 		nodeGraphWidowStyle = new GUIStyle();
 		nodeGraphWidowStyle.normal.background = defaultBackgroundTexture;
 
@@ -601,10 +612,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 			}
-			if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(50), GUILayout.Height(50)))
-				currentGraph.graphDecalPosition = Vector2.zero;
-			if (GUILayout.Button(fileIconTexture, GUILayout.Width(50), GUILayout.Height(50)))
-				EditorGUIUtility.PingObject(currentGraph);
 			EditorGUILayout.EndVertical();
 		}
 		EditorGUILayout.EndScrollView();
@@ -637,7 +644,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		GUI.DrawTexture(currentRect, defaultBackgroundTexture);
 		currentGraph.selectorScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.selectorScrollPosition, GUILayout.ExpandWidth(true));
 		{
-			EditorGUILayout.BeginVertical(splittedPanel);
+			EditorGUILayout.BeginVertical(panelBackgroundStyle);
 			{
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUIUtility.fieldWidth = 0;
@@ -677,14 +684,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void DrawNodeGraphHeader(Rect graphRect)
 	{
 		Event	e = Event.current;
-		EditorGUILayout.BeginVertical(splittedPanel);
+		EditorGUILayout.BeginVertical(navBarBackgroundStyle);
 		{
-			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(splittedPanel, GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
+			Rect helperBarRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
+			{
+				if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+					currentGraph.graphDecalPosition = Vector2.zero;
+				if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+					EditorGUIUtility.PingObject(currentGraph);
+			}
+			EditorGUILayout.EndHorizontal();
+			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
 			{
 				breadcrumbsRect.yMin -= 1;
 				breadcrumbsRect.xMin -= 1;
-				if (e.type == EventType.Repaint)
-					GUI.DrawTexture(breadcrumbsRect, defaultBackgroundTexture);
 				
 				PWNodeGraph g = currentGraph;
 				var breadcrumbsList = new List< string >();
@@ -713,14 +726,23 @@ public class ProceduralWorldsWindow : EditorWindow {
 			#endif
 	
 			if (e.type == EventType.MouseDown //if event is mouse down
-				&& (e.button == 0 || e.button == 2)
 				&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
 				&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
 				&& mouseAboveNodeIndex == -1
 				&& mouseAboveSubmachineIndex == -1)
-				draggingGraph = true;
+			{
+				if (e.button == 2)
+					draggingGraph = true;
+				else if (e.button == 0)
+				{
+					selecting = true;
+					selectionRect.position = e.mousePosition;
+					selectionRect.size = Vector2.zero;
+				}
+			}
 			if (e.type == EventType.MouseUp)
 			{
+				selecting = false;
 				draggingGraph = false;
 				previewMouseDrag = false;
 			}
@@ -761,7 +783,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
 		if (node.windowRect.Contains(e.mousePosition))
 			mouseAboveNode = node;
-		else if (e.type == EventType.MouseDown)
+		else if (e.type == EventType.MouseDown && !draggingLink && !draggingNode)
 			node.OnClickedOutside();
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
@@ -866,7 +888,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			Rect msRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 			msRect.position += new Vector2(msRect.size.x / 2 - 10, msRect.size.y + 5);
 			gs.normal.textColor = greenRedGradient.Evaluate(node.processTime / 20); //20ms ok, after is red
-			GUI.Box(msRect, node.processTime + " ms", gs);
+			GUI.Label(msRect, node.processTime + " ms", gs);
 		}
 
 		//check if user have pressed the close button of this window:
@@ -890,6 +912,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 			nodeEditorBackgroundTexture, new Rect(0, 0, (maxSize.x / nodeEditorBackgroundTexture.width) * scale,
 			(maxSize.y / nodeEditorBackgroundTexture.height) * scale)
 		);
+
+		//rendering the selection rect
+		if (e.type == EventType.mouseDrag && e.button == 0 && selecting)
+			selectionRect.size = e.mousePosition - selectionRect.position;
+		if (selecting)
+		{
+			Rect posiviteSelectionRect = PWUtils.CreateRect(selectionRect.min, selectionRect.max);
+			Rect decaledSelectionRect = PWUtils.DecalRect(posiviteSelectionRect, -currentGraph.graphDecalPosition);
+			GUI.Label(selectionRect, "", selectionStyle);
+			currentGraph.ForeachAllNodes(n => n.selected = decaledSelectionRect.Overlaps(n.windowRect), false, true);
+		}
 
 		EditorGUILayout.BeginHorizontal();
 		{
@@ -1132,12 +1165,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		var subGraph = parentGraph.FindGraphByName(subGraphName);
 
-		//TODO: remove all dependencies and links from the output and input machine.
-
 		if (id < currentGraph.subgraphReferences.Count && id >= 0)
-		{
 			currentGraph.subgraphReferences.RemoveAt(id);
-		}
 
 		DeleteSubmachine(subGraph);
 
@@ -1212,6 +1241,40 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
 	}
 
+	void DeleteSelectedNodes()
+	{
+		List< PWNode > nodeToRemove = new List< PWNode >();
+		List< PWNodeGraph > graphToRemove = new List< PWNodeGraph >();
+
+		currentGraph.ForeachAllNodes(n => {
+			if (n.selected)
+			{
+				if (n.GetType() == typeof(PWNodeGraphExternal))
+				{
+					//TODO: find graph and remove it
+				}
+				else
+					nodeToRemove.Add(n);
+			}
+		});
+
+		foreach (var n in nodeToRemove)
+		{
+			currentGraph.nodes.Remove(n);
+			DeleteNode(n);
+		}
+		foreach (var g in graphToRemove)
+		{
+			currentGraph.subgraphReferences.Remove(g.name);
+			DeleteSubmachine(g);
+		}
+	}
+
+	void MoveSelectedNodes()
+	{
+		draggingSelectedNodes = true;
+	}
+
 #endregion
 
 #region Anchor and Links utils
@@ -1257,12 +1320,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				
 				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
-
-				//TODO: delete all previously linked to the mouseAboveAnchorInfo anchor.
-			}
-			else if (startDragAnchor.linkCount != 0)//or an output
-			{
-				//TODO: delete all previously linked to the startDragAnchor anchor.
 			}
 		}
 		else if (startDragAnchor.anchorType == PWAnchorType.Input)
@@ -1362,6 +1419,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					foreach (var nodeClass in nodeCat.Value.nodes)
 						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
 				}
+
                 menu.AddSeparator("");
 				if (mouseAboveNodeAnchor)
 				{
@@ -1378,6 +1436,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
 				else
 					menu.AddDisabledItem(new GUIContent("Delete link"));
+
                 menu.AddSeparator("");
 				if (mouseAboveNodeIndex != -1)
 					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
@@ -1385,6 +1444,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 					menu.AddItem(new GUIContent("Delete submachine"), false, DeleteSubmachine, mouseAboveSubmachineIndex);
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
+					
+				int selectedNodeCount = 0;
+				currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; });
+
+				if (selectedNodeCount != 0)
+				{
+					string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
+					menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
+
+					string deleteNodeString = (selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
+					menu.AddItem(new GUIContent(deleteNodeString), false, DeleteSelectedNodes);
+				}
+
 				menu.AddSeparator("");
 				if (currentGraph.parentReference != null)
 					menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(parentGraph.FindGraphByName(currentGraph.parentReference)));
@@ -1625,7 +1697,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		//TODO: remove
 		// if (breadcrumbsButtonStyle == null)
 		{
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
@@ -1637,6 +1708,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			nodeSelectorTitleStyle = PWGUISkin.FindStyle("NodeSelectorTitle");
 			nodeSelectorCaseStyle = PWGUISkin.FindStyle("NodeSelectorCase");
+
+			selectionStyle = PWGUISkin.FindStyle("Selection");
+
+			navBarBackgroundStyle = PWGUISkin.FindStyle("NavBarBackground");
+			panelBackgroundStyle = PWGUISkin.FindStyle("PanelBackground");
 	
 			testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
 	

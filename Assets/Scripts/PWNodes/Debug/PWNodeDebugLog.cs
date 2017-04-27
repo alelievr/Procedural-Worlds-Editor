@@ -6,7 +6,7 @@ namespace PW
 {
 	public class PWNodeDebugLog : PWNode {
 	
-		[PWInput("obj")]
+		[PWInput]
 		public object		obj;
 
 		public override void OnNodeCreate()

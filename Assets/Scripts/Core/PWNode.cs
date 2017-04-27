@@ -316,6 +316,8 @@ namespace PW
 		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
 		{
+			var e = Event.current;
+
 			if (boxAnchorStyle == null)
 			{
 				boxAnchorStyle = new GUIStyle(GUI.skin.box);
@@ -328,11 +330,11 @@ namespace PW
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
 			Rect dragRect = new Rect(0, 0, width, 20);
-			if (Event.current.type == EventType.MouseDown && dragRect.Contains(Event.current.mousePosition))
+			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
 				isDragged = true;
-			if (Event.current.type == EventType.MouseUp)
+			if (e.type == EventType.MouseUp)
 				isDragged = false;
-			if (id != -1 && Event.current.isMouse && Event.current.button == 0 && !windowNameEdit)
+			if (id != -1 && e.isMouse && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 
 			int	debugViewH = 0;
@@ -365,16 +367,20 @@ namespace PW
 			GUILayout.EndVertical();
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
-			if (Event.current.type == EventType.Repaint)
+			if (e.type == EventType.Repaint)
 				viewHeight = viewH + debugViewH;
 
 			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 				
-			if (Event.current.type == EventType.Repaint)
+			if (e.type == EventType.Repaint)
 				viewHeight += 24;
 			
 			ProcessAnchors();
 			RenderAnchors();
+
+			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
+			if (e.type == EventType.MouseDown && selectRect.Contains(e.mousePosition))
+				selected = !selected;
 		}
 		#endif
 
@@ -1046,6 +1052,8 @@ namespace PW
 				windowNameEdit = false;
 				GUI.FocusControl(null);
 			}
+			if (Event.current.button != 1 && !Event.current.shift)
+				selected = false;
 		}
 
 		public void AnchorBeingLinked(int anchorId)

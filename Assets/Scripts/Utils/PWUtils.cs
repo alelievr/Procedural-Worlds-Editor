@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PW
 {
@@ -45,42 +43,23 @@ namespace PW
 			v1 = v2;
 			v2 = tmp;
 		}
-	}
 
-	[System.SerializableAttribute]
-	public struct SerializableColor
-	{
-		Vector4		color;
+		public static Rect CreateRect(Vector2 P1, Vector2 P2)
+        {
+            Vector2 D = P1 - P2;
+			Rect R = new Rect();
 
-		public SerializableColor(Color c)
-		{
-			color.x = c.r;
-			color.y = c.g;
-			color.z = c.b;
-			color.w = c.a;
-		}
-
-		public SerializableColor(Color32 c)
-		{
-			color.x = c.r / 255f;
-			color.y = c.g / 255f;
-			color.z = c.b / 255f;
-			color.w = c.a / 255f;
-		}
-
-		public Color GetColor()
-		{
-			return new Color(color.x, color.y, color.z, color.w);
-		}
-
-		public static explicit operator SerializableColor(Color c)
-		{
-			return new SerializableColor(c);
-		}
-
-		public static implicit operator Color(SerializableColor c)
-		{
-			return c.GetColor();
-		}
+            if (D.x < 0)
+                R.x = P1.x;
+            else
+                R.x = P2.x;
+            if (D.y < 0)
+                R.y = P1.y;
+            else
+                R.y = P2.y;
+            R.width = Mathf.Abs(D.x);
+            R.height = Mathf.Abs(D.y);
+            return R;
+        }
 	}
 }
