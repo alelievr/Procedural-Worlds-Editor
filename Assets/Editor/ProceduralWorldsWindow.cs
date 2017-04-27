@@ -293,6 +293,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			if (draggingLink)
 				StopDragLink(false);
+			selecting = false;
+			draggingSelectedNodes = false;
+			draggingSelectedNodesFromContextMenu = false;
+			draggingNode = false;
+			currentGraph.ForeachAllNodes(n => n.selected = false, false, true);
+			Debug.Log("dragginSelected: " + draggingSelectedNodes);
 		}
 
 		if (Event.current.type == EventType.Layout)
@@ -687,7 +693,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Event	e = Event.current;
 		EditorGUILayout.BeginVertical(navBarBackgroundStyle);
 		{
-			Rect helperBarRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
+			/*Rect helperBarRect = */EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
 			{
 				if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 					currentGraph.graphDecalPosition = Vector2.zero;
@@ -786,7 +792,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
 		if (node.windowRect.Contains(e.mousePosition))
 			mouseAboveNode = node;
-		else if (e.type == EventType.MouseDown && !draggingLink && !draggingNode)
+		else if (e.type == EventType.MouseDown)
 			node.OnClickedOutside();
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
@@ -818,11 +824,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (!mouseDraggingWindowLocal)
 			if (node.isDragged)
 			{
-				int	selectedNodeCount = 0;
-
-				currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; }, false, true);
-				if (selectedNodeCount != 0)
-					draggingSelectedNodes = true;
+				if (node.selected)
+				{
+					int	selectedNodeCount = 0;
+	
+					currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; }, false, true);
+					if (selectedNodeCount != 0)
+						draggingSelectedNodes = true;
+				}
 				mouseDraggingWindowLocal = true;
 			}
 
@@ -1249,11 +1258,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 		subgraph.parentReference = currentGraph.name;
 		subgraph.externalName = "PW sub-machine";
 
+		//copy the current layout:
+		subgraph.h1.handlerPosition = currentGraph.h1.handlerPosition;
+		subgraph.h2.handlerPosition = currentGraph.h2.handlerPosition;
+
+		//assign new unique name
 		subgraph.name = "sub" + currentGraph.localWindowIdCount + "-" + currentGraph.externalName;
 		subgraph.externalGraphNode.externalName = subgraph.name;
+
+		//save object to disk
 		AssetDatabase.AddObjectToAsset(subgraph, currentGraph);
 		AssetDatabase.SaveAssets();
 
+		//add this new graph to the global graph storage
 		currentGraph.subgraphReferences.Add(subgraph.name);
 		parentGraph.graphInstancies[subgraph.name] = subgraph;
 
@@ -1341,19 +1358,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 			}
-			else if (mouseAboveAnchorInfo.linkCount != 0)
+			else if (startDragAnchor.linkCount != 0)
 			{
 				var outputNode = FindNodeByWindowId(mouseAboveAnchorInfo.windowId);
 				var inputNode = FindNodeByWindowId(startDragAnchor.windowId);
 
 				//delete links:
-				outputNode.DeleteAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
+				outputNode.DeleteLink(mouseAboveAnchorInfo.anchorId, inputNode, startDragAnchor.anchorId);
 
 				//delete dependencies:
 				inputNode.DeleteDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
 			}
 		}
-		else if (startDragAnchor.anchorType == PWAnchorType.Input)
+		else if (startDragAnchor.linkCount != 0)
 		{
 			PWLink link = FindLinkFromAnchor(startDragAnchor);
 
@@ -1866,11 +1883,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 		switch (linkHighlight)
 		{
 			case PWLinkHighlight.Selected:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorPalette.GetColor("selectedNode"), null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorPalette.GetColor("selectedNode"), null, width + 3);
 				break;
 			case PWLinkHighlight.Delete:
 			case PWLinkHighlight.DeleteAndReset:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(.8f, .1f, .1f, 1), null, width + 2);
+				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .0f, .0f, 1), null, width + 2);
 				break ;
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);

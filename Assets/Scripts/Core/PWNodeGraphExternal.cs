@@ -10,6 +10,7 @@ namespace PW
 
 		[PWInput("in")]
 		[PWMultiple(0, typeof(object))] //accept all entering connections
+		[PWNotRequired]
 		public PWValues	input = new PWValues();
 
 		[PWOutput("out")]
@@ -37,7 +38,7 @@ namespace PW
 			for (int i = 0; i < inputNames.Count || i < outputNames.Count; i++)
 			{
 				EditorGUILayout.BeginHorizontal();
-				if (i < input.Count && inputNames[i] != null)
+				if (i < inputNames.Count && inputNames[i] != null)
 					EditorGUILayout.LabelField(inputNames[i], GUILayout.MaxWidth(100));
 				else
 					EditorGUILayout.LabelField("");

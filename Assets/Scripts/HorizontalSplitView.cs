@@ -40,7 +40,6 @@ public class HorizontalSplitView {
 		if (tmpRect.width > 0f)
 			availableRect = tmpRect;
 
-		Rect splittedPanelRect = new Rect(0, 0, availableRect.width, availableRect.height);
 		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition), GUILayout.ExpandHeight(true));
 		if (beginRect.width > 2)
 			savedBeginRect = beginRect;

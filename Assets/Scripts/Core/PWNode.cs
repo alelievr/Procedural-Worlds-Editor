@@ -548,9 +548,11 @@ namespace PW
 				&& (!data.multiple || (data.multiple && index < data.minMultipleValues)))
 			{
 				Rect errorIconRect = new Rect(singleAnchor.anchorRect);
-				errorIconRect.size = Vector2.one * 15;
-				errorIconRect.position += new Vector2(-1, -10);
+				errorIconRect.size = Vector2.one * 17;
+				errorIconRect.position += new Vector2(-6, -10);
+				GUI.color = Color.red;
 				GUI.DrawTexture(errorIconRect, errorIcon);
+				GUI.color = Color.white;
 			}
 
 			#if DEBUG_WINDOW
@@ -932,7 +934,7 @@ namespace PW
 
 		public static bool		AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
 		{
-			if (from.windowId == to.windowId && from.anchorType == to.anchorType)
+			if (from.anchorType == to.anchorType)
 				return false;
 			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
 		}
@@ -1051,8 +1053,9 @@ namespace PW
 				windowNameEdit = false;
 				GUI.FocusControl(null);
 			}
-			if (Event.current.button != 1 && !Event.current.shift)
+			if (Event.current.button == 0 && !Event.current.shift)
 				selected = false;
+			isDragged = false;
 		}
 
 		public void AnchorBeingLinked(int anchorId)

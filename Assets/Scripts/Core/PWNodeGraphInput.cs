@@ -24,7 +24,10 @@ namespace PW
 			if (names != null && values != null)
 			{
 				for (int i = 0; i < values.Count; i++)
-					EditorGUILayout.LabelField(names[i] + ": " + values[i]);
+					if (i < names.Count)
+						EditorGUILayout.LabelField(names[i] + ": " + values[i]);
+					else if (values[i] != null)
+						EditorGUILayout.LabelField(values[i].ToString());
 			}
 		}
 

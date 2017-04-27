@@ -227,7 +227,7 @@ namespace PW
 	
 					if (values != null)
 					{
-						Debug.Log("assigned total multi");
+						// Debug.Log("assigned total multi");
 						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
