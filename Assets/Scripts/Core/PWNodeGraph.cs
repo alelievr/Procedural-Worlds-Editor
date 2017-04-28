@@ -29,6 +29,8 @@ namespace PW
 	
 		[SerializeField]
 		public List< PWNode >				nodes = new List< PWNode >();
+		[SerializeField]
+		public List< PWOrderingGroup >		orderingGroups = new List< PWOrderingGroup >();
 		
 		[SerializeField]
 		public HorizontalSplitView			h1;
@@ -331,20 +333,28 @@ namespace PW
 		{
 			if (graph == null)
 				graph = this;
+
 			foreach (var node in graph.nodes)
 				callback(node);
+
+			foreach (var subgraphName in graph.subgraphReferences)
+			{
+				var g = FindGraphByName(subgraphName);
+
+				if (g == null)
+					continue ;
+				
+				callback(g.externalGraphNode);
+				
+				if (recursive)
+					ForeachAllNodes(callback, recursive, graphInputAndOutput, g);
+			}
+
 			if (graphInputAndOutput)
 			{
 				callback(graph.inputNode);
 				callback(graph.outputNode);
 			}
-			if (recursive)
-				foreach (var subgraphName in graph.subgraphReferences)
-				{
-					var g = FindGraphByName(subgraphName);
-					if (g != null)
-						ForeachAllNodes(callback, recursive, graphInputAndOutput, g);
-				}
 		}
     }
 }

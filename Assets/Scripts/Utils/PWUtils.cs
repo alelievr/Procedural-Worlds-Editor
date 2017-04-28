@@ -4,6 +4,8 @@ namespace PW
 {
 	public static class PWUtils {
 	
+		static Texture2D debugTexture;
+
 		public static Rect DecalRect(Rect r, Vector2 decal, bool newRect = false)
 		{
 			if (newRect)
@@ -61,5 +63,14 @@ namespace PW
             R.height = Mathf.Abs(D.y);
             return R;
         }
+
+		public static void DrawDebugTexture(Rect rect, Color c)
+		{
+			if (debugTexture == null)
+				debugTexture = new Texture2D(1, 1);
+			debugTexture.SetPixel(0, 0, c);
+			debugTexture.Apply();
+			GUI.DrawTexture(rect, debugTexture);
+		}
 	}
 }

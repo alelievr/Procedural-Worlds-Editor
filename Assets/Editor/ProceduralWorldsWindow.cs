@@ -15,6 +15,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	int					mouseAboveNodeIndex;
 	int					mouseAboveSubmachineIndex;
 	bool				mouseAboveNodeAnchor;
+	PWOrderingGroup		mouseAboveOrderingGroup;
 	bool				draggingGraph = false;
 	bool				draggingLink = false;
 	bool				draggingNode = false;
@@ -952,6 +953,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}, false, true);
 		}
 
+		//ordering group rendering
+		mouseAboveOrderingGroup = null;
+		foreach (var orderingGroup in currentGraph.orderingGroups)
+		{
+			if (orderingGroup.Render(currentGraph.graphDecalPosition, position.size))
+				mouseAboveOrderingGroup = orderingGroup;
+		}
+
+		//node rendering
 		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
@@ -1091,7 +1101,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 #endregion
 
-#region Node And Submachine Utils
+#region Node, Submachine and OrderingGroup Utils
 
 	void OnWindowResize()
 	{
@@ -1314,6 +1324,17 @@ public class ProceduralWorldsWindow : EditorWindow {
 		draggingSelectedNodes = true;
 	}
 
+	void CreateNewOrderingGroup(object pos)
+	{
+		currentGraph.orderingGroups.Add(new PWOrderingGroup((Vector2)pos));
+	}
+
+	void DeleteOrderingGroup()
+	{
+		if (mouseAboveOrderingGroup != null)
+			currentGraph.orderingGroups.Remove(mouseAboveOrderingGroup);
+	}
+
 #endregion
 
 #region Anchor and Links utils
@@ -1469,13 +1490,18 @@ public class ProceduralWorldsWindow : EditorWindow {
             {
                 // Now create the menu, add items and show it
                 GenericMenu menu = new GenericMenu();
-				menu.AddItem(new GUIContent("New PWMachine"), false, CreatePWMachine, e.mousePosition);
+				menu.AddItem(new GUIContent("New submachine"), false, CreatePWMachine, e.mousePosition);
 				foreach (var nodeCat in nodeSelectorList)
 				{
 					string menuString = "Create new/" + nodeCat.Key + "/";
 					foreach (var nodeClass in nodeCat.Value.nodes)
 						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
 				}
+				menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - currentGraph.graphDecalPosition);
+				if (mouseAboveOrderingGroup != null)
+					menu.AddItem(new GUIContent("Delete ordering group"), false, DeleteOrderingGroup);
+				else
+					menu.AddDisabledItem(new GUIContent("Delete ordering group"));
 
                 menu.AddSeparator("");
 				if (mouseAboveNodeAnchor)
@@ -1507,11 +1533,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				if (selectedNodeCount != 0)
 				{
-					string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
-					menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
-
 					string deleteNodeString = (selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
 					menu.AddItem(new GUIContent(deleteNodeString), false, DeleteSelectedNodes);
+
+					string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
+					menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
 				}
 
 				menu.AddSeparator("");

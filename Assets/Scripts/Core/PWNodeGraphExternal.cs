@@ -19,7 +19,6 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			Debug.Log("renamable = true !");
 			renamable = true;
 		}
 
