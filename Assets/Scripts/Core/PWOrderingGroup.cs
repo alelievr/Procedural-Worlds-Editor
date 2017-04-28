@@ -65,7 +65,8 @@ namespace PW
 			if (!orderGroupRect.Overlaps(screen))
 				return false;
 			
-			if (orderingGroupStyle == null)
+			//TODO: remove: only for testing
+			// if (orderingGroupStyle == null)
 				LoadStyles();
 
 			Rect		orderGroupWorldRect = PWUtils.DecalRect(orderGroupRect, graphDecal);
@@ -123,9 +124,11 @@ namespace PW
 			Rect nameRect = orderGroupWorldRect;
 			nameRect.yMin -= 10;
 			GUI.Label(nameRect, name);
+			Rect editNameRect = new Rect(nameRect.position + Vector2.right * 20, Vector2.one * 16);
+			GUI.DrawTexture(editNameRect, ic_edit);
 
 			GUI.color = color;
-			GUI.Label(orderGroupWorldRect, null, orderingGroupStyle);
+			GUI.Label(orderGroupWorldRect, (string)null, orderingGroupStyle);
 			GUI.color = Color.white;
 
 			return (orderGroupWorldRect.Contains(e.mousePosition));
