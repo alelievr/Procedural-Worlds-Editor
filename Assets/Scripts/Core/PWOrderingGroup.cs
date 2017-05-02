@@ -21,16 +21,14 @@ namespace PW
 		static GUIStyle				movepadStyle;
 		static GUIStyle				orderingGroupNameStyle;
 		static Texture2D			ic_edit;
-		static Texture2D			ic_color;
-		static Texture2D			colorPicker;
 
-		bool						editName = false;
-		bool						editColor = false;
 		string						nameFieldControlName;
+		string						colorFieldControlName;
 
 		private PWOrderingGroup()
 		{
 			nameFieldControlName = "orderginGroupName-" + GetHashCode();
+			colorFieldControlName = "orderingGroupColor-" + GetHashCode();
 		}
 
 		public PWOrderingGroup(Vector2 pos)
@@ -66,8 +64,6 @@ namespace PW
 			movepadStyle = GUI.skin.FindStyle("Movepad");
 			orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
 			ic_edit = Resources.Load("ic_edit") as Texture2D;
-			ic_color = Resources.Load("ic_color") as Texture2D;
-			colorPicker = Resources.Load("colorPicker") as Texture2D;
 		}
 
 		public bool Render(Vector2 graphDecal, Vector2 screenSize)
@@ -139,22 +135,9 @@ namespace PW
 			Rect nameRect = orderGroupWorldRect;
 			nameRect.yMin -= 20;
 			nameRect.xMin += 10;
-			Color oldContentColor = GUI.contentColor;
-			GUI.skin.label.normal.textColor = color;
-			GUI.contentColor = color;
-			Vector2 nameSize = GUI.skin.label.CalcSize(new GUIContent(name));
-			nameRect.size = nameSize;
-			if (editName)
-			{
-				GUI.SetNextControlName(nameFieldControlName);
-				name = GUI.TextField(nameRect, name, orderingGroupNameStyle);
-			}
-			else
-				GUI.Label(nameRect, name, orderingGroupNameStyle);
-			GUI.contentColor = oldContentColor;
+			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, 20), ref name, nameFieldControlName, true, orderingGroupNameStyle);
 
-			Rect editNameRect = new Rect(nameRect.position + new Vector2(nameSize.x + 10, 0), Vector2.one * 16);
-			GUI.DrawTexture(editNameRect, ic_edit);
+			/*GUI.DrawTexture(editNameRect, ic_edit);
 			if (e.isMouse && editNameRect.Contains(e.mousePosition))
 			{
 				editName = true;
@@ -169,17 +152,12 @@ namespace PW
 			{
 				editName = false;
 				editColor = false;
-			}
+			}*/
 
 			//draw color picker
 			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
-			GUI.DrawTexture(colorPickerRect, ic_color);
-			if (e.type == EventType.MouseDown && colorPickerRect.Contains(e.mousePosition))
-			{
-				//TODO: display color picker texture and color picker thumb
-				//TODO: assign texture's pixel color to the this.color.
-			}
-			
+			PWGUI.ColorPicker(colorPickerRect, ref color, colorFieldControlName, false);
+
 			//draw ordering group
 			GUI.color = color;
 			GUI.Label(orderGroupWorldRect, (string)null, orderingGroupStyle);
