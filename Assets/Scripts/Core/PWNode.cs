@@ -605,6 +605,9 @@ namespace PW
 					{
 						windowNameEdit = true;
 						GUI.FocusControl(renameNodeField);
+						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+						if (te != null)
+							te.SelectAll();
 					}
 					else if (e.type == EventType.MouseDown)
 						windowNameEdit = false;

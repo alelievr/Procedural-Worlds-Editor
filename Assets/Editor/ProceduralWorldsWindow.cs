@@ -733,15 +733,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 				GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
 			#endif
 	
-			if (e.type == EventType.MouseDown //if event is mouse down
-				&& !mouseAboveNodeAnchor //if mouse is not above a node anchor
-				&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
-				&& mouseAboveNodeIndex == -1
-				&& mouseAboveSubmachineIndex == -1)
+			if (e.type == EventType.MouseDown) //if event is mouse down
 			{
 				if (e.button == 2)
 					draggingGraph = true;
-				else if (e.button == 0)
+				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
+					&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
+					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
+					&& mouseAboveSubmachineIndex == -1 //and mouse is not above a submachine
+					&& e.button == 0)
 				{
 					selecting = true;
 					selectionRect.position = e.mousePosition;
@@ -927,6 +927,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		
 		float	scale = 2f;
 
+		//background grid
 		GUI.DrawTextureWithTexCoords(
 			new Rect(currentGraph.graphDecalPosition.x % 128 - 128, currentGraph.graphDecalPosition.y % 128 - 128, maxSize.x, maxSize.y),
 			nodeEditorBackgroundTexture, new Rect(0, 0, (maxSize.x / nodeEditorBackgroundTexture.width) * scale,
@@ -979,7 +980,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 				terrainMaterializer.UpdateChunks();
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
+			{
+				e.Use();
 				AssetDatabase.SaveAssets();
+			}
 
 			bool	mouseAboveAnchorLocal = false;
 			bool	draggingNodeLocal = false;
