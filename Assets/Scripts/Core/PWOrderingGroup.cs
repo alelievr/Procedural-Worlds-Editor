@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System;
 
 namespace PW
@@ -18,9 +17,21 @@ namespace PW
 		int							callbackId;
 		int							resizingCallbackId;
 
-		GUIStyle					orderingGroupStyle;
-		GUIStyle					movepadStyle;
-		Texture2D					ic_edit;
+		static GUIStyle				orderingGroupStyle;
+		static GUIStyle				movepadStyle;
+		static GUIStyle				orderingGroupNameStyle;
+		static Texture2D			ic_edit;
+		static Texture2D			ic_color;
+		static Texture2D			colorPicker;
+
+		bool						editName = false;
+		bool						editColor = false;
+		string						nameFieldControlName;
+
+		private PWOrderingGroup()
+		{
+			nameFieldControlName = "orderginGroupName-" + GetHashCode();
+		}
 
 		public PWOrderingGroup(Vector2 pos)
 		{
@@ -43,7 +54,7 @@ namespace PW
 				{
 					resizing = true;
 					resizingCallbackId = callbackId;
-					Event.current.type = EventType.Used;
+					Event.current.Use();
 				}
 			}
 			callbackId++;
@@ -53,7 +64,10 @@ namespace PW
 		{
 			orderingGroupStyle = GUI.skin.FindStyle("OrderingGroup");
 			movepadStyle = GUI.skin.FindStyle("Movepad");
+			orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
 			ic_edit = Resources.Load("ic_edit") as Texture2D;
+			ic_color = Resources.Load("ic_color") as Texture2D;
+			colorPicker = Resources.Load("colorPicker") as Texture2D;
 		}
 
 		public bool Render(Vector2 graphDecal, Vector2 screenSize)
@@ -121,12 +135,52 @@ namespace PW
 			if (e.type == EventType.MouseUp)
 				resizing = false;
 
+			//draw renamable name field
 			Rect nameRect = orderGroupWorldRect;
-			nameRect.yMin -= 10;
-			GUI.Label(nameRect, name);
-			Rect editNameRect = new Rect(nameRect.position + Vector2.right * 20, Vector2.one * 16);
-			GUI.DrawTexture(editNameRect, ic_edit);
+			nameRect.yMin -= 20;
+			nameRect.xMin += 10;
+			Color oldContentColor = GUI.contentColor;
+			GUI.skin.label.normal.textColor = color;
+			GUI.contentColor = color;
+			Vector2 nameSize = GUI.skin.label.CalcSize(new GUIContent(name));
+			nameRect.size = nameSize;
+			if (editName)
+			{
+				GUI.SetNextControlName(nameFieldControlName);
+				name = GUI.TextField(nameRect, name, orderingGroupNameStyle);
+			}
+			else
+				GUI.Label(nameRect, name, orderingGroupNameStyle);
+			GUI.contentColor = oldContentColor;
 
+			Rect editNameRect = new Rect(nameRect.position + new Vector2(nameSize.x + 10, 0), Vector2.one * 16);
+			GUI.DrawTexture(editNameRect, ic_edit);
+			if (e.isMouse && editNameRect.Contains(e.mousePosition))
+			{
+				editName = true;
+				GUI.FocusControl(nameFieldControlName);
+				var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+				te.SelectAll();
+			}
+			if (e.isMouse && !editNameRect.Contains(e.mousePosition))
+				editName = false;
+
+			if (e.isKey && e.keyCode == KeyCode.Return)
+			{
+				editName = false;
+				editColor = false;
+			}
+
+			//draw color picker
+			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
+			GUI.DrawTexture(colorPickerRect, ic_color);
+			if (e.type == EventType.MouseDown && colorPickerRect.Contains(e.mousePosition))
+			{
+				//TODO: display color picker texture and color picker thumb
+				//TODO: assign texture's pixel color to the this.color.
+			}
+			
+			//draw ordering group
 			GUI.color = color;
 			GUI.Label(orderGroupWorldRect, (string)null, orderingGroupStyle);
 			GUI.color = Color.white;
