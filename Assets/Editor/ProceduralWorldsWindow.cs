@@ -299,7 +299,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			draggingSelectedNodesFromContextMenu = false;
 			draggingNode = false;
 			currentGraph.ForeachAllNodes(n => n.selected = false, false, true);
-			Debug.Log("dragginSelected: " + draggingSelectedNodes);
 		}
 
 		if (Event.current.type == EventType.Layout)

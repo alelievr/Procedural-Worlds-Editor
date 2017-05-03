@@ -30,7 +30,7 @@ namespace PW
 			colorFieldControlName = "orderingGroupColor-" + GetHashCode();
 		}
 
-		public PWOrderingGroup(Vector2 pos)
+		public PWOrderingGroup(Vector2 pos) : this()
 		{
 			orderGroupRect = new Rect();
 			orderGroupRect.position = pos;
@@ -133,22 +133,7 @@ namespace PW
 			orderingGroupNameStyle.normal.textColor = color;
 			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -20), ref name, nameFieldControlName, true, orderingGroupNameStyle);
 
-			/*GUI.DrawTexture(editNameRect, ic_edit);
-			if (e.isMouse && editNameRect.Contains(e.mousePosition))
-			{
-				editName = true;
-				GUI.FocusControl(nameFieldControlName);
-				var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-				te.SelectAll();
-			}
-			if (e.isMouse && !editNameRect.Contains(e.mousePosition))
-				editName = false;
-
-			if (e.isKey && e.keyCode == KeyCode.Return)
-			{
-				editName = false;
-				editColor = false;
-			}*/
+			//TODO: draw the move pad
 
 			//draw ordering group
 			GUI.color = color;
