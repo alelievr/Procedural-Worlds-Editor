@@ -46,4 +46,22 @@ public static class PWColorPalette  {
 			(byte)((color >>  0) & 0xFF),
 			alpha);
 	}
+
+	public static int ColorToHex(Color c)
+	{
+		byte	alpha = (byte)(c.a * 255);
+		byte	r = (byte)(c.r * 255);
+		byte	g = (byte)(c.g * 255);
+		byte	b = (byte)(c.b * 255);
+
+		return ((alpha << 24) | (r << 16) | (g << 8) | (b));
+	}
+
+	public static void ColorToByte(Color c, out byte r, out byte g, out byte b, out byte a)
+	{
+		a = (byte)(c.a * 255);
+		r = (byte)(c.r * 255);
+		g = (byte)(c.g * 255);
+		b = (byte)(c.b * 255);
+	}
 }

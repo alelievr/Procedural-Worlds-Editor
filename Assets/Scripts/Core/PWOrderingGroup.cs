@@ -20,7 +20,6 @@ namespace PW
 		static GUIStyle				orderingGroupStyle;
 		static GUIStyle				movepadStyle;
 		static GUIStyle				orderingGroupNameStyle;
-		static Texture2D			ic_edit;
 
 		string						nameFieldControlName;
 		string						colorFieldControlName;
@@ -63,7 +62,6 @@ namespace PW
 			orderingGroupStyle = GUI.skin.FindStyle("OrderingGroup");
 			movepadStyle = GUI.skin.FindStyle("Movepad");
 			orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
-			ic_edit = Resources.Load("ic_edit") as Texture2D;
 		}
 
 		public bool Render(Vector2 graphDecal, Vector2 screenSize)
@@ -132,10 +130,8 @@ namespace PW
 				resizing = false;
 
 			//draw renamable name field
-			Rect nameRect = orderGroupWorldRect;
-			nameRect.yMin -= 20;
-			nameRect.xMin += 10;
-			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, 20), ref name, nameFieldControlName, true, orderingGroupNameStyle);
+			orderingGroupNameStyle.normal.textColor = color;
+			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -20), ref name, nameFieldControlName, true, orderingGroupNameStyle);
 
 			/*GUI.DrawTexture(editNameRect, ic_edit);
 			if (e.isMouse && editNameRect.Contains(e.mousePosition))
@@ -154,17 +150,16 @@ namespace PW
 				editColor = false;
 			}*/
 
-			//draw color picker
-			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
-			PWGUI.ColorPicker(colorPickerRect, ref color, colorFieldControlName, false);
-
 			//draw ordering group
 			GUI.color = color;
 			GUI.Label(orderGroupWorldRect, (string)null, orderingGroupStyle);
 			GUI.color = Color.white;
 
+			//draw color picker
+			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
+			PWGUI.ColorPicker(colorPickerRect, ref color, colorFieldControlName, false);
+
 			return (orderGroupWorldRect.Contains(e.mousePosition));
 		}
-
 	}
 }
