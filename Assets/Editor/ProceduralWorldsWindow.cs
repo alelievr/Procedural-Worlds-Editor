@@ -734,10 +734,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 			if (e.type == EventType.MouseDown) //if event is mouse down
 			{
-				if (e.button == 2)
+				if (e.button == 2 && graphRect.Contains(e.mousePosition))
 					draggingGraph = true;
 				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
-					&& graphRect.Contains(e.mousePosition) //and mouse position is in graph
 					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
 					&& mouseAboveSubmachineIndex == -1 //and mouse is not above a submachine
 					&& e.button == 0)

@@ -14,11 +14,12 @@ namespace PW
 		[System.NonSerializedAttribute]
 		public bool					resizing = false;
 
+		bool						moving = false;
 		int							callbackId;
 		int							resizingCallbackId;
 
+		static Texture2D			movepadTexture;
 		static GUIStyle				orderingGroupStyle;
-		static GUIStyle				movepadStyle;
 		static GUIStyle				orderingGroupNameStyle;
 
 		string						nameFieldControlName;
@@ -60,8 +61,8 @@ namespace PW
 		void LoadStyles()
 		{
 			orderingGroupStyle = GUI.skin.FindStyle("OrderingGroup");
-			movepadStyle = GUI.skin.FindStyle("Movepad");
 			orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
+			movepadTexture = Resources.Load("movepad") as Texture2D;
 		}
 
 		public bool Render(Vector2 graphDecal, Vector2 screenSize)
@@ -131,9 +132,23 @@ namespace PW
 
 			//draw renamable name field
 			orderingGroupNameStyle.normal.textColor = color;
-			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -20), ref name, nameFieldControlName, true, orderingGroupNameStyle);
+			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref name, nameFieldControlName, true, orderingGroupNameStyle);
 
-			//TODO: draw the move pad
+			//draw move pad
+			Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(80, 50));
+			GUI.DrawTextureWithTexCoords(movePadRect, movepadTexture, new Rect(0, 0, 5, 4));
+			EditorGUIUtility.AddCursorRect(movePadRect, MouseCursor.MoveArrow);
+			if (e.type == EventType.MouseDown && e.button == 0)
+				if (movePadRect.Contains(e.mousePosition))
+				{
+					moving = true;
+					e.Use();
+				}
+			if ((e.type == EventType.MouseUp || e.type == EventType.MouseDown) && !movePadRect.Contains(e.mousePosition))
+				moving = false;
+
+			if (moving && e.type == EventType.MouseDrag)
+				orderGroupRect.position += e.delta;
 
 			//draw ordering group
 			GUI.color = color;

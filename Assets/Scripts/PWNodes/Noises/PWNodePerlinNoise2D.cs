@@ -20,12 +20,18 @@ namespace PW
 			previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 		}
 
+float v = 0;
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
 			{
+				EditorGUIUtility.labelWidth = 60;
 				persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 1);
 				octaves = EditorGUILayout.IntSlider("Octaves", octaves, 0, 32);
+				Rect r = GUILayoutUtility.GetLastRect();
+				r.position += new Vector2(0, r.height + 5);
+				PWGUI.Slider(r, "s", ref v, 0, 10);
+				EditorGUIUtility.labelWidth = 0;
 			}
 			if (EditorGUI.EndChangeCheck())
 			{

@@ -89,14 +89,12 @@ namespace PW
 					{
 						if (e.isMouse)
 						{
-							Debug.Log("pixel coord: " + colorPickerMousePosition);
 							Vector2 textureCoord = colorPickerMousePosition * (colorPickerTexture.width / 150f);
 							textureCoord.y = colorPickerTexture.height - textureCoord.y;
 							c = colorPickerTexture.GetPixel((int)textureCoord.x, (int)textureCoord.y);
 							fieldState.data = colorPickerMousePosition + new Vector2(6, 9);
 						}
 					}
-					//TODO: draw color picker thumb
 
 					Rect colorPickerThumbRect = new Rect(fieldState.data, new Vector2(8, 8));
 					GUI.DrawTexture(colorPickerThumbRect, colorPickerThumb);
@@ -168,7 +166,7 @@ namespace PW
 
 			var fieldState = textFieldStates[controlName];
 			
-			Vector2 nameSize = GUI.skin.label.CalcSize(new GUIContent(text));
+			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
 			textRect.size = nameSize;
 
 			if (fieldState.active == true)
@@ -208,18 +206,51 @@ namespace PW
 			}
 		}
 	
-		public static void Slider(Rect sliderRect, string controlName, ref float value, float min, float max, float pad = 0f, GUIStyle sliderStyle = null)
+		public static void Slider(Rect sliderRect, string controlName, ref float value, ref float min, ref float max, float step = 0f, bool editableMin = true, bool editableMax = true)
 		{
+			float	tmp;
+
 			if (controlName == null)
 				Debug.LogWarning("controlname is null for colorField !");
 			
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(value.ToString());
+			GUILayout.FlexibleSpace();
+
+			EditorGUILayout.BeginHorizontal();
+			{
+				tmp = EditorGUILayout.FloatField(min, GUILayout.Width(50));
+				if (editableMin)
+					min = tmp;
+				value = GUILayout.HorizontalSlider(value, min, max);
+
+				tmp = EditorGUILayout.FloatField(max, GUILayout.Width(50));
+				if (editableMax)
+					max = tmp;
+			}
+			EditorGUILayout.EndHorizontal();
+			
+		}
+
+		public static void Slider(Rect sliderRect, string controlName, ref float value, float min, float max, float step = 0f)
+		{
+			Slider(sliderRect, controlName, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void IntSlider(Rect intSliderRect, string controlName, ref int value, int min, int max, int padd = 1, GUIStyle sliderStyle = null)
+		public static void IntSlider(Rect intSliderRect, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
 		{
 			float		v = value;
-			Slider(intSliderRect, controlName, ref v, min, max, padd);
+			float		m_min = min;
+			float		m_max = max;
+			Slider(intSliderRect, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
 			value = (int)v;
+			min = (int)m_min;
+			max = (int)m_max;
+		}
+
+		public static void IntSlider(Rect intSliderRect, string controlName, int value, int min, ref int max, int step = 1)
+		{
+			IntSlider(intSliderRect, controlName, ref value, ref min, ref max, step, false, false);
 		}
 	}
 }
