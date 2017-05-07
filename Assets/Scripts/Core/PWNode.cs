@@ -159,7 +159,7 @@ namespace PW
 				actualFields.Add(field.Name);
 				if (!propertyDatas.ContainsKey(field.Name))
 					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
-					
+				
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = GetAnchorColorByType(field.FieldType);
 				PWAnchorType	anchorType = PWAnchorType.None;
@@ -327,6 +327,9 @@ namespace PW
 				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("RenameNodetextField"));
 			}
 
+			//update the PWGUI window rect with this window rect:
+			PWGUI.currentWindowRect = windowRect;
+
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
 			Rect dragRect = new Rect(0, 0, width, 20);
@@ -334,7 +337,7 @@ namespace PW
 				isDragged = true;
 			if (e.type == EventType.MouseUp)
 				isDragged = false;
-			if (id != -1 && e.isMouse && e.button == 0 && !windowNameEdit)
+			if (id != -1 && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 
 			int	debugViewH = 0;

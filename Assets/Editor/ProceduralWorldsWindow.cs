@@ -1055,6 +1055,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					}
 			}
 
+			//draw the dragging link
 			if (draggingLink)
 				DrawNodeCurve(
 					new Rect((int)startDragAnchor.anchorRect.center.x, (int)startDragAnchor.anchorRect.center.y, 0, 0),
@@ -1065,6 +1066,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			mouseAboveNodeAnchor = mouseAboveAnchorLocal;
 			draggingNode = draggingNodeLocal;
 			
+			//unselect all selected links if click beside.
 			if (e.type == EventType.MouseDown && !currentLinks.Any(l => l.hover) && draggingGraph == false)
 				foreach (var l in currentLinks)
 					if (l.selected)
@@ -1073,6 +1075,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						l.linkHighlight = PWLinkHighlight.None;
 					}
 
+			//notofySetDataChanged management
 			bool	reloadRequested = false;
 			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {

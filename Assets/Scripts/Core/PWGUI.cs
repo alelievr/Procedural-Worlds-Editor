@@ -7,11 +7,14 @@ namespace PW
 {
 	public class PWGUI {
 
+		public static Rect	currentWindowRect;
+
 		static Texture2D	ic_color;
 		static Texture2D	ic_edit;
 		static Texture2D	colorPickerTexture;
 		static Texture2D	colorPickerThumb;
 		static GUIStyle		colorPickerStyle;
+		static GUIStyle		centeredLabel;
 
 		static Dictionary< string, FieldState< string, int > > textFieldStates = new Dictionary< string, FieldState< string, int > >();
 		static Dictionary< string, FieldState< Color, Vector2 > > colorFieldStates = new Dictionary< string, FieldState< Color, Vector2 > >();
@@ -47,9 +50,11 @@ namespace PW
 			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
 			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
 			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
+			centeredLabel = new GUIStyle();
+			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}
 	
-		public static void ColorPicker(Rect iconRect, ref Color c, string controlName, bool displayColorPreview = true, GUIStyle style = null)
+		public static void ColorPicker(Rect iconRect, ref Color c, string controlName, bool displayColorPreview = true)
 		{
 			var		e = Event.current;
 			
@@ -60,9 +65,6 @@ namespace PW
 				colorFieldStates[controlName] = new FieldState< Color, Vector2 >();
 
 			var fieldState = colorFieldStates[controlName];
-
-			if (style == null)
-				style = PWGUI.colorPickerStyle;
 
 			if (fieldState.active)
 			{
@@ -143,10 +145,10 @@ namespace PW
 			}
 		}
 
-		public static void ColorPicker(Rect iconRect, ref SerializableColor c, string controlName, bool displayColorPreview = true, GUIStyle colorPickerStyle = null)
+		public static void ColorPicker(Rect iconRect, ref SerializableColor c, string controlName, bool displayColorPreview = true)
 		{
 			Color color = c;
-			ColorPicker(iconRect, ref color, controlName, displayColorPreview, colorPickerStyle);
+			ColorPicker(iconRect, ref color, controlName, displayColorPreview);
 			c = (SerializableColor)color;
 		}
 
@@ -190,7 +192,7 @@ namespace PW
 			if (editable)
 			{
 				Rect iconRect = new Rect(textRect.position + new Vector2(nameSize.x + 10, -2), new Vector2(17, 17));
-				if (e.isMouse && e.button == 0)
+				if (e.type == EventType.MouseDown && e.button == 0)
 				{
 					if (iconRect.Contains(Event.current.mousePosition))
 					{
@@ -205,52 +207,72 @@ namespace PW
 				GUI.DrawTexture(iconRect, ic_edit);
 			}
 		}
-	
-		public static void Slider(Rect sliderRect, string controlName, ref float value, ref float min, ref float max, float step = 0f, bool editableMin = true, bool editableMax = true)
+		
+		public static void Slider(Rect sliderRect, string controlName, ref float value, float min, float max, float step = 0.01f)
 		{
-			float	tmp;
+			Slider(sliderRect, null, controlName, ref value, ref min, ref max, step, false, false);
+		}
+
+		public static void Slider(Rect sliderRect, string name, string controlName, ref float value, float min, float max, float step = 0.01f)
+		{
+			Slider(sliderRect, name, controlName, ref value, ref min, ref max, step, false, false);
+		}
+	
+		public static void Slider(Rect sliderRect, string name, string controlName, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true)
+		{
+			int		sliderLabelWidth = 40;
 
 			if (controlName == null)
-				Debug.LogWarning("controlname is null for colorField !");
-			
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(value.ToString());
-			GUILayout.FlexibleSpace();
+				Debug.LogWarning("controlname is null for slider !");
 
 			EditorGUILayout.BeginHorizontal();
 			{
-				tmp = EditorGUILayout.FloatField(min, GUILayout.Width(50));
-				if (editableMin)
-					min = tmp;
-				value = GUILayout.HorizontalSlider(value, min, max);
+				EditorGUI.BeginDisabledGroup(!editableMin);
+					min = EditorGUILayout.FloatField(min, GUILayout.Width(sliderLabelWidth));
+				EditorGUI.EndDisabledGroup();
+				
+				if (step != 0)
+				{
+					float m = 1 / step;
+					value = Mathf.Round(GUILayout.HorizontalSlider(value, min, max) * m) / m;
+				}
+				else
+					value = GUILayout.HorizontalSlider(value, min, max);
 
-				tmp = EditorGUILayout.FloatField(max, GUILayout.Width(50));
-				if (editableMax)
-					max = tmp;
+				EditorGUI.BeginDisabledGroup(!editableMax);
+					max = EditorGUILayout.FloatField(max, GUILayout.Width(sliderLabelWidth));
+				EditorGUI.EndDisabledGroup();
 			}
 			EditorGUILayout.EndHorizontal();
 			
+			GUILayout.Space(-4);
+			GUILayout.Label(((name != null) ? name : "") + value.ToString(), centeredLabel);
+		}
+		
+		public static void IntSlider(Rect intSliderRect, string controlName, ref int value, int min, int max, int step = 1)
+		{
+			IntSlider(intSliderRect, null, controlName, ref value, ref min, ref max, step, false, false);
 		}
 
-		public static void Slider(Rect sliderRect, string controlName, ref float value, float min, float max, float step = 0f)
+		public static void IntSlider(Rect intSliderRect, string name, string controlName, ref int value, int min, int max, int step = 1)
 		{
-			Slider(sliderRect, controlName, ref value, ref min, ref max, step, false, false);
+			IntSlider(intSliderRect, name, controlName, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void IntSlider(Rect intSliderRect, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
+		public static void IntSlider(Rect intSliderRect, string name, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
 		{
 			float		v = value;
 			float		m_min = min;
 			float		m_max = max;
-			Slider(intSliderRect, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
+			Slider(intSliderRect, name, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
 			value = (int)v;
 			min = (int)m_min;
 			max = (int)m_max;
 		}
 
-		public static void IntSlider(Rect intSliderRect, string controlName, int value, int min, ref int max, int step = 1)
+		public static void ObjectPreview(Rect objectRect, string name, string controlname, object obj)
 		{
-			IntSlider(intSliderRect, controlName, ref value, ref min, ref max, step, false, false);
+
 		}
 	}
 }
