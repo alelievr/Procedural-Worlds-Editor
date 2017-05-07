@@ -1,7 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEditor;
+using Random = UnityEngine.Random;
 
 namespace PW
 {
@@ -18,6 +20,7 @@ namespace PW
 
 		static Dictionary< string, FieldState< string, int > > textFieldStates = new Dictionary< string, FieldState< string, int > >();
 		static Dictionary< string, FieldState< Color, Vector2 > > colorFieldStates = new Dictionary< string, FieldState< Color, Vector2 > >();
+		static Dictionary< string, FieldState< int, Texture2D > > textureFieldStates = new Dictionary< string, FieldState< int, Texture2D > >();
 
 		private class FieldState< T, U >
 		{
@@ -59,7 +62,7 @@ namespace PW
 			var		e = Event.current;
 			
 			if (controlName == null)
-				Debug.LogWarning("controlname is null for colorField !");
+				Debug.LogWarning("controlName is null for colorField !");
 
 			if (!colorFieldStates.ContainsKey(controlName))
 				colorFieldStates[controlName] = new FieldState< Color, Vector2 >();
@@ -158,7 +161,7 @@ namespace PW
 			var		e = Event.current;
 
 			if (controlName == null)
-				Debug.LogWarning("controlname is null for textField !");
+				Debug.LogWarning("controlName is null for textField !");
 
 			if (textFieldStyle == null)
 				textFieldStyle = GUI.skin.label;
@@ -208,22 +211,22 @@ namespace PW
 			}
 		}
 		
-		public static void Slider(Rect sliderRect, string controlName, ref float value, float min, float max, float step = 0.01f)
+		public static void Slider(string controlName, ref float value, float min, float max, float step = 0.01f)
 		{
-			Slider(sliderRect, null, controlName, ref value, ref min, ref max, step, false, false);
+			Slider(null, controlName, ref value, ref min, ref max, step, false, false);
 		}
 
-		public static void Slider(Rect sliderRect, string name, string controlName, ref float value, float min, float max, float step = 0.01f)
+		public static void Slider(string name, string controlName, ref float value, float min, float max, float step = 0.01f)
 		{
-			Slider(sliderRect, name, controlName, ref value, ref min, ref max, step, false, false);
+			Slider(name, controlName, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void Slider(Rect sliderRect, string name, string controlName, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true)
+		public static void Slider(string name, string controlName, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true)
 		{
 			int		sliderLabelWidth = 40;
 
 			if (controlName == null)
-				Debug.LogWarning("controlname is null for slider !");
+				Debug.LogWarning("controlName is null for slider !");
 
 			EditorGUILayout.BeginHorizontal();
 			{
@@ -249,30 +252,84 @@ namespace PW
 			GUILayout.Label(((name != null) ? name : "") + value.ToString(), centeredLabel);
 		}
 		
-		public static void IntSlider(Rect intSliderRect, string controlName, ref int value, int min, int max, int step = 1)
+		public static void IntSlider(string controlName, ref int value, int min, int max, int step = 1)
 		{
-			IntSlider(intSliderRect, null, controlName, ref value, ref min, ref max, step, false, false);
+			IntSlider(null, controlName, ref value, ref min, ref max, step, false, false);
 		}
 
-		public static void IntSlider(Rect intSliderRect, string name, string controlName, ref int value, int min, int max, int step = 1)
+		public static void IntSlider(string name, string controlName, ref int value, int min, int max, int step = 1)
 		{
-			IntSlider(intSliderRect, name, controlName, ref value, ref min, ref max, step, false, false);
+			IntSlider(name, controlName, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void IntSlider(Rect intSliderRect, string name, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
+		public static void IntSlider(string name, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
 		{
 			float		v = value;
 			float		m_min = min;
 			float		m_max = max;
-			Slider(intSliderRect, name, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
+			Slider(name, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
 			value = (int)v;
 			min = (int)m_min;
 			max = (int)m_max;
 		}
 
-		public static void ObjectPreview(Rect objectRect, string name, string controlname, object obj)
+		public static void TexturePreview(Texture tex)
 		{
+			Rect previewRect = EditorGUILayout.GetControlRect();
+			previewRect.size = (currentWindowRect.width - 20 - 30) * Vector2.one;
+			EditorGUI.DrawPreviewTexture(previewRect, tex);
+			GUILayout.Space(previewRect.width - 16);
+		}
+		
+		public static void Sampler2DPreview(string controlName, Sampler2D samp, bool update)
+		{
+			Sampler2DPreview(null, controlName, samp, update);
+		}
 
+		public static void Sampler2DPreview(string name, string controlName, Sampler2D samp, bool update)
+		{
+			int previewSize = (int)currentWindowRect.width - 20 - 30;
+
+			if (controlName == null)
+				Debug.LogWarning("controlName is null for SamplerField");
+
+			if (!textureFieldStates.ContainsKey(controlName))
+			{
+				var state = new FieldState< int, Texture2D >();
+				state.data = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				state.data.filterMode = FilterMode.Point;
+				textureFieldStates[controlName] = state;
+			}
+
+			var fieldState = textureFieldStates[controlName];
+
+			if (samp.size != fieldState.data.width)
+				fieldState.data.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
+
+			if (update)
+			{
+				samp.Foreach((x, y, val) => {
+					fieldState.data.SetPixel(x, y, new Color(val, val, val, 1));
+				});
+				fieldState.data.Apply();
+			}
+
+			Rect previewRect = EditorGUILayout.GetControlRect();
+			previewRect.size = previewSize * Vector2.one;
+			EditorGUI.DrawPreviewTexture(previewRect, fieldState.data);
+			GUILayout.Space(previewSize - 16);
+		}
+
+		public static void ObjectPreview(string name, string controlName, object obj, bool update)
+		{
+			Type objType = obj.GetType();
+
+			if (objType == typeof(Sampler2D))
+				Sampler2DPreview(name, controlName, obj as Sampler2D, update);
+			else
+			{
+				//unity object preview
+			}
 		}
 	}
 }

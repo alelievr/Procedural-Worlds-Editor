@@ -11,49 +11,26 @@ namespace PW
 		[PWOutput]
 		public Sampler2D	output;
 
-		Texture2D			previewTex;
-
 		public override void OnNodeCreate()
 		{
 			name = "Perlin noise 2D";
 			output = new Sampler2D(chunkSize);
-			previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 		}
 
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				EditorGUILayout.LabelField("olol");
-				Rect r = GUILayoutUtility.GetLastRect();
-				r.position += new Vector2(0, r.height + 5);
-				PWGUI.Slider(r, "Persistance: ", "PersistanceControl", ref persistance, 0, 1);
-				r.position += new Vector2(0, r.height + 5);
-				PWGUI.IntSlider(r, "Octaves: ", "OctavesControl", ref octaves, 0, 16);
+				PWGUI.Slider("Persistance: ", "PersistanceControl", ref persistance, 0, 1);
+				PWGUI.IntSlider("Octaves: ", "OctavesControl", ref octaves, 0, 16);
 				EditorGUIUtility.labelWidth = 0;
 			}
 			if (EditorGUI.EndChangeCheck())
-			{
-				UpdateNoisePreview();
 				notifyDataChanged = true;
-			}
 
 			//TODO: shader preview here
-			if (chunkSizeHasChanged)
-				previewTex = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
 
-			if (needUpdate)
-				UpdateNoisePreview();
-
-			GUILayout.Label(previewTex, GUILayout.Width(100), GUILayout.Height(100));
-		}
-
-		void UpdateNoisePreview()
-		{
-			output.Foreach((x, y, val) => {
-				previewTex.SetPixel(x, y, new Color(val, val, val));
-			});
-			previewTex.Apply();
+			PWGUI.Sampler2DPreview("perlinControlName", output, needUpdate);
 		}
 
 		public override void OnNodeProcess()

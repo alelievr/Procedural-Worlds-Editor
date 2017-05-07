@@ -25,7 +25,7 @@ namespace PW
 		{
 			EditorGUILayout.LabelField("MAP:");
 
-			GUILayout.Label(samplerTexture, GUILayout.Width(100), GUILayout.Height(100));
+			PWGUI.TexturePreview(samplerTexture);
 		}
 
 		public override void OnNodeAnchorLink(string propName, int index)
