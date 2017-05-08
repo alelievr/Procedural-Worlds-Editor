@@ -18,8 +18,11 @@ namespace PW
 		static GUIStyle		colorPickerStyle;
 		static GUIStyle		centeredLabel;
 
+		[System.NonSerializedAttribute]
 		static Dictionary< string, FieldState< string, int > > textFieldStates = new Dictionary< string, FieldState< string, int > >();
+		[System.NonSerializedAttribute]
 		static Dictionary< string, FieldState< Color, Vector2 > > colorFieldStates = new Dictionary< string, FieldState< Color, Vector2 > >();
+		[System.NonSerializedAttribute]
 		static Dictionary< string, FieldState< int, Texture2D > > textureFieldStates = new Dictionary< string, FieldState< int, Texture2D > >();
 
 		private class FieldState< T, U >
@@ -56,18 +59,40 @@ namespace PW
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}
+		
+
+		public static void ColorPicker(Rect iconRect, ref Color c, bool displayColorPreview = true)
+		{
+			ColorPicker("", iconRect, ref c, displayColorPreview);
+		}
+
+		public static void ColorPicker(Rect iconRect, ref SerializableColor c, bool displayColorPreview = true)
+		{
+			Color color = c;
+			ColorPicker("", iconRect, ref color, displayColorPreview);
+			c = (SerializableColor)color;
+		}
+
+		public static void ColorPicker(string name, Rect iconRect, ref SerializableColor c, bool displayColorPreview = true)
+		{
+			Color color = c;
+			ColorPicker(name, iconRect, ref color, displayColorPreview);
+			c = (SerializableColor)color;
+		}
 	
-		public static void ColorPicker(Rect iconRect, ref Color c, string controlName, bool displayColorPreview = true)
+		public static void ColorPicker(string name, Rect iconRect, ref Color c, bool displayColorPreview = true)
 		{
 			var		e = Event.current;
 			
-			if (controlName == null)
-				Debug.LogWarning("controlName is null for colorField !");
+			if (name == null)
+				name = "";
 
-			if (!colorFieldStates.ContainsKey(controlName))
-				colorFieldStates[controlName] = new FieldState< Color, Vector2 >();
+			string key = c.GetHashCode().ToString();
 
-			var fieldState = colorFieldStates[controlName];
+			if (!colorFieldStates.ContainsKey(key))
+				colorFieldStates[key] = new FieldState< Color, Vector2 >();
+
+			var fieldState = colorFieldStates[key];
 
 			if (fieldState.active)
 			{
@@ -148,28 +173,20 @@ namespace PW
 			}
 		}
 
-		public static void ColorPicker(Rect iconRect, ref SerializableColor c, string controlName, bool displayColorPreview = true)
-		{
-			Color color = c;
-			ColorPicker(iconRect, ref color, controlName, displayColorPreview);
-			c = (SerializableColor)color;
-		}
-
-		public static void TextField(Vector2 textPosition, ref string text, string controlName, bool editable = false, GUIStyle textFieldStyle = null)
+		public static void TextField(Vector2 textPosition, ref string text, bool editable = false, GUIStyle textFieldStyle = null)
 		{
 			Rect	textRect = new Rect(textPosition, Vector2.zero);
 			var		e = Event.current;
 
-			if (controlName == null)
-				Debug.LogWarning("controlName is null for textField !");
+			string key = text.GetHashCode().ToString();
 
 			if (textFieldStyle == null)
 				textFieldStyle = GUI.skin.label;
 
-			if (!textFieldStates.ContainsKey(controlName))
-				textFieldStates[controlName] = new FieldState< string, int >();
+			if (!textFieldStates.ContainsKey(key))
+				textFieldStates[key] = new FieldState< string, int >();
 
-			var fieldState = textFieldStates[controlName];
+			var fieldState = textFieldStates[key];
 			
 			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
 			textRect.size = nameSize;
@@ -178,7 +195,7 @@ namespace PW
 			{
 				Color oldCursorColor = GUI.skin.settings.cursorColor;
 				GUI.skin.settings.cursorColor = Color.white;
-				GUI.SetNextControlName(controlName);
+				GUI.SetNextControlName(key);
 				text = GUI.TextField(textRect, text, textFieldStyle);
 				GUI.skin.settings.cursorColor = oldCursorColor;
 				if (e.isKey)
@@ -200,7 +217,7 @@ namespace PW
 					if (iconRect.Contains(Event.current.mousePosition))
 					{
 						fieldState.Active(text);
-						GUI.FocusControl(controlName);
+						GUI.FocusControl(key);
 						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 						te.SelectAll();
 					}
@@ -211,22 +228,22 @@ namespace PW
 			}
 		}
 		
-		public static void Slider(string controlName, ref float value, float min, float max, float step = 0.01f)
+		public static void Slider(ref float value, float min, float max, float step = 0.01f)
 		{
-			Slider(null, controlName, ref value, ref min, ref max, step, false, false);
+			Slider(null, ref value, ref min, ref max, step, false, false);
 		}
 
-		public static void Slider(string name, string controlName, ref float value, float min, float max, float step = 0.01f)
+		public static void Slider(string name, ref float value, float min, float max, float step = 0.01f)
 		{
-			Slider(name, controlName, ref value, ref min, ref max, step, false, false);
+			Slider(name, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void Slider(string name, string controlName, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true)
+		public static void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true)
 		{
 			int		sliderLabelWidth = 40;
 
-			if (controlName == null)
-				Debug.LogWarning("controlName is null for slider !");
+			if (name == null)
+				name = "";
 
 			EditorGUILayout.BeginHorizontal();
 			{
@@ -249,25 +266,25 @@ namespace PW
 			EditorGUILayout.EndHorizontal();
 			
 			GUILayout.Space(-4);
-			GUILayout.Label(((name != null) ? name : "") + value.ToString(), centeredLabel);
+			GUILayout.Label(name + value.ToString(), centeredLabel);
 		}
 		
-		public static void IntSlider(string controlName, ref int value, int min, int max, int step = 1)
+		public static void IntSlider(ref int value, int min, int max, int step = 1)
 		{
-			IntSlider(null, controlName, ref value, ref min, ref max, step, false, false);
+			IntSlider(null, ref value, ref min, ref max, step, false, false);
 		}
 
-		public static void IntSlider(string name, string controlName, ref int value, int min, int max, int step = 1)
+		public static void IntSlider(string name, ref int value, int min, int max, int step = 1)
 		{
-			IntSlider(name, controlName, ref value, ref min, ref max, step, false, false);
+			IntSlider(name, ref value, ref min, ref max, step, false, false);
 		}
 	
-		public static void IntSlider(string name, string controlName, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
+		public static void IntSlider(string name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true)
 		{
 			float		v = value;
 			float		m_min = min;
 			float		m_max = max;
-			Slider(name, controlName, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
+			Slider(name, ref v, ref m_min, ref m_max, step, editableMin, editableMax);
 			value = (int)v;
 			min = (int)m_min;
 			max = (int)m_max;
@@ -275,33 +292,27 @@ namespace PW
 
 		public static void TexturePreview(Texture tex)
 		{
-			Rect previewRect = EditorGUILayout.GetControlRect();
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			previewRect.size = (currentWindowRect.width - 20 - 30) * Vector2.one;
 			EditorGUI.DrawPreviewTexture(previewRect, tex);
-			GUILayout.Space(previewRect.width - 16);
+			GUILayout.Space(previewRect.width);
 		}
 		
-		public static void Sampler2DPreview(string controlName, Sampler2D samp, bool update)
+		public static void Sampler2DPreview(string name, Sampler2D samp, bool update)
 		{
-			Sampler2DPreview(null, controlName, samp, update);
-		}
+			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 
-		public static void Sampler2DPreview(string name, string controlName, Sampler2D samp, bool update)
-		{
-			int previewSize = (int)currentWindowRect.width - 20 - 30;
+			string key = samp.GetHashCode().ToString();
 
-			if (controlName == null)
-				Debug.LogWarning("controlName is null for SamplerField");
-
-			if (!textureFieldStates.ContainsKey(controlName))
+			if (!textureFieldStates.ContainsKey(key) || textureFieldStates[key].data == null)
 			{
 				var state = new FieldState< int, Texture2D >();
 				state.data = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
 				state.data.filterMode = FilterMode.Point;
-				textureFieldStates[controlName] = state;
+				textureFieldStates[key] = state;
 			}
 
-			var fieldState = textureFieldStates[controlName];
+			var fieldState = textureFieldStates[key];
 
 			if (samp.size != fieldState.data.width)
 				fieldState.data.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
@@ -314,18 +325,15 @@ namespace PW
 				fieldState.data.Apply();
 			}
 
-			Rect previewRect = EditorGUILayout.GetControlRect();
-			previewRect.size = previewSize * Vector2.one;
-			EditorGUI.DrawPreviewTexture(previewRect, fieldState.data);
-			GUILayout.Space(previewSize - 16);
+			TexturePreview(fieldState.data);
 		}
 
-		public static void ObjectPreview(string name, string controlName, object obj, bool update)
+		public static void ObjectPreview(string name, object obj, bool update)
 		{
 			Type objType = obj.GetType();
 
 			if (objType == typeof(Sampler2D))
-				Sampler2DPreview(name, controlName, obj as Sampler2D, update);
+				Sampler2DPreview(name, obj as Sampler2D, update);
 			else
 			{
 				//unity object preview

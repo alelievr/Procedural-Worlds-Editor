@@ -1180,7 +1180,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.nodeTypeName = t.ToString();
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
-		newNode.computeOrder = -1;
+		newNode.computeOrder = newNode.isDependent ? -1 : 0;
 		GetWindowStyleFromType(t, out newNode.windowStyle, out newNode.windowSelectedStyle);
 		newNode.RunNodeAwake();
 
@@ -1195,6 +1195,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (addToNodeList)
 			currentGraph.nodes.Add(newNode);
 		currentGraph.nodesDictionary[newNode.windowId] = newNode;
+
+		graphNeedReload = true;
 		
 		return newNode;
 	}

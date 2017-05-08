@@ -38,6 +38,7 @@ namespace PW
 		public bool		notifyDataChanged = false;
 		public bool		reloadRequested = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
+		public bool		isDependent {get; private set; }
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
@@ -254,8 +255,10 @@ namespace PW
 				}
 			}
 
-			//Check mirrored fields compatibility:
+			//Check mirrored fields compatibility and if node do not need input to work:
+			isDependent = false;
 			foreach (var kp in propertyDatas)
+			{
 				if (kp.Value.mirroredField != null)
 				{
 					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
@@ -271,6 +274,9 @@ namespace PW
 					else
 						kp.Value.mirroredField = null;
 				}
+				if (kp.Value.anchorType == PWAnchorType.Input && kp.Value.required)
+					isDependent = true;
+			}
 
 			//remove inhexistants dictionary entries:
 			foreach (var kp in propertyDatas)

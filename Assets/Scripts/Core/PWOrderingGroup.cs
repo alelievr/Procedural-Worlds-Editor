@@ -132,7 +132,7 @@ namespace PW
 
 			//draw renamable name field
 			orderingGroupNameStyle.normal.textColor = color;
-			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref name, nameFieldControlName, true, orderingGroupNameStyle);
+			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref name, true, orderingGroupNameStyle);
 
 			//draw move pad
 			Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(80, 50));
@@ -157,7 +157,7 @@ namespace PW
 
 			//draw color picker
 			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
-			PWGUI.ColorPicker(colorPickerRect, ref color, colorFieldControlName, false);
+			PWGUI.ColorPicker(colorPickerRect, ref color, false);
 
 			return (orderGroupWorldRect.Contains(e.mousePosition));
 		}

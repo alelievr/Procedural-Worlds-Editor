@@ -21,8 +21,8 @@ namespace PW
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				PWGUI.Slider("Persistance: ", "PersistanceControl", ref persistance, 0, 1);
-				PWGUI.IntSlider("Octaves: ", "OctavesControl", ref octaves, 0, 16);
+				PWGUI.Slider("Persistance: ", ref persistance, 0, 1);
+				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
 				EditorGUIUtility.labelWidth = 0;
 			}
 			if (EditorGUI.EndChangeCheck())
