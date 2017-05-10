@@ -17,13 +17,14 @@ namespace PW
 			output = new Sampler2D(chunkSize);
 		}
 
+		Color c = Color.white;
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
 			{
 				PWGUI.Slider("Persistance: ", ref persistance, 0, 1);
 				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
-				EditorGUIUtility.labelWidth = 0;
+				PWGUI.ColorPicker("olol color", ref c);
 			}
 			if (EditorGUI.EndChangeCheck())
 				notifyDataChanged = true;

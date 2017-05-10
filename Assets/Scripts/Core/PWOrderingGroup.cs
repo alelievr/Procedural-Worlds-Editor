@@ -22,16 +22,7 @@ namespace PW
 		static GUIStyle				orderingGroupStyle;
 		static GUIStyle				orderingGroupNameStyle;
 
-		string						nameFieldControlName;
-		string						colorFieldControlName;
-
-		private PWOrderingGroup()
-		{
-			nameFieldControlName = "orderginGroupName-" + GetHashCode();
-			colorFieldControlName = "orderingGroupColor-" + GetHashCode();
-		}
-
-		public PWOrderingGroup(Vector2 pos) : this()
+		public PWOrderingGroup(Vector2 pos)
 		{
 			orderGroupRect = new Rect();
 			orderGroupRect.position = pos;

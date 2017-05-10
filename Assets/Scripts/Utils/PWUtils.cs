@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace PW
 {
@@ -71,6 +72,24 @@ namespace PW
 			debugTexture.SetPixel(0, 0, c);
 			debugTexture.Apply();
 			GUI.DrawTexture(rect, debugTexture);
+		}
+
+		public static Gradient CreateGradient(params KeyValuePair< float, Color>[] datas)
+		{
+			Gradient			grad = new Gradient();
+			GradientColorKey[]	colorKeys = new GradientColorKey[datas.Length];
+			GradientAlphaKey[]	alphaKeys = new GradientAlphaKey[datas.Length];
+
+			for (int i = 0; i + 1 < datas.Length; i++)
+			{
+				colorKeys[i].time = datas[i].Key;
+				colorKeys[i].color = datas[i].Value;
+				alphaKeys[i].time = datas[i].Key;
+				alphaKeys[i].alpha = datas[i].Value.a;
+			}
+			grad.SetKeys(colorKeys, alphaKeys);
+
+			return grad;
 		}
 	}
 }
