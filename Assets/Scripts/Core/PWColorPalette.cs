@@ -26,7 +26,9 @@ public static class PWColorPalette  {
 		{"pinkAnchor", HexToColor(0xf659d7)},
 		{"greyAnchor", HexToColor(0x646464)},
 		{"whiteAnchor", HexToColor(0xFFFFFF)},
+		{"selected", HexToColor(0x101868)},
 		{"defaultAnchor", new Color(.75f, .75f, .75f, 1)},
+		{"transparentBackground", new Color(.75f, .75f, .75f, .5f)}
 	};
 
 	public static Color	GetColor(string key)
@@ -66,5 +68,13 @@ public static class PWColorPalette  {
 	public static Color ByteToColor(byte r, byte g, byte b, byte a)
 	{
 		return new Color32(r, g, b, a);
+	}
+
+	public static Texture2D ColorToTexture(Color c)
+	{
+		Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+		tex.SetPixel(0, 0, c);
+		tex.Apply();
+		return tex;
 	}
 }

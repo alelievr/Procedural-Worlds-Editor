@@ -18,20 +18,21 @@ namespace PW
 		}
 
 		Color c = Color.white;
+		float min, max;
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				PWGUI.Slider("Persistance: ", ref persistance, 0, 1);
+				PWGUI.Slider("Persistance: ", ref persistance, ref min, ref max);
 				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
-				PWGUI.ColorPicker("olol color", ref c);
+				PWGUI.ColorPicker(ref c);
 			}
 			if (EditorGUI.EndChangeCheck())
 				notifyDataChanged = true;
 
 			//TODO: shader preview here
 
-			PWGUI.Sampler2DPreview("perlinControlName", output, needUpdate);
+			PWGUI.Sampler2DPreview(output, needUpdate);
 		}
 
 		public override void OnNodeProcess()

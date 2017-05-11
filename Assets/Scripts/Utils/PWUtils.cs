@@ -80,7 +80,7 @@ namespace PW
 			GradientColorKey[]	colorKeys = new GradientColorKey[datas.Length];
 			GradientAlphaKey[]	alphaKeys = new GradientAlphaKey[datas.Length];
 
-			for (int i = 0; i + 1 < datas.Length; i++)
+			for (int i = 0; i < datas.Length; i++)
 			{
 				colorKeys[i].time = datas[i].Key;
 				colorKeys[i].color = datas[i].Value;
@@ -90,6 +90,22 @@ namespace PW
 			grad.SetKeys(colorKeys, alphaKeys);
 
 			return grad;
+		}
+		
+		public static bool Compare(this Gradient gradient, Gradient otherGradient) {
+			if (gradient.alphaKeys.Length != otherGradient.alphaKeys.Length ||
+				gradient.colorKeys.Length != otherGradient.colorKeys.Length)
+				return false;
+			
+			for (int i = 0; i < gradient.colorKeys.Length; i++)
+				if (gradient.colorKeys[i].color != otherGradient.colorKeys[i].color || gradient.colorKeys[i].time != otherGradient.colorKeys[i].time)
+					return false;
+					
+			for (int i = 0; i < gradient.alphaKeys.Length; i++)
+				if (gradient.alphaKeys[i].alpha != otherGradient.alphaKeys[i].alpha || gradient.alphaKeys[i].time != otherGradient.alphaKeys[i].time)
+					return false;
+			
+			return true;
 		}
 	}
 }

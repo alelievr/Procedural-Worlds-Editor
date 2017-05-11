@@ -367,9 +367,16 @@ namespace PW
 			{
 				RectOffset savedmargin = GUI.skin.label.margin;
 				GUI.skin.label.margin = new RectOffset(2, 2, 5, 7);
-				var savedLabelWidth = EditorGUIUtility.labelWidth;
+
+				//magic to fit the window padding ???
+				GUIStyle centerEverything = new GUIStyle();
+				centerEverything.alignment = TextAnchor.MiddleCenter;
+				GUILayout.Label(" ", centerEverything);
+				GUILayout.Space(-GUI.skin.label.lineHeight);
+
 				OnNodeGUI();
-				EditorGUIUtility.labelWidth = savedLabelWidth;
+
+				EditorGUIUtility.labelWidth = 0;
 				GUI.skin.label.margin = savedmargin;
 			}
 			GUILayout.EndVertical();

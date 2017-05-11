@@ -40,6 +40,7 @@ namespace PW
 		static Texture2D	ic_settings;
 		static Texture2D	colorPickerTexture;
 		static Texture2D	colorPickerThumb;
+		static Texture2D	settingsBackgroundTexture;
 		static GUIStyle		colorPickerStyle;
 		static GUIStyle		centeredLabel;
 
@@ -70,10 +71,11 @@ namespace PW
 				this.datas = datas;
 			}
 
-			public void Active(T value)
+			public T Active(T value)
 			{
 				valueBeforeActive = value;
 				active = true;
+				return value;
 			}
 
 			public T InActive()
@@ -82,9 +84,12 @@ namespace PW
 				return valueBeforeActive;
 			}
 
-			public bool	IsActive()
+			public T Invert(T value)
 			{
-				return active;
+				if (active)
+					return InActive();
+				else
+					return Active(value);
 			}
 		}
 
@@ -99,53 +104,55 @@ namespace PW
 			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
 			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
 			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
+			settingsBackgroundTexture = PWColorPalette.ColorToTexture(PWColorPalette.GetColor("transparentBackground"));
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
 			gradientField = typeof(EditorGUILayout).GetMethod(
 				"GradientField",
 				BindingFlags.NonPublic | BindingFlags.Static,
 				null,
-				new Type[] { typeof(Gradient), typeof(GUILayoutOption[]) },
+				new Type[] { typeof(GUIContent), typeof(Gradient), typeof(GUILayoutOption[]) },
 				null
 			);
 		}
 		
-		public static void ColorPicker(string name, ref Color c, bool displayColorPreview = true)
+		public static void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true)
 		{
-			//TODO
+			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
+			ColorPicker(prefix, colorFieldRect, ref c, displayColorPreview);
 		}
 		
 		public static void ColorPicker(ref Color c, bool displayColorPreview = true)
 		{
-			//TODO
+			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
+			ColorPicker(null, colorFieldRect, ref c, displayColorPreview);
 		}
 
-		public static void ColorPicker(Rect iconRect, ref Color c, bool displayColorPreview = true)
+		public static void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true)
 		{
-			ColorPicker("", iconRect, ref c, displayColorPreview);
+			ColorPicker("", rect, ref c, displayColorPreview);
 		}
 
-		public static void ColorPicker(Rect iconRect, ref SerializableColor c, bool displayColorPreview = true)
+		public static void ColorPicker(Rect rect, ref SerializableColor c, bool displayColorPreview = true)
 		{
 			Color color = c;
-			ColorPicker("", iconRect, ref color, displayColorPreview);
+			ColorPicker("", rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
 
-		public static void ColorPicker(string name, Rect iconRect, ref SerializableColor c, bool displayColorPreview = true)
+		public static void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
 		{
 			Color color = c;
-			ColorPicker(name, iconRect, ref color, displayColorPreview);
+			ColorPicker(prefix, rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
 	
-		public static void ColorPicker(string name, Rect iconRect, ref Color c, bool displayColorPreview = true)
+		public static void ColorPicker(string prefix, Rect rect, ref Color c, bool displayColorPreview = true)
 		{
 			var		e = Event.current;
+			Rect	iconRect = rect;
+			int		icColorSize = 18;
 			
-			if (name == null)
-				name = "";
-
 			string key = c.GetHashCode().ToString();
 
 			if (!colorFieldStates.ContainsKey(key))
@@ -158,11 +165,18 @@ namespace PW
 				if (e.type == EventType.KeyDown)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+					{
 						fieldState.InActive();
+						e.Use();
+					}
 					if (e.keyCode == KeyCode.Escape)
+					{
 						c = fieldState.InActive();
+						e.Use();
+					}
 				}
 				
+				//draw the color picker window
 				colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
 				int colorPickerWidth = 170;
 				int	colorPickerHeight = 270;
@@ -222,36 +236,69 @@ namespace PW
 				GUILayout.EndArea();
 			}
 			
+			//draw the icon
+			Rect colorPreviewRect = iconRect;
+			if (displayColorPreview)
+			{
+				int width = (int)rect.width;
+				int colorPreviewPadding = 5;
+				
+				Vector2 prefixSize = Vector2.zero;
+				if (!String.IsNullOrEmpty(prefix))
+				{
+					prefixSize = GUI.skin.label.CalcSize(new GUIContent(prefix));
+					prefixSize.x += 5; //padding of 5 pixels
+					colorPreviewRect.position += new Vector2(prefixSize.x, 0);
+					Rect prefixRect = new Rect(iconRect.position, prefixSize);
+					GUI.Label(prefixRect, prefix);
+				}
+				colorPreviewRect.size = new Vector2(width - icColorSize - prefixSize.x - colorPreviewPadding, 16);
+				iconRect.position += new Vector2(colorPreviewRect.width + prefixSize.x + colorPreviewPadding, 0);
+				iconRect.size = new Vector2(icColorSize, icColorSize);
+				EditorGUIUtility.DrawColorSwatch(colorPreviewRect, c);
+			}
+			
+
+			//actions if clicked on/outside of the icon
 			GUI.DrawTexture(iconRect, ic_color);
 			if (e.type == EventType.MouseDown && e.button == 0)
 			{
-				if (iconRect.Contains(e.mousePosition))
+				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
 					fieldState.Active(c);
 					e.Use();
 				}
-				else
+				else if (fieldState.active)
+				{
 					fieldState.InActive();
+					e.Use();
+				}
+			}
+
+			string newKey = c.GetHashCode().ToString();
+			if (key != newKey)
+			{
+				colorFieldStates[newKey] = colorFieldStates[key];
+				colorFieldStates.Remove(key);
 			}
 		}
 		
-		public static void TextField(Vector2 position, string prefix, ref string text, bool editable = false, GUIStyle textStyle = null)
-		{
-			
-		}
-
 		public static void TextField(string prefix, ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
-
+			TextField(prefix, EditorGUILayout.GetControlRect().position, ref text, editable, textStyle);
 		}
 
 		public static void TextField(ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
-			//TODO: test this
-			TextField(EditorGUILayout.GetControlRect().position, ref text, editable, textStyle);
+			TextField(null, EditorGUILayout.GetControlRect().position, ref text, editable, textStyle);
 		}
 
-		public static void TextField(Vector2 textPosition, ref string text, bool editable = false, GUIStyle textFieldStyle = null)
+		public static void TextField(Vector2 position, ref string text, bool editable = false, GUIStyle textStyle = null)
+		{
+			TextField(null, position, ref text, editable, textStyle);
+		}
+
+		public static void TextField(string prefix, Vector2 textPosition, ref string text, bool editable = false, GUIStyle textFieldStyle = null)
 		{
 			Rect	textRect = new Rect(textPosition, Vector2.zero);
 			var		e = Event.current;
@@ -262,12 +309,35 @@ namespace PW
 				textFieldStyle = GUI.skin.label;
 
 			if (!textFieldStates.ContainsKey(key))
-				textFieldStates[key] = new FieldState< string >(null);
+				textFieldStates[key] = new FieldState< string >();
 
 			var fieldState = textFieldStates[key];
 			
 			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
 			textRect.size = nameSize;
+
+			if (!String.IsNullOrEmpty(prefix))
+			{
+				Vector2 prefixSize = textFieldStyle.CalcSize(new GUIContent(prefix));
+				Rect prefixRect = textRect;
+
+				textRect.position += new Vector2(prefixSize.x, 0);
+				prefixRect.size = prefixSize;
+				GUI.Label(prefixRect, prefix);
+			}
+			
+			Rect iconRect = new Rect(textRect.position + new Vector2(nameSize.x + 10, 0), new Vector2(17, 17));
+			bool editClickIn = (editable && e.type == EventType.MouseDown && e.button == 0 && iconRect.Contains(e.mousePosition));
+
+			if (editClickIn)
+				fieldState.Invert(text);
+			
+			if (editable)
+			{
+				GUI.color = (fieldState.active) ? PWColorPalette.GetColor("selected") : Color.white;
+				GUI.DrawTexture(iconRect, ic_edit);
+				GUI.color = Color.white;
+			}
 
 			if (fieldState.active == true)
 			{
@@ -276,33 +346,44 @@ namespace PW
 				GUI.SetNextControlName(key);
 				text = GUI.TextField(textRect, text, textFieldStyle);
 				GUI.skin.settings.cursorColor = oldCursorColor;
-				if (e.isKey)
+				if (e.isKey && fieldState.active)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+					{
 						fieldState.InActive();
+						e.Use();
+					}
 					else if (e.keyCode == KeyCode.Escape)
+					{
 						text = fieldState.InActive();
+						e.Use();
+					}
 				}
 			}
 			else
-				GUI.Label(textRect, text, textFieldStyle);
+				GUI.Label(textRect, text, textFieldStyle);			
 			
-			if (editable)
+			bool editClickOut = (editable && e.type == EventType.MouseDown && e.button == 0 && !iconRect.Contains(e.mousePosition));
+
+			if (editClickOut && fieldState.active)
 			{
-				Rect iconRect = new Rect(textRect.position + new Vector2(nameSize.x + 10, 0), new Vector2(17, 17));
-				if (e.type == EventType.MouseDown && e.button == 0)
-				{
-					if (iconRect.Contains(Event.current.mousePosition))
-					{
-						fieldState.Active(text);
-						GUI.FocusControl(key);
-						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-						te.SelectAll();
-					}
-					else
-						fieldState.InActive();
-				}
-				GUI.DrawTexture(iconRect, ic_edit);
+				fieldState.InActive();
+				e.Use();
+			}
+
+			string newKey = text.GetHashCode().ToString();
+			if (newKey != key)
+			{
+				textFieldStates[newKey] = textFieldStates[key];
+				textFieldStates.Remove(key);
+			}
+
+			if (editClickIn)
+			{
+				GUI.FocusControl(key);
+				var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+				te.SelectAll();
+				e.Use();
 			}
 		}
 		
@@ -318,7 +399,7 @@ namespace PW
 	
 		public static void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
-			int		sliderLabelWidth = 40;
+			int		sliderLabelWidth = 30;
 
 			foreach (var style in styles)
 				if (style.type == PWGUIStyleType.PrefixLabelWidth)
@@ -372,6 +453,14 @@ namespace PW
 			max = (int)m_max;
 		}
 
+		public static void TexturePreview(Texture tex, bool settings = true)
+		{
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
+			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
+			TexturePreview(previewRect, tex, settings);
+			GUILayout.Space(previewRect.width);
+		}
+
 		public static void TexturePreview(Rect previewRect, Texture tex, bool settings = true)
 		{
 			var e = Event.current;
@@ -397,16 +486,17 @@ namespace PW
 			if (fieldState.active)
 			{
 				if (e.type == EventType.KeyDown)
-				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
+					{
 						fieldState.InActive();
-				}
+						e.Use();
+					}
 				
 				Rect settingsRect = EditorGUILayout.BeginVertical(GUILayout.Width(previewRect.width - 20));
 				{
 					FilterMode	newMode;
 
-					//TODO: drawTexture for trasparent background
+					GUI.DrawTexture(settingsRect, settingsBackgroundTexture);
 
 					EditorGUIUtility.labelWidth = 80;
 					EditorGUI.BeginChangeCheck();
@@ -429,31 +519,31 @@ namespace PW
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					if (fieldState.active)
-						fieldState.InActive();
-					else
-						fieldState.Active(0);
+					fieldState.Invert(0);
 					e.Use();
 				}
-				else
+				else if (fieldState.active)
+				{
 					fieldState.InActive();
+					e.Use();
+				}
 			}
 		}
-
-		public static void TexturePreview(Texture tex, bool settings = true)
+		
+		public static void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true)
 		{
-			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
-			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
-			TexturePreview(previewRect, tex, settings);
-			GUILayout.Space(previewRect.width);
+			Sampler2DPreview(null, samp, update, settings);
 		}
 		
-		public static void Sampler2DPreview(string name, Sampler2D samp, bool update, bool settings = true)
+		public static void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
 
 			string key = samp.GetHashCode().ToString();
+
+			if (!String.IsNullOrEmpty(prefix))
+				EditorGUILayout.LabelField(prefix);
 
 			if (!sampler2DFieldStates.ContainsKey(key) || sampler2DFieldStates[key].datas[0] == null)
 			{
@@ -474,59 +564,81 @@ namespace PW
 
 			Texture2D	tex = fieldState.datas[0] as Texture2D;
 			Gradient	gradient = fieldState.datas[1] as Gradient;
+			
 
 			if (samp.size != tex.width)
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
 
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
+			
+			TexturePreview(tex, false);
+			
 			//draw the settings window
 			if (settings && fieldState.active)
 			{
-				EditorGUI.BeginChangeCheck();
-				fieldState.datas[2] = EditorGUILayout.EnumPopup((FilterMode)fieldState.datas[2]);
-				if (EditorGUI.EndChangeCheck())
-					tex.filterMode = (FilterMode)fieldState.datas[2];
-				EditorGUI.BeginChangeCheck();
-					fieldState.datas[1] = gradientField.Invoke(null, new object[] {(object)gradient, null});
-				if (EditorGUI.EndChangeCheck())
+				EditorGUILayout.BeginVertical();
+				{
+					EditorGUI.BeginChangeCheck();
+					fieldState.datas[2] = EditorGUILayout.EnumPopup((FilterMode)fieldState.datas[2]);
+					if (EditorGUI.EndChangeCheck())
+						tex.filterMode = (FilterMode)fieldState.datas[2];
+					gradient = (Gradient)gradientField.Invoke(null, new object[] {new GUIContent(""), fieldState.datas[1], null});
+					//TODO: check if the gradient have changed
 					update = true;
+					fieldState.datas[1] = gradient;
+				}
+				EditorGUILayout.EndVertical();
 				
-				if (e.type == EventType.KeyDown)
+				if (e.type == EventType.KeyDown && fieldState.active)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
+					{
 						fieldState.InActive();
+						e.Use();
+					}
 				}
 			}
 			
 			//draw the setting icon and manage his events
 			int icSettingsSize = 16;
-			Rect icSettingsRect = new Rect(10, 60, icSettingsSize, icSettingsSize);
+			int	icSettingsPadding = 4;
+			Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
 
 			GUI.DrawTexture(icSettingsRect, ic_settings);
 			if (e.type == EventType.MouseDown && e.button == 0)
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					if (fieldState.active)
-						fieldState.InActive();
-					else
-						fieldState.Active(null);
+					fieldState.Invert(null);
 					e.Use();
 				}
-				else
+				else if (fieldState.active)
+				{
 					fieldState.InActive();
+					e.Use();
+				}
 			}
 
 			//update the texture with the gradient
 			if (update)
 			{
 				samp.Foreach((x, y, val) => {
-					//TODO: istead of grey texture, use the gradient
-					tex.SetPixel(x, y, new Color(val, val, val, 1));
+					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				});
 				tex.Apply();
 			}
-
-			TexturePreview(tex, false);
+			
+			string newKey = samp.GetHashCode().ToString();
+			if (key != newKey)
+			{
+				sampler2DFieldStates[newKey] = sampler2DFieldStates[key];
+				sampler2DFieldStates.Remove(key);
+			}
+		}
+		
+		public static void ObjectPreview(object obj, bool update)
+		{
+			ObjectPreview(null, obj, update);
 		}
 
 		public static void ObjectPreview(string name, object obj, bool update)
@@ -535,10 +647,12 @@ namespace PW
 
 			if (objType == typeof(Sampler2D))
 				Sampler2DPreview(name, obj as Sampler2D, update);
-			else
+			else if (obj.GetType().IsInstanceOfType(typeof(Object)))
 			{
 				//unity object preview
 			}
+			else
+				Debug.LogWarning("can't preview the object of type: " + obj.GetType());
 		}
 	}
 }
