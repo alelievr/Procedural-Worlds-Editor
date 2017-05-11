@@ -340,6 +340,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
 		currentMousePosition = Event.current.mousePosition;
+
+		//render all opened popups (at the end cause the have to be above other infos)
+		PWPopup.RenderAll();
 		
 		if (GUI.changed && Event.current.type == EventType.Layout)
 		{

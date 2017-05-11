@@ -4,7 +4,7 @@ using System;
 namespace PW
 {
 	/*
-		Graph calculus storage classes (must not be serialized)
+	**	Graph calculus storage classes (must not be serialized)
 	*/
 
 	public class Sampler2D
@@ -109,7 +109,7 @@ namespace PW
 	}
 
 	/*
-		Terrain storage classes:
+	**	Terrain storage classes:
 	*/
 
 	[System.SerializableAttribute]
@@ -139,7 +139,7 @@ namespace PW
 	//TODO: other storage classes
 
 	/*
-		Utils
+	**	Utils
 	*/
 
 	[System.SerializableAttribute]
@@ -187,5 +187,42 @@ namespace PW
 			first = f;
 			second = s;
 		}
+	}
+
+	/*
+	**	PWNode render settings
+	*/
+
+	[System.SerializableAttribute]
+	public abstract class PWPopupSettings {}
+
+	[System.SerializableAttribute]
+	public class PWColorPickerSettings : PWPopupSettings
+	{
+		public SerializableColor	c;
+		public Vector2				thumbPosition;
+	}
+
+	[System.SerializableAttribute]
+	public class PWSampler2DSettings : PWPopupSettings
+	{
+		public FilterMode			filterMode;
+		public SerializableGradient	gradient;
+	}
+
+	[System.SerializableAttribute]
+	public class PWSampler3DSettings : PWPopupSettings
+	{
+
+	}
+
+	[System.SerializableAttribute]
+	public class PWTextureSettings : PWPopupSettings
+	{
+		public FilterMode		filterMode;
+		public ScaleMode		scaleMode;
+		public float			scaleAspect;
+		//TODO: light-weight serializableMaterial
+		public Material			material;
 	}
 }
