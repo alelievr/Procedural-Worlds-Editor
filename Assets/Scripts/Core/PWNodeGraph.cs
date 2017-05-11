@@ -88,6 +88,10 @@ namespace PW
 		[SerializeField]
 		public PWNode						externalGraphNode;
 
+		//for GUI settings storage
+		[SerializeField]
+		public PWGUISettingsStorage			GUISettingsStorage;
+
 		[System.NonSerializedAttribute]
 		IOrderedEnumerable< PWNodeComputeInfo > computeOrderSortedNodes = null;
 

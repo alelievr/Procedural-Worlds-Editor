@@ -33,7 +33,8 @@ namespace PW
 
 	public class PWGUI {
 
-		public static Rect	currentWindowRect;
+		public static Rect						currentWindowRect;
+		public static PWGUISettingsStorage		currentGUISettingsStorage;
 
 		static Texture2D	ic_color;
 		static Texture2D	ic_edit;

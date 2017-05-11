@@ -194,30 +194,39 @@ namespace PW
 	*/
 
 	[System.SerializableAttribute]
-	public abstract class PWPopupSettings {}
+	public abstract class PWGUISettings
+	{
+		[System.NonSerializedAttribute]
+		public bool		active = false;
+		[System.NonSerializedAttribute]
+		public object	oldState = null;
+	}
 
 	[System.SerializableAttribute]
-	public class PWColorPickerSettings : PWPopupSettings
+	public class PWColorPickerSettings : PWGUISettings
 	{
 		public SerializableColor	c;
 		public Vector2				thumbPosition;
 	}
 
 	[System.SerializableAttribute]
-	public class PWSampler2DSettings : PWPopupSettings
+	public class PWSliderSettings : PWGUISettings {}
+
+	[System.SerializableAttribute]
+	public class PWTextSettings : PWGUISettings {}
+
+	[System.SerializableAttribute]
+	public class PWSampler2DSettings : PWGUISettings
 	{
 		public FilterMode			filterMode;
 		public SerializableGradient	gradient;
 	}
 
 	[System.SerializableAttribute]
-	public class PWSampler3DSettings : PWPopupSettings
-	{
-
-	}
+	public class PWSampler3DSettings : PWGUISettings {}
 
 	[System.SerializableAttribute]
-	public class PWTextureSettings : PWPopupSettings
+	public class PWTextureSettings : PWGUISettings
 	{
 		public FilterMode		filterMode;
 		public ScaleMode		scaleMode;
@@ -225,4 +234,7 @@ namespace PW
 		//TODO: light-weight serializableMaterial
 		public Material			material;
 	}
+
+	[System.SerializableAttribute]
+	public class PWGUISettingsStorage : SerializableDictionary< int, PWGUISettings > {}
 }

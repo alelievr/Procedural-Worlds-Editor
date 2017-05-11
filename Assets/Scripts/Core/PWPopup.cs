@@ -15,9 +15,9 @@ namespace PW
 		private const int POPUP_COUNT = 4;
 
 		private static int					toRender;
-		private static PWPopupSettings[]	toRenderDatas = new PWPopupSettings[POPUP_COUNT];
+		private static PWGUISettings[]		toRenderDatas = new PWGUISettings[POPUP_COUNT];
 
-		public static void AddToRender(PWPopupSettings settings, int type)
+		public static void AddToRender(PWGUISettings settings, int type)
 		{
 			toRender |= (1 << type);
 			toRenderDatas[type] = settings;
@@ -30,7 +30,7 @@ namespace PW
 					RenderPopup(toRenderDatas[i], i);
 		}
 
-		private static void RenderPopup(PWPopupSettings data, int type)
+		private static void RenderPopup(PWGUISettings data, int type)
 		{
 			switch (type)
 			{
@@ -47,6 +47,21 @@ namespace PW
 		}
 	
 		private static void RenderColorPicker(PWColorPickerSettings data)
+		{
+			
+		}
+
+		private static void RenderSampler2DSettings(PWSampler2DSettings data)
+		{
+
+		}
+
+		private static void RenderSampler3DSettings(PWSampler3DSettings data)
+		{
+
+		}
+
+		private static void RenderTextureSettings(PWTextureSettings data)
 		{
 			
 		}
