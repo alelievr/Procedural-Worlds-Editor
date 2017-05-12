@@ -255,8 +255,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.isVisibleInEditor = true;
 		LoadCustomStyles();
 
-		//set the current GUI settings storage:
+		//set and update the current GUI settings storage:
 		PWGUI.currentGUISettingsStorage = currentGraph.GUISettingsStorage;
+		PWGUI.currentGUISettingsStorage.StartNewFrame();
 
 		//text colors:
 		whiteText = new GUIStyle();

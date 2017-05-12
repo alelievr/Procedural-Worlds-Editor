@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using System;
 
 namespace PW
@@ -196,10 +197,35 @@ namespace PW
 	[System.SerializableAttribute]
 	public abstract class PWGUISettings
 	{
-		[System.NonSerializedAttribute]
-		public bool		active = false;
+		public bool		active {get;  private set;}
 		[System.NonSerializedAttribute]
 		public object	oldState = null;
+
+		public PWGUISettings()
+		{
+			active = false;
+		}
+
+		public object Active(object o)
+		{
+			active = true;
+			oldState = o;
+			return o;
+		}
+
+		public object InActive()
+		{
+			active = false;
+			return oldState;
+		}
+
+		public object Invert(object o)
+		{
+			if (active)
+				return InActive();
+			else
+				return Active(o);
+		}
 	}
 
 	[System.SerializableAttribute]
@@ -219,7 +245,12 @@ namespace PW
 	public class PWSampler2DSettings : PWGUISettings
 	{
 		public FilterMode			filterMode;
-		public SerializableGradient	gradient;
+		public SerializableGradient	serializableGradient;
+
+		[System.NonSerializedAttribute]
+		public Gradient				gradient;
+		[System.NonSerializedAttribute]
+		public Texture2D			texture;
 	}
 
 	[System.SerializableAttribute]
@@ -232,9 +263,68 @@ namespace PW
 		public ScaleMode		scaleMode;
 		public float			scaleAspect;
 		//TODO: light-weight serializableMaterial
+		[System.NonSerializedAttribute]
 		public Material			material;
 	}
 
 	[System.SerializableAttribute]
-	public class PWGUISettingsStorage : SerializableDictionary< int, PWGUISettings > {}
+	public class PWGUISettingsStorage
+	{
+		[SerializeField]
+		List< PWGUISettings >	settings = new List< PWGUISettings >();
+
+		[System.NonSerializedAttribute]
+		int						currentUsedSettings;
+		[System.NonSerializedAttribute]
+		//< Hashcode of the settingObject, index in settings list >
+		Dictionary< int, int >	hashCodeIndexes = new Dictionary< int, int >();
+
+		public  PWGUISettingsStorage()
+		{
+			int i = 0;
+			//FIXME is this working with serialization ???
+			foreach (var setting in settings)
+				hashCodeIndexes.Add(setting.GetHashCode(), i++);
+		}
+
+		public void				StartNewFrame()
+		{
+			currentUsedSettings = 0;
+		}
+
+		public T		GetSettingData< T >(/*int hashCode, */Func< T > newCallback) where T : PWGUISettings
+		{
+			T currentSetting;
+
+			//TODO: if the hashCode is found in the hashCodeIndexes dic. return his value instead of creating new object.
+
+			//TODO: if the hashcode of the object does not exists, create new one and sotre it
+
+			if (settings.Count <= currentUsedSettings)
+			{
+				currentSetting = newCallback();
+				settings.Add(currentSetting);
+				currentUsedSettings++;
+				return currentSetting;
+			}
+
+			// Debug.Log("type at: " + currentUsedSettings + ": " + settings[currentUsedSettings].GetType());
+
+			if (settings[currentUsedSettings].GetType() != typeof(T))
+			{
+				settings[currentUsedSettings] = newCallback();
+				currentSetting = (T)settings[currentUsedSettings];
+			}
+
+			currentSetting = (settings[currentUsedSettings]) as T;
+
+			currentUsedSettings++;
+			return currentSetting;
+		}
+
+		public void		MoveObjectHashCode(int oldHashCode, int newHashCode)
+		{
+			//TODO: move the object at oldHashcode position to the newHashCode 
+		}
+	}
 }

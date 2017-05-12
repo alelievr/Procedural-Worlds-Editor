@@ -46,57 +46,7 @@ namespace PW
 		static GUIStyle		centeredLabel;
 
 		[System.NonSerializedAttribute]
-		static Dictionary< string, FieldState< string > > textFieldStates = new Dictionary< string, FieldState< string > >();
-		[System.NonSerializedAttribute]
-		static Dictionary< string, FieldState< Color > > colorFieldStates = new Dictionary< string, FieldState< Color > >();
-		[System.NonSerializedAttribute]
-		static Dictionary< string, FieldState > sampler2DFieldStates = new Dictionary< string, FieldState >();
-		[System.NonSerializedAttribute]
-		static Dictionary< string, FieldState > textureFieldStates = new Dictionary< string, FieldState >();
-
-		[System.NonSerializedAttribute]
 		static MethodInfo	gradientField;
-
-		[System.SerializableAttribute]
-		private class FieldState< T >
-		{
-			[SerializeField]
-			public bool			active {private set; get;}
-			
-			private T			valueBeforeActive;
-			[SerializeField]
-			public object[]		datas;
-
-			public FieldState(params object[] datas)
-			{
-				this.datas = datas;
-			}
-
-			public T Active(T value)
-			{
-				valueBeforeActive = value;
-				active = true;
-				return value;
-			}
-
-			public T InActive()
-			{
-				active = false;
-				return valueBeforeActive;
-			}
-
-			public T Invert(T value)
-			{
-				if (active)
-					return InActive();
-				else
-					return Active(value);
-			}
-		}
-
-		private class FieldState : FieldState< object > {
-			public FieldState(params object[] datas) : base(datas) {}
-		}
 
 		static PWGUI() {
 			ic_color = Resources.Load("ic_color") as Texture2D;
@@ -112,7 +62,7 @@ namespace PW
 				"GradientField",
 				BindingFlags.NonPublic | BindingFlags.Static,
 				null,
-				new Type[] { typeof(GUIContent), typeof(Gradient), typeof(GUILayoutOption[]) },
+				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
 				null
 			);
 		}
@@ -153,26 +103,23 @@ namespace PW
 			var		e = Event.current;
 			Rect	iconRect = rect;
 			int		icColorSize = 18;
-			
-			string key = c.GetHashCode().ToString();
 
-			if (!colorFieldStates.ContainsKey(key))
-				colorFieldStates[key] = new FieldState< Color >(Vector2.zero);
+			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
+				return new PWColorPickerSettings();
+			});
 
-			var fieldState = colorFieldStates[key];
-
-			if (fieldState.active)
+			if (fieldSettings.active)
 			{
 				if (e.type == EventType.KeyDown)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
 					{
-						fieldState.InActive();
+						fieldSettings.InActive();
 						e.Use();
 					}
 					if (e.keyCode == KeyCode.Escape)
 					{
-						c = fieldState.InActive();
+						c = (Color)fieldSettings.InActive();
 						e.Use();
 					}
 				}
@@ -196,11 +143,11 @@ namespace PW
 							Vector2 textureCoord = colorPickerMousePosition * (colorPickerTexture.width / 150f);
 							textureCoord.y = colorPickerTexture.height - textureCoord.y;
 							c = colorPickerTexture.GetPixel((int)textureCoord.x, (int)textureCoord.y);
-							fieldState.datas[0] = colorPickerMousePosition + new Vector2(6, 9);
+							fieldSettings.thumbPosition = colorPickerMousePosition + new Vector2(6, 9);
 						}
 					}
 
-					Rect colorPickerThumbRect = new Rect((Vector2)fieldState.datas[0], new Vector2(8, 8));
+					Rect colorPickerThumbRect = new Rect(fieldSettings.thumbPosition, new Vector2(8, 8));
 					GUI.DrawTexture(colorPickerThumbRect, colorPickerThumb);
 
 					byte r, g, b, a;
@@ -266,21 +213,14 @@ namespace PW
 			{
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
-					fieldState.Active(c);
+					fieldSettings.Active(c);
 					e.Use();
 				}
-				else if (fieldState.active)
+				else if (fieldSettings.active)
 				{
-					fieldState.InActive();
+					fieldSettings.InActive();
 					e.Use();
 				}
-			}
-
-			string newKey = c.GetHashCode().ToString();
-			if (key != newKey)
-			{
-				colorFieldStates[newKey] = colorFieldStates[key];
-				colorFieldStates.Remove(key);
 			}
 		}
 		
@@ -304,15 +244,11 @@ namespace PW
 			Rect	textRect = new Rect(textPosition, Vector2.zero);
 			var		e = Event.current;
 
-			string key = text.GetHashCode().ToString();
+			string controlName = "textfield-" + text.GetHashCode().ToString();
 
-			if (textFieldStyle == null)
-				textFieldStyle = GUI.skin.label;
-
-			if (!textFieldStates.ContainsKey(key))
-				textFieldStates[key] = new FieldState< string >();
-
-			var fieldState = textFieldStates[key];
+			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
+				return new PWTextSettings();
+			});
 			
 			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
 			textRect.size = nameSize;
@@ -331,32 +267,32 @@ namespace PW
 			bool editClickIn = (editable && e.type == EventType.MouseDown && e.button == 0 && iconRect.Contains(e.mousePosition));
 
 			if (editClickIn)
-				fieldState.Invert(text);
+				fieldSettings.Invert(text);
 			
 			if (editable)
 			{
-				GUI.color = (fieldState.active) ? PWColorPalette.GetColor("selected") : Color.white;
+				GUI.color = (fieldSettings.active) ? PWColorPalette.GetColor("selected") : Color.white;
 				GUI.DrawTexture(iconRect, ic_edit);
 				GUI.color = Color.white;
 			}
 
-			if (fieldState.active == true)
+			if (fieldSettings.active == true)
 			{
 				Color oldCursorColor = GUI.skin.settings.cursorColor;
 				GUI.skin.settings.cursorColor = Color.white;
-				GUI.SetNextControlName(key);
+				GUI.SetNextControlName(controlName);
 				text = GUI.TextField(textRect, text, textFieldStyle);
 				GUI.skin.settings.cursorColor = oldCursorColor;
-				if (e.isKey && fieldState.active)
+				if (e.isKey && fieldSettings.active)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
 					{
-						fieldState.InActive();
+						fieldSettings.InActive();
 						e.Use();
 					}
 					else if (e.keyCode == KeyCode.Escape)
 					{
-						text = fieldState.InActive();
+						text = (string)fieldSettings.InActive();
 						e.Use();
 					}
 				}
@@ -366,22 +302,15 @@ namespace PW
 			
 			bool editClickOut = (editable && e.type == EventType.MouseDown && e.button == 0 && !iconRect.Contains(e.mousePosition));
 
-			if (editClickOut && fieldState.active)
+			if (editClickOut && fieldSettings.active)
 			{
-				fieldState.InActive();
+				fieldSettings.InActive();
 				e.Use();
-			}
-
-			string newKey = text.GetHashCode().ToString();
-			if (newKey != key)
-			{
-				textFieldStates[newKey] = textFieldStates[key];
-				textFieldStates.Remove(key);
 			}
 
 			if (editClickIn)
 			{
-				GUI.FocusControl(key);
+				GUI.FocusControl(controlName);
 				var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 				te.SelectAll();
 				e.Use();
@@ -465,31 +394,29 @@ namespace PW
 		public static void TexturePreview(Rect previewRect, Texture tex, bool settings = true)
 		{
 			var e = Event.current;
-			string key = tex.GetHashCode().ToString();
 
-			if (!textureFieldStates.ContainsKey(key))
-			{
-				FilterMode	mode = FilterMode.Point;
-				ScaleMode	scaleMode = ScaleMode.ScaleToFit;
-				float		scaleAspect = 0;
-				Material	mat = null;
-				var state = new FieldState(mode, scaleMode, scaleAspect, mat);
-				textureFieldStates[key] = state;
-			}
+			//create or load texture settings
+			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
+				var state = new PWTextureSettings();
+				state.filterMode = FilterMode.Bilinear;
+				state.scaleMode = ScaleMode.ScaleToFit;
+				state.scaleAspect = 1;
+				state.material = null;
+				return state;
+			});
 
-			var fieldState = textureFieldStates[key];
-
-			EditorGUI.DrawPreviewTexture(previewRect, tex, (Material)fieldState.datas[3], (ScaleMode)fieldState.datas[1], (float)fieldState.datas[2]);
+			EditorGUI.DrawPreviewTexture(previewRect, tex, fieldSettings.material, fieldSettings.scaleMode, fieldSettings.scaleAspect);
 
 			if (!settings)
 				return ;
 
-			if (fieldState.active)
+			//render the texture settings window
+			if (fieldSettings.active)
 			{
 				if (e.type == EventType.KeyDown)
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
 					{
-						fieldState.InActive();
+						fieldSettings.InActive();
 						e.Use();
 					}
 				
@@ -504,9 +431,9 @@ namespace PW
 						newMode = (FilterMode)EditorGUILayout.EnumPopup("filter mode", tex.filterMode);
 					if (EditorGUI.EndChangeCheck())
 						tex.filterMode = newMode;
-					fieldState.datas[1] = EditorGUILayout.EnumPopup("scale mode", (ScaleMode)fieldState.datas[1]);
-					fieldState.datas[2] = EditorGUILayout.FloatField("scale aspect", (float)fieldState.datas[2]);
-					fieldState.datas[3] = EditorGUILayout.ObjectField("material", (Object)fieldState.datas[3], typeof(Material), false);
+					fieldSettings.scaleMode = (ScaleMode)EditorGUILayout.EnumPopup("scale mode", fieldSettings.scaleMode);
+					fieldSettings.scaleAspect= EditorGUILayout.FloatField("scale aspect", fieldSettings.scaleAspect);
+					fieldSettings.material = (Material)EditorGUILayout.ObjectField("material", fieldSettings.material, typeof(Material), false);
 					EditorGUIUtility.labelWidth = 0;
 				}
 				EditorGUILayout.EndVertical();
@@ -520,12 +447,12 @@ namespace PW
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					fieldState.Invert(0);
+					fieldSettings.Invert(0);
 					e.Use();
 				}
-				else if (fieldState.active)
+				else if (fieldSettings.active)
 				{
-					fieldState.InActive();
+					fieldSettings.InActive();
 					e.Use();
 				}
 			}
@@ -541,30 +468,24 @@ namespace PW
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
 
-			string key = samp.GetHashCode().ToString();
-
 			if (!String.IsNullOrEmpty(prefix))
 				EditorGUILayout.LabelField(prefix);
 
-			if (!sampler2DFieldStates.ContainsKey(key) || sampler2DFieldStates[key].datas[0] == null)
-			{
-				Texture2D	data;
-				FilterMode	mode = FilterMode.Point;
-				Gradient	grad = PWUtils.CreateGradient(
-					new KeyValuePair< float, Color >(0, Color.black),
-					new KeyValuePair< float, Color >(1, Color.white)
+			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
+				var state = new PWSampler2DSettings();
+				state.filterMode = FilterMode.Bilinear;
+				state.gradient = new SerializableGradient(
+					PWUtils.CreateGradient(
+						new KeyValuePair< float, Color >(0, Color.black),
+						new KeyValuePair< float, Color >(1, Color.white)
+					)
 				);
+				state.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				return state;
+			});
 
-				data = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
-				data.filterMode = FilterMode.Point;
-				var state = new FieldState(data, grad, mode);
-				sampler2DFieldStates[key] = state;
-			}
-
-			var fieldState = sampler2DFieldStates[key];
-
-			Texture2D	tex = fieldState.datas[0] as Texture2D;
-			Gradient	gradient = fieldState.datas[1] as Gradient;
+			Texture2D	tex = fieldSettings.texture as Texture2D;
+			Gradient	gradient = fieldSettings.gradient;
 			
 
 			if (samp.size != tex.width)
@@ -575,26 +496,26 @@ namespace PW
 			TexturePreview(tex, false);
 			
 			//draw the settings window
-			if (settings && fieldState.active)
+			if (settings && fieldSettings.active)
 			{
 				EditorGUILayout.BeginVertical();
 				{
 					EditorGUI.BeginChangeCheck();
-					fieldState.datas[2] = EditorGUILayout.EnumPopup((FilterMode)fieldState.datas[2]);
+					fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fieldSettings.filterMode);
 					if (EditorGUI.EndChangeCheck())
-						tex.filterMode = (FilterMode)fieldState.datas[2];
-					gradient = (Gradient)gradientField.Invoke(null, new object[] {new GUIContent(""), fieldState.datas[1], null});
-					//TODO: check if the gradient have changed
-					update = true;
-					fieldState.datas[1] = gradient;
+						tex.filterMode = fieldSettings.filterMode;
+					gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
+					if (!gradient.Compare(fieldSettings.serializableGradient))
+						update = true;
+					fieldSettings.serializableGradient = (SerializableGradient)gradient;
 				}
 				EditorGUILayout.EndVertical();
 				
-				if (e.type == EventType.KeyDown && fieldState.active)
+				if (e.type == EventType.KeyDown && fieldSettings.active)
 				{
 					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
 					{
-						fieldState.InActive();
+						fieldSettings.InActive();
 						e.Use();
 					}
 				}
@@ -610,12 +531,12 @@ namespace PW
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					fieldState.Invert(null);
+					fieldSettings.Invert(null);
 					e.Use();
 				}
-				else if (fieldState.active)
+				else if (fieldSettings.active)
 				{
-					fieldState.InActive();
+					fieldSettings.InActive();
 					e.Use();
 				}
 			}
@@ -623,17 +544,11 @@ namespace PW
 			//update the texture with the gradient
 			if (update)
 			{
+				Debug.Log("update texture !");
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				});
 				tex.Apply();
-			}
-			
-			string newKey = samp.GetHashCode().ToString();
-			if (key != newKey)
-			{
-				sampler2DFieldStates[newKey] = sampler2DFieldStates[key];
-				sampler2DFieldStates.Remove(key);
 			}
 		}
 		

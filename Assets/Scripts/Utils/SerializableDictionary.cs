@@ -157,10 +157,10 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         var hashCodesCopy = new int[newSize];
         var nextCopy = new int[newSize];
  
-        Array.Copy(_Values, 0, valuesCopy, 0, _Count);
-        Array.Copy(_Keys, 0, keysCopy, 0, _Count);
-        Array.Copy(_HashCodes, 0, hashCodesCopy, 0, _Count);
-        Array.Copy(_Next, 0, nextCopy, 0, _Count);
+        Array.Copy(_Values, 0, valuesCopy, 0, Math.Min(_Count, _Values.Length));
+        Array.Copy(_Keys, 0, keysCopy, 0, Math.Min(_Count, _Keys.Length));
+        Array.Copy(_HashCodes, 0, hashCodesCopy, 0, Math.Min(_Count, _HashCodes.Length));
+        Array.Copy(_Next, 0, nextCopy, 0, Math.Min(_Count, _Next.Length));
  
         if (forceNewHashCodes)
         {

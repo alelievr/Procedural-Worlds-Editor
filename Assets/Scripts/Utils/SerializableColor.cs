@@ -38,5 +38,10 @@ namespace PW
 		{
 			return c.GetColor();
 		}
+
+		public override string ToString()
+		{
+			return "r: " + color.x + ", g: " + color.y + ", b: " + color.z + ", a: " + color.w;
+		}
 	}
 }
