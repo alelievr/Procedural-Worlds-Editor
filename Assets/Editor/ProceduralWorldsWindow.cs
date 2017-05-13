@@ -741,12 +741,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 			if (e.type == EventType.MouseDown) //if event is mouse down
 			{
-				if (e.button == 2 && graphRect.Contains(e.mousePosition))
-					draggingGraph = true;
+				//TODO: remove the graph header height
+				if (graphRect.Contains(e.mousePosition))
+				{
+					if (e.button == 2 || (e.command && e.button == 0))
+						draggingGraph = true;
+				}
 				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
 					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
 					&& mouseAboveSubmachineIndex == -1 //and mouse is not above a submachine
-					&& e.button == 0)
+					&& e.button == 0
+					&& !e.command
+					&& !e.control)
 				{
 					selecting = true;
 					selectionRect.position = e.mousePosition;
