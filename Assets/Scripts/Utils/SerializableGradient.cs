@@ -26,10 +26,11 @@ namespace PW
 			colorKeys = new SerializableGradientColorKey[g.colorKeys.Length];
 			for (int i = 0; i < g.colorKeys.Length; i++)
 				colorKeys[i] = (SerializableGradientColorKey)g.colorKeys[i];
-			
+
 			alphaKeys = new SerializableGradientAlphaKey[g.alphaKeys.Length];
 			for (int i = 0; i < g.alphaKeys.Length; i++)
 				alphaKeys[i] = (SerializableGradientAlphaKey)g.alphaKeys[i];
+			mode = g.mode;
 		}
 
 		public static explicit operator SerializableGradient(Gradient g)

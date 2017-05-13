@@ -18,6 +18,8 @@ namespace PW
 		int							callbackId;
 		int							resizingCallbackId;
 
+		PWGUIManager				PWGUI;
+
 		static Texture2D			movepadTexture;
 		static GUIStyle				orderingGroupStyle;
 		static GUIStyle				orderingGroupNameStyle;
@@ -29,6 +31,7 @@ namespace PW
 			orderGroupRect.size = new Vector2(240, 120);
 			name = "ordering group";
 			color = (SerializableColor)Color.white;
+			PWGUI = new PWGUIManager();
 		}
 
 		void CreateAnchorRectCallabck(Rect r, MouseCursor cursor, Action callback)
@@ -65,8 +68,7 @@ namespace PW
 			if (!orderGroupRect.Overlaps(screen))
 				return false;
 			
-			//TODO: remove: only for testing
-			// if (orderingGroupStyle == null)
+			if (orderingGroupStyle == null)
 				LoadStyles();
 
 			Rect		orderGroupWorldRect = PWUtils.DecalRect(orderGroupRect, graphDecal);

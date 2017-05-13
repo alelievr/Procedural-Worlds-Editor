@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace PW
 {
@@ -195,11 +196,37 @@ namespace PW
 	*/
 
 	[System.SerializableAttribute]
-	public abstract class PWGUISettings
+	public class PWGUISettings
 	{
 		public bool		active {get;  private set;}
+		public Vector2	windowPosition;
+
 		[System.NonSerializedAttribute]
 		public object	oldState = null;
+
+		//we put all possible datas for each inputs because unity serialization does not support inheritence :(
+		
+		//colorPicker:
+		public SerializableColor	c;
+		public Vector2				thumbPosition;
+
+		//Sampler2D:
+		public FilterMode			filterMode;
+		public SerializableGradient	serializableGradient;
+
+		[System.NonSerializedAttribute]
+		public Gradient				gradient;
+		[System.NonSerializedAttribute]
+		public Texture2D			texture;
+
+		//Texture:
+		// public FilterMode		filterMode; //duplicated
+		public ScaleMode		scaleMode;
+		public float			scaleAspect;
+		//TODO: light-weight serializableMaterial
+		[System.NonSerializedAttribute]
+		public Material			material;
+		
 
 		public PWGUISettings()
 		{
@@ -228,11 +255,9 @@ namespace PW
 		}
 	}
 
-	[System.SerializableAttribute]
+	/*[System.SerializableAttribute]
 	public class PWColorPickerSettings : PWGUISettings
 	{
-		public SerializableColor	c;
-		public Vector2				thumbPosition;
 	}
 
 	[System.SerializableAttribute]
@@ -244,13 +269,6 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWSampler2DSettings : PWGUISettings
 	{
-		public FilterMode			filterMode;
-		public SerializableGradient	serializableGradient;
-
-		[System.NonSerializedAttribute]
-		public Gradient				gradient;
-		[System.NonSerializedAttribute]
-		public Texture2D			texture;
 	}
 
 	[System.SerializableAttribute]
@@ -259,72 +277,5 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWTextureSettings : PWGUISettings
 	{
-		public FilterMode		filterMode;
-		public ScaleMode		scaleMode;
-		public float			scaleAspect;
-		//TODO: light-weight serializableMaterial
-		[System.NonSerializedAttribute]
-		public Material			material;
-	}
-
-	[System.SerializableAttribute]
-	public class PWGUISettingsStorage
-	{
-		[SerializeField]
-		List< PWGUISettings >	settings = new List< PWGUISettings >();
-
-		[System.NonSerializedAttribute]
-		int						currentUsedSettings;
-		[System.NonSerializedAttribute]
-		//< Hashcode of the settingObject, index in settings list >
-		Dictionary< int, int >	hashCodeIndexes = new Dictionary< int, int >();
-
-		public  PWGUISettingsStorage()
-		{
-			int i = 0;
-			//FIXME is this working with serialization ???
-			foreach (var setting in settings)
-				hashCodeIndexes.Add(setting.GetHashCode(), i++);
-		}
-
-		public void				StartNewFrame()
-		{
-			currentUsedSettings = 0;
-		}
-
-		public T		GetSettingData< T >(/*int hashCode, */Func< T > newCallback) where T : PWGUISettings
-		{
-			T currentSetting;
-
-			//TODO: if the hashCode is found in the hashCodeIndexes dic. return his value instead of creating new object.
-
-			//TODO: if the hashcode of the object does not exists, create new one and sotre it
-
-			if (settings.Count <= currentUsedSettings)
-			{
-				currentSetting = newCallback();
-				settings.Add(currentSetting);
-				currentUsedSettings++;
-				return currentSetting;
-			}
-
-			// Debug.Log("type at: " + currentUsedSettings + ": " + settings[currentUsedSettings].GetType());
-
-			if (settings[currentUsedSettings].GetType() != typeof(T))
-			{
-				settings[currentUsedSettings] = newCallback();
-				currentSetting = (T)settings[currentUsedSettings];
-			}
-
-			currentSetting = (settings[currentUsedSettings]) as T;
-
-			currentUsedSettings++;
-			return currentSetting;
-		}
-
-		public void		MoveObjectHashCode(int oldHashCode, int newHashCode)
-		{
-			//TODO: move the object at oldHashcode position to the newHashCode 
-		}
-	}
+	}*/
 }

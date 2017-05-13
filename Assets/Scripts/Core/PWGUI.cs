@@ -7,6 +7,8 @@ using UnityEditor;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
+using System.Runtime.Serialization.Formatters.Binary;
+
 namespace PW
 {
 	public enum PWGUIStyleType {
@@ -31,10 +33,11 @@ namespace PW
 		}
 	}
 
-	public class PWGUI {
+			
+	[System.SerializableAttribute]
+	public class PWGUIManager {
 
-		public static Rect						currentWindowRect;
-		public static PWGUISettingsStorage		currentGUISettingsStorage;
+		public Rect			currentWindowRect;
 
 		static Texture2D	ic_color;
 		static Texture2D	ic_edit;
@@ -48,7 +51,40 @@ namespace PW
 		[System.NonSerializedAttribute]
 		static MethodInfo	gradientField;
 
-		static PWGUI() {
+		[SerializeField]
+		List< PWGUISettings >	settingsStorage;
+		int						currentSettingCount = 0;
+
+		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings
+		{
+			if (settingsStorage == null)
+				settingsStorage = new List< PWGUISettings >();
+			
+			if (currentSettingCount == settingsStorage.Count)
+			{
+				var s = newGUISettings();
+				Debug.Log("adding new setting field: " + s.GetType() + ", total: " + settingsStorage.Count);
+
+				settingsStorage.Add(s);
+			}
+			if (settingsStorage[currentSettingCount].GetType() != typeof(T))
+			{
+				//try cast, if fails create a new object
+				T ret = settingsStorage[currentSettingCount] as T;
+				if (ret != null)
+					return ret;
+				Debug.Log("type mismatch and cast fail, creating a new insatnce !");
+				settingsStorage[currentSettingCount] = newGUISettings();
+			}
+			return settingsStorage[currentSettingCount++] as T;
+		}
+
+		public void	StartFrame()
+		{
+			currentSettingCount = 0;
+			if (ic_color != null)
+				return ;
+
 			ic_color = Resources.Load("ic_color") as Texture2D;
 			ic_edit = Resources.Load("ic_edit") as Texture2D;
 			ic_settings = Resources.Load("ic_settings") as Texture2D;
@@ -67,45 +103,45 @@ namespace PW
 			);
 		}
 		
-		public static void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
 			ColorPicker(prefix, colorFieldRect, ref c, displayColorPreview);
 		}
 		
-		public static void ColorPicker(ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(ref Color c, bool displayColorPreview = true)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
 			ColorPicker(null, colorFieldRect, ref c, displayColorPreview);
 		}
 
-		public static void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true)
 		{
 			ColorPicker("", rect, ref c, displayColorPreview);
 		}
 
-		public static void ColorPicker(Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		public void ColorPicker(Rect rect, ref SerializableColor c, bool displayColorPreview = true)
 		{
 			Color color = c;
 			ColorPicker("", rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
 
-		public static void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
 		{
 			Color color = c;
 			ColorPicker(prefix, rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
 	
-		public static void ColorPicker(string prefix, Rect rect, ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, Rect rect, ref Color c, bool displayColorPreview = true)
 		{
 			var		e = Event.current;
 			Rect	iconRect = rect;
 			int		icColorSize = 18;
 
-			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
-				return new PWColorPickerSettings();
+			var fieldSettings = GetGUISettingData(() => {
+				return new PWGUISettings();
 			});
 
 			if (fieldSettings.active)
@@ -224,30 +260,30 @@ namespace PW
 			}
 		}
 		
-		public static void TextField(string prefix, ref string text, bool editable = false, GUIStyle textStyle = null)
+		public void TextField(string prefix, ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
 			TextField(prefix, EditorGUILayout.GetControlRect().position, ref text, editable, textStyle);
 		}
 
-		public static void TextField(ref string text, bool editable = false, GUIStyle textStyle = null)
+		public void TextField(ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
 			TextField(null, EditorGUILayout.GetControlRect().position, ref text, editable, textStyle);
 		}
 
-		public static void TextField(Vector2 position, ref string text, bool editable = false, GUIStyle textStyle = null)
+		public void TextField(Vector2 position, ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
 			TextField(null, position, ref text, editable, textStyle);
 		}
 
-		public static void TextField(string prefix, Vector2 textPosition, ref string text, bool editable = false, GUIStyle textFieldStyle = null)
+		public void TextField(string prefix, Vector2 textPosition, ref string text, bool editable = false, GUIStyle textFieldStyle = null)
 		{
 			Rect	textRect = new Rect(textPosition, Vector2.zero);
 			var		e = Event.current;
 
-			string controlName = "textfield-" + text.GetHashCode().ToString();
+			string	controlName = "textfield-" + text.GetHashCode().ToString();
 
-			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
-				return new PWTextSettings();
+			var fieldSettings = GetGUISettingData(() => {
+				return new PWGUISettings();
 			});
 			
 			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
@@ -317,17 +353,17 @@ namespace PW
 			}
 		}
 		
-		public static void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		public void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
 			Slider(null, ref value, ref min, ref max, step, false, false, styles);
 		}
 
-		public static void Slider(string name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		public void Slider(string name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
 			Slider(name, ref value, ref min, ref max, step, false, false, styles);
 		}
 	
-		public static void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			int		sliderLabelWidth = 30;
 
@@ -362,17 +398,17 @@ namespace PW
 			GUILayout.Label(name + value.ToString(), centeredLabel);
 		}
 		
-		public static void IntSlider(ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public void IntSlider(ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
 			IntSlider(null, ref value, ref min, ref max, step, false, false, styles);
 		}
 
-		public static void IntSlider(string name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public void IntSlider(string name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
 			IntSlider(name, ref value, ref min, ref max, step, false, false, styles);
 		}
 	
-		public static void IntSlider(string name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public void IntSlider(string name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			float		v = value;
 			float		m_min = min;
@@ -383,7 +419,7 @@ namespace PW
 			max = (int)m_max;
 		}
 
-		public static void TexturePreview(Texture tex, bool settings = true)
+		public void TexturePreview(Texture tex, bool settings = true)
 		{
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
@@ -391,13 +427,13 @@ namespace PW
 			GUILayout.Space(previewRect.width);
 		}
 
-		public static void TexturePreview(Rect previewRect, Texture tex, bool settings = true)
+		public void TexturePreview(Rect previewRect, Texture tex, bool settings = true)
 		{
 			var e = Event.current;
 
 			//create or load texture settings
-			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
-				var state = new PWTextureSettings();
+			var fieldSettings = GetGUISettingData(() => {
+				var state = new PWGUISettings();
 				state.filterMode = FilterMode.Bilinear;
 				state.scaleMode = ScaleMode.ScaleToFit;
 				state.scaleAspect = 1;
@@ -458,12 +494,12 @@ namespace PW
 			}
 		}
 		
-		public static void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true)
+		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true)
 		{
 			Sampler2DPreview(null, samp, update, settings);
 		}
 		
-		public static void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true)
+		public void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
@@ -471,8 +507,8 @@ namespace PW
 			if (!String.IsNullOrEmpty(prefix))
 				EditorGUILayout.LabelField(prefix);
 
-			var fieldSettings = currentGUISettingsStorage.GetSettingData(() => {
-				var state = new PWSampler2DSettings();
+			var fieldSettings = GetGUISettingData(() => {
+				var state = new PWGUISettings();
 				state.filterMode = FilterMode.Bilinear;
 				state.gradient = new SerializableGradient(
 					PWUtils.CreateGradient(
@@ -484,9 +520,15 @@ namespace PW
 				return state;
 			});
 
+			//recreated texture if it has been destoryed:
+			if (fieldSettings.texture == null)
+				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+			//same for the gradient:
+			if (fieldSettings.gradient == null || fieldSettings.gradient.alphaKeys == null)
+				fieldSettings.gradient = fieldSettings.serializableGradient;
+
 			Texture2D	tex = fieldSettings.texture as Texture2D;
 			Gradient	gradient = fieldSettings.gradient;
-			
 
 			if (samp.size != tex.width)
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
@@ -498,27 +540,29 @@ namespace PW
 			//draw the settings window
 			if (settings && fieldSettings.active)
 			{
-				EditorGUILayout.BeginVertical();
-				{
-					EditorGUI.BeginChangeCheck();
-					fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fieldSettings.filterMode);
-					if (EditorGUI.EndChangeCheck())
-						tex.filterMode = fieldSettings.filterMode;
-					gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
-					if (!gradient.Compare(fieldSettings.serializableGradient))
-						update = true;
-					fieldSettings.serializableGradient = (SerializableGradient)gradient;
-				}
-				EditorGUILayout.EndVertical();
-				
-				if (e.type == EventType.KeyDown && fieldSettings.active)
-				{
-					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
+				PWPopup.AddToRender(fieldSettings, () => {
+					EditorGUILayout.BeginVertical();
 					{
-						fieldSettings.InActive();
-						e.Use();
+						EditorGUI.BeginChangeCheck();
+						fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fieldSettings.filterMode);
+						if (EditorGUI.EndChangeCheck())
+							tex.filterMode = fieldSettings.filterMode;
+						gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
+						if (!gradient.Compare(fieldSettings.serializableGradient))
+							update = true;
+						fieldSettings.serializableGradient = (SerializableGradient)gradient;
 					}
-				}
+					EditorGUILayout.EndVertical();
+					
+					if (e.type == EventType.KeyDown && fieldSettings.active)
+					{
+						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
+						{
+							fieldSettings.InActive();
+							e.Use();
+						}
+					}
+				});
 			}
 			
 			//draw the setting icon and manage his events
@@ -544,7 +588,6 @@ namespace PW
 			//update the texture with the gradient
 			if (update)
 			{
-				Debug.Log("update texture !");
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				});
@@ -552,12 +595,12 @@ namespace PW
 			}
 		}
 		
-		public static void ObjectPreview(object obj, bool update)
+		public void ObjectPreview(object obj, bool update)
 		{
 			ObjectPreview(null, obj, update);
 		}
 
-		public static void ObjectPreview(string name, object obj, bool update)
+		public void ObjectPreview(string name, object obj, bool update)
 		{
 			Type objType = obj.GetType();
 

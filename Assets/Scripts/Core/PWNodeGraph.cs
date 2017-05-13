@@ -90,7 +90,7 @@ namespace PW
 
 		//for GUI settings storage
 		[SerializeField]
-		public PWGUISettingsStorage			GUISettingsStorage;
+		public PWGUIManager					PWGUI;
 
 		[System.NonSerializedAttribute]
 		IOrderedEnumerable< PWNodeComputeInfo > computeOrderSortedNodes = null;

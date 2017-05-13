@@ -220,7 +220,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.inputNode = CreateNewNode(typeof(PWNodeGraphInput), new Vector2(50, (int)(position.height / 2)));
 
 		graph.firstInitialization = "initialized";
-		graph.GUISettingsStorage = new PWGUISettingsStorage();
+		graph.PWGUI = new PWGUIManager();
 
 		graph.saveName = null;
 		graph.externalName = "New ProceduralWorld";
@@ -255,9 +255,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentGraph.isVisibleInEditor = true;
 		LoadCustomStyles();
 
-		//set and update the current GUI settings storage:
-		PWGUI.currentGUISettingsStorage = currentGraph.GUISettingsStorage;
-		PWGUI.currentGUISettingsStorage.StartNewFrame();
+		//update the current GUI settings storage:
+		currentGraph.PWGUI.StartFrame();
 
 		//text colors:
 		whiteText = new GUIStyle();

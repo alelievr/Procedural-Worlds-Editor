@@ -6,27 +6,33 @@ namespace PW
 	public struct SerializableColor
 	{
 		[SerializeField]
-		Vector4		color;
+		float		r;
+		[SerializeField]
+		float		g;
+		[SerializeField]
+		float		b;
+		[SerializeField]
+		float		a;
 
 		public SerializableColor(Color c)
 		{
-			color.x = c.r;
-			color.y = c.g;
-			color.z = c.b;
-			color.w = c.a;
+			r = c.r;
+			g = c.g;
+			b = c.b;
+			a = c.a;
 		}
 
 		public SerializableColor(Color32 c)
 		{
-			color.x = c.r / 255f;
-			color.y = c.g / 255f;
-			color.z = c.b / 255f;
-			color.w = c.a / 255f;
+			r = c.r / 255f;
+			g = c.g / 255f;
+			b = c.b / 255f;
+			a = c.a / 255f;
 		}
 
 		public Color GetColor()
 		{
-			return new Color(color.x, color.y, color.z, color.w);
+			return new Color(r, g, b, a);
 		}
 
 		public static explicit operator SerializableColor(Color c)
@@ -41,7 +47,7 @@ namespace PW
 
 		public override string ToString()
 		{
-			return "r: " + color.x + ", g: " + color.y + ", b: " + color.z + ", a: " + color.w;
+			return "r: " + r + ", g: " + g + ", b: " + b + ", a: " + a;
 		}
 	}
 }

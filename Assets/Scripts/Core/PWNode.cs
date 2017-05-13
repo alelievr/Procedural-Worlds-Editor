@@ -27,6 +27,8 @@ namespace PW
 		public int		seed;
 		public float	processTime = 0f;
 		public string	externalName;
+		[SerializeField]
+		public PWGUIManager	PWGUI;
 
 		//useful state bools
 		public bool		seedHasChanged = false;
@@ -117,6 +119,7 @@ namespace PW
 				viewHeight = 0;
 				renamable = false;
 				maxAnchorRenderHeight = 0;
+				PWGUI = new PWGUIManager();
 
 				OnNodeCreateOnce();
 
@@ -335,6 +338,7 @@ namespace PW
 
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
+			PWGUI.StartFrame();
 
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
