@@ -54,55 +54,9 @@ namespace PW
 		[SerializeField]
 		List< PWGUISettings >	settingsStorage;
 		int						currentSettingCount = 0;
-
-		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings
-		{
-			if (settingsStorage == null)
-				settingsStorage = new List< PWGUISettings >();
-			
-			if (currentSettingCount == settingsStorage.Count)
-			{
-				var s = newGUISettings();
-				Debug.Log("adding new setting field: " + s.GetType() + ", total: " + settingsStorage.Count);
-
-				settingsStorage.Add(s);
-			}
-			if (settingsStorage[currentSettingCount].GetType() != typeof(T))
-			{
-				//try cast, if fails create a new object
-				T ret = settingsStorage[currentSettingCount] as T;
-				if (ret != null)
-					return ret;
-				Debug.Log("type mismatch and cast fail, creating a new insatnce !");
-				settingsStorage[currentSettingCount] = newGUISettings();
-			}
-			return settingsStorage[currentSettingCount++] as T;
-		}
-
-		public void	StartFrame()
-		{
-			currentSettingCount = 0;
-			if (ic_color != null)
-				return ;
-
-			ic_color = Resources.Load("ic_color") as Texture2D;
-			ic_edit = Resources.Load("ic_edit") as Texture2D;
-			ic_settings = Resources.Load("ic_settings") as Texture2D;
-			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
-			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
-			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
-			settingsBackgroundTexture = PWColorPalette.ColorToTexture(PWColorPalette.GetColor("transparentBackground"));
-			centeredLabel = new GUIStyle();
-			centeredLabel.alignment = TextAnchor.MiddleCenter;
-			gradientField = typeof(EditorGUILayout).GetMethod(
-				"GradientField",
-				BindingFlags.NonPublic | BindingFlags.Static,
-				null,
-				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
-				null
-			);
-		}
 		
+	#region Color field
+
 		public void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
@@ -259,6 +213,10 @@ namespace PW
 				}
 			}
 		}
+	
+	#endregion
+
+	#region Text field
 		
 		public void TextField(string prefix, ref string text, bool editable = false, GUIStyle textStyle = null)
 		{
@@ -352,6 +310,10 @@ namespace PW
 				e.Use();
 			}
 		}
+
+	#endregion
+
+	#region Slider and IntSlider field
 		
 		public void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
@@ -418,6 +380,10 @@ namespace PW
 			min = (int)m_min;
 			max = (int)m_max;
 		}
+	
+	#endregion
+
+	#region TexturePreview field
 
 		public void TexturePreview(Texture tex, bool settings = true)
 		{
@@ -493,6 +459,10 @@ namespace PW
 				}
 			}
 		}
+
+	#endregion
+
+	#region Sampler2DPreview field
 		
 		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true)
 		{
@@ -540,25 +510,25 @@ namespace PW
 			//draw the settings window
 			if (settings && fieldSettings.active)
 			{
-				PWPopup.AddToRender(fieldSettings, () => {
+				PWPopup.AddToRender(fieldSettings, (fs) => {
 					EditorGUILayout.BeginVertical();
 					{
 						EditorGUI.BeginChangeCheck();
-						fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fieldSettings.filterMode);
+						fs.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fs.filterMode);
 						if (EditorGUI.EndChangeCheck())
-							tex.filterMode = fieldSettings.filterMode;
+							tex.filterMode = fs.filterMode;
 						gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
-						if (!gradient.Compare(fieldSettings.serializableGradient))
-							update = true;
-						fieldSettings.serializableGradient = (SerializableGradient)gradient;
+						if (!gradient.Compare(fs.serializableGradient))
+							fs.update = true;
+						fs.serializableGradient = (SerializableGradient)gradient;
 					}
 					EditorGUILayout.EndVertical();
 					
-					if (e.type == EventType.KeyDown && fieldSettings.active)
+					if (e.type == EventType.KeyDown && fs.active)
 					{
 						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
 						{
-							fieldSettings.InActive();
+							fs.InActive();
 							e.Use();
 						}
 					}
@@ -585,8 +555,10 @@ namespace PW
 				}
 			}
 
+			//TODO: regions
+
 			//update the texture with the gradient
-			if (update)
+			if (update || fieldSettings.update)
 			{
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
@@ -594,6 +566,10 @@ namespace PW
 				tex.Apply();
 			}
 		}
+
+	#endregion
+
+	#region ObjectPreview field
 		
 		public void ObjectPreview(object obj, bool update)
 		{
@@ -613,5 +589,60 @@ namespace PW
 			else
 				Debug.LogWarning("can't preview the object of type: " + obj.GetType());
 		}
+
+	#endregion
+		
+	#region Utils
+
+		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings
+		{
+			if (settingsStorage == null)
+				settingsStorage = new List< PWGUISettings >();
+			
+			if (currentSettingCount == settingsStorage.Count)
+			{
+				var s = newGUISettings();
+				Debug.Log("adding new setting field: " + s.GetType() + ", total: " + settingsStorage.Count);
+
+				settingsStorage.Add(s);
+			}
+			if (settingsStorage[currentSettingCount].GetType() != typeof(T))
+			{
+				//try cast, if fails create a new object
+				T ret = settingsStorage[currentSettingCount] as T;
+				if (ret != null)
+					return ret;
+				Debug.Log("type mismatch and cast fail, creating a new insatnce !");
+				settingsStorage[currentSettingCount] = newGUISettings();
+			}
+			return settingsStorage[currentSettingCount++] as T;
+		}
+
+		public void	StartFrame()
+		{
+			currentSettingCount = 0;
+
+			if (ic_color != null)
+				return ;
+
+			ic_color = Resources.Load("ic_color") as Texture2D;
+			ic_edit = Resources.Load("ic_edit") as Texture2D;
+			ic_settings = Resources.Load("ic_settings") as Texture2D;
+			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
+			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
+			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
+			settingsBackgroundTexture = PWColorPalette.ColorToTexture(PWColorPalette.GetColor("transparentBackground"));
+			centeredLabel = new GUIStyle();
+			centeredLabel.alignment = TextAnchor.MiddleCenter;
+			gradientField = typeof(EditorGUILayout).GetMethod(
+				"GradientField",
+				BindingFlags.NonPublic | BindingFlags.Static,
+				null,
+				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
+				null
+			);
+		}
+
+	#endregion
 	}
 }

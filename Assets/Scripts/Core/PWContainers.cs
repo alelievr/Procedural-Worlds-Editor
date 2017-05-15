@@ -213,6 +213,8 @@ namespace PW
 		//Sampler2D:
 		public FilterMode			filterMode;
 		public SerializableGradient	serializableGradient;
+		[System.NonSerializedAttribute]
+		public bool					update;
 
 		[System.NonSerializedAttribute]
 		public Gradient				gradient;
@@ -231,6 +233,7 @@ namespace PW
 		public PWGUISettings()
 		{
 			active = false;
+			update = false;
 		}
 
 		public object Active(object o)
@@ -254,28 +257,4 @@ namespace PW
 				return Active(o);
 		}
 	}
-
-	/*[System.SerializableAttribute]
-	public class PWColorPickerSettings : PWGUISettings
-	{
-	}
-
-	[System.SerializableAttribute]
-	public class PWSliderSettings : PWGUISettings {}
-
-	[System.SerializableAttribute]
-	public class PWTextSettings : PWGUISettings {}
-
-	[System.SerializableAttribute]
-	public class PWSampler2DSettings : PWGUISettings
-	{
-	}
-
-	[System.SerializableAttribute]
-	public class PWSampler3DSettings : PWGUISettings {}
-
-	[System.SerializableAttribute]
-	public class PWTextureSettings : PWGUISettings
-	{
-	}*/
 }

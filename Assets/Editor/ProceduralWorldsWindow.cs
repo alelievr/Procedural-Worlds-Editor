@@ -157,6 +157,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle whiteNodeWindow;
 	public GUIStyle whiteNodeWindowSelected;
 
+	public static GUISkin defaultSkin;
+
 #endregion
 
 #region Initialization and data baking
@@ -252,11 +254,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 
     void OnGUI()
     {
+		var e = Event.current;
 		currentGraph.isVisibleInEditor = true;
 		LoadCustomStyles();
 
-		//update the current GUI settings storage:
+		//prevent popup events to influence the rest of the GUI
+		PWPopup.eventType = e.type;
+		if (PWPopup.mouseAbove && e.type != EventType.Repaint && e.type != EventType.Layout)
+			e.type = EventType.Ignore;
+
+		//update the current GUI settings storage and clear drawed popup list:
 		currentGraph.PWGUI.StartFrame();
+		if (e.type == EventType.Layout)
+			PWPopup.ClearAll();
 
 		//text colors:
 		whiteText = new GUIStyle();
@@ -294,7 +304,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		parentGraph.ForeachAllNodes((n) => { if (n != null && !n.unserializeInitialized) n.RunNodeAwake(); }, true, true);
 
 		//esc key event:
-		if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
 		{
 			if (draggingLink)
 				StopDragLink(false);
@@ -305,7 +315,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(n => n.selected = false, false, true);
 		}
 
-		if (Event.current.type == EventType.Layout)
+		if (e.type == EventType.Layout)
 			ProcessPreviewScene(currentGraph.outputType);
 
 		if (terrainMaterializer == null)
@@ -333,22 +343,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 		DrawContextualMenu(g);
 
 		//if event, repaint
-		if (Event.current.type == EventType.mouseDown
-			|| Event.current.type == EventType.mouseDrag
-			|| Event.current.type == EventType.mouseUp
-			|| Event.current.type == EventType.scrollWheel
-			|| Event.current.type == EventType.KeyDown
-			|| Event.current.type == EventType.Repaint
-			|| Event.current.type == EventType.KeyUp)
+		if (e.type == EventType.mouseDown
+			|| e.type == EventType.mouseDrag
+			|| e.type == EventType.mouseUp
+			|| e.type == EventType.scrollWheel
+			|| e.type == EventType.KeyDown
+			|| e.type == EventType.Repaint
+			|| e.type == EventType.KeyUp)
 			Repaint();
 
 		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
-		currentMousePosition = Event.current.mousePosition;
+		currentMousePosition = e.mousePosition;
 
 		//render all opened popups (at the end cause the have to be above other infos)
 		PWPopup.RenderAll();
 		
-		if (GUI.changed && Event.current.type == EventType.Layout)
+		if (GUI.changed && e.type == EventType.Layout)
 		{
 			EditorUtility.SetDirty(this);
 			EditorUtility.SetDirty(currentGraph);
@@ -741,12 +751,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 			if (e.type == EventType.MouseDown) //if event is mouse down
 			{
-				if (e.button == 2 && graphRect.Contains(e.mousePosition))
-					draggingGraph = true;
+				//TODO: remove the graph header height
+				if (graphRect.Contains(e.mousePosition))
+				{
+					if (e.button == 2 || (e.command && e.button == 0))
+						draggingGraph = true;
+				}
 				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
 					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
 					&& mouseAboveSubmachineIndex == -1 //and mouse is not above a submachine
-					&& e.button == 0)
+					&& e.button == 0
+					&& !e.command
+					&& !e.control)
 				{
 					selecting = true;
 					selectionRect.position = e.mousePosition;
@@ -1796,6 +1812,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//initialize if null
 		// if (breadcrumbsButtonStyle == null)
 		{
+			defaultSkin = GUI.skin;
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
 			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
 	
