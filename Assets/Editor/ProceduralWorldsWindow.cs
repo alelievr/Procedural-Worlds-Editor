@@ -157,7 +157,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle whiteNodeWindow;
 	public GUIStyle whiteNodeWindowSelected;
 
-	public static GUISkin defaultSkin;
+	public static GUISkin defaultSkin = null;
 
 #endregion
 
@@ -260,6 +260,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//prevent popup events to influence the rest of the GUI
 		PWPopup.eventType = e.type;
+		PWGUIManager.editorWindowRect = position;
 		if (PWPopup.mouseAbove && e.type != EventType.Repaint && e.type != EventType.Layout)
 			e.type = EventType.Ignore;
 
@@ -1810,7 +1811,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		// if (breadcrumbsButtonStyle == null)
+		if (navBarBackgroundStyle == null || defaultSkin == null)
 		{
 			defaultSkin = GUI.skin;
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");

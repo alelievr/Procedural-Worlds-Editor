@@ -8,40 +8,47 @@ namespace PW
 {
 	public static class PWPopup {
 
-		public static bool		shouldClose;
 		public static bool		mouseAbove {get; private set;}
 		public static EventType	eventType;
 
 		private class PWPopupData
 		{
-			public PWGUISettings			guiSettings;
-			public Action< PWGUISettings>	windowGUI;
+			public PWGUISettings	guiSettings;
+			public Action			windowGUI;
+			public bool				forceUpdate;
+			public string			name;
+			public int				popupWidth;
 
-			public PWPopupData(PWGUISettings guiSettings, Action< PWGUISettings > windowGUI)
+			public PWPopupData(PWGUISettings guiSettings, Action windowGUI, string name, int popupWidth)
 			{
 				this.guiSettings = guiSettings;
 				this.windowGUI = windowGUI;
+				this.name = name;
+				this.popupWidth = popupWidth;
+				this.forceUpdate = false;
 			}
 		}
 
 		private static List< PWPopupData > toRender = new List< PWPopupData >();
 		
 		private static bool					dragging = false;
-		private static Vector2				popupSize = new Vector2(150, 250);
 		private static GUIStyle				popupStyle;
-		private static GUIStyle				closeStyle;
+		private static GUIStyle				headerStyle;
+		private static Texture2D			closeTexture;
 
 		static PWPopup()
 		{
 			popupStyle = GUI.skin.FindStyle("Popup");
-			closeStyle = GUI.skin.FindStyle("WinBtnCloseMac");
+			closeTexture = Resources.Load< Texture2D >("ic_error");
+			headerStyle = GUI.skin.FindStyle("PopupHeader");
+			
 			mouseAbove = false;
 		}
 
-		public static void AddToRender(PWGUISettings s, Action< PWGUISettings > windowGUI)
+		public static void AddToRender(PWGUISettings s, string name, Action windowGUI, int popupWidth = 150)
 		{
 			if (Event.current.type == EventType.Layout)
-				toRender.Add(new PWPopupData(s, windowGUI));
+				toRender.Add(new PWPopupData(s, windowGUI, name, popupWidth));
 		}
 
 		public static void ClearAll()
@@ -65,30 +72,45 @@ namespace PW
 				e.type = eventType;
 			
 			Vector2 position = data.guiSettings.windowPosition;
-			int		closeIconSize = 18;
-			Rect	popupRect = new Rect(position, popupSize);
-			Rect	dragRect = new Rect(position, new Vector2(popupSize.x, 18));
-			Rect	closeIconRect = new Rect(position + new Vector2(popupSize.x, 0), new Vector2(closeIconSize, closeIconSize));
+			int		closeIconSize = 17;
+			int		headerPadding = 12;
+			Rect	popupRect = new Rect(position, new Vector2(data.popupWidth, data.guiSettings.popupHeight + 20 + 5));
+			Rect	dragRect = new Rect(position, new Vector2(data.popupWidth, 18));
+			Rect	headerRect = new Rect(dragRect.position + new Vector2(headerPadding, -1), dragRect.size - new Vector2(headerPadding * 2 + closeIconSize, 0));
+			Rect	closeIconRect = new Rect(position + new Vector2(data.popupWidth - closeIconSize - 12, 1), new Vector2(closeIconSize, closeIconSize));
 
 			if (dragRect.Contains(e.mousePosition))
 			{
 				if (e.type == EventType.MouseDown)
 					dragging = true;
 			}
-			// GUI.Label(closeIconRect, (string)null, closeStyle);
 			if (closeIconRect.Contains(e.mousePosition))
 				if (e.type == EventType.MouseUp)
 					data.guiSettings.InActive();
-			else if (e.type == EventType.MouseUp)
+			if (e.type == EventType.MouseUp)
 				dragging = false;
 			
 			if (dragging && e.type == EventType.mouseDrag)
 				data.guiSettings.windowPosition += e.delta;
 			
 			GUILayout.BeginArea(popupRect, popupStyle);
-			data.guiSettings.update = false;
-			data.windowGUI(data.guiSettings);
+			if (!data.forceUpdate)
+				data.guiSettings.update = false;
+			data.forceUpdate = false;
+			EditorGUILayout.BeginVertical();
+			data.windowGUI();
+			EditorGUILayout.EndVertical();
+			if (e.type == EventType.Repaint)
+				data.guiSettings.popupHeight = (int)GUILayoutUtility.GetLastRect().height;
+			if (data.guiSettings.update)
+				data.forceUpdate = true;
 			GUILayout.EndArea();
+			
+			GUI.color = Color.red;
+			GUI.DrawTexture(closeIconRect, closeTexture);
+			GUI.Label(headerRect, data.name, headerStyle);
+			
+			GUI.color = Color.white;
 
 			if (popupRect.Contains(e.mousePosition))
 				mouseAbove = true;

@@ -17,7 +17,6 @@ namespace PW
 			output = new Sampler2D(chunkSize);
 		}
 
-		Color c = Color.white;
 		float min, max;
 		public override void OnNodeGUI()
 		{
@@ -25,7 +24,6 @@ namespace PW
 			{
 				PWGUI.Slider("Persistance: ", ref persistance, ref min, ref max);
 				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
-				PWGUI.ColorPicker(ref c);
 			}
 			if (EditorGUI.EndChangeCheck())
 				notifyDataChanged = true;

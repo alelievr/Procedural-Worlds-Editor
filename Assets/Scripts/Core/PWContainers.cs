@@ -223,11 +223,15 @@ namespace PW
 
 		//Texture:
 		// public FilterMode		filterMode; //duplicated
-		public ScaleMode		scaleMode;
-		public float			scaleAspect;
+		public ScaleMode			scaleMode;
+		public float				scaleAspect;
 		//TODO: light-weight serializableMaterial
 		[System.NonSerializedAttribute]
-		public Material			material;
+		public Material				material;
+
+		//Editor utils:
+		[System.NonSerializedAttribute]
+		public int					popupHeight;
 		
 
 		public PWGUISettings()

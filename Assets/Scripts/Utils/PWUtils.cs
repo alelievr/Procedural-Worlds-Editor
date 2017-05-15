@@ -92,7 +92,8 @@ namespace PW
 			return grad;
 		}
 		
-		public static bool Compare(this Gradient gradient, Gradient otherGradient) {
+		public static bool Compare(this Gradient gradient, Gradient otherGradient)
+		{
 			if (gradient.alphaKeys.Length != otherGradient.alphaKeys.Length ||
 				gradient.colorKeys.Length != otherGradient.colorKeys.Length)
 				return false;
