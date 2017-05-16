@@ -139,8 +139,16 @@ namespace PW
 			LoadGraphInstances();
 			
 			//add all existing nodes to the nodesDictionary
-			foreach (var node in nodes)
-				nodesDictionary[node.windowId] = node;
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				if (nodes[i] != null)
+					nodesDictionary[nodes[i].windowId] = nodes[i];
+				else
+				{
+					nodes.RemoveAt(i);
+					i--;
+				}
+			}
 			foreach (var subgraphName in subgraphReferences)
 			{
 				var subgraph = FindGraphByName(subgraphName);

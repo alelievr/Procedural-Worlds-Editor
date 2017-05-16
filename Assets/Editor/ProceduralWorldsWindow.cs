@@ -157,8 +157,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle whiteNodeWindow;
 	public GUIStyle whiteNodeWindowSelected;
 
-	public static GUISkin defaultSkin = null;
-
 #endregion
 
 #region Initialization and data baking
@@ -1079,6 +1077,28 @@ public class ProceduralWorldsWindow : EditorWindow {
 					}
 			}
 
+			//duplicate the selected nodes if cmd+d
+			if (e.command && e.keyCode == KeyCode.D && e.type == EventType.KeyDown)
+			{
+				var dupList = new List< PWNode >();
+				foreach (var node in currentGraph.nodes)
+				{
+					if (node.selected)
+						dupList.Add(Instantiate(node));
+					node.selected = false;
+				}
+
+				foreach (var toAdd in dupList)
+				{
+					CreateNewNode(toAdd, toAdd.windowRect.position + new Vector2(40, 40), toAdd.name, true);
+					toAdd.windowId = currentGraph.localWindowIdCount++;
+					toAdd.DeleteAllLinks(false);
+					toAdd.selected = true;
+				}
+
+				e.Use();
+			}
+
 			//draw the dragging link
 			if (draggingLink)
 				DrawNodeCurve(
@@ -1099,7 +1119,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						l.linkHighlight = PWLinkHighlight.None;
 					}
 
-			//notofySetDataChanged management
+			//notifySetDataChanged management
 			bool	reloadRequested = false;
 			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {
@@ -1191,27 +1211,25 @@ public class ProceduralWorldsWindow : EditorWindow {
 		CreateNewNode((Type)type, pos, true);
 	}
 
-	PWNode	CreateNewNode(Type t, Vector2 position, bool addToNodeList = false)
+	PWNode	CreateNewNode(PWNode newNode, Vector2 position, string name, bool addToNodeList = false)
 	{
-		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
-
 		position.x = Mathf.RoundToInt(position.x);
 		position.y = Mathf.RoundToInt(position.y);
 
 		//center to the middle of the screen:
 		newNode.windowRect.position = position;
 		newNode.SetWindowId(currentGraph.localWindowIdCount++);
-		newNode.nodeTypeName = t.ToString();
+		newNode.nodeTypeName = name;
 		newNode.chunkSize = currentGraph.chunkSize;
 		newNode.seed = currentGraph.seed;
 		newNode.computeOrder = newNode.isDependent ? -1 : 0;
-		GetWindowStyleFromType(t, out newNode.windowStyle, out newNode.windowSelectedStyle);
+		GetWindowStyleFromType(newNode.GetType(), out newNode.windowStyle, out newNode.windowSelectedStyle);
 		newNode.RunNodeAwake();
 
 		if (String.IsNullOrEmpty(newNode.externalName))
 		{
-			newNode.externalName = t.Name;
-			newNode.name = t.Name;
+			newNode.externalName = newNode.GetType().Name;
+			newNode.name = newNode.GetType().Name;
 		}
 
 		AssetDatabase.AddObjectToAsset(newNode, currentGraph);
@@ -1223,6 +1241,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graphNeedReload = true;
 		
 		return newNode;
+	}
+
+	PWNode	CreateNewNode(Type t, Vector2 position, bool addToNodeList = false)
+	{
+		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
+
+		return CreateNewNode(newNode, position, t.ToString(), addToNodeList);
 	}
 
 	void DeleteSubmachine(object oid)
@@ -1412,14 +1437,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 			else if (startDragAnchor.linkCount != 0)
 			{
-				var outputNode = FindNodeByWindowId(mouseAboveAnchorInfo.windowId);
 				var inputNode = FindNodeByWindowId(startDragAnchor.windowId);
+
+				//find the link with inputNode:
+				var toRemoveLink = FindLinkFromAnchor(startDragAnchor);
+
+				var outputNode = FindNodeByWindowId(toRemoveLink.localWindowId);
 
 				//delete links:
 				outputNode.DeleteLink(mouseAboveAnchorInfo.anchorId, inputNode, startDragAnchor.anchorId);
 
 				//delete dependencies:
-				inputNode.DeleteDependency(mouseAboveAnchorInfo.windowId, mouseAboveAnchorInfo.anchorId);
+				inputNode.DeleteDependency(toRemoveLink.localWindowId, toRemoveLink.localAnchorId);
 			}
 		}
 		else if (startDragAnchor.linkCount != 0)
@@ -1811,9 +1840,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		if (navBarBackgroundStyle == null || defaultSkin == null)
+		if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
 		{
-			defaultSkin = GUI.skin;
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
 			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
 	

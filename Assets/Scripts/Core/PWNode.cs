@@ -579,15 +579,14 @@ namespace PW
 				Rect anchorSideRect = singleAnchor.anchorRect;
 				if (data.anchorType == PWAnchorType.Input)
 				{
-					anchorSideRect.position += Vector2.left * 140;
-					anchorSideRect.size += Vector2.right * 150;
+					anchorSideRect.size += new Vector2(100, 20);
 				}
 				else
 				{
-					anchorSideRect.position -= Vector2.left * 40;
-					anchorSideRect.size += Vector2.right * 150;
+					anchorSideRect.position -= new Vector2(100, 0);
+					anchorSideRect.size += new Vector2(100, 20);
 				}
-				GUI.Label(anchorSideRect, "id: " + (long)singleAnchor.id + " | links: " + singleAnchor.linkCount);
+				GUI.Label(anchorSideRect, (long)singleAnchor.id + " | " + singleAnchor.linkCount);
 			#endif
 		}
 		
@@ -819,12 +818,17 @@ namespace PW
 				}
 		}
 		
-		public void		DeleteAllLinks()
+		public void		DeleteAllLinks(bool callback = true)
 		{
-			foreach (var l in links)
-				OnNodeAnchorUnlink(l.localName, l.localIndex);
+			if (callback)
+				foreach (var l in links)
+					OnNodeAnchorUnlink(l.localName, l.localIndex);
 			links.Clear();
 			depencendies.Clear();
+
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				singleAnchor.linkCount = 0;
+			});
 		}
 
 	#endregion
