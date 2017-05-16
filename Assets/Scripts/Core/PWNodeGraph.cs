@@ -72,6 +72,10 @@ namespace PW
 		public int							chunkSize;
 		[SerializeField]
 		public int							seed;
+		[SerializeField]
+		public float						step;
+		[SerializeField]
+		public float						maxStep;
 
 		[SerializeField]
 		public PWOutputType					outputType;
@@ -308,6 +312,12 @@ namespace PW
 		{
 			this.chunkSize = chunkSize;
 			ForeachAllNodes((n) => n.chunkSize = chunkSize, true, true);
+		}
+
+		public void UpdateStep(float step)
+		{
+			this.step = step;
+			ForeachAllNodes((n) => n.step = step, true, true);
 		}
 
 		void LoadGraphInstances()

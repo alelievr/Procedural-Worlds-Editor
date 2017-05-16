@@ -24,7 +24,7 @@ namespace PW
 			set {map[x, y] = value;}
 		}
 
-		public Sampler2D(int size, float step = 1)
+		public Sampler2D(int size, float step)
 		{
 			this.map = new float[size, size];
 			this.step = step;
@@ -73,6 +73,13 @@ namespace PW
 		public int			size;
 		[NonSerializedAttribute]
 		public float		step;
+
+		public Sampler3D(int size, float step)
+		{
+			this.map = new float[size, size, size];
+			this.size = size;
+			this.step = step;
+		}
 
 		public float this[int x, int y, int z]
 		{
@@ -139,6 +146,172 @@ namespace PW
 	}
 
 	//TODO: other storage classes
+
+	/*
+	**	Biomes
+	*/
+
+	//TODO: this is not float its sampler2D x)
+
+	[System.SerializableAttribute]
+	public class BasicEdaphicData
+	{
+		public float		PH;
+		public float		drainage;
+		public float		nutrient;
+		public float		mineral;
+	}
+
+	[System.SerializableAttribute]
+	public class ComplexEdaphicData : BasicEdaphicData
+	{
+		public float		clay;
+		public float		silt;
+		public float		sand;
+		public float		coarseSand;
+	}
+
+	[System.SerializableAttribute]
+	public abstract class BiomeData {}
+
+	[System.SerializableAttribute]
+	public class BiomeLessData : BiomeData {}
+	
+	/* Height biomes */
+
+	[System.SerializableAttribute]
+	public class WaterlessBiomeHeightData : BiomeData
+	{
+		public float		height;
+	}
+
+	[System.SerializableAttribute]
+	public class BiomeHeightData : WaterlessBiomeHeightData
+	{
+		public float		waterLevel;
+	}
+
+	/* Wetness biomes */
+
+	[System.SerializableAttribute]
+	public class WaterlessWetnessBiomeData : BiomeData
+	{
+		public float		wetness;
+	}
+	
+	[System.SerializableAttribute]
+	public class WaterlessWetnessBiomeData3D : WaterlessWetnessBiomeData
+	{
+		public float		height;
+	}
+	
+	[System.SerializableAttribute]
+	public class WetnessBiomeData : WaterlessWetnessBiomeData
+	{
+		public float		waterLevel;
+	}
+	
+	[System.SerializableAttribute]
+	public class WetnessBiomeData3D : WetnessBiomeData
+	{
+		public float		height;
+	}
+
+	/* Climate biomes */
+
+	[System.SerializableAttribute]
+	public class WaterlessClimateBiomeData : BiomeData
+	{
+		public float		wetness;
+		public float		temperature;
+	}
+
+	[System.SerializableAttribute]
+	public class WaterlessClimateBiomeData3D : WaterlessClimateBiomeData
+	{
+		public float		height;
+	}
+
+	[System.SerializableAttribute]
+	public class ClimateBiomeData : WaterlessClimateBiomeData
+	{
+		public float		waterLevel;
+	}
+
+	[System.SerializableAttribute]
+	public class ClimateBiomeData3D : ClimateBiomeData
+	{
+		public float		height;
+	}
+
+	/* Enhanced climate biomes */
+	
+	[System.SerializableAttribute]
+	public class WaterlessEnhancedClimateBiomeData : BiomeData
+	{
+		public float			wetness;
+		public float			temperature;
+		public Vector2			wind;
+		public float			lighting;
+		public BasicEdaphicData	soil;
+	}
+
+	[System.SerializableAttribute]
+	public class WaterlessEnhancedClimateBiomeData3D : WaterlessEnhancedClimateBiomeData
+	{
+		public float		height;
+	}
+
+	[System.SerializableAttribute]
+	public class EnhancedClimateBiomeData : WaterlessEnhancedClimateBiomeData
+	{
+		public float		waterLevel;
+	}
+	
+	[System.SerializableAttribute]
+	public class EnhancedClimateBiomeData3D : EnhancedClimateBiomeData
+	{
+		public float		height;
+	}
+
+	/* Complex climate + edaphic biomes */
+
+	[System.SerializableAttribute]
+	public class WaterlessComplexClimateBiomeData : BiomeData
+	{
+		public float				wetness;
+		public float				temperature;
+		public Vector2				wind;
+		public float				lighting;
+		public float				air;
+		public ComplexEdaphicData	soil;
+	}
+
+	[System.SerializableAttribute]
+	public class WaterlessComplexClimateBiomeData3D : WaterlessComplexClimateBiomeData
+	{
+		public float			height;
+	}
+
+	[System.SerializableAttribute]
+	public class ComplexClimateBiomeData : WaterlessComplexClimateBiomeData
+	{
+		public float			waterLevel;
+	}
+
+	[System.SerializableAttribute]
+	public class ComplexClimateBiomeData3D : ComplexClimateBiomeData
+	{
+		public float			height;
+	}
+
+	/* Custom biome */
+
+	[System.SerializableAttribute]
+	public class CustomBiomeData : BiomeData
+	{
+		public float[]			datas;
+	}
 
 	/*
 	**	Utils

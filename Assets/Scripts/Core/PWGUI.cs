@@ -200,7 +200,6 @@ namespace PW
 				EditorGUIUtility.DrawColorSwatch(colorPreviewRect, color);
 			}
 			
-
 			//actions if clicked on/outside of the icon
 			GUI.DrawTexture(iconRect, ic_color);
 			if (e.type == EventType.MouseDown && e.button == 0)
@@ -318,6 +317,11 @@ namespace PW
 	#endregion
 
 	#region Slider and IntSlider field
+
+		public void Slider(ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		{
+			Slider(null, ref value, ref min, ref max, step, editableMin, editableMax, styles);
+		}
 		
 		public void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
@@ -332,6 +336,7 @@ namespace PW
 		public void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			int		sliderLabelWidth = 30;
+			var		e = Event.current;
 
 			foreach (var style in styles)
 				if (style.type == PWGUIStyleType.PrefixLabelWidth)
@@ -340,28 +345,58 @@ namespace PW
 			if (name == null)
 				name = "";
 
-			EditorGUILayout.BeginHorizontal();
-			{
-				EditorGUI.BeginDisabledGroup(!editableMin);
-					min = EditorGUILayout.FloatField(min, GUILayout.Width(sliderLabelWidth));
-				EditorGUI.EndDisabledGroup();
-				
-				if (step != 0)
-				{
-					float m = 1 / step;
-					value = Mathf.Round(GUILayout.HorizontalSlider(value, min, max) * m) / m;
-				}
-				else
-					value = GUILayout.HorizontalSlider(value, min, max);
-
-				EditorGUI.BeginDisabledGroup(!editableMax);
-					max = EditorGUILayout.FloatField(max, GUILayout.Width(sliderLabelWidth));
-				EditorGUI.EndDisabledGroup();
-			}
-			EditorGUILayout.EndHorizontal();
+			var fieldSettings = GetGUISettingData(() => {
+				return new PWGUISettings();
+			});
 			
-			GUILayout.Space(-4);
-			GUILayout.Label(name + value.ToString(), centeredLabel);
+			EditorGUILayout.BeginVertical();
+			{
+				EditorGUILayout.BeginHorizontal();
+				{
+					EditorGUI.BeginDisabledGroup(!editableMin);
+						min = EditorGUILayout.FloatField(min, GUILayout.Width(sliderLabelWidth));
+					EditorGUI.EndDisabledGroup();
+					
+					if (step != 0)
+					{
+						float m = 1 / step;
+						value = Mathf.Round(GUILayout.HorizontalSlider(value, min, max) * m) / m;
+					}
+					else
+						value = GUILayout.HorizontalSlider(value, min, max);
+	
+					EditorGUI.BeginDisabledGroup(!editableMax);
+						max = EditorGUILayout.FloatField(max, GUILayout.Width(sliderLabelWidth));
+					EditorGUI.EndDisabledGroup();
+				}
+				EditorGUILayout.EndHorizontal();
+				
+				GUILayout.Space(-4);
+				EditorGUILayout.BeginHorizontal();
+				{
+					if (!fieldSettings.active)
+					{
+						GUILayout.Label(name + value.ToString(), centeredLabel);
+						Rect valueRect = GUILayoutUtility.GetLastRect();
+						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.clickCount == 2)
+							fieldSettings.Active(value);
+					}
+					else
+					{
+						GUI.SetNextControlName("slider-value-" + value.GetHashCode());
+						GUILayout.FlexibleSpace();
+						value = EditorGUILayout.FloatField(value, GUILayout.Width(50));
+						Rect valueRect = GUILayoutUtility.GetLastRect();
+						GUILayout.FlexibleSpace();
+						if (!valueRect.Contains(e.mousePosition) && e.isMouse || (e.isKey && e.keyCode == KeyCode.Return))
+							{ fieldSettings.InActive(); e.Use(); }
+						if (e.isKey && e.keyCode == KeyCode.Escape)
+							{ value = (float)fieldSettings.InActive(); e.Use(); }
+					}
+				}
+				EditorGUILayout.EndHorizontal();
+			}
+			EditorGUILayout.EndVertical();
 		}
 		
 		public void IntSlider(ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)

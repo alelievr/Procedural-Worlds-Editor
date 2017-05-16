@@ -26,7 +26,7 @@ namespace PW
 
 		public override	void OnNodeCreate()
 		{
-			mask = new Sampler2D(chunkSize);
+			mask = new Sampler2D(chunkSize, step);
 		}
 
 		void	CreateNoiseMask()

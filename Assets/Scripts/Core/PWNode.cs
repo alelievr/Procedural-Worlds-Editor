@@ -25,6 +25,7 @@ namespace PW
 		public Vector3	chunkPosition = Vector3.zero;
 		public int		chunkSize = 16;
 		public int		seed;
+		public float	step;
 		public float	processTime = 0f;
 		public string	externalName;
 		[SerializeField]
@@ -34,12 +35,13 @@ namespace PW
 		public bool		seedHasChanged = false;
 		public bool		positionHasChanged = false;
 		public bool		chunkSizeHasChanged = false;
+		public bool		stepHasChanged = false;
 		public bool		inputHasChanged = false;
 		public bool		outputHasChanged = false;
 		public bool		justReloaded = false;
 		public bool		notifyDataChanged = false;
 		public bool		reloadRequested = false;
-		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
+		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
 		public bool		isDependent {get; private set; }
 
 	#region Internal Node datas and style
@@ -67,6 +69,7 @@ namespace PW
 		Vector3				oldChunkPosition;
 		int					oldSeed;
 		int					oldChunkSize;
+		float				oldStep;
 		Pair< string, int >	lastAttachedLink = null;
 
 		PWAnchorInfo		anchorUnderMouse;
@@ -144,6 +147,8 @@ namespace PW
 				return PWColorPalette.GetColor("yellowAnchor");
 			else if (t.IsSubclassOf(typeof(ChunkData)))
 				return PWColorPalette.GetColor("blueAnchor");
+			else if (t.IsSubclassOf(typeof(BiomeData)))
+				return PWColorPalette.GetColor("purpleAnchor");
 			else if (t == typeof(Sampler2D) || t == typeof(Sampler3D))
 				return PWColorPalette.GetColor("greenAnchor");
 			else if (t == typeof(PWValues) || t == typeof(PWValue))
@@ -618,20 +623,6 @@ namespace PW
 				GUI.DrawTexture(renameIconRect, editIcon);
 				GUI.color = Color.white;
 
-				if (renameIconRect.Contains(e.mousePosition))
-				{
-					if (e.type == EventType.Used) //used by drag
-					{
-						windowNameEdit = true;
-						GUI.FocusControl(renameNodeField);
-						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-						if (te != null)
-							te.SelectAll();
-					}
-					else if (e.type == EventType.MouseDown)
-						windowNameEdit = false;
-				}
-
 				if (windowNameEdit)
 				{
 					GUI.SetNextControlName(renameNodeField);
@@ -648,8 +639,23 @@ namespace PW
 						{
 							windowNameEdit = false;
 							GUI.FocusControl(null);
+							e.Use();
 						}
 					}
+				}
+				
+				if (renameIconRect.Contains(e.mousePosition))
+				{
+					if (e.type == EventType.Used) //used by drag
+					{
+						windowNameEdit = true;
+						GUI.FocusControl(renameNodeField);
+						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+						if (te != null)
+							te.SelectAll();
+					}
+					else if (e.type == EventType.MouseDown)
+						windowNameEdit = false;
 				}
 			}
 		}
@@ -1011,6 +1017,8 @@ namespace PW
 				positionHasChanged = true;
 			if (oldChunkSize != chunkSize)
 				chunkSizeHasChanged = true;
+			if (oldStep != step)
+				stepHasChanged = true;
 		}
 
 		public void		EndFrameUpdate()
@@ -1019,6 +1027,7 @@ namespace PW
 			oldSeed = seed;
 			oldChunkPosition = chunkPosition;
 			oldChunkSize = chunkSize;
+			oldStep = step;
 			seedHasChanged = false;
 			positionHasChanged = false;
 			chunkSizeHasChanged = false;
@@ -1026,6 +1035,7 @@ namespace PW
 			outputHasChanged = false;
 			reloadRequested = false;
 			justReloaded = false;
+			stepHasChanged = false;
 		}
 		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)

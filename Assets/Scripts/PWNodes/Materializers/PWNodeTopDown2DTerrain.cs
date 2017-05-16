@@ -17,7 +17,7 @@ namespace PW
 		{
 			name = "2D TopDown terrain";
 			samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-			texture = new Sampler2D(chunkSize);
+			texture = new Sampler2D(chunkSize, step);
 			terrainOutput = new TopDown2DData();
 		}
 

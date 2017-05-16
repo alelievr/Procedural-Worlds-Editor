@@ -14,7 +14,7 @@ namespace PW
 		public override void OnNodeCreate()
 		{
 			name = "Perlin noise 2D";
-			output = new Sampler2D(chunkSize);
+			output = new Sampler2D(chunkSize, step);
 		}
 
 		float min, max;

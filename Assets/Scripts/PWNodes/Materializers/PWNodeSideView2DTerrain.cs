@@ -14,7 +14,7 @@ namespace PW
 		public override void OnNodeCreate()
 		{
 			name = "2D SideView terrain";
-			texture = new Sampler2D(chunkSize);
+			texture = new Sampler2D(chunkSize, step);
 		}
 
 		public override void OnNodeGUI()
@@ -22,7 +22,7 @@ namespace PW
 			EditorGUILayout.LabelField("MAP:");
 			
 			if (chunkSizeHasChanged)
-				texture = new Sampler2D(chunkSize);
+				texture = new Sampler2D(chunkSize, step);
 			
 			PWGUI.Sampler2DPreview("perlinControlName", texture, needUpdate);
 		}

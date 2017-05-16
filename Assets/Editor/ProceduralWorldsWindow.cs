@@ -134,6 +134,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	public GUIStyle nodeSelectorTitleStyle;
 	public GUIStyle	nodeSelectorCaseStyle;
 	public GUIStyle	selectionStyle;
+	public GUIStyle	prefixLabelStyle;
 
 	public GUIStyle	testNodeWinow;
 	public GUIStyle blueNodeWindow;
@@ -189,15 +190,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Slider", typeof(PWNodeSlider));
 		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
 			"Add", typeof(PWNodeAdd));
-		AddToSelector("Debug", "orangeNode", orangeNodeWindow, orangeNodeWindowSelected,
-			"DebugLog", typeof(PWNodeDebugLog));
-		AddToSelector("Noise masks", "greenNode", greenNodeWindow, greenNodeWindowSelected,
-			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+		AddToSelector("Misc", "greenNode", greenNodeWindow, greenNodeWindowSelected,
+			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask),
+			"Biome switch", typeof(PWNodeBiomeSwitch));
 		AddToSelector("Noises", "blueNode", blueNodeWindow, blueNodeWindowSelected,
 			"Perlin noise 2D", typeof(PWNodePerlinNoise2D));
 		AddToSelector("Materializers", "purpleNode", purpleNodeWindow, purpleNodeWindowSelected,
 			"SideView 2D terrain", typeof(PWNodeSideView2DTerrain),
 			"TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
+		AddToSelector("Debug", "orangeNode", orangeNodeWindow, orangeNodeWindowSelected,
+			"DebugLog", typeof(PWNodeDebugLog));
 		AddToSelector("Custom", "whiteNode", whiteNodeWindow, whiteNodeWindowSelected);
 	}
 
@@ -214,6 +216,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		
 		graph.localWindowIdCount = 0;
 		graph.chunkSize = 16;
+		graph.step = 1;
+		graph.maxStep = 4;
 		
 		graph.parentReference = null;
 		graph.outputNode = CreateNewNode(typeof(PWNodeGraphOutput), new Vector2(position.width - 100, (int)(position.height / 2)));
@@ -614,6 +618,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					MovePreviewCamera(new Vector2(-move.x / 16, move.y / 16));
 				}
 
+				//seed
 				EditorGUI.BeginChangeCheck();
 				GUI.SetNextControlName("seed");
 				parentGraph.seed = EditorGUILayout.IntField("Seed", parentGraph.seed);
@@ -631,6 +636,19 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (EditorGUI.EndChangeCheck())
 				{
 					parentGraph.UpdateChunkSize(parentGraph.chunkSize);
+					graphNeedReload = true;
+				}
+
+				//step:
+				EditorGUI.BeginChangeCheck();
+				float min = 0.05f;
+				EditorGUILayout.BeginHorizontal();
+				EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
+				parentGraph.PWGUI.Slider(ref parentGraph.step, ref min, ref parentGraph.maxStep, 0.01f, false, true);
+				EditorGUILayout.EndHorizontal();
+				if (EditorGUI.EndChangeCheck())
+				{
+					parentGraph.UpdateStep(parentGraph.step);
 					graphNeedReload = true;
 				}
 
@@ -859,7 +877,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
 				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
-			if (mouseAboveAnchor.mouseAbove)
+			if (mouseAboveAnchor.mouseAbove && PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchor))
 			{
 				StopDragLink(true);
 
@@ -1077,24 +1095,42 @@ public class ProceduralWorldsWindow : EditorWindow {
 					}
 			}
 
-			//duplicate the selected nodes if cmd+d
+			//duplicate selected items if cmd+d:
 			if (e.command && e.keyCode == KeyCode.D && e.type == EventType.KeyDown)
 			{
-				var dupList = new List< PWNode >();
+				//duplicate the selected nodes
+				var dupnList = new List< PWNode >();
 				foreach (var node in currentGraph.nodes)
 				{
 					if (node.selected)
-						dupList.Add(Instantiate(node));
+						dupnList.Add(Instantiate(node));
 					node.selected = false;
 				}
 
-				foreach (var toAdd in dupList)
+				foreach (var toAdd in dupnList)
 				{
 					CreateNewNode(toAdd, toAdd.windowRect.position + new Vector2(40, 40), toAdd.name, true);
 					toAdd.windowId = currentGraph.localWindowIdCount++;
 					toAdd.DeleteAllLinks(false);
 					toAdd.selected = true;
 				}
+
+				//duplicate selected subgraphs
+/*				var dupgList = new List< PWNodeGraph >();
+				foreach (var subgraphName in currentGraph.subgraphReferences)
+				{
+					PWNodeGraph pwng = parentGraph.FindGraphByName(subgraphName);
+
+					if (pwng.externalGraphNode.selected)
+						dupgList.Add(Instantiate(pwng));
+				}
+
+				foreach (var toAdd in dupgList)
+				{
+					CreateNewNode(toAdd.externalGraphNode, toAdd.externalGraphNode.windowRect.position + new Vector2(40, 40), toAdd.externalName, true);
+
+					//TODO: duplicate inner nodes too
+				}*/
 
 				e.Use();
 			}
@@ -1435,7 +1471,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 			}
-			else if (startDragAnchor.linkCount != 0)
+			else if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output && startDragAnchor.linkCount != 0)
 			{
 				var inputNode = FindNodeByWindowId(startDragAnchor.windowId);
 
@@ -1840,7 +1876,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
+		// if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
 		{
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
 			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
@@ -1858,6 +1894,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			panelBackgroundStyle = PWGUISkin.FindStyle("PanelBackground");
 	
 			testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
+
+			prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
 	
 			blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
 			blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
