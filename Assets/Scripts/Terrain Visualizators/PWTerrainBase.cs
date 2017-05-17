@@ -59,7 +59,17 @@ namespace PW
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.
 			object firstOutput = graphOutput.inputValues.At(0);
-			return (ChunkData)firstOutput; //return the first value of output
+			if (firstOutput != null)
+			{
+				if ( firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
+					return (ChunkData)firstOutput; //return the first value of output
+				else
+				{
+					Debug.LogWarning("graph first output is not a ChunkData");
+					return null;
+				}
+			}
+			return null;
 		}
 
 		public virtual object OnChunkCreate(ChunkData terrainData, Vector3 pos)

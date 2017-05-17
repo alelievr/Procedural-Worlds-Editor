@@ -497,12 +497,12 @@ namespace PW
 
 	#region Sampler2DPreview field
 		
-		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true)
+		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
-			Sampler2DPreview(null, samp, update, settings);
+			Sampler2DPreview(null, samp, update, settings, fm);
 		}
 		
-		public void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true)
+		public void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
@@ -512,7 +512,7 @@ namespace PW
 
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();
-				state.filterMode = FilterMode.Bilinear;
+				state.filterMode = fm;
 				state.gradient = new SerializableGradient(
 					PWUtils.CreateGradient(
 						new KeyValuePair< float, Color >(0, Color.black),
@@ -520,6 +520,7 @@ namespace PW
 					)
 				);
 				state.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				state.texture.filterMode = fm;
 				return state;
 			});
 
@@ -571,23 +572,26 @@ namespace PW
 				});
 			}
 			
-			//draw the setting icon and manage his events
-			int icSettingsSize = 16;
-			int	icSettingsPadding = 4;
-			Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
-
-			GUI.DrawTexture(icSettingsRect, ic_settings);
-			if (e.type == EventType.MouseDown && e.button == 0)
+			if (settings)
 			{
-				if (icSettingsRect.Contains(e.mousePosition))
+				//draw the setting icon and manage his events
+				int icSettingsSize = 16;
+				int	icSettingsPadding = 4;
+				Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
+	
+				GUI.DrawTexture(icSettingsRect, ic_settings);
+				if (e.type == EventType.MouseDown && e.button == 0)
 				{
-					fieldSettings.Invert(null);
-					e.Use();
-				}
-				else if (fieldSettings.active)
-				{
-					fieldSettings.InActive();
-					e.Use();
+					if (icSettingsRect.Contains(e.mousePosition))
+					{
+						fieldSettings.Invert(null);
+						e.Use();
+					}
+					else if (fieldSettings.active)
+					{
+						fieldSettings.InActive();
+						e.Use();
+					}
 				}
 			}
 
@@ -598,6 +602,7 @@ namespace PW
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				});
 				tex.Apply();
+				fieldSettings.update = false;
 			}
 		}
 
@@ -674,6 +679,19 @@ namespace PW
 				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
 				null
 			);
+		}
+
+		public void SetGradientForField(int fieldIndex, Gradient g)
+		{
+			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+
+			settingsStorage[fieldIndex].gradient = g;
+			settingsStorage[fieldIndex].serializableGradient = (SerializableGradient)g;
+			settingsStorage[fieldIndex].update = true;
 		}
 
 	#endregion

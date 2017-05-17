@@ -9,10 +9,17 @@ namespace PW
 	**	Graph calculus storage classes (must not be serialized)
 	*/
 
+	public enum SamplerType
+	{
+		Sampler2D,
+		Sampler3D,
+	}
+
 	public abstract class Sampler
 	{
-		public int		size;
-		public float	step;
+		public int			size;
+		public float		step;
+		public SamplerType	type;
 	}
 
 	public class Sampler2D : Sampler
@@ -31,6 +38,7 @@ namespace PW
 			this.map = new float[size, size];
 			this.step = step;
 			this.size = size;
+			this.type = SamplerType.Sampler2D;
 		}
 
 		public void Resize(int size)
@@ -77,6 +85,7 @@ namespace PW
 			this.map = new float[size, size, size];
 			this.size = size;
 			this.step = step;
+			this.type = SamplerType.Sampler3D;
 		}
 
 		public float this[int x, int y, int z]
@@ -149,8 +158,6 @@ namespace PW
 	**	Biomes
 	*/
 
-	//TODO: this is not float its sampler2D x)
-
 	[System.SerializableAttribute]
 	public enum BiomeDataType
 	{
@@ -200,7 +207,6 @@ namespace PW
 	{
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
-		public bool					aquatic;
 		
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
@@ -222,6 +228,7 @@ namespace PW
 	public class BiomeData3D
 	{
 		public float				waterLevel;
+		public Sampler2D			waterHeight;
 		
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;

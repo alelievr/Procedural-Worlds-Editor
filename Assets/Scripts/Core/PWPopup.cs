@@ -15,7 +15,6 @@ namespace PW
 		{
 			public PWGUISettings	guiSettings;
 			public Action			windowGUI;
-			public bool				forceUpdate;
 			public string			name;
 			public int				popupWidth;
 
@@ -25,7 +24,6 @@ namespace PW
 				this.windowGUI = windowGUI;
 				this.name = name;
 				this.popupWidth = popupWidth;
-				this.forceUpdate = false;
 			}
 		}
 
@@ -94,16 +92,11 @@ namespace PW
 				data.guiSettings.windowPosition += e.delta;
 			
 			GUILayout.BeginArea(popupRect, popupStyle);
-			if (!data.forceUpdate)
-				data.guiSettings.update = false;
-			data.forceUpdate = false;
 			EditorGUILayout.BeginVertical();
 			data.windowGUI();
 			EditorGUILayout.EndVertical();
 			if (e.type == EventType.Repaint)
 				data.guiSettings.popupHeight = (int)GUILayoutUtility.GetLastRect().height;
-			if (data.guiSettings.update)
-				data.forceUpdate = true;
 			GUILayout.EndArea();
 			
 			GUI.color = Color.red;

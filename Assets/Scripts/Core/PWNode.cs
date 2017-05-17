@@ -46,7 +46,9 @@ namespace PW
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
-		static GUIStyle 	renameNodeTextFieldStyle;
+		static GUIStyle 	renameNodeTextFieldStyle = null;
+		static GUIStyle		inputAnchorLabelStyle = null;
+		static GUIStyle		outputAnchorLabelStyle = null;
 		
 		static Texture2D	errorIcon = null;
 		static Texture2D	editIcon = null;
@@ -287,12 +289,12 @@ namespace PW
 			}
 
 			//remove inhexistants dictionary entries:
+			var toRemoveKeys = new List< string >();
 			foreach (var kp in propertyDatas)
 				if (!actualFields.Contains(kp.Key))
-				{
-					Debug.Log("removed " + kp.Key);
-					propertyDatas.Remove(kp.Key);
-				}
+					toRemoveKeys.Add(kp.Key);
+			foreach (var toRemoveKey in toRemoveKeys)
+				propertyDatas.Remove(toRemoveKey);
 		}
 
 	#endregion
@@ -340,6 +342,9 @@ namespace PW
 				anchorDisabledTexture = GUI.skin.box.active.background;
 				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("RenameNodetextField"));
 			}
+			//TODO: put this in the if above
+			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
+			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
@@ -550,18 +555,20 @@ namespace PW
 
 			}
 			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
-			GUI.color = Color.white;
 
-			if (anchorName != null)
+			if (!String.IsNullOrEmpty(anchorName))
 			{
 				Rect	anchorNameRect = singleAnchor.anchorRect;
+				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
 				if (data.anchorType == PWAnchorType.Input)
-					anchorNameRect.position += new Vector2(20, -4);
+					anchorNameRect.position += new Vector2(-6, -3);
 				else
-					anchorNameRect.position += new Vector2(-30, -4);
-				anchorNameRect.size = new Vector2(windowRect.size.x / 2 - 10, 18);
-				GUI.Label(anchorNameRect, anchorName, GUI.skin.label);
+					anchorNameRect.position += new Vector2(-textSize.x - 6, -3);
+				anchorNameRect.size = textSize + new Vector2(25, 0); //add the anchorLabel size
+				GUI.depth = 10;
+				GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
 			}
+			GUI.color = Color.white;
 			
 			if (!singleAnchor.enabled)
 				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);

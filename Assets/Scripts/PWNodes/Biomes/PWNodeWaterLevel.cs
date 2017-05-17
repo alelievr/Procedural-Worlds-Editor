@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System;
-using System.Linq;
 
 namespace PW
 {
 	public class PWNodeWaterLevel : PWNode {
 
-		[PWInput]
+		[PWInput("Terrain Input")]
 		public Sampler		terrainNoise;
 
-		[PWOutput]
-		public BiomeData	biomeData;
+		[PWOutput("terrestrial")]
+		[PWOffset(5)]
+		public BiomeData	terrestrialBiomeData;
+		[PWOutput("aquatic")]
+		[PWOffset(10)]
+		public BiomeData	aquaticBiomeData;
 
 		[SerializeField]
 		float				waterLevel;
@@ -27,21 +29,25 @@ namespace PW
 		public override void OnNodeCreateOnce()
 		{
 			mapMin = 0;
-			mapMax = 1;
+			mapMax = 100;
+			waterLevel = 50;
 		}
 
 		void UpdateGradient()
 		{
 			waterGradient = PWUtils.CreateGradient(GradientMode.Fixed, 
-				new KeyValuePair< float, Color >(0, Color.white),
-				new KeyValuePair< float, Color >(0.5f, Color.blue));
+				new KeyValuePair< float, Color >(waterLevel / (mapMax - mapMin), Color.white),
+				new KeyValuePair< float, Color >(1, Color.blue));
+			PWGUI.SetGradientForField(0, waterGradient);
 		}
 		
 		public override void OnNodeGUI()
 		{
-			if (biomeData != null)
+			GUILayout.Space(GUI.skin.label.lineHeight * 2.5f);
+				
+			if (terrestrialBiomeData != null)
 			{
-				PWBiomeUtils.DrawBiomeInfos(biomeData);
+				PWBiomeUtils.DrawBiomeInfos(terrestrialBiomeData);
 				EditorGUILayout.Separator();
 			}
 
@@ -51,7 +57,8 @@ namespace PW
 				waterLevel = EditorGUILayout.FloatField("WaterLevel", waterLevel);
 	
 				if (terrainNoise != null)
-					if (terrainNoise.GetType() == typeof(Sampler2D))
+				{
+					if (terrainNoise.type == SamplerType.Sampler2D)
 					{
 						EditorGUILayout.LabelField("Map terrain values:");
 						EditorGUILayout.BeginHorizontal();
@@ -60,24 +67,37 @@ namespace PW
 						mapMax = EditorGUILayout.FloatField("to", mapMax);
 						EditorGUILayout.EndHorizontal();
 	
-						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate);
+						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate, false, FilterMode.Point);
 					}
+					if (waterGradient == null || EditorGUI.EndChangeCheck())
+						UpdateGradient();
+				}
 			}
-			if (EditorGUI.EndChangeCheck())
-				UpdateGradient();
 		}
 
 		public override void OnNodeProcess()
 		{
-			if (biomeData == null)
+			if (terrestrialBiomeData == null)
 			{
-				biomeData = new BiomeData();
-				biomeData.waterLevel = waterLevel;
+				terrestrialBiomeData = new BiomeData();
+				terrestrialBiomeData.waterLevel = waterLevel;
+				aquaticBiomeData = terrestrialBiomeData;
 			}
 			if (needUpdate)
 			{
-				biomeData.terrain = terrainNoise as Sampler2D;
-				biomeData.terrain3D = terrainNoise as Sampler3D;
+				terrestrialBiomeData.terrain = terrainNoise as Sampler2D;
+				terrestrialBiomeData.terrain3D = terrainNoise as Sampler3D;
+
+				//TODO: map the noise values
+				//TODO; compute the waterHeight with the mapped noise:
+				if (terrainNoise.type == SamplerType.Sampler2D)
+				{
+					terrestrialBiomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+					PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+					(terrainNoise as Sampler2D).Foreach((x, y, val) => {
+						terrestrialBiomeData.waterHeight[x, y] = waterLevel - val;
+					});
+				}
 			}
 		}
 
