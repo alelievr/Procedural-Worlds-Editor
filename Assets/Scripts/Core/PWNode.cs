@@ -145,11 +145,11 @@ namespace PW
 		{
 			if (t == typeof(float) || t == typeof(Vector2) || t == typeof(Vector3) || t == typeof(Vector4))
 				return PWColorPalette.GetColor("yellowAnchor");
-			else if (t.IsSubclassOf(typeof(ChunkData)))
+			else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 				return PWColorPalette.GetColor("blueAnchor");
-			else if (t.IsSubclassOf(typeof(BiomeData)))
+			else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
 				return PWColorPalette.GetColor("purpleAnchor");
-			else if (t == typeof(Sampler2D) || t == typeof(Sampler3D))
+			else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
 				return PWColorPalette.GetColor("greenAnchor");
 			else if (t == typeof(PWValues) || t == typeof(PWValue))
 				return PWColorPalette.GetColor("whiteAnchor");
@@ -920,6 +920,8 @@ namespace PW
 
 		static bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
 		{
+			bool ret = false;
+
 			if ((fromType != typeof(PWValues) && to.fieldType != typeof(PWValues)) //exclude PWValues to simple assignation (we need to check with allowedTypes)
 				&& (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object)))
 			{
@@ -944,7 +946,7 @@ namespace PW
 							if (verbose)
 								Debug.Log("checking assignable from " + firstT + " to " + toT);
 							if (firstT.IsAssignableFrom(toT))
-								return true;
+								ret = true;
 						}
 					}
 					else
@@ -952,17 +954,19 @@ namespace PW
 						if (verbose)
 							Debug.Log("checking assignable from " + firstT + " to " + secondType);
 						if (firstT.IsAssignableFrom(secondType))
-							return true;
+							ret = true;
 					}
 			}
 			else
 			{
 				if (verbose)
-					Debug.Log("checking assignable from " + fromType + " to " + to.fieldType);
-				if (fromType.IsAssignableFrom(to.fieldType))
-					return true;
+					Debug.Log("non-generic types, checking assignable from " + fromType + " to " + to.fieldType);
+				if (fromType.IsAssignableFrom(to.fieldType) || to.fieldType.IsAssignableFrom(fromType))
+					ret = true;
 			}
-			return false;
+			if (verbose)
+				Debug.Log("result: " + ret);
+			return ret;
 		}
 
 		public static bool		AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)

@@ -122,6 +122,7 @@ namespace PW
 			typeof(PWNodePerlinNoise2D),
 			typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
 			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeGraphExternal),
+			typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel), typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch),
 		};
 
 		void BakeNode(Type t)

@@ -73,8 +73,13 @@ namespace PW
 			debugTexture.Apply();
 			GUI.DrawTexture(rect, debugTexture);
 		}
-
+		
 		public static Gradient CreateGradient(params KeyValuePair< float, Color>[] datas)
+		{
+			return CreateGradient(GradientMode.Blend, datas);
+		}
+
+		public static Gradient CreateGradient(GradientMode mode, params KeyValuePair< float, Color>[] datas)
 		{
 			Gradient			grad = new Gradient();
 			GradientColorKey[]	colorKeys = new GradientColorKey[datas.Length];
@@ -88,6 +93,7 @@ namespace PW
 				alphaKeys[i].alpha = datas[i].Value.a;
 			}
 			grad.SetKeys(colorKeys, alphaKeys);
+			grad.mode = mode;
 
 			return grad;
 		}

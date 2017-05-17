@@ -616,7 +616,7 @@ namespace PW
 
 			if (objType == typeof(Sampler2D))
 				Sampler2DPreview(name, obj as Sampler2D, update);
-			else if (obj.GetType().IsInstanceOfType(typeof(Object)))
+			else if (obj.GetType().IsSubclassOf(typeof(Object)))
 			{
 				//unity object preview
 			}

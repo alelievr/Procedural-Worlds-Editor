@@ -881,7 +881,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
 				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
-			if (mouseAboveAnchor.mouseAbove && PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchor))
+			if (mouseAboveAnchor.mouseAbove && PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchor, true))
 			{
 				StopDragLink(true);
 

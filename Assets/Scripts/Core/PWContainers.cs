@@ -154,35 +154,10 @@ namespace PW
 	[System.SerializableAttribute]
 	public enum BiomeDataType
 	{
-		BiomeLess,
-
-		WaterlessHeight,
-		Height,
-		WaterlessHeight3D,
-		Height3D,
-
-		WaterlessWetness,
-		Wetness,
-		WaterlessWetness3D,
-		Wetness3D,
-
-		WaterlessClimate,
-		Climate,
-		WaterlessClimate3D,
-		Climate3D,
-
-		WaterlessEnhancedClimate,
-		EnhancedClimate,
-		WaterlessEnhancedClimate3D,
-		EnhancedClimate3D,
-
-		WaterlessComplexClimate,
-		ComplexClimate,
-		WaterlessComplexClimate3D,
-		ComplexClimate3D,
-
-		Custom,
-		Custom3D,
+		BiomeData,
+		BiomeData3D,
+		WaterlessBiomeData,
+		WaterlessBiomeData3D,
 	}
 
 	[System.SerializableAttribute]
@@ -221,174 +196,90 @@ namespace PW
 		public Sampler3D		gravel;
 	}
 
-	[System.SerializableAttribute]
-	public abstract class BiomeData {}
-
-	[System.SerializableAttribute]
-	public class BiomeLessData : BiomeData {}
-	
-	/* Height biomes */
-
-	[System.SerializableAttribute]
-	public class WaterlessBiomeHeightData : BiomeData
+	public class BiomeData
 	{
-		public Sampler2D		height;
-	}
+		public float				waterLevel;
+		public Sampler2D			waterHeight;
+		public bool					aquatic;
+		
+		public Sampler2D			terrain;
+		public Sampler3D			terrain3D;
 
-	[System.SerializableAttribute]
-	public class WaterlessBiomeHeightData3D : BiomeData
-	{
-		public Sampler3D		height;
-	}
+		public Sampler2D			wetness;
+		public Sampler2D			temperature;
+		
+		public Vector2				wind;
+		public Sampler2D			lighting;
+		public BasicEdaphicData		soil;
+		
+		public Sampler2D			air;
+		public ComplexEdaphicData	complexSoil;
 
-	[System.SerializableAttribute]
-	public class BiomeHeightData : WaterlessBiomeHeightData
-	{
-		public float			waterLevel;
-	}
-
-	[System.SerializableAttribute]
-	public class BiomeHeightData3D : WaterlessBiomeHeightData3D
-	{
-		public float			waterLevel;
-	}
-
-	/* Wetness biomes */
-
-	[System.SerializableAttribute]
-	public class WaterlessWetnessBiomeData : BiomeData
-	{
-		public Sampler2D		wetness;
+		public Sampler2D[]			datas;
+		public string[]				dataNames;
 	}
 	
-	[System.SerializableAttribute]
-	public class WaterlessWetnessBiomeData3D : BiomeData
+	public class BiomeData3D
 	{
-		public Sampler3D		wetness;
-	}
-	
-	[System.SerializableAttribute]
-	public class WetnessBiomeData : WaterlessWetnessBiomeData
-	{
-		public float			waterLevel;
-	}
-	
-	[System.SerializableAttribute]
-	public class WetnessBiomeData3D : WaterlessWetnessBiomeData3D
-	{
-		public float			waterLevel;
-	}
-
-	/* Climate biomes */
-
-	[System.SerializableAttribute]
-	public class WaterlessClimateBiomeData : BiomeData
-	{
-		public Sampler2D		wetness;
-		public Sampler2D		temperature;
-	}
-
-	[System.SerializableAttribute]
-	public class WaterlessClimateBiomeData3D : BiomeData
-	{
-		public Sampler3D		wetness;
-		public Sampler3D		temperature;
-	}
-
-	[System.SerializableAttribute]
-	public class ClimateBiomeData : WaterlessClimateBiomeData
-	{
-		public float			waterLevel;
-	}
-
-	[System.SerializableAttribute]
-	public class ClimateBiomeData3D : WaterlessClimateBiomeData3D
-	{
-		public float			waterLevel;
-	}
-
-	/* Enhanced climate biomes */
-	
-	[System.SerializableAttribute]
-	public class WaterlessEnhancedClimateBiomeData : BiomeData
-	{
-		public Sampler2D		wetness;
-		public Sampler2D		temperature;
-		public Vector2			wind;
-		public Sampler2D		lighting;
-		public BasicEdaphicData	soil;
-	}
-
-	[System.SerializableAttribute]
-	public class WaterlessEnhancedClimateBiomeData3D : BiomeData
-	{
+		public float				waterLevel;
+		
+		public Sampler2D			terrain;
+		public Sampler3D			terrain3D;
+		
 		public Sampler3D			wetness;
 		public Sampler3D			temperature;
+		
 		public Vector3				wind;
 		public Sampler2D			lighting;
 		public BasicEdaphicData3D	soil;
-	}
+		
+		public Sampler3D			air;
+		public ComplexEdaphicData3D	complexSoil;
 
-	[System.SerializableAttribute]
-	public class EnhancedClimateBiomeData : WaterlessEnhancedClimateBiomeData
-	{
-		public float		waterLevel;
+		public Sampler3D[]			datas;
+		public string[]				dataNames;
 	}
 	
-	[System.SerializableAttribute]
-	public class EnhancedClimateBiomeData3D : WaterlessEnhancedClimateBiomeData3D
+	public class WaterlessBiomeData
 	{
-		public float		waterLevel;
-	}
-
-	/* Complex climate + edaphic biomes */
-
-	[System.SerializableAttribute]
-	public class WaterlessComplexClimateBiomeData : BiomeData
-	{
+		public Sampler2D			height;
+		
+		public Sampler2D			terrain;
+		public Sampler3D			terrain3D;
+		
 		public Sampler2D			wetness;
 		public Sampler2D			temperature;
+		
 		public Vector2				wind;
 		public Sampler2D			lighting;
-		public Sampler3D			air;
-		public ComplexEdaphicData	soil;
-	}
+		public BasicEdaphicData		soil;
+		
+		public Sampler2D			air;
+		public ComplexEdaphicData	complexSoil;
 
-	[System.SerializableAttribute]
-	public class WaterlessComplexClimateBiomeData3D : BiomeData
-	{
-		public Sampler3D			wetness;
-		public Sampler3D			temperature;
-		public Vector3				wind;
-		public Sampler2D			lighting;
-		public Sampler3D			air;
-		public ComplexEdaphicData3D	soil;
-	}
-
-	[System.SerializableAttribute]
-	public class ComplexClimateBiomeData : WaterlessComplexClimateBiomeData
-	{
-		public float			waterLevel;
-	}
-
-	[System.SerializableAttribute]
-	public class ComplexClimateBiomeData3D : WaterlessComplexClimateBiomeData3D
-	{
-		public float			waterLevel;
-	}
-
-	/* Custom biome */
-
-	[System.SerializableAttribute]
-	public class CustomBiomeData : BiomeData
-	{
 		public Sampler2D[]			datas;
+		public string[]				dataNames;
 	}
 	
-	[System.SerializableAttribute]
-	public class CustomBiomeData3D : BiomeData
+	public class WaterlessBiomeData3D
 	{
+		public Sampler2D			height;
+		
+		public Sampler2D			terrain;
+		public Sampler3D			terrain3D;
+		
+		public Sampler3D			wetness;
+		public Sampler3D			temperature;
+		
+		public Vector3				wind;
+		public Sampler2D			lighting;
+		public BasicEdaphicData3D	soil;
+		
+		public Sampler3D			air;
+		public ComplexEdaphicData3D	complexSoil;
+
 		public Sampler3D[]			datas;
+		public string[]				dataNames;
 	}
 
 	/*
