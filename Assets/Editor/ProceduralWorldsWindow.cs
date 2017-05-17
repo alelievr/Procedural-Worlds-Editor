@@ -190,11 +190,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Slider", typeof(PWNodeSlider));
 		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
 			"Add", typeof(PWNodeAdd));
-		AddToSelector("Misc", "greenNode", greenNodeWindow, greenNodeWindowSelected,
-			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask),
-			"Biome switch", typeof(PWNodeBiomeSwitch));
-		AddToSelector("Noises", "blueNode", blueNodeWindow, blueNodeWindowSelected,
-			"Perlin noise 2D", typeof(PWNodePerlinNoise2D));
+		AddToSelector("Biomes", "greenNode", greenNodeWindow, greenNodeWindowSelected,
+			"Water Level", typeof(PWNodeWaterLevel),
+			"To Biome data", typeof(PWNodeBiomeData),
+			"Biome data switch", typeof(PWNodeBiomeSwitch),
+			"Biome Binder", typeof(PWNodeBiomeBinder),
+			"Biome blender", typeof(PWNodeBiomeBlender));
+		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
+			"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
+			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
 		AddToSelector("Materializers", "purpleNode", purpleNodeWindow, purpleNodeWindowSelected,
 			"SideView 2D terrain", typeof(PWNodeSideView2DTerrain),
 			"TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
