@@ -16,7 +16,7 @@ namespace PW
 
 		public string	nodeTypeName;
 		public Rect		windowRect;
-		public int		windowId;
+		public int		nodeId;
 		public bool		renamable;
 		public int		computeOrder;
 		public int		viewHeight;
@@ -73,6 +73,7 @@ namespace PW
 		int					oldChunkSize;
 		float				oldStep;
 		Pair< string, int >	lastAttachedLink = null;
+		bool				preprocess = false;
 
 		PWAnchorInfo		anchorUnderMouse;
 
@@ -80,7 +81,7 @@ namespace PW
 		[SerializeField]
 		List< PWLink >					links = new List< PWLink >();
 		[SerializeField]
-		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >(); //List< windowId, anchorId >
+		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >(); //List< nodeId, anchorId >
 
 		//backed datas about properties and nodes
 		[System.SerializableAttribute]
@@ -90,6 +91,9 @@ namespace PW
 
 		[NonSerializedAttribute]
 		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
+
+		[System.NonSerializedAttribute]
+		private PWNodeGraph		currentGraph;
 
 		[System.NonSerializedAttribute]
 		public bool		unserializeInitialized = false;
@@ -245,7 +249,7 @@ namespace PW
 					data.first.linkType = GetLinkTypeFromType(field.FieldType);
 					data.first.name = name;
 					data.offset = offset;
-					data.windowId = windowId;
+					data.nodeId = nodeId;
 
 					//add missing values to instance of list:
 
@@ -313,6 +317,10 @@ namespace PW
 		{
 		}
 
+		public virtual void OnNodePreProcess()
+		{
+		}
+
 		public virtual void OnNodeProcess()
 		{
 		}
@@ -365,14 +373,14 @@ namespace PW
 				GUIStyle debugstyle = new GUIStyle();
 
 				EditorGUILayout.BeginVertical(debugstyle);
-				EditorGUILayout.LabelField("Id: " + windowId + " | Compute order: " + computeOrder);
+				EditorGUILayout.LabelField("Id: " + nodeId + " | Compute order: " + computeOrder);
 				EditorGUILayout.LabelField("type: " + GetType());
 				EditorGUILayout.LabelField("Dependencies:");
 				foreach (var dep in depencendies)
-					EditorGUILayout.LabelField("    " + dep.windowId + " : " + dep.anchorId);
+					EditorGUILayout.LabelField("    " + dep.nodeId + " : " + dep.anchorId);
 				EditorGUILayout.LabelField("Links:");
 				foreach (var l in links)
-					EditorGUILayout.LabelField("    " + l.distantWindowId + " : " + l.distantAnchorId);
+					EditorGUILayout.LabelField("    " + l.distantNodeId + " : " + l.distantAnchorId);
 				EditorGUILayout.EndVertical();
 				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
 			#endif
@@ -438,6 +446,10 @@ namespace PW
 				lastAttachedLink = null;
 			}
 
+			preprocess = true;
+			OnNodePreProcess();
+			preprocess = false;
+
 			OnNodeProcess();
 		}
 
@@ -461,7 +473,7 @@ namespace PW
 			{
 				ret = new PWAnchorInfo(data.fieldName, PWUtils.DecalRect(singleAnchor.anchorRect, graphDecal + windowRect.position),
 					singleAnchor.color, data.type,
-					data.anchorType, windowId, singleAnchor.id,
+					data.anchorType, nodeId, singleAnchor.id,
 					data.classAQName, index,
 					data.generic, data.allowedTypes,
 					singleAnchor.linkType, singleAnchor.linkCount);
@@ -676,10 +688,10 @@ namespace PW
 			return links;
 		}
 
-		public List< PWLink > GetLinks(int anchorId, int targetWindowId, int targetAnchorId)
+		public List< PWLink > GetLinks(int anchorId, int targetNodeId, int targetAnchorId)
 		{
 			return links.Where(l => l.localAnchorId == anchorId
-				&& l.distantWindowId == targetWindowId
+				&& l.distantNodeId == targetNodeId
 				&& l.distantAnchorId == targetAnchorId).ToList();
 		}
 
@@ -709,7 +721,7 @@ namespace PW
 				return ;
 			if (from.anchorType == to.anchorType)
 				return ;
-			if (from.windowId == to.windowId)
+			if (from.nodeId == to.nodeId)
 				return ;
 
 			//we store output links:
@@ -717,8 +729,8 @@ namespace PW
 			{
 				outputHasChanged = true;
 				links.Add(new PWLink(
-					to.windowId, to.anchorId, to.name, to.classAQName, to.propIndex,
-					from.windowId, from.anchorId, from.name, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
+					to.nodeId, to.anchorId, to.name, to.classAQName, to.propIndex,
+					from.nodeId, from.anchorId, from.name, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
 					GetLinkType(from.fieldType, to.fieldType))
 				);
 				lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
@@ -751,7 +763,7 @@ namespace PW
 						}
 					}
 				});
-				depencendies.Add(new PWNodeDependency(to.windowId, to.anchorId, from.anchorId));
+				depencendies.Add(new PWNodeDependency(to.nodeId, to.anchorId, from.anchorId));
 			}
 		}
 
@@ -768,14 +780,14 @@ namespace PW
 
 			PWAnchorInfo from = new PWAnchorInfo(
 					fromAnchor.fieldName, new Rect(), fromAnchor.first.color,
-					fromAnchor.type, fromAnchor.anchorType, fromAnchor.windowId,
+					fromAnchor.type, fromAnchor.anchorType, fromAnchor.nodeId,
 					fromAnchor.first.id, fromAnchor.classAQName,
 					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes,
 					fromAnchor.first.linkType, fromAnchor.first.linkCount
 			);
 			PWAnchorInfo to = new PWAnchorInfo(
 				toAnchor.fieldName, new Rect(), toAnchor.first.color,
-				toAnchor.type, toAnchor.anchorType, toAnchor.windowId,
+				toAnchor.type, toAnchor.anchorType, toAnchor.nodeId,
 				toAnchor.first.id, toAnchor.classAQName,
 				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes,
 				toAnchor.first.linkType, toAnchor.first.linkCount
@@ -803,13 +815,13 @@ namespace PW
 		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
 		{
 			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == myAnchorId && l.distantWindowId == distantWindow.windowId && l.distantAnchorId == distantAnchorId;
+				bool delete = l.localAnchorId == myAnchorId && l.distantNodeId == distantWindow.nodeId && l.distantAnchorId == distantAnchorId;
 				if (delete)
 					OnNodeAnchorUnlink(l.localName, l.localIndex);
 				return delete;
 			});
 			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
-			if (DeleteDependencies(d => d.windowId == distantWindow.windowId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
+			if (DeleteDependencies(d => d.nodeId == distantWindow.nodeId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
 			{
 				PWAnchorData.PWAnchorMultiData singleAnchorData;
 				GetAnchorData(myAnchorId, out singleAnchorData);
@@ -818,11 +830,11 @@ namespace PW
 			}
 		}
 		
-		public void		DeleteLinkByWindowTarget(int targetWindowId)
+		public void		DeleteLinkByWindowTarget(int targetNodeId)
 		{
 			PWAnchorData.PWAnchorMultiData singleAnchorData;
 			for (int i = 0; i < links.Count; i++)
-				if (links[i].distantWindowId == targetWindowId)
+				if (links[i].distantNodeId == targetNodeId)
 				{
 					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
 					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
@@ -892,22 +904,22 @@ namespace PW
 			return nDeleted;
 		}
 
-		public void		DeleteDependency(int targetWindowId, int distantAnchorId)
+		public void		DeleteDependency(int targetNodeId, int distantAnchorId)
 		{
-			DeleteDependencies(d => d.windowId == targetWindowId && d.anchorId == distantAnchorId);
+			DeleteDependencies(d => d.nodeId == targetNodeId && d.anchorId == distantAnchorId);
 		}
 
-		public void		DeleteDependenciesByWindowTarget(int targetWindowId)
+		public void		DeleteDependenciesByWindowTarget(int targetNodeId)
 		{
-			DeleteDependencies(d => d.windowId == targetWindowId);
+			DeleteDependencies(d => d.nodeId == targetNodeId);
 		}
 		
 		public List< Pair < int, int > >	GetAnchorConnections(int anchorId)
 		{
 			return depencendies.Where(d => d.connectedAnchorId == anchorId)
-					.Select(d => new Pair< int, int >(d.windowId, d.anchorId))
+					.Select(d => new Pair< int, int >(d.nodeId, d.anchorId))
 					.Concat(links.Where(l => l.localAnchorId == anchorId)
-						.Select(l => new Pair< int, int >(l.distantWindowId, l.distantAnchorId))
+						.Select(l => new Pair< int, int >(l.distantNodeId, l.distantAnchorId))
 					).ToList();
 		}
 
@@ -989,8 +1001,8 @@ namespace PW
 
 			ForeachPWAnchors((data, singleAnchor, i) => {
 				//Hide anchors and highlight when mouse hover
-				// Debug.Log(data.windowId + ":" + data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
-				if (data.windowId != toLink.windowId
+				// Debug.Log(data.nodeId + ":" + data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
+				if (data.nodeId != toLink.nodeId
 					&& data.anchorType == anchorType
 					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
 				{
@@ -1074,11 +1086,11 @@ namespace PW
 			return ret;
 		}
 
-		public void		SetWindowId(int id)
+		public void		SetNodeId(int id)
 		{
-			windowId = id;
+			nodeId = id;
 			ForeachPWAnchors((data, singleAnchor, i) => {
-				data.windowId = id;
+				data.nodeId = id;
 			});
 		}
 
@@ -1128,7 +1140,7 @@ namespace PW
 
 		/* Utils function to manipulate PWnode variables */
 
-		public void		UpdatePropEnabled(string propertyName, bool enabled, int index = 0)
+		public void				UpdatePropEnabled(string propertyName, bool enabled, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1139,7 +1151,7 @@ namespace PW
 			}
 		}
 
-		public void		UpdatePropName(string propertyName, string newName, int index = 0)
+		public void				UpdatePropName(string propertyName, string newName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1150,7 +1162,7 @@ namespace PW
 			}
 		}
 
-		public void		UpdatePropBackgroundColor(string propertyName, Color newColor, int index = 0)
+		public void				UpdatePropBackgroundColor(string propertyName, Color newColor, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1161,7 +1173,7 @@ namespace PW
 			}
 		}
 
-		public void		UpdatePropVisibility(string propertyName, PWVisibility visibility, int index = 0)
+		public void				UpdatePropVisibility(string propertyName, PWVisibility visibility, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1172,7 +1184,7 @@ namespace PW
 			}
 		}
 
-		public int		GetPropLinkCount(string propertyName, int index = 0)
+		public int				GetPropLinkCount(string propertyName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1184,7 +1196,7 @@ namespace PW
 			return -1;
 		}
 
-		public Rect?	GetAnchorRect(string propertyName, int index = 0)
+		public Rect?			GetAnchorRect(string propertyName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -1196,7 +1208,7 @@ namespace PW
 			return null;
 		}
 
-		public Rect?	GetAnchorRect(int id)
+		public Rect?			GetAnchorRect(int id)
 		{
 			var matches =	from p in propertyDatas
 							from p2 in p.Value.multi
@@ -1209,11 +1221,41 @@ namespace PW
 			return PWUtils.DecalRect(r, graphDecal + windowRect.position);
 		}
 
-		public PWAnchorData	GetAnchorData(string propName)
+		public PWAnchorData		GetAnchorData(string propName)
 		{
 			if (propertyDatas.ContainsKey(propName))
 				return propertyDatas[propName];
 			return null;
+		}
+
+		public PWNode			GetFirstNodeAttachedToAnchor(int anchorId)
+		{
+			var link = links.FirstOrDefault(l => l.localAnchorId == anchorId);
+
+			if (link != null)
+				return FindNodeById(link.distantNodeId);
+			return null;
+		}
+
+		public List< PWNode >	GetNodesAttachedToAnchor(int anchorId)
+		{
+			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
+		}
+
+		public void				DisableNodeComputing(int nodeId)
+		{
+			if (!preprocess)
+			{
+				Debug.LogWarning("DisableNodeComputing can't be called outside of OnNodePreProcess()");
+				return ;
+			}
+
+
+		}
+
+		public void			RequestComputing(int nodeId)
+		{
+
 		}
 
 	#endregion
@@ -1237,7 +1279,7 @@ namespace PW
 
 	#region Utils and Miscellaneous
 
-		void ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
+		void			ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
 		{
 			foreach (var PWAnchorData in propertyDatas)
 			{
@@ -1272,13 +1314,25 @@ namespace PW
 			}
 		}
 
-		void ForeachPWAnchorDatas(Action< PWAnchorData > callback)
+		void 			ForeachPWAnchorDatas(Action< PWAnchorData > callback)
 		{
 			foreach (var data in propertyDatas)
 			{
 				if (data.Value != null)
 					callback(data.Value);
 			}
+		}
+
+		PWNode			FindNodeById(int nodeId)
+		{
+			if (currentGraph != null)
+				return currentGraph.nodesDictionary[nodeId];
+			return null;
+		}
+
+		public void		UpdateCurrentGraph(PWNodeGraph ng)
+		{
+			currentGraph = ng;
 		}
 
 		public static PWLinkType GetLinkTypeFromType(Type fieldType)
@@ -1294,7 +1348,7 @@ namespace PW
 			return PWLinkType.BasicData;
 		}
 
-		PWAnchorType	InverAnchorType(PWAnchorType type)
+		PWAnchorType			InverAnchorType(PWAnchorType type)
 		{
 			if (type == PWAnchorType.Input)
 				return PWAnchorType.Output;
@@ -1303,7 +1357,7 @@ namespace PW
 			return PWAnchorType.None;
 		}
 
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
+		public PWAnchorData		GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
 		{
 			int				index;
 			

@@ -54,7 +54,7 @@ namespace PW
 		public Vector2						graphDecalPosition;
 		[SerializeField]
 		[HideInInspector]
-		public int							localWindowIdCount;
+		public int							localNodeIdCount;
 		[SerializeField]
 		[HideInInspector]
 		public string						firstInitialization = null;
@@ -147,7 +147,7 @@ namespace PW
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				if (nodes[i] != null)
-					nodesDictionary[nodes[i].windowId] = nodes[i];
+					nodesDictionary[nodes[i].nodeId] = nodes[i];
 				else
 				{
 					nodes.RemoveAt(i);
@@ -159,14 +159,14 @@ namespace PW
 				var subgraph = FindGraphByName(subgraphName);
 
 				if (subgraph != null && subgraph.externalGraphNode != null)
-					nodesDictionary[subgraph.externalGraphNode.windowId] = subgraph.externalGraphNode;
+					nodesDictionary[subgraph.externalGraphNode.nodeId] = subgraph.externalGraphNode;
 			}
 			if (externalGraphNode != null)
-				nodesDictionary[externalGraphNode.windowId] = externalGraphNode;
+				nodesDictionary[externalGraphNode.nodeId] = externalGraphNode;
 			if (inputNode != null)
-				nodesDictionary[inputNode.windowId] = inputNode;
+				nodesDictionary[inputNode.nodeId] = inputNode;
 			if (outputNode != null)
-				nodesDictionary[outputNode.windowId] = outputNode;
+				nodesDictionary[outputNode.nodeId] = outputNode;
 		}
 
 		private class PWNodeComputeInfo
@@ -189,7 +189,7 @@ namespace PW
 						(kp.Value.GetType() == typeof(PWNodeGraphExternal)
 							? subgraphReferences.FirstOrDefault(gName => {
 								var g = FindGraphByName(gName);
-								if (g.externalGraphNode.windowId == kp.Value.windowId)
+								if (g.externalGraphNode.nodeId == kp.Value.nodeId)
 									return true;
 								return false;
 								})
@@ -204,16 +204,16 @@ namespace PW
 
 			foreach (var link in links)
 			{
-				if (!nodesDictionary.ContainsKey(link.distantWindowId))
+				if (!nodesDictionary.ContainsKey(link.distantNodeId))
 					continue;
 
-				var target = nodesDictionary[link.distantWindowId];
+				var target = nodesDictionary[link.distantNodeId];
 	
 				if (target == null)
 					continue ;
 	
-				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.windowId);
-				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.windowId);
+				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.nodeId);
+				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
 				
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
 				if (val == null)
@@ -273,9 +273,13 @@ namespace PW
 				if (!realMode)
 				{
 					Stopwatch	st = new Stopwatch();
+
+					nodeInfo.node.UpdateCurrentGraph(this);
+					
 					st.Start();
 					nodeInfo.node.Process();
 					st.Stop();
+
 					nodeInfo.node.processTime = st.ElapsedMilliseconds;
 					calculTime += nodeInfo.node.processTime;
 				}

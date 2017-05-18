@@ -35,7 +35,7 @@ namespace PW
 		//name of the attached propery / name specified in PW I/O.
 		public string				fieldName;
 		//window id of the anchor
-		public int					windowId;
+		public int					nodeId;
 		//anchor type (input / output)
 		public PWAnchorType			anchorType;
 		//anchor field type

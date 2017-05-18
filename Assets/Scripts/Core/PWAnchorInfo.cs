@@ -13,7 +13,7 @@ namespace PW
 		public Color		anchorColor;
 		public Type			fieldType;
 		public PWAnchorType	anchorType;
-		public int			windowId;
+		public int			nodeId;
 		public int			anchorId;
 		public bool			generic;
 		public string		classAQName;
@@ -24,19 +24,19 @@ namespace PW
 	
 		public PWAnchorInfo(string name, Rect anchorRect, Color anchorColor,
 			Type fieldType, PWAnchorType anchorType,
-			int windowId, int anchorId,
+			int nodeId, int anchorId,
 			string classAQName, int propIndex,
 			bool generic, Type[] allowedTypes,
 			PWLinkType linkType, int linkCount) : this(name, anchorRect,
 				anchorColor, fieldType,
-				anchorType, windowId,
+				anchorType, nodeId,
 				anchorId, classAQName, propIndex,
 				generic, allowedTypes.Cast< SerializableType >().ToArray(),
 				linkType, linkCount) {}
 		
 		public PWAnchorInfo(string name, Rect anchorRect, Color anchorColor,
 			Type fieldType, PWAnchorType anchorType,
-			int windowId, int anchorId,
+			int nodeId, int anchorId,
 			string classAQName, int propIndex,
 			bool generic, SerializableType[] allowedTypes,
 			PWLinkType linkType, int linkCount)
@@ -47,7 +47,7 @@ namespace PW
 			this.mouseAbove = false;
 			this.fieldType = fieldType;
 			this.anchorType = anchorType;
-			this.windowId = windowId;
+			this.nodeId = nodeId;
 			this.anchorId = anchorId;
 			this.generic = generic;
 			this.allowedTypes = allowedTypes;

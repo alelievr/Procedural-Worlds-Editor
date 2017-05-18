@@ -12,8 +12,8 @@ namespace PW
 			public Vector2			range;
 			public bool				value;
 
-			List< BiomeSwitchNode >	childs;
-			Action					terraformer;
+			List< BiomeSwitchNode >	childs = null;
+			Action					terraformer = null;
 			
 			public BiomeSwitchNode(Vector2 range, bool value)
 			{
@@ -33,6 +33,11 @@ namespace PW
 					return childs[0];
 				return childs[1];
 			}
+		}
+
+		public void BuildTree(PWNode node)
+		{
+			//TODO: build the tree with the graph
 		}
 
 	}

@@ -206,6 +206,11 @@ namespace PW
 	public abstract class BiomeBaseData
 	{
 		public BiomeSwitchTree		biomeTree;
+
+		public BiomeBaseData()
+		{
+			biomeTree = new BiomeSwitchTree();
+		}
 	}
 	
 	public class WaterlessBiomeData : BiomeBaseData

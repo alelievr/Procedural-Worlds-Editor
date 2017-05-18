@@ -3,13 +3,13 @@
 	[System.SerializableAttribute]
 	public class PWNodeDependency
 	{
-		public int		windowId;
+		public int		nodeId;
 		public int		anchorId;
 		public int		connectedAnchorId;
 
-		public PWNodeDependency(int windowId, int anchorId, int connectedAnchorId)
+		public PWNodeDependency(int nodeId, int anchorId, int connectedAnchorId)
 		{
-			this.windowId = windowId;
+			this.nodeId = nodeId;
 			this.anchorId = anchorId;
 			this.connectedAnchorId = connectedAnchorId;
 		}

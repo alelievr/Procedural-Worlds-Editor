@@ -80,18 +80,25 @@ namespace PW
 			}
 		}
 
-		public override void OnNodeProcess()
+		public override void OnNodePreProcess()
 		{
 			if (terrestrialBiomeData == null)
+			{
 				terrestrialBiomeData = new BiomeData();
-			
+				aquaticBiomeData = terrestrialBiomeData;
+
+				terrestrialBiomeData.biomeTree.BuildTree(this);
+			}
+		}
+
+		public override void OnNodeProcess()
+		{
 			if (needUpdate)
 			{
 				terrestrialBiomeData.terrain = terrainNoise as Sampler2D;
 				terrestrialBiomeData.terrain3D = terrainNoise as Sampler3D;
 				
 				terrestrialBiomeData.waterLevel = waterLevel;
-				aquaticBiomeData = terrestrialBiomeData;
 
 				if (terrainNoise.type == SamplerType.Sampler2D)
 				{

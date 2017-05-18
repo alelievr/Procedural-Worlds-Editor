@@ -27,13 +27,13 @@ namespace PW
 	public class PWLink
 	{
 		//distant datas:
-		public int					distantWindowId;
+		public int					distantNodeId;
 		public int					distantAnchorId;
 		public string				distantName;
 		public string				distantClassAQName;
 		public int					distantIndex;
 		//local datas:
-		public int					localWindowId;
+		public int					localNodeId;
 		public int					localAnchorId;
 		public string				localName;
 		public string				localClassAQName;
@@ -47,13 +47,13 @@ namespace PW
 	
 		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, int lIndex, Color c, PWLinkType lt)
 		{
-			distantWindowId = dWin;
+			distantNodeId = dWin;
 			distantAnchorId = dAttr;
 			distantName = dName;
 			distantClassAQName = dCName;
 			distantIndex = dIndex;
 			localAnchorId = lAttr;
-			localWindowId = lWin;
+			localNodeId = lWin;
 			localClassAQName = lCName;
 			localIndex = lIndex;
 			localName = lName;
