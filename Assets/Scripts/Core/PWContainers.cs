@@ -203,54 +203,13 @@ namespace PW
 		public Sampler3D		gravel;
 	}
 
-	public class BiomeData
+	public abstract class BiomeBaseData
 	{
-		public float				waterLevel;
-		public Sampler2D			waterHeight;
-		
-		public Sampler2D			terrain;
-		public Sampler3D			terrain3D;
-
-		public Sampler2D			wetness;
-		public Sampler2D			temperature;
-		
-		public Vector2				wind;
-		public Sampler2D			lighting;
-		public BasicEdaphicData		soil;
-		
-		public Sampler2D			air;
-		public ComplexEdaphicData	complexSoil;
-
-		public Sampler2D[]			datas;
-		public string[]				dataNames;
+		public BiomeSwitchTree		biomeTree;
 	}
 	
-	public class BiomeData3D
+	public class WaterlessBiomeData : BiomeBaseData
 	{
-		public float				waterLevel;
-		public Sampler2D			waterHeight;
-		
-		public Sampler2D			terrain;
-		public Sampler3D			terrain3D;
-		
-		public Sampler3D			wetness;
-		public Sampler3D			temperature;
-		
-		public Vector3				wind;
-		public Sampler2D			lighting;
-		public BasicEdaphicData3D	soil;
-		
-		public Sampler3D			air;
-		public ComplexEdaphicData3D	complexSoil;
-
-		public Sampler3D[]			datas;
-		public string[]				dataNames;
-	}
-	
-	public class WaterlessBiomeData
-	{
-		public Sampler2D			height;
-		
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
 		
@@ -268,10 +227,8 @@ namespace PW
 		public string[]				dataNames;
 	}
 	
-	public class WaterlessBiomeData3D
+	public class WaterlessBiomeData3D : BiomeBaseData
 	{
-		public Sampler2D			height;
-		
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
 		
@@ -287,6 +244,18 @@ namespace PW
 
 		public Sampler3D[]			datas;
 		public string[]				dataNames;
+	}
+
+	public class BiomeData : WaterlessBiomeData
+	{
+		public float				waterLevel;
+		public Sampler2D			waterHeight;
+	}
+	
+	public class BiomeData3D : WaterlessBiomeData3D
+	{
+		public float				waterLevel;
+		public Sampler2D			waterHeight;
 	}
 
 	/*

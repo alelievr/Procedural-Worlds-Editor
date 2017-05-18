@@ -11,6 +11,11 @@ namespace PW
 		public static void DrawBiomeInfos(BiomeData b)
 		{
 			EditorGUILayout.LabelField("Biome");
+
+			if (b.terrain != null)
+				EditorGUILayout.LabelField("Terrain: 2D");
+			else if (b.terrain3D != null)
+				EditorGUILayout.LabelField("Terrain: 3D");
 		}
 		
 		public static void DrawBiomeInfos(BiomeData3D b)

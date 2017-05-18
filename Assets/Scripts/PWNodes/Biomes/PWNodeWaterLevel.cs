@@ -8,6 +8,7 @@ namespace PW
 	public class PWNodeWaterLevel : PWNode {
 
 		[PWInput("Terrain Input")]
+		[PWOffset(5)]
 		public Sampler		terrainNoise;
 
 		[PWOutput("terrestrial")]
@@ -43,7 +44,7 @@ namespace PW
 		
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(GUI.skin.label.lineHeight * 2.5f);
+			GUILayout.Space(GUI.skin.label.lineHeight * 4f);
 				
 			if (terrestrialBiomeData != null)
 			{
@@ -69,6 +70,10 @@ namespace PW
 	
 						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate, false, FilterMode.Point);
 					}
+					else
+					{
+						EditorGUILayout.LabelField("TODO: water level 3D");
+					}
 					if (waterGradient == null || EditorGUI.EndChangeCheck())
 						UpdateGradient();
 				}
@@ -78,26 +83,29 @@ namespace PW
 		public override void OnNodeProcess()
 		{
 			if (terrestrialBiomeData == null)
-			{
 				terrestrialBiomeData = new BiomeData();
-				terrestrialBiomeData.waterLevel = waterLevel;
-				aquaticBiomeData = terrestrialBiomeData;
-			}
+			
 			if (needUpdate)
 			{
 				terrestrialBiomeData.terrain = terrainNoise as Sampler2D;
 				terrestrialBiomeData.terrain3D = terrainNoise as Sampler3D;
+				
+				terrestrialBiomeData.waterLevel = waterLevel;
+				aquaticBiomeData = terrestrialBiomeData;
 
-				//TODO: map the noise values
-				//TODO; compute the waterHeight with the mapped noise:
 				if (terrainNoise.type == SamplerType.Sampler2D)
 				{
+					//terrain mapping
+					terrestrialBiomeData.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+
+					//waterHeight evaluation
 					terrestrialBiomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-					PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
 					(terrainNoise as Sampler2D).Foreach((x, y, val) => {
 						terrestrialBiomeData.waterHeight[x, y] = waterLevel - val;
 					});
 				}
+				else
+					; //TODO
 			}
 		}
 
