@@ -1,4 +1,5 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_WINDOW
+// #define DEBUG_ANCHOR
 
 using UnityEditor;
 using UnityEngine;
@@ -534,10 +535,10 @@ namespace PW
 
 			if (data.multiple)
 			{
-				if (singleAnchor.additional)
+				/*if (singleAnchor.additional)
 					anchorName = "+";
 				else
-					anchorName += index;
+					anchorName += index;*/
 			}
 
 			switch (singleAnchor.highlighMode)
@@ -590,7 +591,7 @@ namespace PW
 				GUI.color = Color.white;
 			}
 
-			#if DEBUG_WINDOW
+			#if DEBUG_ANCHOR
 				Rect anchorSideRect = singleAnchor.anchorRect;
 				if (data.anchorType == PWAnchorType.Input)
 				{
@@ -851,7 +852,7 @@ namespace PW
 
 	#region dependencies management and utils
 
-		int DeleteDependencies(Func< PWNodeDependency, bool > pred)
+		int		DeleteDependencies(Func< PWNodeDependency, bool > pred)
 		{
 			PWAnchorData.PWAnchorMultiData	singleAnchor;
 			PWAnchorData.PWAnchorMultiData	multiAnchor;
@@ -922,6 +923,18 @@ namespace PW
 		public List< PWNodeDependency > GetDependencies(int anchorId)
 		{
 			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
+		}
+
+		public PWNodeDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
+		{
+			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
+		}
+
+		public void UpdateLinkMode(PWLink link, PWLinkMode newMode)
+		{
+			link.mode = newMode;
+
+			//find the dependency attached to this link:
 		}
 
 	#endregion
@@ -1367,9 +1380,9 @@ namespace PW
 
 		Color GetAnchorDominantColor(PWAnchorInfo from, PWAnchorInfo to)
 		{
-			if (from.anchorColor == PWColorPalette.GetColor("greyAnchor") || from.anchorColor == PWColorPalette.GetColor("whiteAnchor"))
+			if (from.anchorColor.Compare(PWColorPalette.GetColor("greyAnchor")) || from.anchorColor.Compare(PWColorPalette.GetColor("whiteAnchor")))
 				return to.anchorColor;
-			if (to.anchorColor == PWColorPalette.GetColor("greyAnchor") || to.anchorColor == PWColorPalette.GetColor("whiteAnchor"))
+			if (to.anchorColor.Compare(PWColorPalette.GetColor("greyAnchor")) || to.anchorColor.Compare(PWColorPalette.GetColor("whiteAnchor")))
 				return from.anchorColor;
 			return to.anchorColor;
 		}

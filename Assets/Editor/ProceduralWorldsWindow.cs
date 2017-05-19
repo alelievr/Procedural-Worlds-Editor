@@ -657,6 +657,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 					graphNeedReload = true;
 				}
 
+				if (GUILayout.Button("Force graph to reload"))
+				{
+					graphNeedReload = true;
+					EvaluateComputeOrder();
+					Debug.Log("graph reloaded !");
+				}
+
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -888,7 +895,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				//attach link to the node:
 				node.AttachLink(mouseAboveAnchor, startDragAnchor);
-				var win = FindNodeByNodeId(startDragAnchor.nodeId);
+				var win = FindNodeById(startDragAnchor.nodeId);
 				if (win != null)
 				{
 					win.AttachLink(startDragAnchor, mouseAboveAnchor);
@@ -921,8 +928,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var link in links)
 		{
 			// Debug.Log("link: " + link.localNodeId + ":" + link.localAnchorId + " to " + link.distantNodeId + ":" + link.distantAnchorId);
-			var fromWindow = FindNodeByNodeId(link.localNodeId);
-			var toWindow = FindNodeByNodeId(link.distantNodeId);
+			var fromWindow = FindNodeById(link.localNodeId);
+			var toWindow = FindNodeById(link.distantNodeId);
 
 			if (toWindow == null) //invalid window ids
 			{
@@ -1121,7 +1128,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 
 				//duplicate selected subgraphs
-/*				var dupgList = new List< PWNodeGraph >();
+				/*var dupgList = new List< PWNodeGraph >();
 				foreach (var subgraphName in currentGraph.subgraphReferences)
 				{
 					PWNodeGraph pwng = parentGraph.FindGraphByName(subgraphName);
@@ -1229,14 +1236,14 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//remove all input links for each node links:
 		foreach (var link in node.GetLinks())
 		{
-			var n = FindNodeByNodeId(link.distantNodeId);
+			var n = FindNodeById(link.distantNodeId);
 			if (n != null)
 				n.DeleteDependenciesByWindowTarget(link.localNodeId);
 		}
 		//remove all links for node dependencies
 		foreach (var deps in node.GetDependencies())
 		{
-			var n = FindNodeByNodeId(deps.nodeId);
+			var n = FindNodeById(deps.nodeId);
 			if (n != null)
 				n.DeleteLinkByWindowTarget(node.nodeId);
 		}
@@ -1470,20 +1477,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
 
-				var from = FindNodeByNodeId(link.localNodeId);
-				var to = FindNodeByNodeId(link.distantNodeId);
+				var from = FindNodeById(link.localNodeId);
+				var to = FindNodeById(link.distantNodeId);
 				
 				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 			}
 			else if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output && startDragAnchor.linkCount != 0)
 			{
-				var inputNode = FindNodeByNodeId(startDragAnchor.nodeId);
+				var inputNode = FindNodeById(startDragAnchor.nodeId);
 
 				//find the link with inputNode:
 				var toRemoveLink = FindLinkFromAnchor(startDragAnchor);
 
-				var outputNode = FindNodeByNodeId(toRemoveLink.localNodeId);
+				var outputNode = FindNodeById(toRemoveLink.localNodeId);
 
 				//delete links:
 				outputNode.DeleteLink(mouseAboveAnchorInfo.anchorId, inputNode, startDragAnchor.anchorId);
@@ -1507,7 +1514,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (anchor.anchorType == PWAnchorType.Input)
 		{
 			//find the anchor node
-			var node = FindNodeByNodeId(anchor.nodeId);
+			var node = FindNodeById(anchor.nodeId);
 			if (node == null)
 				return null;
 
@@ -1517,7 +1524,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				return null;
 
 			//get the linked window from the dependency
-			var linkNode = FindNodeByNodeId(deps[0].nodeId);
+			var linkNode = FindNodeById(deps[0].nodeId);
 			if (linkNode == null)
 				return null;
 
@@ -1542,13 +1549,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DeleteAllAnchorLinks()
 	{
-		var node = FindNodeByNodeId(mouseAboveAnchorInfo.nodeId);
+		var node = FindNodeById(mouseAboveAnchorInfo.nodeId);
 		if (node == null)
 			return ;
 		var anchorConnections = node.GetAnchorConnections(mouseAboveAnchorInfo.anchorId);
 		foreach (var ac in anchorConnections)
 		{
-			var n = FindNodeByNodeId(ac.first);
+			var n = FindNodeById(ac.first);
 			if (n != null)
 			{
 				if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output)
@@ -1566,13 +1573,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		PWLink	link = l  as PWLink;
 
-		var from = FindNodeByNodeId(link.localNodeId);
-		var to = FindNodeByNodeId(link.distantNodeId);
+		var from = FindNodeById(link.localNodeId);
+		var to = FindNodeById(link.distantNodeId);
 
 		from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
 		to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
 		
 		EvaluateComputeOrder();
+	}
+
+	void UpdateLinkMode(PWLink link, PWLinkMode newMode)
+	{
+		link.mode = newMode;
+
+        var node = FindNodeById(link.distantNodeId);
+		var dep = node.GetDependency(link.distantAnchorId, link.localNodeId, link.localAnchorId);
+        dep.mode = newMode;
+		
+		currentGraph.RebakeGraphParts();
 	}
 
 #endregion
@@ -1614,8 +1632,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
 				if (hoveredLink != null)
 				{
-					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWLinkMode.AutoProcess, () => { hoveredLink.mode = PWLinkMode.AutoProcess; });
-					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWLinkMode.RequestForProcess, () => { hoveredLink.mode = PWLinkMode.RequestForProcess; });
+					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWLinkMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWLinkMode.AutoProcess); });
+					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWLinkMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWLinkMode.RequestForProcess); });
 					menu.AddItem(new GUIContent("Link/Delete link"), false, DeleteLink, hoveredLink);
 				}
 				else
@@ -1680,6 +1698,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			currentGraph.UpdateComputeOrder();
 
+			currentGraph.RebakeGraphParts();
+
 			return 0;
 		}
 
@@ -1687,7 +1707,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (nodeComputeOrderCount.ContainsKey(nodeId))
 			return nodeComputeOrderCount[nodeId];
 
-		var node = FindNodeByNodeId(nodeId);
+		var node = FindNodeById(nodeId);
 		if (node == null)
 			return 0;
 
@@ -1725,32 +1745,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 	}
 
-	PWNode FindNodeByNodeId(int id)
+	PWNode FindNodeById(int id)
 	{
-		if (currentGraph.nodesDictionary.ContainsKey(id))
-			return currentGraph.nodesDictionary[id];
-
-		var ret = currentGraph.nodes.FirstOrDefault(n => n.nodeId == id);
-		if (ret != null)
-			return ret;
-
-		string gExternalNodeName = currentGraph.subgraphReferences.FirstOrDefault(gName => {
-			var g = parentGraph.FindGraphByName(gName);
-			return g && g.externalGraphNode.nodeId == id;
-		});
-		if (gExternalNodeName != null)
-		{
-			var gExternalNode = parentGraph.FindGraphByName(gExternalNodeName);
-			if(gExternalNode.externalGraphNode != null)
-				return gExternalNode.externalGraphNode;
-		}
-
-		if (currentGraph.inputNode.nodeId == id)
-			return currentGraph.inputNode;
-		if (currentGraph.outputNode.nodeId == id)
-			return currentGraph.outputNode;
-
-		return null;
+		return currentGraph.FindNodebyId(id);
 	}
 
 	void OnDestroy()

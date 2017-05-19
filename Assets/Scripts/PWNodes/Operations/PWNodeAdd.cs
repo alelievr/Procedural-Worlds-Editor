@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace PW
 {
@@ -10,7 +11,7 @@ namespace PW
 		[PWInput]
 		public PWValues	values = new PWValues();
 	
-		[PWOutput("flt")]
+		[PWOutput("float")]
 		public float	fOutput;
 		[PWOutput("vec2")]
 		public Vector2	v2Output;
@@ -19,11 +20,13 @@ namespace PW
 		[PWOutput("vec4")]
 		public Vector4	v4Output;
 		
-		List< int >		ints;
-		List< float >	floats;
-		List< Vector2 >	vec2s;
-		List< Vector3 >	vec3s;
-		List< Vector4 >	vec4s;
+		readonly string[] outputNames = {"fOutput", "v2Output", "v3Output", "v4Output"};
+		
+		List< int >		ints = new List< int >();
+		List< float >	floats = new List< float >();
+		List< Vector2 >	vec2s = new List< Vector2 >();
+		List< Vector3 >	vec3s = new List< Vector3 >();
+		List< Vector4 >	vec4s = new List< Vector4 >();
 	
 		bool			intify = false;
 	
@@ -32,11 +35,18 @@ namespace PW
 			//override window width
 			windowRect.width = 150;
 		}
-	
-		void			HideOutputExcept(string propName)
+
+		void 			UpdateOutputVisibility()
 		{
-			foreach (var prop in new string[]{"fOutput", "v2Output", "v3Output", "v4Output"})
-				UpdatePropVisibility(prop, (prop == propName) ? PWVisibility.Visible : PWVisibility.Gone);
+			ints = values.GetValues< int >();
+			floats = values.GetValues< float >();
+			vec2s = values.GetValues< Vector2 >();
+			vec3s = values.GetValues< Vector3 >();
+			vec4s = values.GetValues< Vector4 >();
+
+			string outFieldName = GetOutputFieldName();
+			foreach (var prop in outputNames)
+				UpdatePropVisibility(prop, (prop == outFieldName) ? PWVisibility.Visible : PWVisibility.Gone);
 		}
 	
 		string			GetModeName()
@@ -50,6 +60,19 @@ namespace PW
 			return ("float");
 		}
 
+		string			GetOutputFieldName()
+		{
+			if (vec4s.Count != 0)
+				return ("v4Output");
+			if (vec3s.Count != 0)
+				return ("v3Output");
+			if (vec2s.Count != 0)
+				return ("v2Output");
+			else if (ints.Count != 0 || floats.Count != 0)
+				return ("fOutput");
+			return null;
+		}
+
 		void DisplayResult< T >(T result)
 		{
 			EditorGUIUtility.labelWidth = 100;
@@ -58,12 +81,6 @@ namespace PW
 	
 		public override void OnNodeGUI()
 		{
-			ints = values.GetValues< int >();
-			floats = values.GetValues< float >();
-			vec2s = values.GetValues< Vector2 >();
-			vec3s = values.GetValues< Vector3 >();
-			vec4s = values.GetValues< Vector4 >();
-			
 			EditorGUILayout.LabelField("Mode: " + GetModeName());
 	
 			EditorGUIUtility.labelWidth = 100;
@@ -77,6 +94,18 @@ namespace PW
 				DisplayResult(v2Output);
 			else
 				DisplayResult(fOutput);
+		}
+
+		public override void OnNodeAnchorLink(string propName, int index)
+		{
+			if (propName == "values")
+				UpdateOutputVisibility();
+		}
+
+		public override void OnNodeAnchorUnlink(string propName, int index)
+		{
+			if (propName == "values")
+				UpdateOutputVisibility();
 		}
 
 		public override void OnNodeProcess()
@@ -96,7 +125,6 @@ namespace PW
 	
 			if (vec4s.Count != 0)
 			{
-				HideOutputExcept("v4Output");
 				foreach (var vec4 in vec4s)
 					v4Output += vec4;
 				foreach (var vec3 in vec3s)
@@ -112,7 +140,6 @@ namespace PW
 			}
 			else if (vec3s.Count != 0)
 			{
-				HideOutputExcept("v3Output");
 				foreach (var vec3 in vec3s)
 					v3Output += (Vector3)vec3;
 				foreach (var vec2 in vec2s)
@@ -126,7 +153,6 @@ namespace PW
 			}
 			else if (vec2s.Count != 0)
 			{
-				HideOutputExcept("v2Output");
 				foreach (var vec2 in vec2s)
 					v2Output += (Vector2)vec2;
 				foreach (var flt in floats)
@@ -138,7 +164,6 @@ namespace PW
 			}
 			else //int and floats
 			{
-				HideOutputExcept("fOutput");
 				foreach (var flt in floats)
 					fOutput += flt;
 				foreach (var integer in ints)

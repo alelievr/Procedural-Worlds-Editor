@@ -114,5 +114,13 @@ namespace PW
 			
 			return true;
 		}
+		
+		public static bool Compare(this Color c1, Color c2)
+		{
+			for (int i = 0; i < 4; i++)
+				if (c1[i] != c2[i])
+					return false;
+			return true;
+		}
 	}
 }
