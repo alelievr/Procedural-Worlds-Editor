@@ -73,7 +73,6 @@ namespace PW
 		int					oldChunkSize;
 		float				oldStep;
 		Pair< string, int >	lastAttachedLink = null;
-		bool				preprocess = false;
 
 		PWAnchorInfo		anchorUnderMouse;
 
@@ -317,10 +316,6 @@ namespace PW
 		{
 		}
 
-		public virtual void OnNodePreProcess()
-		{
-		}
-
 		public virtual void OnNodeProcess()
 		{
 		}
@@ -445,10 +440,6 @@ namespace PW
 				OnNodeAnchorLink(lastAttachedLink.first, lastAttachedLink.second);
 				lastAttachedLink = null;
 			}
-
-			preprocess = true;
-			OnNodePreProcess();
-			preprocess = false;
 
 			OnNodeProcess();
 		}
@@ -1242,20 +1233,11 @@ namespace PW
 			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
 		}
 
-		public void				DisableNodeComputing(int nodeId)
+		public void				RequestProcessing(int nodeId)
 		{
-			if (!preprocess)
-			{
-				Debug.LogWarning("DisableNodeComputing can't be called outside of OnNodePreProcess()");
+			if (!currentGraph.RequestProcessing(nodeId))
+				Debug.Log("failed to request computing of node " + nodeId + ": not found in the current graph");
 				return ;
-			}
-
-
-		}
-
-		public void			RequestComputing(int nodeId)
-		{
-
 		}
 
 	#endregion

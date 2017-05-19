@@ -115,6 +115,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	private static Texture2D	rencenterIconTexture;
 	private static Texture2D	fileIconTexture;
+	private static Texture2D	pauseIconTexture;
 
 	private static Gradient		greenRedGradient;
 	
@@ -1609,16 +1610,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 					menu.AddItem(new GUIContent("New Link"), false, BeginDragLink);
 					menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
 				}
-				else
-				{
-					menu.AddDisabledItem(new GUIContent("New Link"));
-					menu.AddDisabledItem(new GUIContent("Delete all links"));
-				}
+
 				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
 				if (hoveredLink != null)
-					menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
+				{
+					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWLinkMode.AutoProcess, () => { hoveredLink.mode = PWLinkMode.AutoProcess; });
+					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWLinkMode.RequestForProcess, () => { hoveredLink.mode = PWLinkMode.RequestForProcess; });
+					menu.AddItem(new GUIContent("Link/Delete link"), false, DeleteLink, hoveredLink);
+				}
 				else
-					menu.AddDisabledItem(new GUIContent("Delete link"));
+					menu.AddDisabledItem(new GUIContent("Link"));
 
                 menu.AddSeparator("");
 				if (mouseAboveNodeIndex != -1)
@@ -1857,6 +1858,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		//icons and utils
 		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
 		fileIconTexture = CreateTexture2DFromFile("ic_file");
+		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
 
 		//generating green-red gradient
         GradientColorKey[] gck;
@@ -1979,24 +1981,25 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (e.type == EventType.Repaint)
 		{
 			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
+			PWLinkMode m = (link != null) ? link.mode : PWLinkMode.AutoProcess;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
 				case PWLinkType.Sampler3D:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s, m);
 					break ;
 				case PWLinkType.ThreeChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s, m);
 					break ;
 				case PWLinkType.FourChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 7, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 7, s, m);
 					break ;
 				default:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s, m);
 					break ;
 			}
 			if (link != null && link.linkHighlight == PWLinkHighlight.DeleteAndReset)
@@ -2006,7 +2009,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
     }
 
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight)
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWLinkMode linkMode)
 	{
 		switch (linkHighlight)
 		{
@@ -2019,6 +2022,20 @@ public class ProceduralWorldsWindow : EditorWindow {
 				break ;
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
+
+		if (linkMode == PWLinkMode.RequestForProcess)
+		{
+			Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
+			Vector2 pauseSize = new Vector2(20, 20);
+			Matrix4x4 savedGUIMatrix = GUI.matrix;
+			Rect pauseRect = new Rect((Vector2)points[2] - pauseSize / 2, pauseSize);
+			float angle = Vector2.Angle((startPos.y > endPos.y) ? startPos - endPos : endPos - startPos, Vector2.right);
+			GUIUtility.RotateAroundPivot(angle, points[2]);
+			GUI.color = c;
+            GUI.DrawTexture(pauseRect, pauseIconTexture);
+			GUI.color = Color.white;
+			GUI.matrix = savedGUIMatrix;
+        }
 	}
 #endregion
 }

@@ -24,6 +24,13 @@ namespace PW
 	}
 
 	[System.SerializableAttribute]
+	public enum PWLinkMode
+	{
+		AutoProcess,
+		RequestForProcess,
+	}
+
+	[System.SerializableAttribute]
 	public class PWLink
 	{
 		//distant datas:
@@ -44,6 +51,7 @@ namespace PW
 		public PWLinkHighlight		linkHighlight;
 		public bool					hover;
 		public bool					selected;
+		public PWLinkMode			mode;
 	
 		public PWLink(int dWin, int dAttr, string dName, string dCName, int dIndex, int lWin, int lAttr, string lName, string lCName, int lIndex, Color c, PWLinkType lt)
 		{

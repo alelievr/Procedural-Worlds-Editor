@@ -80,7 +80,7 @@ namespace PW
 			}
 		}
 
-		public override void OnNodePreProcess()
+		public override void OnNodeProcess()
 		{
 			if (terrestrialBiomeData == null)
 			{
@@ -89,10 +89,7 @@ namespace PW
 
 				terrestrialBiomeData.biomeTree.BuildTree(this);
 			}
-		}
-
-		public override void OnNodeProcess()
-		{
+			
 			if (needUpdate)
 			{
 				terrestrialBiomeData.terrain = terrainNoise as Sampler2D;

@@ -302,6 +302,12 @@ namespace PW
 			return calculTime;
 		}
 
+		public bool RequestProcessing(int nodeId)
+		{
+			//TODO
+			return true;
+		}
+
 		public void	UpdateSeed(int seed)
 		{
 			this.seed = seed;
