@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace PW
@@ -52,7 +53,7 @@ namespace PW
 		[SerializeField]
 		public List< PWAnchorMultiData >	multi;
 		//accessor for the first anchor data:
-		public PWAnchorMultiData	first { get{ return multi[0]; } set{ multi[0] = value; } }
+		public PWAnchorMultiData	first { get{ if (multi.Count != 0) return multi[0]; return null; } set{ multi[0] = value; } }
 
 		//properties for multiple anchors:
 		[SerializeField]
@@ -118,7 +119,7 @@ namespace PW
 
 		public void AddNewAnchor(int id, bool affectValues = true)
 		{
-			AddNewAnchor(first.color, id, affectValues);
+			AddNewAnchor((first != null) ? first.color : Color.white, id, affectValues);
 		}
 
 		public void AddNewAnchor(Color c, int id, bool affectValues = true)
@@ -128,7 +129,7 @@ namespace PW
 
 			if (c == new Color(0, 0, 0, 0))
 				c = PWNode.GetAnchorColorByType(type);
-			tmp.name = first.name;
+			tmp.name = (first != null) ? first.name : "";
 			tmp.additional = true;
 			tmp.id = id;
 			if (anchorValues.Count == multipleValueCount)
@@ -139,6 +140,11 @@ namespace PW
 				anchorValues.Add(null);
 
 			multi.Add(tmp);
+		}
+
+		public void RemoveAllAnchors()
+		{
+			multi.Clear();
 		}
 	}
 }

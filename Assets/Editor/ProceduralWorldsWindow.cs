@@ -194,7 +194,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Biomes", "greenNode", greenNodeWindow, greenNodeWindowSelected,
 			"Water Level", typeof(PWNodeWaterLevel),
 			"To Biome data", typeof(PWNodeBiomeData),
-			"Biome data switch", typeof(PWNodeBiomeSwitch),
+			"Biome switch", typeof(PWNodeBiomeSwitch),
 			"Biome Binder", typeof(PWNodeBiomeBinder),
 			"Biome blender", typeof(PWNodeBiomeBlender));
 		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
@@ -1879,7 +1879,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		// if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
+		if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
 		{
 			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
 			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
@@ -1920,12 +1920,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 			greyNodeWindowSelected = PWGUISkin.FindStyle("GreyNodeWindowSelected");
 			whiteNodeWindow = PWGUISkin.FindStyle("WhiteNodeWindow");
 			whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
+			
+			//copy all custom styles to the new style
+			PWGUISkin.customStyles = PWGUISkin.customStyles.Concat(GUI.skin.customStyles).ToArray();
+
+			//set the custom style for the editor
+			GUI.skin = PWGUISkin;
 		}
 		if (nodeSelectorList.Count == 0)
 			InitializeNodeSelector();
-
-		//set the custom style for the editor
-		GUI.skin = PWGUISkin;
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)

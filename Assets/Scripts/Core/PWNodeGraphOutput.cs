@@ -11,7 +11,7 @@ namespace PW
 
 		//allow everything as output type
 		[PWMultiple(1, typeof(object))]
-		[PWInput("in")]
+		[PWInput]
 		[PWOffset(0, 20)]
 		public PWValues				inputValues = new PWValues();
 

@@ -206,6 +206,8 @@ namespace PW
 	public abstract class BiomeBaseData
 	{
 		public BiomeSwitchTree		biomeTree;
+		public bool					isWaterless;
+		public bool					is3D;
 
 		public BiomeBaseData()
 		{
@@ -230,6 +232,12 @@ namespace PW
 
 		public Sampler2D[]			datas;
 		public string[]				dataNames;
+
+		public WaterlessBiomeData()
+		{
+			is3D = false;
+			isWaterless = true;
+		}
 	}
 	
 	public class WaterlessBiomeData3D : BiomeBaseData
@@ -249,18 +257,36 @@ namespace PW
 
 		public Sampler3D[]			datas;
 		public string[]				dataNames;
+
+		public WaterlessBiomeData3D()
+		{
+			is3D = true;
+			isWaterless = true;
+		}
 	}
 
 	public class BiomeData : WaterlessBiomeData
 	{
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
+
+		public BiomeData()
+		{
+			is3D = false;
+			isWaterless = false;
+		}
 	}
 	
 	public class BiomeData3D : WaterlessBiomeData3D
 	{
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
+
+		public BiomeData3D()
+		{
+			is3D = true;
+			isWaterless = false;
+		}
 	}
 
 	/*

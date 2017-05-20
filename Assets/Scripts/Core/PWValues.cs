@@ -100,5 +100,12 @@ namespace PW
 			names.RemoveAt(index);
 			return true;
 		}
+
+		public void Clear()
+		{
+			values.Clear();
+			names.Clear();
+			valuesCount = 0;
+		}
 	}
 }

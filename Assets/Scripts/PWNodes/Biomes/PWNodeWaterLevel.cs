@@ -11,6 +11,7 @@ namespace PW
 		[PWOffset(5)]
 		public Sampler		terrainNoise;
 
+		//TODO: remove this output and set one BiomeData as output.
 		[PWOutput("terrestrial")]
 		[PWOffset(5)]
 		public BiomeData	terrestrialBiomeData;
@@ -32,6 +33,7 @@ namespace PW
 			mapMin = 0;
 			mapMax = 100;
 			waterLevel = 50;
+			externalName = "Water level";
 		}
 
 		void UpdateGradient()

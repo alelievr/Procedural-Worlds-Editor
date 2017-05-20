@@ -1,4 +1,4 @@
-﻿#define DEBUG_WINDOW
+﻿// #define DEBUG_WINDOW
 // #define DEBUG_ANCHOR
 
 using UnityEditor;
@@ -153,7 +153,7 @@ namespace PW
 				return PWColorPalette.GetColor("yellowAnchor");
 			else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 				return PWColorPalette.GetColor("blueAnchor");
-			else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
+			else if (t.IsSubclassOf(typeof(BiomeBaseData)) || t == typeof(BiomeBaseData))
 				return PWColorPalette.GetColor("purpleAnchor");
 			else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
 				return PWColorPalette.GetColor("greenAnchor");
@@ -178,7 +178,7 @@ namespace PW
 				PWAnchorData	data = propertyDatas[field.Name];
 				Color			backgroundColor = GetAnchorColorByType(field.FieldType);
 				PWAnchorType	anchorType = PWAnchorType.None;
-				string			name = field.Name;
+				string			name = "";
 				Vector2			offset = Vector2.zero;
 
 				data.anchorInstance = field.GetValue(this);
@@ -345,10 +345,9 @@ namespace PW
 				anchorTexture = GUI.skin.box.normal.background;
 				anchorDisabledTexture = GUI.skin.box.active.background;
 				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("RenameNodetextField"));
+				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
+				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 			}
-			//TODO: put this in the if above
-			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
-			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
@@ -487,7 +486,7 @@ namespace PW
 
 			//if there is more values in PWValues than the available anchor count, create new anchors:
 			ForeachPWAnchorDatas((data) => {
-				if (data.multiple && data.anchorInstance != null)
+				if (data.anchorType == PWAnchorType.Input && data.multiple && data.anchorInstance != null)
 				{
 					if (((PWValues)data.anchorInstance).Count >= data.multi.Count)
 						data.AddNewAnchor(data.fieldName.GetHashCode() + data.multi.Count, false);
@@ -531,7 +530,7 @@ namespace PW
 			if (singleAnchor == null || boxAnchorStyle == null)
 				return ;
 
-			string anchorName = (data.multiple) ? "" : data.anchorName;
+			string anchorName = (data.multiple) ? singleAnchor.name : data.anchorName;
 
 			if (data.multiple)
 			{
@@ -1188,6 +1187,30 @@ namespace PW
 			}
 		}
 
+		public void				UpdateMultiProp(string propertyName, int newCount, params string[] newNames)
+		{
+			if (!propertyDatas.ContainsKey(propertyName))
+				return ;
+			if (!propertyDatas[propertyName].multiple)
+				return ;
+			
+			var prop = propertyDatas[propertyName];
+			prop.RemoveAllAnchors();
+			prop.minMultipleValues = 0;
+			
+			PWValues values = prop.anchorInstance as PWValues;
+			if (prop.anchorInstance != null)
+				values.Clear();
+
+			for (int i = 0; i < newCount; i++)
+			{
+				prop.AddNewAnchor(prop.fieldName.GetHashCode() + i);
+				if (newNames != null && i < newNames.Length)
+					prop.multi[i].name = newNames[i];
+				prop.multi[i].color = (SerializableColor)FindColorFromtypes(prop.allowedTypes);
+			}
+		}
+
 		public int				GetPropLinkCount(string propertyName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
@@ -1246,6 +1269,16 @@ namespace PW
 			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
 		}
 
+		public List< PWNode > 	GetOutputNodes()
+		{
+			return links.Select(l => FindNodeById(l.distantNodeId)).ToList();
+		}
+
+		public List< PWNode >	GetInputNodes()
+		{
+			return depencendies.Select(d => FindNodeById(d.nodeId)).ToList();
+		}
+
 		public void				RequestProcessing(int nodeId)
 		{
 			if (!currentGraph.RequestProcessing(nodeId))
@@ -1294,8 +1327,12 @@ namespace PW
 					if (data.anchorType == PWAnchorType.Input)
 						if (data.displayHiddenMultipleAnchors || showAdditional)
 							anchorCount++;
+					// if (GetType() == typeof(PWNodeBiomeSwitch))
+						// Debug.Log("anchor count: " + anchorCount);
 					for (int i = 0; i < anchorCount; i++)
 					{
+						// if (GetType() == typeof(PWNodeBiomeSwitch))
+							// Debug.Log("access to multi[" + i + "]");
 						//if multi-anchor instance does not exists, create it:
 						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
 							data.multi[i].additional = true;
@@ -1385,6 +1422,19 @@ namespace PW
 			if (to.anchorColor.Compare(PWColorPalette.GetColor("greyAnchor")) || to.anchorColor.Compare(PWColorPalette.GetColor("whiteAnchor")))
 				return from.anchorColor;
 			return to.anchorColor;
+		}
+
+		Color FindColorFromtypes(SerializableType[] types)
+		{
+			Color defaultColor = PWColorPalette.GetColor("defaultAnchor");
+
+			foreach (var type in types)
+			{
+				Color c = GetAnchorColorByType(type.GetType());
+				if (!c.Compare(defaultColor))
+					return c;
+			}
+			return defaultColor;
 		}
 
 	#endregion

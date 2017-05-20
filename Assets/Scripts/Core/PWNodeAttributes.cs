@@ -101,7 +101,10 @@ namespace PW
 		
 		public PWMultiple(params Type[] allowedTypes)
 		{
-			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
+			List< SerializableType > ts = new List< SerializableType >();
+			foreach (var t in allowedTypes)
+				ts.Add((SerializableType)t);
+			this.allowedTypes = ts.ToArray();
 			minValues = 0;
 			maxValues = 100;
 		}

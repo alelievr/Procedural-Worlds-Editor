@@ -97,7 +97,7 @@ namespace PW
 		public PWGUIManager					PWGUI;
 
 		[System.NonSerializedAttribute]
-		IOrderedEnumerable< PWNodeComputeInfo > computeOrderSortedNodes = null;
+		IOrderedEnumerable< PWNodeProcessInfo > computeOrderSortedNodes = null;
 
 		[System.NonSerializedAttribute]
 		public bool								unserializeInitialized = false;
@@ -125,12 +125,12 @@ namespace PW
 			typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel), typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch),
 		};
 		
-		private class PWNodeComputeInfo
+		private class PWNodeProcessInfo
 		{
 			public PWNode node;
 			public string graphName;
 
-			public PWNodeComputeInfo(PWNode n, string g) {
+			public PWNodeProcessInfo(PWNode n, string g) {
 				node = n;
 				graphName = g;
 			}
@@ -148,25 +148,27 @@ namespace PW
 		[System.NonSerializedAttribute]
 		//store the list of nodes to becomputed per RequestForProcess nodes so if you ask to process
 		// a node, it will just take the list from this dic. and compute them in the order of the list
-		Dictionary< int, List< PWNodeComputeInfo > >	bakedGraphParts = new Dictionary< int, List< PWNodeComputeInfo > >();
-		bool											graphPartsBaked = false;
+		Dictionary< int, List< PWNodeProcessInfo > >	bakedGraphParts = new Dictionary< int, List< PWNodeProcessInfo > >();
 		void BakeGraphParts(bool threaded = true)
 		{
 			//TODO: thread this, can be long
 
 			ForeachAllNodes((n) => {
+				if (!n)
+					return ;
+					
 				var links = n.GetLinks();
 
 				if (links.Count > 0
 					&& links.All(l => l.mode == PWLinkMode.RequestForProcess)
 					&& n.GetDependencies().All(d => d.mode == PWLinkMode.RequestForProcess))
 				{
-					List< PWNodeComputeInfo > toComputeList;
+					List< PWNodeProcessInfo > toComputeList;
 
 					if (bakedGraphParts.ContainsKey(n.nodeId))
 						toComputeList = bakedGraphParts[n.nodeId];
 					else
-						toComputeList = bakedGraphParts[n.nodeId] = new List< PWNodeComputeInfo >();
+						toComputeList = bakedGraphParts[n.nodeId] = new List< PWNodeProcessInfo >();
 
 					//go back to the farest node dependency with the RequestForProcess links:
 					foreach (var depNodeId in n.GetDependencies().Select(d => d.nodeId).Distinct())
@@ -177,9 +179,9 @@ namespace PW
 							continue ;
 						
 						if (node.GetLinks().All(dl => dl.mode == PWLinkMode.RequestForProcess))
-							toComputeList.Insert(0, new PWNodeComputeInfo(node, FindGraphNameFromExternalNode(node)));
+							toComputeList.Insert(0, new PWNodeProcessInfo(node, FindGraphNameFromExternalNode(node)));
 					}
-					toComputeList.Add(new PWNodeComputeInfo(n, FindGraphNameFromExternalNode(n)));
+					toComputeList.Add(new PWNodeProcessInfo(n, FindGraphNameFromExternalNode(n)));
 
 					foreach (var link in links.Where(l => l.mode == PWLinkMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
 					{
@@ -188,36 +190,28 @@ namespace PW
 						//if the node goes nowhere, add it
 						if (node.GetLinks().Count == 0)
 						{
-							List< PWNodeComputeInfo > subToComputeList;
+							List< PWNodeProcessInfo > subToComputeList;
 							if (bakedGraphParts.ContainsKey(node.nodeId))
 								subToComputeList = bakedGraphParts[node.nodeId];
 							else
-								subToComputeList = bakedGraphParts[node.nodeId] = new List< PWNodeComputeInfo >();
+								subToComputeList = bakedGraphParts[node.nodeId] = new List< PWNodeProcessInfo >();
 							
 							subToComputeList.RemoveAll(nodeInfo => toComputeList.Any(ni => ni.node.nodeId == nodeInfo.node.nodeId));
 
 							subToComputeList.InsertRange(0, toComputeList);
 							if (!subToComputeList.Any(ni => ni.node.nodeId == node.nodeId))
-								subToComputeList.Insert(subToComputeList.Count, new PWNodeComputeInfo(node, FindGraphNameFromExternalNode(node)));
-
-							//TODO: remove duplication in this new list
+								subToComputeList.Insert(subToComputeList.Count, new PWNodeProcessInfo(node, FindGraphNameFromExternalNode(node)));
 						}
 					}
-					//check if the linked node dependencies contains AutoProcess links and do not
-					// if it does, nothing to but
-					// else add it to the bakedGraphParts Dictionary with a copy of this list more one element (linked node) at the end
 				}
 			}, true, true);
 			
-
 			/*foreach (var kp in bakedGraphParts)
 			{
 				Debug.Log("to compute list for node " + kp.Key);
 				foreach (var ne in kp.Value)
 					Debug.Log("\tne: " + ne.node.nodeId);
 			}*/
-
-			graphPartsBaked = true;
 		}
 
 		public void RebakeGraphParts(bool graphRecursive = false)
@@ -278,7 +272,7 @@ namespace PW
 		{
 			computeOrderSortedNodes = nodesDictionary
 					//select all nodes building an object with node value and graph name (if needed)
-					.Select(kp => new PWNodeComputeInfo(kp.Value, FindGraphNameFromExternalNode(kp.Value)))
+					.Select(kp => new PWNodeProcessInfo(kp.Value, FindGraphNameFromExternalNode(kp.Value)))
 					//sort the resulting list by computeOrder:
 					.OrderBy(n => n.node.computeOrder);
 		}
@@ -324,7 +318,6 @@ namespace PW
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
-					Debug.Log("assigned from " + link.localName + " to " + link.distantName);
 					prop.SetValue(target, localVal);
 				}
 				else if (val != null) // both are multi-anchors
@@ -340,6 +333,43 @@ namespace PW
 					}
 				}
 			}
+		}
+
+		float ProcessNode(PWNodeProcessInfo nodeInfo)
+		{
+			float	calculTime = 0;
+
+			//if you are in editor mode, update the process time of the node
+			if (!realMode)
+			{
+				Stopwatch	st = new Stopwatch();
+
+				nodeInfo.node.UpdateCurrentGraph(this);
+				
+				st.Start();
+				nodeInfo.node.Process();
+				st.Stop();
+
+				nodeInfo.node.processTime = st.ElapsedMilliseconds;
+				calculTime = nodeInfo.node.processTime;
+			}
+			else
+				nodeInfo.node.Process();
+
+			if (realMode || !isVisibleInEditor)
+				nodeInfo.node.EndFrameUpdate();
+			ProcessNodeLinks(nodeInfo.node);
+
+			//if node was an external node, compute his subgraph
+			if (nodeInfo.graphName != null)
+			{
+				PWNodeGraph g = FindGraphByName(nodeInfo.graphName);
+				float time = g.ProcessGraph();
+				if (!realMode)
+					nodeInfo.node.processTime = time;
+			}
+
+			return calculTime;
 		}
 
 		public float ProcessGraph()
@@ -363,43 +393,24 @@ namespace PW
 				if (links.Count > 0 && !links.Any(l => l.mode == PWLinkMode.AutoProcess))
 					continue ;
 				
-				//if you are in editor mode, update the process time of the node
-				if (!realMode)
-				{
-					Stopwatch	st = new Stopwatch();
-
-					nodeInfo.node.UpdateCurrentGraph(this);
-					
-					st.Start();
-					nodeInfo.node.Process();
-					st.Stop();
-
-					nodeInfo.node.processTime = st.ElapsedMilliseconds;
-					calculTime += nodeInfo.node.processTime;
-				}
-				else
-					nodeInfo.node.Process();
-
-				if (realMode || !isVisibleInEditor)
-					nodeInfo.node.EndFrameUpdate();
-				ProcessNodeLinks(nodeInfo.node);
-
-				//if node was an external node, compute his subgraph
-				if (nodeInfo.graphName != null)
-				{
-					PWNodeGraph g = FindGraphByName(nodeInfo.graphName);
-					float time = g.ProcessGraph();
-					if (!realMode)
-						nodeInfo.node.processTime = time;
-				}
+				calculTime += ProcessNode(nodeInfo);
 			}
 			return calculTime;
 		}
 
 		public bool RequestProcessing(int nodeId)
 		{
-			//TODO
-			return true;
+			if (bakedGraphParts.ContainsKey(nodeId))
+			{
+				var toComputeList = bakedGraphParts[nodeId];
+
+				//compute the list
+				foreach (var nodeInfo in toComputeList)
+					ProcessNode(nodeInfo);
+
+				return true;
+			}
+			return false;
 		}
 
 		public void	UpdateSeed(int seed)
