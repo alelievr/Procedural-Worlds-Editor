@@ -49,6 +49,8 @@ namespace PW
 		public string				classAQName;
 		//the visual offset of the anchor
 		public Vector2				offset;
+		//the visual padding between multiple anchor of the same field
+		public int					multiPadding;
 		//list of rendered anchors:
 		[SerializeField]
 		public List< PWAnchorMultiData >	multi;

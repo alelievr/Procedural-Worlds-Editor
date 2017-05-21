@@ -58,7 +58,7 @@ namespace PW
 
 		[PWOutput]
 		[PWMultiple(typeof(BiomeBaseData))]
-		[PWOffset(20)]
+		[PWOffset(0, 41, 1)]
 		public PWValues			outputBiomes = new PWValues();
 
 		public BiomeSwitchMode	switchMode;
@@ -79,7 +79,7 @@ namespace PW
 				SwitchData elem = switchDatas[index];
 				
                 rect.y += 2;
-				int		floatFieldSize = 40;
+				int		floatFieldSize = 30;
 				int		labelFieldSize = 80;
 				Rect labelRect = new Rect(rect.x, rect.y, labelFieldSize, EditorGUIUtility.singleLineHeight);
 				Rect minRect = new Rect(rect.x + labelFieldSize, rect.y, floatFieldSize, EditorGUIUtility.singleLineHeight);
@@ -101,8 +101,11 @@ namespace PW
 			};
 
 			switchList.onRemoveCallback += (ReorderableList l) => {
-				switchDatas.RemoveAt(l.index);
-				UpdateSwitchMode();
+				if (switchDatas.Count > 1)
+				{
+					switchDatas.RemoveAt(l.index);
+					UpdateSwitchMode();
+				}
 			};
 		}
 
@@ -130,20 +133,22 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-			EditorGUIUtility.labelWidth = 80;
-			EditorGUI.BeginChangeCheck();
-			{
-				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
-				switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
-			}
-			if (EditorGUI.EndChangeCheck() || needUpdate)
-				UpdateSwitchMode();
-			
-			//TODO: display a reorderable list of min-max floats
-			//TODO: preview for min-max data coverage
-
-			if (switchMode != BiomeSwitchMode.Water)
-				switchList.DoLayoutList();
+				EditorGUIUtility.labelWidth = 80;
+				EditorGUI.BeginChangeCheck();
+				{
+					selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
+					switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+				}
+				if (EditorGUI.EndChangeCheck() || needUpdate)
+					UpdateSwitchMode();
+				
+				//TODO: display a reorderable list of min-max floats
+				//TODO: preview for min-max data coverage
+	
+				if (switchMode != BiomeSwitchMode.Water)
+				{
+					switchList.DoLayoutList();
+				}
 		}
 
 		//no process needed, this node only exists for user visual organization.

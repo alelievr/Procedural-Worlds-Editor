@@ -14,10 +14,7 @@ namespace PW
 		//TODO: remove this output and set one BiomeData as output.
 		[PWOutput("terrestrial")]
 		[PWOffset(5)]
-		public BiomeData	terrestrialBiomeData;
-		[PWOutput("aquatic")]
-		[PWOffset(10)]
-		public BiomeData	aquaticBiomeData;
+		public BiomeData	biomeData;
 
 		[SerializeField]
 		float				waterLevel;
@@ -48,9 +45,9 @@ namespace PW
 		{
 			GUILayout.Space(GUI.skin.label.lineHeight * 4f);
 				
-			if (terrestrialBiomeData != null)
+			if (biomeData != null)
 			{
-				PWBiomeUtils.DrawBiomeInfos(terrestrialBiomeData);
+				PWBiomeUtils.DrawBiomeInfos(biomeData);
 				EditorGUILayout.Separator();
 			}
 
@@ -84,30 +81,29 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			if (terrestrialBiomeData == null)
+			if (biomeData == null)
 			{
-				terrestrialBiomeData = new BiomeData();
-				aquaticBiomeData = terrestrialBiomeData;
+				biomeData = new BiomeData();
 
-				terrestrialBiomeData.biomeTree.BuildTree(this);
+				biomeData.biomeTree.BuildTree(this);
 			}
 			
 			if (needUpdate)
 			{
-				terrestrialBiomeData.terrain = terrainNoise as Sampler2D;
-				terrestrialBiomeData.terrain3D = terrainNoise as Sampler3D;
+				biomeData.terrain = terrainNoise as Sampler2D;
+				biomeData.terrain3D = terrainNoise as Sampler3D;
 				
-				terrestrialBiomeData.waterLevel = waterLevel;
+				biomeData.waterLevel = waterLevel;
 
 				if (terrainNoise.type == SamplerType.Sampler2D)
 				{
 					//terrain mapping
-					terrestrialBiomeData.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+					biomeData.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
 
 					//waterHeight evaluation
-					terrestrialBiomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+					biomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
 					(terrainNoise as Sampler2D).Foreach((x, y, val) => {
-						terrestrialBiomeData.waterHeight[x, y] = waterLevel - val;
+						biomeData.waterHeight[x, y] = waterLevel - val;
 					});
 				}
 				else

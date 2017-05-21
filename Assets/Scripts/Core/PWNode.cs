@@ -50,6 +50,7 @@ namespace PW
 		static GUIStyle 	renameNodeTextFieldStyle = null;
 		static GUIStyle		inputAnchorLabelStyle = null;
 		static GUIStyle		outputAnchorLabelStyle = null;
+		public static GUIStyle	innerNodePaddingStyle = null;
 		
 		static Texture2D	errorIcon = null;
 		static Texture2D	editIcon = null;
@@ -180,6 +181,7 @@ namespace PW
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = "";
 				Vector2			offset = Vector2.zero;
+				int				multiPadding = 0;
 
 				data.anchorInstance = field.GetValue(this);
 				System.Object[] attrs = field.GetCustomAttributes(true);
@@ -215,7 +217,10 @@ namespace PW
 					if (colorAttr != null)
 						backgroundColor = colorAttr.color;
 					if (offsetAttr != null)
+					{
 						offset = offsetAttr.offset;
+						multiPadding = offsetAttr.multiPadding;
+					}
 					if (multipleAttr != null)
 					{
 						//check if field is PWValues type otherwise do not implement multi-anchor
@@ -250,6 +255,7 @@ namespace PW
 					data.first.name = name;
 					data.offset = offset;
 					data.nodeId = nodeId;
+					data.multiPadding = multiPadding;
 
 					//add missing values to instance of list:
 
@@ -344,9 +350,10 @@ namespace PW
 				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 				anchorTexture = GUI.skin.box.normal.background;
 				anchorDisabledTexture = GUI.skin.box.active.background;
-				renameNodeTextFieldStyle = new GUIStyle(GUI.skin.FindStyle("RenameNodetextField"));
+				renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
 				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
+				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
 			}
 
 			//update the PWGUI window rect with this window rect:
@@ -380,21 +387,11 @@ namespace PW
 				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
 			#endif
 
-			GUILayout.BeginVertical();
+			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
-				RectOffset savedmargin = GUI.skin.label.margin;
-				GUI.skin.label.margin = new RectOffset(2, 2, 5, 7);
-
-				//magic to fit the window padding ???
-				GUIStyle centerEverything = new GUIStyle();
-				centerEverything.alignment = TextAnchor.MiddleCenter;
-				GUILayout.Label(" ", centerEverything);
-				GUILayout.Space(-GUI.skin.label.lineHeight);
-
 				OnNodeGUI();
 
 				EditorGUIUtility.labelWidth = 0;
-				GUI.skin.label.margin = savedmargin;
 			}
 			GUILayout.EndVertical();
 
@@ -504,6 +501,13 @@ namespace PW
 						else if (data.anchorType == PWAnchorType.Output)
 							outputAnchorRect.position += data.offset;
 					}
+					if (singleAnchor.visibility != PWVisibility.Gone && i != -1)
+					{
+						if (data.anchorType == PWAnchorType.Input)
+							inputAnchorRect.position += new Vector2(0, data.multiPadding);
+						else if (data.anchorType == PWAnchorType.Output)
+							outputAnchorRect.position += new Vector2(0, data.multiPadding);
+					}
 					if (singleAnchor.visibility == PWVisibility.Visible)
 						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
 					if (singleAnchor.visibility != PWVisibility.Gone)
@@ -532,13 +536,13 @@ namespace PW
 
 			string anchorName = (data.multiple) ? singleAnchor.name : data.anchorName;
 
-			if (data.multiple)
+			/*if (data.multiple && data.anchorType == PWAnchorType.Input)
 			{
-				/*if (singleAnchor.additional)
+				if (singleAnchor.additional)
 					anchorName = "+";
 				else
-					anchorName += index;*/
-			}
+					anchorName += index;
+			}*/
 
 			switch (singleAnchor.highlighMode)
 			{
@@ -564,10 +568,10 @@ namespace PW
 				Rect	anchorNameRect = singleAnchor.anchorRect;
 				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
 				if (data.anchorType == PWAnchorType.Input)
-					anchorNameRect.position += new Vector2(-6, -3);
+					anchorNameRect.position += new Vector2(-6, -2);
 				else
-					anchorNameRect.position += new Vector2(-textSize.x - 6, -3);
-				anchorNameRect.size = textSize + new Vector2(25, 0); //add the anchorLabel size
+					anchorNameRect.position += new Vector2(-textSize.x - 6, -2);
+				anchorNameRect.size = textSize + new Vector2(25, 4); //add the anchorLabel size
 				GUI.depth = 10;
 				GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
 			}

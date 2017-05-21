@@ -297,6 +297,12 @@ namespace PW
 				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.nodeId);
 				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
 				
+				//ignore old links not removed cause of property removed in a script at compilation
+				if (!realMode)
+					if (!bakedNodeFields.ContainsKey(link.localClassAQName)
+						|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName))
+							continue ;
+
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
 				if (val == null)
 					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);

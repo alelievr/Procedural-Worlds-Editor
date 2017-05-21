@@ -1922,13 +1922,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 			whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
 			
 			//copy all custom styles to the new style
-			PWGUISkin.customStyles = PWGUISkin.customStyles.Concat(GUI.skin.customStyles).ToArray();
+			string[] stylesToCopy = {"RL"};
+			PWGUISkin.customStyles = PWGUISkin.customStyles.Concat(
+				GUI.skin.customStyles.Where(
+					style => stylesToCopy.Any(
+						styleName => style.name.Contains(styleName) && !PWGUISkin.customStyles.Any(
+							s => s.name.Contains(styleName)
+						)
+					)
+				)
+			).ToArray();
 
-			//set the custom style for the editor
-			GUI.skin = PWGUISkin;
+			//TODO: copy only required styles to the new style
 		}
 		if (nodeSelectorList.Count == 0)
 			InitializeNodeSelector();
+			
+		//set the custom style for the editor
+		GUI.skin = PWGUISkin;
 	}
 
     void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)

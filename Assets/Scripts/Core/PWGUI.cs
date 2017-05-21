@@ -426,6 +426,7 @@ namespace PW
 
 		public void TexturePreview(Texture tex, bool settings = true)
 		{
+			//TODO: good rect calcul
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
 			TexturePreview(previewRect, tex, settings);

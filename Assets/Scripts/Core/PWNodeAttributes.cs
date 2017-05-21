@@ -39,6 +39,14 @@ namespace PW
 	public class PWOffset : Attribute
 	{
 		public Vector2	offset;
+		public int		multiPadding = 0;
+		
+		public PWOffset(int x, int y, int multiPadding)
+		{
+			offset.x = x;
+			offset.y = y;
+			this.multiPadding = multiPadding;
+		}
 
 		public PWOffset(int x, int y)
 		{
