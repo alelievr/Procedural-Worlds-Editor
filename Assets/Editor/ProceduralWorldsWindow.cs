@@ -659,6 +659,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				if (GUILayout.Button("Force graph to reload"))
 				{
+					parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
 					graphNeedReload = true;
 					EvaluateComputeOrder();
 					Debug.Log("graph reloaded !");
@@ -838,7 +839,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			pos.y = Mathf.RoundToInt(Mathf.RoundToInt(pos.y / snapPixels) * snapPixels);
 			node.windowRect.position = pos;
 		}
-		node.UpdateCurrentGraph(currentGraph);
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));

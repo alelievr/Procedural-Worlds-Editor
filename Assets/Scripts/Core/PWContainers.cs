@@ -124,6 +124,30 @@ namespace PW
 		}
 	}
 
+	[System.SerializableAttribute]
+	public class Vector2Sampler2D
+	{
+		public Vector2[,]	map;
+	}
+	
+	[System.SerializableAttribute]
+	public class Vector3Sampler2D
+	{
+		public Vector3[,]	map;
+	}
+	
+	[System.SerializableAttribute]
+	public class Vector2Sampler3D
+	{
+		public Vector2[,,]	map;
+	}
+	
+	[System.SerializableAttribute]
+	public class Vector3Sampler3D
+	{
+		public Vector3[,,]	map;
+	}
+
 	/*
 	**	Terrain storage classes:
 	*/
@@ -223,7 +247,7 @@ namespace PW
 		public Sampler2D			wetness;
 		public Sampler2D			temperature;
 		
-		public Vector2				wind;
+		public Vector2Sampler2D		wind;
 		public Sampler2D			lighting;
 		public BasicEdaphicData		soil;
 		
@@ -248,7 +272,7 @@ namespace PW
 		public Sampler3D			wetness;
 		public Sampler3D			temperature;
 		
-		public Vector3				wind;
+		public Vector3Sampler2D		wind;
 		public Sampler2D			lighting;
 		public BasicEdaphicData3D	soil;
 		

@@ -145,6 +145,31 @@ namespace PW
 				dico[field.Name] = field;
 		}
 
+		void InsertNodeIfNotExists(List< PWNodeProcessInfo > toComputeList, PWNode node)
+		{
+			if (toComputeList.Any(i => i.node.nodeId == node.nodeId))
+				return ;
+			
+			toComputeList.Insert(0, new PWNodeProcessInfo(node, FindGraphNameFromExternalNode(node)));
+		}
+
+		void TryBuildGraphPart(PWNode leadNode, List< PWNodeProcessInfo > toComputeList, int depth = 0)
+		{
+			InsertNodeIfNotExists(toComputeList, leadNode);
+			
+			foreach (var dep in leadNode.GetDependencies())
+			{
+				var depNode = FindNodebyId(dep.nodeId);
+
+				if (depNode.processMode == PWProcessMode.RequestForProcess)
+				{
+					InsertNodeIfNotExists(toComputeList, depNode);
+
+					TryBuildGraphPart(depNode, toComputeList, depth++);
+				}
+			}
+		}
+
 		[System.NonSerializedAttribute]
 		//store the list of nodes to becomputed per RequestForProcess nodes so if you ask to process
 		// a node, it will just take the list from this dic. and compute them in the order of the list
@@ -152,24 +177,6 @@ namespace PW
 		void BakeGraphParts(bool threaded = true)
 		{
 			//TODO: thread this, can be long
-
-			//TODO: assign the good process mode to the nodes
-			if (computeOrderSortedNodes != null)
-				foreach (var nodeInfo in computeOrderSortedNodes.Reverse())
-				{
-					int		mode = 0;
-	
-					foreach (var link in nodeInfo.node.GetLinks())
-						if (link.mode == PWProcessMode.RequestForProcess)
-							mode |= 1;
-						else
-							mode |= 2;
-	
-					if (mode == 1) //full RequestForProcess mode
-						nodeInfo.node.processMode = PWProcessMode.RequestForProcess;
-					else
-						nodeInfo.node.processMode = PWProcessMode.AutoProcess;
-				}
 
 			ForeachAllNodes((n) => {
 				if (!n)
@@ -181,17 +188,19 @@ namespace PW
 				if (links.Count > 0 && links.All(l => l.mode == PWProcessMode.RequestForProcess))
 				{
 					List< PWNodeProcessInfo > toComputeList;
-					
-					if (deps.Count > 0 && deps.Any(d => d.mode == PWProcessMode.AutoProcess))
-					{
-						//check if the dependencies are on a 
-						return ;
-					}
 
 					if (bakedGraphParts.ContainsKey(n.nodeId))
 						toComputeList = bakedGraphParts[n.nodeId];
 					else
 						toComputeList = bakedGraphParts[n.nodeId] = new List< PWNodeProcessInfo >();
+					
+					//analyze of "extern groups" (group of node with only one RequestForProcess link at the end)
+					if (deps.Any(d => FindNodebyId(d.nodeId).processMode == PWProcessMode.RequestForProcess))
+					{
+						TryBuildGraphPart(n, toComputeList);
+
+						return ;
+					}
 
 					//go back to the farest node dependency with the RequestForProcess links:
 					foreach (var depNodeId in n.GetDependencies().Select(d => d.nodeId).Distinct())
@@ -202,9 +211,9 @@ namespace PW
 							continue ;
 						
 						if (node.GetLinks().All(dl => dl.mode == PWProcessMode.RequestForProcess))
-							toComputeList.Insert(0, new PWNodeProcessInfo(node, FindGraphNameFromExternalNode(node)));
+							InsertNodeIfNotExists(toComputeList, node);
 					}
-					toComputeList.Add(new PWNodeProcessInfo(n, FindGraphNameFromExternalNode(n)));
+					InsertNodeIfNotExists(toComputeList, n);
 
 					foreach (var link in links.Where(l => l.mode == PWProcessMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
 					{
@@ -229,13 +238,13 @@ namespace PW
 				}
 			}, true, true);
 			
-			Debug.Log("created graph parts: " + bakedGraphParts.Count);
+			/*Debug.Log("created graph parts: " + bakedGraphParts.Count);
 			foreach (var kp in bakedGraphParts)
 			{
 				Debug.Log("to compute list for node " + kp.Key);
 				foreach (var ne in kp.Value)
 					Debug.Log("\tne: " + ne.node.nodeId);
-			}
+			}*/
 		}
 
 		public void RebakeGraphParts(bool graphRecursive = false)
@@ -287,7 +296,10 @@ namespace PW
 				nodesDictionary[inputNode.nodeId] = inputNode;
 			if (outputNode != null)
 				nodesDictionary[outputNode.nodeId] = outputNode;
-				
+
+			foreach (var node in nodes)
+				node.UpdateCurrentGraph(this);
+			
 			//bake the graph parts (RequestForProcess links)
 			BakeGraphParts();
 		}
@@ -368,6 +380,7 @@ namespace PW
 		float ProcessNode(PWNodeProcessInfo nodeInfo)
 		{
 			float	calculTime = 0;
+
 
 			//if you are in editor mode, update the process time of the node
 			if (!realMode)

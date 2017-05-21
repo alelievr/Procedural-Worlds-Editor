@@ -1,14 +1,14 @@
 ﻿namespace PW
 {
 	[System.SerializableAttribute]
-	public class PWNodeDependency
+	public class PWDependency
 	{
 		public int			nodeId;
 		public int			anchorId;
 		public int			connectedAnchorId;
 		public PWProcessMode	mode;
 
-		public PWNodeDependency(int nodeId, int anchorId, int connectedAnchorId)
+		public PWDependency(int nodeId, int anchorId, int connectedAnchorId)
 		{
 			this.nodeId = nodeId;
 			this.anchorId = anchorId;

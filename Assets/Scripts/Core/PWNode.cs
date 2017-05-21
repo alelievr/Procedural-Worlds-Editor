@@ -42,7 +42,8 @@ namespace PW
 		public bool		justReloaded = false;
 		public bool		notifyDataChanged = false;
 		public bool		reloadRequested = false;
-		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
+		public bool		forceReload = false;
+		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
 		public bool		isDependent {get; private set; }
 		public PWProcessMode	processMode;
 
@@ -88,7 +89,7 @@ namespace PW
 		[SerializeField]
 		List< PWLink >					links = new List< PWLink >();
 		[SerializeField]
-		List< PWNodeDependency >		depencendies = new List< PWNodeDependency >(); //List< nodeId, anchorId >
+		List< PWDependency >		depencendies = new List< PWDependency >(); //List< nodeId, anchorId >
 
 		//backed datas about properties and nodes
 		[System.SerializableAttribute]
@@ -700,6 +701,10 @@ namespace PW
 					if (linkedNode != null)
 						link.mode = processMode;
 				}
+
+				//change all the dependencies mode if needed:
+				UpdateDependenciesMode();
+
 				e.Use();
 			}
 		}
@@ -788,7 +793,7 @@ namespace PW
 						}
 					}
 				});
-				depencendies.Add(new PWNodeDependency(to.nodeId, to.anchorId, from.anchorId));
+				depencendies.Add(new PWDependency(to.nodeId, to.anchorId, from.anchorId));
 			}
 		}
 
@@ -885,7 +890,7 @@ namespace PW
 
 	#region dependencies management and utils
 
-		int		DeleteDependencies(Func< PWNodeDependency, bool > pred)
+		int		DeleteDependencies(Func< PWDependency, bool > pred)
 		{
 			PWAnchorData.PWAnchorMultiData	singleAnchor;
 			PWAnchorData.PWAnchorMultiData	multiAnchor;
@@ -948,17 +953,17 @@ namespace PW
 					).ToList();
 		}
 
-		public List< PWNodeDependency >	GetDependencies()
+		public List< PWDependency >	GetDependencies()
 		{
 			return depencendies;
 		}
 
-		public List< PWNodeDependency > GetDependencies(int anchorId)
+		public List< PWDependency > GetDependencies(int anchorId)
 		{
 			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
 		}
 
-		public PWNodeDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
+		public PWDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
 		{
 			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
 		}
@@ -1096,6 +1101,7 @@ namespace PW
 			reloadRequested = false;
 			justReloaded = false;
 			stepHasChanged = false;
+			forceReload = false;
 		}
 		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
@@ -1305,7 +1311,10 @@ namespace PW
 
 		public List< PWNode > 	GetOutputNodes()
 		{
-			return links.Select(l => FindNodeById(l.distantNodeId)).ToList();
+			return links.Select(l => {
+				var node = FindNodeById(l.distantNodeId);
+				return node;
+			}).ToList();
 		}
 
 		public List< PWNode >	GetInputNodes()
@@ -1386,6 +1395,37 @@ namespace PW
 			{
 				if (data.Value != null)
 					callback(data.Value);
+			}
+		}
+		
+		void UpdateDependenciesMode(PWNode node = null, int depth = 0)
+		{
+			if (node == null && depth == 0)
+				node = this;
+
+			if (node == null)
+				return ;
+
+			if (depth > 10)
+			{
+				Debug.LogWarning("too many recursive search, aborting !");
+				return ;
+			}
+			
+			foreach (var dep in node.depencendies) {
+				var depNode = FindNodeById(dep.nodeId);
+
+				bool allRequestMode = depNode.GetLinks().All(l => {
+						var depNodeLink = FindNodeById(l.distantNodeId);
+						return depNodeLink.processMode == PWProcessMode.RequestForProcess;
+					}
+				);
+				
+				if (allRequestMode)
+					depNode.processMode = PWProcessMode.RequestForProcess;
+				else
+					depNode.processMode = PWProcessMode.AutoProcess;
+				UpdateDependenciesMode(depNode, depth + 1);
 			}
 		}
 

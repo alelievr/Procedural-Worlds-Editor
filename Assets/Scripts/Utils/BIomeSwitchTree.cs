@@ -8,24 +8,43 @@ namespace PW
 	public class BiomeSwitchTree {
 
 		BiomeSwitchNode		root = null;
-		BiomeSwitchNode		currentTreeNode;
+
+		private enum SwitchMode
+		{
+			Unknown,
+			Float,
+			Bool,
+		}
 
 		private class BiomeSwitchNode
 		{
-			public Vector2			range;
+			public float			min;
+			public float			max;
 			public bool				value;
-			bool					initialized = false;
+			public SwitchMode		mode;
+			public PWBiomeSwitchMode	biomeSwitchMode;
 
 			List< BiomeSwitchNode >	childs = null;
 			Action					terraformer = null;
 			
-			public BiomeSwitchNode() {}
+			public BiomeSwitchNode()
+			{
+				mode = SwitchMode.Unknown;
+			}
 
-			public void SetSwitchValue(Vector2 range, bool value)
+			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode)
+			{
+				this.min = min;
+				this.max = max;
+				this.mode = SwitchMode.Float;
+				this.biomeSwitchMode = biomeSwitchMode;
+			}
+			
+			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode)
 			{
 				this.value = value;
-				this.range = range;
-				initialized = true;
+				this.mode = SwitchMode.Bool;
+				this.biomeSwitchMode = biomeSwitchMode;
 			}
 
 			public BiomeSwitchNode GetNext(float value)
@@ -40,29 +59,96 @@ namespace PW
 					return childs[0];
 				return childs[1];
 			}
-		}
 
-		public void BuildTree(PWNode node, int depth = 0)
-		{
-			var outputNodes = node.GetOutputNodes();
-
-			if (depth == 0)
-				currentTreeNode = root = new BiomeSwitchNode();
-
-			foreach (var outNode in outputNodes)
+			public void SetChildCount(int count)
 			{
-				if (node.GetType() == typeof(PWNodeBiomeSwitch))
-				{
-					PWNodeBiomeSwitch bSwitch = node as PWNodeBiomeSwitch;
-					//TODO
-					// currentTreeNode.SetSwitchValue(bSwitch.);
-				}
-				else if (node.GetType() != typeof(PWNodeBiomeBinder))
-					BuildTree(outNode, depth++);
-				else
-					break ;
+				childs = new List< BiomeSwitchNode >(count);
+				while (childs.Count != count)
+					childs.Add(new BiomeSwitchNode());
+			}
+
+			public BiomeSwitchNode GetChildAt(int i)
+			{
+				return childs[i];
+			}
+
+			public IEnumerable< BiomeSwitchNode > GetChilds()
+			{
+				return childs;
+			}
+
+			public override string ToString()
+			{
+				if (mode == SwitchMode.Bool)
+					return "[" + biomeSwitchMode + "]: " + value;
+				else if (mode == SwitchMode.Float)
+					return "[" + biomeSwitchMode + "]: " + min + " -> " + max;
+				return "non-initialized switch";
 			}
 		}
 
+		void BuildTreeInternal(PWNode node, BiomeSwitchNode currentNode, int depth)
+		{
+			Debug.Log("evaluated node: " + node);
+			if (node == null)
+				return ;
+			
+			//TODO: tree build support subgraphs
+			if (node.GetType() == typeof(PWNodeBiomeSwitch))
+			{
+				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
+
+				switch (bSwitch.switchMode)
+				{
+					case PWBiomeSwitchMode.Water:
+						currentNode.SetChildCount(2);
+
+						currentNode.GetChildAt(0).SetSwitchValue(false, bSwitch.switchMode);
+						currentNode.GetChildAt(1).SetSwitchValue(true, bSwitch.switchMode);
+
+						break ;
+					default:
+						currentNode.SetChildCount(bSwitch.switchDatas.Count);
+
+						for (int i = 0; i < bSwitch.switchDatas.Count; i++)
+						{
+							var child = currentNode.GetChildAt(i);
+							var sData = bSwitch.switchDatas[i];
+		
+							child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode);
+						}
+						break ;
+				}
+				int childIndex = 0;
+				foreach (var outNode in node.GetOutputNodes())
+					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex++), depth + 1);
+			}
+			else if (node.GetType() != typeof(PWNodeBiomeBinder))
+			{
+				foreach (var outNode in node.GetOutputNodes())
+					BuildTreeInternal(outNode, currentNode, depth++);
+			}
+			else
+				return ;
+		}
+
+		public void BuildTree(PWNode node)
+		{
+			root = new BiomeSwitchNode();
+			BuildTreeInternal(node, root, 0);
+
+			DumpBuiltTree();
+		}
+
+		void DumpBuiltTree()
+		{
+			BiomeSwitchNode current = root;
+
+			Debug.Log("built tree:");
+			string	childs = "";
+			foreach (var child in current.GetChilds())
+				childs += child;
+			Debug.Log("swicth line" + childs);
+		}
 	}
 }

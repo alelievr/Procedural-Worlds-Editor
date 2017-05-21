@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditorInternal;
 using UnityEngine;
 using System;
@@ -8,7 +9,7 @@ using UnityEditor;
 
 namespace PW
 {
-	public enum BiomeSwitchMode
+	public enum PWBiomeSwitchMode
 	{
 		Water,
 		Height,
@@ -37,13 +38,13 @@ namespace PW
 	}
 
 	[System.SerializableAttribute]
-	public class SwitchData
+	public class BiomeFieldSwitchData
 	{
 		public float		min;
 		public float		max;
 		public string		name;
 
-		public SwitchData()
+		public BiomeFieldSwitchData()
 		{
 			name = "swampland";
 			min = 70;
@@ -61,22 +62,24 @@ namespace PW
 		[PWOffset(0, 41, 1)]
 		public PWValues			outputBiomes = new PWValues();
 
-		public BiomeSwitchMode	switchMode;
-		public List< SwitchData >	switchDatas = new List< SwitchData >();
-		public bool				boolSwitch;
+		public PWBiomeSwitchMode			switchMode;
+		public List< BiomeFieldSwitchData >	switchDatas = new List< BiomeFieldSwitchData >();
 
 		ReorderableList			switchList;
 		string[]				biomeSwitchModes;
 		int						selectedBiomeSwitchMode;
+		[SerializeField]
+		bool					error;
+		string					errorString;
 
 		public override void OnNodeCreate()
 		{
 			name = "Biome switch";
 			UpdateBiomeSwitchModes();
-			switchList = new ReorderableList(switchDatas, typeof(SwitchData), true, true, true, true);
+			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-				SwitchData elem = switchDatas[index];
+				BiomeFieldSwitchData elem = switchDatas[index];
 				
                 rect.y += 2;
 				int		floatFieldSize = 30;
@@ -96,7 +99,7 @@ namespace PW
 			};
 
 			switchList.onAddCallback += (ReorderableList l) => {
-				switchDatas.Add(new SwitchData());
+				switchDatas.Add(new BiomeFieldSwitchData());
 				UpdateSwitchMode();
 			};
 
@@ -107,22 +110,64 @@ namespace PW
 					UpdateSwitchMode();
 				}
 			};
+
+			if (switchDatas.Count == 0)
+			{
+				switchDatas.Add(new BiomeFieldSwitchData());
+				UpdateSwitchMode();
+			}
 		}
 
 		void UpdateBiomeSwitchModes()
 		{
 			if (inputBiome != null && inputBiome.isWaterless)
-				biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode)).Skip(1).ToArray();
+				biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode)).Skip(1).ToArray();
 			else
-				biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));
+				biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 		}
 
 		void UpdateSwitchMode()
 		{
-			if (switchMode == BiomeSwitchMode.Water)
+			if (switchMode == PWBiomeSwitchMode.Water)
 				UpdateMultiProp("outputBiomes", 2, "terrestrial", "aquatic");
 			else
 				UpdateMultiProp("outputBiomes", switchDatas.Count, null);
+		}
+
+		Dictionary< PWBiomeSwitchMode, string > switchModeToName = new Dictionary< PWBiomeSwitchMode, string >()
+		{
+			{PWBiomeSwitchMode.Water, "waterHeight"},
+			{PWBiomeSwitchMode.Wetness, "wetness"},
+			{PWBiomeSwitchMode.Temperature, "temperature"},
+			{PWBiomeSwitchMode.Wind, "wind"},
+			{PWBiomeSwitchMode.Lighting, "lighting"},
+			{PWBiomeSwitchMode.Air, "air"},
+			//soil settings apart.
+		};
+
+		void CheckForBiomeSwitchErrors()
+		{
+			//TODO: check if the selected switch mode have a sampler in the input biome
+			// ex: to switch on temperature, we need a temperature map.
+			error = false;
+			if (switchMode.ToString().Contains("Custom"))
+			{
+				var fieldInfo = inputBiome.GetType().GetField("datas", BindingFlags.Instance | BindingFlags.GetField | BindingFlags.Public);
+				var datas = fieldInfo.GetValue(inputBiome) as object[];
+				int index = (int)(switchMode.ToString().Last());
+				if (index > datas.Length)
+				{
+					errorString = "can's switch on custom value\nat index " + index + ",\n data not provided";
+					error = true;
+				}
+			}
+			else if (switchModeToName.ContainsKey(switchMode)
+				&& inputBiome.GetType().GetField(switchModeToName[switchMode], BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField).GetValue(inputBiome) == null)
+			{
+				errorString = "can't switch on field " + switchModeToName[switchMode] + ",\ndata not provided !";
+				error = true;
+			}
+				
 		}
 
 		public override void OnNodeAnchorLink(string propName, int index)
@@ -133,22 +178,29 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
-				EditorGUIUtility.labelWidth = 80;
-				EditorGUI.BeginChangeCheck();
-				{
-					selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
-					switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
-				}
-				if (EditorGUI.EndChangeCheck() || needUpdate)
-					UpdateSwitchMode();
-				
-				//TODO: display a reorderable list of min-max floats
-				//TODO: preview for min-max data coverage
-	
-				if (switchMode != BiomeSwitchMode.Water)
-				{
-					switchList.DoLayoutList();
-				}
+			EditorGUIUtility.labelWidth = 80;
+			EditorGUI.BeginChangeCheck();
+			{
+				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
+				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+			}
+			if (EditorGUI.EndChangeCheck() || needUpdate)
+			{
+				UpdateSwitchMode();
+				CheckForBiomeSwitchErrors();
+			}
+
+			if (error)
+			{
+				Rect errorRect = EditorGUILayout.GetControlRect(false, GUI.skin.label.lineHeight * 3);
+				EditorGUI.LabelField(errorRect, errorString);
+				return ;
+			}
+			
+			if (switchMode != PWBiomeSwitchMode.Water)
+				switchList.DoLayoutList();
+
+			//TODO: preview for min-max data coverage
 		}
 
 		//no process needed, this node only exists for user visual organization.

@@ -81,7 +81,7 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			if (biomeData == null)
+			if (biomeData == null || forceReload)
 			{
 				biomeData = new BiomeData();
 

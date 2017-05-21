@@ -508,6 +508,9 @@ namespace PW
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
 
+			if (samp == null)
+				return ;
+
 			if (!String.IsNullOrEmpty(prefix))
 				EditorGUILayout.LabelField(prefix);
 
