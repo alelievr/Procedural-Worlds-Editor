@@ -4,7 +4,7 @@ namespace PW
 {
 	public class PWNodeSlider : PWNode {
 	
-		[PWOutput("V")]
+		[PWOutput]
 		[PWColor(1, 0, 0)]
 		public float	value1 = .5f;
 		float	min = 0;

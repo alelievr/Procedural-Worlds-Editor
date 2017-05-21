@@ -153,17 +153,40 @@ namespace PW
 		{
 			//TODO: thread this, can be long
 
+			//TODO: assign the good process mode to the nodes
+			if (computeOrderSortedNodes != null)
+				foreach (var nodeInfo in computeOrderSortedNodes.Reverse())
+				{
+					int		mode = 0;
+	
+					foreach (var link in nodeInfo.node.GetLinks())
+						if (link.mode == PWProcessMode.RequestForProcess)
+							mode |= 1;
+						else
+							mode |= 2;
+	
+					if (mode == 1) //full RequestForProcess mode
+						nodeInfo.node.processMode = PWProcessMode.RequestForProcess;
+					else
+						nodeInfo.node.processMode = PWProcessMode.AutoProcess;
+				}
+
 			ForeachAllNodes((n) => {
 				if (!n)
 					return ;
 					
 				var links = n.GetLinks();
+				var deps = n.GetDependencies();
 
-				if (links.Count > 0
-					&& links.All(l => l.mode == PWLinkMode.RequestForProcess)
-					&& n.GetDependencies().All(d => d.mode == PWLinkMode.RequestForProcess))
+				if (links.Count > 0 && links.All(l => l.mode == PWProcessMode.RequestForProcess))
 				{
 					List< PWNodeProcessInfo > toComputeList;
+					
+					if (deps.Count > 0 && deps.Any(d => d.mode == PWProcessMode.AutoProcess))
+					{
+						//check if the dependencies are on a 
+						return ;
+					}
 
 					if (bakedGraphParts.ContainsKey(n.nodeId))
 						toComputeList = bakedGraphParts[n.nodeId];
@@ -178,12 +201,12 @@ namespace PW
 						if (node == null)
 							continue ;
 						
-						if (node.GetLinks().All(dl => dl.mode == PWLinkMode.RequestForProcess))
+						if (node.GetLinks().All(dl => dl.mode == PWProcessMode.RequestForProcess))
 							toComputeList.Insert(0, new PWNodeProcessInfo(node, FindGraphNameFromExternalNode(node)));
 					}
 					toComputeList.Add(new PWNodeProcessInfo(n, FindGraphNameFromExternalNode(n)));
 
-					foreach (var link in links.Where(l => l.mode == PWLinkMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
+					foreach (var link in links.Where(l => l.mode == PWProcessMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
 					{
 						PWNode node = FindNodebyId(link.distantNodeId);
 					
@@ -206,12 +229,13 @@ namespace PW
 				}
 			}, true, true);
 			
-			/*foreach (var kp in bakedGraphParts)
+			Debug.Log("created graph parts: " + bakedGraphParts.Count);
+			foreach (var kp in bakedGraphParts)
 			{
 				Debug.Log("to compute list for node " + kp.Key);
 				foreach (var ne in kp.Value)
 					Debug.Log("\tne: " + ne.node.nodeId);
-			}*/
+			}
 		}
 
 		public void RebakeGraphParts(bool graphRecursive = false)
@@ -286,7 +310,7 @@ namespace PW
 				if (!nodesDictionary.ContainsKey(link.distantNodeId))
 					continue;
 				
-				if (link.mode == PWLinkMode.RequestForProcess)
+				if (link.mode == PWProcessMode.RequestForProcess)
 					continue ;
 
 				var target = nodesDictionary[link.distantNodeId];
@@ -396,7 +420,7 @@ namespace PW
 				
 				//if ndoe outputs is only in RequestForProcess mode, avoid the computing
 				var links = nodeInfo.node.GetLinks();
-				if (links.Count > 0 && !links.Any(l => l.mode == PWLinkMode.AutoProcess))
+				if (links.Count > 0 && !links.Any(l => l.mode == PWProcessMode.AutoProcess))
 					continue ;
 				
 				calculTime += ProcessNode(nodeInfo);

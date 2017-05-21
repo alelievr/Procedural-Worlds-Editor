@@ -1,4 +1,4 @@
-﻿// #define DEBUG_WINDOW
+﻿#define DEBUG_NODE
 // #define DEBUG_ANCHOR
 
 using UnityEditor;
@@ -44,18 +44,24 @@ namespace PW
 		public bool		reloadRequested = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested;}}
 		public bool		isDependent {get; private set; }
+		public PWProcessMode	processMode;
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
 		static GUIStyle 	renameNodeTextFieldStyle = null;
 		static GUIStyle		inputAnchorLabelStyle = null;
 		static GUIStyle		outputAnchorLabelStyle = null;
+		static GUIStyle		debugStyle = null;
+		public GUIStyle		windowStyle;
+		public GUIStyle		windowSelectedStyle;
 		public static GUIStyle	innerNodePaddingStyle = null;
 		
 		static Texture2D	errorIcon = null;
 		static Texture2D	editIcon = null;
 		static Texture2D	anchorTexture = null;
 		static Texture2D	anchorDisabledTexture = null;
+		static Texture2D	nodeAutoProcessModeIcon = null;
+		static Texture2D	nodeRequestForProcessIcon = null;
 
 		static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
 		static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
@@ -102,9 +108,6 @@ namespace PW
 		public bool		windowNameEdit = false;
 		public bool		selected = false;
 
-		public GUIStyle	windowStyle;
-		public GUIStyle windowSelectedStyle;
-
 	#endregion
 
 	#region OnEnable, data initialization and baking
@@ -113,9 +116,14 @@ namespace PW
 			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
 				return Resources.Load< Texture2D >(ressourcePath);
 			};
-				
-			errorIcon = CreateTexture2DFromFile("ic_error");
-			editIcon = CreateTexture2DFromFile("ic_edit");
+			
+			if (errorIcon == null)
+			{
+				errorIcon = CreateTexture2DFromFile("ic_error");
+				editIcon = CreateTexture2DFromFile("ic_edit");
+				nodeAutoProcessModeIcon = CreateTexture2DFromFile("ic_autoProcess");
+				nodeRequestForProcessIcon = CreateTexture2DFromFile("ic_requestForProcess");
+			}
 
 			LoadFieldAttributes();
 
@@ -130,6 +138,7 @@ namespace PW
 				renamable = false;
 				maxAnchorRenderHeight = 0;
 				PWGUI = new PWGUIManager();
+				processMode = PWProcessMode.AutoProcess;
 
 				OnNodeCreateOnce();
 
@@ -354,6 +363,7 @@ namespace PW
 				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
+				debugStyle = GUI.skin.FindStyle("Debug");
 			}
 
 			//update the PWGUI window rect with this window rect:
@@ -362,7 +372,7 @@ namespace PW
 
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
-			Rect dragRect = new Rect(0, 0, width, 20);
+			Rect dragRect = new Rect(30, 0, width, 20);
 			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
 				isDragged = true;
 			if (e.type == EventType.MouseUp)
@@ -371,10 +381,8 @@ namespace PW
 				GUI.DragWindow(dragRect);
 
 			int	debugViewH = 0;
-			#if DEBUG_WINDOW
-				GUIStyle debugstyle = new GUIStyle();
-
-				EditorGUILayout.BeginVertical(debugstyle);
+			#if DEBUG_NODE
+				EditorGUILayout.BeginVertical(debugStyle);
 				EditorGUILayout.LabelField("Id: " + nodeId + " | Compute order: " + computeOrder);
 				EditorGUILayout.LabelField("type: " + GetType());
 				EditorGUILayout.LabelField("Dependencies:");
@@ -672,6 +680,28 @@ namespace PW
 						windowNameEdit = false;
 				}
 			}
+			
+			//render the process mode icon
+			int		processIconSize = 25;
+			Rect	processModeRect = new Rect(8, 2, processIconSize, processIconSize);
+			if (processMode == PWProcessMode.AutoProcess)
+				GUI.Label(processModeRect, new GUIContent("", nodeAutoProcessModeIcon, "auto process mode, click to switch to request for process mode"));
+			else
+				GUI.Label(processModeRect, new GUIContent("", nodeRequestForProcessIcon, "request for process mode mode, click to switch to auto process"));
+			if (e.type == EventType.MouseDown && processModeRect.Contains(e.mousePosition))
+			{
+				processMode = (processMode == PWProcessMode.AutoProcess) ? PWProcessMode.RequestForProcess : PWProcessMode.AutoProcess;
+				
+				//change all my link modes to the type of the linked node:
+				foreach (var link in links)
+				{
+					var linkedNode = FindNodeById(link.distantNodeId);
+
+					if (linkedNode != null)
+						link.mode = processMode;
+				}
+				e.Use();
+			}
 		}
 
 	#endregion
@@ -933,7 +963,7 @@ namespace PW
 			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
 		}
 
-		public void UpdateLinkMode(PWLink link, PWLinkMode newMode)
+		public void UpdateLinkMode(PWLink link, PWProcessMode newMode)
 		{
 			link.mode = newMode;
 

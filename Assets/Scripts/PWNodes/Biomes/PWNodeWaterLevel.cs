@@ -43,7 +43,7 @@ namespace PW
 		
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(GUI.skin.label.lineHeight * 4f);
+			GUILayout.Space(GUI.skin.label.lineHeight * 2f);
 				
 			if (biomeData != null)
 			{

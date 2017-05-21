@@ -211,8 +211,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void InitializeNewGraph(PWNodeGraph graph)
 	{
 		//setup splitted panels:
-		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
-		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * .25f, 0, position.width / 2);
+		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4 - 20);
+		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * .25f, 20, position.width / 2);
 
 		graph.graphDecalPosition = Vector2.zero;
 
@@ -838,6 +838,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			pos.y = Mathf.RoundToInt(Mathf.RoundToInt(pos.y / snapPixels) * snapPixels);
 			node.windowRect.position = pos;
 		}
+		node.UpdateCurrentGraph(currentGraph);
 		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
 		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
@@ -1582,7 +1583,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EvaluateComputeOrder();
 	}
 
-	void UpdateLinkMode(PWLink link, PWLinkMode newMode)
+	void UpdateLinkMode(PWLink link, PWProcessMode newMode)
 	{
 		link.mode = newMode;
 
@@ -1632,8 +1633,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
 				if (hoveredLink != null)
 				{
-					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWLinkMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWLinkMode.AutoProcess); });
-					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWLinkMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWLinkMode.RequestForProcess); });
+					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWProcessMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWProcessMode.AutoProcess); });
+					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWProcessMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWProcessMode.RequestForProcess); });
 					menu.AddItem(new GUIContent("Link/Delete link"), false, DeleteLink, hoveredLink);
 				}
 				else
@@ -1992,22 +1993,22 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (e.type == EventType.Repaint)
 		{
 			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
-			PWLinkMode m = (link != null) ? link.mode : PWLinkMode.AutoProcess;
+			PWProcessMode m = (link != null) ? link.mode : PWProcessMode.AutoProcess;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
 				case PWLinkType.Sampler3D:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s, m);
 					break ;
 				case PWLinkType.ThreeChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
 					break ;
 				case PWLinkType.FourChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 1, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 3, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 5, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 7, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 16, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
 					break ;
 				default:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s, m);
@@ -2020,7 +2021,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
     }
 
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWLinkMode linkMode)
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWProcessMode linkMode)
 	{
 		switch (linkHighlight)
 		{
@@ -2034,7 +2035,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 
-		if (linkMode == PWLinkMode.RequestForProcess)
+		if (linkMode == PWProcessMode.RequestForProcess)
 		{
 			Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
 			Vector2 pauseSize = new Vector2(20, 20);
