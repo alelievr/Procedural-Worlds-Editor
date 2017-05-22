@@ -13,6 +13,10 @@ namespace PW
 	{
 		Sampler2D,
 		Sampler3D,
+		Vector2Sampler2D,
+		Vector3Sampler2D,
+		Vector2Sampler3D,
+		Vector3Sampler3D,
 	}
 
 	public abstract class Sampler
@@ -20,6 +24,8 @@ namespace PW
 		public int			size;
 		public float		step;
 		public SamplerType	type;
+		public float		min = 0;
+		public float		max = 1;
 	}
 
 	public class Sampler2D : Sampler
@@ -31,6 +37,14 @@ namespace PW
 		{
 			get {return map[x, y];}
 			set {map[x, y] = value;}
+		}
+		
+		public float At(int x, int y, bool normalized)
+		{
+			if (normalized)
+				return map[x, y] / (min - max);
+			else
+				return map[x, y];
 		}
 
 		public Sampler2D(int size, float step)
@@ -54,18 +68,28 @@ namespace PW
 					map[x, y] = callback(x, y);
 		}
 		
-		public void Foreach(Func< int, int, float, float > callback)
+		public void Foreach(Func< int, int, float, float > callback, bool normalized = false)
 		{
-			for (int x = 0; x < size; x++)
-				for (int y = 0; y < size; y++)
-					map[x, y] = callback(x, y, map[x, y]);
+			if (normalized)
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						map[x, y] = callback(x, y, At(x, y, true));
+			else
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						map[x, y] = callback(x, y, map[x, y]);
 		}
 		
-		public void Foreach(Action< int, int, float > callback)
+		public void Foreach(Action< int, int, float > callback, bool normalized = false)
 		{
-			for (int x = 0; x < size; x++)
-				for (int y = 0; y < size; y++)
-					callback(x, y, map[x, y]);
+			if (normalized)
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						callback(x, y, At(x, y, true));
+			else
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						callback(x, y, map[x, y]);
 		}
 		
 		public override string ToString()
@@ -93,6 +117,14 @@ namespace PW
 			get {return map[x, y, z];}
 			set {map[x, y, z] = value;}
 		}
+
+		public float At(int x, int y, int z, bool normalized)
+		{
+			if (normalized)
+				return map[x, y, z] / (min - max);
+			else
+				return map[x, y, z];
+		}
 		
 		public void Foreach(Func< int, int, int, float > callback)
 		{
@@ -102,20 +134,32 @@ namespace PW
 						map[x, y, z] = callback(x, y, z);
 		}
 		
-		public void Foreach(Func< int, int, int, float, float > callback)
+		public void Foreach(Func< int, int, int, float, float > callback, bool normalized = false)
 		{
-			for (int x = 0; x < size; x++)
-				for (int y = 0; y < size; y++)
-					for (int z = 0; z < size; z++)
-						map[x, y, z] = callback(x, y, z, map[x, y, z]);
+			if (normalized)
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						for (int z = 0; z < size; z++)
+							map[x, y, z] = callback(x, y, z, At(x, y, z, true));
+			else
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						for (int z = 0; z < size; z++)
+							map[x, y, z] = callback(x, y, z, map[x, y, z]);
 		}
 		
-		public void Foreach(Action< int, int, int, float > callback)
+		public void Foreach(Action< int, int, int, float > callback, bool normalized = false)
 		{
-			for (int x = 0; x < size; x++)
-				for (int y = 0; y < size; y++)
-					for (int z = 0; z < size; z++)
-						callback(x, y, z, map[x, y, z]);
+			if (normalized)
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						for (int z = 0; z < size; z++)
+							callback(x, y, z, At(x, y, z, true));
+			else
+				for (int x = 0; x < size; x++)
+					for (int y = 0; y < size; y++)
+						for (int z = 0; z < size; z++)
+							callback(x, y, z, map[x, y, z]);
 		}
 
 		public override string ToString()
@@ -227,92 +271,39 @@ namespace PW
 		public Sampler3D		gravel;
 	}
 
-	public abstract class BiomeBaseData
+	public class BiomeData
 	{
 		public BiomeSwitchTree		biomeTree;
-		public bool					isWaterless;
-		public bool					is3D;
 
-		public BiomeBaseData()
+		public float				waterLevel;
+		public Sampler2D			waterHeight;
+
+		public Sampler2D			terrain;
+		public Sampler3D			terrain3D;
+		
+		public Sampler2D			wetness;
+		public Sampler3D			wetness3D;
+		public Sampler2D			temperature;
+		public Sampler3D			temperature3D;
+		
+		public Vector2Sampler2D		wind;
+		public Vector3Sampler2D		wind3D;
+		public Sampler2D			lighting;
+		
+		public Sampler2D			air;
+		public Sampler3D			air3D;
+		public ComplexEdaphicData	soil;
+
+		public Sampler2D[]			datas;
+		public Sampler3D[]			datas3D;
+		public string[]				dataNames;
+
+		public BiomeData()
 		{
 			biomeTree = new BiomeSwitchTree();
 		}
 	}
 	
-	public class WaterlessBiomeData : BiomeBaseData
-	{
-		public Sampler2D			terrain;
-		public Sampler3D			terrain3D;
-		
-		public Sampler2D			wetness;
-		public Sampler2D			temperature;
-		
-		public Vector2Sampler2D		wind;
-		public Sampler2D			lighting;
-		public BasicEdaphicData		soil;
-		
-		public Sampler2D			air;
-		public ComplexEdaphicData	complexSoil;
-
-		public Sampler2D[]			datas;
-		public string[]				dataNames;
-
-		public WaterlessBiomeData()
-		{
-			is3D = false;
-			isWaterless = true;
-		}
-	}
-	
-	public class WaterlessBiomeData3D : BiomeBaseData
-	{
-		public Sampler2D			terrain;
-		public Sampler3D			terrain3D;
-		
-		public Sampler3D			wetness;
-		public Sampler3D			temperature;
-		
-		public Vector3Sampler2D		wind;
-		public Sampler2D			lighting;
-		public BasicEdaphicData3D	soil;
-		
-		public Sampler3D			air;
-		public ComplexEdaphicData3D	complexSoil;
-
-		public Sampler3D[]			datas;
-		public string[]				dataNames;
-
-		public WaterlessBiomeData3D()
-		{
-			is3D = true;
-			isWaterless = true;
-		}
-	}
-
-	public class BiomeData : WaterlessBiomeData
-	{
-		public float				waterLevel;
-		public Sampler2D			waterHeight;
-
-		public BiomeData()
-		{
-			is3D = false;
-			isWaterless = false;
-		}
-	}
-	
-	public class BiomeData3D : WaterlessBiomeData3D
-	{
-		public float				waterLevel;
-		public Sampler2D			waterHeight;
-
-		public BiomeData3D()
-		{
-			is3D = true;
-			isWaterless = false;
-		}
-	}
-
 	/*
 	**	Utils
 	*/

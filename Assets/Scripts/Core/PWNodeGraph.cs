@@ -122,7 +122,9 @@ namespace PW
 			typeof(PWNodePerlinNoise2D),
 			typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
 			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeGraphExternal),
-			typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel), typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch),
+			typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
+			typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
+			typeof(PWNodeBiomeWetness),
 		};
 		
 		private class PWNodeProcessInfo
@@ -380,7 +382,6 @@ namespace PW
 		float ProcessNode(PWNodeProcessInfo nodeInfo)
 		{
 			float	calculTime = 0;
-
 
 			//if you are in editor mode, update the process time of the node
 			if (!realMode)

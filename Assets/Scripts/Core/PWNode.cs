@@ -164,7 +164,7 @@ namespace PW
 				return PWColorPalette.GetColor("yellowAnchor");
 			else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 				return PWColorPalette.GetColor("blueAnchor");
-			else if (t.IsSubclassOf(typeof(BiomeBaseData)) || t == typeof(BiomeBaseData))
+			else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
 				return PWColorPalette.GetColor("purpleAnchor");
 			else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
 				return PWColorPalette.GetColor("greenAnchor");
@@ -1297,20 +1297,18 @@ namespace PW
 
 		public PWNode			GetFirstNodeAttachedToAnchor(int anchorId)
 		{
-			var link = links.FirstOrDefault(l => l.localAnchorId == anchorId);
-
-			if (link != null)
-				return FindNodeById(link.distantNodeId);
-			return null;
+			return GetNodesAttachedToAnchor(anchorId).FirstOrDefault();
 		}
 
 		public List< PWNode >	GetNodesAttachedToAnchor(int anchorId)
 		{
+			//TODO: management of subgraphs
 			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
 		}
 
 		public List< PWNode > 	GetOutputNodes()
 		{
+			//TODO: management of subgraphs
 			return links.Select(l => {
 				var node = FindNodeById(l.distantNodeId);
 				return node;
@@ -1319,6 +1317,7 @@ namespace PW
 
 		public List< PWNode >	GetInputNodes()
 		{
+			//TODO: management of subgraphs
 			return depencendies.Select(d => FindNodeById(d.nodeId)).ToList();
 		}
 
@@ -1370,12 +1369,8 @@ namespace PW
 					if (data.anchorType == PWAnchorType.Input)
 						if (data.displayHiddenMultipleAnchors || showAdditional)
 							anchorCount++;
-					// if (GetType() == typeof(PWNodeBiomeSwitch))
-						// Debug.Log("anchor count: " + anchorCount);
 					for (int i = 0; i < anchorCount; i++)
 					{
-						// if (GetType() == typeof(PWNodeBiomeSwitch))
-							// Debug.Log("access to multi[" + i + "]");
 						//if multi-anchor instance does not exists, create it:
 						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
 							data.multi[i].additional = true;

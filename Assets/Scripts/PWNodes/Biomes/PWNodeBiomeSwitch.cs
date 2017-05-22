@@ -55,10 +55,10 @@ namespace PW
 	public class PWNodeBiomeSwitch : PWNode {
 
 		[PWInput]
-		public BiomeBaseData	inputBiome;
+		public BiomeData	inputBiome;
 
 		[PWOutput]
-		[PWMultiple(typeof(BiomeBaseData))]
+		[PWMultiple(typeof(BiomeData))]
 		[PWOffset(0, 41, 1)]
 		public PWValues			outputBiomes = new PWValues();
 
@@ -67,6 +67,7 @@ namespace PW
 
 		ReorderableList			switchList;
 		string[]				biomeSwitchModes;
+		[SerializeField]
 		int						selectedBiomeSwitchMode;
 		[SerializeField]
 		bool					error;
@@ -75,7 +76,7 @@ namespace PW
 		public override void OnNodeCreate()
 		{
 			name = "Biome switch";
-			UpdateBiomeSwitchModes();
+			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
@@ -118,14 +119,6 @@ namespace PW
 			}
 		}
 
-		void UpdateBiomeSwitchModes()
-		{
-			if (inputBiome != null && inputBiome.isWaterless)
-				biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode)).Skip(1).ToArray();
-			else
-				biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
-		}
-
 		void UpdateSwitchMode()
 		{
 			if (switchMode == PWBiomeSwitchMode.Water)
@@ -147,8 +140,7 @@ namespace PW
 
 		void CheckForBiomeSwitchErrors()
 		{
-			//TODO: check if the selected switch mode have a sampler in the input biome
-			// ex: to switch on temperature, we need a temperature map.
+			//TODO: work with new BiomeData storage class
 			error = false;
 			if (switchMode.ToString().Contains("Custom"))
 			{
@@ -167,17 +159,15 @@ namespace PW
 				errorString = "can't switch on field " + switchModeToName[switchMode] + ",\ndata not provided !";
 				error = true;
 			}
-				
-		}
-
-		public override void OnNodeAnchorLink(string propName, int index)
-		{
-			if (propName == "inputBiome")
-				UpdateBiomeSwitchModes();
 		}
 
 		public override void OnNodeGUI()
 		{
+			if (inputBiome == null)
+			{
+				EditorGUILayout.LabelField("null biome input !");
+				return ;
+			}
 			EditorGUIUtility.labelWidth = 80;
 			EditorGUI.BeginChangeCheck();
 			{
@@ -189,6 +179,9 @@ namespace PW
 				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();
 			}
+
+			for (int i = 0; i < outputBiomes.Count; i++)
+				UpdatePropVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
 
 			if (error)
 			{

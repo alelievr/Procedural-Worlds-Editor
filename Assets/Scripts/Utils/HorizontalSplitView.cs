@@ -65,6 +65,7 @@ public class HorizontalSplitView {
 			resize = false;
 		lastMouseX = Event.current.mousePosition.x;
 		internHandlerPosition = (int)Mathf.Clamp(handlerPosition, minWidth, maxWidth);
+		handlerPosition = Mathf.Clamp(handlerPosition, minWidth, maxWidth);
 
 		if (resize && Event.current.isMouse)
 			Event.current.Use();

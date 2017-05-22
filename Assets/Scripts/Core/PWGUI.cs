@@ -67,7 +67,7 @@ namespace PW
 		public void ColorPicker(ref Color c, bool displayColorPreview = true)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
-			ColorPicker(null, colorFieldRect, ref c, displayColorPreview);
+			ColorPicker("", colorFieldRect, ref c, displayColorPreview);
 		}
 
 		public void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true)
@@ -81,15 +81,25 @@ namespace PW
 			ColorPicker("", rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
-
+		
 		public void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		{
+			ColorPicker(new GUIContent(prefix), rect, ref c, displayColorPreview);
+		}
+
+		public void ColorPicker(GUIContent prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
 		{
 			Color color = c;
 			ColorPicker(prefix, rect, ref color, displayColorPreview);
 			c = (SerializableColor)color;
 		}
-	
+		
 		public void ColorPicker(string prefix, Rect rect, ref Color color, bool displayColorPreview = true)
+		{
+			ColorPicker(new GUIContent(prefix), rect, ref color, displayColorPreview);
+		}
+	
+		public void ColorPicker(GUIContent prefix, Rect rect, ref Color color, bool displayColorPreview = true)
 		{
 			var		e = Event.current;
 			Rect	iconRect = rect;
@@ -186,9 +196,9 @@ namespace PW
 				int colorPreviewPadding = 5;
 				
 				Vector2 prefixSize = Vector2.zero;
-				if (!String.IsNullOrEmpty(prefix))
+				if (prefix != null && !String.IsNullOrEmpty(prefix.text))
 				{
-					prefixSize = GUI.skin.label.CalcSize(new GUIContent(prefix));
+					prefixSize = GUI.skin.label.CalcSize(prefix);
 					prefixSize.x += 5; //padding of 5 pixels
 					colorPreviewRect.position += new Vector2(prefixSize.x, 0);
 					Rect prefixRect = new Rect(iconRect.position, prefixSize);
@@ -320,20 +330,30 @@ namespace PW
 
 		public void Slider(ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
-			Slider(null, ref value, ref min, ref max, step, editableMin, editableMax, styles);
+			Slider("", ref value, ref min, ref max, step, editableMin, editableMax, styles);
 		}
 		
 		public void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
-			Slider(null, ref value, ref min, ref max, step, false, false, styles);
+			Slider("", ref value, ref min, ref max, step, false, false, styles);
 		}
-
+		
 		public void Slider(string name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		{
+			Slider(new GUIContent(name), ref value, min, max, step, styles);
+		}
+		
+		public void Slider(GUIContent name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
 			Slider(name, ref value, ref min, ref max, step, false, false, styles);
 		}
-	
+		
 		public void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		{
+			Slider(new GUIContent(name), ref value, ref min, ref max, step, editableMin, editableMax, styles);
+		}
+	
+		public void Slider(GUIContent name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			int		sliderLabelWidth = 30;
 			var		e = Event.current;
@@ -343,7 +363,7 @@ namespace PW
 					sliderLabelWidth = style.data;
 
 			if (name == null)
-				name = "";
+				name = new GUIContent();
 
 			var fieldSettings = GetGUISettingData(() => {
 				return new PWGUISettings();
@@ -376,7 +396,8 @@ namespace PW
 				{
 					if (!fieldSettings.active)
 					{
-						GUILayout.Label(name + value.ToString(), centeredLabel);
+						name.text += value.ToString();
+						GUILayout.Label(name, centeredLabel);
 						Rect valueRect = GUILayoutUtility.GetLastRect();
 						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.clickCount == 2)
 							fieldSettings.Active(value);
@@ -401,15 +422,25 @@ namespace PW
 		
 		public void IntSlider(ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
-			IntSlider(null, ref value, ref min, ref max, step, false, false, styles);
+			IntSlider((GUIContent)null, ref value, ref min, ref max, step, false, false, styles);
+		}
+		
+		public void IntSlider(string name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		{
+			IntSlider(new GUIContent(name), ref value, min, max, step, styles);
 		}
 
-		public void IntSlider(string name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public void IntSlider(GUIContent name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
 			IntSlider(name, ref value, ref min, ref max, step, false, false, styles);
 		}
-	
+		
 		public void IntSlider(string name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		{
+			IntSlider(new GUIContent(name), ref value, ref min, ref max, step, editableMin, editableMax, styles);
+		}
+	
+		public void IntSlider(GUIContent name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			float		v = value;
 			float		m_min = min;
@@ -500,10 +531,15 @@ namespace PW
 		
 		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
-			Sampler2DPreview(null, samp, update, settings, fm);
+			Sampler2DPreview((GUIContent)null, samp, update, settings, fm);
 		}
 		
 		public void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
+		{
+			Sampler2DPreview(new GUIContent(prefix), samp, update, settings, fm);
+		}
+		
+		public void Sampler2DPreview(GUIContent prefix, Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
@@ -511,7 +547,7 @@ namespace PW
 			if (samp == null)
 				return ;
 
-			if (!String.IsNullOrEmpty(prefix))
+			if (prefix != null && !String.IsNullOrEmpty(prefix.text))
 				EditorGUILayout.LabelField(prefix);
 
 			var fieldSettings = GetGUISettingData(() => {
@@ -604,7 +640,7 @@ namespace PW
 			{
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
-				});
+				}, true);
 				tex.Apply();
 				fieldSettings.update = false;
 			}
@@ -616,10 +652,15 @@ namespace PW
 		
 		public void ObjectPreview(object obj, bool update)
 		{
-			ObjectPreview(null, obj, update);
+			ObjectPreview((GUIContent)null, obj, update);
+		}
+		
+		public void ObjectPreview(string name, object obj, bool update)
+		{
+			ObjectPreview(new GUIContent(name), obj, update);
 		}
 
-		public void ObjectPreview(string name, object obj, bool update)
+		public void ObjectPreview(GUIContent name, object obj, bool update)
 		{
 			Type objType = obj.GetType();
 

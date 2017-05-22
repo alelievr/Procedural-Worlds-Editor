@@ -3,6 +3,8 @@ using UnityEngine;
 
 public static class PWColorPalette  {
 
+	public static Color		orange = HexToColor(0xFFA500);
+
 	static Dictionary< string, Color > colors = new Dictionary< string, Color >{
 		{"blueNode", HexToColor(0x4864ef)},
 		{"greenNode", HexToColor(0x30b030)},

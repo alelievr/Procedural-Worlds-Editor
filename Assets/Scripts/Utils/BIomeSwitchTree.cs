@@ -24,7 +24,7 @@ namespace PW
 			public SwitchMode		mode;
 			public PWBiomeSwitchMode	biomeSwitchMode;
 
-			List< BiomeSwitchNode >	childs = null;
+			List< BiomeSwitchNode >	childs = new List< BiomeSwitchNode >();
 			Action					terraformer = null;
 			
 			public BiomeSwitchNode()
@@ -62,7 +62,6 @@ namespace PW
 
 			public void SetChildCount(int count)
 			{
-				childs = new List< BiomeSwitchNode >(count);
 				while (childs.Count != count)
 					childs.Add(new BiomeSwitchNode());
 			}
@@ -143,7 +142,7 @@ namespace PW
 		void DumpBuiltTree()
 		{
 			BiomeSwitchNode current = root;
-
+			
 			Debug.Log("built tree:");
 			string	childs = "";
 			foreach (var child in current.GetChilds())

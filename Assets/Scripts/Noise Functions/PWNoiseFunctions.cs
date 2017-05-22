@@ -15,6 +15,8 @@ namespace PW
 			ret.Foreach((x, y, val) => {
 				return Mathf.Lerp(min, max, samp[x, y]);
 			});
+			ret.min = min;
+			ret.max = max;
 			return ret;
 		}
 

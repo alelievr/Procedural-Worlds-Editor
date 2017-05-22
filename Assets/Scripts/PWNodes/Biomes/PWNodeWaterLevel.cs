@@ -12,7 +12,7 @@ namespace PW
 		public Sampler		terrainNoise;
 
 		//TODO: remove this output and set one BiomeData as output.
-		[PWOutput("terrestrial")]
+		[PWOutput("biome datas")]
 		[PWOffset(5)]
 		public BiomeData	biomeData;
 
@@ -102,6 +102,8 @@ namespace PW
 
 					//waterHeight evaluation
 					biomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+					biomeData.waterHeight.min = mapMin;
+					biomeData.waterHeight.max = mapMax;
 					(terrainNoise as Sampler2D).Foreach((x, y, val) => {
 						biomeData.waterHeight[x, y] = waterLevel - val;
 					});

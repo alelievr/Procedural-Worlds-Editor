@@ -196,7 +196,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"To Biome data", typeof(PWNodeBiomeData),
 			"Biome switch", typeof(PWNodeBiomeSwitch),
 			"Biome Binder", typeof(PWNodeBiomeBinder),
-			"Biome blender", typeof(PWNodeBiomeBlender));
+			"Biome blender", typeof(PWNodeBiomeBlender),
+			"Biome temperature map", typeof(PWNodeBiomeTemperature),
+			"Biome wetness map", typeof(PWNodeBiomeWetness));
 		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
 			"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
 			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
@@ -211,8 +213,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	void InitializeNewGraph(PWNodeGraph graph)
 	{
 		//setup splitted panels:
-		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4 - 20);
-		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * .25f, 20, position.width / 2);
+		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
+		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
 
 		graph.graphDecalPosition = Vector2.zero;
 
@@ -335,8 +337,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	
 		DrawNodeGraphCore();
 
-		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 4);
-		currentGraph.h2.UpdateMinMax(0, position.width / 2);
+		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 3);
+		currentGraph.h2.UpdateMinMax(50, position.width / 2);
 
 		currentGraph.h1.Begin();
 		Rect p1 = currentGraph.h2.Begin(defaultBackgroundTexture);
