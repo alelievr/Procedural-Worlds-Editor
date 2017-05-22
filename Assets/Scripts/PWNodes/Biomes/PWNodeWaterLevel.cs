@@ -66,7 +66,7 @@ namespace PW
 						mapMin = EditorGUILayout.FloatField("from", mapMin);
 						mapMax = EditorGUILayout.FloatField("to", mapMax);
 						EditorGUILayout.EndHorizontal();
-	
+
 						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate, false, FilterMode.Point);
 					}
 					else

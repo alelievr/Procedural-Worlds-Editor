@@ -457,16 +457,34 @@ namespace PW
 
 		public void TexturePreview(Texture tex, bool settings = true)
 		{
-			//TODO: good rect calcul
-			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
-			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
-			TexturePreview(previewRect, tex, settings);
-			GUILayout.Space(previewRect.width);
+			TexturePreview(tex, settings, true, false);
 		}
 
 		public void TexturePreview(Rect previewRect, Texture tex, bool settings = true)
 		{
+			TexturePreview(previewRect, tex, settings, true, false);
+		}
+		
+		Rect TexturePreview(Texture tex, bool settings, bool settingsStorage, bool debug)
+		{
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
+			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
+			GUILayout.Space(previewRect.width);
+			TexturePreview(previewRect, tex, settings);
+			return previewRect;
+		}
+
+		void TexturePreview(Rect previewRect, Texture tex, bool settings, bool settingsStorage, bool debug)
+		{
 			var e = Event.current;
+
+			if (!settingsStorage)
+			{
+				EditorGUI.DrawPreviewTexture(previewRect, tex);
+				if (debug)
+					DisplayTextureDebug(previewRect, tex as Texture2D);
+				return ;
+			}
 
 			//create or load texture settings
 			var fieldSettings = GetGUISettingData(() => {
@@ -475,13 +493,21 @@ namespace PW
 				state.scaleMode = ScaleMode.ScaleToFit;
 				state.scaleAspect = 1;
 				state.material = null;
+				state.debug = false;
 				return state;
 			});
+
+			if (e.type == EventType.Repaint)
+				fieldSettings.savedRect = previewRect;
 
 			EditorGUI.DrawPreviewTexture(previewRect, tex, fieldSettings.material, fieldSettings.scaleMode, fieldSettings.scaleAspect);
 
 			if (!settings)
 				return ;
+
+			//render debug:
+			if (fieldSettings.debug)
+				DisplayTextureDebug(fieldSettings.savedRect, tex as Texture2D);
 
 			//render the texture settings window
 			if (fieldSettings.active)
@@ -503,6 +529,7 @@ namespace PW
 						fieldSettings.scaleMode = (ScaleMode)EditorGUILayout.EnumPopup("scale mode", fieldSettings.scaleMode);
 						fieldSettings.scaleAspect = EditorGUILayout.FloatField("scale aspect", fieldSettings.scaleAspect);
 						fieldSettings.material = (Material)EditorGUILayout.ObjectField("material", fieldSettings.material, typeof(Material), false);
+						fieldSettings.debug = EditorGUILayout.Toggle("debug", fieldSettings.debug);
 						EditorGUIUtility.labelWidth = 0;
 				}, 200);
 			}
@@ -522,6 +549,24 @@ namespace PW
 					fieldSettings.InActive();
 					e.Use();
 				}
+			}
+		}
+
+		void DisplayTextureDebug(Rect textureRect, Texture2D tex)
+		{
+			var e = Event.current;
+
+			Vector2 pixelPos = e.mousePosition - textureRect.position;
+
+			Debug.Log("pixel: " + pixelPos + "texwidth: " + tex.width + ", " + textureRect.width+ ", r:" + tex.width / textureRect.width);
+			if (textureRect.width > 0)
+				pixelPos *= tex.width / textureRect.width;
+
+			if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < tex.width && pixelPos.y < tex.height)
+			{
+				Color pixel = tex.GetPixel((int)pixelPos.x, (int)pixelPos.y);
+				EditorGUILayout.LabelField("pixel(" + (int)pixelPos.x + ", " + (int)pixelPos.y + ")");
+				EditorGUILayout.LabelField(pixel.ToString("F2"));
 			}
 		}
 
@@ -553,6 +598,7 @@ namespace PW
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();
 				state.filterMode = fm;
+				state.debug = false;
 				state.gradient = new SerializableGradient(
 					PWUtils.CreateGradient(
 						new KeyValuePair< float, Color >(0, Color.black),
@@ -576,10 +622,12 @@ namespace PW
 
 			if (samp.size != tex.width)
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
-
-			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			
-			TexturePreview(tex, false);
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
+			if (previewRect.width > 2)
+				fieldSettings.savedRect = previewRect;
+
+			Rect textureRect = TexturePreview(tex, false, false, false);
 			
 			//draw the settings window
 			if (settings && fieldSettings.active)
@@ -606,6 +654,9 @@ namespace PW
 							e.Use();
 						}
 					}
+
+					EditorGUIUtility.labelWidth = 100;
+					fieldSettings.debug = EditorGUILayout.Toggle("debug", fieldSettings.debug);
 
 					if (GUILayout.Button("force update"))
 						fieldSettings.update = true;
@@ -635,6 +686,9 @@ namespace PW
 				}
 			}
 
+			if (!settings && fieldSettings.texture.filterMode != fm)
+				fieldSettings.texture.filterMode = fm;
+
 			//update the texture with the gradient
 			if (update || fieldSettings.update)
 			{
@@ -643,6 +697,20 @@ namespace PW
 				}, true);
 				tex.Apply();
 				fieldSettings.update = false;
+			}
+
+			if (fieldSettings.debug)
+			{
+				Vector2 pixelPos = e.mousePosition - fieldSettings.savedRect.position;
+
+				pixelPos *= samp.size / fieldSettings.savedRect.width;
+
+				EditorGUILayout.LabelField("Sampler2D min: " + samp.min + ", max: " + samp.max);
+
+				if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < samp.size && pixelPos.y < samp.size)
+					EditorGUILayout.LabelField("(" + (int)pixelPos.x + ", " + (int)pixelPos.y + "): " + samp[(int)pixelPos.x, (int)pixelPos.y]);
+				else
+					EditorGUILayout.LabelField("(NA, NA): NA");
 			}
 		}
 
