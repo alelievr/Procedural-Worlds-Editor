@@ -1,4 +1,4 @@
-﻿#define DEBUG_NODE
+﻿// #define DEBUG_NODE
 // #define DEBUG_ANCHOR
 
 using UnityEditor;
@@ -854,10 +854,8 @@ namespace PW
 			if (DeleteDependencies(d => d.nodeId == distantWindow.nodeId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
 			{
 				PWAnchorData.PWAnchorMultiData	singleAnchorData;
-				PWAnchorData					data;
-				int								index;
 				
-				data = GetAnchorData(myAnchorId, out singleAnchorData, out index);
+				GetAnchorData(myAnchorId, out singleAnchorData);
 				if (singleAnchorData != null)
 					singleAnchorData.linkCount--;
 			}
@@ -1313,6 +1311,24 @@ namespace PW
 			return null;
 		}
 
+		public int?				GetAnchorId(PWAnchorType anchorType, int index)
+		{
+			var multiAnchorList =	from p in propertyDatas
+									where p.Value.anchorType == anchorType
+									select p.Value.multi;
+			
+			int i = 0;
+			foreach (var anchorList in multiAnchorList)
+				foreach (var anchor in anchorList)
+					if (anchor.visibility == PWVisibility.Visible)
+					{
+						if (index == i)
+							return anchor.id;
+						i++;
+					}
+			return null;
+		}
+
 		public PWNode			GetFirstNodeAttachedToAnchor(int anchorId)
 		{
 			return GetNodesAttachedToAnchor(anchorId).FirstOrDefault();
@@ -1326,31 +1342,33 @@ namespace PW
 		public List< PWNode > 	GetOutputNodes()
 		{
 			var nodes = links.Select(l => FindNodeById(l.distantNodeId)).Where(n => n != null);
+			List< PWNode > finalList = new List< PWNode >();
 
 			foreach (var node in nodes)
 			{
 				if (node.GetType() == typeof(PWNodeGraphExternal))
 				{
-					PWNodeGraphExternal ge = node as PWNodeGraphExternal;
-
-					nodes = nodes.Concat(ge.graphInput.GetOutputNodes());
+					Debug.Log("trying to get graph output nodes: " + finalList.Count);
+					finalList.AddRange((node as PWNodeGraphExternal).graphInput.GetOutputNodes());
+					Debug.Log("after size: " + finalList.Count);
 				}
+				else
+					finalList.Add(node);
 			}
-			return nodes.ToList();
+			return finalList;
 		}
 
 		public List< PWNode >	GetInputNodes()
 		{
 			var nodes = depencendies.Select(d => FindNodeById(d.nodeId)).Where(n => n != null);
+			List< PWNode > finalList = new List< PWNode >();
 			
 			foreach (var node in nodes)
 			{
 				if (node.GetType() == typeof(PWNodeGraphExternal))
-				{
-					PWNodeGraphExternal ge = node as PWNodeGraphExternal;
-
-					nodes = nodes.Concat(ge.graphOutput.GetInputNodes());
-				}
+					finalList.AddRange(((node as PWNodeGraphExternal).graphOutput.GetInputNodes()));
+				else
+					finalList.Add(node);
 			}
 			return nodes.ToList();
 		}
@@ -1462,6 +1480,7 @@ namespace PW
 		{
 			if (currentGraph != null)
 				return currentGraph.nodesDictionary[nodeId];
+			Debug.Log("currentGraph null !");
 			return null;
 		}
 

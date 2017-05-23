@@ -51,7 +51,7 @@ namespace PW
 		{
 			fieldUpdate = false;
 
-			EditorGUILayout.Space();
+			GUILayout.Space(GUI.skin.label.lineHeight * 3);
 
 			EditorGUI.BeginChangeCheck();
 			PWGUI.Slider("height multiplier: ", ref terrainHeightMultiplier, -1, 1);

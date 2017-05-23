@@ -23,6 +23,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingSelectedNodesFromContextMenu = false;
 	public static bool	graphNeedReload = false;
 	bool				previewMouseDrag = false;
+	bool				editorNeedRepaint = false;
 	PWAnchorInfo		startDragAnchor;
 	PWAnchorInfo		mouseAboveAnchorInfo;
 	[System.NonSerializedAttribute]
@@ -352,15 +353,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		DrawContextualMenu(g);
 
+		//FIXME
+		if (!editorNeedRepaint)
+			editorNeedRepaint = e.isMouse || e.type == EventType.MouseUp;
+
 		//if event, repaint
-		if (e.type == EventType.mouseDown
-			|| e.type == EventType.mouseDrag
-			|| e.type == EventType.mouseUp
-			|| e.type == EventType.scrollWheel
-			|| e.type == EventType.KeyDown
-			|| e.type == EventType.Repaint
-			|| e.type == EventType.KeyUp)
+		if ((editorNeedRepaint || draggingGraph || draggingLink || draggingNode))
+		{
 			Repaint();
+			editorNeedRepaint = false;
+		}
 
 		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
 		currentMousePosition = e.mousePosition;

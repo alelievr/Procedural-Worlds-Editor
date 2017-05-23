@@ -62,14 +62,14 @@ namespace PW
 
 			public void SetChildCount(int count)
 			{
-				while (childs.Count <= count)
+				while (childs.Count < count)
 					childs.Add(new BiomeSwitchNode());
 			}
 
 			public BiomeSwitchNode GetChildAt(int i, bool createIfNotExists = false)
 			{
 				if (createIfNotExists && i >= childs.Count)
-					SetChildCount(i);
+					SetChildCount(i + 1);
 				return childs[i];
 			}
 
@@ -99,29 +99,57 @@ namespace PW
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
 			{
 				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
+				int					outputLinksCount = bSwitch.GetLinks().Count;
+				int					childIndex = 0;
 
+				currentNode.SetChildCount(outputLinksCount);
 				switch (bSwitch.switchMode)
 				{
 					case PWBiomeSwitchMode.Water:
-						currentNode.SetChildCount(2);
+						int?	terrestrialAnchorId = node.GetAnchorId(PWAnchorType.Output, 0);
+						int?	aquaticAnchorId = node.GetAnchorId(PWAnchorType.Output, 1);
 
-						currentNode.GetChildAt(0).SetSwitchValue(false, bSwitch.switchMode);
-						currentNode.GetChildAt(1).SetSwitchValue(true, bSwitch.switchMode);
+						//get all nodes on the first anchor:
+						if (terrestrialAnchorId != null)
+						{
+							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
+							for (int i = 0; i < nodes.Count; i++)
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode);
+						}
+						if (aquaticAnchorId != null)
+						{
+							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchorId.Value);
+							for (int i = 0; i < nodes.Count; i++)
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode);
+						}
 
 						break ;
 					default:
-						currentNode.SetChildCount(bSwitch.switchDatas.Count);
+						Debug.Log("swicth data count for node " + node.nodeId + ": " + bSwitch.switchDatas.Count);
 
-						for (int i = 0; i < bSwitch.switchDatas.Count; i++)
+						for (int anchorIndex = 0; anchorIndex < bSwitch.switchDatas.Count; anchorIndex++)
 						{
-							var child = currentNode.GetChildAt(i);
-							var sData = bSwitch.switchDatas[i];
-		
-							child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode);
+							int? anchorId = node.GetAnchorId(PWAnchorType.Output, anchorIndex);
+
+							if (anchorId == null)
+								continue ;
+
+							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchorId.Value);
+
+							if (attachedNodesToAnchor.Count == 0)
+								Debug.LogWarning("nothing attached to the biome switch output " + anchorIndex);
+
+							foreach (var attachedNode in attachedNodesToAnchor)
+							{
+								var child = currentNode.GetChildAt(childIndex++);
+								var sData = bSwitch.switchDatas[anchorIndex];
+
+								child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode);
+							}
 						}
 						break ;
 				}
-				int childIndex = 0;
+				childIndex = 0;
 				foreach (var outNode in node.GetOutputNodes())
 				{
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1);
@@ -146,11 +174,20 @@ namespace PW
 			DumpBuiltTree();
 		}
 
+		void DumpBiomeTree(BiomeSwitchNode node, int depth = 0)
+		{
+			Debug.Log("node at depth " + depth + ": " + node);
+
+			foreach (var child in node.GetChilds())
+				DumpBiomeTree(child, depth + 1);
+		}
+
 		void DumpBuiltTree()
 		{
 			BiomeSwitchNode current = root;
 			
 			Debug.Log("built tree:");
+			DumpBiomeTree(root);
 			string	childs = "";
 			foreach (var child in current.GetChilds())
 				childs += child + " | ";

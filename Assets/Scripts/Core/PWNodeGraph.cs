@@ -301,6 +301,10 @@ namespace PW
 
 			foreach (var node in nodes)
 				node.UpdateCurrentGraph(this);
+			if (inputNode != null)
+				inputNode.UpdateCurrentGraph(this);
+			if (outputNode != null)
+				outputNode.UpdateCurrentGraph(this);
 			
 			//bake the graph parts (RequestForProcess links)
 			BakeGraphParts();
@@ -397,8 +401,6 @@ namespace PW
 			{
 				Stopwatch	st = new Stopwatch();
 
-				nodeInfo.node.UpdateCurrentGraph(this);
-				
 				st.Start();
 				nodeInfo.node.Process();
 				st.Stop();
@@ -441,7 +443,7 @@ namespace PW
 				if (realMode || !isVisibleInEditor)
 					nodeInfo.node.BeginFrameUpdate();
 				
-				//if ndoe outputs is only in RequestForProcess mode, avoid the computing
+				//if node outputs is only in RequestForProcess mode, avoid the computing
 				var links = nodeInfo.node.GetLinks();
 				if (links.Count > 0 && !links.Any(l => l.mode == PWProcessMode.AutoProcess))
 					continue ;

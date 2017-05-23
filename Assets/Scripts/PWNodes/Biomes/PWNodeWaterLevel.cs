@@ -11,7 +11,6 @@ namespace PW
 		[PWOffset(5)]
 		public Sampler		terrainNoise;
 
-		//TODO: remove this output and set one BiomeData as output.
 		[PWOutput("biome datas")]
 		[PWOffset(5)]
 		public BiomeData	outputBiome;

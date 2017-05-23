@@ -140,16 +140,14 @@ namespace PW
 
 		void CheckForBiomeSwitchErrors()
 		{
-			//TODO: work with new BiomeData storage class
 			error = false;
 			if (switchMode.ToString().Contains("Custom"))
 			{
-				var fieldInfo = inputBiome.GetType().GetField("datas", BindingFlags.Instance | BindingFlags.GetField | BindingFlags.Public);
-				var datas = fieldInfo.GetValue(inputBiome) as object[];
-				int index = (int)(switchMode.ToString().Last());
-				if (index > datas.Length)
+				var datas = inputBiome.datas;
+				int index = (switchMode.ToString().Last() - '0');
+				if (inputBiome.datas[index] == null)
 				{
-					errorString = "can's switch on custom value\nat index " + index + ",\n data not provided";
+					errorString = "can's switch on custom value\nat index " + index + ",\ndata not provided";
 					error = true;
 				}
 			}
@@ -160,7 +158,7 @@ namespace PW
 				error = true;
 			}
 		}
-
+		
 		public override void OnNodeGUI()
 		{
 			for (int i = 0; i < outputBiomes.Count; i++)
@@ -186,13 +184,14 @@ namespace PW
 
 			if (error)
 			{
-				Rect errorRect = EditorGUILayout.GetControlRect(false, GUI.skin.label.lineHeight * 3);
+				Rect errorRect = EditorGUILayout.GetControlRect(false, GUI.skin.label.lineHeight * 3.5f);
 				EditorGUI.LabelField(errorRect, errorString);
 				return ;
 			}
 			
 			if (switchMode != PWBiomeSwitchMode.Water)
 				switchList.DoLayoutList();
+
 
 			//TODO: preview for min-max data coverage
 		}

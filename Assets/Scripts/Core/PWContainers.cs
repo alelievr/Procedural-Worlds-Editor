@@ -301,6 +301,8 @@ namespace PW
 		public BiomeData()
 		{
 			biomeTree = new BiomeSwitchTree();
+			datas = new Sampler2D[9];
+			datas3D = new Sampler3D[9];
 		}
 	}
 	
