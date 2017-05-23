@@ -1102,16 +1102,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (mouseAboveNodeAnchor && draggingLink)
 			{
 				if (startDragAnchor.fieldType != null && mouseAboveAnchorInfo.fieldType != null)
-				{
-					if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo, true))
+					if (PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchorInfo))
 					{
 						if (mouseAboveNode != null)
 							mouseAboveNode.AnchorBeingLinked(mouseAboveAnchorInfo.anchorId);
 						snappedToAnchorMouseRect = mouseAboveAnchorInfo.anchorRect;
 					}
-					else
-						Debug.Log(startDragAnchor.nodeId + ":" + startDragAnchor.anchorId + " -> " + mouseAboveAnchorInfo.nodeId + ":" + mouseAboveAnchorInfo.anchorId + " not linkable");
-				}
 			}
 
 			//duplicate selected items if cmd+d:

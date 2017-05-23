@@ -95,7 +95,7 @@ namespace PW
 			
 			Debug.Log("evaluated node: " + node);
 			
-			//TODO: tree build support subgraphs
+			//TODO: anchor to multiple PWNodeBiomeSwitch management
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
 			{
 				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
@@ -123,7 +123,11 @@ namespace PW
 				}
 				int childIndex = 0;
 				foreach (var outNode in node.GetOutputNodes())
-					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex++, true), depth + 1);
+				{
+					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1);
+					if (outNode.GetType() == typeof(PWNodeBiomeSwitch))
+						childIndex++;
+				}
 			}
 			else if (node.GetType() != typeof(PWNodeBiomeBinder))
 			{

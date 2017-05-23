@@ -853,8 +853,11 @@ namespace PW
 			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
 			if (DeleteDependencies(d => d.nodeId == distantWindow.nodeId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
 			{
-				PWAnchorData.PWAnchorMultiData singleAnchorData;
-				GetAnchorData(myAnchorId, out singleAnchorData);
+				PWAnchorData.PWAnchorMultiData	singleAnchorData;
+				PWAnchorData					data;
+				int								index;
+				
+				data = GetAnchorData(myAnchorId, out singleAnchorData, out index);
 				if (singleAnchorData != null)
 					singleAnchorData.linkCount--;
 			}
@@ -905,6 +908,7 @@ namespace PW
 					data = GetAnchorData(d.connectedAnchorId, out singleAnchor, out index);
 					if (data == null)
 						return delete;
+					OnNodeAnchorUnlink(data.fieldName, index);
 					singleAnchor.linkCount--;
 					nDeleted++;
 					if (data.multiple)
@@ -1321,11 +1325,10 @@ namespace PW
 
 		public List< PWNode > 	GetOutputNodes()
 		{
-			var nodes = links.Select(l => FindNodeById(l.distantNodeId));
+			var nodes = links.Select(l => FindNodeById(l.distantNodeId)).Where(n => n != null);
 
 			foreach (var node in nodes)
 			{
-				if (node != null)
 				if (node.GetType() == typeof(PWNodeGraphExternal))
 				{
 					PWNodeGraphExternal ge = node as PWNodeGraphExternal;
@@ -1338,7 +1341,7 @@ namespace PW
 
 		public List< PWNode >	GetInputNodes()
 		{
-			var nodes = depencendies.Select(d => FindNodeById(d.nodeId));
+			var nodes = depencendies.Select(d => FindNodeById(d.nodeId)).Where(n => n != null);
 			
 			foreach (var node in nodes)
 			{
