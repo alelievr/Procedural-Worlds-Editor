@@ -42,7 +42,7 @@ namespace PW
 		public float At(int x, int y, bool normalized)
 		{
 			if (normalized)
-				return map[x, y] / (max - min);
+				return (map[x, y] - min) / (max - min);
 			else
 				return map[x, y];
 		}
@@ -121,7 +121,7 @@ namespace PW
 		public float At(int x, int y, int z, bool normalized)
 		{
 			if (normalized)
-				return map[x, y, z] / (max - min);
+				return (map[x, y, z] + min) / (max - min);
 			else
 				return map[x, y, z];
 		}

@@ -807,6 +807,17 @@ namespace PW
 			settingsStorage[fieldIndex].update = true;
 		}
 
+		public void SetDebugForField(int fieldIndex, bool value)
+		{
+			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+			
+			settingsStorage[fieldIndex].debug = value;
+		}
+
 	#endregion
 	}
 }

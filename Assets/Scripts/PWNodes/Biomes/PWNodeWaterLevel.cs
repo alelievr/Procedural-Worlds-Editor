@@ -14,7 +14,7 @@ namespace PW
 		//TODO: remove this output and set one BiomeData as output.
 		[PWOutput("biome datas")]
 		[PWOffset(5)]
-		public BiomeData	biomeData;
+		public BiomeData	outputBiome;
 
 		[SerializeField]
 		float				waterLevel;
@@ -45,9 +45,9 @@ namespace PW
 		{
 			GUILayout.Space(GUI.skin.label.lineHeight * 2f);
 				
-			if (biomeData != null)
+			if (outputBiome != null)
 			{
-				PWBiomeUtils.DrawBiomeInfos(biomeData);
+				PWBiomeUtils.DrawBiomeInfos(outputBiome);
 				EditorGUILayout.Separator();
 			}
 
@@ -81,31 +81,31 @@ namespace PW
 
 		public override void OnNodeProcess()
 		{
-			if (biomeData == null || forceReload)
+			if (outputBiome == null || forceReload)
 			{
-				biomeData = new BiomeData();
+				outputBiome = new BiomeData();
 
-				biomeData.biomeTree.BuildTree(this);
+				outputBiome.biomeTree.BuildTree(this);
 			}
 			
 			if (needUpdate)
 			{
-				biomeData.terrain = terrainNoise as Sampler2D;
-				biomeData.terrain3D = terrainNoise as Sampler3D;
+				outputBiome.terrain = terrainNoise as Sampler2D;
+				outputBiome.terrain3D = terrainNoise as Sampler3D;
 				
-				biomeData.waterLevel = waterLevel;
+				outputBiome.waterLevel = waterLevel;
 
 				if (terrainNoise.type == SamplerType.Sampler2D)
 				{
 					//terrain mapping
-					biomeData.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+					outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
 
 					//waterHeight evaluation
-					biomeData.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-					biomeData.waterHeight.min = mapMin;
-					biomeData.waterHeight.max = mapMax;
-					(terrainNoise as Sampler2D).Foreach((x, y, val) => {
-						biomeData.waterHeight[x, y] = waterLevel - val;
+					outputBiome.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+					outputBiome.waterHeight.min = mapMin;
+					outputBiome.waterHeight.max = mapMax;
+					outputBiome.terrain.Foreach((x, y, val) => {
+						outputBiome.waterHeight[x, y] = waterLevel - val;
 					});
 				}
 				else

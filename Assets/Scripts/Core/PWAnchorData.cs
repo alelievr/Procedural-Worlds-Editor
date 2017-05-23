@@ -134,11 +134,11 @@ namespace PW
 			tmp.name = (first != null) ? first.name : "";
 			tmp.additional = true;
 			tmp.id = id;
-			if (anchorValues.Count == multipleValueCount)
+			if (anchorValues != null && anchorValues.Count == multipleValueCount)
 				multipleValueCount++;
 			// Debug.Log("new anchor with id: " + id);
 			//add an object to the PWValues list:
-			if (affectValues)
+			if (affectValues && anchorValues != null)
 				anchorValues.Add(null);
 
 			multi.Add(tmp);

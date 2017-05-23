@@ -146,8 +146,14 @@ namespace PW
 			Debug.Log("built tree:");
 			string	childs = "";
 			foreach (var child in current.GetChilds())
-				childs += child;
-			Debug.Log("swicth line" + childs);
+				childs += child + " | ";
+			Debug.Log("swicth line1: " + childs);
+
+			childs = "";
+			foreach (var child in current.GetChilds())
+				foreach (var childOfChild in child.GetChilds())
+					childs += childOfChild + " | ";
+			Debug.Log("swicth line2: " + childs);
 		}
 	}
 }

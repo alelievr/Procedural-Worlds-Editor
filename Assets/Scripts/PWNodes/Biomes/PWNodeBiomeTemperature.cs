@@ -24,33 +24,74 @@ namespace PW
 		float					terrainHeightMultiplier = 0;
 		[SerializeField]
 		float					waterMultiplier = .2f;
+		[SerializeField]
+		float					averageTemperature = 17;
+
+		Gradient				temperatureGradient;
+		bool					fieldUpdate = false;
+		[SerializeField]
+		bool					internalTemperatureMap = true;
 
 		public override void OnNodeCreate()
 		{
 			externalName = "Temperature node";
 
-			Gradient temperatureGradient = PWUtils.CreateGradient(
+			temperatureGradient = PWUtils.CreateGradient(
 				new KeyValuePair< float, Color >(0f, Color.blue),
 				new KeyValuePair< float, Color >(.25f, Color.cyan),
 				new KeyValuePair< float, Color >(.5f, Color.yellow),
 				new KeyValuePair< float, Color >(.75f, PWColorPalette.orange),
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
-			PWGUI.SetGradientForField(3, temperatureGradient);
+			
+			UpdateTemperatureMap();
 		}
 
 		public override void OnNodeGUI()
 		{
+			fieldUpdate = false;
+
 			EditorGUILayout.Space();
 
-			PWGUI.Slider("height multiplier", ref terrainHeightMultiplier, 0, 1);
-			PWGUI.Slider(new GUIContent("water multiplier"), ref waterMultiplier, 0, 1);
+			EditorGUI.BeginChangeCheck();
+			PWGUI.Slider("height multiplier: ", ref terrainHeightMultiplier, 0, 1);
+			PWGUI.Slider(new GUIContent("water multiplier: "), ref waterMultiplier, 0, 1);
 
-			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, needUpdate, false, FilterMode.Point);
+			EditorGUILayout.LabelField("temperature limits:");
+			EditorGUILayout.BeginHorizontal();
+			EditorGUIUtility.labelWidth = 30;
+			minTemperature = EditorGUILayout.FloatField("from", minTemperature);
+			maxTemperature = EditorGUILayout.FloatField("to", maxTemperature);
+			EditorGUILayout.EndHorizontal();
+			EditorGUIUtility.labelWidth = 120;
+			averageTemperature = EditorGUILayout.FloatField("average temperature", averageTemperature);
+			if (EditorGUI.EndChangeCheck())
+				fieldUpdate = true;
+				
+			if (fieldUpdate)
+				UpdateTemperatureMap();
+			
+			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, needUpdate || fieldUpdate, false, FilterMode.Point);
 
-			//TODO: map temperature noise values
+			if (fieldUpdate)
+			{
+				PWGUI.SetGradientForField(2, temperatureGradient);
+				PWGUI.SetDebugForField(2, true);
+			}
 
 			//TODO: temperature map creation options
+		}
+
+		public override void OnNodeAnchorLink(string prop, int index)
+		{
+			if (prop == "temperatureMap")
+				internalTemperatureMap = false;
+		}
+		
+		public override void OnNodeAnchorUnlink(string prop, int index)
+		{
+			if (prop == "temperatureMap")
+				internalTemperatureMap = true;
 		}
 
 		void UpdateTemperatureMap()
@@ -62,13 +103,19 @@ namespace PW
 			(temperatureMap as Sampler2D).Foreach((x, y, val) => {
 				float	terrainMod = 0;
 				float	waterMod = 0;
+				float	temperatureRange = (maxTemperature - minTemperature);
+				float	mapValue = (internalTemperatureMap) ? averageTemperature : val;
 
-				if (terrainHeightMultiplier != 0)
-					terrainMod = inputBiome.terrain.At(x, y, true) * terrainHeightMultiplier;
-				if (waterMultiplier != 0)
-					waterMod = inputBiome.waterHeight.At(x, y, true) * waterMultiplier;
-				return minTemperature + terrainMod;
+				if (inputBiome != null)
+				{
+					if (terrainHeightMultiplier != 0)
+						terrainMod = inputBiome.terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
+					if (waterMultiplier != 0)
+						waterMod = inputBiome.waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
+				}
+				return mapValue + terrainMod + waterMod;
 			});
+
 			temperatureMap.min = minTemperature;
 			temperatureMap.max = maxTemperature;
 		}
@@ -78,12 +125,11 @@ namespace PW
 			if (temperatureMap != null || needUpdate)
 				UpdateTemperatureMap();
 			
-			if (temperatureMap.type == SamplerType.Sampler2D)
+			if (inputBiome != null)
+			{
 				inputBiome.temperature = temperatureMap as Sampler2D;
-			else if (temperatureMap.type == SamplerType.Sampler3D)
 				inputBiome.temperature3D = temperatureMap as Sampler3D;
-			else
-				Debug.LogWarning("bad sampler type, only Sampler2D and Sampler3D is allowed");
+			}
 
 			outputBiome = inputBiome;
 		}

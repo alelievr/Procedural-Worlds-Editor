@@ -18,6 +18,7 @@ namespace PW
 		Wind,
 		Lighting,
 		Air,
+		//TODO: one Soil swicth
 		SoilPH,
 		SoilDrainage,
 		SoilNutriment,
@@ -113,10 +114,9 @@ namespace PW
 			};
 
 			if (switchDatas.Count == 0)
-			{
 				switchDatas.Add(new BiomeFieldSwitchData());
-				UpdateSwitchMode();
-			}
+			
+			UpdateSwitchMode();
 		}
 
 		void UpdateSwitchMode()
@@ -163,8 +163,12 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
+			for (int i = 0; i < outputBiomes.Count; i++)
+				UpdatePropVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
+
 			if (inputBiome == null)
 			{
+				error = true;
 				EditorGUILayout.LabelField("null biome input !");
 				return ;
 			}
@@ -179,9 +183,6 @@ namespace PW
 				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();
 			}
-
-			for (int i = 0; i < outputBiomes.Count; i++)
-				UpdatePropVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
 
 			if (error)
 			{
