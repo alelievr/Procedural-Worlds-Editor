@@ -1002,10 +1002,24 @@ namespace PW
 					{
 						if (verbose)
 							Debug.Log("to type is generic");
+							
+						if (firstT == typeof(object))
+						{
+							ret = true;
+							break ;
+						}
+
 						foreach (Type toT in to.allowedTypes)
 						{
 							if (verbose)
 								Debug.Log("checking assignable from " + firstT + " to " + toT);
+
+							if (toT == typeof(object))
+							{
+								ret = true;
+								break ;
+							}
+
 							if (firstT.IsAssignableFrom(toT))
 								ret = true;
 						}
@@ -1302,30 +1316,47 @@ namespace PW
 
 		public List< PWNode >	GetNodesAttachedToAnchor(int anchorId)
 		{
-			//TODO: management of subgraphs
 			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
 		}
 
 		public List< PWNode > 	GetOutputNodes()
 		{
-			//TODO: management of subgraphs
-			return links.Select(l => {
-				var node = FindNodeById(l.distantNodeId);
-				return node;
-			}).ToList();
+			var nodes = links.Select(l => FindNodeById(l.distantNodeId));
+
+			foreach (var node in nodes)
+			{
+				if (node != null)
+				if (node.GetType() == typeof(PWNodeGraphExternal))
+				{
+					PWNodeGraphExternal ge = node as PWNodeGraphExternal;
+
+					nodes = nodes.Concat(ge.graphInput.GetOutputNodes());
+				}
+			}
+			return nodes.ToList();
 		}
 
 		public List< PWNode >	GetInputNodes()
 		{
-			//TODO: management of subgraphs
-			return depencendies.Select(d => FindNodeById(d.nodeId)).ToList();
+			var nodes = depencendies.Select(d => FindNodeById(d.nodeId));
+			
+			foreach (var node in nodes)
+			{
+				if (node.GetType() == typeof(PWNodeGraphExternal))
+				{
+					PWNodeGraphExternal ge = node as PWNodeGraphExternal;
+
+					nodes = nodes.Concat(ge.graphOutput.GetInputNodes());
+				}
+			}
+			return nodes.ToList();
 		}
 
 		public void				RequestProcessing(int nodeId)
 		{
 			if (!currentGraph.RequestProcessing(nodeId))
 				Debug.Log("failed to request computing of node " + nodeId + ": not found in the current graph");
-				return ;
+			return ;
 		}
 
 	#endregion

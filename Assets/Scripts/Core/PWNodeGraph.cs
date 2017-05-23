@@ -362,7 +362,16 @@ namespace PW
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
-					prop.SetValue(target, localVal);
+					if (realMode)
+						prop.SetValue(target, localVal);
+					else
+					{
+						try {
+							prop.SetValue(target, localVal);
+						} catch {
+							Debug.LogWarning("can't assign " + link.localName + " to " + link.distantName);
+						}
+					}
 				}
 				else if (val != null) // both are multi-anchors
 				{

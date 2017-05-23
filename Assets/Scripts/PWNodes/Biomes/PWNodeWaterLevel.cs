@@ -95,7 +95,7 @@ namespace PW
 				
 				outputBiome.waterLevel = waterLevel;
 
-				if (terrainNoise.type == SamplerType.Sampler2D)
+				if (terrainNoise != null && terrainNoise.type == SamplerType.Sampler2D)
 				{
 					//terrain mapping
 					outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);

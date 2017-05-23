@@ -62,12 +62,14 @@ namespace PW
 
 			public void SetChildCount(int count)
 			{
-				while (childs.Count != count)
+				while (childs.Count <= count)
 					childs.Add(new BiomeSwitchNode());
 			}
 
-			public BiomeSwitchNode GetChildAt(int i)
+			public BiomeSwitchNode GetChildAt(int i, bool createIfNotExists = false)
 			{
+				if (createIfNotExists && i >= childs.Count)
+					SetChildCount(i);
 				return childs[i];
 			}
 
@@ -88,9 +90,10 @@ namespace PW
 
 		void BuildTreeInternal(PWNode node, BiomeSwitchNode currentNode, int depth)
 		{
-			Debug.Log("evaluated node: " + node);
 			if (node == null)
 				return ;
+			
+			Debug.Log("evaluated node: " + node);
 			
 			//TODO: tree build support subgraphs
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
@@ -120,7 +123,7 @@ namespace PW
 				}
 				int childIndex = 0;
 				foreach (var outNode in node.GetOutputNodes())
-					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex++), depth + 1);
+					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex++, true), depth + 1);
 			}
 			else if (node.GetType() != typeof(PWNodeBiomeBinder))
 			{

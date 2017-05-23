@@ -7,6 +7,8 @@ namespace PW
 
 		[SerializeField]
 		public PWNodeGraphInput		graphInput;
+		[SerializeField]
+		public PWNodeGraphOutput	graphOutput;
 
 		[PWInput("in")]
 		[PWMultiple(0, typeof(object))] //accept all entering connections
@@ -63,6 +65,7 @@ namespace PW
 		{
 			// graphOutput = @out as PWNodeGraphOutput;
 			graphInput = @in as PWNodeGraphInput;
+			graphOutput = @out as PWNodeGraphOutput;
 		}
 	}
 }
