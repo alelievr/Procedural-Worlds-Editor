@@ -60,7 +60,7 @@ namespace PW
 
 		[PWOutput]
 		[PWMultiple(typeof(BiomeData))]
-		[PWOffset(0, 41, 1)]
+		[PWOffset(0, 58, 1)]
 		public PWValues			outputBiomes = new PWValues();
 
 		public PWBiomeSwitchMode			switchMode;
@@ -73,6 +73,12 @@ namespace PW
 		[SerializeField]
 		bool					error;
 		string					errorString;
+		Sampler					currentSampler;
+		Texture2D				biomeRepartitionPreview;
+		bool					updatePreview;
+		
+		const int				previewTextureWidth = 200;
+		const int				previewTextureHeight = 60;
 
 		public override void OnNodeCreate()
 		{
@@ -143,19 +149,37 @@ namespace PW
 			error = false;
 			if (switchMode.ToString().Contains("Custom"))
 			{
+				//TODO: 3d samplers management
 				var datas = inputBiome.datas;
 				int index = (switchMode.ToString().Last() - '0');
+				currentSampler = inputBiome.datas[index];
 				if (inputBiome.datas[index] == null)
 				{
 					errorString = "can's switch on custom value\nat index " + index + ",\ndata not provided";
 					error = true;
 				}
 			}
-			else if (switchModeToName.ContainsKey(switchMode)
-				&& inputBiome.GetType().GetField(switchModeToName[switchMode], BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField).GetValue(inputBiome) == null)
+			else if (switchModeToName.ContainsKey(switchMode))
 			{
-				errorString = "can't switch on field " + switchModeToName[switchMode] + ",\ndata not provided !";
-				error = true;
+				var field = inputBiome.GetType().GetField(switchModeToName[switchMode], BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
+				var field3D = inputBiome.GetType().GetField(switchModeToName[switchMode] + "3D", BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
+				object val = null, val3D = null;
+
+				if (field != null)
+					val = field.GetValue(inputBiome);
+				if (field3D != null)
+					val3D = field3D.GetValue(inputBiome);
+
+				if (val == null && val3D == null)
+				{
+					errorString = "can't switch on field " + switchModeToName[switchMode] + ",\ndata not provided !";
+					error = true;
+				}
+				else
+				{
+					currentSampler = ((val == null) ? val3D : val) as Sampler;
+					updatePreview = true;
+				}
 			}
 		}
 		
@@ -163,6 +187,9 @@ namespace PW
 		{
 			for (int i = 0; i < outputBiomes.Count; i++)
 				UpdatePropVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
+				
+			if (biomeRepartitionPreview == null)
+				biomeRepartitionPreview = new Texture2D(previewTextureWidth, 1);
 
 			if (inputBiome == null)
 			{
@@ -175,11 +202,16 @@ namespace PW
 			{
 				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
 				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+				if (currentSampler != null)
+					EditorGUILayout.LabelField("min: " + currentSampler.min + ", max: " + currentSampler.max);
+				else
+					EditorGUILayout.LabelField("");
 			}
 			if (EditorGUI.EndChangeCheck() || needUpdate)
 			{
 				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();
+				updatePreview = true;
 			}
 
 			if (error)
@@ -188,12 +220,37 @@ namespace PW
 				EditorGUI.LabelField(errorRect, errorString);
 				return ;
 			}
+
+			if (updatePreview && currentSampler != null)
+			{
+				float min = currentSampler.min;
+				float max = currentSampler.max;
+				float range = max - min;
+
+				int		i = 0;
+				foreach (var switchData in switchDatas)
+				{
+					float rMin = ((switchData.min + min) / range) * previewTextureWidth;
+					float rMax = ((switchData.max + min) / range) * previewTextureWidth;
+
+					Color c = UnityEngine.Random.ColorHSV();
+					Debug.Log("pixels: " + rMin + "->" + rMax + " = " + c);
+					for (int x = (int)rMin; x < (int)rMax; x++)
+						biomeRepartitionPreview.SetPixel(x, 0, c);
+					i++;
+				}
+				updatePreview = false;
+			}
 			
 			if (switchMode != PWBiomeSwitchMode.Water)
+			{
 				switchList.DoLayoutList();
 
-
-			//TODO: preview for min-max data coverage
+				Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
+				previewRect.height = previewTextureHeight;
+				GUILayout.Space(previewTextureHeight);
+				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
+			}
 		}
 
 		//no process needed, this node only exists for user visual organization.
