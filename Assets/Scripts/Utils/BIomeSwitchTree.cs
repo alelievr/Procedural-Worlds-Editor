@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
 using System;
+using Debug = UnityEngine.Debug;
 
 namespace PW
 {
@@ -93,7 +95,7 @@ namespace PW
 			if (node == null)
 				return ;
 			
-			Debug.Log("evaluated node: " + node);
+			// Debug.Log("evaluated node: " + node);
 			
 			//TODO: anchor to multiple PWNodeBiomeSwitch management
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
@@ -125,7 +127,7 @@ namespace PW
 
 						break ;
 					default:
-						Debug.Log("swicth data count for node " + node.nodeId + ": " + bSwitch.switchDatas.Count);
+						// Debug.Log("swicth data count for node " + node.nodeId + ": " + bSwitch.switchDatas.Count);
 
 						for (int anchorIndex = 0; anchorIndex < bSwitch.switchDatas.Count; anchorIndex++)
 						{
@@ -136,8 +138,8 @@ namespace PW
 
 							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchorId.Value);
 
-							if (attachedNodesToAnchor.Count == 0)
-								Debug.LogWarning("nothing attached to the biome switch output " + anchorIndex);
+							// if (attachedNodesToAnchor.Count == 0)
+								// Debug.LogWarning("nothing attached to the biome switch output " + anchorIndex);
 
 							foreach (var attachedNode in attachedNodesToAnchor)
 							{
@@ -168,9 +170,14 @@ namespace PW
 
 		public void BuildTree(PWNode node)
 		{
+			Stopwatch st = new Stopwatch();
+			st.Start();
 			root = new BiomeSwitchNode();
 			BuildTreeInternal(node, root, 0);
+			st.Stop();
 
+			Debug.Log("built tree time: " + st.ElapsedMilliseconds);
+			
 			DumpBuiltTree();
 		}
 

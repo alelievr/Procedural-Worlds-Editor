@@ -54,15 +54,15 @@ namespace PW
 			toRender.Clear();
 		}
 
-		public static void RenderAll()
+		public static void RenderAll(ref bool needExternalRepaint)
 		{
 			mouseAbove = false;
 
 			foreach (var d in toRender)
-				RenderPopup(d);
+				RenderPopup(d, ref needExternalRepaint);
 		}
 
-		private static void RenderPopup(PWPopupData data)
+		private static void RenderPopup(PWPopupData data, ref bool needExternalRepaint)
 		{
 			var e = Event.current;
 
@@ -104,6 +104,9 @@ namespace PW
 			GUI.Label(headerRect, data.name, headerStyle);
 			
 			GUI.color = Color.white;
+
+			if (dragging)
+				needExternalRepaint = true;
 
 			if (popupRect.Contains(e.mousePosition))
 				mouseAbove = true;

@@ -80,7 +80,7 @@ namespace PW
 		bool					updatePreview;
 		
 		const int				previewTextureWidth = 200;
-		const int				previewTextureHeight = 60;
+		const int				previewTextureHeight = 40;
 
 		public override void OnNodeCreate()
 		{
@@ -102,12 +102,17 @@ namespace PW
 				Rect	colorFieldRect = new Rect(rect.x + nameFieldSize + 4, rect.y - 2, colorFieldSize, colorFieldSize);
 				Rect	minRect = new Rect(rect.x, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
             	Rect	maxRect = new Rect(rect.x + floatFieldSize, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
-				EditorGUIUtility.labelWidth = 25;
-				PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
-				elem.name = EditorGUI.TextField(nameRect, elem.name);
-				elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
-				elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
-				EditorGUIUtility.labelWidth = 0;
+				EditorGUI.BeginChangeCheck();
+				{
+					EditorGUIUtility.labelWidth = 25;
+					PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
+					elem.name = EditorGUI.TextField(nameRect, elem.name);
+					elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
+					elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+					EditorGUIUtility.labelWidth = 0;
+				}
+				if (EditorGUI.EndChangeCheck())
+					updatePreview = true;
 
 				switchDatas[index] = elem;
             };
@@ -151,6 +156,7 @@ namespace PW
 			{PWBiomeSwitchMode.Wind, "wind"},
 			{PWBiomeSwitchMode.Lighting, "lighting"},
 			{PWBiomeSwitchMode.Air, "air"},
+			{PWBiomeSwitchMode.Height, "terrain"}
 			//soil settings apart.
 		};
 
@@ -160,7 +166,6 @@ namespace PW
 			if (switchMode.ToString().Contains("Custom"))
 			{
 				//TODO: 3d samplers management
-				var datas = inputBiome.datas;
 				int index = (switchMode.ToString().Last() - '0');
 				currentSampler = inputBiome.datas[index];
 				if (inputBiome.datas[index] == null)
@@ -237,14 +242,18 @@ namespace PW
 				float max = currentSampler.max;
 				float range = max - min;
 
+				//clear the current texture:
+				for (int x = 0; x < previewTextureWidth; x++)
+					biomeRepartitionPreview.SetPixel(x, 0, Color.white);
+
 				int		i = 0;
 				foreach (var switchData in switchDatas)
 				{
-					float rMin = ((switchData.min + min) / range) * previewTextureWidth;
-					float rMax = ((switchData.max + min) / range) * previewTextureWidth;
+					float switchMin = Mathf.Max(switchData.min, min);
+					float switchMax = Mathf.Min(switchData.max, max);
+					float rMin = ((switchMin - min) / range) * previewTextureWidth;
+					float rMax = ((switchMax - min) / range) * previewTextureWidth;
 
-					Color c = UnityEngine.Random.ColorHSV();
-					Debug.Log("pixels: " + rMin + "->" + rMax + " = " + c);
 					for (int x = (int)rMin; x < (int)rMax; x++)
 						biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
 					i++;
@@ -255,15 +264,14 @@ namespace PW
 			
 			if (switchMode != PWBiomeSwitchMode.Water)
 			{
-				EditorGUI.BeginChangeCheck();
 				switchList.DoLayoutList();
-				if (EditorGUI.EndChangeCheck())
-					updatePreview = true;
 
+				EditorGUILayout.LabelField("repartition map:");
 				Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 				previewRect.height = previewTextureHeight;
 				GUILayout.Space(previewTextureHeight);
-				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
+				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, true);
+				PWGUI.SetScaleModeForField(1, ScaleMode.StretchToFill);
 			}
 		}
 

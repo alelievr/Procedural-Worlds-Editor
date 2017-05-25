@@ -1347,11 +1347,7 @@ namespace PW
 			foreach (var node in nodes)
 			{
 				if (node.GetType() == typeof(PWNodeGraphExternal))
-				{
-					Debug.Log("trying to get graph output nodes: " + finalList.Count);
 					finalList.AddRange((node as PWNodeGraphExternal).graphInput.GetOutputNodes());
-					Debug.Log("after size: " + finalList.Count);
-				}
 				else
 					finalList.Add(node);
 			}

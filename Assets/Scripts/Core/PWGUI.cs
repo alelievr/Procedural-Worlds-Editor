@@ -7,8 +7,6 @@ using UnityEditor;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
-using System.Runtime.Serialization.Formatters.Binary;
-
 namespace PW
 {
 	public enum PWGUIStyleType {
@@ -119,6 +117,7 @@ namespace PW
 				int colorPickerWidth = 170;
 				int colorPickerHeight = 270;
 				
+				GUI.changed = true;
 				PWPopup.AddToRender(fieldSettings, "Color picker", () =>
 				{
 					if (e.type == EventType.KeyDown)
@@ -824,6 +823,39 @@ namespace PW
 			}
 			
 			settingsStorage[fieldIndex].debug = value;
+		}
+
+		public void SetScaleModeForField(int fieldIndex, ScaleMode mode)
+		{
+			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+
+			settingsStorage[fieldIndex].scaleMode = mode;
+		}
+		
+		public void SetScaleAspectForField(int fieldIndex, float aspect)
+		{
+			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+
+			settingsStorage[fieldIndex].scaleAspect = aspect;
+		}
+		
+		public void SetMaterialForField(int fieldIndex, Material mat)
+		{
+			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+
+			settingsStorage[fieldIndex].material = mat;
 		}
 
 	#endregion

@@ -368,7 +368,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		currentMousePosition = e.mousePosition;
 
 		//render all opened popups (at the end cause the have to be above other infos)
-		PWPopup.RenderAll();
+		PWPopup.RenderAll(ref editorNeedRepaint);
 		
 		if (GUI.changed && e.type == EventType.Layout)
 		{
