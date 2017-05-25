@@ -41,15 +41,17 @@ namespace PW
 	[System.SerializableAttribute]
 	public class BiomeFieldSwitchData
 	{
-		public float		min;
-		public float		max;
-		public string		name;
+		public float				min;
+		public float				max;
+		public string				name;
+		public SerializableColor	color;
 
 		public BiomeFieldSwitchData()
 		{
 			name = "swampland";
 			min = 70;
 			max = 90;
+			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f);
 		}
 	}
 
@@ -86,18 +88,26 @@ namespace PW
 			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 
+			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
+
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
 				BiomeFieldSwitchData elem = switchDatas[index];
 				
                 rect.y += 2;
-				int		floatFieldSize = 30;
-				int		labelFieldSize = 80;
-				Rect labelRect = new Rect(rect.x, rect.y, labelFieldSize, EditorGUIUtility.singleLineHeight);
-				Rect minRect = new Rect(rect.x + labelFieldSize, rect.y, floatFieldSize, EditorGUIUtility.singleLineHeight);
-            	Rect maxRect = new Rect(rect.x + labelFieldSize + floatFieldSize, rect.y, floatFieldSize, EditorGUIUtility.singleLineHeight);
-				elem.name = EditorGUI.TextField(labelRect, elem.name);
-				elem.min = EditorGUI.FloatField(minRect, elem.min);
-				elem.max = EditorGUI.FloatField(maxRect, elem.max);
+				int		floatFieldSize = 70;
+				int		colorFieldSize = 20;
+				int		nameFieldSize = (int)rect.width - colorFieldSize - 2;
+				float	lineHeight = EditorGUIUtility.singleLineHeight;
+				Rect	nameRect = new Rect(rect.x, rect.y, nameFieldSize, EditorGUIUtility.singleLineHeight);
+				Rect	colorFieldRect = new Rect(rect.x + nameFieldSize + 4, rect.y - 2, colorFieldSize, colorFieldSize);
+				Rect	minRect = new Rect(rect.x, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
+            	Rect	maxRect = new Rect(rect.x + floatFieldSize, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
+				EditorGUIUtility.labelWidth = 25;
+				PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
+				elem.name = EditorGUI.TextField(nameRect, elem.name);
+				elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
+				elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+				EditorGUIUtility.labelWidth = 0;
 
 				switchDatas[index] = elem;
             };
@@ -236,15 +246,19 @@ namespace PW
 					Color c = UnityEngine.Random.ColorHSV();
 					Debug.Log("pixels: " + rMin + "->" + rMax + " = " + c);
 					for (int x = (int)rMin; x < (int)rMax; x++)
-						biomeRepartitionPreview.SetPixel(x, 0, c);
+						biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
 					i++;
 				}
+				biomeRepartitionPreview.Apply();
 				updatePreview = false;
 			}
 			
 			if (switchMode != PWBiomeSwitchMode.Water)
 			{
+				EditorGUI.BeginChangeCheck();
 				switchList.DoLayoutList();
+				if (EditorGUI.EndChangeCheck())
+					updatePreview = true;
 
 				Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 				previewRect.height = previewTextureHeight;

@@ -6,13 +6,13 @@ namespace PW
 	public struct SerializableColor
 	{
 		[SerializeField]
-		float		r;
+		public float		r;
 		[SerializeField]
-		float		g;
+		public float		g;
 		[SerializeField]
-		float		b;
+		public float		b;
 		[SerializeField]
-		float		a;
+		public float		a;
 
 		public SerializableColor(Color c)
 		{

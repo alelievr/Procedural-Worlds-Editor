@@ -58,55 +58,60 @@ namespace PW
 		
 	#region Color field
 
-		public void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, ref Color c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
-			ColorPicker(prefix, colorFieldRect, ref c, displayColorPreview);
+			ColorPicker(prefix, colorFieldRect, ref c, displayColorPreview, previewOnIcon);
 		}
 		
-		public void ColorPicker(ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(ref Color c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
 			Rect colorFieldRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
-			ColorPicker("", colorFieldRect, ref c, displayColorPreview);
+			ColorPicker("", colorFieldRect, ref c, displayColorPreview, previewOnIcon);
 		}
 
-		public void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true)
+		public void ColorPicker(Rect rect, ref Color c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
-			ColorPicker("", rect, ref c, displayColorPreview);
+			ColorPicker("", rect, ref c, displayColorPreview, previewOnIcon);
 		}
 
-		public void ColorPicker(Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		public void ColorPicker(Rect rect, ref SerializableColor c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
 			Color color = c;
-			ColorPicker("", rect, ref color, displayColorPreview);
+			ColorPicker("", rect, ref color, displayColorPreview, previewOnIcon);
 			c = (SerializableColor)color;
 		}
 		
-		public void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
-			ColorPicker(new GUIContent(prefix), rect, ref c, displayColorPreview);
+			ColorPicker(new GUIContent(prefix), rect, ref c, displayColorPreview, previewOnIcon);
 		}
 
-		public void ColorPicker(GUIContent prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true)
+		public void ColorPicker(GUIContent prefix, Rect rect, ref SerializableColor c, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
 			Color color = c;
-			ColorPicker(prefix, rect, ref color, displayColorPreview);
+			ColorPicker(prefix, rect, ref color, displayColorPreview, previewOnIcon);
 			c = (SerializableColor)color;
 		}
 		
-		public void ColorPicker(string prefix, Rect rect, ref Color color, bool displayColorPreview = true)
+		public void ColorPicker(string prefix, Rect rect, ref Color color, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
-			ColorPicker(new GUIContent(prefix), rect, ref color, displayColorPreview);
+			ColorPicker(new GUIContent(prefix), rect, ref color, displayColorPreview, previewOnIcon);
 		}
 	
-		public void ColorPicker(GUIContent prefix, Rect rect, ref Color color, bool displayColorPreview = true)
+		public void ColorPicker(GUIContent prefix, Rect rect, ref Color color, bool displayColorPreview = true, bool previewOnIcon = false)
 		{
 			var		e = Event.current;
 			Rect	iconRect = rect;
 			int		icColorSize = 18;
+			Color	localColor = color;
 
 			var fieldSettings = GetGUISettingData(() => {
-				return new PWGUISettings();
+				PWGUISettings colorSettings = new PWGUISettings();
+
+				colorSettings.c = (SerializableColor)localColor;
+
+				return colorSettings;
 			});
 
 			if (fieldSettings.active)
@@ -140,7 +145,7 @@ namespace PW
 	
 						if (colorPickerMousePosition.x >= 0 && colorPickerMousePosition.y >= 0 && colorPickerMousePosition.x <= 150 && colorPickerMousePosition.y <= 150)
 						{
-							if (e.isMouse)
+							if (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
 							{
 								Vector2 textureCoord = colorPickerMousePosition * (colorPickerTexture.width / 150f);
 								textureCoord.y = colorPickerTexture.height - textureCoord.y;
@@ -211,7 +216,10 @@ namespace PW
 			}
 			
 			//actions if clicked on/outside of the icon
+			if (previewOnIcon)
+				GUI.color = color;
 			GUI.DrawTexture(iconRect, ic_color);
+			GUI.color = Color.white;
 			if (e.type == EventType.MouseDown && e.button == 0)
 			{
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
