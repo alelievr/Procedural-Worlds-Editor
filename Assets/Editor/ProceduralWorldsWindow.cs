@@ -459,7 +459,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawPresetLineHeader("2D");
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
-					currentGraph.outputType = PWOutputType.TOPDOWNVIEW_2D;
+					currentGraph.outputType = PWTerrainOutputMode.TopDown2D;
 					CreateNewNode(typeof(PWNodePerlinNoise2D));
 					PWNode perlin = currentGraph.nodes.Last();
 					perlin.windowRect.position += Vector2.left * 400;
@@ -508,13 +508,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 #endregion
 
-#region Noise preview processing and rendering
+#region Terrain preview processing and rendering
 
-	GameObject GetLoadedPreviewScene(params PWOutputType[] allowedTypes)
+	GameObject GetLoadedPreviewScene(params PWTerrainOutputMode[] allowedTypes)
 	{
 		GameObject		ret;
 
-		Func< string, PWOutputType, GameObject >	TestSceneNametype = (string name, PWOutputType type) =>
+		Func< string, PWTerrainOutputMode, GameObject >	TestSceneNametype = (string name, PWTerrainOutputMode type) =>
 		{
 			ret = GameObject.Find(name);
 			if (ret == null)
@@ -524,40 +524,40 @@ public class ProceduralWorldsWindow : EditorWindow {
 					return ret;
 			return null;
 		};
-		ret = TestSceneNametype(PWConstants.previewSideViewSceneName, PWOutputType.SIDEVIEW_2D);
+		ret = TestSceneNametype(PWConstants.previewSideViewSceneName, PWTerrainOutputMode.SideView2D);
 		if (ret != null)
 			return ret;
-		ret = TestSceneNametype(PWConstants.previewTopDownSceneName, PWOutputType.TOPDOWNVIEW_2D);
+		ret = TestSceneNametype(PWConstants.previewTopDownSceneName, PWTerrainOutputMode.TopDown2D);
 		if (ret != null)
 			return ret;
-		ret = TestSceneNametype(PWConstants.preview3DSceneName, PWOutputType.PLANE_3D);
+		ret = TestSceneNametype(PWConstants.preview3DSceneName, PWTerrainOutputMode.Planar3D);
 		if (ret != null)
 			return ret;
 		return null;
 	}
 
-	void ProcessPreviewScene(PWOutputType outputType)
+	void ProcessPreviewScene(PWTerrainOutputMode outputType)
 	{
 		if (previewScene == null)
 		{
 			//TODO: do the preview for Density field 1D
 			switch (outputType)
 			{
-				case PWOutputType.DENSITY_2D:
-				case PWOutputType.SIDEVIEW_2D:
-					previewScene = GetLoadedPreviewScene(PWOutputType.DENSITY_2D, PWOutputType.SIDEVIEW_2D);
+				case PWTerrainOutputMode.Density2D:
+				case PWTerrainOutputMode.SideView2D:
+					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.Density2D, PWTerrainOutputMode.SideView2D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.previewSideViewSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
-				case PWOutputType.TOPDOWNVIEW_2D:
-					previewScene = GetLoadedPreviewScene(PWOutputType.TOPDOWNVIEW_2D);
+				case PWTerrainOutputMode.TopDown2D:
+					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.TopDown2D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.previewTopDownSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
 				default: //for 3d previewScenes:
-					previewScene = GetLoadedPreviewScene(PWOutputType.CUBIC_3D, PWOutputType.DENSITY_3D, PWOutputType.PLANE_3D, PWOutputType.SPHERICAL_3D);
+					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.Cubic3D, PWTerrainOutputMode.Density3D, PWTerrainOutputMode.Planar3D, PWTerrainOutputMode.Spherical3D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.preview3DSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.preview3DSceneName;
@@ -1277,6 +1277,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		newNode.seed = currentGraph.seed;
 		newNode.computeOrder = newNode.isDependent ? -1 : 0;
 		GetWindowStyleFromType(newNode.GetType(), out newNode.windowStyle, out newNode.windowSelectedStyle);
+		newNode.UpdateCurrentGraph(currentGraph);
 		newNode.RunNodeAwake();
 
 		if (String.IsNullOrEmpty(newNode.externalName))

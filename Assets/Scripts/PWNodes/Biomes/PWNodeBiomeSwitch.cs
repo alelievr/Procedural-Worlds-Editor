@@ -62,7 +62,7 @@ namespace PW
 
 		[PWOutput]
 		[PWMultiple(typeof(BiomeData))]
-		[PWOffset(0, 58, 1)]
+		[PWOffset(0, 53, 16)]
 		public PWValues			outputBiomes = new PWValues();
 
 		public PWBiomeSwitchMode			switchMode;
@@ -78,6 +78,7 @@ namespace PW
 		Sampler					currentSampler;
 		Texture2D				biomeRepartitionPreview;
 		bool					updatePreview;
+		float					localCoveragePercent;
 		
 		const int				previewTextureWidth = 200;
 		const int				previewTextureHeight = 40;
@@ -246,6 +247,7 @@ namespace PW
 				for (int x = 0; x < previewTextureWidth; x++)
 					biomeRepartitionPreview.SetPixel(x, 0, Color.white);
 
+				localCoveragePercent = 0;
 				int		i = 0;
 				foreach (var switchData in switchDatas)
 				{
@@ -253,6 +255,7 @@ namespace PW
 					float switchMax = Mathf.Min(switchData.max, max);
 					float rMin = ((switchMin - min) / range) * previewTextureWidth;
 					float rMax = ((switchMax - min) / range) * previewTextureWidth;
+					localCoveragePercent += (rMax - rMin) / previewTextureWidth * 100;
 
 					for (int x = (int)rMin; x < (int)rMax; x++)
 						biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
@@ -266,7 +269,7 @@ namespace PW
 			{
 				switchList.DoLayoutList();
 
-				EditorGUILayout.LabelField("repartition map:");
+				EditorGUILayout.LabelField("repartition map: (" + localCoveragePercent.ToString("F1") + "%)");
 				Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 				previewRect.height = previewTextureHeight;
 				GUILayout.Space(previewTextureHeight);

@@ -1376,6 +1376,11 @@ namespace PW
 			return ;
 		}
 
+		public PWTerrainOutputMode		GetOutputType()
+		{
+			return currentGraph.outputType;
+		}
+
 	#endregion
 
 	#region Unused (for the moment) overrided functions

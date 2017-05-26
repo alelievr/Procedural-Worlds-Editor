@@ -305,6 +305,17 @@ namespace PW
 			datas3D = new Sampler3D[9];
 		}
 	}
+
+	public class Biome
+	{
+		public BiomeData			biomeDataReference;
+		public PWTerrainOutputMode	mode;
+
+		//datas for TopDown2D terrain
+		public Texture2D	surfaceTexture;
+
+		//TODO: datas for others output modes
+	}
 	
 	/*
 	**	Utils

@@ -9,18 +9,18 @@ using Debug = UnityEngine.Debug;
 
 namespace PW
 {
-	public enum	PWOutputType
+	public enum	PWTerrainOutputMode
 	{
-		NONE,
-		SIDEVIEW_2D,
-		TOPDOWNVIEW_2D,
-		PLANE_3D,
-		SPHERICAL_3D,
-		CUBIC_3D,
-		DENSITY_1D,
-		DENSITY_2D,
-		DENSITY_3D,
-		MESH,
+		None,
+		SideView2D,
+		TopDown2D,
+		Planar3D,
+		Spherical3D,
+		Cubic3D,
+		Density1D,
+		Density2D,
+		Density3D,
+		Mesh,
 	}
 
 	[CreateAssetMenu(fileName = "New ProceduralWorld", menuName = "Procedural World", order = 1)]
@@ -78,7 +78,7 @@ namespace PW
 		public float						maxStep;
 
 		[SerializeField]
-		public PWOutputType					outputType;
+		public PWTerrainOutputMode					outputType;
 
 		[SerializeField]
 		public List< string >				subgraphReferences = new List< string >();
