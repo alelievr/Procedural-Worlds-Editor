@@ -44,7 +44,7 @@ namespace PW
 		public bool		reloadRequested = false;
 		public bool		forceReload = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
-		public bool		isDependent {get; private set; }
+		public bool		isDependent { get; private set; }
 		public PWProcessMode	processMode;
 
 	#region Internal Node datas and style

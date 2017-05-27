@@ -359,7 +359,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//FIXME
 		if (!editorNeedRepaint)
-			editorNeedRepaint = e.isMouse || e.type == EventType.MouseUp;
+			editorNeedRepaint = e.isMouse || e.type == EventType.MouseUp || e.type == EventType.MouseDown;
 
 		//if event, repaint
 		if ((editorNeedRepaint || draggingGraph || draggingLink || draggingNode))
@@ -1682,7 +1682,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	}
 
 #endregion
-	
+
 #region Utils and miscellaneous
 
 	//Dictionary< nodeId, dependencyWeight >

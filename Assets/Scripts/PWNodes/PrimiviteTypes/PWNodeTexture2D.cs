@@ -17,7 +17,11 @@ namespace PW
 
 		public override void OnNodeGUI()
 		{
+			GUILayout.Space(EditorGUIUtility.singleLineHeight);
+			PreviewRenderUtility d = new PreviewRenderUtility();
 			outputTexture = EditorGUILayout.ObjectField(outputTexture, typeof(Texture2D), false) as Texture2D;
+			if (outputTexture != null)
+				PWGUI.TexturePreview(outputTexture);
 		}
 
 		//no process needed
