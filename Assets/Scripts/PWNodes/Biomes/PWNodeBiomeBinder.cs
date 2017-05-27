@@ -6,7 +6,7 @@ namespace PW
 {
 	public class PWNodeBiomeBinder : PWNode {
 
-		[PWInput("biome data")]
+		[PWInput("biome datas")]
 		public BiomeData		inputBiome;
 		
 		public PWTerrainOutputMode		outputType;
@@ -48,14 +48,13 @@ namespace PW
 				outputType = GetOutputType();
 				UpdateOutputType();
 			}
-			
+
 			externalName = "Biome binder";
 			initialized = true;
 		}
 
 		public override void OnNodeGUI()
 		{
-			externalName = "biome binder";
 
 		}
 

@@ -189,7 +189,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 			n.Value.nodes.Clear();
 		
 		AddToSelector("Simple values", "redNode", redNodeWindow, redNodeWindowSelected,
-			"Slider", typeof(PWNodeSlider));
+			"Slider", typeof(PWNodeSlider),
+			"Constant", typeof(PWNodeConstant),
+			"Material", typeof(PWNodeMaterial),
+			"Texture2D", typeof(PWNodeTexture2D),
+			"Mesh", typeof(PWNodeMesh));
 		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
 			"Add", typeof(PWNodeAdd));
 		AddToSelector("Biomes", "greenNode", greenNodeWindow, greenNodeWindowSelected,
@@ -1526,18 +1530,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			//get dependencies of this anchor
 			var deps = node.GetDependencies(anchor.anchorId);
-			if (deps.Count == 0)
+			if (deps.Count() == 0)
 				return null;
 
 			//get the linked window from the dependency
-			var linkNode = FindNodeById(deps[0].nodeId);
+			var linkNode = FindNodeById(deps.First().nodeId);
 			if (linkNode == null)
 				return null;
 
 			//find the link of each dependency
-			IEnumerable< PWLink > links = new List< PWLink >();
+			List< PWLink > links = new List< PWLink >();
 			foreach (var dep in deps)
-				links = links.Concat(linkNode.GetLinks(dep.anchorId, node.nodeId, dep.connectedAnchorId));
+				links.Add(linkNode.GetLink(dep.anchorId, node.nodeId, dep.connectedAnchorId));
 			return links;
 		}
 		else

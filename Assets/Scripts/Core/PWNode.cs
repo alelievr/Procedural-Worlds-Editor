@@ -160,7 +160,7 @@ namespace PW
 
 		public static Color GetAnchorColorByType(Type t)
 		{
-			if (t == typeof(float) || t == typeof(Vector2) || t == typeof(Vector3) || t == typeof(Vector4))
+			if (t == typeof(int) || t == typeof(float) || t == typeof(Vector2) || t == typeof(Vector3) || t == typeof(Vector4) || t == typeof(Texture2D) || t == typeof(Mesh))
 				return PWColorPalette.GetColor("yellowAnchor");
 			else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 				return PWColorPalette.GetColor("blueAnchor");
@@ -337,10 +337,12 @@ namespace PW
 		{
 		}
 
+		//TODO: change the return type to bool
 		public virtual void	OnNodeAnchorLink(string propName, int index)
 		{
 		}
 
+		//TODO: change the return type to bool
 		public virtual void OnNodeAnchorUnlink(string propName, int index)
 		{
 		}
@@ -717,12 +719,17 @@ namespace PW
 		{
 			return links;
 		}
-
-		public List< PWLink > GetLinks(int anchorId, int targetNodeId, int targetAnchorId)
+		
+		public IEnumerable< PWLink > GetLinks(int localAnchorId)
 		{
-			return links.Where(l => l.localAnchorId == anchorId
+			return links.Where(l => l.localAnchorId == localAnchorId);
+		}
+
+		public PWLink GetLink(int anchorId, int targetNodeId, int targetAnchorId)
+		{
+			return links.FirstOrDefault(l => l.localAnchorId == anchorId
 				&& l.distantNodeId == targetNodeId
-				&& l.distantAnchorId == targetAnchorId).ToList();
+				&& l.distantAnchorId == targetAnchorId);
 		}
 
 		PWLinkType		GetLinkType(Type from, Type to)
@@ -960,9 +967,9 @@ namespace PW
 			return depencendies;
 		}
 
-		public List< PWDependency > GetDependencies(int anchorId)
+		public IEnumerable< PWDependency > GetDependencies(int anchorId)
 		{
-			return depencendies.Where(d => d.connectedAnchorId == anchorId).ToList();
+			return depencendies.Where(d => d.connectedAnchorId == anchorId);
 		}
 
 		public PWDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
@@ -1267,6 +1274,30 @@ namespace PW
 			}
 		}
 
+		public bool				RequestRemoveLink(string propertyName, int index = 0)
+		{
+			if (!propertyDatas.ContainsKey(propertyName))
+				return false;
+			
+			var prop = propertyDatas[propertyName];
+
+			if (index >= prop.multi.Count || index < 0)
+				return false;
+
+			if (currentGraph == null)
+				return false;
+
+			var links = GetLinks(prop.multi[index].id);
+			foreach (var link in links)
+			{
+				var linkedNode = FindNodeById(link.distantNodeId);
+
+				linkedNode.DeleteLink(link.distantAnchorId, this, link.localAnchorId);
+				DeleteLink(link.localAnchorId, linkedNode, link.distantAnchorId);
+			}
+			return true;
+		}
+
 		public int				GetPropLinkCount(string propertyName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
@@ -1376,7 +1407,7 @@ namespace PW
 			return ;
 		}
 
-		public PWTerrainOutputMode		GetOutputType()
+		public PWTerrainOutputMode	GetOutputType()
 		{
 			return currentGraph.outputType;
 		}

@@ -16,7 +16,7 @@ namespace PW
 
 	public enum	ChunkVisibility
 	{
-		NONE,
+		None,
 		VISIBLE,
 		HIDDEN,
 		UNLOADED,
@@ -101,14 +101,14 @@ namespace PW
 		{
 			foreach (var kp in chunks)
 			{
-				if (filter == ChunkVisibility.NONE || kp.Value.visibility == filter)
+				if (filter == ChunkVisibility.None || kp.Value.visibility == filter)
 					callback(kp.Key, kp.Value.terrainData, kp.Value.userData);
 			}
 		}
 
 		public void Foreach(Action<Vector3i, ChunkData, object> callback)
 		{
-			Foreach(ChunkVisibility.NONE, callback);
+			Foreach(ChunkVisibility.None, callback);
 		}
 
 		public void Clear()

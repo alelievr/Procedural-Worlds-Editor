@@ -115,7 +115,7 @@ namespace PW
 
 		[System.NonSerializedAttribute]
 		List< Type > allNodeTypeList = new List< Type > {
-			typeof(PWNodeSlider),
+			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh),
 			typeof(PWNodeAdd),
 			typeof(PWNodeDebugLog),
 			typeof(PWNodeCircleNoiseMask),
