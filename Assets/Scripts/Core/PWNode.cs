@@ -111,7 +111,7 @@ namespace PW
 
 	#endregion
 
-	#region OnEnable, data initialization and baking
+	#region OnEnable, OnDisable, data initialization and baking
 		public void OnEnable()
 		{
 			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
@@ -317,6 +317,11 @@ namespace PW
 				propertyDatas.Remove(toRemoveKey);
 		}
 
+		public void OnDisable()
+		{
+			OnNodeDisable();
+		}
+
 	#endregion
 
 	#region inheritence virtual API
@@ -334,6 +339,14 @@ namespace PW
 		}
 
 		public virtual void OnNodeProcess()
+		{
+		}
+
+		public virtual void OnNodeDisable()
+		{
+		}
+
+		public virtual void OnNodeDelete()
 		{
 		}
 

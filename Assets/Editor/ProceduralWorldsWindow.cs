@@ -1241,6 +1241,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DeleteNode(PWNode node)
 	{
+		node.OnNodeDelete();
+
 		graphNeedReload = true;
 		//remove all input links for each node links:
 		foreach (var link in node.GetLinks())
