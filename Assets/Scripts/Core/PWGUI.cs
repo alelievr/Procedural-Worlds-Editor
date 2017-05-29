@@ -571,6 +571,8 @@ namespace PW
 
 			if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < tex.width && pixelPos.y < tex.height)
 			{
+				if (e.isMouse)
+					e.Use();
 				Color pixel = tex.GetPixel((int)pixelPos.x, (int)pixelPos.y);
 				EditorGUILayout.LabelField("pixel(" + (int)pixelPos.x + ", " + (int)pixelPos.y + ")");
 				EditorGUILayout.LabelField(pixel.ToString("F2"));
@@ -715,7 +717,11 @@ namespace PW
 				EditorGUILayout.LabelField("Sampler2D min: " + samp.min + ", max: " + samp.max);
 
 				if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < samp.size && pixelPos.y < samp.size)
+				{
+					if (e.isMouse)
+						e.Use();
 					EditorGUILayout.LabelField("(" + (int)pixelPos.x + ", " + (int)pixelPos.y + "): " + samp[(int)pixelPos.x, (int)pixelPos.y]);
+				}
 				else
 					EditorGUILayout.LabelField("(NA, NA): NA");
 			}

@@ -9,6 +9,7 @@ namespace PW
 	
 		public override void OnNodeCreate()
 		{
+			externalName = "your node name";
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
 		}
 

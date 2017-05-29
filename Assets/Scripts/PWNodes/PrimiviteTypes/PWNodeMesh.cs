@@ -10,12 +10,27 @@ namespace PW
 		[PWOutput("mesh")]
 		public Mesh			outputMesh;
 
+		GameObject			meshRenderObject;
 		PWGUIObjectPreview	objectPreview;
+
+		[SerializeField]
+		bool				showSceneHiddenObjects = false;
 
 		public override void OnNodeCreate()
 		{
+			meshRenderObject = new GameObject("MeshNodeRenderer", typeof(MeshRenderer), typeof(MeshFilter));
+			//TODO: init meshRenderer;
+
+			UpdateHideFlags();
 			externalName = "";
-			//init objectPreview
+		}
+
+		void UpdateHideFlags()
+		{
+			if (showSceneHiddenObjects)
+				meshRenderObject.hideFlags = HideFlags.DontSave;
+			else
+				meshRenderObject.hideFlags = HideFlags.HideAndDontSave;
 		}
 
 		public override void OnNodeGUI()
@@ -23,7 +38,7 @@ namespace PW
 			EditorGUI.BeginChangeCheck();
 			outputMesh = EditorGUILayout.ObjectField(outputMesh, typeof(Mesh), false) as Mesh;
 			if (EditorGUI.EndChangeCheck())
-				objectPreview.UpdateObjects(outputMesh);
+				objectPreview.UpdateObjects(meshRenderObject);
 
 			
 
@@ -32,7 +47,7 @@ namespace PW
 
 		public override void OnNodeDisable()
 		{
-			objectPreview.Cleaup();
+			objectPreview.Cleanup();
 		}
 
 		//no process needed

@@ -82,10 +82,12 @@ namespace PW
 			//TODO: temperature map creation options
 		}
 
-		public override void OnNodeAnchorLink(string prop, int index)
+		public override bool OnNodeAnchorLink(string prop, int index)
 		{
 			if (prop == "temperatureMap")
 				internalTemperatureMap = false;
+			
+			return true;
 		}
 		
 		public override void OnNodeAnchorUnlink(string prop, int index)

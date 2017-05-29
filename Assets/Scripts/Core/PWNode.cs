@@ -350,12 +350,11 @@ namespace PW
 		{
 		}
 
-		//TODO: change the return type to bool
-		public virtual void	OnNodeAnchorLink(string propName, int index)
+		public virtual bool	OnNodeAnchorLink(string propName, int index)
 		{
+			return true;
 		}
 
-		//TODO: change the return type to bool
 		public virtual void OnNodeAnchorUnlink(string propName, int index)
 		{
 		}
@@ -455,12 +454,17 @@ namespace PW
 					}
 				}
 				
+			//TODO: remove this deprecated code
 			//send anchor connection events:
-			if (lastAttachedLink != null)
+			/*if (lastAttachedLink != null)
 			{
-				OnNodeAnchorLink(lastAttachedLink.first, lastAttachedLink.second);
+				bool revokeLink = !OnNodeAnchorLink(lastAttachedLink.first, lastAttachedLink.second);
+				
+				if (revokeLink)
+					RequestRemoveLink();
+				
 				lastAttachedLink = null;
-			}
+			}*/
 
 			OnNodeProcess();
 		}
@@ -764,26 +768,30 @@ namespace PW
 			return PWLinkType.BasicData;
 		}
 
-		public void		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
+		public bool		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
 		{
 			//quit if types are not compatible
 			if (!AnchorAreAssignable(from, to))
-				return ;
+				return false;
 			if (from.anchorType == to.anchorType)
-				return ;
+				return false;
 			if (from.nodeId == to.nodeId)
-				return ;
+				return false;
+			
+			//if link was revoked by the node's code
+			if (!OnNodeAnchorLink(from.fieldName, from.propIndex))
+				return false;
 
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
 			{
 				outputHasChanged = true;
 				links.Add(new PWLink(
-					to.nodeId, to.anchorId, to.name, to.classAQName, to.propIndex,
-					from.nodeId, from.anchorId, from.name, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
+					to.nodeId, to.anchorId, to.fieldName, to.classAQName, to.propIndex,
+					from.nodeId, from.anchorId, from.fieldName, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
 					GetLinkType(from.fieldType, to.fieldType))
 				);
-				lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
+				lastAttachedLink = new Pair< string, int>(from.fieldName, from.propIndex);
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -796,7 +804,7 @@ namespace PW
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
-						lastAttachedLink = new Pair< string, int>(from.name, from.propIndex);
+						lastAttachedLink = new Pair< string, int>(from.fieldName, from.propIndex);
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple && data.anchorInstance != null)
@@ -815,6 +823,7 @@ namespace PW
 				});
 				depencendies.Add(new PWDependency(to.nodeId, to.anchorId, from.anchorId));
 			}
+			return true;
 		}
 
 		public void AttachLink(string myAnchor, PWNode target, string targetAnchor)

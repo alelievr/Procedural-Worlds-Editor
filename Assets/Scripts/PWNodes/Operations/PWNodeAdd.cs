@@ -96,10 +96,12 @@ namespace PW
 				DisplayResult(fOutput);
 		}
 
-		public override void OnNodeAnchorLink(string propName, int index)
+		public override bool OnNodeAnchorLink(string propName, int index)
 		{
 			if (propName == "values")
 				UpdateOutputVisibility();
+			
+			return true;
 		}
 
 		public override void OnNodeAnchorUnlink(string propName, int index)

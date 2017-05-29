@@ -7,7 +7,7 @@ namespace PW
 	[System.SerializableAttribute]
 	public struct PWAnchorInfo {
 	
-		public string		name;
+		public string		fieldName;
 		public Rect			anchorRect;
 		public bool			mouseAbove;
 		public Color		anchorColor;
@@ -34,14 +34,14 @@ namespace PW
 				generic, allowedTypes.Cast< SerializableType >().ToArray(),
 				linkType, linkCount) {}
 		
-		public PWAnchorInfo(string name, Rect anchorRect, Color anchorColor,
+		public PWAnchorInfo(string fieldName, Rect anchorRect, Color anchorColor,
 			Type fieldType, PWAnchorType anchorType,
 			int nodeId, int anchorId,
 			string classAQName, int propIndex,
 			bool generic, SerializableType[] allowedTypes,
 			PWLinkType linkType, int linkCount)
 		{
-			this.name = name;
+			this.fieldName = fieldName;
 			this.anchorRect = anchorRect;
 			this.anchorColor = anchorColor;
 			this.mouseAbove = false;

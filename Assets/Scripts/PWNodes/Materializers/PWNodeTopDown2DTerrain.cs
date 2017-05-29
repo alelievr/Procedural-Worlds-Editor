@@ -28,10 +28,12 @@ namespace PW
 			PWGUI.TexturePreview(samplerTexture);
 		}
 
-		public override void OnNodeAnchorLink(string propName, int index)
+		public override bool OnNodeAnchorLink(string propName, int index)
 		{
 			if (propName == "texture")
 				samplerTexture = new Texture2D(texture.size, texture.size, TextureFormat.ARGB32, false, false);
+			
+			return true;
 		}
 
 		public override void OnNodeProcess()

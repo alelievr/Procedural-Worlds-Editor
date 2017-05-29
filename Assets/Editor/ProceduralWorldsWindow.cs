@@ -902,6 +902,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				StopDragLink(true);
 
+				//TODO: manage the AttachLink return values, if one of them is false, delete the link.
+
 				//attach link to the node:
 				node.AttachLink(mouseAboveAnchor, startDragAnchor);
 				var win = FindNodeById(startDragAnchor.nodeId);
@@ -1944,8 +1946,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					)
 				)
 			).ToArray();
-
-			//TODO: copy only required styles to the new style
 		}
 		if (nodeSelectorList.Count == 0)
 			InitializeNodeSelector();

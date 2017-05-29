@@ -44,10 +44,11 @@ namespace PW
 			maskTexture.Apply();
 		}
 
-		public override	void OnNodeAnchorLink(string propName, int index)
+		public override	bool OnNodeAnchorLink(string propName, int index)
 		{
 			if (propName == "samp")
 				CreateNoiseMask();
+			return true;
 		}
 
 		/*public override void OnNodeAnchorUnLink(string propName, int index)
