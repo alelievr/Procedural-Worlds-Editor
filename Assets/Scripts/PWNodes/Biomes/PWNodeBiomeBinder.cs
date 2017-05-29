@@ -62,7 +62,7 @@ namespace PW
 		{
 			if (prop == "inputBiome" && outputBiome != null)
 				outputBiome.biomeDataReference = inputBiome;
-			return false;
+			return true;
 		}
 
 		public override void OnNodeProcess()

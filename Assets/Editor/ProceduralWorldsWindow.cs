@@ -359,7 +359,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		//FIXME
 		if (!editorNeedRepaint)
-			editorNeedRepaint = e.isMouse || e.type == EventType.MouseUp || e.type == EventType.MouseDown;
+			editorNeedRepaint = e.isMouse || e.type == EventType.ScrollWheel;
 
 		//if event, repaint
 		if ((editorNeedRepaint || draggingGraph || draggingLink || draggingNode))
@@ -905,18 +905,25 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//TODO: manage the AttachLink return values, if one of them is false, delete the link.
 
 				//attach link to the node:
-				node.AttachLink(mouseAboveAnchor, startDragAnchor);
-				var win = FindNodeById(startDragAnchor.nodeId);
-				if (win != null)
+				bool linkNotRevoked = node.AttachLink(mouseAboveAnchor, startDragAnchor);
+
+				if (linkNotRevoked)
 				{
-					win.AttachLink(startDragAnchor, mouseAboveAnchor);
-					graphNeedReload = true;
+					var win = FindNodeById(startDragAnchor.nodeId);
+					if (win != null)
+					{
+						//remove link if it was revoked.
+						if (!win.AttachLink(startDragAnchor, mouseAboveAnchor))
+							node.DeleteLink(mouseAboveAnchor.anchorId, win, startDragAnchor.anchorId);
+						
+						graphNeedReload = true;
+					}
+					else
+						Debug.LogWarning("window id not found: " + startDragAnchor.nodeId);
+					
+					//Recalcul the compute order:
+					EvaluateComputeOrder();
 				}
-				else
-					Debug.LogWarning("window id not found: " + startDragAnchor.nodeId);
-				
-				//Recalcul the compute order:
-				EvaluateComputeOrder();
 			}
 
 		if (mouseAboveAnchor.mouseAbove)
@@ -1490,6 +1497,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input && mouseAboveAnchorInfo.linkCount != 0)
 			{
 				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
+
+				if (link == null) //link was not created / canceled by the node
+					return ;
 
 				var from = FindNodeById(link.localNodeId);
 				var to = FindNodeById(link.distantNodeId);

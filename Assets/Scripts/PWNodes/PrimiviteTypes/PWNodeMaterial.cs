@@ -8,12 +8,12 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			externalName = "";
+			externalName = "Material";
 		}
 
 		public override void OnNodeGUI()
 		{
-
+			
 		}
 
 		public override void OnNodeProcess()

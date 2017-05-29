@@ -636,7 +636,7 @@ namespace PW
 			if (previewRect.width > 2)
 				fieldSettings.savedRect = previewRect;
 
-			Rect textureRect = TexturePreview(tex, false, false, false);
+			TexturePreview(tex, false, false, false);
 			
 			//draw the settings window
 			if (settings && fieldSettings.active)
