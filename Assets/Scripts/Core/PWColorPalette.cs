@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
+using PW;
 
 public static class PWColorPalette  {
 
@@ -32,6 +34,27 @@ public static class PWColorPalette  {
 		{"defaultAnchor", new Color(.75f, .75f, .75f, 1)},
 		{"transparentBackground", new Color(.75f, .75f, .75f, .5f)}
 	};
+	
+	public static Color GetAnchorColorByType(Type t)
+	{
+		if (t == typeof(int) || t == typeof(float) || t == typeof(Vector2)
+			|| t == typeof(Vector3) || t == typeof(Vector4) || t == typeof(Texture2D)
+			|| t == typeof(Mesh) || t == typeof(GameObject) || t == typeof(Material))
+			return GetColor("redAnchor");
+		else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
+			return GetColor("blueAnchor");
+		else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
+			return GetColor("purpleAnchor");
+		else if (t == typeof(Biome))
+			return GetColor("cyanAnchor");
+		else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
+			return GetColor("greenAnchor");
+		else if (t == typeof(PWValues) || t == typeof(PWValue))
+			return GetColor("whiteAnchor");
+		else
+			return GetColor("defaultAnchor");
+	}
+
 
 	public static Color	GetColor(string key)
 	{

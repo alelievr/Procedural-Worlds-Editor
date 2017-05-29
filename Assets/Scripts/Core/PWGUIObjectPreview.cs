@@ -12,9 +12,9 @@ public class PWGUIObjectPreview {
 	private Bounds					renderBounds;
 	private Rect					previewRect = new Rect(0, 0, 170, 170);
 	private GameObject				firstObject = null;
-	private Vector3					previewCenter;
+	// private Vector3					previewCenter;
 
-	public void Initialize(float cameraFieldOfView = 30f)
+	public void Initialize(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Skybox)
     {
         var flags = BindingFlags.Static | BindingFlags.NonPublic;
         var propInfo = typeof(Camera).GetProperty("PreviewCullingLayer", flags);
@@ -24,11 +24,12 @@ public class PWGUIObjectPreview {
 		preview.m_CameraFieldOfView = cameraFieldOfView;
 		preview.m_Camera.cullingMask = 1 << previewLayer;
 		preview.m_Camera.farClipPlane = 10000;
-		preview.m_Camera.clearFlags = CameraClearFlags.Skybox;
+		preview.m_Camera.clearFlags = clearFlags;
 		preview.m_Camera.transform.position = new Vector3(4, 6, -4);
 		preview.m_Camera.transform.rotation = Quaternion.Euler(45, -45, 0);
 	}
 
+	//all object have to be instances.
 	public void UpdateObjects(params GameObject[] objs)
 	{
 		if (objs.Length == 0 || objs[0] == null)
@@ -38,16 +39,12 @@ public class PWGUIObjectPreview {
 		
 		renderBounds = new Bounds(objs[0].transform.position, Vector3.zero);
 		firstObject = objs[0];
-		previewCenter = firstObject.transform.position;
+		// previewCenter = firstObject.transform.position;
 
 		foreach (var robj in renderObjects)
 		{
 			var obj = robj;
 
-			//if the object is not instanciated
-			if (!GameObject.Find(obj.name))
-				obj = GameObject.Instantiate(obj);
-			
 			obj.layer = previewLayer;
 			
 			var meshRenderer = obj.GetComponent< MeshRenderer >();
@@ -105,7 +102,11 @@ public class PWGUIObjectPreview {
 		preview.BeginPreview(rect, GUIStyle.none);
 
 		foreach (var obj in renderObjects)
-			obj.SetActive(true);
+		{
+			Debug.Log("rendered object: " + obj);
+			if (obj != null)
+				obj.SetActive(true);
+		}
 
 		preview.m_Camera.Render();
 

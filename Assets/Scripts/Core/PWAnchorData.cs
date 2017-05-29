@@ -130,7 +130,7 @@ namespace PW
 			PWValues			anchorValues = anchorInstance as PWValues;
 
 			if (c == new Color(0, 0, 0, 0))
-				c = PWNode.GetAnchorColorByType(type);
+				c = PWColorPalette.GetAnchorColorByType(type);
 			tmp.name = (first != null) ? first.name : "";
 			tmp.additional = true;
 			tmp.id = id;

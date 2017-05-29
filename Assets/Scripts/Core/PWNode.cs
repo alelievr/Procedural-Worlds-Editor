@@ -81,7 +81,6 @@ namespace PW
 		int					oldSeed;
 		int					oldChunkSize;
 		float				oldStep;
-		Pair< string, int >	lastAttachedLink = null;
 
 		PWAnchorInfo		anchorUnderMouse;
 
@@ -158,22 +157,6 @@ namespace PW
 				bakedNodeFields[fInfo.Name] = fInfo;
 		}
 
-		public static Color GetAnchorColorByType(Type t)
-		{
-			if (t == typeof(int) || t == typeof(float) || t == typeof(Vector2) || t == typeof(Vector3) || t == typeof(Vector4) || t == typeof(Texture2D) || t == typeof(Mesh))
-				return PWColorPalette.GetColor("yellowAnchor");
-			else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
-				return PWColorPalette.GetColor("blueAnchor");
-			else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
-				return PWColorPalette.GetColor("purpleAnchor");
-			else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
-				return PWColorPalette.GetColor("greenAnchor");
-			else if (t == typeof(PWValues) || t == typeof(PWValue))
-				return PWColorPalette.GetColor("whiteAnchor");
-			else
-				return PWColorPalette.GetColor("defaultAnchor");
-		}
-
 		void LoadFieldAttributes()
 		{
 			//get input variables
@@ -187,7 +170,7 @@ namespace PW
 					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
 				
 				PWAnchorData	data = propertyDatas[field.Name];
-				Color			backgroundColor = GetAnchorColorByType(field.FieldType);
+				Color			backgroundColor = PWColorPalette.GetAnchorColorByType(field.FieldType);
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = "";
 				Vector2			offset = Vector2.zero;
@@ -453,18 +436,6 @@ namespace PW
 						bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
 					}
 				}
-				
-			//TODO: remove this deprecated code
-			//send anchor connection events:
-			/*if (lastAttachedLink != null)
-			{
-				bool revokeLink = !OnNodeAnchorLink(lastAttachedLink.first, lastAttachedLink.second);
-				
-				if (revokeLink)
-					RequestRemoveLink();
-				
-				lastAttachedLink = null;
-			}*/
 
 			OnNodeProcess();
 		}
@@ -791,7 +762,6 @@ namespace PW
 					from.nodeId, from.anchorId, from.fieldName, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
 					GetLinkType(from.fieldType, to.fieldType))
 				);
-				lastAttachedLink = new Pair< string, int>(from.fieldName, from.propIndex);
 				//mark local output anchors as linked:
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
@@ -804,7 +774,6 @@ namespace PW
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
-						lastAttachedLink = new Pair< string, int>(from.fieldName, from.propIndex);
 						singleAnchor.linkCount++;
 						//if data was added to multi-anchor:
 						if (data.multiple && data.anchorInstance != null)
@@ -1609,7 +1578,7 @@ namespace PW
 
 			foreach (var type in types)
 			{
-				Color c = GetAnchorColorByType(type.GetType());
+				Color c = PWColorPalette.GetAnchorColorByType(type.GetType());
 				if (!c.Compare(defaultColor))
 					return c;
 			}

@@ -12,7 +12,9 @@ namespace PW
 		PWGUIObjectPreview		objectPreview = new PWGUIObjectPreview();
 
 		[SerializeField]
-		bool					previewGO;
+		GameObject				previewGO;
+		[SerializeField]
+		bool					showPreview;
 		[SerializeField]
 		bool					showSceneHiddenObjects = false;
 
@@ -21,35 +23,42 @@ namespace PW
 			externalName = "GameObject";
 			renamable = true;
 			objectPreview.Initialize();
-			objectPreview.UpdateObjects(outputGameObject);
+			objectPreview.UpdateObjects(previewGO);
+
+			UpdateGameObject();
 		}
 
-		void UpdateHideFlags()
+		void UpdateGameObject()
 		{
-			if (outputGameObject == null)
+			if (previewGO == null || objectPreview == null) 
 				return ;
 			
+			DestroyImmediate(previewGO);
+
+			previewGO = GameObject.Instantiate(outputGameObject, Vector3.zero, Quaternion.identity);
+			Debug.Log("instanciated new GO: " +previewGO);
+			
 			if (showSceneHiddenObjects)
-				outputGameObject.hideFlags = HideFlags.DontSave;
+				previewGO.hideFlags = HideFlags.DontSave;
 			else
-				outputGameObject.hideFlags = HideFlags.HideAndDontSave;
+				previewGO.hideFlags = HideFlags.HideAndDontSave;
+			
+			objectPreview.UpdateObjects(previewGO);
 		}
 
 		public override void OnNodeGUI()
 		{
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
+			EditorGUI.BeginChangeCheck();
 			outputGameObject = EditorGUILayout.ObjectField(outputGameObject, typeof(GameObject), false) as GameObject;
 
-			EditorGUI.BeginChangeCheck();
 			showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
 			if (EditorGUI.EndChangeCheck())
-				UpdateHideFlags();
+				UpdateGameObject();
 
-			if ((previewGO = EditorGUILayout.Foldout(previewGO, "show preview")))
-			{
+			if ((showPreview = EditorGUILayout.Foldout(showPreview, "show preview")))
 				objectPreview.Render();
-			}
 		}
 
 		public override void OnNodeDisable()
