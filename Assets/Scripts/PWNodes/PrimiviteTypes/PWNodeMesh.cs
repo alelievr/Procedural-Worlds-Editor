@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace PW
@@ -21,6 +19,7 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
+			renamable = true;
 			externalName = "mesh";
 
 			meshRenderObject = new GameObject("MeshNodeRenderer", typeof(MeshRenderer), typeof(MeshFilter));
@@ -76,7 +75,7 @@ namespace PW
 
 		public override void OnNodeDisable()
 		{
-			DestroyImmediate(meshRenderObject);
+			//this will destroy all loaded objects too
 			objectPreview.Cleanup();
 		}
 

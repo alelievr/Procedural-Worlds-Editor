@@ -191,6 +191,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AddToSelector("Simple values", "redNode", redNodeWindow, redNodeWindowSelected,
 			"Slider", typeof(PWNodeSlider),
 			"Constant", typeof(PWNodeConstant),
+			"GameObject", typeof(PWNodeGameObject),
 			"Material", typeof(PWNodeMaterial),
 			"Texture2D", typeof(PWNodeTexture2D),
 			"Mesh", typeof(PWNodeMesh));

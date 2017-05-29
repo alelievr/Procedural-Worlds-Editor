@@ -1310,7 +1310,10 @@ namespace PW
 				return false;
 
 			var links = GetLinks(prop.multi[index].id);
+			var toRemove = new List< PWLink >();
 			foreach (var link in links)
+				toRemove.Add(link);
+			foreach (var link in toRemove)
 			{
 				var linkedNode = FindNodeById(link.distantNodeId);
 

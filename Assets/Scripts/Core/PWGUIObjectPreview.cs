@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Reflection;
-using System.Linq;
 
 public class PWGUIObjectPreview {
 
@@ -34,7 +31,7 @@ public class PWGUIObjectPreview {
 
 	public void UpdateObjects(params GameObject[] objs)
 	{
-		if (objs.Length == 0)
+		if (objs.Length == 0 || objs[0] == null)
 			return ;
 		
 		renderObjects = objs;
@@ -43,8 +40,14 @@ public class PWGUIObjectPreview {
 		firstObject = objs[0];
 		previewCenter = firstObject.transform.position;
 
-		foreach (var obj in renderObjects)
+		foreach (var robj in renderObjects)
 		{
+			var obj = robj;
+
+			//if the object is not instanciated
+			if (!GameObject.Find(obj.name))
+				obj = GameObject.Instantiate(obj);
+			
 			obj.layer = previewLayer;
 			
 			var meshRenderer = obj.GetComponent< MeshRenderer >();
@@ -76,7 +79,6 @@ public class PWGUIObjectPreview {
 			if (e.type == EventType.ScrollWheel)
 			{
 				preview.m_Camera.transform.position *= 1 + (e.delta.y / 10);
-				Debug.Log("delta: " + (1 + (e.delta.y / 10)));
 				e.Use();
 			}
 		}
@@ -115,6 +117,8 @@ public class PWGUIObjectPreview {
 
 	public void Cleanup()
 	{
+		foreach (var obj in renderObjects)
+			GameObject.DestroyImmediate(obj);
 		if (preview != null)
 		{
 			preview.Cleanup();
