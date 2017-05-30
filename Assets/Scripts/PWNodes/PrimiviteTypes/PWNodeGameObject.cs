@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace PW
@@ -30,13 +28,13 @@ namespace PW
 
 		void UpdateGameObject()
 		{
-			if (previewGO == null || objectPreview == null) 
+			if (outputGameObject == null || objectPreview == null) 
 				return ;
 			
 			DestroyImmediate(previewGO);
 
 			previewGO = GameObject.Instantiate(outputGameObject, Vector3.zero, Quaternion.identity);
-			Debug.Log("instanciated new GO: " +previewGO);
+			Debug.Log("instanciated new GO: " + previewGO);
 			
 			if (showSceneHiddenObjects)
 				previewGO.hideFlags = HideFlags.DontSave;
@@ -51,13 +49,14 @@ namespace PW
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 			EditorGUI.BeginChangeCheck();
-			outputGameObject = EditorGUILayout.ObjectField(outputGameObject, typeof(GameObject), false) as GameObject;
-
-			showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
+			{
+				outputGameObject = EditorGUILayout.ObjectField(outputGameObject, typeof(GameObject), false) as GameObject;
+				showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
+			}
 			if (EditorGUI.EndChangeCheck())
 				UpdateGameObject();
 
-			if ((showPreview = EditorGUILayout.Foldout(showPreview, "show preview")))
+			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
 				objectPreview.Render();
 		}
 

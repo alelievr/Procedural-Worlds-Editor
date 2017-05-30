@@ -60,7 +60,7 @@ namespace PW
 			if (EditorGUI.EndChangeCheck())
 				UpdateHideFlags();
 
-			if ((displayPreview = EditorGUILayout.Foldout(displayPreview, "mesh preview")))
+			if ((displayPreview = EditorGUILayout.Foldout(displayPreview, "preview")))
 			{
 				EditorGUIUtility.labelWidth = 75;
 				

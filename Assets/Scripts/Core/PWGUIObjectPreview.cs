@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 
 public class PWGUIObjectPreview {
 
 	public PreviewRenderUtility		preview;
 
-	private GameObject[]			renderObjects = new GameObject[0];
-	private bool					showSceneHiddenObjects;
-	private int						previewLayer;
-	private Bounds					renderBounds;
-	private Rect					previewRect = new Rect(0, 0, 170, 170);
-	private GameObject				firstObject = null;
-	// private Vector3					previewCenter;
+	private List< GameObject >	renderObjects = new List< GameObject >();
+	private bool				showSceneHiddenObjects;
+	private int					previewLayer;
+	private Bounds				renderBounds;
+	private Rect				previewRect = new Rect(0, 0, 170, 170);
+	private GameObject			firstObject = null;
+	// private Vector3			previewCenter;
 
 	public void Initialize(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Skybox)
     {
@@ -29,14 +31,34 @@ public class PWGUIObjectPreview {
 		preview.m_Camera.transform.rotation = Quaternion.Euler(45, -45, 0);
 	}
 
+	void ExpandRenderObjects(GameObject parent, List< GameObject > toAddList)
+	{
+		Transform parentTransform = parent.transform;
+		int		nChild = parentTransform.childCount;
+
+		for (int i = 0; i < nChild; i++)
+		{
+			var child = parentTransform.GetChild(i).gameObject;
+			if (child != null)
+				toAddList.Add(child);
+			ExpandRenderObjects(child, toAddList);
+		}
+	}
+
 	//all object have to be instances.
 	public void UpdateObjects(params GameObject[] objs)
 	{
 		if (objs.Length == 0 || objs[0] == null)
 			return ;
 		
-		renderObjects = objs;
+		renderObjects = objs.Where(o => o != null).ToList();
+
+		var toAdd = new List< GameObject >();
+		foreach (var ro in renderObjects)
+			ExpandRenderObjects(ro, toAdd);
 		
+		renderObjects = renderObjects.Concat(toAdd).ToList();
+	
 		renderBounds = new Bounds(objs[0].transform.position, Vector3.zero);
 		firstObject = objs[0];
 		// previewCenter = firstObject.transform.position;
@@ -102,11 +124,7 @@ public class PWGUIObjectPreview {
 		preview.BeginPreview(rect, GUIStyle.none);
 
 		foreach (var obj in renderObjects)
-		{
-			Debug.Log("rendered object: " + obj);
-			if (obj != null)
-				obj.SetActive(true);
-		}
+			obj.SetActive(true);
 
 		preview.m_Camera.Render();
 

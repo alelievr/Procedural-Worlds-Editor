@@ -58,7 +58,7 @@ namespace PW
 			if (EditorGUI.EndChangeCheck())
 				UpdateHideFlags();
 			
-			if ((showPreview = EditorGUILayout.Foldout(showPreview, "show preview")))
+			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
 				objectPreview.Render();
 		}
 		
