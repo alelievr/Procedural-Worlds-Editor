@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using PW;
+using PW.Core;
 
-namespace PW
+namespace PW.Noise
 {
 	public class PerlinNoise2D : Noise {
 	

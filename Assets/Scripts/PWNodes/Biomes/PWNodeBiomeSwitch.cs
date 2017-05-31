@@ -6,8 +6,9 @@ using UnityEngine;
 using System;
 using System.Linq;
 using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public enum PWBiomeSwitchMode
 	{
@@ -51,7 +52,7 @@ namespace PW
 			name = "swampland";
 			min = 70;
 			max = 90;
-			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f);
+			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f, 1);
 		}
 	}
 
@@ -171,7 +172,7 @@ namespace PW
 				currentSampler = inputBiome.datas[index];
 				if (inputBiome.datas[index] == null)
 				{
-					errorString = "can's switch on custom value\nat index " + index + ",\ndata not provided";
+					errorString = "can't switch on custom value\nat index " + index + ",\ndata not provided";
 					error = true;
 				}
 			}

@@ -3,13 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 using System;
+using PW.Core;
 using Debug = UnityEngine.Debug;
 
 namespace PW
 {
+	using Node;
+
 	public class BiomeSwitchTree {
 
-		BiomeSwitchNode		root = null;
+		public bool							isBuilt { private set; get; }
+
+		private BiomeSwitchNode				root = null;
+		private int							biomeIdCount = 0;
+
+		private Dictionary< int, Biome >	biomePerId = new Dictionary< int, Biome >();
+		private Dictionary< string, Biome >	biomePerName = new Dictionary< string, Biome >();
 
 		private enum SwitchMode
 		{
@@ -20,21 +29,22 @@ namespace PW
 
 		private class BiomeSwitchNode
 		{
-			public float			min;
-			public float			max;
-			public bool				value;
-			public SwitchMode		mode;
+			public float				min;
+			public float				max;
+			public bool					value;
+			public SwitchMode			mode;
 			public PWBiomeSwitchMode	biomeSwitchMode;
+			public Biome				biome;
+			public string				biomeName;
 
-			List< BiomeSwitchNode >	childs = new List< BiomeSwitchNode >();
-			Action					terraformer = null;
+			List< BiomeSwitchNode >		childs = new List< BiomeSwitchNode >();
 			
 			public BiomeSwitchNode()
 			{
 				mode = SwitchMode.Unknown;
 			}
 
-			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode)
+			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode, string biomeName)
 			{
 				this.min = min;
 				this.max = max;
@@ -42,11 +52,17 @@ namespace PW
 				this.biomeSwitchMode = biomeSwitchMode;
 			}
 			
-			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode)
+			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode, string biomeName)
 			{
 				this.value = value;
 				this.mode = SwitchMode.Bool;
 				this.biomeSwitchMode = biomeSwitchMode;
+				this.biomeName = biomeName;
+			}
+
+			public void SetBiome(Biome b)
+			{
+				biome = b;
 			}
 
 			public BiomeSwitchNode GetNext(float value)
@@ -90,7 +106,12 @@ namespace PW
 			}
 		}
 
-		void BuildTreeInternal(PWNode node, BiomeSwitchNode currentNode, int depth)
+		public BiomeSwitchTree()
+		{
+			isBuilt = false;
+		}
+
+		void BuildTreeInternal(PWNode node, BiomeSwitchNode currentNode, int depth, BiomeSwitchNode parent = null)
 		{
 			if (node == null)
 				return ;
@@ -116,13 +137,13 @@ namespace PW
 						{
 							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
 							for (int i = 0; i < nodes.Count; i++)
-								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode);
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial");
 						}
 						if (aquaticAnchorId != null)
 						{
 							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchorId.Value);
 							for (int i = 0; i < nodes.Count; i++)
-								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode);
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic");
 						}
 
 						break ;
@@ -146,7 +167,7 @@ namespace PW
 								var child = currentNode.GetChildAt(childIndex++);
 								var sData = bSwitch.switchDatas[anchorIndex];
 
-								child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode);
+								child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode, sData.name);
 							}
 						}
 						break ;
@@ -154,17 +175,35 @@ namespace PW
 				childIndex = 0;
 				foreach (var outNode in node.GetOutputNodes())
 				{
-					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1);
+					Debug.Log("parent set: " + currentNode);
+					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
 					if (outNode.GetType() == typeof(PWNodeBiomeSwitch))
 						childIndex++;
 				}
 			}
-			else if (node.GetType() != typeof(PWNodeBiomeBinder))
+			else if (node.GetType() == typeof(PWNodeBiomeBinder))
 			{
-				foreach (var outNode in node.GetOutputNodes())
-					BuildTreeInternal(outNode, currentNode, depth++);
+				PWNodeBiomeBinder binder = node as PWNodeBiomeBinder;
+
+				string biomeName = (parent.biomeName == null) ? "biome-" + UnityEngine.Random.Range(0, 424242) : parent.biomeName;
+
+				//Biome binder detected, assiign the biome to the current Node:
+				currentNode.biome = binder.outputBiome;
+
+				Debug.Log("biomename: " + biomeName);
+				//set the biome ID and name:
+				currentNode.biome.name = biomeName;
+				currentNode.biome.id = biomeIdCount++;
+
+				//store the biome in dictionaries for fast access
+				biomePerId[currentNode.biome.id] = currentNode.biome;
+				biomePerName[biomeName] = currentNode.biome;
 			}
 			else
+			{
+				foreach (var outNode in node.GetOutputNodes())
+					BuildTreeInternal(outNode, currentNode, depth++, parent);
+			}
 				return ;
 		}
 
@@ -179,6 +218,8 @@ namespace PW
 			Debug.Log("built tree time: " + st.ElapsedMilliseconds);
 			
 			DumpBuiltTree();
+
+			isBuilt = true;
 		}
 
 		void DumpBiomeTree(BiomeSwitchNode node, int depth = 0)
@@ -205,6 +246,27 @@ namespace PW
 				foreach (var childOfChild in child.GetChilds())
 					childs += childOfChild + " | ";
 			Debug.Log("swicth line2: " + childs);
+		}
+
+		public Biome GetBiome(bool water, float height, float temperature, float wetness, float wind, float air, float data1)
+		{
+			//TODO ...
+			return null;
+		}
+
+		public int GetBiomeCount()
+		{
+			return biomePerId.Count;
+		}
+
+		public Biome GetBiome(string name)
+		{
+			return biomePerName[name];
+		}
+
+		public Biome GetBiome(int id)
+		{
+			return biomePerId[id];
 		}
 	}
 }

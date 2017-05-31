@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW;
+using PW.Core;
+using PW.Node;
 
 public class ProceduralWorldsWindow : EditorWindow {
 

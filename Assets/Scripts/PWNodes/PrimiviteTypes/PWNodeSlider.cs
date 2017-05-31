@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeSlider : PWNode {
 	

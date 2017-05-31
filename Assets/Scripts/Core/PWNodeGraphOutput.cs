@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace PW
+namespace PW.Core
 {
 	[System.SerializableAttribute]
 	public class PWNodeGraphOutput : PWNode {

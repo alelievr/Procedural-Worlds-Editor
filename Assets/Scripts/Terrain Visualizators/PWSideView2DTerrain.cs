@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using PW;
+using PW.Core;
 
 public class PWSideView2DTerrain : PWTerrainBase {
 

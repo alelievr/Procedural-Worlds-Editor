@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW
+namespace PW.Noise
 {
 	public class Noise {
 	

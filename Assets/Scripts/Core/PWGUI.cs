@@ -7,7 +7,7 @@ using UnityEditor;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
-namespace PW
+namespace PW.Core
 {
 	public enum PWGUIStyleType {
 		PrefixLabelWidth,

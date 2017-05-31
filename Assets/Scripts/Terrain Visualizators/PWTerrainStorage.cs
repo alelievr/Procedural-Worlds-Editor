@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using PW.Core;
 
 //Class used to store / load / update generated chunks by PWNodeGraph.
 

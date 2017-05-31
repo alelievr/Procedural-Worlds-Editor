@@ -2,8 +2,9 @@
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeAdd : PWNode {
 	

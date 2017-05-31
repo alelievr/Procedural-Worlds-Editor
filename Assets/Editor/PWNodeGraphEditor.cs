@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW;
+using PW.Core;
 
 [CustomEditor(typeof(PWNodeGraph))]
 public class PWNodeGraphEditor : Editor {

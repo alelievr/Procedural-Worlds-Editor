@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeMesh : PWNode {
 

@@ -2,7 +2,7 @@
 using UnityEditor;
 using System;
 
-namespace PW
+namespace PW.Core
 {
 	[System.SerializableAttribute]
 	public class PWOrderingGroup {

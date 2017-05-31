@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
+using PW.Core;
 
 namespace PW
 {
@@ -265,6 +266,8 @@ namespace PW
 							while (PWValuesInstance.Count < data.multipleValueCount)
 								PWValuesInstance.Add(null);
 					}
+					else if (data.multiple)
+						Debug.LogWarning("Uninitialized PWmultiple field in class " + GetType() + ": " + data.fieldName);
 				}
 			}
 
@@ -1318,15 +1321,11 @@ namespace PW
 
 		public Rect?			GetAnchorRect(int id)
 		{
-			var matches =	from p in propertyDatas
-							from p2 in p.Value.multi
-							where p2.id == id
-							select p2;
-
-			if (matches.Count() == 0)
-				return null;
-			Rect r = matches.First().anchorRect;
-			return PWUtils.DecalRect(r, graphDecal + windowRect.position);
+			foreach (var propKP in propertyDatas)
+				foreach (var anchor in propKP.Value.multi)
+					if (anchor.id == id)
+						return PWUtils.DecalRect(anchor.anchorRect, graphDecal + windowRect.position);
+			return null;
 		}
 
 		public PWAnchorData		GetAnchorData(string propName)
@@ -1401,7 +1400,7 @@ namespace PW
 			return ;
 		}
 
-		public PWTerrainOutputMode	GetOutputType()
+		public PWTerrainOutputMode	GetTerrainOutputMode()
 		{
 			return currentGraph.outputType;
 		}

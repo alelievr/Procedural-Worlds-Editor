@@ -1,4 +1,4 @@
-﻿namespace PW
+﻿namespace PW.Core
 {
 	[System.SerializableAttribute]
 	public class PWDependency

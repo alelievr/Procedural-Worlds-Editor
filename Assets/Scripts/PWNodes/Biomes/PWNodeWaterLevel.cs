@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeWaterLevel : PWNode {
 
@@ -84,7 +85,7 @@ namespace PW
 			{
 				outputBiome = new BiomeData();
 
-				outputBiome.biomeTree.BuildTree(this);
+				outputBiome.biomeTreeStartPoint = this;
 			}
 			
 			if (needUpdate)

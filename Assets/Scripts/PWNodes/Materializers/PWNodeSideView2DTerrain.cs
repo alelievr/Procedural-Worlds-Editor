@@ -1,7 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeSideView2DTerrain : PWNode {
 	

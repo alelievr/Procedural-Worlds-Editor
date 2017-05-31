@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW
+namespace PW.Core
 {
 	[AttributeUsage(AttributeTargets.Field)]
 	public class PWInput : Attribute

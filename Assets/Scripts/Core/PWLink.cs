@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PW
+namespace PW.Core
 {
 	[System.SerializableAttribute]
 	public enum PWLinkType

@@ -1,7 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodePerlinNoise2D : PWNode {
 		
@@ -11,24 +12,26 @@ namespace PW
 		[PWOutput]
 		public Sampler2D	output;
 
+		[SerializeField]
+		float				persistanceMin;
+		[SerializeField]
+		float				persistanceMax;
+
 		public override void OnNodeCreate()
 		{
 			name = "Perlin noise 2D";
 			output = new Sampler2D(chunkSize, step);
 		}
 
-		float min, max;
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				PWGUI.Slider("Persistance: ", ref persistance, ref min, ref max);
+				PWGUI.Slider("Persistance: ", ref persistance, ref persistanceMin, ref persistanceMax);
 				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
 			}
 			if (EditorGUI.EndChangeCheck())
 				notifyDataChanged = true;
-
-			//TODO: shader preview here
 
 			PWGUI.Sampler2DPreview(output, needUpdate);
 		}

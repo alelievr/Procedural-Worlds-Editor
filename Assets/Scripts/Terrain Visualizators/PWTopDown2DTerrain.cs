@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using PW;
+using PW.Core;
 
 public class PWTopDown2DTerrain : PWTerrainBase {
 

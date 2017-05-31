@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
-using PW;
+using PW.Core;
 
 public static class PWColorPalette  {
 

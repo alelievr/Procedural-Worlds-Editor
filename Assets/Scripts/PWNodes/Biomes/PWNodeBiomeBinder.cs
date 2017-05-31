@@ -1,28 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeBiomeBinder : PWNode {
 
 		[PWInput("biome datas")]
-		public BiomeData		inputBiome;
+		public BiomeData			inputBiome;
 		
-		public PWTerrainOutputMode		outputType;
-
+		public PWTerrainOutputMode	outputMode;
+		
 		//inputs for 2D topdown map
 		[PWInput("surface texture")]
-		public Texture2D		terrainSurface;
+		public Texture2D			terrainSurface;
 
 		//inputs for 3D heightmap terrain
 		//TODO
 
 		[PWOutput("biome")]
-		public Biome			outputBiome;
-
-		[SerializeField]
-		bool					initialized = false;
+		public Biome				outputBiome;
 
 		static Dictionary< PWTerrainOutputMode, List< string > > propertiesPerOutputType = new Dictionary< PWTerrainOutputMode, List< string > >()
 		{
@@ -33,7 +32,7 @@ namespace PW
 		void UpdateOutputType()
 		{
 			foreach (var kp in propertiesPerOutputType)
-				if (outputType == kp.Key)
+				if (outputMode == kp.Key)
 					foreach (var propName in kp.Value)
 						UpdatePropVisibility(propName, PWVisibility.Visible);
 				else
@@ -43,19 +42,18 @@ namespace PW
 
 		public override void OnNodeCreate()
 		{
-			if (!initialized)
-			{
-				outputType = GetOutputType();
-				UpdateOutputType();
-			}
-
 			externalName = "Biome binder";
-			initialized = true;
 		}
 
 		public override void OnNodeGUI()
 		{
+			PWTerrainOutputMode	oldTerrainMode = outputMode;
+				outputMode = GetTerrainOutputMode();
+			if (outputMode != oldTerrainMode)
+				UpdateOutputType();
 
+			if (outputBiome != null)
+				EditorGUILayout.LabelField(outputBiome.name +  ":" + outputBiome.id);
 		}
 
 		public override bool OnNodeAnchorLink(string prop, int index)
@@ -72,9 +70,8 @@ namespace PW
 				outputBiome = new Biome();
 				outputBiome.biomeDataReference = inputBiome;
 			}
-			outputBiome.mode = outputType;
+			outputBiome.mode = outputMode;
 			outputBiome.surfaceTexture = terrainSurface;
 		}
-
 	}
 }

@@ -7,8 +7,10 @@ using System.Linq;
 using System;
 using Debug = UnityEngine.Debug;
 
-namespace PW
+namespace PW.Core
 {
+	using Node;
+	
 	public enum	PWTerrainOutputMode
 	{
 		None,
@@ -27,6 +29,10 @@ namespace PW
 	[System.SerializableAttribute]
 	public class PWNodeGraph : ScriptableObject {
 	
+		[SerializeField]
+		public int							majorVersion = 0;
+		public int							minorVersion = 0;
+
 		[SerializeField]
 		public List< PWNode >				nodes = new List< PWNode >();
 		[SerializeField]
@@ -342,7 +348,8 @@ namespace PW
 				//ignore old links not removed cause of property removed in a script at compilation
 				if (!realMode)
 					if (!bakedNodeFields.ContainsKey(link.localClassAQName)
-						|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName))
+						|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
+						|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
 							continue ;
 
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);

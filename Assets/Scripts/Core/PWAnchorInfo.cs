@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace PW
+namespace PW.Core
 {
 	[System.SerializableAttribute]
 	public struct PWAnchorInfo {

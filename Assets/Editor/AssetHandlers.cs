@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
-using PW;
+using PW.Core;
 
 public class NewBehaviourScript {
 

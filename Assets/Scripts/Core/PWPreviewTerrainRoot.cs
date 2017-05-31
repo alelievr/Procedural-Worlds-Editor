@@ -4,13 +4,4 @@ using UnityEngine;
 
 public class PWPreviewTerrainRoot : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

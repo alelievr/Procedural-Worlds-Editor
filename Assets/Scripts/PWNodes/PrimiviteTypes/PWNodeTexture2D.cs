@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using PW.Core;
 
-namespace PW
+namespace PW.Node
 {
 	public class PWNodeTexture2D : PWNode {
 

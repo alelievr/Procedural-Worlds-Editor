@@ -3,10 +3,10 @@ using UnityEngine;
 using System;
 using System.Linq;
 
-namespace PW
+namespace PW.Core
 {
 	/*
-	**	Graph calculus storage classes (must not be serialized)
+	**	Graph computing storage classes (must not be serialized)
 	*/
 
 	public enum SamplerType
@@ -169,25 +169,25 @@ namespace PW
 	}
 
 	[System.SerializableAttribute]
-	public class Vector2Sampler2D
+	public class Vector2Sampler2D : Sampler
 	{
 		public Vector2[,]	map;
 	}
 	
 	[System.SerializableAttribute]
-	public class Vector3Sampler2D
+	public class Vector3Sampler2D : Sampler
 	{
 		public Vector3[,]	map;
 	}
 	
 	[System.SerializableAttribute]
-	public class Vector2Sampler3D
+	public class Vector2Sampler3D : Sampler
 	{
 		public Vector2[,,]	map;
 	}
 	
 	[System.SerializableAttribute]
-	public class Vector3Sampler3D
+	public class Vector3Sampler3D : Sampler
 	{
 		public Vector3[,,]	map;
 	}
@@ -274,24 +274,30 @@ namespace PW
 	public class BiomeData
 	{
 		public BiomeSwitchTree		biomeTree;
+		public PWNode				biomeTreeStartPoint;
 
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
 
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
+		public Sampler				terrainRef { get { return (terrain == null) ? terrain3D : terrain as Sampler; } }
 		
 		public Sampler2D			wetness;
 		public Sampler3D			wetness3D;
+		public Sampler				wetnessRef { get { return (wetness == null) ? wetness3D : wetness as Sampler; } }
 		public Sampler2D			temperature;
 		public Sampler3D			temperature3D;
+		public Sampler				temperatureRef { get { return (temperature == null) ? temperature3D : temperature as Sampler; } }
 		
 		public Vector2Sampler2D		wind;
 		public Vector3Sampler2D		wind3D;
+		public Sampler				windRef { get { return (wind == null) ? wind3D : wind as Sampler; } }
 		public Sampler2D			lighting;
 		
 		public Sampler2D			air;
 		public Sampler3D			air3D;
+		public Sampler				airRef { get { return (air == null) ? air3D : air as Sampler; } }
 		public ComplexEdaphicData	soil;
 
 		public Sampler2D[]			datas;
@@ -310,9 +316,11 @@ namespace PW
 	{
 		public BiomeData			biomeDataReference;
 		public PWTerrainOutputMode	mode;
+		public string				name;
+		public int					id;
 
 		//datas for TopDown2D terrain
-		public Texture2D	surfaceTexture;
+		public Texture2D			surfaceTexture;
 
 		//TODO: datas for others output modes
 	}
