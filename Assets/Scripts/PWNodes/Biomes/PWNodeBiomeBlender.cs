@@ -31,7 +31,7 @@ namespace PW.Node
 
 		void InitOrUpdatePreview()
 		{
-			if (inputBiomes.Count != 0)
+			if (inputBiomes.GetValues< Biome >().Count != 0)
 			{
 				var biome = inputBiomes.GetValues< Biome >().First().biomeDataReference;
 				var heightSamp = biome.terrainRef;

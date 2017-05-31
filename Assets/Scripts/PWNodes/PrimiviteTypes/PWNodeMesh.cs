@@ -26,7 +26,6 @@ namespace PW.Node
 			meshRenderObject = new GameObject("MeshNodeRenderer", typeof(MeshRenderer), typeof(MeshFilter));
 			previewMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
 			meshRenderObject.GetComponent< MeshRenderer >().material = previewMaterial;
-			objectPreview.Initialize();
 			UpdateMeshRenderer();
 			objectPreview.UpdateObjects(meshRenderObject);
 			UpdateHideFlags();

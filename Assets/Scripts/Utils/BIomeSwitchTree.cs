@@ -261,12 +261,18 @@ namespace PW
 
 		public Biome GetBiome(string name)
 		{
-			return biomePerName[name];
+			Biome		biome = null;
+
+			biomePerName.TryGetValue(name, out biome);
+			return biome;
 		}
 
 		public Biome GetBiome(int id)
 		{
-			return biomePerId[id];
+			Biome		biome = null;
+
+			biomePerId.TryGetValue(id, out biome);
+			return biome;
 		}
 	}
 }

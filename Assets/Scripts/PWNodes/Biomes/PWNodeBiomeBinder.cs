@@ -9,6 +9,7 @@ namespace PW.Node
 	public class PWNodeBiomeBinder : PWNode {
 
 		[PWInput("biome datas")]
+		[PWOffset(20)]
 		public BiomeData			inputBiome;
 		
 		public PWTerrainOutputMode	outputMode;
@@ -21,6 +22,7 @@ namespace PW.Node
 		//TODO
 
 		[PWOutput("biome")]
+		[PWOffset(20)]
 		public Biome				outputBiome;
 
 		static Dictionary< PWTerrainOutputMode, List< string > > propertiesPerOutputType = new Dictionary< PWTerrainOutputMode, List< string > >()
@@ -53,7 +55,7 @@ namespace PW.Node
 				UpdateOutputType();
 
 			if (outputBiome != null)
-				EditorGUILayout.LabelField(outputBiome.name +  ":" + outputBiome.id);
+				EditorGUILayout.LabelField(outputBiome.id +  ":" +  outputBiome.name);
 		}
 
 		public override bool OnNodeAnchorLink(string prop, int index)

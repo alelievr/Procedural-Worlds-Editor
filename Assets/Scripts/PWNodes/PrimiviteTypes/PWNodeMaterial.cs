@@ -8,9 +8,7 @@ namespace PW.Node
 
 		[PWOutput("Material")]
 		public Material			outputMaterial;
-		PWGUIObjectPreview		objectPreview = new PWGUIObjectPreview();
-
-		GameObject				previewGO;
+		PWGUIMaterialPreview	matPreview;
 
 		[SerializeField]
 		bool					showPreview;
@@ -22,29 +20,9 @@ namespace PW.Node
 			renamable = true;
 			externalName = "Material";
 			
-			previewGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			objectPreview.Initialize(30, CameraClearFlags.Color);
-			objectPreview.UpdateObjects(previewGO);
-			if (outputMaterial != null)
-				UpdatePreviewMaterial();
-		}
-
-		void		UpdatePreviewMaterial()
-		{
-			previewGO.GetComponent< MeshRenderer >().material = outputMaterial;
+			matPreview = new PWGUIMaterialPreview(outputMaterial);
 		}
 		
-		void UpdateHideFlags()
-		{
-			if (previewGO == null)
-				return ;
-			
-			if (showSceneHiddenObjects)
-				previewGO.hideFlags = HideFlags.DontSave;
-			else
-				previewGO.hideFlags = HideFlags.HideAndDontSave;
-		}
-
 		public override void OnNodeGUI()
 		{
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
@@ -52,20 +30,20 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			outputMaterial = EditorGUILayout.ObjectField(outputMaterial, typeof(Material), false) as Material;
 			if (EditorGUI.EndChangeCheck())
-				UpdatePreviewMaterial();
-				
+				matPreview.SetMaterial(outputMaterial);
+			
 			EditorGUI.BeginChangeCheck();
 			showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
 			if (EditorGUI.EndChangeCheck())
-				UpdateHideFlags();
+				matPreview.UpdateShowSceneHiddenObjects(showSceneHiddenObjects);
 			
 			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
-				objectPreview.Render();
+				matPreview.Render();
 		}
 		
 		public override void OnNodeDisable()
 		{
-			objectPreview.Cleanup();
+			matPreview.Cleanup();
 		}
 
 		//no process needed

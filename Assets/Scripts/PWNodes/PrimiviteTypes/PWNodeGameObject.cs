@@ -21,7 +21,6 @@ namespace PW.Node
 		{
 			externalName = "GameObject";
 			renamable = true;
-			objectPreview.Initialize();
 			objectPreview.UpdateObjects(previewGO);
 
 			UpdateGameObject();
