@@ -275,7 +275,7 @@ namespace PW.Node
 				previewRect.height = previewTextureHeight;
 				GUILayout.Space(previewTextureHeight);
 				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, true);
-				PWGUI.SetScaleModeForField(1, ScaleMode.StretchToFill);
+				PWGUI.SetScaleModeForField(0, ScaleMode.StretchToFill);
 			}
 		}
 

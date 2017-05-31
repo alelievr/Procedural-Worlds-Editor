@@ -17,7 +17,7 @@ namespace PW.Node
 		[SerializeField]
 		bool					isMaterialOutput = false;
 		[SerializeField]
-		Vector2					tiling;
+		Vector2					tiling = Vector2.one;
 		[SerializeField]
 		Vector2					offset;
 		[SerializeField]
@@ -90,8 +90,8 @@ namespace PW.Node
 
 		void UpdateMaterialProperties()
 		{
-			outputMaterial.SetTextureOffset("offset", offset);
-			outputMaterial.SetTextureScale("tiling", tiling);
+			outputMaterial.SetTextureOffset("_MainTex", offset);
+			outputMaterial.SetTextureScale("_MainTex", tiling);
 			if (outputTexture != null)
 				outputMaterial.SetTexture("_MainTex", outputTexture);
 			matPreview.SetMaterial(outputMaterial);

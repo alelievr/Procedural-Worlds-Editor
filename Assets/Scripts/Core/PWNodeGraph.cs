@@ -121,7 +121,7 @@ namespace PW.Core
 
 		[System.NonSerializedAttribute]
 		List< Type > allNodeTypeList = new List< Type > {
-			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject),
+			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor),
 			typeof(PWNodeAdd),
 			typeof(PWNodeDebugLog),
 			typeof(PWNodeCircleNoiseMask),
@@ -356,9 +356,19 @@ namespace PW.Core
 				if (val == null)
 					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);
 				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+
 				//simple assignation, without multi-anchor
 				if (link.distantIndex == -1 && link.localIndex == -1)
-					prop.SetValue(target, val);
+				{
+					if (realMode)
+						prop.SetValue(target, val);
+					else
+						try {
+							prop.SetValue(target, val);
+						} catch (Exception e) {
+							Debug.LogError(e);
+						}
+				}
 				else if (link.distantIndex != -1 && link.localIndex == -1) //distant link is a multi-anchor
 				{
 					PWValues values = (PWValues)prop.GetValue(target);

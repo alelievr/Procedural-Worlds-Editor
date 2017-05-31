@@ -190,9 +190,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 		foreach (var n in nodeSelectorList)
 			n.Value.nodes.Clear();
 		
-		AddToSelector("Simple values", "redNode", redNodeWindow, redNodeWindowSelected,
+		AddToSelector("Primitive types", "redNode", redNodeWindow, redNodeWindowSelected,
 			"Slider", typeof(PWNodeSlider),
 			"Constant", typeof(PWNodeConstant),
+			"Color", typeof(PWNodeColor),
 			"GameObject", typeof(PWNodeGameObject),
 			"Material", typeof(PWNodeMaterial),
 			"Texture2D", typeof(PWNodeTexture2D),

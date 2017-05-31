@@ -39,7 +39,8 @@ public static class PWColorPalette  {
 	{
 		if (t == typeof(int) || t == typeof(float) || t == typeof(Vector2)
 			|| t == typeof(Vector3) || t == typeof(Vector4) || t == typeof(Texture2D)
-			|| t == typeof(Mesh) || t == typeof(GameObject) || t == typeof(Material))
+			|| t == typeof(Mesh) || t == typeof(GameObject) || t == typeof(Material)
+			|| t == typeof(Color))
 			return GetColor("redAnchor");
 		else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 			return GetColor("blueAnchor");

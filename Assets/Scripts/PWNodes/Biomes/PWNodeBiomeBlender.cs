@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Node
 {
@@ -70,14 +71,10 @@ namespace PW.Node
 			switch (terrainMode)
 			{
 				case PWTerrainOutputMode.TopDown2D:
-				
-					Biome biome = biomeData.biomeTree.GetBiome("olol");
-
-					//TODO: blend all the datas of the TopDown2D map.
-					//TODO: in another class !
-
+					BiomeBlending.BlendTopDownd2D(biomes);
 					break ;
 				case PWTerrainOutputMode.Planar3D:
+					BiomeBlending.BlendPlanar3D(biomes);
 					break ;
 				//TODO: other terrain modes
 			}

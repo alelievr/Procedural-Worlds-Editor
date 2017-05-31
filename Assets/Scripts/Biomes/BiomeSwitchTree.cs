@@ -4,9 +4,10 @@ using UnityEngine;
 using System.Diagnostics;
 using System;
 using PW.Core;
+using PW;
 using Debug = UnityEngine.Debug;
 
-namespace PW
+namespace PW.Biomator
 {
 	using Node;
 

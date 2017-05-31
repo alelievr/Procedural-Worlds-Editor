@@ -8,15 +8,19 @@ namespace PW.Node
 {
 	public class PWNodeBiomeBinder : PWNode {
 
-		[PWInput("biome datas")]
+		[PWInput("Biome datas")]
 		[PWOffset(20)]
 		public BiomeData			inputBiome;
 		
 		public PWTerrainOutputMode	outputMode;
 		
 		//inputs for 2D topdown map
-		[PWInput("surface texture")]
-		public Texture2D			terrainSurface;
+		[PWInput("Surface Material")]
+		public Material				terrainSurface;
+
+		//TODO: dispositon algos
+
+		//TODO: landforms (rivers / oth) in another data structure
 
 		//inputs for 3D heightmap terrain
 		//TODO
@@ -73,7 +77,7 @@ namespace PW.Node
 				outputBiome.biomeDataReference = inputBiome;
 			}
 			outputBiome.mode = outputMode;
-			outputBiome.surfaceTexture = terrainSurface;
+			outputBiome.surfaceMaterial = terrainSurface;
 		}
 	}
 }

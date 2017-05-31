@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Linq;
+using PW.Biomator;
 
 namespace PW.Core
 {
@@ -320,7 +321,8 @@ namespace PW.Core
 		public int					id;
 
 		//datas for TopDown2D terrain
-		public Texture2D			surfaceTexture;
+		public Material				surfaceMaterial;
+		public Color				surfaceColorModifier;
 
 		//TODO: datas for others output modes
 	}
