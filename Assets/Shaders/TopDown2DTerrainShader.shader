@@ -27,6 +27,7 @@
 	
 			struct VertInput {
 				float4	pos : POSITION;
+				float3	norm : NORMAL;
 				float2	uv : TEXCOORD0;
 			};
 	
@@ -39,7 +40,8 @@
 				VertOutput	o;
 	
 				float height = tex2Dlod(_HeightMap, float4(input.uv, 0, 0)).x;
-				o.pos = mul(UNITY_MATRIX_MVP, input.pos) + float4(0, height, 0, 0);
+				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
+				o.pos.xyz += input.norm * height;
 				o.uv = TRANSFORM_TEX(input.uv, _MainTex);
 				return o;
 			}
