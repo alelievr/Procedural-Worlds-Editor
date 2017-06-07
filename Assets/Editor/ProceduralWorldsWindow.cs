@@ -2009,6 +2009,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 			if (HandleUtility.nearestControl == id)
 			{
+				Debug.Log("bezier curve take the control !");
 				GUIUtility.hotControl = id;
 				link.hover = true;
 			}
