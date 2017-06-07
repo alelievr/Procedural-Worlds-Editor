@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: d04758929699e47d28d4ac5009167de6
-timeCreated: 1496794037
+timeCreated: 1496794343
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -23,7 +23,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: $randomseed
       value:
-        scalar[0]: 0
+        scalar[0]: 2799
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -79,7 +79,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: aperture
       value:
-        scalar[0]: 0.5
+        scalar[0]: 0.532
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -114,7 +114,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: cataract
       value:
-        scalar[0]: 0.05
+        scalar[0]: 0.066
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0

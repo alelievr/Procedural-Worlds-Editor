@@ -207,7 +207,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Biome Binder", typeof(PWNodeBiomeBinder),
 			"Biome blender", typeof(PWNodeBiomeBlender),
 			"Biome temperature map", typeof(PWNodeBiomeTemperature),
-			"Biome wetness map", typeof(PWNodeBiomeWetness));
+			"Biome wetness map", typeof(PWNodeBiomeWetness),
+			"Biome surface", typeof(PWNodeBiomeSurface));
 		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
 			"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
 			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));

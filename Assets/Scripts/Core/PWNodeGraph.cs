@@ -130,7 +130,7 @@ namespace PW.Core
 			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeGraphExternal),
 			typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
 			typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
-			typeof(PWNodeBiomeWetness),
+			typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface)
 		};
 		
 		private class PWNodeProcessInfo

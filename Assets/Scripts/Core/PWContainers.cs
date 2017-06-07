@@ -334,13 +334,15 @@ namespace PW.Core
 		Complex,
 	}
 
-	public abstract class SurfaceMaps
+	public class SurfaceMaps
 	{
 		SurfaceMapType		type;
 
 		public Texture2D	albedo;
-		public Texture2D	difFuse;
+		public Texture2D	secondAlbedo;
+		public Texture2D	diffuse;
 		public Texture2D	normal;
+		public Texture2D	secondNormal;
 		public Texture2D	height;
 		public Texture2D	emissive;
 		public Texture2D	specular;
@@ -350,6 +352,7 @@ namespace PW.Core
 		public Texture2D	detailMask;
 		public Texture2D	metallic;
 		public Texture2D	roughness;
+		public Texture2D	displacement;
 
 		public Texture2D	blend;
 	}
