@@ -85,6 +85,7 @@ namespace PW.Node
 			{
 				outputBiome = new BiomeData();
 
+				outputBiome.isWaterless = false;
 				outputBiome.biomeTreeStartPoint = this;
 			}
 			

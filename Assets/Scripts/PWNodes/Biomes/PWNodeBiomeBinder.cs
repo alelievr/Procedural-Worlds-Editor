@@ -17,7 +17,7 @@ namespace PW.Node
 		//inputs for 2D topdown map
 		[PWInput("Surface")]
 		[PWNotRequired]
-		public SurfaceMaps				terrainSurface;
+		public SurfaceMaps			terrainSurface;
 
 		//TODO: dispositon algos
 

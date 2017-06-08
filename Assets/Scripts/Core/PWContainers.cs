@@ -277,6 +277,12 @@ namespace PW.Core
 		public BiomeSwitchTree		biomeTree;
 		public PWNode				biomeTreeStartPoint;
 
+		public bool					isWaterless;
+
+		//biome disosition maps (can be 2D or 3D)
+		public Sampler2D			biomes;
+		public Sampler3D			biomes3D;
+
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
 
@@ -310,6 +316,7 @@ namespace PW.Core
 			biomeTree = new BiomeSwitchTree();
 			datas = new Sampler2D[9];
 			datas3D = new Sampler3D[9];
+			isWaterless = true;
 		}
 	}
 
@@ -318,6 +325,7 @@ namespace PW.Core
 		public BiomeData			biomeDataReference;
 		public PWTerrainOutputMode	mode;
 		public string				name;
+		public Color				previewColor;
 		public int					id;
 
 		//datas for TopDown2D terrain

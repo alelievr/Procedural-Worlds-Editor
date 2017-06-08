@@ -72,10 +72,10 @@ namespace PW.Node
 			switch (terrainMode)
 			{
 				case PWTerrainOutputMode.TopDown2D:
-					BiomeBlending.BlendTopDownd2D(biomes);
+					BiomeBlending.BlendTopDownd2D(biomes, biomeData);
 					break ;
 				case PWTerrainOutputMode.Planar3D:
-					BiomeBlending.BlendPlanar3D(biomes);
+					BiomeBlending.BlendPlanar3D(biomes, biomeData);
 					break ;
 				//TODO: other terrain modes
 			}

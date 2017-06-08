@@ -36,6 +36,7 @@ namespace PW.Biomator
 			public SwitchMode			mode;
 			public PWBiomeSwitchMode	biomeSwitchMode;
 			public Biome				biome;
+			public Color				previewColor;
 			public string				biomeName;
 
 			List< BiomeSwitchNode >		childs = new List< BiomeSwitchNode >();
@@ -45,21 +46,23 @@ namespace PW.Biomator
 				mode = SwitchMode.Unknown;
 			}
 
-			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode, string biomeName)
+			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
 			{
 				this.min = min;
 				this.max = max;
 				this.mode = SwitchMode.Float;
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
+				this.previewColor = previewColor;
 			}
 			
-			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode, string biomeName)
+			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
 			{
 				this.value = value;
 				this.mode = SwitchMode.Bool;
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
+				this.previewColor = previewColor;
 			}
 
 			public void SetBiome(Biome b)
@@ -137,13 +140,13 @@ namespace PW.Biomator
 						{
 							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchorId.Value);
 							for (int i = 0; i < nodes.Count; i++)
-								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic");
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic", Color.blue);
 						}
 						if (terrestrialAnchorId != null)
 						{
 							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
 							for (int i = 0; i < nodes.Count; i++)
-								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial");
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial", Color.black);
 						}
 
 						break ;
@@ -167,7 +170,7 @@ namespace PW.Biomator
 								var child = currentNode.GetChildAt(childIndex++);
 								var sData = bSwitch.switchDatas[anchorIndex];
 
-								child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode, sData.name);
+								child.SetSwitchValue(sData.min, sData.max, bSwitch.switchMode, sData.name, sData.color);
 							}
 						}
 						break ;
@@ -257,6 +260,7 @@ namespace PW.Biomator
 		public Biome GetBiome(bool water, float height, float temperature, float wetness, float wind, float air, float data1)
 		{
 			//TODO ...
+			//BOUM !!!
 			return null;
 		}
 
