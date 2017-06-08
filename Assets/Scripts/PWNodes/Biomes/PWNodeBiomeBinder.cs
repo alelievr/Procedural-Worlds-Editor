@@ -60,7 +60,7 @@ namespace PW.Node
 				UpdateOutputType();
 
 			if (outputBiome != null)
-				EditorGUILayout.LabelField(outputBiome.id +  ":" +  outputBiome.name);
+				EditorGUILayout.LabelField("id: " + outputBiome.id +  " (" +  outputBiome.name + ")");
 		}
 
 		public override bool OnNodeAnchorLink(string prop, int index)

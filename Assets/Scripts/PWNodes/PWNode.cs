@@ -604,8 +604,8 @@ namespace PW
 					if (data.anchorType == PWAnchorType.Input)
 						anchorNameRect.position += new Vector2(-6, -2);
 					else
-						anchorNameRect.position += new Vector2(-textSize.x - 6, -2);
-					anchorNameRect.size = textSize + new Vector2(25, 4); //add the anchorLabel size
+						anchorNameRect.position += new Vector2(-textSize.x + 4, -2);
+					anchorNameRect.size = textSize + new Vector2(15, 4); //add the anchorLabel size
 					GUI.depth = 10;
 					GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
 				}

@@ -66,11 +66,8 @@ namespace PW.Node
 			var biomeData = biomes[0].biomeDataReference;
 
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt)
-			{
-				Debug.Log("Building biuome tree");
+			if (!biomeData.biomeTree.isBuilt || forceReload)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-			}
 
 			switch (terrainMode)
 			{
