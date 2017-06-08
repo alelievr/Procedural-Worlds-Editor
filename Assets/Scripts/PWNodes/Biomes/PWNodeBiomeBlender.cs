@@ -45,7 +45,8 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			if (inputBiomes.Count == 0 || inputBiomes.GetValues< Biome >().First() == null)
+			var biomes = inputBiomes.GetValues< Biome >();
+			if (biomes.Count == 0 || biomes.First() == null)
 				EditorGUILayout.LabelField("biomes not connected !");
 			else
 			{
@@ -66,7 +67,10 @@ namespace PW.Node
 
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeTree.isBuilt)
+			{
+				Debug.Log("Building biuome tree");
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
+			}
 
 			switch (terrainMode)
 			{

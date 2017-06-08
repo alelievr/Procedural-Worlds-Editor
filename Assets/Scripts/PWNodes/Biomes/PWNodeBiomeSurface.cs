@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using PW.Core;
 
 namespace PW.Node
@@ -11,35 +12,35 @@ namespace PW.Node
 		[PWOutput]
 		public SurfaceMaps		maps;
 		
-		[PWInput("Albedo")]
+		[PWInput("Albedo"), PWOffset(20), PWNotRequired]
 		public Texture2D		albedo;
-		[PWInput("Diffuse")]
+		[PWInput("Diffuse"), PWNotRequired]
 		public Texture2D		diffuse;
-		[PWInput("Normal")]
+		[PWInput("Normal"), PWNotRequired]
 		public Texture2D		normal;
-		[PWInput("Height")]
+		[PWInput("Height"), PWNotRequired]
 		public Texture2D		height;
-		[PWInput("Emissive")]
+		[PWInput("Emissive"), PWNotRequired]
 		public Texture2D		emissive;
-		[PWInput("Specular")]
+		[PWInput("Specular"), PWNotRequired]
 		public Texture2D		specular;
-		[PWInput("Opacity")]
+		[PWInput("Opacity"), PWNotRequired]
 		public Texture2D		opacity;
-		[PWInput("Smoothness")]
+		[PWInput("Smoothness"), PWNotRequired]
 		public Texture2D		smoothness;
-		[PWInput("Ambiant occulision")]
+		[PWInput("Ambiant occulision"), PWNotRequired]
 		public Texture2D		ambiantOcculison;
-		[PWInput("Detail mask")]
+		[PWInput("Detail mask"), PWNotRequired]
 		public Texture2D		detailMask;
-		[PWInput("Second albedo")]
+		[PWInput("Second albedo"), PWNotRequired]
 		public Texture2D		secondAlbedo;
-		[PWInput("Second normal")]
+		[PWInput("Second normal"), PWNotRequired]
 		public Texture2D		secondNormal;
-		[PWInput("Metallic")]
+		[PWInput("Metallic"), PWNotRequired]
 		public Texture2D		metallic;
-		[PWInput("Roughness")]
+		[PWInput("Roughness"), PWNotRequired]
 		public Texture2D		roughness;
-		[PWInput("Displacement")]
+		[PWInput("Displacement"), PWNotRequired]
 		public Texture2D		displacement;
 
 		[SerializeField]
@@ -65,25 +66,41 @@ namespace PW.Node
 		public override void OnNodeCreate()
 		{
 			externalName = "Biome surface";
+
+			UpdateInputVisibilities();
+		}
+
+		void UpdateInputVisibilities()
+		{
+			foreach (var inputName in inputNames)
+				UpdatePropVisibility(inputName, PWVisibility.Gone);
+
+			switch (type)
+			{
+				case SurfaceMapType.Basic:
+					foreach (var inputName in inputNames)
+						if (basicInputFields.Contains(inputName))
+							UpdatePropVisibility(inputName, PWVisibility.Visible);
+					break ;
+				case SurfaceMapType.Normal:
+					foreach (var inputName in inputNames)
+						if (normalInputFields.Contains(inputName))
+							UpdatePropVisibility(inputName, PWVisibility.Visible);
+					break ;
+				case SurfaceMapType.Complex:
+					foreach (var inputName in inputNames)
+						UpdatePropVisibility(inputName, PWVisibility.Visible);
+					break ;
+			}
 		}
 
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 110;
+			EditorGUI.BeginChangeCheck();
 			type = (SurfaceMapType)EditorGUILayout.EnumPopup("Surface complexity", type);
-
-			if (type != SurfaceMapType.Complex || type != SurfaceMapType.Normal)
-			{
-				//display basic maps
-			}
-			if (type != SurfaceMapType.Complex)
-			{
-				//display normal maps
-			}
-			if (type == SurfaceMapType.Complex)
-			{
-				//display complex maps
-			}
+			if (EditorGUI.EndChangeCheck())
+				UpdateInputVisibilities();
 		}
 
 		public override void OnNodeProcess()

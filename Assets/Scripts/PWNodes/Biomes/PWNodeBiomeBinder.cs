@@ -15,8 +15,9 @@ namespace PW.Node
 		public PWTerrainOutputMode	outputMode;
 		
 		//inputs for 2D topdown map
-		[PWInput("Surface Material")]
-		public Material				terrainSurface;
+		[PWInput("Surface")]
+		[PWNotRequired]
+		public SurfaceMaps				terrainSurface;
 
 		//TODO: dispositon algos
 
@@ -77,7 +78,7 @@ namespace PW.Node
 				outputBiome.biomeDataReference = inputBiome;
 			}
 			outputBiome.mode = outputMode;
-			outputBiome.surfaceMaterial = terrainSurface;
+			outputBiome.surfaceMaps = terrainSurface;
 		}
 	}
 }

@@ -13,17 +13,17 @@ namespace PW.Core
 		/// Use it to retreive the value of a non-nullable type
 		public T? Get< T >() where T : struct
 		{
-			if (value.GetType().IsAssignableFrom(typeof(T)))
-				return (T)value;
-			return null;
+			if (value == null)
+				return null;
+			return (T)value;
 		}
 
 		/// Use it to retreive the value of a nullable type
 		public T GetNullable< T >() where T : class
 		{
-			if (value.GetType().IsAssignableFrom(typeof(T)))
-				return (T)value;
-			return null;
+			if (value == null)
+				return null;
+			return value as T;
 		}
 	}
 }

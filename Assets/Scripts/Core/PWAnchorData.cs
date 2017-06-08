@@ -106,9 +106,6 @@ namespace PW.Core
 
 		public PWAnchorData(string name, int id)
 		{
-			multiple = false;
-			generic = false;
-			required = true;
 			displayHiddenMultipleAnchors = false;
 			mirroredField = null;
 

@@ -1,5 +1,6 @@
 ﻿// #define DEBUG_NODE
 // #define DEBUG_ANCHOR
+// #define HIDE_ANCHOR_LABEL
 
 using UnityEditor;
 using UnityEngine;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using PW.Core;
+using PW.Node;
 
 namespace PW
 {
@@ -112,6 +114,14 @@ namespace PW
 	#endregion
 
 	#region OnEnable, OnDisable, data initialization and baking
+
+		public PWNode()
+		{
+			LoadFieldAttributes();
+
+			BakeNodeFields();
+		}
+
 		public void OnEnable()
 		{
 			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
@@ -125,7 +135,7 @@ namespace PW
 				nodeAutoProcessModeIcon = CreateTexture2DFromFile("ic_autoProcess");
 				nodeRequestForProcessIcon = CreateTexture2DFromFile("ic_requestForProcess");
 			}
-
+			
 			LoadFieldAttributes();
 
 			BakeNodeFields();
@@ -176,6 +186,11 @@ namespace PW
 				string			name = "";
 				Vector2			offset = Vector2.zero;
 				int				multiPadding = 0;
+				
+				//default anchor values
+				data.multiple = false;
+				data.generic = false;
+				data.required = true;
 
 				data.anchorInstance = field.GetValue(this);
 				System.Object[] attrs = field.GetCustomAttributes(true);
@@ -240,6 +255,9 @@ namespace PW
 				{
 					if (data.required && anchorType == PWAnchorType.Output)
 						data.required = false;
+					//protection against stupid UpdateMultiProp remove all anchors
+					if (data.multiple && data.multi.Count == 0)
+						data.AddNewAnchor(backgroundColor, field.Name.GetHashCode());
 					data.classAQName = GetType().AssemblyQualifiedName;
 					data.fieldName = field.Name;
 					data.anchorType = anchorType;
@@ -272,10 +290,9 @@ namespace PW
 			}
 
 			//Check mirrored fields compatibility and if node do not need input to work:
-			isDependent = false;
 			foreach (var kp in propertyDatas)
 			{
-				if (kp.Value.mirroredField != null)
+				if (!String.IsNullOrEmpty(kp.Value.mirroredField))
 				{
 					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
 					{
@@ -290,9 +307,9 @@ namespace PW
 					else
 						kp.Value.mirroredField = null;
 				}
-				if (kp.Value.anchorType == PWAnchorType.Input && kp.Value.required)
-					isDependent = true;
 			}
+
+			UpdateDependentStatus();
 
 			//remove inhexistants dictionary entries:
 			var toRemoveKeys = new List< string >();
@@ -306,6 +323,19 @@ namespace PW
 		public void OnDisable()
 		{
 			OnNodeDisable();
+		}
+
+		void UpdateDependentStatus()
+		{
+			isDependent = false;
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (data.anchorType == PWAnchorType.Input && data.required && singleAnchor.visibility == PWVisibility.Visible)
+				{
+					if (GetType() == typeof(PWNodeBiomeSurface))
+						Debug.Log("node is dependent with field: " + data.fieldName);
+					isDependent = true;
+				}
+			}, false, false);
 		}
 
 	#endregion
@@ -386,6 +416,7 @@ namespace PW
 				EditorGUILayout.BeginVertical(debugStyle);
 				EditorGUILayout.LabelField("Id: " + nodeId + " | Compute order: " + computeOrder);
 				EditorGUILayout.LabelField("type: " + GetType());
+				EditorGUILayout.LabelField("isDependent: " + isDependent);
 				EditorGUILayout.LabelField("Dependencies:");
 				foreach (var dep in depencendies)
 					EditorGUILayout.LabelField("    " + dep.nodeId + " : " + dep.anchorId);
@@ -430,7 +461,7 @@ namespace PW
 		public void Process()
 		{
 			foreach (var kp in propertyDatas)
-				if (kp.Value.mirroredField != null)
+				if (!String.IsNullOrEmpty(kp.Value.mirroredField))
 				{
 					var val = kp.Value.anchorInstance;
 					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
@@ -565,18 +596,20 @@ namespace PW
 			}
 			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
 
-			if (!String.IsNullOrEmpty(anchorName))
-			{
-				Rect	anchorNameRect = singleAnchor.anchorRect;
-				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
-				if (data.anchorType == PWAnchorType.Input)
-					anchorNameRect.position += new Vector2(-6, -2);
-				else
-					anchorNameRect.position += new Vector2(-textSize.x - 6, -2);
-				anchorNameRect.size = textSize + new Vector2(25, 4); //add the anchorLabel size
-				GUI.depth = 10;
-				GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
-			}
+			#if !HIDE_ANCHOR_LABEL
+				if (!String.IsNullOrEmpty(anchorName))
+				{
+					Rect	anchorNameRect = singleAnchor.anchorRect;
+					Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
+					if (data.anchorType == PWAnchorType.Input)
+						anchorNameRect.position += new Vector2(-6, -2);
+					else
+						anchorNameRect.position += new Vector2(-textSize.x - 6, -2);
+					anchorNameRect.size = textSize + new Vector2(25, 4); //add the anchorLabel size
+					GUI.depth = 10;
+					GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
+				}
+			#endif
 			GUI.color = Color.white;
 			
 			if (!singleAnchor.enabled)
@@ -784,7 +817,7 @@ namespace PW
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
 						}
-						if (data.mirroredField != null)
+						if (!String.IsNullOrEmpty(data.mirroredField))
 						{
 							//no need to check if anchorInstance is null because is is assigned from mirrored property.
 							var mirroredProp = propertyDatas[data.mirroredField];
@@ -1139,9 +1172,9 @@ namespace PW
 			bool	ret = true;
 
 			ForeachPWAnchors((data, singleAnchor, i) => {
-			if (data.required && singleAnchor.linkCount == 0
-					&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
-				ret = false;
+				if (data.required && singleAnchor.linkCount == 0
+						&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
+					ret = false;
 			});
 			return ret;
 		}
@@ -1242,6 +1275,7 @@ namespace PW
 					return ;
 				anchors[index].visibility = visibility;
 			}
+			UpdateDependentStatus();
 		}
 
 		public void				UpdateMultiProp(string propertyName, int newCount, params string[] newNames)
@@ -1254,6 +1288,7 @@ namespace PW
 			var prop = propertyDatas[propertyName];
 			prop.RemoveAllAnchors();
 			prop.minMultipleValues = 0;
+			prop.anchorInstance = bakedNodeFields[propertyName].GetValue(this);
 			
 			PWValues values = prop.anchorInstance as PWValues;
 			if (prop.anchorInstance != null)
@@ -1426,7 +1461,7 @@ namespace PW
 
 	#region Utils and Miscellaneous
 
-		void			ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false)
+		void			ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false, bool instanceValueCount = true)
 		{
 			foreach (var PWAnchorData in propertyDatas)
 			{
@@ -1442,7 +1477,11 @@ namespace PW
 							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
 					}
 
-					int anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
+					int anchorCount;
+					if (instanceValueCount)
+						anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
+					else
+						anchorCount = data.multi.Count;
 					if (data.anchorType == PWAnchorType.Input)
 						if (data.displayHiddenMultipleAnchors || showAdditional)
 							anchorCount++;

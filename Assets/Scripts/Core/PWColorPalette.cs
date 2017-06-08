@@ -44,7 +44,7 @@ public static class PWColorPalette  {
 			return GetColor("redAnchor");
 		else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
 			return GetColor("blueAnchor");
-		else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData))
+		else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData) || t == typeof(SurfaceMaps))
 			return GetColor("purpleAnchor");
 		else if (t == typeof(Biome))
 			return GetColor("cyanAnchor");

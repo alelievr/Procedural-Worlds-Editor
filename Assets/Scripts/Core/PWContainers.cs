@@ -321,7 +321,7 @@ namespace PW.Core
 		public int					id;
 
 		//datas for TopDown2D terrain
-		public Material				surfaceMaterial;
+		public SurfaceMaps			surfaceMaps;
 		public Color				surfaceColorModifier;
 
 		//TODO: datas for others output modes
