@@ -16,7 +16,7 @@ namespace PW.Node
 		Height,
 		Wetness,
 		Temperature,
-		Wind,
+/*		Wind,
 		Lighting,
 		Air,
 		//TODO: one Soil swicth
@@ -36,7 +36,7 @@ namespace PW.Node
 		Custom6,
 		Custom7,
 		Custom8,
-		Custom9,
+		Custom9,*/
 	}
 
 	[System.SerializableAttribute]
@@ -155,9 +155,9 @@ namespace PW.Node
 			{PWBiomeSwitchMode.Water, "waterHeight"},
 			{PWBiomeSwitchMode.Wetness, "wetness"},
 			{PWBiomeSwitchMode.Temperature, "temperature"},
-			{PWBiomeSwitchMode.Wind, "wind"},
-			{PWBiomeSwitchMode.Lighting, "lighting"},
-			{PWBiomeSwitchMode.Air, "air"},
+			// {PWBiomeSwitchMode.Wind, "wind"},
+			// {PWBiomeSwitchMode.Lighting, "lighting"},
+			// {PWBiomeSwitchMode.Air, "air"},
 			{PWBiomeSwitchMode.Height, "terrain"}
 			//soil settings apart.
 		};

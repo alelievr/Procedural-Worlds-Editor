@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: d8a6b3d624a604a7797cda019b74f9a7
-timeCreated: 1496766530
+timeCreated: 1496972378
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -37,14 +37,14 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: saturation
       value:
-        scalar[0]: 0.5
+        scalar[0]: 0.505
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: luminosity
       value:
-        scalar[0]: 0.5
+        scalar[0]: 0.491
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -86,7 +86,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: height_range
       value:
-        scalar[0]: 0.15
+        scalar[0]: 0.201
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0

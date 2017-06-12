@@ -729,6 +729,19 @@ namespace PW.Core
 
 	#endregion
 
+	#region BiomeMapPreview field
+	
+		public void BiomeMap2DPreview(BiomeMap2D map, bool update, bool settings = true)
+		{
+			BiomeMap2DPreview(new GUIContent(), map, update, settings);
+		}
+
+		public void BiomeMap2DPreview(GUIContent prefix, BiomeMap2D map, bool update, bool settings = true)
+		{
+			//TODO: biome map preview with texture preview.
+		}
+	#endregion
+
 	#region ObjectPreview field
 		
 		public void ObjectPreview(object obj, bool update)
@@ -756,7 +769,7 @@ namespace PW.Core
 		}
 
 	#endregion
-		
+
 	#region Utils
 
 		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings

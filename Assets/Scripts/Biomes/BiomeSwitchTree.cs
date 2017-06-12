@@ -16,7 +16,7 @@ namespace PW.Biomator
 		public bool							isBuilt { private set; get; }
 
 		private BiomeSwitchNode				root = null;
-		private int							biomeIdCount = 0;
+		private short						biomeIdCount = 0;
 
 		private Dictionary< int, Biome >	biomePerId = new Dictionary< int, Biome >();
 		private Dictionary< string, Biome >	biomePerName = new Dictionary< string, Biome >();
@@ -54,6 +54,7 @@ namespace PW.Biomator
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
 				this.previewColor = previewColor;
+				this.biome = null;
 			}
 			
 			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
@@ -63,6 +64,7 @@ namespace PW.Biomator
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
 				this.previewColor = previewColor;
+				this.biome = null;
 			}
 
 			public void SetBiome(Biome b)
@@ -94,6 +96,11 @@ namespace PW.Biomator
 				if (createIfNotExists && i >= childs.Count)
 					SetChildCount(i + 1);
 				return childs[i];
+			}
+
+			public int				GetChildCount()
+			{
+				return childs.Count;
 			}
 
 			public IEnumerable< BiomeSwitchNode > GetChilds()
@@ -180,14 +187,10 @@ namespace PW.Biomator
 				{
 					if (bSwitch.switchMode == PWBiomeSwitchMode.Water)
 						Debug.Log("first water switch mode output type: " + currentNode.GetChildAt(0));
-					Debug.Log(currentNode + " output's: " + currentNode.GetChildAt(childIndex, true));
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
 					Type outNodeType = outNode.GetType();
 					if (outNodeType == typeof(PWNodeBiomeSwitch) || outNodeType == typeof(PWNodeBiomeBinder))
-					{
-						Debug.Log("inc child index !");
 						childIndex++;
-					}
 				}
 			}
 			else if (node.GetType() == typeof(PWNodeBiomeBinder))
@@ -257,11 +260,87 @@ namespace PW.Biomator
 			Debug.Log("swicth line2: " + childs);
 		}
 
-		public Biome GetBiome(bool water, float height, float temperature, float wetness, float wind, float air, float data1)
+		public void FillBiomeMap(int biomeBlendCount, BiomeData biomeData)
 		{
-			//TODO ...
-			//BOUM !!!
-			return null;
+			bool			is3DBiomes = false;
+			bool			is3DTerrain = biomeData.terrain3D != null;
+			Biome[]			nearestBiomes = new Biome[biomeBlendCount];
+
+			//TODO: biome blend count > 1 management
+			
+			//TODO: biomeData.datas3D null check
+			if (biomeData.air3D != null || biomeData.wind3D != null || biomeData.wetness3D != null || biomeData.temperature3D != null)
+				is3DBiomes = true;
+			
+			int		terrainSize = (is3DTerrain) ? biomeData.terrain3D.size : biomeData.terrain.size;
+			float	terrainStep = (is3DTerrain) ? biomeData.terrain3D.step : biomeData.terrain.step;
+			if (is3DBiomes)
+				biomeData.biomeIds3D = new BiomeMap3D(terrainSize, terrainStep);
+			else
+				biomeData.biomeIds = new BiomeMap2D(terrainSize, terrainStep);
+
+			if (is3DBiomes)
+			{
+				//TODO
+			}
+			else
+			{
+				var biomeMap = biomeData.biomeIds;
+
+				for (int x = 0; x < terrainSize; x++)
+				for (int y = 0; y < terrainSize; y++)
+				{
+					bool water = (biomeData.isWaterless) ? false : biomeData.waterHeight[x, y] > 0;
+					float temp = (biomeData.temperature != null) ? biomeData.temperature[x, y] : 0;
+					float wet = (biomeData.wetness != null) ? biomeData.wetness[x, y] : 0;
+					//TODO: 3D terrain management
+					float height = (is3DTerrain) ? 0 : biomeData.terrain[x, y];
+					BiomeSwitchNode current = root;
+					while (true)
+					{
+						nextChild:
+						if (current.biome != null)
+							break ;
+						int childCount = current.GetChildCount();
+						for (int i = 0; i < childCount; i++)
+						{
+							var child = current.GetChildAt(i);
+							switch (child.biomeSwitchMode)
+							{
+								case PWBiomeSwitchMode.Water:
+									if (child.value == water)
+										{ current = child; goto nextChild; }
+									break ;
+								case PWBiomeSwitchMode.Height:
+									if (height >= child.min && height < child.max)
+										{current = child; goto nextChild; }
+									break ;
+								case PWBiomeSwitchMode.Temperature:
+									if (temp >= child.min && temp < child.max)
+										{ current = child; goto nextChild; }
+									break ;
+								case PWBiomeSwitchMode.Wetness:
+									if (wet >= child.min && wet < child.max)
+										{ current = child; goto nextChild; }
+									break ;
+							}
+						}
+						//if flow reach this part, values are missing in the biome graph so biome can't be chosen.
+						break ;
+					}
+					if (current.biome == null)
+					{
+						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 50);
+						continue ;
+					}
+					if (x == 0 && y == 0)
+						Debug.Log("set biome id to: " + current.biome.id);
+					if (current.biome != null)
+					{
+						biomeMap.SetFirstBiomeId(x, y, current.biome.id);
+					}
+				}
+			}
 		}
 
 		public int GetBiomeCount()

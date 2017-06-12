@@ -20,8 +20,6 @@ namespace PW.Node
 
 		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
-		[SerializeField]
-		PWTerrainOutputMode	terrainMode;
 
 		public override void OnNodeCreate()
 		{
@@ -46,15 +44,22 @@ namespace PW.Node
 		public override void OnNodeGUI()
 		{
 			var biomes = inputBiomes.GetValues< Biome >();
+			BiomeData biomeData = null;
 			if (biomes.Count == 0 || biomes.First() == null)
 				EditorGUILayout.LabelField("biomes not connected !");
 			else
 			{
+				biomeData = biomes.First().biomeDataReference;
 				EditorGUIUtility.labelWidth = 120;
 			 	maxBiomeBlendCount = EditorGUILayout.IntField("max blended biomes", maxBiomeBlendCount);
 			}
-			
-			terrainMode = GetTerrainOutputMode();
+
+			if (biomeData != null)
+			{
+				if (biomeData.biomeIds != null)
+					PWGUI.BiomeMap2DPreview(biomeData.biomeIds, needUpdate);
+				//TODO: biome 3D preview
+			}
 		}
 
 		public override void OnNodeProcess()
@@ -69,16 +74,7 @@ namespace PW.Node
 			if (!biomeData.biomeTree.isBuilt || forceReload)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
-			switch (terrainMode)
-			{
-				case PWTerrainOutputMode.TopDown2D:
-					BiomeBlending.BlendTopDownd2D(biomes, biomeData);
-					break ;
-				case PWTerrainOutputMode.Planar3D:
-					BiomeBlending.BlendPlanar3D(biomes, biomeData);
-					break ;
-				//TODO: other terrain modes
-			}
+			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 		}
 	}
 }

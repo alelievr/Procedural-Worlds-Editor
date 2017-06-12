@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: d04758929699e47d28d4ac5009167de6
-timeCreated: 1496794343
+timeCreated: 1496972342
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -23,21 +23,21 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: $randomseed
       value:
-        scalar[0]: 2799
+        scalar[0]: 2884
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: Luminosity
       value:
-        scalar[0]: 0.5
+        scalar[0]: 0.502
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: Contrast
       value:
-        scalar[0]: 0
+        scalar[0]: 0.004
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -72,14 +72,14 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: size
       value:
-        scalar[0]: 0.25
-        scalar[1]: 0.25
+        scalar[0]: 0.2
+        scalar[1]: 0.2
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: aperture
       value:
-        scalar[0]: 0.532
+        scalar[0]: 0.138
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -100,21 +100,21 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: veins
       value:
-        scalar[0]: 0.5
+        scalar[0]: 0.369
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: red_eyes
       value:
-        scalar[0]: 0.16
+        scalar[0]: 0.087
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: cataract
       value:
-        scalar[0]: 0.066
+        scalar[0]: 0.125
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -308,8 +308,8 @@ SubstanceImporter:
     buildTargetSettings:
     - serializedVersion: 2
       buildTarget: 
-      textureWidth: 512
-      textureHeight: 512
+      textureWidth: 2048
+      textureHeight: 2048
       textureFormat: 0
       loadingBehavior: 1
   deletedPrototypes: []

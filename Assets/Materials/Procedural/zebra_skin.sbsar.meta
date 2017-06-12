@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: de5eba349e5104b5bacf26da2de80169
-timeCreated: 1496794223
+timeCreated: 1497128748
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -30,9 +30,9 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: skin_color_1
       value:
-        scalar[0]: 0.4685012
-        scalar[1]: 0.8014706
-        scalar[2]: 0.13554281
+        scalar[0]: 0.8890024
+        scalar[1]: 0.9264706
+        scalar[2]: 0.85153544
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: skin_color_2
@@ -100,35 +100,35 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: stripes_number
       value:
-        scalar[0]: 30
+        scalar[0]: 7
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: stripes_width
       value:
-        scalar[0]: 0.65
+        scalar[0]: 0.541
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: stripes_softness
       value:
-        scalar[0]: 0.25
+        scalar[0]: 0.156
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: stripes_distortion
       value:
-        scalar[0]: 0.5
+        scalar[0]: 1
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: fur_length
       value:
-        scalar[0]: 0.65
+        scalar[0]: 0
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0

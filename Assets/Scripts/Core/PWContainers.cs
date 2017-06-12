@@ -272,6 +272,49 @@ namespace PW.Core
 		public Sampler3D		gravel;
 	}
 
+	public struct BiomeBlendPoint
+	{
+		public short	firstBiomeId;
+		public short	secondBiomeId;
+		public float	firstBiomeBlendPercent;
+		public float	secondBiomeBlendPercent;
+	}
+
+	public class BiomeMap2D : Sampler
+	{
+		BiomeBlendPoint[]	blendMap;
+
+		public BiomeMap2D(int size, float step)
+		{
+			this.size = size;
+			this.step = step;
+			blendMap = new BiomeBlendPoint[size * size];
+		}
+		
+		public void SetFirstBiomeId(int x, int y, short id)
+		{
+			int		i = x + y * size;
+			blendMap[i].firstBiomeId = id;
+		}
+	}
+
+	public class BiomeMap3D : Sampler
+	{
+		BiomeBlendPoint[]	blendMap;
+		
+		public BiomeMap3D(int size, float step)
+		{
+			this.size = size;
+			this.step = step;
+			blendMap = new BiomeBlendPoint[size * size * size];
+		}
+
+		public BiomeBlendPoint this[int x, int y, int z]
+		{
+			get { return blendMap[x + y * size + z * size * size]; }
+		}
+	}
+
 	public class BiomeData
 	{
 		public BiomeSwitchTree		biomeTree;
@@ -280,8 +323,8 @@ namespace PW.Core
 		public bool					isWaterless;
 
 		//biome disosition maps (can be 2D or 3D)
-		public Sampler2D			biomes;
-		public Sampler3D			biomes3D;
+		public BiomeMap2D			biomeIds;
+		public BiomeMap3D			biomeIds3D;
 
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
@@ -326,7 +369,7 @@ namespace PW.Core
 		public PWTerrainOutputMode	mode;
 		public string				name;
 		public Color				previewColor;
-		public int					id;
+		public short				id;
 
 		//datas for TopDown2D terrain
 		public SurfaceMaps			surfaceMaps;

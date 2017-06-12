@@ -5,7 +5,9 @@ namespace PW
 {
 	public static class PWUtils {
 	
-		static Texture2D debugTexture;
+		static Texture2D	debugTexture;
+		static int			localMaxLog = 0;
+		static int			localMaxLogWarning = 0;
 
 		public static Rect DecalRect(Rect r, Vector2 decal, bool newRect = false)
 		{
@@ -121,6 +123,22 @@ namespace PW
 				if (c1[i] != c2[i])
 					return false;
 			return true;
+		}
+
+		public static void LogMax(object p, int maxLog)
+		{
+			if (localMaxLog >= maxLog)
+				return ;
+			Debug.Log(p);
+			localMaxLog++;
+		}
+		
+		public static void LogWarningMax(object p, int maxLog)
+		{
+			if (localMaxLogWarning >= maxLog)
+				return ;
+			Debug.LogWarning(p);
+			localMaxLogWarning++;
 		}
     }
 }
