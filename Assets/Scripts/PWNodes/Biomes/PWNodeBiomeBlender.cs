@@ -57,7 +57,7 @@ namespace PW.Node
 			if (biomeData != null)
 			{
 				if (biomeData.biomeIds != null)
-					PWGUI.BiomeMap2DPreview(biomeData.biomeIds, needUpdate);
+					PWGUI.BiomeMap2DPreview(biomeData, needUpdate);
 				//TODO: biome 3D preview
 			}
 		}

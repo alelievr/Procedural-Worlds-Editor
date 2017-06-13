@@ -250,6 +250,15 @@ namespace PW.Node
 
 				localCoveragePercent = 0;
 				int		i = 0;
+
+				//add water if there is:
+				if (!inputBiome.isWaterless)
+				{
+					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
+					for (int x = 0; x < rMax; x++)
+						biomeRepartitionPreview.SetPixel(x, 0, Color.blue);
+				}
+
 				foreach (var switchData in switchDatas)
 				{
 					float switchMin = Mathf.Max(switchData.min, min);

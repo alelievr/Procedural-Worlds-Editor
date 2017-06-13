@@ -202,7 +202,11 @@ namespace PW.Biomator
 				//Biome binder detected, assign the biome to the current Node:
 				currentNode.biome = binder.outputBiome;
 
-				Debug.Log("current node: " + currentNode);
+				// Debug.Log("current node: " + currentNode + ", preview color: " + currentNode.previewColor);
+
+				//set the color of the biome in the binder
+				binder.outputBiome.previewColor = currentNode.previewColor;
+
 				//set the biome ID and name:
 				currentNode.biome.name = biomeName;
 				currentNode.biome.id = biomeIdCount++;
@@ -350,18 +354,16 @@ namespace PW.Biomator
 
 		public Biome GetBiome(string name)
 		{
-			Biome		biome = null;
-
-			biomePerName.TryGetValue(name, out biome);
-			return biome;
+			if (biomePerName.ContainsKey(name))
+				return biomePerName[name];
+			return null;
 		}
 
 		public Biome GetBiome(int id)
 		{
-			Biome		biome = null;
-
-			biomePerId.TryGetValue(id, out biome);
-			return biome;
+			if (biomePerId.ContainsKey(id))
+				return biomePerId[id];
+			return null;
 		}
 	}
 }

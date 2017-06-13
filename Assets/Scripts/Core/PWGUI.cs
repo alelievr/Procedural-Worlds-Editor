@@ -614,19 +614,21 @@ namespace PW.Core
 						new KeyValuePair< float, Color >(1, Color.white)
 					)
 				);
-				state.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
-				state.texture.filterMode = fm;
 				return state;
 			});
 
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
+			{
 				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				fieldSettings.texture.filterMode = fieldSettings.filterMode;
+			}
+
 			//same for the gradient:
 			if (fieldSettings.gradient == null || fieldSettings.gradient.alphaKeys == null)
 				fieldSettings.gradient = fieldSettings.serializableGradient;
 
-			Texture2D	tex = fieldSettings.texture as Texture2D;
+			Texture2D	tex = fieldSettings.texture;
 			Gradient	gradient = fieldSettings.gradient;
 
 			if (samp.size != tex.width)
@@ -731,14 +733,52 @@ namespace PW.Core
 
 	#region BiomeMapPreview field
 	
-		public void BiomeMap2DPreview(BiomeMap2D map, bool update, bool settings = true)
+		public void BiomeMap2DPreview(BiomeData map, bool update, bool settings = true, bool debug = true)
 		{
-			BiomeMap2DPreview(new GUIContent(), map, update, settings);
+			BiomeMap2DPreview(new GUIContent(), map, update, settings, debug);
 		}
 
-		public void BiomeMap2DPreview(GUIContent prefix, BiomeMap2D map, bool update, bool settings = true)
+		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool update, bool settings = true, bool debug = true)
 		{
-			//TODO: biome map preview with texture preview.
+			if (biomeData.biomeIds == null)
+			{
+				Debug.Log("biomeData does not contains biome map 2D");
+				return ;
+			}
+			var map = biomeData.biomeIds;
+			int texSize = biomeData.biomeIds.size;
+			var fieldSettings = GetGUISettingData(() => {
+				var state = new PWGUISettings();
+				state.filterMode = FilterMode.Point;
+				state.debug = debug;
+				update = true;
+				return state;
+			});
+
+			if (fieldSettings.texture == null)
+			{
+				fieldSettings.texture = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
+				fieldSettings.texture.filterMode = FilterMode.Point;
+			}
+			
+			if (texSize != fieldSettings.texture.width)
+				fieldSettings.texture.Resize(texSize, texSize, TextureFormat.RGBA32, false);
+
+			if (update || fieldSettings.update)
+			{
+				for (int x = 0; x < texSize; x++)
+					for (int y = 0; y < texSize; y++)
+					{
+						var blendInfo = map.GetBiomeBlendInfo(x, y);
+						Color firstBiomeColor = biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId).previewColor;
+
+						//TODO: second biome color:
+						fieldSettings.texture.SetPixel(x, y, firstBiomeColor);
+					}
+				fieldSettings.texture.Apply();
+			}
+
+			TexturePreview(fieldSettings.texture, false, false, false);
 		}
 	#endregion
 

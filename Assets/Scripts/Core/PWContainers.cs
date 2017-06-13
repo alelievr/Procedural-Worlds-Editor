@@ -296,6 +296,11 @@ namespace PW.Core
 			int		i = x + y * size;
 			blendMap[i].firstBiomeId = id;
 		}
+
+		public BiomeBlendPoint	GetBiomeBlendInfo(int x, int y)
+		{
+			return blendMap[x + y * size];
+		}
 	}
 
 	public class BiomeMap3D : Sampler
