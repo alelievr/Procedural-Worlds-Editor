@@ -107,10 +107,15 @@ namespace PW.Node
 				EditorGUI.BeginChangeCheck();
 				{
 					EditorGUIUtility.labelWidth = 25;
-					PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
-					elem.name = EditorGUI.TextField(nameRect, elem.name);
-					elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
-					elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+					EditorGUI.BeginChangeCheck();
+					{
+						PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
+						elem.name = EditorGUI.TextField(nameRect, elem.name);
+						elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
+						elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+					}
+					if (EditorGUI.EndChangeCheck())
+						notifyDataChanged = true;
 					EditorGUIUtility.labelWidth = 0;
 				}
 				if (EditorGUI.EndChangeCheck())
@@ -123,8 +128,13 @@ namespace PW.Node
 				EditorGUI.LabelField(rect, "switches");
 			};
 
+			switchList.onReorderCallback += (ReorderableList l) => {
+				notifyDataChanged = true;
+			};
+
 			switchList.onAddCallback += (ReorderableList l) => {
 				switchDatas.Add(new BiomeFieldSwitchData());
+				notifyDataChanged = true;
 				UpdateSwitchMode();
 			};
 
@@ -132,6 +142,7 @@ namespace PW.Node
 				if (switchDatas.Count > 1)
 				{
 					switchDatas.RemoveAt(l.index);
+					notifyDataChanged = true;
 					UpdateSwitchMode();
 				}
 			};
@@ -251,8 +262,8 @@ namespace PW.Node
 				localCoveragePercent = 0;
 				int		i = 0;
 
-				//add water if there is:
-				if (!inputBiome.isWaterless)
+				//add water if there is and if switch mode is height:
+				if (!inputBiome.isWaterless && switchMode == PWBiomeSwitchMode.Height)
 				{
 					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
 					for (int x = 0; x < rMax; x++)
@@ -288,7 +299,7 @@ namespace PW.Node
 			}
 		}
 
-		//no process needed, this node only exists for user visual organization.
+		//no process needed else than assignation, this node only exists for user visual organization.
 		//switch values are collected form BiomeSwitchTree to create a biome tree.
 
 		public override void OnNodeProcess()

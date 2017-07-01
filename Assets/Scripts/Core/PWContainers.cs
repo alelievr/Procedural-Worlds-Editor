@@ -20,6 +20,9 @@ namespace PW.Core
 		Vector3Sampler3D,
 	}
 
+	/*
+	**	Parent of all Sampler (array) storage classes
+	*/
 	public abstract class Sampler
 	{
 		public int			size;
@@ -28,7 +31,10 @@ namespace PW.Core
 		public float		min = 0;
 		public float		max = 1;
 	}
-
+	
+	/*
+	**	Store a 2D array of float (usefull for 2D noise or heightmaps)
+	*/
 	public class Sampler2D : Sampler
 	{
 		[NonSerializedAttribute]
@@ -99,6 +105,9 @@ namespace PW.Core
 		}
 	}
 
+	/*
+	**	Store 3D array of float (usefull for 3D noise)
+	*/
 	[System.SerializableAttribute]
 	public class Sampler3D : Sampler
 	{
@@ -169,6 +178,10 @@ namespace PW.Core
 		}
 	}
 
+	/*
+	**	Vector samplers, same as Samplers but with vectors instead of floats
+	*/
+
 	[System.SerializableAttribute]
 	public class Vector2Sampler2D : Sampler
 	{
@@ -197,6 +210,9 @@ namespace PW.Core
 	**	Terrain storage classes:
 	*/
 
+	/*
+	**	Parent class to store everything needed to render a chunk
+	*/
 	[System.SerializableAttribute]
 	public abstract class ChunkData
 	{
@@ -409,6 +425,7 @@ namespace PW.Core
 		public Texture2D	metallic;
 		public Texture2D	roughness;
 		public Texture2D	displacement;
+		public Texture2D	tesselation;
 
 		public Texture2D	blend;
 	}

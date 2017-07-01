@@ -225,6 +225,7 @@ namespace PW.Biomator
 
 		public void BuildTree(PWNode node)
 		{
+			biomeIdCount = 0;
 			Stopwatch st = new Stopwatch();
 			st.Start();
 			root = new BiomeSwitchNode();

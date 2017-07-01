@@ -30,6 +30,9 @@ namespace PW.Node
 		[PWOffset(20)]
 		public Biome				outputBiome;
 
+		[SerializeField]
+		Rect						colorPreviewRect;
+
 		static Dictionary< PWTerrainOutputMode, List< string > > propertiesPerOutputType = new Dictionary< PWTerrainOutputMode, List< string > >()
 		{
 			{ PWTerrainOutputMode.TopDown2D, new List< string >() {"terrainSurface"} },
@@ -59,8 +62,21 @@ namespace PW.Node
 			if (outputMode != oldTerrainMode)
 				UpdateOutputType();
 
+			EditorGUILayout.BeginHorizontal();
 			if (outputBiome != null)
+			{
+				EditorGUIUtility.labelWidth = 72;
 				EditorGUILayout.LabelField("id: " + outputBiome.id +  " (" +  outputBiome.name + ")");
+				if (Event.current.type == EventType.Repaint)
+				{
+					colorPreviewRect = EditorGUILayout.GetControlRect();
+					colorPreviewRect.width -= 88;
+				}
+				else
+					EditorGUILayout.GetControlRect();
+				EditorGUIUtility.DrawColorSwatch(colorPreviewRect, outputBiome.previewColor);
+			}
+			EditorGUILayout.EndHorizontal();
 		}
 
 		public override bool OnNodeAnchorLink(string prop, int index)

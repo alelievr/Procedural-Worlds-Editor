@@ -21,6 +21,9 @@ namespace PW.Node
 		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
 
+		[SerializeField]
+		bool				biomePreviewFoldout = true;
+
 		public override void OnNodeCreate()
 		{
 			externalName = "Biome blender";
@@ -56,10 +59,15 @@ namespace PW.Node
 
 			if (biomeData != null)
 			{
-				if (biomeData.biomeIds != null)
-					PWGUI.BiomeMap2DPreview(biomeData, needUpdate);
-				//TODO: biome 3D preview
+				if ((biomePreviewFoldout = EditorGUILayout.Foldout(biomePreviewFoldout, "Biome id map")))
+				{
+					if (biomeData.biomeIds != null)
+						PWGUI.BiomeMap2DPreview(biomeData, needUpdate);
+					//TODO: biome 3D preview
+				}
 			}
+			else
+				EditorGUILayout.LabelField("no biome data");
 		}
 
 		public override void OnNodeProcess()
@@ -71,7 +79,7 @@ namespace PW.Node
 			var biomeData = biomes[0].biomeDataReference;
 
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt || forceReload)
+			if (!biomeData.biomeTree.isBuilt || forceReload || reloadRequested)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
