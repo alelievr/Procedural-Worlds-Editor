@@ -7,7 +7,7 @@ using PW.Core;
 
 namespace PW
 {
-	public static class PWBiomeUtils {
+	public static class BiomeUtils {
 	
 		public static void DrawBiomeInfos(BiomeData b)
 		{

@@ -10,7 +10,7 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public enum PWBiomeSwitchMode
+	public enum BiomeSwitchMode
 	{
 		Water,
 		Height,
@@ -45,15 +45,29 @@ namespace PW.Node
 		public float				min;
 		public float				max;
 		public string				name;
+		public float				absoluteMax; //max value in the map
+		public float				absoluteMin; //min value in the map
 		public SerializableColor	color;
 
-		public BiomeFieldSwitchData()
+		public BiomeFieldSwitchData(Sampler samp)
 		{
+			UpdateSampler(samp);
 			name = "swampland";
 			min = 70;
 			max = 90;
 			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f, 1);
 		}
+
+		public void UpdateSampler(Sampler samp)
+		{
+			if (samp != null)
+			{
+				absoluteMax = samp.max;
+				absoluteMin = samp.min;
+			}
+		}
+
+		public BiomeFieldSwitchData() : this(null) {}
 	}
 
 	public class PWNodeBiomeSwitch : PWNode {
@@ -66,7 +80,7 @@ namespace PW.Node
 		[PWOffset(0, 53, 16)]
 		public PWValues			outputBiomes = new PWValues();
 
-		public PWBiomeSwitchMode			switchMode;
+		public BiomeSwitchMode			switchMode;
 		public List< BiomeFieldSwitchData >	switchDatas = new List< BiomeFieldSwitchData >();
 
 		ReorderableList			switchList;
@@ -84,13 +98,17 @@ namespace PW.Node
 		const int				previewTextureWidth = 200;
 		const int				previewTextureHeight = 40;
 
+		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
+
 		public override void OnNodeCreate()
 		{
 			name = "Biome switch";
-			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
+			biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));
 			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 
 			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
+
+			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { notifyDataChanged = true; });
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
 				BiomeFieldSwitchData elem = switchDatas[index];
@@ -109,13 +127,22 @@ namespace PW.Node
 					EditorGUIUtility.labelWidth = 25;
 					EditorGUI.BeginChangeCheck();
 					{
+						float oldMin = elem.min;
+						float oldMax = elem.max;
+						
 						PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
 						elem.name = EditorGUI.TextField(nameRect, elem.name);
 						elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
 						elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+
+						//affect up/down cell value
+						if (elem.min != oldMin && index > 0)
+							switchDatas[index - 1].max = elem.min;
+						if (elem.max != oldMax && index + 1 < switchDatas.Count)
+							switchDatas[index + 1].min = elem.max;
 					}
 					if (EditorGUI.EndChangeCheck())
-						notifyDataChanged = true;
+						delayedChanges.UpdateValue(delayedUpdateKey, elem);
 					EditorGUIUtility.labelWidth = 0;
 				}
 				if (EditorGUI.EndChangeCheck())
@@ -133,7 +160,7 @@ namespace PW.Node
 			};
 
 			switchList.onAddCallback += (ReorderableList l) => {
-				switchDatas.Add(new BiomeFieldSwitchData());
+				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
 				notifyDataChanged = true;
 				UpdateSwitchMode();
 			};
@@ -148,28 +175,28 @@ namespace PW.Node
 			};
 
 			if (switchDatas.Count == 0)
-				switchDatas.Add(new BiomeFieldSwitchData());
+				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
 			
 			UpdateSwitchMode();
 		}
 
 		void UpdateSwitchMode()
 		{
-			if (switchMode == PWBiomeSwitchMode.Water)
+			if (switchMode == BiomeSwitchMode.Water)
 				UpdateMultiProp("outputBiomes", 2, "terrestrial", "aquatic");
 			else
 				UpdateMultiProp("outputBiomes", switchDatas.Count, null);
 		}
 
-		Dictionary< PWBiomeSwitchMode, string > switchModeToName = new Dictionary< PWBiomeSwitchMode, string >()
+		Dictionary< BiomeSwitchMode, string > switchModeToName = new Dictionary< BiomeSwitchMode, string >()
 		{
-			{PWBiomeSwitchMode.Water, "waterHeight"},
-			{PWBiomeSwitchMode.Wetness, "wetness"},
-			{PWBiomeSwitchMode.Temperature, "temperature"},
-			// {PWBiomeSwitchMode.Wind, "wind"},
-			// {PWBiomeSwitchMode.Lighting, "lighting"},
-			// {PWBiomeSwitchMode.Air, "air"},
-			{PWBiomeSwitchMode.Height, "terrain"}
+			{BiomeSwitchMode.Water, "waterHeight"},
+			{BiomeSwitchMode.Wetness, "wetness"},
+			{BiomeSwitchMode.Temperature, "temperature"},
+			// {BiomeSwitchMode.Wind, "wind"},
+			// {BiomeSwitchMode.Lighting, "lighting"},
+			// {BiomeSwitchMode.Air, "air"},
+			{BiomeSwitchMode.Height, "terrain"}
 			//soil settings apart.
 		};
 
@@ -181,6 +208,8 @@ namespace PW.Node
 				//TODO: 3d samplers management
 				int index = (switchMode.ToString().Last() - '0');
 				currentSampler = inputBiome.datas[index];
+				foreach (var sd in switchDatas)
+					sd.UpdateSampler(currentSampler);
 				if (inputBiome.datas[index] == null)
 				{
 					errorString = "can't switch on custom value\nat index " + index + ",\ndata not provided";
@@ -206,6 +235,8 @@ namespace PW.Node
 				else
 				{
 					currentSampler = ((val == null) ? val3D : val) as Sampler;
+					foreach (var sd in switchDatas)
+						sd.UpdateSampler(currentSampler);
 					updatePreview = true;
 				}
 			}
@@ -229,7 +260,7 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			{
 				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
-				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+				switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
 				if (currentSampler != null)
 					EditorGUILayout.LabelField("min: " + currentSampler.min + ", max: " + currentSampler.max);
 				else
@@ -263,7 +294,7 @@ namespace PW.Node
 				int		i = 0;
 
 				//add water if there is and if switch mode is height:
-				if (!inputBiome.isWaterless && switchMode == PWBiomeSwitchMode.Height)
+				if (!inputBiome.isWaterless && switchMode == BiomeSwitchMode.Height)
 				{
 					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
 					for (int x = 0; x < rMax; x++)
@@ -286,7 +317,7 @@ namespace PW.Node
 				updatePreview = false;
 			}
 			
-			if (switchMode != PWBiomeSwitchMode.Water)
+			if (switchMode != BiomeSwitchMode.Water)
 			{
 				switchList.DoLayoutList();
 

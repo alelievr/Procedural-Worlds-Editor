@@ -8,11 +8,11 @@ namespace PW.Node
 {
 	public class PWNodeWaterLevel : PWNode {
 
-		[PWInput("Terrain Input")]
+		[PWInput("Terrain input")]
 		[PWOffset(5)]
 		public Sampler		terrainNoise;
 
-		[PWOutput("biome datas")]
+		[PWOutput("Biome datas")]
 		[PWOffset(5)]
 		public BiomeData	outputBiome;
 
@@ -25,6 +25,8 @@ namespace PW.Node
 
 		Gradient			waterGradient;
 
+		const string		delayedUpdateKey = "delayedUpdate";
+
 		public override void OnNodeCreateOnce()
 		{
 			mapMin = 0;
@@ -33,29 +35,43 @@ namespace PW.Node
 			externalName = "Water level";
 		}
 
+		public override void OnNodeCreate()
+		{
+			delayedChanges.BindCallback(delayedUpdateKey, (obj) => { Debug.LogWarning("OK"); notifyDataChanged = true; });
+		}
+
 		void UpdateGradient()
 		{
 			waterGradient = PWUtils.CreateGradient(GradientMode.Fixed, 
-				new KeyValuePair< float, Color >(waterLevel / (mapMax - mapMin), Color.white),
-				new KeyValuePair< float, Color >(1, Color.blue));
+				new KeyValuePair< float, Color >(waterLevel / (mapMax - mapMin), Color.blue),
+				new KeyValuePair< float, Color >(1, Color.white));
 			PWGUI.SetGradientForField(0, waterGradient);
 		}
 		
 		public override void OnNodeGUI()
 		{
+			bool updateWaterPreview = false;
+
 			GUILayout.Space(GUI.skin.label.lineHeight * 2f);
 				
 			if (outputBiome != null)
 			{
-				PWBiomeUtils.DrawBiomeInfos(outputBiome);
+				BiomeUtils.DrawBiomeInfos(outputBiome);
 				EditorGUILayout.Separator();
 			}
 
+			EditorGUIUtility.labelWidth = 100;
+
+			EditorGUI.BeginChangeCheck();
+				waterLevel = EditorGUILayout.FloatField("WaterLevel", waterLevel);
+			if (EditorGUI.EndChangeCheck())
+			{
+				delayedChanges.UpdateValue(delayedUpdateKey);
+				updateWaterPreview = true;
+			}
+	
 			EditorGUI.BeginChangeCheck();
 			{
-				EditorGUIUtility.labelWidth = 100;
-				waterLevel = EditorGUILayout.FloatField("WaterLevel", waterLevel);
-	
 				if (terrainNoise != null)
 				{
 					if (terrainNoise.type == SamplerType.Sampler2D)
@@ -66,15 +82,18 @@ namespace PW.Node
 						mapMin = EditorGUILayout.FloatField("from", mapMin);
 						mapMax = EditorGUILayout.FloatField("to", mapMax);
 						EditorGUILayout.EndHorizontal();
-
+	
 						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate, false, FilterMode.Point);
 					}
 					else
 					{
 						EditorGUILayout.LabelField("TODO: water level 3D");
 					}
-					if (waterGradient == null || EditorGUI.EndChangeCheck())
+					if (waterGradient == null || EditorGUI.EndChangeCheck() || updateWaterPreview)
+					{
 						UpdateGradient();
+						delayedChanges.UpdateValue(delayedUpdateKey);
+					}
 				}
 			}
 		}
@@ -89,7 +108,7 @@ namespace PW.Node
 				outputBiome.biomeTreeStartPoint = this;
 			}
 			
-			if (needUpdate)
+			if (needUpdate || reloadRequested)
 			{
 				outputBiome.terrain = terrainNoise as Sampler2D;
 				outputBiome.terrain3D = terrainNoise as Sampler3D;

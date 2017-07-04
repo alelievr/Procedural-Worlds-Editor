@@ -628,12 +628,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 				if (e.type == EventType.MouseDown && previewRect.Contains(e.mousePosition))
 					previewMouseDrag = true;
 
-				if (e.type == EventType.Layout && previewMouseDrag)
+				if (e.type == EventType.MouseDrag && previewMouseDrag)
 				{
 					//mouse controls:
-					Vector2 move = e.mousePosition - lastMousePosition;
-
-					MovePreviewCamera(new Vector2(-move.x / 16, move.y / 16));
+					e.Use();
+					MovePreviewCamera(new Vector2(-e.delta.x / 8, e.delta.y / 8));
 				}
 
 				//seed
@@ -1100,7 +1099,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			RenderNode(nodeId++, currentGraph.outputNode, "output", -2, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 
 			EndWindows();
-			
+
 			//submachine enter button click management:
 			foreach (var graphName in currentGraph.subgraphReferences)
 			{

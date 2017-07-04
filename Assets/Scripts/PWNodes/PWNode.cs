@@ -87,9 +87,12 @@ namespace PW
 
 		PWAnchorInfo		anchorUnderMouse;
 
+		[NonSerialized]
+		protected DelayedChanges	delayedChanges = new DelayedChanges();
+
 		//node links and deps
 		[SerializeField]
-		List< PWLink >					links = new List< PWLink >();
+		List< PWLink >				links = new List< PWLink >();
 		[SerializeField]
 		List< PWDependency >		depencendies = new List< PWDependency >(); //List< nodeId, anchorId >
 
@@ -120,6 +123,8 @@ namespace PW
 			LoadFieldAttributes();
 
 			BakeNodeFields();
+
+			delayedChanges.Clear();
 		}
 
 		public void OnEnable()
@@ -446,6 +451,8 @@ namespace PW
 			
 			ProcessAnchors();
 			RenderAnchors();
+
+			delayedChanges.Update();
 
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))

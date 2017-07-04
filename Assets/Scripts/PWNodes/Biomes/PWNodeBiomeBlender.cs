@@ -23,6 +23,8 @@ namespace PW.Node
 
 		[SerializeField]
 		bool				biomePreviewFoldout = true;
+		[SerializeField]
+		bool				biomeCoverageRecap = false;
 
 		public override void OnNodeCreate()
 		{
@@ -68,6 +70,14 @@ namespace PW.Node
 			}
 			else
 				EditorGUILayout.LabelField("no biome data");
+
+			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
+			{
+				foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
+					if (biomeCoverageKP.Value > 0)
+						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), biomeCoverageKP.Value * 100 + "%");
+				//TODO: exloit the biome switch tree datas
+			}
 		}
 
 		public override void OnNodeProcess()
