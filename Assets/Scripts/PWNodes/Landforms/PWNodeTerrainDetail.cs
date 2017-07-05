@@ -22,7 +22,7 @@ namespace PW.Node
 			EditorGUIUtility.labelWidth = 100;
 			outputDetail.biomeDetailMask = EditorGUILayout.MaskField("details", outputDetail.biomeDetailMask, Enum.GetNames(typeof(TerrainDetailType)));
 
-
+			
 		}
 
 		public override void OnNodeProcess()

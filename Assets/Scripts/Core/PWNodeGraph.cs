@@ -25,6 +25,12 @@ namespace PW.Core
 		Mesh,
 	}
 
+	public enum PWGraphProcessMode
+	{
+		Normal,			//output a disaplayable terrain (with isosurface / oth)
+		TerrainData,	//output a structure containing all maps for a chunk (terrain, wet, temp, biomes, ...)
+	}
+
 	[CreateAssetMenu(fileName = "New ProceduralWorld", menuName = "Procedural World", order = 1)]
 	[System.SerializableAttribute]
 	public class PWNodeGraph : ScriptableObject {
@@ -84,7 +90,7 @@ namespace PW.Core
 		public float						maxStep;
 
 		[SerializeField]
-		public PWTerrainOutputMode					outputType;
+		public PWTerrainOutputMode			outputType;
 
 		[SerializeField]
 		public List< string >				subgraphReferences = new List< string >();
@@ -97,6 +103,9 @@ namespace PW.Core
 		public PWNode						outputNode;
 		[SerializeField]
 		public PWNode						externalGraphNode;
+
+		[SerializeField]
+		public PWGraphProcessMode			processMode;
 
 		//for GUI settings storage
 		[SerializeField]
@@ -133,6 +142,13 @@ namespace PW.Core
 			typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface),
 
 		};
+
+		//Precomputed data part:
+
+		public TerrainDetail			terrainDetail;
+
+		[System.NonSerialized]
+		public GeologicBakedDatas		geologicTerrain;
 		
 		private class PWNodeProcessInfo
 		{
@@ -144,6 +160,8 @@ namespace PW.Core
 				graphName = g;
 			}
 		}
+
+	#region Graph baking (prepare regions that will be computed once)
 
 		void BakeNode(Type t)
 		{
@@ -170,7 +188,7 @@ namespace PW.Core
 			{
 				var depNode = FindNodebyId(dep.nodeId);
 
-				if (depNode.processMode == PWProcessMode.RequestForProcess)
+				if (depNode.processMode == PWNodeProcessMode.RequestForProcess)
 				{
 					InsertNodeIfNotExists(toComputeList, depNode);
 
@@ -194,7 +212,7 @@ namespace PW.Core
 				var links = n.GetLinks();
 				var deps = n.GetDependencies();
 
-				if (links.Count > 0 && links.All(l => l.mode == PWProcessMode.RequestForProcess))
+				if (links.Count > 0 && links.All(l => l.mode == PWNodeProcessMode.RequestForProcess))
 				{
 					List< PWNodeProcessInfo > toComputeList;
 
@@ -204,7 +222,7 @@ namespace PW.Core
 						toComputeList = bakedGraphParts[n.nodeId] = new List< PWNodeProcessInfo >();
 					
 					//analyze of "extern groups" (group of node with only one RequestForProcess link at the end)
-					if (deps.Any(d => FindNodebyId(d.nodeId).processMode == PWProcessMode.RequestForProcess))
+					if (deps.Any(d => FindNodebyId(d.nodeId).processMode == PWNodeProcessMode.RequestForProcess))
 					{
 						TryBuildGraphPart(n, toComputeList);
 
@@ -219,12 +237,12 @@ namespace PW.Core
 						if (node == null)
 							continue ;
 						
-						if (node.GetLinks().All(dl => dl.mode == PWProcessMode.RequestForProcess))
+						if (node.GetLinks().All(dl => dl.mode == PWNodeProcessMode.RequestForProcess))
 							InsertNodeIfNotExists(toComputeList, node);
 					}
 					InsertNodeIfNotExists(toComputeList, n);
 
-					foreach (var link in links.Where(l => l.mode == PWProcessMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
+					foreach (var link in links.Where(l => l.mode == PWNodeProcessMode.RequestForProcess).GroupBy(l => l.localNodeId).Select(g => g.First()))
 					{
 						PWNode node = FindNodebyId(link.distantNodeId);
 					
@@ -271,6 +289,10 @@ namespace PW.Core
 					graph.RebakeGraphParts(true);
 				}
 		}
+
+	#endregion
+
+	#region Graph initialization
 	
 		public void OnEnable()
 		{
@@ -317,14 +339,29 @@ namespace PW.Core
 			BakeGraphParts();
 		}
 
-		public void	UpdateComputeOrder()
+		void LoadGraphInstances()
 		{
-			computeOrderSortedNodes = nodesDictionary
-					//select all nodes building an object with node value and graph name (if needed)
-					.Select(kp => new PWNodeProcessInfo(kp.Value, FindGraphNameFromExternalNode(kp.Value)))
-					//sort the resulting list by computeOrder:
-					.OrderBy(n => n.node.computeOrder);
+			//load all available graph instancies in the AssetDatabase:
+			if (!String.IsNullOrEmpty(assetPath))
+			{
+				int		resourceIndex = assetPath.IndexOf("Resources");
+				if (resourceIndex != -1)
+				{
+					string resourcePath = Path.ChangeExtension(assetPath.Substring(resourceIndex + 10), null);
+					var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
+					foreach (var graph in graphs)
+					{
+						if (graphInstancies.ContainsKey(graph.name))
+							continue ;
+						graphInstancies.Add(graph.name, graph as PWNodeGraph);
+					}
+				}
+			}
 		}
+	
+	#endregion
+
+	#region Graph processing
 
 		void ProcessNodeLinks(PWNode node)
 		{
@@ -335,7 +372,7 @@ namespace PW.Core
 				if (!nodesDictionary.ContainsKey(link.distantNodeId))
 					continue;
 				
-				if (link.mode == PWProcessMode.RequestForProcess)
+				if (link.mode == PWNodeProcessMode.RequestForProcess)
 					continue ;
 
 				var target = nodesDictionary[link.distantNodeId];
@@ -445,8 +482,9 @@ namespace PW.Core
 			return calculTime;
 		}
 
-		public float ProcessGraph()
+		public float ProcessGraph(PWGraphProcessMode processMode = PWGraphProcessMode.Normal)
 		{
+			//TODO: processMode
 			float		calculTime = 0f;
 
 			if (computeOrderSortedNodes == null)
@@ -463,7 +501,7 @@ namespace PW.Core
 				
 				//if node outputs is only in RequestForProcess mode, avoid the computing
 				var links = nodeInfo.node.GetLinks();
-				if (links.Count > 0 && !links.Any(l => l.mode == PWProcessMode.AutoProcess))
+				if (links.Count > 0 && !links.Any(l => l.mode == PWNodeProcessMode.AutoProcess))
 					continue ;
 				
 				calculTime += ProcessNode(nodeInfo);
@@ -485,51 +523,35 @@ namespace PW.Core
 			}
 			return false;
 		}
+	
+	#endregion
 
-		public void	UpdateSeed(int seed)
+	#region Graph API
+
+		public void			UpdateSeed(int seed)
 		{
 			this.seed = seed;
 			ForeachAllNodes((n) => n.seed = seed, true, true);
 		}
 
-		public void UpdateChunkPosition(Vector3 chunkPos)
+		public void			UpdateChunkPosition(Vector3 chunkPos)
 		{
 			ForeachAllNodes((n) => n.chunkPosition = chunkPos, true, true);
 		}
 
-		public void UpdateChunkSize(int chunkSize)
+		public void			UpdateChunkSize(int chunkSize)
 		{
 			this.chunkSize = chunkSize;
 			ForeachAllNodes((n) => n.chunkSize = chunkSize, true, true);
 		}
 
-		public void UpdateStep(float step)
+		public void			UpdateStep(float step)
 		{
 			this.step = step;
 			ForeachAllNodes((n) => n.step = step, true, true);
 		}
 
-		void LoadGraphInstances()
-		{
-			//load all available graph instancies in the AssetDatabase:
-			if (!String.IsNullOrEmpty(assetPath))
-			{
-				int		resourceIndex = assetPath.IndexOf("Resources");
-				if (resourceIndex != -1)
-				{
-					string resourcePath = Path.ChangeExtension(assetPath.Substring(resourceIndex + 10), null);
-					var graphs = Resources.LoadAll(resourcePath, typeof(PWNodeGraph));
-					foreach (var graph in graphs)
-					{
-						if (graphInstancies.ContainsKey(graph.name))
-							continue ;
-						graphInstancies.Add(graph.name, graph as PWNodeGraph);
-					}
-				}
-			}
-		}
-
-		public PWNodeGraph FindGraphByName(string name)
+		public PWNodeGraph	FindGraphByName(string name)
 		{
 			PWNodeGraph		ret;
 				
@@ -540,7 +562,7 @@ namespace PW.Core
 			return null;
 		}
 
-		public string FindGraphNameFromExternalNode(PWNode node)
+		public string		FindGraphNameFromExternalNode(PWNode node)
 		{
 			if (node.GetType() != typeof(PWNodeGraphExternal))
 				return null;
@@ -553,14 +575,14 @@ namespace PW.Core
             });
 		}
 
-		public PWNode FindNodebyId(int nodeId)
+		public PWNode		FindNodebyId(int nodeId)
 		{
 			if (nodesDictionary.ContainsKey(nodeId))
 				return nodesDictionary[nodeId];
 			return null;
 		}
 
-		public void ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
+		public void			ForeachAllNodes(System.Action< PWNode > callback, bool recursive = false, bool graphInputAndOutput = false, PWNodeGraph graph = null)
 		{
 			if (graph == null)
 				graph = this;
@@ -587,5 +609,16 @@ namespace PW.Core
 				callback(graph.outputNode);
 			}
 		}
+
+		public void	UpdateComputeOrder()
+		{
+			computeOrderSortedNodes = nodesDictionary
+					//select all nodes building an object with node value and graph name (if needed)
+					.Select(kp => new PWNodeProcessInfo(kp.Value, FindGraphNameFromExternalNode(kp.Value)))
+					//sort the resulting list by computeOrder:
+					.OrderBy(n => n.node.computeOrder);
+		}
+
+	#endregion
     }
 }

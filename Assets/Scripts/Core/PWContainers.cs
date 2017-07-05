@@ -403,7 +403,8 @@ namespace PW.Core
 		River,
 		Lake,
 		Ravine,
-/*		Volcano,
+/*		FractalRiverBassin,
+		Volcano,
 		UndergroundRiver,
 		UnderGroundLake,
 		Caves,
@@ -416,7 +417,7 @@ namespace PW.Core
 	*/
 	public class TerrainDetail
 	{
-		public int			biomeDetailMask = (int)TerrainDetailType.River;
+		public int			biomeDetailMask = (int)TerrainDetailType.River | (int)TerrainDetailType.Lake;
 
 		//Datas for rivers:
 		public int			sourcePointMinHeight = 70;
@@ -431,6 +432,16 @@ namespace PW.Core
 
 		//Datas for Ravines:
 		//TODO
+	}
+
+	//Datas stored for river / lakes / oth precomputing
+	public class GeologicBakedDatas
+	{
+		//TODO: fusion this
+		Sampler2D		rivers;
+		Sampler2D		lakes;
+
+		//TODO: other geologic datas (for geologic update :)
 	}
 
 	public class Biome

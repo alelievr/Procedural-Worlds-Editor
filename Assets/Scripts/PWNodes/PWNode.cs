@@ -14,6 +14,13 @@ using PW.Node;
 namespace PW
 {
 	[System.SerializableAttribute]
+	public enum PWNodeProcessMode
+	{
+		AutoProcess,
+		RequestForProcess,
+	}
+
+	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
 		public static int	windowRenderOrder = 0;
@@ -50,7 +57,7 @@ namespace PW
 		public bool		forceReload = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
 		public bool		isDependent { get; private set; }
-		public PWProcessMode	processMode;
+		public PWNodeProcessMode	processMode;
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
@@ -156,7 +163,7 @@ namespace PW
 				renamable = false;
 				maxAnchorRenderHeight = 0;
 				PWGUI = new PWGUIManager();
-				processMode = PWProcessMode.AutoProcess;
+				processMode = PWNodeProcessMode.AutoProcess;
 
 				OnNodeCreateOnce();
 
@@ -720,13 +727,13 @@ namespace PW
 			//render the process mode icon
 			int		processIconSize = 25;
 			Rect	processModeRect = new Rect(8, 2, processIconSize, processIconSize);
-			if (processMode == PWProcessMode.AutoProcess)
+			if (processMode == PWNodeProcessMode.AutoProcess)
 				GUI.Label(processModeRect, new GUIContent("", nodeAutoProcessModeIcon, "auto process mode, click to switch to request for process mode"));
 			else
 				GUI.Label(processModeRect, new GUIContent("", nodeRequestForProcessIcon, "request for process mode mode, click to switch to auto process"));
 			if (e.type == EventType.MouseDown && processModeRect.Contains(e.mousePosition))
 			{
-				processMode = (processMode == PWProcessMode.AutoProcess) ? PWProcessMode.RequestForProcess : PWProcessMode.AutoProcess;
+				processMode = (processMode == PWNodeProcessMode.AutoProcess) ? PWNodeProcessMode.RequestForProcess : PWNodeProcessMode.AutoProcess;
 				
 				//change all my link modes to the type of the linked node:
 				foreach (var link in links)
@@ -1013,7 +1020,7 @@ namespace PW
 			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
 		}
 
-		public void UpdateLinkMode(PWLink link, PWProcessMode newMode)
+		public void UpdateLinkMode(PWLink link, PWNodeProcessMode newMode)
 		{
 			link.mode = newMode;
 
@@ -1538,14 +1545,14 @@ namespace PW
 
 				bool allRequestMode = depNode.GetLinks().All(l => {
 						var depNodeLink = FindNodeById(l.distantNodeId);
-						return depNodeLink.processMode == PWProcessMode.RequestForProcess;
+						return depNodeLink.processMode == PWNodeProcessMode.RequestForProcess;
 					}
 				);
 				
 				if (allRequestMode)
-					depNode.processMode = PWProcessMode.RequestForProcess;
+					depNode.processMode = PWNodeProcessMode.RequestForProcess;
 				else
-					depNode.processMode = PWProcessMode.AutoProcess;
+					depNode.processMode = PWNodeProcessMode.AutoProcess;
 				UpdateDependenciesMode(depNode, depth + 1);
 			}
 		}

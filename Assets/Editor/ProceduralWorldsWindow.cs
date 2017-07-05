@@ -247,6 +247,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		graph.saveName = null;
 		graph.externalName = "New ProceduralWorld";
+
+		graph.processMode = PWGraphProcessMode.Normal;
 	}
 
 	void OnEnable()
@@ -660,7 +662,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				//step:
 				EditorGUI.BeginChangeCheck();
-				float min = 0.05f;
+				float min = 0.1f;
 				EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
 				parentGraph.PWGUI.Slider(ref parentGraph.step, ref min, ref parentGraph.maxStep, 0.01f, false, true);
@@ -1620,7 +1622,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EvaluateComputeOrder();
 	}
 
-	void UpdateLinkMode(PWLink link, PWProcessMode newMode)
+	void UpdateLinkMode(PWLink link, PWNodeProcessMode newMode)
 	{
 		link.mode = newMode;
 
@@ -1670,8 +1672,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
 				if (hoveredLink != null)
 				{
-					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWProcessMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWProcessMode.AutoProcess); });
-					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWProcessMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWProcessMode.RequestForProcess); });
+					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWNodeProcessMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWNodeProcessMode.AutoProcess); });
+					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWNodeProcessMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWNodeProcessMode.RequestForProcess); });
 					menu.AddItem(new GUIContent("Link/Delete link"), false, DeleteLink, hoveredLink);
 				}
 				else
@@ -2029,7 +2031,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (e.type == EventType.Repaint)
 		{
 			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
-			PWProcessMode m = (link != null) ? link.mode : PWProcessMode.AutoProcess;
+			PWNodeProcessMode m = (link != null) ? link.mode : PWNodeProcessMode.AutoProcess;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
 				case PWLinkType.Sampler3D:
@@ -2057,7 +2059,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
     }
 
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWProcessMode linkMode)
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWNodeProcessMode linkMode)
 	{
 		switch (linkHighlight)
 		{
@@ -2071,7 +2073,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 
-		if (linkMode == PWProcessMode.RequestForProcess)
+		if (linkMode == PWNodeProcessMode.RequestForProcess)
 		{
 			Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
 			Vector2 pauseSize = new Vector2(20, 20);
