@@ -1,6 +1,5 @@
-﻿Shader "ProceduralWorlds/TopDown2DTerrainShader" {
+﻿Shader "ProceduralWorlds/Basic terrain" {
 	Properties {
-		_Color ("Color modifier", Color) = (1,1,1,1)
 		_MainTex ("Surface (RGB)", 2D) = "white" {}
 		_HeightMap ("Heightmap", 2D) = "black" {}
 	}
@@ -22,18 +21,19 @@
 	
 			sampler2D	_MainTex;
 			sampler2D	_HeightMap;
-			half4		_Color;
 			float4		_MainTex_ST;
 	
 			struct VertInput {
 				float4	pos : POSITION;
 				float3	norm : NORMAL;
 				float2	uv : TEXCOORD0;
+				float4	color : COLOR;
 			};
 	
 			struct VertOutput {
 				float4	pos : SV_POSITION;
 				float2	uv : TEXCOORD0;
+				float4	color : COLOR;
 			};
 	
 			VertOutput vert(VertInput input) {
@@ -42,12 +42,13 @@
 				float height = tex2Dlod(_HeightMap, float4(input.uv, 0, 0)).x;
 				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
 				o.pos.xyz += input.norm * height;
+				o.color = input.color;
 				o.uv = TRANSFORM_TEX(input.uv, _MainTex);
 				return o;
 			}
 	
 			half4 frag(VertOutput o) : COLOR {
-				return tex2D(_MainTex, o.uv) * _Color;
+				return tex2D(_MainTex, o.uv) * o.color;
 			}
 			ENDCG
 		}

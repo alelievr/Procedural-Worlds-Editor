@@ -346,8 +346,6 @@ namespace PW.Biomator
 						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 50);
 						continue ;
 					}
-					if (x == 0 && y == 0)
-						Debug.Log("set biome id to: " + current.biome.id);
 					if (current.biome != null)
 					{
 						biomeMap.SetFirstBiomeId(x, y, current.biome.id);

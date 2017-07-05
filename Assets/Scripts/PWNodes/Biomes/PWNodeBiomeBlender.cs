@@ -75,7 +75,7 @@ namespace PW.Node
 			{
 				foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
 					if (biomeCoverageKP.Value > 0)
-						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), biomeCoverageKP.Value * 100 + "%");
+						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
 				//TODO: exloit the biome switch tree datas
 			}
 		}
@@ -89,7 +89,7 @@ namespace PW.Node
 			var biomeData = biomes[0].biomeDataReference;
 
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt || forceReload || reloadRequested)
+			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);

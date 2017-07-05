@@ -44,6 +44,8 @@ namespace PW
 		public bool		outputHasChanged = false;
 		public bool		justReloaded = false;
 		public bool		notifyDataChanged = false;
+		public bool		notifyBiomeDataChanged = false;
+		public bool		biomeReloadRequested = false;
 		public bool		reloadRequested = false;
 		public bool		forceReload = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
@@ -1156,6 +1158,7 @@ namespace PW
 			inputHasChanged = false;
 			outputHasChanged = false;
 			reloadRequested = false;
+			biomeReloadRequested = false;
 			justReloaded = false;
 			stepHasChanged = false;
 			forceReload = false;

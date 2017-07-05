@@ -209,6 +209,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Biome temperature map", typeof(PWNodeBiomeTemperature),
 			"Biome wetness map", typeof(PWNodeBiomeWetness),
 			"Biome surface", typeof(PWNodeBiomeSurface));
+		AddToSelector("Landforms", "cyanNode", cyanNodeWindow, cyanNodeWindowSelected,
+			"Terrain detail", typeof(PWNodeTerrainDetail));
 		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
 			"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
 			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
@@ -1191,15 +1193,18 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			//notifySetDataChanged management
 			bool	reloadRequested = false;
+			bool	biomeReload = false;
 			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {
 				if (e.type == EventType.Layout)
 				{
 					p.EndFrameUpdate();
-					if (p.notifyDataChanged)
+					if (p.notifyDataChanged || p.notifyBiomeDataChanged)
 					{
+						biomeReload = p.notifyBiomeDataChanged;
 						graphNeedReload = true;
 						p.notifyDataChanged = false;
+						p.notifyBiomeDataChanged = false;
 						reloadRequested = true;
 						reloadWeight = p.computeOrder;
 					}
@@ -1211,7 +1216,12 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				currentGraph.ForeachAllNodes(n => {
 					if (n.computeOrder >= reloadWeight)
-						n.reloadRequested = true;
+					{
+						if (biomeReload)
+							n.biomeReloadRequested = true;
+						else
+							n.reloadRequested = true;
+					}
 				}, true, true);
 			}
 		}

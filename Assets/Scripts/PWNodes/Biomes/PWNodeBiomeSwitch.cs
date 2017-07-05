@@ -108,7 +108,7 @@ namespace PW.Node
 
 			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
 
-			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { notifyDataChanged = true; });
+			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { notifyBiomeDataChanged = true; });
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
 				BiomeFieldSwitchData elem = switchDatas[index];
@@ -156,12 +156,12 @@ namespace PW.Node
 			};
 
 			switchList.onReorderCallback += (ReorderableList l) => {
-				notifyDataChanged = true;
+				notifyBiomeDataChanged = true;
 			};
 
 			switchList.onAddCallback += (ReorderableList l) => {
 				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
-				notifyDataChanged = true;
+				notifyBiomeDataChanged = true;
 				UpdateSwitchMode();
 			};
 
@@ -169,7 +169,7 @@ namespace PW.Node
 				if (switchDatas.Count > 1)
 				{
 					switchDatas.RemoveAt(l.index);
-					notifyDataChanged = true;
+					notifyBiomeDataChanged = true;
 					UpdateSwitchMode();
 				}
 			};

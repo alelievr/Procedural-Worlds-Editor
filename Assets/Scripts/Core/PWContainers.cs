@@ -384,6 +384,55 @@ namespace PW.Core
 		}
 	}
 
+	public enum CaveType
+	{
+		PerlinWorms,
+		CellularAutomata,
+	}
+
+	public enum TerrainDetailBlendMode
+	{
+		Additive,
+		Subtractive,
+		Max,
+		Min,
+	}
+
+	public enum	TerrainDetailType : Int16
+	{
+		River,
+		Lake,
+		Ravine,
+/*		Volcano,
+		UndergroundRiver,
+		UnderGroundLake,
+		Caves,
+		Holes,
+*/
+	}
+
+	/*
+	**	This structure contains all information about landforms to apply to terrain during the building
+	*/
+	public class TerrainDetail
+	{
+		public int			biomeDetailMask = (int)TerrainDetailType.River;
+
+		//Datas for rivers:
+		public int			sourcePointMinHeight = 70;
+		public int			sourcePointMaxHeight = 100;
+		public float		noiseIntensity;
+		public float		sourceRarity = 0.5f;
+
+		//Datas for Lakes:
+		public int			lakeMinHeight = 70;
+		public int			lakeMaxHeight = 100;
+		public float		lakeSize = 0.5f;
+
+		//Datas for Ravines:
+		//TODO
+	}
+
 	public class Biome
 	{
 		public BiomeData			biomeDataReference;

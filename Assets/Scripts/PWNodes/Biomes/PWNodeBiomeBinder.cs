@@ -19,11 +19,13 @@ namespace PW.Node
 		[PWNotRequired]
 		public SurfaceMaps			terrainSurface;
 
+		[PWInput("Details")]
+		[PWNotRequired]
+		public TerrainDetail		biomeDetail;
+
 		//TODO: dispositon algos
 
-		//TODO: landforms (rivers / oth) in another data structure
-
-		//inputs for 3D heightmap terrain
+		//inputs for 3D planar terrain
 		//TODO
 
 		[PWOutput("biome")]

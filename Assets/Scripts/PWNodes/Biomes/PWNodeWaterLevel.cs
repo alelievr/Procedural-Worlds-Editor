@@ -37,7 +37,7 @@ namespace PW.Node
 
 		public override void OnNodeCreate()
 		{
-			delayedChanges.BindCallback(delayedUpdateKey, (obj) => { Debug.LogWarning("OK"); notifyDataChanged = true; });
+			delayedChanges.BindCallback(delayedUpdateKey, (obj) => { notifyBiomeDataChanged = true; });
 		}
 
 		void UpdateGradient()
