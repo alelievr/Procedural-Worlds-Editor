@@ -1487,6 +1487,11 @@ namespace PW
 				{
 					if (data.anchorInstance == null)
 					{
+						if (!bakedNodeFields.ContainsKey(data.fieldName))
+						{
+							Debug.LogError("key not found in bakedNodeFields: " + data.fieldName + " in node " + GetType());
+							continue ;
+						}
 						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
 						if (data.anchorInstance == null)
 							continue ;

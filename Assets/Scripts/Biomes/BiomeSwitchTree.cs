@@ -135,7 +135,9 @@ namespace PW.Biomator
 				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
 				int					outputLinksCount = bSwitch.GetLinks().Count;
 				int					childIndex = 0;
+				List< PWNode >		outputNodeList = new List< PWNode >();
 
+				Debug.Log("encountered switch: " + bSwitch.switchMode);
 				currentNode.SetChildCount(outputLinksCount);
 				switch (bSwitch.switchMode)
 				{
@@ -143,19 +145,23 @@ namespace PW.Biomator
 						int?	terrestrialAnchorId = node.GetAnchorId(PWAnchorType.Output, 0);
 						int?	aquaticAnchorId = node.GetAnchorId(PWAnchorType.Output, 1);
 
+						if (terrestrialAnchorId != null)
+						{
+							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
+							outputNodeList.AddRange(nodes);
+							// Debug.Log("terrestrialNodes: " + nodes[0].nodeId);
+							for (int i = 0; i < nodes.Count; i++)
+								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial", Color.black);
+							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
+						}
 						//get all nodes on the first anchor:
 						if (aquaticAnchorId != null)
 						{
 							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchorId.Value);
+							// Debug.Log("aquaticNodes: " + nodes[0].nodeId);
+							outputNodeList.AddRange(nodes);
 							for (int i = 0; i < nodes.Count; i++)
 								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic", Color.blue);
-							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
-						}
-						if (terrestrialAnchorId != null)
-						{
-							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
-							for (int i = 0; i < nodes.Count; i++)
-								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial", Color.black);
 							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
 						}
 
@@ -172,6 +178,7 @@ namespace PW.Biomator
 								continue ;
 
 							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchorId.Value);
+							outputNodeList.AddRange(attachedNodesToAnchor);
 
 							// if (attachedNodesToAnchor.Count == 0)
 								// Debug.LogWarning("nothing attached to the biome switch output " + anchorIndex);
@@ -188,10 +195,10 @@ namespace PW.Biomator
 						break ;
 				}
 				childIndex = 0;
-				foreach (var outNode in node.GetOutputNodes())
+				foreach (var outNode in outputNodeList)
 				{
 					if (bSwitch.switchMode == BiomeSwitchMode.Water)
-						Debug.Log("first water switch mode output type: " + currentNode.GetChildAt(0));
+						Debug.Log("water switch mode output type: " + currentNode.GetChildAt(childIndex) + " [" + childIndex + "] -> " + outNode);
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
 					Type outNodeType = outNode.GetType();
 					if (outNodeType == typeof(PWNodeBiomeSwitch) || outNodeType == typeof(PWNodeBiomeBinder))
@@ -204,6 +211,12 @@ namespace PW.Biomator
 
 				string biomeName = currentNode.biomeName;
 
+				if (String.IsNullOrEmpty(biomeName))
+				{
+					Debug.LogWarning("Biome name null or empty for biomeBinder: " + binder);
+					return ;
+				}
+
 				//Biome binder detected, assign the biome to the current Node:
 				currentNode.biome = binder.outputBiome;
 
@@ -211,6 +224,8 @@ namespace PW.Biomator
 
 				//set the color of the biome in the binder
 				binder.outputBiome.previewColor = currentNode.previewColor;
+
+				Debug.Log("previewColor for biome " + biomeName + ": " + binder.outputBiome.previewColor);
 
 				//set the biome ID and name:
 				currentNode.biome.name = biomeName;

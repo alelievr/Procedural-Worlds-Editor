@@ -266,7 +266,7 @@ namespace PW.Node
 				else
 					EditorGUILayout.LabelField("");
 			}
-			if (EditorGUI.EndChangeCheck() || needUpdate)
+			if (EditorGUI.EndChangeCheck() || needUpdate || biomeReloadRequested)
 			{
 				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();
@@ -325,8 +325,8 @@ namespace PW.Node
 				Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 				previewRect.height = previewTextureHeight;
 				GUILayout.Space(previewTextureHeight);
-				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, true);
-				PWGUI.SetScaleModeForField(0, ScaleMode.StretchToFill);
+				PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
+				PWGUI.SetScaleModeForField(-1, ScaleMode.StretchToFill);
 			}
 		}
 

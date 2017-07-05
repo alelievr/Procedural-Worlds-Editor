@@ -17,7 +17,7 @@ namespace PW.Core
 
 		[PWOutput("out")]
 		[PWMultiple(0, typeof(object))]
-		public PWValues	output = null;
+		public PWValues	output = new PWValues();
 
 		public override void OnNodeCreate()
 		{

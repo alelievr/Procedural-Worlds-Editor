@@ -415,6 +415,7 @@ namespace PW.Core
 	/*
 	**	This structure contains all information about landforms to apply to terrain during the building
 	*/
+	[System.Serializable]
 	public class TerrainDetail
 	{
 		public int			biomeDetailMask = (int)TerrainDetailType.River | (int)TerrainDetailType.Lake;
@@ -437,9 +438,7 @@ namespace PW.Core
 	//Datas stored for river / lakes / oth precomputing
 	public class GeologicBakedDatas
 	{
-		//TODO: fusion this
-		Sampler2D		rivers;
-		Sampler2D		lakes;
+		public Sampler2D		waterBodies;
 
 		//TODO: other geologic datas (for geologic update :)
 	}

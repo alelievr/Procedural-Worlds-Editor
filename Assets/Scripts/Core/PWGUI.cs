@@ -860,9 +860,12 @@ namespace PW.Core
 			);
 		}
 
+		//A negative value of fieldIndex will take the objectat the specified index starting from the end
 		public void SetGradientForField(int fieldIndex, Gradient g)
 		{
-			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			if (fieldIndex < 0)
+				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;
@@ -875,7 +878,9 @@ namespace PW.Core
 
 		public void SetDebugForField(int fieldIndex, bool value)
 		{
-			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			if (fieldIndex < 0)
+				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;
@@ -886,7 +891,9 @@ namespace PW.Core
 
 		public void SetScaleModeForField(int fieldIndex, ScaleMode mode)
 		{
-			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			if (fieldIndex < 0)
+				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;
@@ -897,7 +904,9 @@ namespace PW.Core
 		
 		public void SetScaleAspectForField(int fieldIndex, float aspect)
 		{
-			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			if (fieldIndex < 0)
+				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;
@@ -908,7 +917,9 @@ namespace PW.Core
 		
 		public void SetMaterialForField(int fieldIndex, Material mat)
 		{
-			if (fieldIndex >= settingsStorage.Count || fieldIndex < 0)
+			if (fieldIndex < 0)
+				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;

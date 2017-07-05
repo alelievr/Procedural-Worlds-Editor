@@ -237,6 +237,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.chunkSize = 16;
 		graph.step = 1;
 		graph.maxStep = 4;
+		graph.geologicTerrainStep = 8;
+		graph.geologicDistanceCheck = 2;
 		
 		graph.parentReference = null;
 		graph.outputNode = CreateNewNode(typeof(PWNodeGraphOutput), new Vector2(position.width - 100, (int)(position.height / 2)));
@@ -419,6 +421,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 					currentGraph.presetChoosed = true;
 					graphNeedReload = true;
 					callback();
+					currentGraph.UpdateStep(parentGraph.step);
+					currentGraph.UpdateChunkSize(parentGraph.chunkSize);
+					currentGraph.UpdateSeed(parentGraph.seed);
 					EvaluateComputeOrder();
 				}
 			EditorGUILayout.LabelField(description, whiteText);
@@ -672,6 +677,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 					parentGraph.UpdateStep(parentGraph.step);
 					graphNeedReload = true;
 				}
+
+				EditorGUILayout.Separator();
+
+				EditorGUI.BeginChangeCheck();
+				parentGraph.PWGUI.Slider("Geological terrain step: ", ref parentGraph.geologicTerrainStep, 4, 64);
+				if (EditorGUI.EndChangeCheck())
+					graphNeedReload = true;
+
+				EditorGUILayout.Separator();
 
 				if (GUILayout.Button("Force graph to reload"))
 				{

@@ -87,6 +87,8 @@ namespace PW.Core
 		[SerializeField]
 		public float						step;
 		[SerializeField]
+		public float						geologicTerrainStep;
+		[SerializeField]
 		public float						maxStep;
 
 		[SerializeField]
@@ -144,8 +146,10 @@ namespace PW.Core
 		};
 
 		//Precomputed data part:
-
-		public TerrainDetail			terrainDetail;
+		[SerializeField]
+		public TerrainDetail			terrainDetail = new TerrainDetail();
+		[SerializeField]
+		public int						geologicDistanceCheck;
 
 		[System.NonSerialized]
 		public GeologicBakedDatas		geologicTerrain;
@@ -288,6 +292,19 @@ namespace PW.Core
 
 					graph.RebakeGraphParts(true);
 				}
+		}
+
+		void		BakeNeededGeologicDatas()
+		{
+			float		oldStep = step;
+			processMode = PWGraphProcessMode.TerrainData;
+			step = geologicTerrainStep;
+
+			ProcessGraph();
+			//TODO: execute graph until TerrainBuilder node with a larger step to find
+
+			processMode = PWGraphProcessMode.Normal;
+			step = oldStep;
 		}
 
 	#endregion
@@ -482,13 +499,16 @@ namespace PW.Core
 			return calculTime;
 		}
 
-		public float ProcessGraph(PWGraphProcessMode processMode = PWGraphProcessMode.Normal)
+		public float ProcessGraph()
 		{
 			//TODO: processMode
 			float		calculTime = 0f;
 
 			if (computeOrderSortedNodes == null)
 				UpdateComputeOrder();
+
+			if (terrainDetail.biomeDetailMask != 0 && processMode == PWGraphProcessMode.Normal)
+				BakeNeededGeologicDatas();
 			
 			foreach (var nodeInfo in computeOrderSortedNodes)
 			{

@@ -64,7 +64,7 @@ namespace PW.Node
 				if ((biomePreviewFoldout = EditorGUILayout.Foldout(biomePreviewFoldout, "Biome id map")))
 				{
 					if (biomeData.biomeIds != null)
-						PWGUI.BiomeMap2DPreview(biomeData, needUpdate);
+						PWGUI.BiomeMap2DPreview(biomeData, needUpdate || forceReload || biomeReloadRequested);
 					//TODO: biome 3D preview
 				}
 			}
@@ -87,6 +87,9 @@ namespace PW.Node
 
 			var biomes = inputBiomes.GetValues< Biome >();
 			var biomeData = biomes[0].biomeDataReference;
+
+			if (biomeData == null)
+				return ;
 
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)

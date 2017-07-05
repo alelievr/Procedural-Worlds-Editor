@@ -56,8 +56,8 @@ namespace PW.Node
 				
 			if (outputBiome != null)
 			{
-				BiomeUtils.DrawBiomeInfos(outputBiome);
-				EditorGUILayout.Separator();
+				// BiomeUtils.DrawBiomeInfos(outputBiome);
+				// EditorGUILayout.Separator();
 			}
 
 			EditorGUIUtility.labelWidth = 100;
@@ -108,7 +108,7 @@ namespace PW.Node
 				outputBiome.biomeTreeStartPoint = this;
 			}
 			
-			if (needUpdate || reloadRequested)
+			if (needUpdate || reloadRequested || biomeReloadRequested)
 			{
 				outputBiome.terrain = terrainNoise as Sampler2D;
 				outputBiome.terrain3D = terrainNoise as Sampler3D;

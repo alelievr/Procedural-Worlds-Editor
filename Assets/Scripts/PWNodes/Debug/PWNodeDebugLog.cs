@@ -48,6 +48,10 @@ namespace PW.Node
 				{
 					//TODO
 				}
+				else if (objType == typeof(BiomeData))
+				{
+					BiomeUtils.DrawBiomeInfos(obj as BiomeData);
+				}
 			}
 			else
 				EditorGUILayout.LabelField("null");
