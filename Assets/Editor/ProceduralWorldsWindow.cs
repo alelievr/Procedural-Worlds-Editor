@@ -682,6 +682,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				EditorGUI.BeginChangeCheck();
 				parentGraph.PWGUI.Slider("Geological terrain step: ", ref parentGraph.geologicTerrainStep, 4, 64);
+				parentGraph.PWGUI.IntSlider("Geological search distance: ", ref parentGraph.geologicDistanceCheck, 1, 4);
 				if (EditorGUI.EndChangeCheck())
 					graphNeedReload = true;
 

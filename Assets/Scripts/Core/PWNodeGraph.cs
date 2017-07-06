@@ -27,8 +27,8 @@ namespace PW.Core
 
 	public enum PWGraphProcessMode
 	{
-		Normal,			//output a disaplayable terrain (with isosurface / oth)
-		TerrainData,	//output a structure containing all maps for a chunk (terrain, wet, temp, biomes, ...)
+		Normal,		//output a disaplayable terrain (with isosurface / oth)
+		Geologic,	//output a structure containing all maps for a chunk (terrain, wet, temp, biomes, ...)
 	}
 
 	[CreateAssetMenu(fileName = "New ProceduralWorld", menuName = "Procedural World", order = 1)]
@@ -145,6 +145,9 @@ namespace PW.Core
 
 		};
 
+		[System.NonSerialized]
+		Vector3							currentChunkPosition;
+
 		//Precomputed data part:
 		[SerializeField]
 		public TerrainDetail			terrainDetail = new TerrainDetail();
@@ -152,16 +155,18 @@ namespace PW.Core
 		public int						geologicDistanceCheck;
 
 		[System.NonSerialized]
-		public GeologicBakedDatas		geologicTerrain;
+		public GeologicBakedDatas		geologicBakedDatas = new GeologicBakedDatas();
 		
 		private class PWNodeProcessInfo
 		{
-			public PWNode node;
-			public string graphName;
+			public PWNode	node;
+			public string	graphName;
+			public Type		type;
 
 			public PWNodeProcessInfo(PWNode n, string g) {
 				node = n;
 				graphName = g;
+				type = n.GetType();
 			}
 		}
 
@@ -297,12 +302,14 @@ namespace PW.Core
 		void		BakeNeededGeologicDatas()
 		{
 			float		oldStep = step;
-			processMode = PWGraphProcessMode.TerrainData;
+			processMode = PWGraphProcessMode.Geologic;
 			step = geologicTerrainStep;
 
-			ProcessGraph();
-			//TODO: execute graph until TerrainBuilder node with a larger step to find
+			for (int x = 0; x < geologicDistanceCheck; x++)
+				for (int y = 0; y < geologicDistanceCheck; y++)
+					ProcessGraph();
 
+			UpdateChunkPosition(currentChunkPosition);
 			processMode = PWGraphProcessMode.Normal;
 			step = oldStep;
 		}
@@ -515,6 +522,10 @@ namespace PW.Core
 				//ignore unlink nodes
 				if (nodeInfo.node.computeOrder < 0)
 					continue ;
+
+				//TODO: uncomment for when TerrainBuilder node will be OK
+				// if (processMode == PWGraphProcessMode.Geologic && nodeInfo.type == typeof(PWNodeTerrainBuilder))
+					// return ;
 				
 				if (realMode || !isVisibleInEditor)
 					nodeInfo.node.BeginFrameUpdate();
@@ -556,6 +567,7 @@ namespace PW.Core
 
 		public void			UpdateChunkPosition(Vector3 chunkPos)
 		{
+			currentChunkPosition = chunkPos;
 			ForeachAllNodes((n) => n.chunkPosition = chunkPos, true, true);
 		}
 
