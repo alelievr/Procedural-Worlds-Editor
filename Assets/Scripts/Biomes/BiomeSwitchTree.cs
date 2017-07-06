@@ -340,15 +340,15 @@ namespace PW.Biomator
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Height:
-									if (height >= child.min && height < child.max)
+									if (height > child.min && height <= child.max)
 										{current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Temperature:
-									if (temp >= child.min && temp < child.max)
+									if (temp > child.min && temp <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Wetness:
-									if (wet >= child.min && wet < child.max)
+									if (wet > child.min && wet <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 							}

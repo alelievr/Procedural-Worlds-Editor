@@ -199,7 +199,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Texture2D", typeof(PWNodeTexture2D),
 			"Mesh", typeof(PWNodeMesh));
 		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
-			"Add", typeof(PWNodeAdd));
+			"Add", typeof(PWNodeAdd),
+			"Curve", typeof(PWNodeCurve));
 		AddToSelector("Biomes", "greenNode", greenNodeWindow, greenNodeWindowSelected,
 			"Water Level", typeof(PWNodeWaterLevel),
 			"To Biome data", typeof(PWNodeBiomeData),
