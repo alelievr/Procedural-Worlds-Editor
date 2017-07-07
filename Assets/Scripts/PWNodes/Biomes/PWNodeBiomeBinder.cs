@@ -15,13 +15,17 @@ namespace PW.Node
 		public PWTerrainOutputMode	outputMode;
 		
 		//inputs for 2D topdown map
-		[PWInput("Surface")]
+		[PWInput("Surface substance")]
 		[PWNotRequired]
 		public SurfaceMaps			terrainSurface;
 
 		[PWInput("Details")]
 		[PWNotRequired]
 		public TerrainDetail		biomeDetail;
+
+		[PWInput("Terrain modifier")]
+		[PWNotRequired]
+		public Sampler				biomeTerrainModifier;
 
 		//TODO: dispositon algos
 

@@ -300,6 +300,9 @@ namespace PW.Biomator
 			if (biomeData.air3D != null || biomeData.wind3D != null || biomeData.wetness3D != null || biomeData.temperature3D != null)
 				is3DBiomes = true;
 			
+			if (biomeData.terrainRef == null)
+				return ;
+				
 			int		terrainSize = (is3DTerrain) ? biomeData.terrain3D.size : biomeData.terrain.size;
 			float	terrainStep = (is3DTerrain) ? biomeData.terrain3D.step : biomeData.terrain.step;
 			if (is3DBiomes)

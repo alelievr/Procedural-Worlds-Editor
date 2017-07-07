@@ -353,6 +353,10 @@ namespace PW.Core
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
 		public Sampler				terrainRef { get { return (terrain == null) ? terrain3D : terrain as Sampler; } }
+
+		public Sampler2D			biomeTerrain;
+		public Sampler3D			biomeTerrain3D;
+		public Sampler				biomeTerrainRef { get { return (biomeTerrain == null) ? biomeTerrain3D : biomeTerrain as Sampler; } }
 		
 		public Sampler2D			wetness;
 		public Sampler3D			wetness3D;
@@ -369,6 +373,7 @@ namespace PW.Core
 		public Sampler2D			air;
 		public Sampler3D			air3D;
 		public Sampler				airRef { get { return (air == null) ? air3D : air as Sampler; } }
+		
 		public ComplexEdaphicData	soil;
 
 		public Sampler2D[]			datas;

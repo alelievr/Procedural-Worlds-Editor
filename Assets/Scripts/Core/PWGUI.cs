@@ -30,7 +30,6 @@ namespace PW.Core
 			return new PWGUIStyle(pixels, PWGUIStyleType.PrefixLabelWidth);
 		}
 	}
-
 			
 	[System.SerializableAttribute]
 	public class PWGUIManager {
@@ -770,7 +769,10 @@ namespace PW.Core
 					for (int y = 0; y < texSize; y++)
 					{
 						var blendInfo = map.GetBiomeBlendInfo(x, y);
-						Color firstBiomeColor = biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId).previewColor;
+						var biome = biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
+						if (biome == null)
+							continue ;
+						Color firstBiomeColor = biome.previewColor;
 
 						//TODO: second biome color:
 						fieldSettings.texture.SetPixel(x, y, firstBiomeColor);

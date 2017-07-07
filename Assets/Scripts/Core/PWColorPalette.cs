@@ -50,7 +50,7 @@ public static class PWColorPalette  {
 			return GetColor("cyanAnchor");
 		else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
 			return GetColor("greenAnchor");
-		else if (t == typeof(PWValues) || t == typeof(PWValue))
+		else if (t == typeof(PWValues))
 			return GetColor("whiteAnchor");
 		else
 			return GetColor("defaultAnchor");

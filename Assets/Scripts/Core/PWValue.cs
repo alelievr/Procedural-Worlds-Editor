@@ -25,5 +25,10 @@ namespace PW.Core
 				return null;
 			return value as T;
 		}
+
+		public void Set(object o)
+		{
+			value = o;
+		}
 	}
 }
