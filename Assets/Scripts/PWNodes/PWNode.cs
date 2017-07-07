@@ -505,11 +505,10 @@ namespace PW
 			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
 
 			singleAnchor.anchorRect = anchorRect;
-			Debug.Log("forcedY = " + singleAnchor.forcedY);
 			if (singleAnchor.forcedY != -1)
 			{
 				singleAnchor.anchorRect.y = singleAnchor.forcedY;
-				Debug.Log("forced anchor rect to y: " + singleAnchor.anchorRect.y);
+				anchorRect.y = singleAnchor.forcedY;
 			}
 
 			if (!ret.mouseAbove)
@@ -538,7 +537,7 @@ namespace PW
 
 			//if there is more values in PWValues than the available anchor count, create new anchors:
 			ForeachPWAnchorDatas((data) => {
-				if (data.anchorType == PWAnchorType.Input && data.multiple && data.anchorInstance != null)
+				if (data.anchorType == PWAnchorType.Input && data.multiple && data.anchorInstance != null && !data.forcedAnchorNumber)
 				{
 					if (((PWValues)data.anchorInstance).Count >= data.multi.Count)
 						data.AddNewAnchor(data.fieldName.GetHashCode() + data.multi.Count, false);
@@ -565,7 +564,7 @@ namespace PW
 					}
 					if (singleAnchor.visibility == PWVisibility.Visible)
 						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
-					if (singleAnchor.visibility != PWVisibility.Gone)
+					if (singleAnchor.visibility != PWVisibility.Gone && singleAnchor.forcedY == -1)
 					{
 						if (data.anchorType == PWAnchorType.Input)
 							inputAnchorRect.position += Vector2.up * (18 + anchorMargin);
@@ -1319,8 +1318,12 @@ namespace PW
 				return ;
 			if (!propertyDatas[propertyName].multiple)
 				return ;
-			
+				
 			var prop = propertyDatas[propertyName];
+			
+			if (prop.multi.Count == newCount && (newNames == null || newNames.Length == 0)) //alreadythe good name of anchors.
+				return ;
+
 			prop.forcedAnchorNumber = true;
 			prop.RemoveAllAnchors();
 			prop.minMultipleValues = 0;

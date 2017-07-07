@@ -25,7 +25,7 @@ namespace PW.Node
 
 		[PWInput("Terrain modifier")]
 		[PWNotRequired]
-		public Sampler				biomeTerrainModifier;
+		public BiomeTerrain			biomeTerrainModifier;
 
 		//TODO: dispositon algos
 
@@ -83,6 +83,8 @@ namespace PW.Node
 				EditorGUIUtility.DrawColorSwatch(colorPreviewRect, outputBiome.previewColor);
 			}
 			EditorGUILayout.EndHorizontal();
+
+			//TODO: preview the modified terrain
 		}
 
 		public override bool OnNodeAnchorLink(string prop, int index)
@@ -99,6 +101,7 @@ namespace PW.Node
 				outputBiome = new Biome();
 				outputBiome.biomeDataReference = inputBiome;
 			}
+			outputBiome.biomeTerrain = biomeTerrainModifier;
 			outputBiome.mode = outputMode;
 			outputBiome.surfaceMaps = terrainSurface;
 		}

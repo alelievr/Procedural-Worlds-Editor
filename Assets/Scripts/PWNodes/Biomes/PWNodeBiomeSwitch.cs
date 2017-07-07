@@ -293,14 +293,6 @@ namespace PW.Node
 				localCoveragePercent = 0;
 				int		i = 0;
 
-				//add water if there is and if switch mode is height:
-				if (!inputBiome.isWaterless && switchMode == BiomeSwitchMode.Height)
-				{
-					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
-					for (int x = 0; x < rMax; x++)
-						biomeRepartitionPreview.SetPixel(x, 0, Color.blue);
-				}
-
 				foreach (var switchData in switchDatas)
 				{
 					float switchMin = Mathf.Max(switchData.min, min);
@@ -313,6 +305,15 @@ namespace PW.Node
 						biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
 					i++;
 				}
+				
+				//add water if there is and if switch mode is height:
+				if (!inputBiome.isWaterless && switchMode == BiomeSwitchMode.Height)
+				{
+					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
+					for (int x = 0; x < rMax; x++)
+						biomeRepartitionPreview.SetPixel(x, 0, Color.blue);
+				}
+
 				biomeRepartitionPreview.Apply();
 				updatePreview = false;
 			}

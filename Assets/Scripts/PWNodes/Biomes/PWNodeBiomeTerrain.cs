@@ -10,7 +10,7 @@ namespace PW.Node
 	public class PWNodeBiomeTerrain : PWNode {
 
 		[PWInput]
-		[PWMultiple]
+		[PWMultiple(typeof(object))]
 		public PWValues			inputs = new PWValues();
 
 		[PWOutput("Terrain modifiers")]
@@ -58,8 +58,12 @@ namespace PW.Node
 						elem.curve = EditorGUI.CurveField(curveRect, (AnimationCurve)elem.curve);
 						break ;
 					case BiomeTerrainModifierType.Max:
-						UpdateMultiProp("inputs", lastRequiredInputCount - 1);
-						UpdatePropPosition("inputs", rect.y, listRequiredInputCout);
+						UpdateMultiProp("inputs", lastRequiredInputCount);
+						//TODO: stabilize rect.y
+						if (Event.current.type == EventType.Repaint)
+							elem.y = rect.y;
+						UpdatePropVisibility("inputs", PWVisibility.Visible, listRequiredInputCout);
+						UpdatePropPosition("inputs", elem.y - 10, listRequiredInputCout);
 						listRequiredInputCout++;
 						break ;
 					default:
@@ -93,6 +97,8 @@ namespace PW.Node
 		{
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
+			for (int i = 0; i < modifierList.count; i++)
+				UpdatePropVisibility("inputs", PWVisibility.Invisible, i);
 			listRequiredInputCout = 0;
 			modifierList.DoLayoutList();
 			lastRequiredInputCount = listRequiredInputCout;

@@ -493,6 +493,9 @@ namespace PW.Core
 	{
 		public BiomeTerrainModifierType		type;
 
+		//position in the node
+		public float						y;
+
 		//Curve modifier:
 		public SerializableAnimationCurve	curve = new SerializableAnimationCurve();
 
@@ -516,6 +519,7 @@ namespace PW.Core
 		public string				name;
 		public Color				previewColor;
 		public short				id;
+		public BiomeTerrain			biomeTerrain;
 
 		//datas for TopDown2D terrain
 		public SurfaceMaps			surfaceMaps;
