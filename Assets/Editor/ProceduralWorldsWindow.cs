@@ -197,29 +197,37 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"GameObject", typeof(PWNodeGameObject),
 			"Material", typeof(PWNodeMaterial),
 			"Texture2D", typeof(PWNodeTexture2D),
-			"Mesh", typeof(PWNodeMesh));
+			"Mesh", typeof(PWNodeMesh)
+		);
 		AddToSelector("Operations", "yellowNode", yellowNodeWindow, yellowNodeWindowSelected,
 			"Add", typeof(PWNodeAdd),
-			"Curve", typeof(PWNodeCurve));
+			"Curve", typeof(PWNodeCurve)
+		);
 		AddToSelector("Biomes", "greenNode", greenNodeWindow, greenNodeWindowSelected,
 			"Water Level", typeof(PWNodeWaterLevel),
 			"To Biome data", typeof(PWNodeBiomeData),
 			"Biome switch", typeof(PWNodeBiomeSwitch),
 			"Biome Binder", typeof(PWNodeBiomeBinder),
 			"Biome blender", typeof(PWNodeBiomeBlender),
+			"Biome substances", typeof(PWNodeBiomeSurface),
+			"Biome terrain", typeof(PWNodeBiomeTerrain),
 			"Biome temperature map", typeof(PWNodeBiomeTemperature),
-			"Biome wetness map", typeof(PWNodeBiomeWetness),
-			"Biome surface", typeof(PWNodeBiomeSurface));
+			"Biome wetness map", typeof(PWNodeBiomeWetness)
+		);
 		AddToSelector("Landforms", "cyanNode", cyanNodeWindow, cyanNodeWindowSelected,
-			"Terrain detail", typeof(PWNodeTerrainDetail));
+			"Terrain detail", typeof(PWNodeTerrainDetail)
+		);
 		AddToSelector("Noises And Masks", "blueNode", blueNodeWindow, blueNodeWindowSelected,
 			"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
-			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask));
+			"Circle Noise Mask", typeof(PWNodeCircleNoiseMask)
+		);
 		AddToSelector("Materializers", "purpleNode", purpleNodeWindow, purpleNodeWindowSelected,
 			"SideView 2D terrain", typeof(PWNodeSideView2DTerrain),
-			"TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain));
+			"TopDown 2D terrain", typeof(PWNodeTopDown2DTerrain)
+		);
 		AddToSelector("Debug", "orangeNode", orangeNodeWindow, orangeNodeWindowSelected,
-			"DebugLog", typeof(PWNodeDebugLog));
+			"DebugLog", typeof(PWNodeDebugLog)
+		);
 		AddToSelector("Custom", "whiteNode", whiteNodeWindow, whiteNodeWindowSelected);
 	}
 

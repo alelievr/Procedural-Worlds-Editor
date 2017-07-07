@@ -505,6 +505,12 @@ namespace PW
 			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
 
 			singleAnchor.anchorRect = anchorRect;
+			Debug.Log("forcedY = " + singleAnchor.forcedY);
+			if (singleAnchor.forcedY != -1)
+			{
+				singleAnchor.anchorRect.y = singleAnchor.forcedY;
+				Debug.Log("forced anchor rect to y: " + singleAnchor.anchorRect.y);
+			}
 
 			if (!ret.mouseAbove)
 			{
@@ -1295,6 +1301,18 @@ namespace PW
 			UpdateDependentStatus();
 		}
 
+		public void				UpdatePropPosition(string propertyName, float y, int index = -1)
+		{
+			if (propertyDatas.ContainsKey(propertyName))
+			{
+				var anchors = propertyDatas[propertyName].multi;
+				if (anchors.Count <= index)
+					return ;
+				anchors[index].forcedY = y;
+			}
+			UpdateDependentStatus();
+		}
+
 		public void				UpdateMultiProp(string propertyName, int newCount, params string[] newNames)
 		{
 			if (!propertyDatas.ContainsKey(propertyName))
@@ -1303,6 +1321,7 @@ namespace PW
 				return ;
 			
 			var prop = propertyDatas[propertyName];
+			prop.forcedAnchorNumber = true;
 			prop.RemoveAllAnchors();
 			prop.minMultipleValues = 0;
 			prop.anchorInstance = bakedNodeFields[propertyName].GetValue(this);
@@ -1500,15 +1519,16 @@ namespace PW
 					}
 
 					int anchorCount;
-					if (instanceValueCount)
+					if (instanceValueCount && !data.forcedAnchorNumber)
 						anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
 					else
 						anchorCount = data.multi.Count;
-					if (data.anchorType == PWAnchorType.Input)
+					if (data.anchorType == PWAnchorType.Input && !data.forcedAnchorNumber)
 						if (data.displayHiddenMultipleAnchors || showAdditional)
 							anchorCount++;
 					for (int i = 0; i < anchorCount; i++)
 					{
+						// Debug.Log("i = " + i + ", anchor: " + data.fieldName + ", " + data.forcedAnchorNumber + ", " + GetType());
 						//if multi-anchor instance does not exists, create it:
 						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
 							data.multi[i].additional = true;

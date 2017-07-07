@@ -108,7 +108,7 @@ namespace PW.Core
 	/*
 	**	Store 3D array of float (usefull for 3D noise)
 	*/
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Sampler3D : Sampler
 	{
 		[NonSerializedAttribute]
@@ -182,25 +182,25 @@ namespace PW.Core
 	**	Vector samplers, same as Samplers but with vectors instead of floats
 	*/
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Vector2Sampler2D : Sampler
 	{
 		public Vector2[,]	map;
 	}
 	
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Vector3Sampler2D : Sampler
 	{
 		public Vector3[,]	map;
 	}
 	
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Vector2Sampler3D : Sampler
 	{
 		public Vector2[,,]	map;
 	}
 	
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Vector3Sampler3D : Sampler
 	{
 		public Vector3[,,]	map;
@@ -213,7 +213,7 @@ namespace PW.Core
 	/*
 	**	Parent class to store everything needed to render a chunk
 	*/
-	[System.SerializableAttribute]
+	[Serializable]
 	public abstract class ChunkData
 	{
 		public int			size;
@@ -224,12 +224,12 @@ namespace PW.Core
 		}
 	}
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class SideView2DData : ChunkData
 	{
 	}
 	
-	[System.SerializableAttribute]
+	[Serializable]
 	public class TopDown2DData : ChunkData
 	{
 		//TODO for chunk saving to file: encode image to png and store path.
@@ -243,7 +243,7 @@ namespace PW.Core
 	**	Biomes
 	*/
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public enum BiomeDataType
 	{
 		BiomeData,
@@ -252,7 +252,7 @@ namespace PW.Core
 		WaterlessBiomeData3D,
 	}
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class BasicEdaphicData
 	{
 		public Sampler2D		PH;
@@ -279,7 +279,7 @@ namespace PW.Core
 		public Sampler3D		mineral;
 	}
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class ComplexEdaphicData3D : BasicEdaphicData
 	{
 		public Sampler3D		clay;
@@ -420,7 +420,7 @@ namespace PW.Core
 	/*
 	**	This structure contains all information about landforms to apply to terrain during the building
 	*/
-	[System.Serializable]
+	[Serializable]
 	public class TerrainDetail
 	{
 		public int			biomeDetailMask = (int)TerrainDetailType.River | (int)TerrainDetailType.Lake;
@@ -446,21 +446,6 @@ namespace PW.Core
 		public Sampler2D		waterBodies;
 
 		//TODO: other geologic datas (for geologic update :)
-	}
-
-	public class Biome
-	{
-		public BiomeData			biomeDataReference;
-		public PWTerrainOutputMode	mode;
-		public string				name;
-		public Color				previewColor;
-		public short				id;
-
-		//datas for TopDown2D terrain
-		public SurfaceMaps			surfaceMaps;
-		public Color				surfaceColorModifier;
-
-		//TODO: datas for others output modes
 	}
 
 	public enum SurfaceMapType
@@ -493,12 +478,57 @@ namespace PW.Core
 
 		public Texture2D	blend;
 	}
+
+	public enum BiomeTerrainModifierType
+	{
+		Curve,
+		Max,
+	}
+
+	/*
+	**	Store the terrain modification performed by biome
+	*/
+	[Serializable]
+	public class BiomeTerrainModifer
+	{
+		public BiomeTerrainModifierType		type;
+
+		//Curve modifier:
+		public SerializableAnimationCurve	curve = new SerializableAnimationCurve();
+
+		//Max modifier:
+		public Sampler						inputMaxTerrain;
+		
+		//TODO: other modifiers
+	}
+
+	[Serializable]
+	public class BiomeTerrain
+	{
+		[SerializeField]
+		public List< BiomeTerrainModifer >	terrainModifiers = new List< BiomeTerrainModifer >();
+	}
+
+	public class Biome
+	{
+		public BiomeData			biomeDataReference;
+		public PWTerrainOutputMode	mode;
+		public string				name;
+		public Color				previewColor;
+		public short				id;
+
+		//datas for TopDown2D terrain
+		public SurfaceMaps			surfaceMaps;
+		public Color				surfaceColorModifier;
+
+		//TODO: datas for others output modes
+	}
 	
 	/*
 	**	Utils
 	*/
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public struct Vector3i
 	{
 		public int	x;
@@ -530,7 +560,7 @@ namespace PW.Core
 		}
 	}
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class Pair< T, U >
 	{
 		[SerializeField]
@@ -549,7 +579,7 @@ namespace PW.Core
 	**	PWNode render settings
 	*/
 
-	[System.SerializableAttribute]
+	[Serializable]
 	public class PWGUISettings
 	{
 		public bool		active {get;  private set;}

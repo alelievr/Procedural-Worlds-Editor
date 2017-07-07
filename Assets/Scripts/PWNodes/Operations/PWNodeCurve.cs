@@ -15,20 +15,12 @@ namespace PW.Node
 		[PWNotRequired]
 		public Sampler		inputTerrain;
 
-		[PWInput("BiomeData input")]
-		[PWNotRequired]
-		public BiomeData	inputBiomeData;
-
 		[PWOutput("Terrain output")]
 		public Sampler		outputTerrain;
 
 		AnimationCurve		curve;
 		[SerializeField]
 		SerializableAnimationCurve	sCurve = new SerializableAnimationCurve();
-		Sampler				samplerPreview;
-
-		[SerializeField]
-		bool				enableBiomeMap = true;
 
 		public override void OnNodeCreate()
 		{
@@ -59,12 +51,6 @@ namespace PW.Node
 				{
 				}
 			}
-			if (inputBiomeData != null && inputBiomeData.biomeTerrainRef != null)
-			{
-				EditorGUILayout.Toggle("Enable biome map", enableBiomeMap);
-				if (inputTerrain.type == SamplerType.Sampler2D)
-					PWGUI.Sampler2DPreview(inputBiomeData.biomeTerrain, needUpdate || updatePreview);
-			}
 		}
 
 		void					CurveTerrain(Sampler input, Sampler output)
@@ -81,20 +67,6 @@ namespace PW.Node
 			}
 		}
 
-		void					CurveTerrainBiome(Sampler input, Sampler output)
-		{
-			if (input.type == SamplerType.Sampler2D)
-			{
-				(output as Sampler2D).Foreach((x, y, val) => {
-					var bInfo = inputBiomeData.biomeIds.GetBiomeBlendInfo(x, y);
-				});
-			}
-			else
-			{
-
-			}
-		}
-
 		void					UpdateTerrain()
 		{
 			if (outputTerrain == null)
@@ -102,28 +74,13 @@ namespace PW.Node
 
 			if (inputTerrain != null)
 				CurveTerrain(inputTerrain, outputTerrain);
-			else if (inputBiomeData != null)
-			{
-				if (inputBiomeData.terrainRef == null)
-					return ;
-				if (!enableBiomeMap)
-					CurveTerrain(inputBiomeData.terrainRef, inputBiomeData.terrainRef);
-				else
-					CurveTerrainBiome(inputBiomeData.terrainRef, inputBiomeData.biomeTerrainRef);
-			}
 		}
 
 		public override void	OnNodeProcess()
 		{
 			if (inputTerrain != null)
 				PWUtils.ResizeSamplerIfNeeded(inputTerrain, ref outputTerrain);
-			else if (inputBiomeData != null)
-			{
-				Sampler s = inputBiomeData.biomeTerrainRef;
-				PWUtils.ResizeSamplerIfNeeded(inputBiomeData.terrainRef, ref s);
-				outputTerrain = inputBiomeData.biomeTerrainRef;
-			}
-
+			
 			if (!needUpdate)
 				return ;
 			

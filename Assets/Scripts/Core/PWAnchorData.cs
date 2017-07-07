@@ -73,6 +73,8 @@ namespace PW.Core
 		public bool					required;
 		//anchor name if specified in PWInput or PWOutput else null
 		public string				anchorName;
+		//for multi anchor, tell if the number of anchors is locked
+		public bool					forcedAnchorNumber = false;
 
 		[System.SerializableAttribute]
 		public class PWAnchorMultiData
@@ -91,6 +93,8 @@ namespace PW.Core
 			public int					linkCount;
 			//if anchor is an additional hidden anchor (only visible when creating a new link)
 			public bool					additional;
+			//override default y anchor position
+			public float				forcedY;
 
 			public PWAnchorMultiData(Color color)
 			{
@@ -101,6 +105,7 @@ namespace PW.Core
 				highlighMode = PWAnchorHighlight.None;
 				visibility = PWVisibility.Visible;
 				this.color = (SerializableColor)color;
+				forcedY = -1;
 			}
 		}
 
