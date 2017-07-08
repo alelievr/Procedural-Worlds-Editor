@@ -14,9 +14,11 @@ namespace PW.Node
 		[PWInput]
 		public PWValues		inputBiomes = new PWValues();
 
+		[PWOutput]
+		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 		//TODO: set the terrain as output.
 
-		//TODO: biome merge range by disponible biomeData fields
+		//TODO: biome blend range by disponible biomeData fields
 
 		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
@@ -96,6 +98,10 @@ namespace PW.Node
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+
+			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;
+			outputBlendedBiomeTerrain.biomeMap3D = biomeData.biomeIds3D;
+			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
 		}
 	}
 }

@@ -14,7 +14,6 @@ public class PWNodeScriptMenuItem {
 	{
 		string	path = AssetDatabase.GetAssetPath(Selection.activeObject) + "/" + newFileBaseName;
 		path = AssetDatabase.GenerateUniqueAssetPath(path);
-		Debug.Log(path);
 
 		File.Copy(templateFile, path);
 		AssetDatabase.Refresh();

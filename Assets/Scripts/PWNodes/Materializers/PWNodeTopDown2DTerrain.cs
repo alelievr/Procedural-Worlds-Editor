@@ -7,18 +7,17 @@ namespace PW.Node
 	public class PWNodeTopDown2DTerrain : PWNode {
 	
 		[PWInput]
-		public Sampler2D		texture;
+		public BlendedBiomeTerrain	inputBlendedBiomes;
 
 		[PWOutput]
-		public TopDown2DData	terrainOutput;
+		public TopDown2DData		terrainOutput;
 
-		private Texture2D		samplerTexture;
+		[SerializeField]
+		MaterializerType			materializer;
 
 		public override void OnNodeCreate()
 		{
 			name = "2D TopDown terrain";
-			samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-			texture = new Sampler2D(chunkSize, step);
 			terrainOutput = new TopDown2DData();
 		}
 
@@ -26,29 +25,22 @@ namespace PW.Node
 		{
 			EditorGUILayout.LabelField("MAP:");
 
-			PWGUI.TexturePreview(samplerTexture);
-		}
-
-		public override bool OnNodeAnchorLink(string propName, int index)
-		{
-			if (propName == "texture")
-				samplerTexture = new Texture2D(texture.size, texture.size, TextureFormat.ARGB32, false, false);
-			
-			return true;
+			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
+			EditorGUIUtility.labelWidth = 80;
+			materializer = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", materializer);
 		}
 
 		public override void OnNodeProcess()
 		{
-			if (chunkSizeHasChanged)
-				samplerTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.ARGB32, false, false);
-			if (needUpdate)
-			{
-				texture.Foreach((x, y, val) => {samplerTexture.SetPixel(x, y, new Color(0, 0, val));});
-				samplerTexture.Apply();
-			}
-
 			terrainOutput.size = chunkSize;
-			terrainOutput.texture = samplerTexture;
+			
+			//TODO: apply biome terrain modifiers to terrain
+
+			//TODO: apply biome terrain detail (caves / oth)
+
+			//TODO: apply geologic layer (rivers / oth)
+
+			//TODO: place vegetation / small details
 		}
 	}
 }

@@ -493,8 +493,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 					CreateNewNode(typeof(PWNodeTopDown2DTerrain));
 					PWNode terrain = currentGraph.nodes.Last();
 
-					perlin.AttachLink("output", terrain, "texture");
-					terrain.AttachLink("texture", perlin, "output");
+					//FIXME
+					// perlin.AttachLink("output", terrain, "texture");
+					// terrain.AttachLink("texture", perlin, "output");
 					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
 					currentGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
 				}, false);

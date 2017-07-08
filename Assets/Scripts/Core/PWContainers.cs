@@ -216,7 +216,8 @@ namespace PW.Core
 	[Serializable]
 	public abstract class ChunkData
 	{
-		public int			size;
+		public int					size;
+		public MaterializerType		materializerType;
 
 		public override string ToString()
 		{
@@ -526,6 +527,29 @@ namespace PW.Core
 		public Color				surfaceColorModifier;
 
 		//TODO: datas for others output modes
+	}
+
+	public enum MaterializerType
+	{
+		//2D materializers:
+		SquareTileMap,
+		// HexTileMap,
+		// MarchingSquare,
+
+		//3D:
+		// MarchingCube,
+		// ExtendedMarchingCube,
+		// DualCountering,
+		// SurfaceNets,
+		// GreedyMeshing,
+		// MonotoneMeshing,
+	}
+
+	public class BlendedBiomeTerrain
+	{
+		public BiomeSwitchTree		biomeTree;
+		public BiomeMap2D			biomeMap;
+		public BiomeMap3D			biomeMap3D;
 	}
 	
 	/*

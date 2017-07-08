@@ -115,9 +115,8 @@ namespace PW
 				return ;
 			if (!terrainStorage.isLoaded(position))
 			{
+				Debug.Log("try generate");
 				var data = RequestChunk(position, 42);
-				if (data == null)
-					return ;
 				var userChunkData = OnChunkCreate(data, position);
 				terrainStorage.AddChunk(position, data, userChunkData);
 			}
@@ -145,7 +144,7 @@ namespace PW
 			return "chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 		}
 
-		GameObject			TryFrinExistingGameobjectByName(string name)
+		GameObject			TryFindExistingGameobjectByName(string name)
 		{
 			Transform t = terrainRoot.transform.FindChild(name);
 			if (t != null)
@@ -158,7 +157,7 @@ namespace PW
 			string		name = PositionToChunkName(pos);
 			GameObject	ret;
 
-			ret = TryFrinExistingGameobjectByName(name);
+			ret = TryFindExistingGameobjectByName(name);
 			if (ret != null && ret.GetComponent< MeshRenderer >() == null)
 				return ret;
 			else if (ret != null)
@@ -177,7 +176,7 @@ namespace PW
 			string		name = PositionToChunkName(pos);
 			GameObject	ret;
 
-			ret = TryFrinExistingGameobjectByName(name);
+			ret = TryFindExistingGameobjectByName(name);
 			if (ret != null && ret.GetComponent< MeshRenderer >() != null)
 				return ret;
 			else if (ret != null)
