@@ -219,6 +219,14 @@ namespace PW.Core
 		public int					size;
 		public MaterializerType		materializerType;
 
+		public Sampler				terrain;
+		public Sampler				waterHeight;
+		public Sampler				wetnessMap;
+		public Sampler				temperatureMap;
+		public Sampler				windMap;
+		public Sampler				lightingMap;
+		public Sampler				airMap;
+
 		public override string ToString()
 		{
 			return GetType().Name + "(" + size + ")";
@@ -550,6 +558,14 @@ namespace PW.Core
 		public BiomeSwitchTree		biomeTree;
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
+
+		public Sampler				terrain;
+		public Sampler				waterHeight;
+		public Sampler				wetnessMap;
+		public Sampler				temperatureMap;
+		public Sampler				windMap;
+		public Sampler				lightingMap;
+		public Sampler				airMap;
 	}
 	
 	/*

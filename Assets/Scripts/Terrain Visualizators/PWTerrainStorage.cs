@@ -10,21 +10,21 @@ namespace PW
 {
 	public enum		PWStorageMode
 	{
-		MEMORY,
-		FILE,
+		Memory,
+		File,
 		// ENCRYPTED_FILE,
 	}
 
 	public enum	ChunkVisibility
 	{
 		None,
-		VISIBLE,
-		HIDDEN,
-		UNLOADED,
+		Visible,
+		Hidden,
+		NotLoaded,
 	}
 
 	[System.SerializableAttribute]
-	[CreateAssetMenuAttribute()]
+	[CreateAssetMenuAttribute]
 	public class PWTerrainStorage : ScriptableObject {
 		
 		[System.SerializableAttribute]
@@ -41,10 +41,10 @@ namespace PW
 				visibility = visi;
 			}
 
-			public Chunk(ChunkData terrain, object user) : this(terrain, user, ChunkVisibility.VISIBLE) {}
+			public Chunk(ChunkData terrain, object user) : this(terrain, user, ChunkVisibility.Visible) {}
 		}
 
-		public PWStorageMode	storeMode = PWStorageMode.FILE;
+		public PWStorageMode	storeMode = PWStorageMode.File;
 		public string			storageFolder = null;
 		public bool				editorMode;
 
@@ -66,7 +66,7 @@ namespace PW
 		public ChunkData	AddChunk(Vector3i pos, ChunkData chunk, object userChunkDatas)
 		{
 			chunks[pos] = new Chunk(chunk, userChunkDatas);
-			if (storeMode == PWStorageMode.FILE)
+			if (storeMode == PWStorageMode.File)
 			{
 				//TODO: asyn save chunkData ans pos to a file.
 			}
@@ -77,7 +77,7 @@ namespace PW
 		{
 			if (chunks.ContainsKey(pos))
 				return chunks[pos].terrainData;
-			else if (storeMode == PWStorageMode.FILE)
+			else if (storeMode == PWStorageMode.File)
 			{
 				//TODO: check if file at pos exists and load it if exists.
 			}

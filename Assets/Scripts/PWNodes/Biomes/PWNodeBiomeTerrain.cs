@@ -59,7 +59,6 @@ namespace PW.Node
 						break ;
 					case BiomeTerrainModifierType.Max:
 						UpdateMultiProp("inputs", lastRequiredInputCount);
-						//TODO: stabilize rect.y
 						if (Event.current.type == EventType.Repaint)
 							elem.y = rect.y;
 						UpdatePropVisibility("inputs", PWVisibility.Visible, listRequiredInputCout);

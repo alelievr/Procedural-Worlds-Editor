@@ -23,9 +23,6 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			EditorGUILayout.LabelField("MAP:");
-
-			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
 			EditorGUIUtility.labelWidth = 80;
 			materializer = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", materializer);
 		}
@@ -33,6 +30,7 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			terrainOutput.size = chunkSize;
+			terrainOutput.wetnessMap = inputBlendedBiomes.wetnessMap;
 			
 			//TODO: apply biome terrain modifiers to terrain
 

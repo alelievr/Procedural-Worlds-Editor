@@ -102,6 +102,13 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;
 			outputBlendedBiomeTerrain.biomeMap3D = biomeData.biomeIds3D;
 			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
+			outputBlendedBiomeTerrain.terrain = biomeData.terrainRef;
+			outputBlendedBiomeTerrain.waterHeight = biomeData.waterHeight;
+			outputBlendedBiomeTerrain.wetnessMap = biomeData.wetnessRef;
+			outputBlendedBiomeTerrain.temperatureMap = biomeData.temperatureRef;
+			outputBlendedBiomeTerrain.windMap = biomeData.windRef;
+			outputBlendedBiomeTerrain.lightingMap = biomeData.lighting;
+			outputBlendedBiomeTerrain.airMap = biomeData.airRef;
 		}
 	}
 }
