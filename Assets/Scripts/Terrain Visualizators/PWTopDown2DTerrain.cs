@@ -4,6 +4,8 @@ using PW.Core;
 
 public class PWTopDown2DTerrain : PWTerrainBase {
 
+	static Gradient			rainbow = null;
+
 	void Start () {
 		InitGraph(graph);
 	}
@@ -13,7 +15,13 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		if (cd == null)
 			return null;
 		
+		if (rainbow == null)
+			rainbow = PWUtils.CreateRainbowGradient();
+		
 		TopDown2DData	chunk = (TopDown2DData)cd;
+		
+		//create the terrain texture:
+		
 
 		GameObject g = CreateChunkObject(pos, PrimitiveType.Quad);
 		g.transform.rotation = Quaternion.Euler(90, 0, 0);

@@ -488,39 +488,6 @@ namespace PW.Core
 		public Texture2D	blend;
 	}
 
-	public enum BiomeTerrainModifierType
-	{
-		Curve,
-		Max,
-	}
-
-	/*
-	**	Store the terrain modification performed by biome
-	*/
-	[Serializable]
-	public class BiomeTerrainModifer
-	{
-		public BiomeTerrainModifierType		type;
-
-		//position in the node
-		public float						y;
-
-		//Curve modifier:
-		public SerializableAnimationCurve	curve = new SerializableAnimationCurve();
-
-		//Max modifier:
-		public Sampler						inputMaxTerrain;
-		
-		//TODO: other modifiers
-	}
-
-	[Serializable]
-	public class BiomeTerrain
-	{
-		[SerializeField]
-		public List< BiomeTerrainModifer >	terrainModifiers = new List< BiomeTerrainModifer >();
-	}
-
 	public class Biome
 	{
 		public BiomeData			biomeDataReference;

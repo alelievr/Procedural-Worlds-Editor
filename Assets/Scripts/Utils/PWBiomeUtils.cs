@@ -45,5 +45,26 @@ namespace PW
 			if (b.terrain3D != null)
 				EditorGUILayout.LabelField("Terrain: 3D");
 		}
+
+		public static void ApplyBiomeTerrainModifiers(BlendedBiomeTerrain b)
+		{
+			if (b.terrain.type == SamplerType.Sampler2D)
+			{
+				(b.terrain as Sampler2D).Foreach((x, y, val) => {
+					int	biomeId = b.biomeMap.GetBiomeBlendInfo(x, y).firstBiomeId;
+					//TODO: biome blending
+					return b.biomeTree.GetBiome(biomeId).biomeTerrain.ComputeValue(x, y, val);
+				});
+			}
+			//else: TODO
+			//TODO: apply biome terrain modifiers to terrain
+
+			//TODO: apply biome terrain detail (caves / oth)
+		}
+
+		public static void BakeBiomeSurfaceMaps(BlendedBiomeTerrain b)
+		{
+			//TODO: create surface blend maps
+		}
 	}
 }

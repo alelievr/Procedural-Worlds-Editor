@@ -76,6 +76,17 @@ namespace PW
 			debugTexture.Apply();
 			GUI.DrawTexture(rect, debugTexture);
 		}
+
+		public static Gradient CreateRainbowGradient()
+		{
+			return CreateGradient(
+				new KeyValuePair< float, Color >(0.00f, Color.red),
+				new KeyValuePair< float, Color >(0.24f, Color.yellow),
+				new KeyValuePair< float, Color >(0.50f, Color.green),
+				new KeyValuePair< float, Color >(0.77f, Color.cyan),
+				new KeyValuePair< float, Color >(1.00f, Color.blue)
+			);
+		}
 		
 		public static Gradient CreateGradient(params KeyValuePair< float, Color>[] datas)
 		{
