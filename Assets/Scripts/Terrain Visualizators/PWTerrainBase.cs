@@ -115,7 +115,6 @@ namespace PW
 				return ;
 			if (!terrainStorage.isLoaded(position))
 			{
-				Debug.Log("try generate");
 				var data = RequestChunk(position, 42);
 				var userChunkData = OnChunkCreate(data, position);
 				terrainStorage.AddChunk(position, data, userChunkData);

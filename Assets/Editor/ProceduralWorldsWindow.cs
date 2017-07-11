@@ -1221,6 +1221,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			//notifySetDataChanged management
 			bool	reloadRequested = false;
 			bool	biomeReload = false;
+			PWNode	reloadRequestedNode = null;
 			int		reloadWeight = 0;
 			currentGraph.ForeachAllNodes(p => {
 				if (e.type == EventType.Layout)
@@ -1234,6 +1235,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 						p.notifyBiomeDataChanged = false;
 						reloadRequested = true;
 						reloadWeight = p.computeOrder;
+						reloadRequestedNode = p;
 					}
 				}
 			}, true, true);
@@ -1248,6 +1250,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 							n.biomeReloadRequested = true;
 						else
 							n.reloadRequested = true;
+						n.SetReloadReuqestedNode(reloadRequestedNode);
 					}
 				}, true, true);
 			}
@@ -1826,15 +1829,13 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		if (currentGraph.saveName != null)
 			return ;
-
-		string path = "Assets/ProceduralWorlds/Resources/";
 		
-		if (!Directory.Exists(path))
-			Directory.CreateDirectory(path);
+		if (!Directory.Exists(PWConstants.resourcePath))
+			Directory.CreateDirectory(PWConstants.resourcePath);
 
 		currentGraph.saveName = "New ProceduralWorld";
 		currentGraph.name = currentGraph.saveName;
-		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + currentGraph.saveName + ".asset");
+		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(PWConstants.resourcePath, currentGraph.saveName + ".asset"));
 
 		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
 		AssetDatabase.SaveAssets();

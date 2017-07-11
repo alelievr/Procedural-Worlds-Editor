@@ -343,15 +343,15 @@ namespace PW.Biomator
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Height:
-									if (height > child.min && height <= child.max)
+									if (height >= child.min && height <= child.max)
 										{current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Temperature:
-									if (temp > child.min && temp <= child.max)
+									if (temp >= child.min && temp <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Wetness:
-									if (wet > child.min && wet <= child.max)
+									if (wet >= child.min && wet <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 							}
@@ -359,14 +359,12 @@ namespace PW.Biomator
 						//if flow reach this part, values are missing in the biome graph so biome can't be chosen.
 						break ;
 					}
-					if (current.biome == null)
+					if (current.biome != null)
+						biomeMap.SetFirstBiomeId(x, y, current.biome.id);
+					else
 					{
 						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 50);
 						continue ;
-					}
-					if (current.biome != null)
-					{
-						biomeMap.SetFirstBiomeId(x, y, current.biome.id);
 					}
 				}
 			}
@@ -389,6 +387,11 @@ namespace PW.Biomator
 			if (biomePerId.ContainsKey(id))
 				return biomePerId[id];
 			return null;
+		}
+
+		public Dictionary< int, Biome > GetBiomes()
+		{
+			return biomePerId;
 		}
 
 		public Dictionary< BiomeSwitchMode, float > GetBiomeCoverage()

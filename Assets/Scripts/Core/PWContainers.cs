@@ -533,6 +533,8 @@ namespace PW.Core
 		public Sampler				windMap;
 		public Sampler				lightingMap;
 		public Sampler				airMap;
+
+		public Texture2DArray		terrainTextureArray;
 	}
 	
 	/*

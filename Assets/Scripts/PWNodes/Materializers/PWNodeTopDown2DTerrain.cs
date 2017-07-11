@@ -15,6 +15,9 @@ namespace PW.Node
 		[SerializeField]
 		MaterializerType			materializer;
 
+		[System.NonSerialized]
+		public Texture2DArray		biomeTextureArray = null;
+
 		[SerializeField]
 		MapOutputOption[]			outputMaps = {
 			new MapOutputOption("height", false),
@@ -39,7 +42,7 @@ namespace PW.Node
 
 		public override void OnNodeCreate()
 		{
-			name = "2D TopDown terrain";
+			externalName = "2D TopDown terrain";
 			terrainOutput = new TopDown2DData();
 		}
 
@@ -68,6 +71,9 @@ namespace PW.Node
 		{
 			//TODO: 3D biome map management
 			BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
+
+			if (biomeTextureArray == null)
+				BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes);
 
 			//TODO: apply geologic layer (rivers / oth)
 

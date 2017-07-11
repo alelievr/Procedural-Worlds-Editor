@@ -62,9 +62,17 @@ namespace PW
 			//TODO: apply biome terrain detail (caves / oth)
 		}
 
-		public static void BakeBiomeSurfaceMaps(BlendedBiomeTerrain b)
+		public static void GenerateBiomeBlendMaps(BlendedBiomeTerrain b)
 		{
-			//TODO: create surface blend maps
+			//2D biomes
+			if (b.biomeMap != null)
+			{
+				
+			}
+			else
+			{
+				//TODO:
+			}
 		}
 	}
 }

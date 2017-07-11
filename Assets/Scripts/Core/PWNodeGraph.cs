@@ -57,8 +57,6 @@ namespace PW.Core
 		[SerializeField]
 		public string						externalName;
 		[SerializeField]
-		public string						assetName;
-		[SerializeField]
 		public string						assetPath;
 		[SerializeField]
 		public string						saveName;

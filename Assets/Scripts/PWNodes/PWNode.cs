@@ -106,7 +106,7 @@ namespace PW
 		List< PWDependency >		depencendies = new List< PWDependency >(); //List< nodeId, anchorId >
 
 		//backed datas about properties and nodes
-		[System.SerializableAttribute]
+		[System.Serializable]
 		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
 		[SerializeField]
 		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
@@ -114,10 +114,13 @@ namespace PW
 		[NonSerializedAttribute]
 		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		private PWNodeGraph		currentGraph;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
+		private PWNode			reloadRequestFromNode;
+
+		[System.NonSerialized]
 		public bool		unserializeInitialized = false;
 
 		public bool		windowNameEdit = false;
@@ -1174,6 +1177,7 @@ namespace PW
 			justReloaded = false;
 			stepHasChanged = false;
 			forceReload = false;
+			reloadRequestFromNode = null;
 		}
 		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
@@ -1247,6 +1251,23 @@ namespace PW
 							singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
 				}
 			});
+		}
+
+		public void			SetReloadReuqestedNode(PWNode n)
+		{
+			reloadRequestFromNode = n;
+		}
+
+		protected Type		GetReloadRequestType()
+		{
+			if (reloadRequestFromNode != null)
+				return reloadRequestFromNode.GetType();
+			return null;
+		}
+
+		protected PWNode	GetReloadRequestNode()
+		{
+			return reloadRequestFromNode;
 		}
 
 	#endregion
@@ -1467,16 +1488,26 @@ namespace PW
 			return nodes.ToList();
 		}
 
-		public void				RequestProcessing(int nodeId)
+		protected void				RequestProcessing(int nodeId)
 		{
 			if (!currentGraph.RequestProcessing(nodeId))
 				Debug.Log("failed to request computing of node " + nodeId + ": not found in the current graph");
 			return ;
 		}
 
-		public PWTerrainOutputMode	GetTerrainOutputMode()
+		protected PWTerrainOutputMode	GetTerrainOutputMode()
 		{
 			return currentGraph.outputType;
+		}
+
+		protected string				GetGraphAssetName()
+		{
+			return currentGraph.saveName;
+		}
+
+		protected string				GetGraphName()
+		{
+			return currentGraph.externalName;
 		}
 
 	#endregion

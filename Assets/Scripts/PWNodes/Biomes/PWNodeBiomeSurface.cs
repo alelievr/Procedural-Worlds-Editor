@@ -106,7 +106,22 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			maps = new SurfaceMaps();
+
+			maps.albedo = albedo;
+			maps.normal = normal;
+			maps.diffuse = diffuse;
+			maps.height = height;
+			maps.emissive = emissive;
+			maps.specular = specular;
+			maps.opacity = opacity;
+			maps.smoothness = smoothness;
+			maps.ambiantOcculison = ambiantOcculison;
+			maps.detailMask = detailMask;
+			maps.secondAlbedo = secondAlbedo;
+			maps.secondNormal = secondNormal;
+			maps.metallic = metallic;
+			maps.roughness = roughness;
+			maps.displacement = displacement;
 		}
-		
 	}
 }

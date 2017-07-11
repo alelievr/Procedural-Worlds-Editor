@@ -97,6 +97,9 @@ namespace PW.Node
 			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
+			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
+				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadTexture2DArray(biomeData.biomeTree, GetGraphAssetName());
+
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 
 			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;

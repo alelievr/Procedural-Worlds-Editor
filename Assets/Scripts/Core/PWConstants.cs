@@ -1,8 +1,11 @@
-﻿public class PWConstants {
+﻿using System.IO;
 
-	public const string		RealModeRootObjectName = "PWWorldRoot";
+public class PWConstants {
 
-	public const string		previewSideViewSceneName = "PWPreviewSideView2D";
-	public const string		previewTopDownSceneName = "PWPreviewTopDown2D";
-	public const string		preview3DSceneName = "PWPreview3D";
+	public static readonly string		RealModeRootObjectName = "PWWorldRoot";
+
+	public static readonly string		previewSideViewSceneName = "PWPreviewSideView2D";
+	public static readonly string		previewTopDownSceneName = "PWPreviewTopDown2D";
+	public static readonly string		preview3DSceneName = "PWPreview3D";
+	public static readonly string		resourcePath = Path.Combine(Path.Combine("Assets", "ProceduralWorlds"), "Resources");
 }
