@@ -98,7 +98,7 @@ namespace PW.Node
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
-				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadTexture2DArray(biomeData.biomeTree, GetGraphAssetName());
+				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, GetGraphName() + "-Albedo");
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 

@@ -21,7 +21,7 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		TopDown2DData	chunk = (TopDown2DData)cd;
 		
 		//create the terrain texture:
-		
+		//TODO: bind the blendMap with biome maps to the terrain shader
 
 		GameObject g = CreateChunkObject(pos, PrimitiveType.Quad);
 		g.transform.rotation = Quaternion.Euler(90, 0, 0);

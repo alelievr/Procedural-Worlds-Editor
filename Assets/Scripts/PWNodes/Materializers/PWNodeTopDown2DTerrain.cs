@@ -73,7 +73,7 @@ namespace PW.Node
 			BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
 
 			if (biomeTextureArray == null)
-				BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes);
+				terrainOutput.blendMaps = BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes, GetGraphName());
 
 			//TODO: apply geologic layer (rivers / oth)
 

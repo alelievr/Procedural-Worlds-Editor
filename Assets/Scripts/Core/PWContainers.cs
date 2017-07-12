@@ -227,6 +227,8 @@ namespace PW.Core
 		public Sampler				lightingMap;
 		public Sampler				airMap;
 
+		public Texture2DArray		blendMaps;
+
 		public override string ToString()
 		{
 			return GetType().Name + "(" + size + ")";

@@ -62,16 +62,22 @@ namespace PW
 			//TODO: apply biome terrain detail (caves / oth)
 		}
 
-		public static void GenerateBiomeBlendMaps(BlendedBiomeTerrain b)
+		static IEnumerable< Texture2D > GenerateBiomeBlendMaps(BlendedBiomeTerrain b)
+		{
+			//TODO
+			// b.biomeMap.GetBiomeBlendInfo();
+			return null;
+		}
+
+		public static Texture2DArray GenerateBiomeBlendMaps(BlendedBiomeTerrain b, string assetName)
 		{
 			//2D biomes
 			if (b.biomeMap != null)
-			{
-				
-			}
+				return PWAssets.GenerateOrLoadTexture2DArray(assetName + "-BlendMaps", GenerateBiomeBlendMaps(b));
 			else
 			{
 				//TODO:
+				return null;
 			}
 		}
 	}

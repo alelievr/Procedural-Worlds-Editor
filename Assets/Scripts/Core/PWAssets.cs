@@ -12,15 +12,18 @@ using UnityEditor;
 namespace PW.Core
 {
 	public class PWAssets {
-	
-		public static Texture2DArray	GenerateOrLoadTexture2DArray(BiomeSwitchTree bst, string fName)
+
+		public static Texture2DArray	GenerateOrLoadTexture2DArray(string fName, IEnumerable< Texture2D > texs)
 		{
-			Texture2DArray		ret;
 			bool				isLinear = false;
 			int					i;
+			Texture2DArray		ret;
 
-			if (String.IsNullOrEmpty(fName))
-				fName = "PW";
+			if (String.IsNullOrEmpty(fName) || texs == null)
+			{
+				Debug.LogError("asset file null or empty !");
+				return null;
+			}
 			string assetFile = Path.Combine(PWConstants.resourcePath, fName + ".asset");
 
 			ret = Resources.Load< Texture2DArray >(assetFile);
@@ -29,17 +32,16 @@ namespace PW.Core
 			
 			#if UNITY_EDITOR
 				//generate and store Texture2DArray if not found
-				var biomeTextures = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.surfaceMaps.albedo).Where(a => a != null);
-				int	biomeTextureCount = biomeTextures.Count();
-				if (biomeTextureCount == 0)
+				int	texCount = texs.Count();
+				if (texCount == 0)
 				{
 					Debug.LogWarning("no texture detected in any biomes");
 					return null;
 				}
-				var firstTexture = biomeTextures.First();
-				ret = new Texture2DArray(firstTexture.width, firstTexture.height, biomeTextureCount, firstTexture.format, firstTexture.mipmapCount > 1, isLinear);
+				var firstTexture = texs.First();
+				ret = new Texture2DArray(firstTexture.width, firstTexture.height, texCount, firstTexture.format, firstTexture.mipmapCount > 1, isLinear);
 				i = 0;
-				foreach (var tex in biomeTextures)
+				foreach (var tex in texs)
 				{
 					if (tex.width != firstTexture.width || tex.height != firstTexture.height)
 					{
@@ -61,6 +63,12 @@ namespace PW.Core
 				Debug.LogError("Texture2DArray asset not found at path: " + assetFile);
 				return null;
 			#endif
+		}
+	
+		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName)
+		{
+			var biomeTextures = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.surfaceMaps.albedo).Where(a => a != null);
+			return GenerateOrLoadTexture2DArray(fName, biomeTextures);
 		}
 	}
 }

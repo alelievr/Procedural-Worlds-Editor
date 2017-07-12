@@ -1500,11 +1500,6 @@ namespace PW
 			return currentGraph.outputType;
 		}
 
-		protected string				GetGraphAssetName()
-		{
-			return currentGraph.saveName;
-		}
-
 		protected string				GetGraphName()
 		{
 			return currentGraph.externalName;
