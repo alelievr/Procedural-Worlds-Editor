@@ -26,7 +26,8 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		GameObject g = CreateChunkObject(pos, PrimitiveType.Quad);
 		g.transform.rotation = Quaternion.Euler(90, 0, 0);
 		g.transform.localScale = Vector3.one * 10;
-		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
+		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_AlbedoMaps", chunk.albedoMaps);
+		g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_BlendMaps", chunk.blendMaps);
 		return g;
 	}
 

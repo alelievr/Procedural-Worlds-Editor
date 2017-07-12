@@ -1,19 +1,23 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
+using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using UnityEditor;
 using PW.Core;
+using Debug = UnityEngine.Debug;
 
 namespace PW
 {
 	public static class BiomeUtils {
 
-		static bool terrainFoldout = false;
-		static bool wetnessFoldout = false;
-		static bool temperatureFoldout = false;
-		static bool waterFoldout = false;
-		static bool update = false;
+		static bool			terrainFoldout = false;
+		static bool			wetnessFoldout = false;
+		static bool			temperatureFoldout = false;
+		static bool			waterFoldout = false;
+		static bool			update = false;
+		static Color[]		blackTexture;
 		static PWGUIManager	PWGUI = new PWGUIManager();
 	
 		public static void DrawBiomeInfos(BiomeData b)
@@ -64,16 +68,58 @@ namespace PW
 
 		static IEnumerable< Texture2D > GenerateBiomeBlendMaps(BlendedBiomeTerrain b)
 		{
-			//TODO
-			// b.biomeMap.GetBiomeBlendInfo();
-			return null;
+			List< Texture2D >		texs = new List< Texture2D >();
+
+			#if UNITY_EDITOR
+				Stopwatch	sw = new Stopwatch();
+				sw.Start();
+			#endif
+
+			int			chunkSize = b.terrain.size;
+			BiomeMap2D	biomeMap = b.biomeMap;
+			int			textureCount = b.biomeTree.GetBiomes().Select(l => l.Value.surfaceMaps.albedo).GroupBy(l => l.name).Count();
+			if (blackTexture == null || blackTexture.Length != chunkSize * chunkSize)
+				blackTexture = new Color[chunkSize * chunkSize];
+
+			for (int i = 0; i <= textureCount / 4; i++)
+			{
+				Texture2D	tex = new Texture2D(chunkSize, chunkSize, TextureFormat.RGBA32, true, false);
+				tex.SetPixels(blackTexture);
+				tex.filterMode = FilterMode.Point;
+				tex.Apply();
+				texs.Add(tex);
+			}
+
+			for (int x = 0; x < chunkSize; x++)
+				for (int y = 0; y < chunkSize; y++)
+				{
+					var bInfo = biomeMap.GetBiomeBlendInfo(x, y);
+					if (bInfo.firstBiomeBlendPercent != 1)
+						PWUtils.LogMax("error: blendinfo: " + bInfo.firstBiomeBlendPercent, 500);
+					//TODO: biome blening
+					int		texIndex = bInfo.firstBiomeId / 4;
+					int		texChan = bInfo.firstBiomeId % 4;
+					Color c = texs[texIndex].GetPixel(x, y);
+					c[texChan] = bInfo.firstBiomeBlendPercent;
+					texs[texIndex].SetPixel(x, y, c);
+				}
+
+			foreach (var tex in texs)
+				tex.Apply();
+
+			#if UNITY_EDITOR
+				sw.Stop();
+				Debug.Log(sw.ElapsedMilliseconds + "ms taken to generate blend maps");
+			#endif
+			
+			return texs;
 		}
 
 		public static Texture2DArray GenerateBiomeBlendMaps(BlendedBiomeTerrain b, string assetName)
 		{
 			//2D biomes
 			if (b.biomeMap != null)
-				return PWAssets.GenerateOrLoadTexture2DArray(assetName + "-BlendMaps", GenerateBiomeBlendMaps(b));
+				return PWAssets.GenerateTexture2DArray(GenerateBiomeBlendMaps(b));
 			else
 			{
 				//TODO:

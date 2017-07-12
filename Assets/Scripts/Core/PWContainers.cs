@@ -227,7 +227,9 @@ namespace PW.Core
 		public Sampler				lightingMap;
 		public Sampler				airMap;
 
+		//TODO: save the blend maps to the disk
 		public Texture2DArray		blendMaps;
+		public Texture2DArray		albedoMaps;
 
 		public override string ToString()
 		{
@@ -303,12 +305,14 @@ namespace PW.Core
 	{
 		public short	firstBiomeId;
 		public short	secondBiomeId;
-		public float	firstBiomeBlendPercent;
-		public float	secondBiomeBlendPercent;
-	}
+        public float	firstBiomeBlendPercent;
+        public float	secondBiomeBlendPercent;
+		public bool		init;
+    }
 
 	public class BiomeMap2D : Sampler
 	{
+		public bool			init = false;
 		BiomeBlendPoint[]	blendMap;
 
 		public BiomeMap2D(int size, float step)
@@ -316,16 +320,24 @@ namespace PW.Core
 			this.size = size;
 			this.step = step;
 			blendMap = new BiomeBlendPoint[size * size];
+			for (int i = 0; i < size * size; i++)
+				blendMap[i].init = false;
+			Debug.Log("NEW BIOME MAP !!!");
 		}
 		
 		public void SetFirstBiomeId(int x, int y, short id)
 		{
 			int		i = x + y * size;
 			blendMap[i].firstBiomeId = id;
+			blendMap[i].firstBiomeBlendPercent = 1;
+			blendMap[i].init = true;
+			//TODO: blending here
 		}
 
 		public BiomeBlendPoint	GetBiomeBlendInfo(int x, int y)
 		{
+			if (!blendMap[x + y * size].init)
+				Debug.Log("GETTING UNINITIALIZED DATA !");
 			return blendMap[x + y * size];
 		}
 	}
@@ -612,15 +624,15 @@ namespace PW.Core
 		//Sampler2D:
 		public FilterMode			filterMode;
 		public SerializableGradient	serializableGradient;
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public bool					update;
 		public bool					debug;
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Rect					savedRect;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Gradient				gradient;
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Texture2D			texture;
 
 		//Texture:
@@ -628,14 +640,17 @@ namespace PW.Core
 		public ScaleMode			scaleMode;
 		public float				scaleAspect;
 		//TODO: light-weight serializableMaterial
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Material				material;
 
+		//Texture2DArray:
+		[System.NonSerialized]
+		public Texture2D[]			textures;
+
 		//Editor utils:
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public int					popupHeight;
 		
-
 		public PWGUISettings()
 		{
 			active = false;

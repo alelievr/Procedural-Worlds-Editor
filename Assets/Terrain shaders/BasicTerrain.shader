@@ -1,7 +1,10 @@
 ﻿Shader "ProceduralWorlds/Basic terrain" {
 	Properties {
-		_MainTex ("Surface (RGB)", 2D) = "white" {}
-		_HeightMap ("Heightmap", 2D) = "black" {}
+		// _MainTex ("Surface (RGB)", 2D) = "white" {}
+		// _HeightMap ("Heightmap", 2D) = "black" {}
+		_AlbedoMaps ("Albedo maps", 2DArray) = "" {}
+		_BlendMaps ("Blend maps", 2DArray) = "blackTexture" {}
+		_ShowBlendMap ("Show blend map", Range(0, 1)) = 0
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -9,20 +12,27 @@
 		
 		Pass {
 			CGPROGRAM
+
+			//define the maximum number of texture to be displayed in the shader divided by 4 so 8 will be fore 32 textures.
+			#define MAX_BLENDMAPS		1
+
 			// Physically based Standard lighting model, and enable shadows on all light types
 			#pragma vertex vert
 			#pragma fragment frag
 	
-			// Use shader model 3.0 target, to get nicer looking lighting
-			#pragma target 3.0
+			// Use shader model 3.5 to user TextureArray
+			#pragma target 3.5
 	
 			#include "UnityCG.cginc"
 			
+			// sampler2D	_MainTex;
+			// sampler2D	_HeightMap;
+			// float4		_MainTex_ST;
+			float		_ShowBlendMap;
 	
-			sampler2D	_MainTex;
-			sampler2D	_HeightMap;
-			float4		_MainTex_ST;
-	
+			UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
+			UNITY_DECLARE_TEX2DARRAY(_BlendMaps);
+
 			struct VertInput {
 				float4	pos : POSITION;
 				float3	norm : NORMAL;
@@ -39,16 +49,35 @@
 			VertOutput vert(VertInput input) {
 				VertOutput	o;
 	
-				float height = tex2Dlod(_HeightMap, float4(input.uv, 0, 0)).x;
 				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
-				o.pos.xyz += input.norm * height;
 				o.color = input.color;
-				o.uv = TRANSFORM_TEX(input.uv, _MainTex);
+				o.uv = input.uv;
 				return o;
 			}
 	
 			half4 frag(VertOutput o) : COLOR {
-				return tex2D(_MainTex, o.uv) * o.color;
+				half4 col = half4(0, 0, 0, 0);
+
+				for (int j = 0; j < MAX_BLENDMAPS; j++)
+				{
+					float4 b = UNITY_SAMPLE_TEX2DARRAY(_BlendMaps, float3(o.uv, j));
+
+					if (_ShowBlendMap > .5f)
+					{
+						if (length(b) == 0)
+							b = float4(1, 1, 1, 1);
+						col += b;
+					}
+					else
+					{
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 0)) * b.r;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 1)) * b.g;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 2)) * b.b;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 3)) * b.a;
+					}
+				}
+
+				return col / MAX_BLENDMAPS;
 			}
 			ENDCG
 		}

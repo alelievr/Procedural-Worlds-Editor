@@ -812,6 +812,30 @@ namespace PW.Core
 
 	#endregion
 
+	#region Texture2DArray preview field
+
+	public void Texture2DArrayPreview(Texture2DArray textureArray, bool update)
+	{
+		var	fieldSettings = GetGUISettingData(() => new PWGUISettings());
+		if (update)
+		{
+			if (fieldSettings.textures == null || fieldSettings.textures.Length < textureArray.depth)
+				fieldSettings.textures = new Texture2D[textureArray.depth];
+			for (int i = 0; i < textureArray.depth; i++)
+			{
+				Texture2D tex = new Texture2D(textureArray.width, textureArray.height, textureArray.format, false);
+				tex.SetPixels(textureArray.GetPixels(i));
+				tex.Apply();
+				fieldSettings.textures[i] = tex;
+			}
+		}
+
+		foreach (var tex in fieldSettings.textures)
+			TexturePreview(tex, false, false, false);
+	}
+
+	#endregion
+
 	#region Utils
 
 		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings

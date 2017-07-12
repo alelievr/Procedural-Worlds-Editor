@@ -15,6 +15,9 @@ namespace PW.Node
 		[SerializeField]
 		MaterializerType			materializer;
 
+		[SerializeField]
+		bool						blendMapsFoldout;
+
 		[System.NonSerialized]
 		public Texture2DArray		biomeTextureArray = null;
 
@@ -52,6 +55,7 @@ namespace PW.Node
 			EditorGUIUtility.labelWidth = 80;
 			materializer = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", materializer);
 			
+			EditorGUILayout.LabelField("Output maps in chunk");
 			EditorGUIUtility.labelWidth = 66;
 			EditorGUILayout.BeginHorizontal();
 			foreach (var outputMap in outputMaps)
@@ -65,6 +69,9 @@ namespace PW.Node
 				}
 			}
 			EditorGUILayout.EndHorizontal();
+
+			if ((blendMapsFoldout = EditorGUILayout.Foldout(blendMapsFoldout, "Show blend maps")))
+				PWGUI.Texture2DArrayPreview(terrainOutput.blendMaps, needUpdate);
 		}
 
 		public override void OnNodeProcess()

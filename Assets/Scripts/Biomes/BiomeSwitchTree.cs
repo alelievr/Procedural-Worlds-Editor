@@ -316,8 +316,6 @@ namespace PW.Biomator
 			}
 			else
 			{
-				var biomeMap = biomeData.biomeIds;
-
 				for (int x = 0; x < terrainSize; x++)
 				for (int y = 0; y < terrainSize; y++)
 				{
@@ -343,15 +341,15 @@ namespace PW.Biomator
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Height:
-									if (height >= child.min && height <= child.max)
+									if (height > child.min && height <= child.max)
 										{current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Temperature:
-									if (temp >= child.min && temp <= child.max)
+									if (temp > child.min && temp <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Wetness:
-									if (wet >= child.min && wet <= child.max)
+									if (wet > child.min && wet <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
 							}
@@ -359,10 +357,13 @@ namespace PW.Biomator
 						//if flow reach this part, values are missing in the biome graph so biome can't be chosen.
 						break ;
 					}
+					//TODO: blending with second biome
 					if (current.biome != null)
-						biomeMap.SetFirstBiomeId(x, y, current.biome.id);
+						biomeData.biomeIds.SetFirstBiomeId(x, y, current.biome.id);
 					else
 					{
+						//FIXME!!!!
+						biomeData.biomeIds.SetFirstBiomeId(x, y, 0);
 						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 50);
 						continue ;
 					}

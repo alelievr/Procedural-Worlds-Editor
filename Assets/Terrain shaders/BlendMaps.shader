@@ -51,17 +51,21 @@ Shader "Custom/Sample2DArrayTexture"
                     return UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, _SliceRange));
 
                 for (int j = 0; j < MAX_TEX_NUMBER; j += 4) //max of 32 textures for Topdown Tilemap biomes
-                {
+            	{
                     float4 b = UNITY_SAMPLE_TEX2DARRAY(_BlendMaps, float3(i.uv, j));
 
                     if (_ShowBlendMap > 0)
-                        col += b;
+                    {
+                        if (length(b) == 0)
+                            b = float4(1, 1, 1, 1);
+						col += b;
+                    }
                     else
                     {
-                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 0)) * b.x;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 1)) * b.y;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 2)) * b.z;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 3)) * b.w;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 0)) * b.r;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 1)) * b.g;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 2)) * b.b;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_InputTextures, float3(i.uv, j + 3)) * b.a;
                     }
                 }
                 return col;
