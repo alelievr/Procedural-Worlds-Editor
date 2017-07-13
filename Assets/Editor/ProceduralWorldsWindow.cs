@@ -119,6 +119,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 	private static Texture2D	rencenterIconTexture;
 	private static Texture2D	fileIconTexture;
 	private static Texture2D	pauseIconTexture;
+	private static Texture2D	eyeIconTexture;
 
 	private static Gradient		greenRedGradient;
 	
@@ -781,14 +782,30 @@ public class ProceduralWorldsWindow : EditorWindow {
 		Event	e = Event.current;
 		EditorGUILayout.BeginVertical(navBarBackgroundStyle);
 		{
-			/*Rect helperBarRect = */EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
+			//Icon bar:
+			EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
 			{
+				//recenter the graph
 				if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 					currentGraph.graphDecalPosition = Vector2.zero;
+				//ping the current PW object in the project window
 				if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 					EditorGUIUtility.PingObject(currentGraph);
+				//Show every hidden object in your hierarchy
+				if (GUILayout.Button(eyeIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+				{
+					var objs = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
+
+					foreach (var obj in objs)
+					{
+						if (obj.hideFlags == HideFlags.HideAndDontSave)
+							obj.hideFlags = HideFlags.DontSave;
+					}
+				}
 			}
 			EditorGUILayout.EndHorizontal();
+
+			//Breadcrumbs bar:
 			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
 			{
 				breadcrumbsRect.yMin -= 1;
@@ -1922,6 +1939,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
 		fileIconTexture = CreateTexture2DFromFile("ic_file");
 		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
+		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
 
 		//generating green-red gradient
         GradientColorKey[] gck;

@@ -54,6 +54,19 @@
 				o.uv = input.uv;
 				return o;
 			}
+
+			half4 blend(half4 texture1, float a1, half4 texture2)
+			{
+				float a2 = 1 - a1;
+				float depth = 0.2;
+				float ma = max(texture1.a + a1, texture2.a + a2) - depth;
+			
+				float b1 = max(texture1.a + a1 - ma, 0);
+				float b2 = max(texture2.a + a2 - ma, 0);
+			
+				return (texture1 * b1 + texture2 * b2) / (b1 + b2);
+			}
+	
 	
 			half4 frag(VertOutput o) : COLOR {
 				half4 col = half4(0, 0, 0, 0);
@@ -71,10 +84,10 @@
 					else
 					{
 						float2 nuv = TRANSFORM_TEX(o.uv, _AlbedoMaps);
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 0)) * b.r;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 1)) * b.g;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 2)) * b.b;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 3)) * b.a;
+                        col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 0)), b.r, col);
+                        col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 1)), b.g, col);
+                        col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 2)), b.b, col);
+                        col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 3)), b.a, col);
 					}
 				}
 
