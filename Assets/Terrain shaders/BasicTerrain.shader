@@ -4,6 +4,7 @@
 		// _HeightMap ("Heightmap", 2D) = "black" {}
 		_AlbedoMaps ("Albedo maps", 2DArray) = "" {}
 		_BlendMaps ("Blend maps", 2DArray) = "blackTexture" {}
+		[HideInInspector] _BlendMapsCount ("Blend maps count", Int) = 1
 		_ShowBlendMap ("Show blend map", Range(0, 1)) = 0
 	}
 	SubShader {
@@ -12,9 +13,6 @@
 		
 		Pass {
 			CGPROGRAM
-
-			//define the maximum number of texture to be displayed in the shader divided by 4 so 8 will be fore 32 textures.
-			#define MAX_BLENDMAPS		1
 
 			// Physically based Standard lighting model, and enable shadows on all light types
 			#pragma vertex vert
@@ -29,6 +27,8 @@
 			// sampler2D	_HeightMap;
 			// float4		_MainTex_ST;
 			float		_ShowBlendMap;
+			int			_BlendMapsCount;
+			float4		_AlbedoMaps_ST;
 	
 			UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
 			UNITY_DECLARE_TEX2DARRAY(_BlendMaps);
@@ -58,7 +58,7 @@
 			half4 frag(VertOutput o) : COLOR {
 				half4 col = half4(0, 0, 0, 0);
 
-				for (int j = 0; j < MAX_BLENDMAPS; j++)
+				for (int j = 0; j < _BlendMapsCount; j++)
 				{
 					float4 b = UNITY_SAMPLE_TEX2DARRAY(_BlendMaps, float3(o.uv, j));
 
@@ -70,14 +70,15 @@
 					}
 					else
 					{
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 0)) * b.r;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 1)) * b.g;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 2)) * b.b;
-                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(o.uv, j + 3)) * b.a;
+						float2 nuv = TRANSFORM_TEX(o.uv, _AlbedoMaps);
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 0)) * b.r;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 1)) * b.g;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 2)) * b.b;
+                        col += UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 3)) * b.a;
 					}
 				}
 
-				return col / MAX_BLENDMAPS;
+				return col;
 			}
 			ENDCG
 		}

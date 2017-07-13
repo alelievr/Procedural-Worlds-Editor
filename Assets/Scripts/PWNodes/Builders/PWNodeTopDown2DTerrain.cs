@@ -82,6 +82,8 @@ namespace PW.Node
 			if (biomeTextureArray == null)
 				terrainOutput.blendMaps = BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes, GetGraphName());
 
+			terrainOutput.albedoMaps = inputBlendedBiomes.terrainTextureArray;
+
 			//TODO: apply geologic layer (rivers / oth)
 
 			//TODO: place vegetation / small details

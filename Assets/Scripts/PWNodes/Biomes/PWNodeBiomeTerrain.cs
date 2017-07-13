@@ -84,7 +84,7 @@ namespace PW.Node
 			};
 
 			modifierList.onRemoveCallback += (l) => {
-				if (outputBiomeTerrain.terrainModifiers.Count > 1)
+				if (outputBiomeTerrain.terrainModifiers.Count >= 1)
 				{
 					outputBiomeTerrain.terrainModifiers.RemoveAt(l.index);
 					notifyDataChanged = true;

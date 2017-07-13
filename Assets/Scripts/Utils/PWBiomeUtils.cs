@@ -54,8 +54,15 @@ namespace PW
 		{
 			if (b.terrain.type == SamplerType.Sampler2D)
 			{
-				(b.terrain as Sampler2D).Foreach((x, y, val) => {
+				PWUtils.ResizeSamplerIfNeeded(b.terrain, ref b.biomeTerrain);
+				Sampler2D	terrain = b.terrain as Sampler2D;
+				Sampler2D	biomeTerrain = b.biomeTerrain as Sampler2D;
+				//Fill biomeTerrain instead of terrain to keep an original version of the terrain
+				biomeTerrain.Foreach((x, y) => {
+					float val = terrain[x, y];
 					int	biomeId = b.biomeMap.GetBiomeBlendInfo(x, y).firstBiomeId;
+					if (biomeId == -1)
+						return val;
 					//TODO: biome blending
 					return b.biomeTree.GetBiome(biomeId).biomeTerrain.ComputeValue(x, y, val);
 				});
@@ -94,8 +101,9 @@ namespace PW
 				for (int y = 0; y < chunkSize; y++)
 				{
 					var bInfo = biomeMap.GetBiomeBlendInfo(x, y);
-					if (bInfo.firstBiomeBlendPercent != 1)
-						PWUtils.LogMax("error: blendinfo: " + bInfo.firstBiomeBlendPercent, 500);
+					if (bInfo.firstBiomeId == -1 || bInfo.secondBiomeId == -1)
+						continue ;
+					
 					//TODO: biome blening
 					int		texIndex = bInfo.firstBiomeId / 4;
 					int		texChan = bInfo.firstBiomeId % 4;

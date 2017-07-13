@@ -225,7 +225,7 @@ namespace PW.Biomator
 				//set the color of the biome in the binder
 				binder.outputBiome.previewColor = currentNode.previewColor;
 
-				Debug.Log("previewColor for biome " + biomeName + ": " + binder.outputBiome.previewColor);
+				Debug.Log("set biome " + currentNode.biome + " in node " + currentNode);
 
 				//set the biome ID and name:
 				currentNode.biome.name = biomeName;
@@ -255,9 +255,9 @@ namespace PW.Biomator
 			BuildTreeInternal(node, root, 0);
 			st.Stop();
 
-			Debug.Log("built tree time: " + st.ElapsedMilliseconds);
+			Debug.Log("built tree time: " + st.ElapsedMilliseconds + "ms");
 			
-			DumpBuiltTree();
+			// DumpBuiltTree();
 
 			isBuilt = true;
 		}
@@ -278,13 +278,13 @@ namespace PW.Biomator
 			DumpBiomeTree(root);
 			string	childs = "";
 			foreach (var child in current.GetChilds())
-				childs += child + " | ";
+				childs += child + "(" + child.biome + ") | ";
 			Debug.Log("swicth line1: " + childs);
 
 			childs = "";
 			foreach (var child in current.GetChilds())
 				foreach (var childOfChild in child.GetChilds())
-					childs += childOfChild + " | ";
+					childs += childOfChild + "(" + childOfChild.biome + ") | ";
 			Debug.Log("swicth line2: " + childs);
 		}
 
@@ -322,6 +322,7 @@ namespace PW.Biomator
 					bool water = (biomeData.isWaterless) ? false : biomeData.waterHeight[x, y] > 0;
 					float temp = (biomeData.temperature != null) ? biomeData.temperature[x, y] : 0;
 					float wet = (biomeData.wetness != null) ? biomeData.wetness[x, y] : 0;
+					// Debug.Log("map [" + x + "/" + y + "] = " + biomeData.terrain[x, y]);
 					//TODO: 3D terrain management
 					float height = (is3DTerrain) ? 0 : biomeData.terrain[x, y];
 					BiomeSwitchNode current = root;
@@ -342,7 +343,7 @@ namespace PW.Biomator
 									break ;
 								case BiomeSwitchMode.Height:
 									if (height > child.min && height <= child.max)
-										{current = child; goto nextChild; }
+										{ current = child; goto nextChild; }
 									break ;
 								case BiomeSwitchMode.Temperature:
 									if (temp > child.min && temp <= child.max)
@@ -363,8 +364,9 @@ namespace PW.Biomator
 					else
 					{
 						//FIXME!!!!
-						biomeData.biomeIds.SetFirstBiomeId(x, y, 0);
-						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 50);
+						biomeData.biomeIds.SetFirstBiomeId(x, y, -1);
+						// PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 200);
+						Debug.LogWarning("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height);
 						continue ;
 					}
 				}

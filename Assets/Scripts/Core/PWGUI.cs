@@ -816,6 +816,8 @@ namespace PW.Core
 
 	public void Texture2DArrayPreview(Texture2DArray textureArray, bool update)
 	{
+		if (textureArray == null)
+			return ;
 		var	fieldSettings = GetGUISettingData(() => new PWGUISettings());
 		if (update)
 		{

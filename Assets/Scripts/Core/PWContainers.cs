@@ -307,7 +307,6 @@ namespace PW.Core
 		public short	secondBiomeId;
         public float	firstBiomeBlendPercent;
         public float	secondBiomeBlendPercent;
-		public bool		init;
     }
 
 	public class BiomeMap2D : Sampler
@@ -320,9 +319,6 @@ namespace PW.Core
 			this.size = size;
 			this.step = step;
 			blendMap = new BiomeBlendPoint[size * size];
-			for (int i = 0; i < size * size; i++)
-				blendMap[i].init = false;
-			Debug.Log("NEW BIOME MAP !!!");
 		}
 		
 		public void SetFirstBiomeId(int x, int y, short id)
@@ -330,14 +326,11 @@ namespace PW.Core
 			int		i = x + y * size;
 			blendMap[i].firstBiomeId = id;
 			blendMap[i].firstBiomeBlendPercent = 1;
-			blendMap[i].init = true;
 			//TODO: blending here
 		}
 
 		public BiomeBlendPoint	GetBiomeBlendInfo(int x, int y)
 		{
-			if (!blendMap[x + y * size].init)
-				Debug.Log("GETTING UNINITIALIZED DATA !");
 			return blendMap[x + y * size];
 		}
 	}
@@ -377,13 +370,10 @@ namespace PW.Core
 		public Sampler3D			terrain3D;
 		public Sampler				terrainRef { get { return (terrain == null) ? terrain3D : terrain as Sampler; } }
 
-		public Sampler2D			biomeTerrain;
-		public Sampler3D			biomeTerrain3D;
-		public Sampler				biomeTerrainRef { get { return (biomeTerrain == null) ? biomeTerrain3D : biomeTerrain as Sampler; } }
-		
 		public Sampler2D			wetness;
 		public Sampler3D			wetness3D;
 		public Sampler				wetnessRef { get { return (wetness == null) ? wetness3D : wetness as Sampler; } }
+
 		public Sampler2D			temperature;
 		public Sampler3D			temperature3D;
 		public Sampler				temperatureRef { get { return (temperature == null) ? temperature3D : temperature as Sampler; } }
@@ -541,6 +531,7 @@ namespace PW.Core
 		public BiomeMap3D			biomeMap3D;
 
 		public Sampler				terrain;
+		public Sampler				biomeTerrain;
 		public Sampler				waterHeight;
 		public Sampler				wetnessMap;
 		public Sampler				temperatureMap;

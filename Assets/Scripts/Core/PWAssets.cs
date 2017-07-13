@@ -47,7 +47,7 @@ namespace PW.Core
 			}
 			ret.anisoLevel = firstTexture.anisoLevel;
 			ret.filterMode = firstTexture.filterMode;
-			ret.wrapMode = TextureWrapMode.Clamp;
+			ret.wrapMode = firstTexture.wrapMode;
 			ret.Apply();
 			return ret;
 		}
