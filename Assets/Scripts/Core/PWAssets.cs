@@ -80,7 +80,7 @@ namespace PW.Core
 	
 		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName)
 		{
-			var biomeTextures = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.surfaceMaps.albedo).Where(a => a != null);
+			var biomeTextures = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces.biomeLayers[0].layerMaps[0].slopeMaps[0].albedo).Where(a => a != null);
 			return GenerateOrLoadTexture2DArray(fName, biomeTextures);
 		}
 	}

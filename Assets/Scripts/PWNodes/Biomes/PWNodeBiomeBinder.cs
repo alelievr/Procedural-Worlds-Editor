@@ -17,7 +17,7 @@ namespace PW.Node
 		//inputs for 2D topdown map
 		[PWInput("Surface substance")]
 		[PWNotRequired]
-		public SurfaceMaps			terrainSurface;
+		public BiomeSurfaces		biomeSurfaces;
 
 		[PWInput("Details")]
 		[PWNotRequired]
@@ -103,7 +103,7 @@ namespace PW.Node
 			}
 			outputBiome.biomeTerrain = biomeTerrainModifier;
 			outputBiome.mode = outputMode;
-			outputBiome.surfaceMaps = terrainSurface;
+			outputBiome.biomeSurfaces = biomeSurfaces;
 		}
 	}
 }

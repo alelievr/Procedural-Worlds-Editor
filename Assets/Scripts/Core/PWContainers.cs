@@ -468,7 +468,7 @@ namespace PW.Core
 		Complex,
 	}
 
-	public class SurfaceMaps
+	public class BiomeSurfaceMaps
 	{
 		SurfaceMapType		type;
 
@@ -488,24 +488,40 @@ namespace PW.Core
 		public Texture2D	roughness;
 		public Texture2D	displacement;
 		public Texture2D	tesselation;
+		
+		public Color		temperatureColorModifier;
+		public Color		wetnessColorModifier;
+	}
 
-		public Texture2D	blend;
+	public class BiomeSurfaceSlopeMaps
+	{
+		public float					minSlope;
+		public float					maxSlope;
+		public List< BiomeSurfaceMaps >	slopeMaps;
+	}
+
+	public class BiomeSurfaceLayer
+	{
+		public float							minHeight;
+		public float							maxHeight;
+		public List< BiomeSurfaceSlopeMaps	>	layerMaps;
+	}
+
+	public class BiomeSurfaces
+	{
+		public List< BiomeSurfaceLayer >	biomeLayers;
 	}
 
 	public class Biome
 	{
-		public BiomeData			biomeDataReference;
-		public PWTerrainOutputMode	mode;
-		public string				name;
-		public Color				previewColor;
-		public short				id;
-		public BiomeTerrain			biomeTerrain;
+		public BiomeData				biomeDataReference;
+		public PWTerrainOutputMode		mode;
+		public string					name;
+		public Color					previewColor;
+		public short					id;
+		public BiomeTerrain				biomeTerrain;
 
-		//datas for TopDown2D terrain
-		public SurfaceMaps			surfaceMaps;
-		public Color				surfaceColorModifier;
-
-		//TODO: datas for others output modes
+		public BiomeSurfaces			biomeSurfaces;
 	}
 
 	public enum MaterializerType
