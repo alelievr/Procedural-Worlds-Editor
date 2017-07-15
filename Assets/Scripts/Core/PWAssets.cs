@@ -34,6 +34,7 @@ namespace PW.Core
 				return null;
 			}
 			i = 0;
+			
 			foreach (var tex in texs)
 			{
 				if (tex.width != firstTexture.width || tex.height != firstTexture.height)
@@ -61,9 +62,11 @@ namespace PW.Core
 				Debug.LogError("asset file null or empty !");
 				return null;
 			}
-			string assetFile = Path.Combine(PWConstants.resourcePath, fName + ".asset");
+			string assetFile = fName + ".asset";
 
-			ret = Resources.Load< Texture2DArray >(assetFile);
+			ret = Resources.Load< Texture2DArray >(fName);
+			if (ret == null)
+				Debug.LogError("Texture2DArray not found: " + assetFile);
 			if (ret != null)
 				return ret;
 				

@@ -45,7 +45,7 @@ namespace PW.Node
 			if (needUpdate)
 			{
 				output.Foreach((x, y) => {
-					float val = Mathf.PerlinNoise((float)x * step / 20f + seed, (float)y * step / 20f + seed);
+					float val = Mathf.PerlinNoise((float)x * step / 20f + seed + chunkPosition.x, (float)y * step / 20f + seed + chunkPosition.y);
 					for (int i = 0; i < octaves; i++)
 						val *= 1.2f;
 					return val;

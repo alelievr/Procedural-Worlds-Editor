@@ -121,7 +121,7 @@ namespace PW
 
 			#if UNITY_EDITOR
 				sw.Stop();
-				Debug.Log(sw.ElapsedMilliseconds + "ms taken to generate blend maps");
+				// Debug.Log(sw.ElapsedMilliseconds + "ms taken to generate blend maps");
 			#endif
 			
 			return texs;

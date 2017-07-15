@@ -49,6 +49,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	//terrain materializer
 	PWTerrainBase		terrainMaterializer;
+	int					chunkRenderDistance = 4; //chunk render distance
 
 	//multi-node selection
 	[System.NonSerializedAttribute]
@@ -609,7 +610,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void MovePreviewCamera(Vector2 move)
 	{
-		previewCamera.gameObject.transform.position += new Vector3(move.x, 0, move.y);
+		previewCamera.transform.position += new Vector3(move.x, 0, move.y);
+		terrainMaterializer.position = previewCamera.transform.position;
 	}
 
 #endregion
@@ -629,7 +631,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.height - currentRect.width - 4), GUILayout.ExpandWidth(true));
 			{
-				EditorGUILayout.LabelField("Procedural Worlds Editor !", whiteText);
+				EditorGUILayout.Space();
+
+				chunkRenderDistance = EditorGUILayout.IntSlider("chunk Render distance", chunkRenderDistance, 1, 24);
+				terrainMaterializer.renderDistance = chunkRenderDistance;
 
 				if (currentGraph == null)
 					OnEnable();
@@ -676,6 +681,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					parentGraph.UpdateChunkSize(parentGraph.chunkSize);
 					graphNeedReload = true;
 				}
+				terrainMaterializer.chunkSize = parentGraph.chunkSize;
 
 				//step:
 				EditorGUI.BeginChangeCheck();
@@ -1041,9 +1047,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 	void DrawNodeGraphCore()
 	{
-		Event	e = Event.current;
-		int		i;
+		Event		e = Event.current;
+		EventType	savedEventType;
+		int			i;
 		
+		//check if we have an event outside of the graph core area
+		savedEventType = e.type;
+		if ((e.isMouse) && currentGraph.h2.mousePanel == 1)
+			e.type = EventType.Ignore;
+
 		float	scale = 2f;
 
 		//background grid
@@ -1274,6 +1286,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		}
 		EditorGUILayout.EndHorizontal();
+
+		e.type = savedEventType;
 	}
 
 #endregion

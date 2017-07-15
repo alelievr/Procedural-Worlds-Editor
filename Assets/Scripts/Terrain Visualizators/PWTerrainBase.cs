@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using PW.Core;
 
 namespace PW
 {
-	public enum PWChunkLoadMode
+	public enum PWChunkLoadPatternMode
 	{
 		CUBIC,
 		// PRIORITY_CUBIC,
@@ -12,11 +14,12 @@ namespace PW
 
 	[System.SerializableAttribute]
 	public abstract class PWTerrainBase : MonoBehaviour {
-		public Vector3			position;
-		public int				viewDistance;
-		public PWChunkLoadMode	loadMode;
-		public PWNodeGraph		graph;
-		public PWTerrainStorage	terrainStorage;
+		public Vector3					position;
+		public int						renderDistance;
+		public int						chunkSize;
+		public PWChunkLoadPatternMode	loadPatternMode;
+		public PWNodeGraph				graph;
+		public PWTerrainStorage			terrainStorage;
 		
 		[HideInInspector]
 		public GameObject		terrainRoot;
@@ -105,24 +108,47 @@ namespace PW
 				terrainStorage.AddChunk(pos, terrainData, userData);
 			return userData;
 		}
+
+		//Generate 2D positions
+		IEnumerable< Vector3 > GenerateChunkPositions()
+		{
+			//snap position to the nearest chunk:
+			position = Vector3.zero;//PWUtils.Round(position / chunkSize) * chunkSize;
+
+			switch (loadPatternMode)
+			{
+				case PWChunkLoadPatternMode.CUBIC:
+					Vector3 pos = position;
+					for (int x = -renderDistance; x < renderDistance; x++)
+						for (int z = -renderDistance; z < renderDistance; z++)
+						{
+							Vector3 chunkPos = pos + new Vector3(x * chunkSize, 0, z * chunkSize);
+							yield return chunkPos;
+						}
+					break ;
+			}
+			yield return position;
+		}
 	
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks()
 		{
-			//TODO: view distance loading algorithm.
-
 			if (terrainStorage == null)
 				return ;
-			if (!terrainStorage.isLoaded(position))
+
+			foreach (var pos in GenerateChunkPositions())
 			{
-				var data = RequestChunk(position, 42);
-				var userChunkData = OnChunkCreate(data, position);
-				terrainStorage.AddChunk(position, data, userChunkData);
-			}
-			else
-			{
-				var chunk = terrainStorage[position];
-				OnChunkRender(chunk.terrainData, chunk.userData, position);
+				if (!terrainStorage.isLoaded(pos))
+				{
+					var data = RequestChunk(pos, 42);
+					var userChunkData = OnChunkCreate(data, pos);
+					terrainStorage.AddChunk(pos, data, userChunkData);
+				}
+				else
+				{
+					var chunk = terrainStorage[pos];
+					OnChunkRender(chunk.terrainData, chunk.userData, pos);
+				}
 			}
 		}
 

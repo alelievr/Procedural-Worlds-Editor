@@ -7,6 +7,8 @@ public class HorizontalSplitView {
 	[SerializeField]
 	public float	handlerPosition;
 	[SerializeField]
+	public int		mousePanel;
+	[SerializeField]
 	int				internHandlerPosition;
 	[SerializeField]
 	bool			resize = false;
@@ -43,6 +45,8 @@ public class HorizontalSplitView {
 		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition), GUILayout.ExpandHeight(true));
 		if (beginRect.width > 2)
 			savedBeginRect = beginRect;
+		if (savedBeginRect.Contains(Event.current.mousePosition))
+			mousePanel = 1;
 		return savedBeginRect;
 	}
 
@@ -70,7 +74,12 @@ public class HorizontalSplitView {
 		if (resize && Event.current.isMouse)
 			Event.current.Use();
 
-		return new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
+		Rect ret =  new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
+		if (ret.Contains(Event.current.mousePosition))
+			mousePanel = 2;
+		else if (mousePanel != 1)
+			mousePanel = 0;
+		return ret;
 	}
 
 	public void UpdateMinMax(float min, float max)
