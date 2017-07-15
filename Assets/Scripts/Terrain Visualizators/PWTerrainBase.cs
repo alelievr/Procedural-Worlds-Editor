@@ -65,8 +65,14 @@ namespace PW
 			object firstOutput = graphOutput.inputValues.At(0);
 			if (firstOutput != null)
 			{
-				if ( firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
+				if (firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
+				{
+					var terrain = ((ChunkData)firstOutput).terrain;
+					Debug.Log("terrain: " + terrain);
+					if (terrain != null)
+						Debug.Log("first val: " + ((Sampler2D)terrain)[0, 0]);
 					return (ChunkData)firstOutput; //return the first value of output
+				}
 				else
 				{
 					Debug.LogWarning("graph first output is not a ChunkData");
@@ -113,19 +119,22 @@ namespace PW
 		IEnumerable< Vector3 > GenerateChunkPositions()
 		{
 			//snap position to the nearest chunk:
-			position = Vector3.zero;//PWUtils.Round(position / chunkSize) * chunkSize;
+			if (chunkSize > 0)
+				position = PWUtils.Round(position / chunkSize) * chunkSize;
+			else
+				position = Vector3.zero;
 
 			switch (loadPatternMode)
 			{
 				case PWChunkLoadPatternMode.CUBIC:
 					Vector3 pos = position;
-					for (int x = -renderDistance; x < renderDistance; x++)
-						for (int z = -renderDistance; z < renderDistance; z++)
+					for (int x = -renderDistance; x <= renderDistance; x++)
+						for (int z = -renderDistance; z <= renderDistance; z++)
 						{
 							Vector3 chunkPos = pos + new Vector3(x * chunkSize, 0, z * chunkSize);
 							yield return chunkPos;
 						}
-					break ;
+					yield break ;
 			}
 			yield return position;
 		}

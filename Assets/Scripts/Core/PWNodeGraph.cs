@@ -410,7 +410,10 @@ namespace PW.Core
 					if (!bakedNodeFields.ContainsKey(link.localClassAQName)
 						|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
 						|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
+						{
+							Debug.LogError("Can't find field: " + link.localName + " in " + link.localClassAQName + " OR " + link.distantName + " in " + link.distantClassAQName);
 							continue ;
+						}
 
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
 				if (val == null)
@@ -490,6 +493,7 @@ namespace PW.Core
 
 			if (realMode || !isVisibleInEditor)
 				nodeInfo.node.EndFrameUpdate();
+			
 			ProcessNodeLinks(nodeInfo.node);
 
 			//if node was an external node, compute his subgraph
@@ -521,7 +525,7 @@ namespace PW.Core
 				if (nodeInfo.node.computeOrder < 0)
 					continue ;
 
-				//TODO: uncomment for when TerrainBuilder node will be OK
+				//TODO: uncomment when TerrainBuilder node will be OK
 				// if (processMode == PWGraphProcessMode.Geologic && nodeInfo.type == typeof(PWNodeTerrainBuilder))
 					// return ;
 				

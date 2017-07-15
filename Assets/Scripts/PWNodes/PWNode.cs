@@ -927,6 +927,8 @@ namespace PW
 				{
 					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
 					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
+					if (singleAnchorData == null)
+						continue ;
 					singleAnchorData.linkCount--;
 					links.RemoveAt(i--);
 				}
@@ -1163,6 +1165,11 @@ namespace PW
 		public void		EndFrameUpdate()
 		{
 			//reset values at the end of the frame
+			//reset all non editor-dependent params:
+			inputHasChanged = false;
+			outputHasChanged = false;
+			justReloaded = false;
+			forceReload = false;
 			oldSeed = seed;
 			oldChunkPosition = chunkPosition;
 			oldChunkSize = chunkSize;
@@ -1170,13 +1177,9 @@ namespace PW
 			seedHasChanged = false;
 			positionHasChanged = false;
 			chunkSizeHasChanged = false;
-			inputHasChanged = false;
-			outputHasChanged = false;
 			reloadRequested = false;
 			biomeReloadRequested = false;
-			justReloaded = false;
 			stepHasChanged = false;
-			forceReload = false;
 			reloadRequestFromNode = null;
 		}
 		

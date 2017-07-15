@@ -23,7 +23,7 @@ namespace PW.Node
 
 		[SerializeField]
 		MapOutputOption[]			outputMaps = {
-			new MapOutputOption("height", false),
+			new MapOutputOption("height", true),
 			new MapOutputOption("wetness", false),
 			new MapOutputOption("temperatue", false),
 			new MapOutputOption("air", false),

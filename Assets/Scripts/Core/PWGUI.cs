@@ -831,9 +831,10 @@ namespace PW.Core
 				fieldSettings.textures[i] = tex;
 			}
 		}
-
-		foreach (var tex in fieldSettings.textures)
-			TexturePreview(tex, false, false, false);
+	
+		if (fieldSettings.textures != null)
+			foreach (var tex in fieldSettings.textures)
+				TexturePreview(tex, false, false, false);
 	}
 
 	#endregion

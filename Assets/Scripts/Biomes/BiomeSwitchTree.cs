@@ -366,7 +366,7 @@ namespace PW.Biomator
 						//FIXME!!!!
 						biomeData.biomeIds.SetFirstBiomeId(x, y, -1);
 						// PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 200);
-						Debug.LogWarning("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height);
+						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 300);
 						continue ;
 					}
 				}

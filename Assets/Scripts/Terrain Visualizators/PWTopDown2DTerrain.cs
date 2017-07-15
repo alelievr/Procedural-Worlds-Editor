@@ -22,15 +22,17 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		
 		//create the terrain texture:
 		//TODO: bind the blendMap with biome maps to the terrain shader
+		//TODO: bind all vertex datas from the mesh
 
 		GameObject g = CreateChunkObject(pos, PrimitiveType.Quad);
 		g.transform.rotation = Quaternion.Euler(90, 0, 0);
 		g.transform.localScale = Vector3.one * chunkSize;
-		var mat = g.GetComponent< MeshRenderer >().sharedMaterial;
+		var mat = new Material(Shader.Find("ProceduralWorlds/Basic terrain"));
 		mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
 		mat.SetTexture("_BlendMaps", chunk.blendMaps);
 		if (chunk.blendMaps != null)
 			mat.SetInt("_BlendMapsCount", chunk.blendMaps.depth);
+		g.GetComponent< MeshRenderer >().sharedMaterial = mat;
 		return g;
 	}
 

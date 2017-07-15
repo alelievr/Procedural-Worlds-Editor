@@ -633,7 +633,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			{
 				EditorGUILayout.Space();
 
-				chunkRenderDistance = EditorGUILayout.IntSlider("chunk Render distance", chunkRenderDistance, 1, 24);
+				chunkRenderDistance = EditorGUILayout.IntSlider("chunk Render distance", chunkRenderDistance, 0, 24);
 				terrainMaterializer.renderDistance = chunkRenderDistance;
 
 				if (currentGraph == null)
@@ -1049,13 +1049,15 @@ public class ProceduralWorldsWindow : EditorWindow {
 	{
 		Event		e = Event.current;
 		EventType	savedEventType;
+		bool		savedIsMouse;
 		int			i;
 		
 		//check if we have an event outside of the graph core area
 		savedEventType = e.type;
-		if ((e.isMouse) && currentGraph.h2.mousePanel == 1)
+		savedIsMouse = e.isMouse;
+		if ((e.isMouse) && currentGraph.h2.mousePanel != 2)
 			e.type = EventType.Ignore;
-
+		
 		float	scale = 2f;
 
 		//background grid
@@ -1097,8 +1099,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
-			//if we are on the mother graph, render the terrain
-			//TODO: other preview type for graph outputs in function of graph output type.
 			if (e.type == EventType.Layout)
 			{
 				currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
@@ -1208,23 +1208,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					toAdd.selected = true;
 				}
 
-				//duplicate selected subgraphs
-				/*var dupgList = new List< PWNodeGraph >();
-				foreach (var subgraphName in currentGraph.subgraphReferences)
-				{
-					PWNodeGraph pwng = parentGraph.FindGraphByName(subgraphName);
-
-					if (pwng.externalGraphNode.selected)
-						dupgList.Add(Instantiate(pwng));
-				}
-
-				foreach (var toAdd in dupgList)
-				{
-					CreateNewNode(toAdd.externalGraphNode, toAdd.externalGraphNode.windowRect.position + new Vector2(40, 40), toAdd.externalName, true);
-
-					//TODO: duplicate inner nodes too
-				}*/
-
 				e.Use();
 			}
 
@@ -1270,7 +1253,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 			}, true, true);
 
-			//TODO: subgraph dependencies management.
 			if (reloadRequested)
 			{
 				currentGraph.ForeachAllNodes(n => {
@@ -1286,8 +1268,9 @@ public class ProceduralWorldsWindow : EditorWindow {
 			}
 		}
 		EditorGUILayout.EndHorizontal();
-
-		e.type = savedEventType;
+		
+		if (savedIsMouse && currentGraph.h2.mousePanel != 2)
+			e.type = savedEventType;
 	}
 
 #endregion
