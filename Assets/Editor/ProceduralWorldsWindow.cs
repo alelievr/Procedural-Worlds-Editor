@@ -195,6 +195,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Slider", typeof(PWNodeSlider),
 			"Constant", typeof(PWNodeConstant),
 			"Color", typeof(PWNodeColor),
+			"Surface maps", typeof(PWNodeSurfaceMaps),
 			"GameObject", typeof(PWNodeGameObject),
 			"Material", typeof(PWNodeMaterial),
 			"Texture2D", typeof(PWNodeTexture2D),
@@ -210,7 +211,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			"Biome switch", typeof(PWNodeBiomeSwitch),
 			"Biome Binder", typeof(PWNodeBiomeBinder),
 			"Biome blender", typeof(PWNodeBiomeBlender),
-			"Biome substances", typeof(PWNodeBiomeSurface),
+			"Biome surface", typeof(PWNodeBiomeSurface),
 			"Biome terrain", typeof(PWNodeBiomeTerrain),
 			"Biome temperature map", typeof(PWNodeBiomeTemperature),
 			"Biome wetness map", typeof(PWNodeBiomeWetness)

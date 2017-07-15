@@ -15,7 +15,7 @@ namespace PW.Node
 		public PWTerrainOutputMode	outputMode;
 		
 		//inputs for 2D topdown map
-		[PWInput("Surface substance")]
+		[PWInput("Surfaces")]
 		[PWNotRequired]
 		public BiomeSurfaces		biomeSurfaces;
 

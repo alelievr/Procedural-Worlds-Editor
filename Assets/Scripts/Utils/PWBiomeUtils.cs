@@ -84,7 +84,11 @@ namespace PW
 
 			int			chunkSize = b.terrain.size;
 			BiomeMap2D	biomeMap = b.biomeMap;
-			int			textureCount = b.biomeTree.GetBiomes().Select(l => l.Value.surfaceMaps.albedo).GroupBy(l => l.name).Count();
+			int			textureCount = 0;
+			foreach (var kp in b.biomeTree.GetBiomes())
+				if (kp.Value.biomeSurfaces != null)
+					foreach (var layer in kp.Value.biomeSurfaces.biomeLayers)
+						textureCount += layer.slopeMaps.Count;
 			if (blackTexture == null || blackTexture.Length != chunkSize * chunkSize)
 				blackTexture = new Color[chunkSize * chunkSize];
 

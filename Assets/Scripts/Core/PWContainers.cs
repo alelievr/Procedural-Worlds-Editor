@@ -468,48 +468,62 @@ namespace PW.Core
 		Complex,
 	}
 
+	[Serializable]
 	public class BiomeSurfaceMaps
 	{
+		[SerializeField]
 		SurfaceMapType		type;
 
-		public Texture2D	albedo;
-		public Texture2D	secondAlbedo;
-		public Texture2D	diffuse;
-		public Texture2D	normal;
-		public Texture2D	secondNormal;
-		public Texture2D	height;
-		public Texture2D	emissive;
-		public Texture2D	specular;
-		public Texture2D	opacity;
-		public Texture2D	smoothness;
-		public Texture2D	ambiantOcculison;
-		public Texture2D	detailMask;
-		public Texture2D	metallic;
-		public Texture2D	roughness;
-		public Texture2D	displacement;
-		public Texture2D	tesselation;
+		public string		name;
+
+		[NonSerialized] public Texture2D	albedo;
+		[NonSerialized] public Texture2D	secondAlbedo;
+		[NonSerialized] public Texture2D	diffuse;
+		[NonSerialized] public Texture2D	normal;
+		[NonSerialized] public Texture2D	secondNormal;
+		[NonSerialized] public Texture2D	height;
+		[NonSerialized] public Texture2D	emissive;
+		[NonSerialized] public Texture2D	specular;
+		[NonSerialized] public Texture2D	opacity;
+		[NonSerialized] public Texture2D	smoothness;
+		[NonSerialized] public Texture2D	ambiantOcculison;
+		[NonSerialized] public Texture2D	detailMask;
+		[NonSerialized] public Texture2D	metallic;
+		[NonSerialized] public Texture2D	roughness;
+		[NonSerialized] public Texture2D	displacement;
+		[NonSerialized] public Texture2D	tesselation;
 		
-		public Color		temperatureColorModifier;
-		public Color		wetnessColorModifier;
+		[NonSerialized] public Color		temperatureColorModifier;
+		[NonSerialized] public Color		wetnessColorModifier;
 	}
 
+	[Serializable]
 	public class BiomeSurfaceSlopeMaps
 	{
 		public float					minSlope;
 		public float					maxSlope;
-		public List< BiomeSurfaceMaps >	slopeMaps;
+
+		public float					y;
+
+		public BiomeSurfaceMaps 		surfaceMaps;
 	}
 
+	[Serializable]
 	public class BiomeSurfaceLayer
 	{
 		public float							minHeight;
 		public float							maxHeight;
-		public List< BiomeSurfaceSlopeMaps	>	layerMaps;
+
+		public string							name = "Layer name";
+		public bool								foldout = false;
+
+		public List< BiomeSurfaceSlopeMaps	>	slopeMaps = new List< BiomeSurfaceSlopeMaps >();
 	}
 
+	[Serializable]
 	public class BiomeSurfaces
 	{
-		public List< BiomeSurfaceLayer >	biomeLayers;
+		public List< BiomeSurfaceLayer >	biomeLayers = new List< BiomeSurfaceLayer >();
 	}
 
 	public class Biome

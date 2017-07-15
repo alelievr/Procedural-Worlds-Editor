@@ -34,23 +34,30 @@ public static class PWColorPalette  {
 		{"defaultAnchor", new Color(.75f, .75f, .75f, 1)},
 		{"transparentBackground", new Color(.75f, .75f, .75f, .5f)}
 	};
+
+	static bool			IsType(Type t, params Type[] types)
+	{
+		foreach (var type in types)
+			if (t == type || t.IsSubclassOf(type))
+				return true;
+		return false;
+	}
 	
 	public static Color GetAnchorColorByType(Type t)
 	{
-		if (t == typeof(int) || t == typeof(float) || t == typeof(Vector2)
-			|| t == typeof(Vector3) || t == typeof(Vector4) || t == typeof(Texture2D)
-			|| t == typeof(Mesh) || t == typeof(GameObject) || t == typeof(Material)
-			|| t == typeof(Color))
+		if (IsType(t, typeof(int), typeof(float), typeof(Vector2), typeof(Vector3),
+			typeof(Vector4), typeof(Texture2D), typeof(Mesh), typeof(GameObject),
+			typeof(Material), typeof(Color), typeof(BiomeSurfaceMaps)))
 			return GetColor("redAnchor");
-		else if (t.IsSubclassOf(typeof(ChunkData)) || t == typeof(ChunkData))
+		else if (IsType(t, typeof(ChunkData)))
 			return GetColor("blueAnchor");
-		else if (t.IsSubclassOf(typeof(BiomeData)) || t == typeof(BiomeData) || t == typeof(SurfaceMaps))
+		else if (IsType(t, typeof(BiomeData), typeof(BiomeTerrain), typeof(BiomeSurfaces)))
 			return GetColor("purpleAnchor");
-		else if (t == typeof(Biome))
+		else if (IsType(t, typeof(Biome)))
 			return GetColor("cyanAnchor");
-		else if (t.IsSubclassOf(typeof(Sampler)) || t == typeof(Sampler))
+		else if (IsType(t, typeof(Sampler)))
 			return GetColor("greenAnchor");
-		else if (t == typeof(PWValues))
+		else if (IsType(t, typeof(PWValues), typeof(PWValue)))
 			return GetColor("whiteAnchor");
 		else
 			return GetColor("defaultAnchor");

@@ -130,7 +130,7 @@ namespace PW.Core
 
 		[System.NonSerializedAttribute]
 		List< Type > allNodeTypeList = new List< Type > {
-			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor),
+			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
 			typeof(PWNodeAdd), typeof(PWNodeCurve),
 			typeof(PWNodeDebugLog),
 			typeof(PWNodeCircleNoiseMask),

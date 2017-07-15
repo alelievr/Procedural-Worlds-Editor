@@ -23,7 +23,7 @@ namespace PW.Core
 			int	texCount = texs.Count();
 			if (texCount == 0)
 			{
-				Debug.LogWarning("no texture detected in any biomes");
+				Debug.LogWarning("no textures to create Texture2DArray");
 				return null;
 			}
 			var firstTexture = texs.First();
@@ -69,6 +69,11 @@ namespace PW.Core
 				
 			#if UNITY_EDITOR
 				ret = GenerateTexture2DArray(texs);
+				if (ret == null)
+				{
+					Debug.LogError("Can't create texture array, no albedo found in any biomes");
+					return null;
+				}
 				AssetDatabase.CreateAsset(ret, assetFile);
 				AssetDatabase.SaveAssets();
 			#else
@@ -80,7 +85,15 @@ namespace PW.Core
 	
 		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName)
 		{
-			var biomeTextures = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces.biomeLayers[0].layerMaps[0].slopeMaps[0].albedo).Where(a => a != null);
+			List< Texture2D > biomeTextures = new List< Texture2D >();
+			var biomeSurfaces = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces);
+			foreach (var biomeSurface in biomeSurfaces)
+				if (biomeSurface.biomeLayers != null)
+					foreach (var layerSurface in biomeSurface.biomeLayers)
+						foreach (var slopeSurface in layerSurface.slopeMaps)
+							if (slopeSurface.surfaceMaps != null)
+								if (slopeSurface.surfaceMaps.albedo != null && !biomeTextures.Contains(slopeSurface.surfaceMaps.albedo))
+									biomeTextures.Add(slopeSurface.surfaceMaps.albedo);
 			return GenerateOrLoadTexture2DArray(fName, biomeTextures);
 		}
 	}
