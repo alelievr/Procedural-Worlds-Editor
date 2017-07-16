@@ -1165,15 +1165,14 @@ namespace PW
 		public void		EndFrameUpdate()
 		{
 			//reset values at the end of the frame
-			//reset all non editor-dependent params:
-			inputHasChanged = false;
-			outputHasChanged = false;
-			justReloaded = false;
-			forceReload = false;
 			oldSeed = seed;
 			oldChunkPosition = chunkPosition;
 			oldChunkSize = chunkSize;
 			oldStep = step;
+			inputHasChanged = false;
+			outputHasChanged = false;
+			justReloaded = false;
+			forceReload = false;
 			seedHasChanged = false;
 			positionHasChanged = false;
 			chunkSizeHasChanged = false;

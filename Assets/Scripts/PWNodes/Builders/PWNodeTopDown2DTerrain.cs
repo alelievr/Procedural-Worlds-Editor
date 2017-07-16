@@ -79,8 +79,7 @@ namespace PW.Node
 			//TODO: 3D biome map management
 			BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
 
-			if (biomeTextureArray == null)
-				terrainOutput.blendMaps = BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes, GetGraphName());
+			terrainOutput.blendMaps = BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes, GetGraphName());
 
 			terrainOutput.albedoMaps = inputBlendedBiomes.terrainTextureArray;
 

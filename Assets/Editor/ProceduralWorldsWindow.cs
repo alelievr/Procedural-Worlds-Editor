@@ -1101,7 +1101,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			//We run the calcul the nodes:
 			if (e.type == EventType.Layout)
 			{
-				currentGraph.ForeachAllNodes(p => p.BeginFrameUpdate());
 				if (graphNeedReload)
 				{
 					terrainMaterializer.DestroyAllChunks();
@@ -1239,7 +1238,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(p => {
 				if (e.type == EventType.Layout)
 				{
-					p.EndFrameUpdate();
 					if (p.notifyDataChanged || p.notifyBiomeDataChanged)
 					{
 						biomeReload = p.notifyBiomeDataChanged;

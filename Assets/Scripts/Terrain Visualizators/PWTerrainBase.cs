@@ -68,9 +68,6 @@ namespace PW
 				if (firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
 				{
 					var terrain = ((ChunkData)firstOutput).terrain;
-					Debug.Log("terrain: " + terrain);
-					if (terrain != null)
-						Debug.Log("first val: " + ((Sampler2D)terrain)[0, 0]);
 					return (ChunkData)firstOutput; //return the first value of output
 				}
 				else

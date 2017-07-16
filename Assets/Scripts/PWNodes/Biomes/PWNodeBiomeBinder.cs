@@ -97,10 +97,8 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			if (outputBiome == null)
-			{
 				outputBiome = new Biome();
-				outputBiome.biomeDataReference = inputBiome;
-			}
+			outputBiome.biomeDataReference = inputBiome;
 			outputBiome.biomeTerrain = biomeTerrainModifier;
 			outputBiome.mode = outputMode;
 			outputBiome.biomeSurfaces = biomeSurfaces;
