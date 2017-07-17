@@ -64,7 +64,9 @@ namespace PW
 		static GUIStyle 	renameNodeTextFieldStyle = null;
 		static GUIStyle		inputAnchorLabelStyle = null;
 		static GUIStyle		outputAnchorLabelStyle = null;
+		#if DEBUG_NODE
 		static GUIStyle		debugStyle = null;
+		#endif
 		public GUIStyle		windowStyle;
 		public GUIStyle		windowSelectedStyle;
 		public static GUIStyle	innerNodePaddingStyle = null;
@@ -411,7 +413,9 @@ namespace PW
 				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
+				#if DEBUG_NODE
 				debugStyle = GUI.skin.FindStyle("Debug");
+				#endif
 			}
 
 			//update the PWGUI window rect with this window rect:
@@ -1150,7 +1154,7 @@ namespace PW
 			});
 		}
 
-		public void BeginFrameUpdate()
+		public void		BeginFrameUpdate()
 		{
 			if (oldSeed != seed)
 				seedHasChanged = true;
@@ -1271,6 +1275,45 @@ namespace PW
 		{
 			return reloadRequestFromNode;
 		}
+
+	#endregion
+
+	#region Editor specific functions
+
+		#if UNITY_EDITOR
+
+		public class NodeFrameInfo
+		{
+			public bool 	seedHasChanged, positionHasChanged, chunkSizeHasChanged, stepHasChanged, reloadRequested, justReloaded, biomeReloadRequested;
+		}
+
+		public NodeFrameInfo		SnapshotFrameInfo()
+		{
+			NodeFrameInfo		ni = new NodeFrameInfo();
+
+			ni.seedHasChanged = seedHasChanged;
+			ni.positionHasChanged = positionHasChanged;
+			ni.chunkSizeHasChanged = chunkSizeHasChanged;
+			ni.stepHasChanged = stepHasChanged;
+			ni.reloadRequested = reloadRequested;
+			ni.justReloaded = justReloaded;
+			ni.biomeReloadRequested = biomeReloadRequested;
+
+			return ni;
+		}
+
+		public void					RestoreSnapshot(NodeFrameInfo ni)
+		{
+			seedHasChanged = ni.seedHasChanged;
+			positionHasChanged = ni.positionHasChanged;
+			chunkSizeHasChanged = ni.positionHasChanged;
+			stepHasChanged = ni.stepHasChanged;
+			reloadRequested = ni.reloadRequested;
+			justReloaded = ni.justReloaded;
+			biomeReloadRequested = ni.biomeReloadRequested;
+		}
+
+		#endif
 
 	#endregion
 

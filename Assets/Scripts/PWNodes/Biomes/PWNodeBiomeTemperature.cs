@@ -72,7 +72,7 @@ namespace PW.Node
 			if (fieldUpdate)
 				UpdateTemperatureMap();
 			
-			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, needUpdate || fieldUpdate, false, FilterMode.Point);
+			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, needUpdate, false, FilterMode.Point);
 
 			if (fieldUpdate)
 			{

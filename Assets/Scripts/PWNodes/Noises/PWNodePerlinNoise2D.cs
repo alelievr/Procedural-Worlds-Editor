@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using PW.Core;
+using PW.Noises;
 
 namespace PW.Node
 {
@@ -44,11 +45,11 @@ namespace PW.Node
 			//recalcul perlin noise values with new seed / position.
 			if (needUpdate)
 			{
-				float scale = 20f;
+				float scale = 40f;
 				output.Foreach((x, y) => {
 					float nx = (float)x * step + chunkPosition.x;
 					float ny = (float)y * step + chunkPosition.z;
-					float val = Mathf.PerlinNoise(nx / scale + (float)seed, ny / scale + (float)seed);
+					float val = PerlinNoise2D.GenerateNoise(nx / scale, ny / scale, 2, 2, 1, 1, seed);
 					for (int i = 0; i < octaves; i++)
 						val *= 1.2f;
 					return val;

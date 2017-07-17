@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
-using PW.Core;
+using System.Collections;
 
 namespace PW.Noises
 {
-	public class PerlinNoise2D : Noise {
-		        static int[] p = {151,160,137,91,90,15,
+    public class PerlinNoise3D : Noise
+    {
+        static int[] p = {151,160,137,91,90,15,
            131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
            190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
            88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -32,27 +33,36 @@ namespace PW.Noises
            138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
        };
 
-        static float PerlinValue(float x, float y, int seed = 0)
+        static float PerlinValue(float x, float y, float z, int seed = 0)
         {
             x += 12.254f * seed;
             y += 31.964f * seed;
+            z += -17.934f * seed;
             int X = (int)Mathf.Floor(x) & 255,
-                Y = (int)Mathf.Floor(y) & 255;
+                Y = (int)Mathf.Floor(y) & 255,
+                Z = (int)Mathf.Floor(z) & 255;
             x -= Mathf.Floor(x);
             y -= Mathf.Floor(y);
+            z -= Mathf.Floor(z);
             float u = Fade(x),
-                  v = Fade(y);
-            int A = p[X] + Y, AA = p[A], AB = p[A + 1],
-                B = p[X + 1] + Y, BA = p[B], BB = p[B + 1];
+                  v = Fade(y),
+                  w = Fade(z);
+            int A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z,
+                B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
 
-            return Lerp(v, Lerp(u, Grad(p[AA + 1], x, y),
-                       Grad(p[BA + 1], x - 1, y)),
-                   Lerp(u, Grad(p[AB + 1], x, y - 1),
-                       Grad(p[BB + 1], x - 1, y - 1)));
+            return Lerp(w, Lerp(v, Lerp(u, Grad(p[AA], x, y, z),
+                            Grad(p[BA], x - 1, y, z)),
+                        Lerp(u, Grad(p[AB], x, y - 1, z),
+                            Grad(p[BB], x - 1, y - 1, z))),
+                    Lerp(v, Lerp(u, Grad(p[AA + 1], x, y, z - 1),
+                            Grad(p[BA + 1], x - 1, y, z - 1)),
+                        Lerp(u, Grad(p[AB + 1], x, y - 1, z - 1),
+                            Grad(p[BB + 1], x - 1, y - 1, z - 1))));
         }
 
-        public static float GenerateNoise(float x,
+        static public float GenerateNoise(float x,
                 float y,
+                float z,
                 int octaves = 2,
                 float frequency = 2,
                 float lacunarity = 1,
@@ -62,49 +72,27 @@ namespace PW.Noises
             float ret = 0;
             x *= frequency;
             y *= frequency;
+            z *= frequency;
 
             for (int i = 0; i < octaves; i++)
             {
-                float val = PerlinValue(x, y, seed);
+                float val = PerlinValue(x, y, z, seed);
                 ret += val * persistence;
                 x *= lacunarity;
                 y *= lacunarity;
+                z *= lacunarity;
                 persistence *= persistence;
             }
             return (Mathf.Clamp((ret + 1f) / 2f, 0, 1));
         }
         static float Fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
         static float Lerp(float t, float a, float b) { return a + t * (b - a); }
-        static float Grad(int hash, float x, float y)
+        static float Grad(int hash, float x, float y, float z)
         {
             int h = hash & 15;
             float u = h < 8 ? x : y,
-                  v = h < 4 ? y : x;
+                  v = h < 4 ? y : h == 12 || h == 14 ? x : z;
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
-    
-		public override void ComputeSampler(Sampler samp, int seed)
-		{
-			if (samp == null)
-				Debug.LogError("null sampler send to Noise ComputeSampler !");
-			if (hasGraphicAcceleration)
-			{
-				//compute shader here
-			}
-			else
-			{
-				//TODO: thread with workers
-				if (samp.type == SamplerType.Sampler2D)
-				{
-					(samp as Sampler2D).Foreach((x, y) => {
-						return PerlinValue(x, y, seed);
-					});
-				}
-				else
-				{
-
-				}
-			}
-		}
-	}
+    }
 }

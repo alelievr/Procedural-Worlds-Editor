@@ -20,6 +20,7 @@ namespace PW
 		public PWChunkLoadPatternMode	loadPatternMode;
 		public PWNodeGraph				graph;
 		public PWTerrainStorage			terrainStorage;
+		public float					terrainScale = .1f; //10 cm per point
 		
 		[HideInInspector]
 		public GameObject		terrainRoot;
@@ -66,10 +67,7 @@ namespace PW
 			if (firstOutput != null)
 			{
 				if (firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
-				{
-					var terrain = ((ChunkData)firstOutput).terrain;
 					return (ChunkData)firstOutput; //return the first value of output
-				}
 				else
 				{
 					Debug.LogWarning("graph first output is not a ChunkData");
@@ -198,28 +196,6 @@ namespace PW
 			ret.transform.parent = terrainRoot.transform;
 			ret.transform.position = pos;
 			//TODO: implement Sampler* scale (step) in the scale of the object.
-
-			return ret;
-		}
-
-		public GameObject	CreateChunkObject(Vector3 pos, PrimitiveType prim)
-		{
-			string		name = PositionToChunkName(pos);
-			GameObject	ret;
-
-			ret = TryFindExistingGameobjectByName(name);
-			if (ret != null && ret.GetComponent< MeshRenderer >() != null)
-				return ret;
-			else if (ret != null)
-				GameObject.DestroyImmediate(ret);
-
-			ret = GameObject.CreatePrimitive(prim);
-			ret.name = name;
-			ret.transform.parent = terrainRoot.transform;
-			ret.transform.position = pos;
-
-			if (prim == PrimitiveType.Quad || prim == PrimitiveType.Plane)
-				ret.GetComponent< MeshRenderer >().sharedMaterial = Resources.Load< Material >("preview2DMaterial");
 
 			return ret;
 		}

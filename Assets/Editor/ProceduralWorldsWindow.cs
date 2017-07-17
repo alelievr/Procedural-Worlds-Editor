@@ -1096,6 +1096,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 
 		//node rendering
+		parentGraph.ForeachAllNodes(n => n.BeginFrameUpdate());
+		PWNode.NodeFrameInfo	snap = parentGraph.nodes[0].SnapshotFrameInfo();
 		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
@@ -1109,6 +1111,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				//updateChunks will update and generate new chunks if needed.
 				terrainMaterializer.UpdateChunks();
 			}
+			parentGraph.ForeachAllNodes(n => n.RestoreSnapshot(snap));
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
 				e.Use();
@@ -1238,6 +1241,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(p => {
 				if (e.type == EventType.Layout)
 				{
+					p.EndFrameUpdate();
 					if (p.notifyDataChanged || p.notifyBiomeDataChanged)
 					{
 						biomeReload = p.notifyBiomeDataChanged;
