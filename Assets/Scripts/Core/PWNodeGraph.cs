@@ -490,6 +490,8 @@ namespace PW.Core
 			}
 			else
 				nodeInfo.node.Process();
+
+			nodeInfo.node.EndFrameUpdate();
 			
 			ProcessNodeLinks(nodeInfo.node);
 
@@ -525,6 +527,8 @@ namespace PW.Core
 				//TODO: uncomment when TerrainBuilder node will be OK
 				// if (processMode == PWGraphProcessMode.Geologic && nodeInfo.type == typeof(PWNodeTerrainBuilder))
 					// return ;
+				
+				nodeInfo.node.BeginFrameUpdate();
 				
 				//if node outputs is only in RequestForProcess mode, avoid the computing
 				var links = nodeInfo.node.GetLinks();

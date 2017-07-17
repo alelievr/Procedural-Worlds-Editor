@@ -702,6 +702,7 @@ namespace PW.Core
 			//update the texture with the gradient
 			if (update || fieldSettings.update)
 			{
+				Debug.Log("updated Sampler2D texture for preview !");
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				}, true);
@@ -814,29 +815,29 @@ namespace PW.Core
 
 	#region Texture2DArray preview field
 
-	public void Texture2DArrayPreview(Texture2DArray textureArray, bool update)
-	{
-		if (textureArray == null)
-			return ;
-		var	fieldSettings = GetGUISettingData(() => new PWGUISettings());
-		if (update)
+		public void Texture2DArrayPreview(Texture2DArray textureArray, bool update)
 		{
-			if (fieldSettings.textures == null || fieldSettings.textures.Length < textureArray.depth)
-				fieldSettings.textures = new Texture2D[textureArray.depth];
-			for (int i = 0; i < textureArray.depth; i++)
+			if (textureArray == null)
+				return ;
+			var	fieldSettings = GetGUISettingData(() => new PWGUISettings());
+			if (update)
 			{
-				Texture2D tex = new Texture2D(textureArray.width, textureArray.height, textureArray.format, false);
-				tex.SetPixels(textureArray.GetPixels(i));
-				tex.Apply();
-				fieldSettings.textures[i] = tex;
+				if (fieldSettings.textures == null || fieldSettings.textures.Length < textureArray.depth)
+					fieldSettings.textures = new Texture2D[textureArray.depth];
+				for (int i = 0; i < textureArray.depth; i++)
+				{
+					Texture2D tex = new Texture2D(textureArray.width, textureArray.height, textureArray.format, false);
+					tex.SetPixels(textureArray.GetPixels(i));
+					tex.Apply();
+					fieldSettings.textures[i] = tex;
+				}
 			}
+		
+			if (fieldSettings.textures != null)
+				foreach (var tex in fieldSettings.textures)
+					TexturePreview(tex, false, false, false);
 		}
 	
-		if (fieldSettings.textures != null)
-			foreach (var tex in fieldSettings.textures)
-				TexturePreview(tex, false, false, false);
-	}
-
 	#endregion
 
 	#region Utils
