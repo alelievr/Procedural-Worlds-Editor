@@ -74,7 +74,6 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 
 		GameObject g = CreateChunkObject(pos * terrainScale);
 		g.transform.rotation = Quaternion.identity;
-		Debug.Log("chunkSize: " + chunkSize);
 		g.transform.localScale = Vector3.one * chunkSize * terrainScale;
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();

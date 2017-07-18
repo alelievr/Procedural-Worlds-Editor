@@ -329,7 +329,10 @@ namespace PW.Core
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				if (nodes[i] != null)
+				{
+					nodes[i].RunNodeAwake();
 					nodesDictionary[nodes[i].nodeId] = nodes[i];
+				}
 				else
 				{
 					nodes.RemoveAt(i);

@@ -1189,7 +1189,7 @@ namespace PW
 		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
 		{
-			ForeachPWAnchorDatas((data)=> {
+			ForeachPWAnchorDatas((data) => {
 				if (data.multiple)
 					data.displayHiddenMultipleAnchors = display;
 			});
@@ -1699,6 +1699,11 @@ namespace PW
 					return c;
 			}
 			return defaultColor;
+		}
+
+		public override string ToString()
+		{
+			return "[" + GetType() + "] " + externalName;
 		}
 
 	#endregion

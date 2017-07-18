@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using PW.Core;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace PW
 {

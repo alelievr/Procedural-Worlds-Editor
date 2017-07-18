@@ -64,6 +64,7 @@ namespace PW.Core
 			}
 			string assetFile = fName + ".asset";
 
+			return null;
 			ret = Resources.Load< Texture2DArray >(fName);
 			if (ret == null)
 				Debug.LogError("Texture2DArray not found: " + assetFile);

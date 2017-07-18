@@ -31,7 +31,7 @@ namespace PW.Core
 		}
 	}
 			
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public class PWGUIManager {
 
 		public static Rect	editorWindowRect;
@@ -702,7 +702,6 @@ namespace PW.Core
 			//update the texture with the gradient
 			if (update || fieldSettings.update)
 			{
-				Debug.Log("updated Sampler2D texture for preview !");
 				samp.Foreach((x, y, val) => {
 					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
 				}, true);

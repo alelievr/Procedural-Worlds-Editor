@@ -9,6 +9,7 @@ using UnityEditor;
 using PW;
 using PW.Core;
 using PW.Node;
+using Object = UnityEngine.Object;
 
 public class ProceduralWorldsWindow : EditorWindow {
 
@@ -605,7 +606,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		if (terrainMaterializer == null)
 			terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
 		if (terrainMaterializer.initialized == false || terrainMaterializer.graph != currentGraph)
-			terrainMaterializer.InitGraph(parentGraph);
+			terrainMaterializer.InitGraph(Object.Instantiate< PWNodeGraph >(currentGraph));
 	}
 
 	void MovePreviewCamera(Vector2 move)
@@ -1105,17 +1106,24 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				if (graphNeedReload)
 				{
-					terrainMaterializer.DestroyAllChunks();
-					AssetDatabase.SaveAssets();
-					//load another instance of the current graph to separate calls:
 					graphNeedReload = false;
+					
+					terrainMaterializer.DestroyAllChunks();
 
+					//load another instance of the current graph to separate calls:
+					if (terrainMaterializer.graph.GetHashCode() != currentGraph.GetHashCode())
+						DestroyImmediate(terrainMaterializer.graph);
+					terrainMaterializer.InitGraph(CloneGraph(currentGraph));
+
+					//process the instance of the graph in our editor so we can see datas on chunk 0, 0, 0
 					currentGraph.realMode = false;
+					currentGraph.ForeachAllNodes(n => n.UpdateCurrentGraph(currentGraph));
+					currentGraph.UpdateChunkPosition(Vector3.zero);
+					currentGraph.ProcessGraph();
 				}
 				//updateChunks will update and generate new chunks if needed.
 				//TODOMAYBE: remove this when workers will be added to the Terrain.
 				terrainMaterializer.UpdateChunks();
-
 			}
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
@@ -1897,6 +1905,21 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 		windowStyle = greyNodeWindow;
 		windowSelectedStyle = greyNodeWindowSelected;
+	}
+
+	PWNodeGraph CloneGraph(PWNodeGraph graph)
+	{
+		PWNodeGraph	newGraph = Object.Instantiate< PWNodeGraph >(graph);
+
+		newGraph.nodes.Clear();
+		foreach (var node in graph.nodes)
+		{
+			var n = Object.Instantiate< PWNode >(node);
+			n.UpdateCurrentGraph(newGraph);
+			newGraph.nodes.Add(n);
+		}
+		newGraph.OnEnable();
+		return newGraph;
 	}
 
 #endregion

@@ -31,17 +31,20 @@ namespace PW
 		private PWNodeGraphOutput	graphOutput = null;
 
 		private	int				oldSeed = 0;
+		private int				WorkerGenerationId = 42;
 		
 		void Start () {
 			InitGraph(graph);
 		}
 
-		public void InitGraph(PWNodeGraph graph = null)
+		public void InitGraph(PWNodeGraph graph)
 		{
 			if (graph != null)
 				this.graph = graph;
-			if (graph == null)
+			else
 				return ;
+			
+			graph.realMode = true;
 			chunkSize = graph.chunkSize;
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			if (!graph.realMode)
@@ -149,9 +152,18 @@ namespace PW
 			{
 				if (!terrainStorage.isLoaded(pos))
 				{
-					var data = RequestChunk(pos, 42);
+					ChunkData data = RequestChunk(pos, graph.seed);
 					var userChunkData = OnChunkCreate(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
+					/*PWWorker.EnqueueTask(
+						() => RequestChunk(pos, graph.seed),
+						(chunkData) => {
+							ChunkData data = chunkData as ChunkData;
+							var userChunkData = OnChunkCreate(data, pos);
+							terrainStorage.AddChunk(pos, data, userChunkData);
+						},
+						WorkerGenerationId
+					);*/
 				}
 				else
 				{
@@ -163,6 +175,7 @@ namespace PW
 
 		public void	DestroyAllChunks()
 		{
+			PWWorker.StopAllWorkers(WorkerGenerationId);
 			if (terrainStorage == null)
 				return ;
 			terrainStorage.Foreach((pos, terrainData, userData) => {
