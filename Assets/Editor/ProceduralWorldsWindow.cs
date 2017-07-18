@@ -605,8 +605,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			previewCamera.targetTexture = previewCameraRenderTexture;
 		if (terrainMaterializer == null)
 			terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
-		if (terrainMaterializer.initialized == false || terrainMaterializer.graph != currentGraph)
-			terrainMaterializer.InitGraph(Object.Instantiate< PWNodeGraph >(currentGraph));
 	}
 
 	void MovePreviewCamera(Vector2 move)
@@ -1111,7 +1109,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 					terrainMaterializer.DestroyAllChunks();
 
 					//load another instance of the current graph to separate calls:
-					if (terrainMaterializer.graph.GetHashCode() != currentGraph.GetHashCode())
+					if (terrainMaterializer.graph != null && terrainMaterializer.graph.GetHashCode() != currentGraph.GetHashCode())
 						DestroyImmediate(terrainMaterializer.graph);
 					terrainMaterializer.InitGraph(CloneGraph(currentGraph));
 

@@ -29,6 +29,21 @@
 			float		_ShowBlendMap;
 			int			_BlendMapsCount;
 			float4		_AlbedoMaps_ST;
+
+			//unity appdata_fulll:
+			/*
+			struct appdata_full {
+				float4 vertex : POSITION;
+				float4 tangent : TANGENT;
+				float3 normal : NORMAL;
+				float4 texcoord : TEXCOORD0;
+				float4 texcoord1 : TEXCOORD1;
+				float4 texcoord2 : TEXCOORD2;
+				float4 texcoord3 : TEXCOORD3;
+				fixed4 color : COLOR;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+			*/
 	
 			UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
 			UNITY_DECLARE_TEX2DARRAY(_BlendMaps);
