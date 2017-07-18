@@ -12,7 +12,7 @@ namespace PW
 		// PRIORITY_CIRCLE,
 	}
 
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public abstract class PWTerrainBase : MonoBehaviour {
 		public Vector3					position;
 		public int						renderDistance;
@@ -31,6 +31,10 @@ namespace PW
 		private PWNodeGraphOutput	graphOutput = null;
 
 		private	int				oldSeed = 0;
+		
+		void Start () {
+			InitGraph(graph);
+		}
 
 		public void InitGraph(PWNodeGraph graph = null)
 		{
@@ -38,6 +42,7 @@ namespace PW
 				this.graph = graph;
 			if (graph == null)
 				return ;
+			chunkSize = graph.chunkSize;
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			if (!graph.realMode)
 				terrainRoot = GameObject.Find("PWPreviewTerrain");

@@ -9,10 +9,6 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 	static Mesh				topDownTerrainMesh = null;
 	static int				topDownTerrainMeshSize = 0;
 
-	void Start () {
-		InitGraph(graph);
-	}
-
 	void	GenerateTopDownTerrainMesh()
 	{
 		int					size = chunkSize * chunkSize;
@@ -22,7 +18,7 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		Vector3[]			normals = new Vector3[size];
 		int[]				triangles = new int[nFaces * 6];
 
-		int					terrainWidth = chunkSize * (int)terrainScale;
+		float				terrainWidth = 1;
 
 		topDownTerrainMesh = new Mesh();
 		topDownTerrainMesh.Clear();
@@ -46,13 +42,13 @@ public class PWTopDown2DTerrain : PWTerrainBase {
         {
             int i = face % (chunkSize - 1) + (face / (chunkSize - 1) * chunkSize);
 
-            triangles[t++] = i + chunkSize;
             triangles[t++] = i + 1;
-            triangles[t++] = i;
-
-            triangles[t++] = i + chunkSize;
             triangles[t++] = i + chunkSize + 1;
+            triangles[t++] = i + chunkSize;
+
+            triangles[t++] = i;
             triangles[t++] = i + 1;
+            triangles[t++] = i + chunkSize;
         }
 
         topDownTerrainMesh.vertices = vertices;
@@ -77,7 +73,8 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		//TODO: bind all vertex datas from the mesh
 
 		GameObject g = CreateChunkObject(pos * terrainScale);
-		g.transform.rotation = Quaternion.Euler(90, 0, 0);
+		g.transform.rotation = Quaternion.identity;
+		Debug.Log("chunkSize: " + chunkSize);
 		g.transform.localScale = Vector3.one * chunkSize * terrainScale;
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
@@ -96,6 +93,7 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 			mat.SetInt("_BlendMapsCount", chunk.blendMaps.depth);
 		}
 		mr.sharedMaterial = mat;
+		//TODO: vertex painting
 		return g;
 	}
 

@@ -1096,22 +1096,27 @@ public class ProceduralWorldsWindow : EditorWindow {
 		}
 
 		//node rendering
-		parentGraph.ForeachAllNodes(n => n.BeginFrameUpdate());
-		PWNode.NodeFrameInfo	snap = parentGraph.nodes[0].SnapshotFrameInfo();
 		EditorGUILayout.BeginHorizontal();
 		{
 			//We run the calcul the nodes:
 			if (e.type == EventType.Layout)
 			{
+				currentGraph.ForeachAllNodes(n => n.BeginFrameUpdate());
+
 				if (graphNeedReload)
 				{
 					terrainMaterializer.DestroyAllChunks();
+					AssetDatabase.SaveAssets();
+					//load another instance of the current graph to separate calls:
 					graphNeedReload = false;
+
+					currentGraph.realMode = false;
 				}
 				//updateChunks will update and generate new chunks if needed.
+				//TODOMAYBE: remove this when workers will be added to the Terrain.
 				terrainMaterializer.UpdateChunks();
+
 			}
-			parentGraph.ForeachAllNodes(n => n.RestoreSnapshot(snap));
 			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 			{
 				e.Use();

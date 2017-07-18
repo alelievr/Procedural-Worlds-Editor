@@ -92,7 +92,9 @@ namespace PW.Node
 
 			if (biomeData == null)
 				return ;
-
+			
+			if (!realMode)
+				Debug.Log("biomeReloadRequested: " + biomeReloadRequested);
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);

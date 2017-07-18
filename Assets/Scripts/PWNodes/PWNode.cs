@@ -57,6 +57,7 @@ namespace PW
 		public bool		forceReload = false;
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
 		public bool		isDependent { get; private set; }
+		public bool		realMode { get { return currentGraph != null ? currentGraph.realMode : false; }}
 		public PWNodeProcessMode	processMode;
 
 	#region Internal Node datas and style
@@ -1275,45 +1276,6 @@ namespace PW
 		{
 			return reloadRequestFromNode;
 		}
-
-	#endregion
-
-	#region Editor specific functions
-
-		#if UNITY_EDITOR
-
-		public class NodeFrameInfo
-		{
-			public bool 	seedHasChanged, positionHasChanged, chunkSizeHasChanged, stepHasChanged, reloadRequested, justReloaded, biomeReloadRequested;
-		}
-
-		public NodeFrameInfo		SnapshotFrameInfo()
-		{
-			NodeFrameInfo		ni = new NodeFrameInfo();
-
-			ni.seedHasChanged = seedHasChanged;
-			ni.positionHasChanged = positionHasChanged;
-			ni.chunkSizeHasChanged = chunkSizeHasChanged;
-			ni.stepHasChanged = stepHasChanged;
-			ni.reloadRequested = reloadRequested;
-			ni.justReloaded = justReloaded;
-			ni.biomeReloadRequested = biomeReloadRequested;
-
-			return ni;
-		}
-
-		public void					RestoreSnapshot(NodeFrameInfo ni)
-		{
-			seedHasChanged = ni.seedHasChanged;
-			positionHasChanged = ni.positionHasChanged;
-			chunkSizeHasChanged = ni.positionHasChanged;
-			stepHasChanged = ni.stepHasChanged;
-			reloadRequested = ni.reloadRequested;
-			justReloaded = ni.justReloaded;
-			biomeReloadRequested = ni.biomeReloadRequested;
-		}
-
-		#endif
 
 	#endregion
 
