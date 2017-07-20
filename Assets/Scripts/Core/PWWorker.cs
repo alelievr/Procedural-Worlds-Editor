@@ -48,7 +48,7 @@ public static class PWWorker {
 		if (!working)
 		{
 			SetWorkerCount(8);
-			Work();
+			// Work();
 		}
 	}
 

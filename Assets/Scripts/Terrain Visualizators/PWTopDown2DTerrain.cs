@@ -84,7 +84,10 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 
 		mf.sharedMesh = topDownTerrainMesh;
 
-		Material mat = new Material(Shader.Find("ProceduralWorlds/Basic terrain"));
+		Shader topDown2DBasicTerrainShader = Shader.Find("ProceduralWorlds/Basic terrain");
+		if (topDown2DBasicTerrainShader == null)
+			topDown2DBasicTerrainShader = Shader.Find("Standard");
+		Material mat = new Material(topDown2DBasicTerrainShader);
 		mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
 		if (chunk.blendMaps != null)
 		{
