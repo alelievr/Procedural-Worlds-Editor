@@ -193,7 +193,7 @@ namespace PW
 
 		GameObject			TryFindExistingGameobjectByName(string name)
 		{
-			Transform t = terrainRoot.transform.FindChild(name);
+			Transform t = terrainRoot.transform.Find(name);
 			if (t != null)
 				return t.gameObject;
 			return null;

@@ -1,4 +1,6 @@
-﻿Shader "ProceduralWorlds/Basic terrain" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "ProceduralWorlds/Basic terrain" {
 	Properties {
 		// _MainTex ("Surface (RGB)", 2D) = "white" {}
 		// _HeightMap ("Heightmap", 2D) = "black" {}
@@ -64,7 +66,7 @@
 			VertOutput vert(VertInput input) {
 				VertOutput	o;
 	
-				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
+				o.pos = UnityObjectToClipPos(input.pos);
 				o.color = input.color;
 				o.uv = input.uv;
 				return o;

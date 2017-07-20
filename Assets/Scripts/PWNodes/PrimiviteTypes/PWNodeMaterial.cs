@@ -43,7 +43,8 @@ namespace PW.Node
 		
 		public override void OnNodeDisable()
 		{
-			matPreview.Cleanup();
+			if (matPreview != null)
+				matPreview.Cleanup();
 		}
 
 		//no process needed

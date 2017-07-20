@@ -16,6 +16,7 @@ namespace PW
 		private Bounds				renderBounds;
 		private Rect				previewRect = new Rect(0, 0, 170, 170);
 		private GameObject			firstObject = null;
+		private Camera				cam;
 		// private Vector3			previewCenter;
 	
 		public PWGUIObjectPreview(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Skybox, float distance = 10)
@@ -25,14 +26,20 @@ namespace PW
 			previewLayer = (int)propInfo.GetValue(null, new object[0]);
 	
 			preview = new PreviewRenderUtility(true);
-			preview.m_CameraFieldOfView = cameraFieldOfView;
-			preview.m_Camera.cullingMask = 1 << previewLayer;
-			preview.m_Camera.farClipPlane = 10000;
-			preview.m_Camera.nearClipPlane = 0.001f;
-			preview.m_Camera.clearFlags = clearFlags;
-			preview.m_Camera.transform.position = (new Vector3(0, 0, -1)).normalized * distance;
+			#if UNITY_2017
+				cam = preview.camera;
+				preview.cameraFieldOfView = cameraFieldOfView;
+			#else
+				cam = preview.m_Camera;
+				preview.m_CameraFieldOfView = cameraFieldOfView;
+			#endif
+			cam.cullingMask = 1 << previewLayer;
+			cam.farClipPlane = 10000;
+			cam.nearClipPlane = 0.001f;
+			cam.clearFlags = clearFlags;
+			cam.transform.position = (new Vector3(0, 0, -1)).normalized * distance;
 
-			preview.m_Camera.transform.rotation = Quaternion.Euler(0, 0, 0);
+			cam.transform.rotation = Quaternion.Euler(0, 0, 0);
 		}
 	
 		void ExpandRenderObjects(GameObject parent, List< GameObject > toAddList)
@@ -88,20 +95,20 @@ namespace PW
 			{
 				if (e.type == EventType.mouseDrag && firstObject != null && e.button == 0)
 				{
-					preview.m_Camera.transform.RotateAround(firstObject.transform.position, Vector3.up, e.delta.x);
-					preview.m_Camera.transform.RotateAround(firstObject.transform.position, preview.m_Camera.transform.right, e.delta.y);
-					preview.m_Camera.transform.LookAt(firstObject.transform);
+					cam.transform.RotateAround(firstObject.transform.position, Vector3.up, e.delta.x);
+					cam.transform.RotateAround(firstObject.transform.position, cam.transform.right, e.delta.y);
+					cam.transform.LookAt(firstObject.transform);
 					e.Use();
 				}
 				if (e.type == EventType.mouseDrag && e.button == 2)
 				{
-					Vector3 panDirection = preview.m_Camera.transform.right * e.delta.x - preview.m_Camera.transform.up * e.delta.y;
-					preview.m_Camera.transform.position += panDirection / 10;
+					Vector3 panDirection = cam.transform.right * e.delta.x - cam.transform.up * e.delta.y;
+					cam.transform.position += panDirection / 10;
 					e.Use();
 				}
 				if (e.type == EventType.ScrollWheel)
 				{
-					preview.m_Camera.transform.position *= 1 + (e.delta.y / 10);
+					cam.transform.position *= 1 + (e.delta.y / 10);
 					e.Use();
 				}
 			}
@@ -130,7 +137,7 @@ namespace PW
 			foreach (var obj in renderObjects)
 				obj.SetActive(true);
 	
-			preview.m_Camera.Render();
+			cam.Render();
 	
 			foreach (var obj in renderObjects)
 				obj.SetActive(false);
