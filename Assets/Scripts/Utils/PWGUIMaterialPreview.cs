@@ -54,7 +54,7 @@ namespace PW
 
 		public void Render(Rect r)
 		{
-			objectPreview.Render();
+			objectPreview.Render(r);
 		}
 
 		public void Cleanup()
