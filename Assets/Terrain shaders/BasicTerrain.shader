@@ -14,17 +14,13 @@
 
 		#pragma surface surf StandardSpecular vertex:vert
 
-		// Use shader model 3.5 to user TextureArray
+		// Use shader model 3.5 for TextureArray feature
 		#pragma target 3.5
 
 		#include "UnityCG.cginc"
 		
-		// sampler2D	_MainTex;
-		// sampler2D	_HeightMap;
-		// float4		_MainTex_ST;
 		float		_ShowBlendMap;
 		int			_BlendMapsCount;
-		float4		_AlbedoMaps_ST;
 
 		//unity appdata_full:
 		/*
@@ -41,15 +37,31 @@
 		};
 		*/
 
-		// UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
-		// UNITY_DECLARE_TEX2DARRAY(_BlendMaps);
-
-		void vert(inout appdata_full v)
+		UNITY_DECLARE_TEX2DARRAY(_AlbedoMaps);
+		
+		struct Input
 		{
+			//store biome blend infos:
+			//	x -> first biome id (for TextureArrays) and y -> first biome percent
+			//	z -> second biome id and y -> second biome percent
+			float4	biomeBlendInfos;	//UV chan 1 in Vector4
+			float4	data : COLOR;		//vertex color, encode 4 variables from *Terrain nodes
+			// float4	otherDatas;		//Tangent chan, unused
+
+			//we keep the channel 0 of Uvs for textures:
+			float2	uv_AlbedoMaps;
+		};
+
+		void vert(inout appdata_full v, out Input o)
+		{
+			UNITY_INITIALIZE_OUTPUT(Input, o);
+			o.biomeBlendInfos = v.texcoord1;
+			// o.otherDatas = v.tangent;
+
 			//TODO: displacement
 		}
 
-/*		half4 blend(half4 texture1, float a1, half4 texture2)
+		half4 blend(half4 texture1, float a1, half4 texture2)
 		{
 			float a2 = 1 - a1;
 			float depth = 0.2;
@@ -59,37 +71,29 @@
 			float b2 = max(texture2.a + a2 - ma, 0);
 		
 			return (texture1 * b1 + texture2 * b2) / (b1 + b2);
-		}*/
+		}
 
-		struct Input
+		void surf(in Input v, inout SurfaceOutputStandardSpecular o)
 		{
-			float2 uv_Maintex;
-		};
+			int		biomeId1 = v.biomeBlendInfos.x;
+			float	blend1 = v.biomeBlendInfos.y;
+			int		biomeId2 = v.biomeBlendInfos.z;
+			float	blend2 = v.biomeBlendInfos.w;
 
-		void surf(Input v, inout SurfaceOutputStandardSpecular o) {
-			half3 col = half3(0, 0, 0);
-
-			/*for (int j = 0; j < _BlendMapsCount; j++)
+			if (_ShowBlendMap > .5f)
 			{
-				float4 b = UNITY_SAMPLE_TEX2DARRAY(_BlendMaps, float3(o.uv, j));
+				half3	col = half3(1, 1, 0) * blend1 + half3(0, 1, 1) * blend2;
 
-				if (_ShowBlendMap > .5f)
-				{
-					if (length(b) == 0)
-						b = float4(1, 1, 1, 1);
-					col += b;
-				}
-				else
-				{
-					float2 nuv = TRANSFORM_TEX(o.uv, _AlbedoMaps);
-					col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 0)), b.r, col);
-					col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 1)), b.g, col);
-					col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 2)), b.b, col);
-					col = blend(UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(nuv, j + 3)), b.a, col);
-				}
-			}*/
+				o.Albedo = half4(col, 1);
+				o.Emission = o.Albedo;
+				return ;
+			}
 
-			o.Albedo = float3(v.uv_Maintex, 1);
+			half4	b1 = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(v.uv_AlbedoMaps.xy, biomeId1));
+			half4	b2 = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(v.uv_AlbedoMaps.xy, biomeId2));
+
+			o.Albedo = blend(b1, blend1, b2);
+			o.Emission = o.Albedo;
 		}
 
 		ENDCG
