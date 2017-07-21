@@ -118,7 +118,7 @@ namespace PW
 		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
 
 		[System.NonSerialized]
-		private PWNodeGraph		currentGraph;
+		public PWNodeGraph		currentGraph;
 
 		[System.NonSerialized]
 		private PWNode			reloadRequestFromNode;
@@ -386,6 +386,10 @@ namespace PW
 		{
 		}
 
+		public virtual void OnNodeProcessOnce()
+		{
+		}
+
 		public virtual bool	OnNodeAnchorLink(string propName, int index)
 		{
 			return true;
@@ -474,6 +478,9 @@ namespace PW
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				selected = !selected;
+				
+			if (e.type == EventType.Layout)
+				EndFrameUpdate();
 		}
 		#endif
 
@@ -741,9 +748,9 @@ namespace PW
 			int		processIconSize = 25;
 			Rect	processModeRect = new Rect(8, 2, processIconSize, processIconSize);
 			if (processMode == PWNodeProcessMode.AutoProcess)
-				GUI.Label(processModeRect, new GUIContent("", nodeAutoProcessModeIcon, "auto process mode, click to switch to request for process mode"));
+				GUI.Label(processModeRect, new GUIContent("", nodeAutoProcessModeIcon, "Auto process mode, click to switch to request for process mode"));
 			else
-				GUI.Label(processModeRect, new GUIContent("", nodeRequestForProcessIcon, "request for process mode mode, click to switch to auto process"));
+				GUI.Label(processModeRect, new GUIContent("", nodeRequestForProcessIcon, "Request for process mode, click to switch to auto process mode"));
 			if (e.type == EventType.MouseDown && processModeRect.Contains(e.mousePosition))
 			{
 				processMode = (processMode == PWNodeProcessMode.AutoProcess) ? PWNodeProcessMode.RequestForProcess : PWNodeProcessMode.AutoProcess;

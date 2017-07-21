@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
@@ -102,6 +103,23 @@ namespace PW.Node
 			outputBiome.biomeTerrain = biomeTerrainModifier;
 			outputBiome.mode = outputMode;
 			outputBiome.biomeSurfaces = biomeSurfaces;
+		}
+
+		public override void OnNodeProcessOnce()
+		{
+			//just pass the biomeSurfaces to the blender for processOnce:
+			if (outputBiome == null)
+				outputBiome = new Biome();
+			var surfaceNode = GetInputNodes().Where(n => n.GetType() == typeof(PWNodeBiomeSurface));
+			if (surfaceNode.Count() > 0)
+			{
+				RequestProcessing(surfaceNode.First().nodeId); //process the surface node
+				outputBiome.biomeSurfaces = biomeSurfaces;
+			}
+			else
+			{
+				Debug.LogWarning("No surface attached to biome !");
+			}
 		}
 	}
 }

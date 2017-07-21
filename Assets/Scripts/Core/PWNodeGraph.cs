@@ -111,24 +111,24 @@ namespace PW.Core
 		[SerializeField]
 		public PWGUIManager					PWGUI;
 
-		[System.NonSerializedAttribute]
-		IOrderedEnumerable< PWNodeProcessInfo > computeOrderSortedNodes = null;
+		[System.NonSerialized]
+		IOrderedEnumerable< PWNodeProcessInfo >		computeOrderSortedNodes = null;
 
-		[System.NonSerializedAttribute]
-		public bool								unserializeInitialized = false;
+		[System.NonSerialized]
+		public bool									unserializeInitialized = false;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Dictionary< string, PWNodeGraph >	graphInstancies = new Dictionary< string, PWNodeGraph >();
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public Dictionary< int, PWNode >			nodesDictionary = new Dictionary< int, PWNode >();
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		Dictionary< string, Dictionary< string, FieldInfo > > bakedNodeFields = new Dictionary< string, Dictionary< string, FieldInfo > >();
 
-		[System.NonSerializedAttribute]
-		public bool			isVisibleInEditor = false;
+		[System.NonSerialized]
+		public bool									isVisibleInEditor = false;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		List< Type > allNodeTypeList = new List< Type > {
 			typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
 			typeof(PWNodeAdd), typeof(PWNodeCurve),
@@ -360,7 +360,7 @@ namespace PW.Core
 			if (outputNode != null)
 				outputNode.UpdateCurrentGraph(this);
 			
-			//bake the graph parts (RequestForProcess links)
+			//bake the graph parts (RequestForProcess nodes)
 			BakeGraphParts();
 		}
 
@@ -543,6 +543,25 @@ namespace PW.Core
 				calculTime += ProcessNode(nodeInfo);
 			}
 			return calculTime;
+		}
+
+		//call all processOnce functions
+		public void	ProcessGraphOnce()
+		{
+			Debug.LogWarning("Process once called !");
+			
+			if (computeOrderSortedNodes == null)
+				UpdateComputeOrder();
+
+			foreach (var nodeInfo in computeOrderSortedNodes)
+			{
+				if (nodeInfo.node.computeOrder < 0)
+					continue ;
+				
+				nodeInfo.node.OnNodeProcessOnce();
+
+				ProcessNodeLinks(nodeInfo.node);
+			}
 		}
 
 		public bool RequestProcessing(int nodeId)

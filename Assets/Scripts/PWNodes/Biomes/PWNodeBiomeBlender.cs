@@ -40,6 +40,8 @@ namespace PW.Node
 			if (inputBiomes.GetValues< Biome >().Count != 0)
 			{
 				var biome = inputBiomes.GetValues< Biome >().First().biomeDataReference;
+				if (biome == null)
+					return ;
 				var heightSamp = biome.terrainRef;
 				biomeRepartitionPreview = new Texture2D(heightSamp.size, heightSamp.size, TextureFormat.RGBA32, false);
 				biomeRepartitionPreview.filterMode = FilterMode.Point;
@@ -93,14 +95,9 @@ namespace PW.Node
 			if (biomeData == null)
 				return ;
 			
-			if (!realMode)
-				Debug.Log("biomeReloadRequested: " + biomeReloadRequested);
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-
-			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
-				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, GetGraphName() + "-Albedo");
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 
@@ -114,6 +111,21 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.windMap = biomeData.windRef;
 			outputBlendedBiomeTerrain.lightingMap = biomeData.lighting;
 			outputBlendedBiomeTerrain.airMap = biomeData.airRef;
+		}
+		
+		public override void OnNodeProcessOnce()
+		{
+			var biomes = inputBiomes.GetValues< Biome >();
+			var biomeData = biomes[0].biomeDataReference;
+
+			if (biomeData == null)
+			{
+				Debug.LogWarning("Can't build the biome albedo map, need to access to Biome datas !");
+				return ;
+			}
+				
+			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
+				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, GetGraphName() + "-Albedo");
 		}
 	}
 }

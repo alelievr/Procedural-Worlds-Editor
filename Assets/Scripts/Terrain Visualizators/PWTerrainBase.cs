@@ -47,6 +47,7 @@ namespace PW
 			graph.realMode = true;
 			chunkSize = graph.chunkSize;
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
+			graph.UpdateComputeOrder();
 			if (!graph.realMode)
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
 			if (terrainRoot == null)
@@ -58,6 +59,7 @@ namespace PW
 					terrainRoot.transform.position = Vector3.zero;
 				}
 			}
+			graph.ProcessGraphOnce();
 		}
 
 		public ChunkData RequestChunk(Vector3 pos, int seed)

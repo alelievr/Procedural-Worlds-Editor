@@ -24,7 +24,8 @@ public class ProceduralWorldsWindow : EditorWindow {
 	bool				draggingNode = false;
 	bool				draggingSelectedNodes = false;
 	bool				draggingSelectedNodesFromContextMenu = false;
-	public static bool	graphNeedReload = false;
+	public bool			graphNeedReload = false;
+	public bool			graphNeedReloadOnce = false;
 	bool				previewMouseDrag = false;
 	bool				editorNeedRepaint = false;
 	PWAnchorInfo		startDragAnchor;
@@ -705,13 +706,25 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 				EditorGUILayout.Separator();
 
-				if (GUILayout.Button("Force graph to reload"))
+				EditorGUILayout.BeginHorizontal();
 				{
-					parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
-					graphNeedReload = true;
-					EvaluateComputeOrder();
-					Debug.Log("graph reloaded !");
+					if (GUILayout.Button("Force reload"))
+					{
+						parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
+						graphNeedReload = true;
+						EvaluateComputeOrder();
+						Debug.Log("graph reloaded !");
+					}
+					if (GUILayout.Button("Force reload Once"))
+					{
+						parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
+						graphNeedReload = true;
+						graphNeedReloadOnce = true;
+						EvaluateComputeOrder();
+						Debug.Log("graph fully reloaded !");
+					}
 				}
+				EditorGUILayout.EndHorizontal();
 
 			}
 			EditorGUILayout.EndVertical();
@@ -1100,7 +1113,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 			//We run the calcul the nodes:
 			if (e.type == EventType.Layout)
 			{
-				currentGraph.ForeachAllNodes(n => n.BeginFrameUpdate());
+				currentGraph.ForeachAllNodes(n => n.BeginFrameUpdate(), true, true);
 
 				if (graphNeedReload)
 				{
@@ -1113,10 +1126,16 @@ public class ProceduralWorldsWindow : EditorWindow {
 						DestroyImmediate(terrainMaterializer.graph);
 					terrainMaterializer.InitGraph(CloneGraph(currentGraph));
 
+					Debug.Log("currentGraph: " + currentGraph.GetHashCode() + " , terrainMat: " + terrainMaterializer.graph.GetHashCode());
 					//process the instance of the graph in our editor so we can see datas on chunk 0, 0, 0
 					currentGraph.realMode = false;
 					currentGraph.ForeachAllNodes(n => n.UpdateCurrentGraph(currentGraph));
 					currentGraph.UpdateChunkPosition(Vector3.zero);
+
+					if (graphNeedReloadOnce)
+						currentGraph.ProcessGraphOnce();
+					graphNeedReloadOnce = false;
+
 					currentGraph.ProcessGraph();
 				}
 				//updateChunks will update and generate new chunks if needed.
@@ -1252,7 +1271,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			currentGraph.ForeachAllNodes(p => {
 				if (e.type == EventType.Layout)
 				{
-					p.EndFrameUpdate();
 					if (p.notifyDataChanged || p.notifyBiomeDataChanged)
 					{
 						biomeReload = p.notifyBiomeDataChanged;
@@ -1728,9 +1746,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
 				if (hoveredLink != null)
 				{
-					menu.AddItem(new GUIContent("Link/AutoProcess mode"), hoveredLink.mode == PWNodeProcessMode.AutoProcess, () => { UpdateLinkMode(hoveredLink, PWNodeProcessMode.AutoProcess); });
-					menu.AddItem(new GUIContent("Link/RequestForProcess mode"), hoveredLink.mode == PWNodeProcessMode.RequestForProcess, () => { UpdateLinkMode(hoveredLink, PWNodeProcessMode.RequestForProcess); });
-					menu.AddItem(new GUIContent("Link/Delete link"), false, DeleteLink, hoveredLink);
+					menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
 				}
 				else
 					menu.AddDisabledItem(new GUIContent("Link"));

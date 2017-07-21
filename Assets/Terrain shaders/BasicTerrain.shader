@@ -6,6 +6,7 @@
 		_BlendMaps ("Blend maps", 2DArray) = "blackTexture" {}
 		[HideInInspector] _BlendMapsCount ("Blend maps count", Int) = 1
 		_ShowBlendMap ("Show blend map", Range(0, 1)) = 0
+		_Displacement ("Displacement", Range(0, 5)) = 0
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -20,6 +21,7 @@
 		#include "UnityCG.cginc"
 		
 		float		_ShowBlendMap;
+		float		_Displacement;
 		int			_BlendMapsCount;
 
 		//unity appdata_full:
@@ -56,9 +58,10 @@
 		{
 			UNITY_INITIALIZE_OUTPUT(Input, o);
 			o.biomeBlendInfos = v.texcoord1;
-			// o.otherDatas = v.tangent;
+			// o.otherDatas = v.tangent; //unused
 
-			//TODO: displacement
+			//data.x is certainly the height of the terrain
+			v.vertex.xyz += v.normal * o.data.x * _Displacement;
 		}
 
 		half4 blend(half4 texture1, float a1, half4 texture2)
@@ -84,15 +87,15 @@
 			{
 				half3	col = half3(1, 1, 0) * blend1 + half3(0, 1, 1) * blend2;
 
-				o.Albedo = half4(col, 1);
-				o.Emission = o.Albedo;
+				o.Albedo = col;
+				o.Emission = col;
 				return ;
 			}
 
 			half4	b1 = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(v.uv_AlbedoMaps.xy, biomeId1));
 			half4	b2 = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(v.uv_AlbedoMaps.xy, biomeId2));
 
-			o.Albedo = blend(b1, blend1, b2);
+			o.Albedo = blend(b1, blend1, b2).xyz;
 			o.Emission = o.Albedo;
 		}
 
