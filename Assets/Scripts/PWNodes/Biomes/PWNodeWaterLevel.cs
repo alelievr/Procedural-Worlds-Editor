@@ -98,15 +98,18 @@ namespace PW.Node
 			}
 		}
 
+		void				CreateNewBiome()
+		{
+			outputBiome = new BiomeData();
+
+			outputBiome.isWaterless = false;
+			outputBiome.biomeTreeStartPoint = this;
+		}
+
 		public override void OnNodeProcess()
 		{
 			if (outputBiome == null || forceReload)
-			{
-				outputBiome = new BiomeData();
-
-				outputBiome.isWaterless = false;
-				outputBiome.biomeTreeStartPoint = this;
-			}
+				CreateNewBiome();
 			
 			if (needUpdate || reloadRequested || biomeReloadRequested)
 			{
@@ -133,5 +136,9 @@ namespace PW.Node
 			}
 		}
 
+		public override void OnNodeProcessOnce()
+		{
+			CreateNewBiome();
+		}
 	}
 }

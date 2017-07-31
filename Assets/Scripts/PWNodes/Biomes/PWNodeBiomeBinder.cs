@@ -110,16 +110,9 @@ namespace PW.Node
 			//just pass the biomeSurfaces to the blender for processOnce:
 			if (outputBiome == null)
 				outputBiome = new Biome();
-			var surfaceNode = GetInputNodes().Where(n => n.GetType() == typeof(PWNodeBiomeSurface));
-			if (surfaceNode.Count() > 0)
-			{
-				RequestProcessing(surfaceNode.First().nodeId); //process the surface node
-				outputBiome.biomeSurfaces = biomeSurfaces;
-			}
-			else
-			{
-				Debug.LogWarning("No surface attached to biome !");
-			}
+			
+			outputBiome.biomeSurfaces = biomeSurfaces;
+			outputBiome.biomeDataReference = inputBiome;
 		}
 	}
 }

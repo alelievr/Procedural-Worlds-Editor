@@ -70,8 +70,8 @@ namespace PW.Node
 			}
 			EditorGUILayout.EndHorizontal();
 
-			if ((blendMapsFoldout = EditorGUILayout.Foldout(blendMapsFoldout, "Show blend maps")))
-				PWGUI.Texture2DArrayPreview(terrainOutput.blendMaps, needUpdate);
+			if (terrainOutput.albedoMaps != null)
+				PWGUI.Texture2DArrayPreview(terrainOutput.albedoMaps, needUpdate);
 		}
 
 		public override void OnNodeProcess()
@@ -79,7 +79,8 @@ namespace PW.Node
 			//TODO: 3D biome map management
 			BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
 
-			terrainOutput.blendMaps = BiomeUtils.GenerateBiomeBlendMaps(inputBlendedBiomes, GetGraphName());
+			terrainOutput.biomeMap = inputBlendedBiomes.biomeMap;
+			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
 
 			terrainOutput.albedoMaps = inputBlendedBiomes.terrainTextureArray;
 

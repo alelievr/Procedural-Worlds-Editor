@@ -3,8 +3,6 @@
 		// _MainTex ("Surface (RGB)", 2D) = "white" {}
 		// _HeightMap ("Heightmap", 2D) = "black" {}
 		_AlbedoMaps ("Albedo maps", 2DArray) = "" {}
-		_BlendMaps ("Blend maps", 2DArray) = "blackTexture" {}
-		[HideInInspector] _BlendMapsCount ("Blend maps count", Int) = 1
 		_ShowBlendMap ("Show blend map", Range(0, 1)) = 0
 		_Displacement ("Displacement", Range(0, 5)) = 0
 	}
@@ -12,6 +10,8 @@
 		Tags { "RenderType"="Opaque" }
 		
 		CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
 
 		#pragma surface surf StandardSpecular vertex:vert
 
@@ -22,7 +22,6 @@
 		
 		float		_ShowBlendMap;
 		float		_Displacement;
-		int			_BlendMapsCount;
 
 		//unity appdata_full:
 		/*
@@ -75,6 +74,19 @@
 		
 			return (texture1 * b1 + texture2 * b2) / (b1 + b2);
 		}
+		
+		half random (in half2 uv, in half3 seed) {
+			return frac(sin(dot(uv.xy, half2(seed.x, seed.y))) * seed.z);
+		}
+
+		half3 GetRandomColor(int id)
+		{
+			return half3(
+				random(half2(-42, id), half3(12.843, 78.324, 252332.0 + id)),
+				random(half2(21, id), half3(92.843, 18.324, 152332.0 + id)),
+				random(half2(12, id), half3(22.843, 38.324, 452332.0 + id))
+			);
+		}
 
 		void surf(in Input v, inout SurfaceOutputStandardSpecular o)
 		{
@@ -83,9 +95,9 @@
 			int		biomeId2 = v.biomeBlendInfos.z;
 			float	blend2 = v.biomeBlendInfos.w;
 
-			if (_ShowBlendMap > .5f)
+			if (_ShowBlendMap > .01f)
 			{
-				half3	col = half3(1, 1, 0) * blend1 + half3(0, 1, 1) * blend2;
+				half3 col = GetRandomColor(biomeId1);
 
 				o.Albedo = col;
 				o.Emission = col;

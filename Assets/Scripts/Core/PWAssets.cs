@@ -27,8 +27,9 @@ namespace PW.Core
 				return null;
 			}
 			var firstTexture = texs.First();
+			bool mipmap = firstTexture.mipmapCount > 1;
 			try {
-				ret = new Texture2DArray(firstTexture.width, firstTexture.height, texCount, firstTexture.format, firstTexture.mipmapCount > 1, isLinear);
+				ret = new Texture2DArray(firstTexture.width, firstTexture.height, texCount, firstTexture.format, mipmap, isLinear);
 			} catch (Exception e) {
 				Debug.LogError(e);
 				return null;
@@ -53,7 +54,7 @@ namespace PW.Core
 			return ret;
 		}
 
-		public static Texture2DArray	GenerateOrLoadTexture2DArray(string fName, IEnumerable< Texture2D > texs)
+		public static Texture2DArray	GenerateOrLoadTexture2DArray(string fName, IEnumerable< Texture2D > texs, bool forceReload = false)
 		{
 			Texture2DArray	ret;
 
@@ -62,12 +63,11 @@ namespace PW.Core
 				Debug.LogError("asset file null or empty !");
 				return null;
 			}
-			string assetFile = fName + ".asset";
 
-			ret = Resources.Load< Texture2DArray >(fName);
+			ret = Resources.Load< Texture2DArray >(Path.GetFileNameWithoutExtension(fName));
 			if (ret == null)
-				Debug.LogError("Texture2DArray not found: " + assetFile);
-			if (ret != null)
+				Debug.LogError("Texture2DArray not found: " + fName);
+			if (ret != null && ret.depth == texs.Count() && !forceReload)
 				return ret;
 				
 			#if UNITY_EDITOR
@@ -77,7 +77,7 @@ namespace PW.Core
 					Debug.LogError("Can't create texture array, no albedo found in any biomes");
 					return null;
 				}
-				AssetDatabase.CreateAsset(ret, assetFile);
+				AssetDatabase.CreateAsset(ret, fName + ".asset");
 				AssetDatabase.SaveAssets();
 			#else
 				Debug.LogError("Cannot save TextureArray in play mode !" + assetFile);
@@ -86,7 +86,7 @@ namespace PW.Core
 			return ret;
 		}
 	
-		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName)
+		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName, bool forceReload = false)
 		{
 			List< Texture2D > biomeTextures = new List< Texture2D >();
 			var biomeSurfaces = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces);
@@ -97,7 +97,7 @@ namespace PW.Core
 							if (slopeSurface.surfaceMaps != null)
 								if (slopeSurface.surfaceMaps.albedo != null && !biomeTextures.Contains(slopeSurface.surfaceMaps.albedo))
 									biomeTextures.Add(slopeSurface.surfaceMaps.albedo);
-			return GenerateOrLoadTexture2DArray(fName, biomeTextures);
+			return GenerateOrLoadTexture2DArray(fName, biomeTextures, forceReload);
 		}
 	}
 }

@@ -48,15 +48,19 @@ namespace PW.Node
 				EditorGUILayout.LabelField("Connect a terrain plz.");
 		}
 
+		void				CreateNewBiome()
+		{
+			outputBiome = new BiomeData();
+
+			outputBiome.isWaterless = true;
+			outputBiome.biomeTreeStartPoint = this;
+		}
+
 		public override void OnNodeProcess()
 		{
 			if (outputBiome == null || forceReload)
-			{
-				outputBiome = new BiomeData();
+				CreateNewBiome();
 
-				outputBiome.isWaterless = true;
-				outputBiome.biomeTreeStartPoint = this;
-			}
 			if (needUpdate || reloadRequested)
 			{
 				if (terrain != null && terrain.type == SamplerType.Sampler2D)

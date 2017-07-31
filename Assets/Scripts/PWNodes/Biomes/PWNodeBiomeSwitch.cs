@@ -339,5 +339,11 @@ namespace PW.Node
 			for (int i = 0; i < outputBiomes.Count; i++)
 				outputBiomes.AssignAt(i, inputBiome, "inputBiome");
 		}
+
+		public override void OnNodeProcessOnce()
+		{
+			for (int i = 0; i < outputBiomes.Count; i++)
+				outputBiomes.AssignAt(i, inputBiome, "inputBiome");
+		}
 	}
 }

@@ -32,11 +32,6 @@ namespace PW.Node
 			LayerAndSlopeSurface,
 		}
 
-		public override void OnNodeCreateOnce()
-		{
-			processMode = PWNodeProcessMode.RequestForProcess;
-		}
-
 		public override void OnNodeCreate()
 		{
 			externalName = "Biome surface";
@@ -167,6 +162,6 @@ namespace PW.Node
 			}
 		}
 
-		//nothing to process
+		//nothing to process, output already set
 	}
 }

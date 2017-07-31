@@ -1519,6 +1519,13 @@ namespace PW
 			return currentGraph.externalName;
 		}
 
+		protected string				GetGraphPath()
+		{
+			if (currentGraph.assetPath != null)
+				return System.IO.Path.GetDirectoryName(currentGraph.assetPath);
+			return null;
+		}
+
 	#endregion
 
 	#region Unused (for the moment) overrided functions

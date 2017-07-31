@@ -82,6 +82,9 @@ namespace PW.Node
 						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
 				//TODO: exloit the biome switch tree datas
 			}
+			
+			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
+				LoadBiomeTexture2DArray(biomeData, false);
 		}
 
 		public override void OnNodeProcess()
@@ -123,9 +126,19 @@ namespace PW.Node
 				Debug.LogWarning("Can't build the biome albedo map, need to access to Biome datas !");
 				return ;
 			}
-				
-			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
-				outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, GetGraphName() + "-Albedo");
+
+			//build the biome tree:
+			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
+			
+			//generate (edit mode) or load (play mode) the albedo texture array for the shader:
+			if (outputBlendedBiomeTerrain.terrainTextureArray == null)
+				LoadBiomeTexture2DArray(biomeData, true);
+		}
+
+		void	LoadBiomeTexture2DArray(BiomeData biomeData, bool forceReload)
+		{
+			string	assetFilePath = System.IO.Path.Combine(GetGraphPath(), GetGraphName() + "-Albedo");
+			outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, assetFilePath);
 		}
 	}
 }

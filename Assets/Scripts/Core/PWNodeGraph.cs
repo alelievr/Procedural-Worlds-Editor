@@ -423,7 +423,9 @@ namespace PW.Core
 					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);
 				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
 
-				//simple assignation, without multi-anchor
+				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
+
+				// simple assignation, without multi-anchor
 				if (link.distantIndex == -1 && link.localIndex == -1)
 				{
 					if (realMode)

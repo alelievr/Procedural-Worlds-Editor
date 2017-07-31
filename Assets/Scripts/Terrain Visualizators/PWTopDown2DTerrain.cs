@@ -16,8 +16,6 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 		int					size = chunkSize * chunkSize;
 		int					nFaces = (chunkSize - 1) * (chunkSize - 1);
 		Vector3[]			vertices = new Vector3[size];
-		Vector2[]			uvs = new Vector2[size];
-		List< Vector4 >		blendInfos = new List< Vector4 >();
 		Vector3[]			normals = new Vector3[size];
 		int[]				triangles = new int[nFaces * 6];
 
@@ -33,8 +31,6 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 			{
 				float zPos = ((float)z / (chunkSize - 1) - .5f) * terrainWidth;
 				vertices[z + x * chunkSize] = new Vector3(xPos, 0, zPos);
-				uvs[z + x * chunkSize] = new Vector2((float)x / (chunkSize - 1), (float)z / (chunkSize - 1));
-				blendInfos.Add(new Vector4((float)z / (chunkSize - 1), (float)x / (chunkSize - 1), 1, 1));
 			}
 		}
 
@@ -56,14 +52,33 @@ public class PWTopDown2DTerrain : PWTerrainBase {
         }
 
         topDownTerrainMesh.vertices = vertices;
-		topDownTerrainMesh.SetUVs(0, uvs.ToList());
-		topDownTerrainMesh.SetUVs(1, blendInfos);
 		topDownTerrainMesh.normals = normals;
 		topDownTerrainMesh.triangles = triangles;
 		topDownTerrainMesh.RecalculateBounds();
 	}
+
+	void					UpdateMeshDatas(BiomeMap2D biomes)
+	{
+		// Vector2[]			uvs = new Vector2[chunkSize * chunkSize];
+		List< Vector4 >		blendInfos = new List< Vector4 >();
+
+		for (int x = 0; x < chunkSize; x++)
+			for (int z = 0; z < chunkSize; z++)
+			{
+				Vector4 biomeInfo = Vector4.zero;
+				var biomePoint = biomes.GetBiomeBlendInfo(x, z);
+
+				biomeInfo.x = biomePoint.firstBiomeId;
+				biomeInfo.y = biomePoint.firstBiomeBlendPercent;
+				biomeInfo.z = biomePoint.secondBiomeId;
+				biomeInfo.w = biomePoint.secondBiomeBlendPercent;
+				blendInfos.Add(biomeInfo);
+			}
+		// topDownTerrainMesh.SetUVs(0, uvs.ToList());
+		topDownTerrainMesh.SetUVs(1, blendInfos);
+	}
 	
-	public override object OnChunkCreate(ChunkData cd, Vector3 pos)
+	public override object	OnChunkCreate(ChunkData cd, Vector3 pos)
 	{
 		if (cd == null)
 			return null;
@@ -86,6 +101,8 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 	
 		if (topDownTerrainMesh == null || topDownTerrainMeshSize != chunkSize)
 			GenerateTopDownTerrainMesh();
+			
+		UpdateMeshDatas(chunk.biomeMap);
 
 		mf.sharedMesh = topDownTerrainMesh;
 
@@ -94,17 +111,12 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 			topDown2DBasicTerrainShader = Shader.Find("Standard");
 		Material mat = new Material(topDown2DBasicTerrainShader);
 		mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
-		if (chunk.blendMaps != null)
-		{
-			mat.SetTexture("_BlendMaps", chunk.blendMaps);
-			mat.SetInt("_BlendMapsCount", chunk.blendMaps.depth);
-		}
 		mr.sharedMaterial = mat;
 		//TODO: vertex painting
 		return g;
 	}
 
-	public override void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
+	public override void 	OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
 	{
 		GameObject g = userStoredObject as GameObject;
 
@@ -112,7 +124,7 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 			DestroyImmediate(g);
 	}
 
-	public override void OnChunkRender(ChunkData cd, object chunkGameObject, Vector3 pos)
+	public override void	OnChunkRender(ChunkData cd, object chunkGameObject, Vector3 pos)
 	{
 		if (cd == null)
 			return ;

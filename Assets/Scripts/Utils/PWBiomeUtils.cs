@@ -126,17 +126,5 @@ namespace PW
 			
 			return texs;
 		}
-
-		public static Texture2DArray GenerateBiomeBlendMaps(BlendedBiomeTerrain b, string assetName)
-		{
-			//2D biomes
-			if (b.biomeMap != null)
-				return PWAssets.GenerateTexture2DArray(GenerateBiomeBlendMaps(b));
-			else
-			{
-				//TODO:
-				return null;
-			}
-		}
 	}
 }

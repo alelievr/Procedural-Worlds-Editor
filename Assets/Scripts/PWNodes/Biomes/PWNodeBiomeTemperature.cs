@@ -137,5 +137,11 @@ namespace PW.Node
 			outputBiome = inputBiome;
 		}
 
+		//to prebuild the biome tree:
+		public override void OnNodeProcessOnce()
+		{
+			outputBiome = inputBiome;
+		}
+
 	}
 }

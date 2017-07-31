@@ -126,7 +126,9 @@ namespace PW.Node
 				UpdateInputVisibilities();
 		}
 
-		public override void OnNodeProcess()
+		//no process needed, everything already assigned in ProcessOnce
+
+		public override void OnNodeProcessOnce()
 		{
 			maps.albedo = albedo;
 			maps.normal = normal;
@@ -144,6 +146,5 @@ namespace PW.Node
 			maps.roughness = roughness;
 			maps.displacement = displacement;
 		}
-		
 	}
 }

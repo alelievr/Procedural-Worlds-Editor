@@ -227,8 +227,9 @@ namespace PW.Core
 		public Sampler				lightingMap;
 		public Sampler				airMap;
 
-		//TODO: save the blend maps to the disk
-		public Texture2DArray		blendMaps;
+		//TODO: save vertex datas to the disk
+		public BiomeMap2D			biomeMap;
+		public BiomeMap3D			biomeMap3D;
 		public Texture2DArray		albedoMaps;
 
 		public override string ToString()
@@ -476,25 +477,25 @@ namespace PW.Core
 
 		public string		name;
 
-		[NonSerialized] public Texture2D	albedo;
-		[NonSerialized] public Texture2D	secondAlbedo;
-		[NonSerialized] public Texture2D	diffuse;
-		[NonSerialized] public Texture2D	normal;
-		[NonSerialized] public Texture2D	secondNormal;
-		[NonSerialized] public Texture2D	height;
-		[NonSerialized] public Texture2D	emissive;
-		[NonSerialized] public Texture2D	specular;
-		[NonSerialized] public Texture2D	opacity;
-		[NonSerialized] public Texture2D	smoothness;
-		[NonSerialized] public Texture2D	ambiantOcculison;
-		[NonSerialized] public Texture2D	detailMask;
-		[NonSerialized] public Texture2D	metallic;
-		[NonSerialized] public Texture2D	roughness;
-		[NonSerialized] public Texture2D	displacement;
-		[NonSerialized] public Texture2D	tesselation;
+		public Texture2D	albedo;
+		public Texture2D	secondAlbedo;
+		public Texture2D	diffuse;
+		public Texture2D	normal;
+		public Texture2D	secondNormal;
+		public Texture2D	height;
+		public Texture2D	emissive;
+		public Texture2D	specular;
+		public Texture2D	opacity;
+		public Texture2D	smoothness;
+		public Texture2D	ambiantOcculison;
+		public Texture2D	detailMask;
+		public Texture2D	metallic;
+		public Texture2D	roughness;
+		public Texture2D	displacement;
+		public Texture2D	tesselation;
 		
-		[NonSerialized] public Color		temperatureColorModifier;
-		[NonSerialized] public Color		wetnessColorModifier;
+		public Color		temperatureColorModifier;
+		public Color		wetnessColorModifier;
 	}
 
 	[Serializable]
