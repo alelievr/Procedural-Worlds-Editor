@@ -4,6 +4,7 @@
 		// _HeightMap ("Heightmap", 2D) = "black" {}
 		_AlbedoMaps ("Albedo maps", 2DArray) = "" {}
 		_ShowBlendMap ("Show blend map", Range(0, 1)) = 0
+		_ShowAlbedo ("Show albedo array", Float) = 0
 		_Displacement ("Displacement", Range(0, 5)) = 0
 	}
 	SubShader {
@@ -21,6 +22,7 @@
 		#include "UnityCG.cginc"
 		
 		float		_ShowBlendMap;
+		float		_ShowAlbedo;
 		float		_Displacement;
 
 		//unity appdata_full:
@@ -50,13 +52,14 @@
 			// float4	otherDatas;		//Tangent chan, unused
 
 			//we keep the channel 0 of Uvs for textures:
-			float2	uv_AlbedoMaps;
+			float2	uv_AlbedoMaps : TEXCOORD0;
 		};
 
 		void vert(inout appdata_full v, out Input o)
 		{
 			UNITY_INITIALIZE_OUTPUT(Input, o);
 			o.biomeBlendInfos = v.texcoord1;
+			o.uv_AlbedoMaps = v.texcoord;
 			// o.otherDatas = v.tangent; //unused
 
 			//data.x is certainly the height of the terrain
@@ -75,32 +78,43 @@
 			return (texture1 * b1 + texture2 * b2) / (b1 + b2);
 		}
 		
-		half random (in half2 uv, in half3 seed) {
+		/*half random (in half2 uv, in half3 seed) {
 			return frac(sin(dot(uv.xy, half2(seed.x, seed.y))) * seed.z);
 		}
 
-		half3 GetRandomColor(int id)
+		half3 GetRandomColor(half2 uv, int id)
 		{
+			uv *= 10;
 			return half3(
-				random(half2(-42, id), half3(12.843, 78.324, 252332.0 + id)),
-				random(half2(21, id), half3(92.843, 18.324, 152332.0 + id)),
-				random(half2(12, id), half3(22.843, 38.324, 452332.0 + id))
+				random(uv, half3(12.843, 78.324, 252332.0 + id)),
+				random(uv, half3(92.843, 18.324, 152332.0 + id)),
+				random(uv, half3(22.843, 38.324, 452332.0 + id))
 			);
-		}
+		}*/
 
 		void surf(in Input v, inout SurfaceOutputStandardSpecular o)
 		{
-			int		biomeId1 = v.biomeBlendInfos.x;
+			//TextureArray set different textuer every .5 on z
+			float	biomeId1 = v.biomeBlendInfos.x - .49;
 			float	blend1 = v.biomeBlendInfos.y;
-			int		biomeId2 = v.biomeBlendInfos.z;
+			float	biomeId2 = v.biomeBlendInfos.z - .49;
 			float	blend2 = v.biomeBlendInfos.w;
 
 			if (_ShowBlendMap > .01f)
 			{
-				half3 col = GetRandomColor(biomeId1);
+				// half3 col = GetRandomColor(v.uv_AlbedoMaps, 0);
+				half3 col = half3(biomeId1, biomeId1 / 2, biomeId1 / 4);
 
 				o.Albedo = col;
-				o.Emission = col;
+				// o.Emission = col;
+				return ;
+			}
+
+			if (_ShowAlbedo != 0)
+			{
+				half4	c = UNITY_SAMPLE_TEX2DARRAY(_AlbedoMaps, float3(v.uv_AlbedoMaps.xy, _ShowAlbedo));
+
+				o.Albedo = c.rgb;
 				return ;
 			}
 
