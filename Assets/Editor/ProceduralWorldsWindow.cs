@@ -16,7 +16,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	//graph, node, anchors and links control and 
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
-	int					mouseAboveSubmachineIndex;
 	bool				mouseAboveNodeAnchor;
 	PWOrderingGroup		mouseAboveOrderingGroup;
 	bool				draggingGraph = false;
@@ -254,7 +253,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		graph.geologicTerrainStep = 8;
 		graph.geologicDistanceCheck = 2;
 		
-		graph.parentReference = null;
 		graph.outputNode = CreateNewNode(typeof(PWNodeGraphOutput), new Vector2(position.width - 100, (int)(position.height / 2)));
 		graph.inputNode = CreateNewNode(typeof(PWNodeGraphInput), new Vector2(50, (int)(position.height / 2)));
 
@@ -318,9 +316,6 @@ public class ProceduralWorldsWindow : EditorWindow {
  		//background color:
 		if (defaultBackgroundTexture == null || !currentGraph.unserializeInitialized || resizeHandleTexture == null)
 			OnEnable();
-
-		if (currentGraph.parentReference == null || String.IsNullOrEmpty(currentGraph.parentReference))
-			currentGraph.parentReference = null;
 
 		//function is in OnGUI cause in OnEnable, the position values are bad.
 		if (currentGraph.firstInitialization == null)
@@ -823,30 +818,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 			}
 			EditorGUILayout.EndHorizontal();
-
-			//Breadcrumbs bar:
-			Rect breadcrumbsRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(20), GUILayout.ExpandWidth(true));
-			{
-				breadcrumbsRect.yMin -= 1;
-				breadcrumbsRect.xMin -= 1;
-				
-				PWNodeGraph g = currentGraph;
-				var breadcrumbsList = new List< string >();
-				while (g != null)
-				{
-					breadcrumbsList.Add(g.name);
-					g = parentGraph.FindGraphByName(g.parentReference);
-				}
-				breadcrumbsList.Reverse();
-				bool first = true;
-				foreach (var b in breadcrumbsList)
-				{
-					if (GUILayout.Button(b, (first) ? breadcrumbsButtonLeftStyle : breadcrumbsButtonStyle, GUILayout.MaxWidth(150)))
-						SwitchGraph(parentGraph.FindGraphByName(b));
-					first = false;
-				}
-			}
-			EditorGUILayout.EndHorizontal();
 	
 			//remove 4 pixels for the separation bar
 			graphRect.size -= Vector2.right * 4;
@@ -866,7 +837,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 				}
 				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
 					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
-					&& mouseAboveSubmachineIndex == -1 //and mouse is not above a submachine
 					&& e.button == 0
 					&& !e.command
 					&& !e.control)
@@ -926,7 +896,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
-	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, ref bool mouseDraggingWindowLocal, bool submachine = false)
+	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, ref bool mouseDraggingWindowLocal)
 	{
 		Event	e = Event.current;
 
@@ -934,10 +904,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
 		{
-			if (submachine)
-				mouseAboveSubmachineIndex = index;
-			else
-				mouseAboveNodeIndex = index;
+			mouseAboveNodeIndex = index;
 		}
 
 		//highlight, hide, add all linkable anchors:
@@ -1156,7 +1123,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 			if (!draggingSelectedNodesFromContextMenu)
 				draggingSelectedNodes = false;
 			mouseAboveNodeIndex = -1;
-			mouseAboveSubmachineIndex = -1;
 
 			PWNode.windowRenderOrder = 0;
 
@@ -1174,34 +1140,10 @@ public class ProceduralWorldsWindow : EditorWindow {
 				RenderNode(nodeId++, node, nodeName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 			}
 
-			//display graph sub-PWGraphs
-			i = 0;
-			foreach (var graphName in currentGraph.subgraphReferences)
-			{
-				var graph = parentGraph.FindGraphByName(graphName);
-				if (graph)
-					RenderNode(nodeId++, graph.externalGraphNode, graph.externalGraphNode.externalName, i, ref mouseAboveAnchorLocal, ref draggingNodeLocal, true);
-				i++;
-			}
-
 			//display the upper graph reference:
-			if (currentGraph.parentReference != null)
-				RenderNode(nodeId++, currentGraph.inputNode, "upper graph", -2, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 			RenderNode(nodeId++, currentGraph.outputNode, "output", -2, ref mouseAboveAnchorLocal, ref draggingNodeLocal);
 
 			EndWindows();
-
-			//submachine enter button click management:
-			foreach (var graphName in currentGraph.subgraphReferences)
-			{
-				var graph = parentGraph.FindGraphByName(graphName);
-
-				if (!graph || !graph.externalGraphNode)
-					continue ;
-
-				if (graph.externalGraphNode.specialButtonClick)
-					SwitchGraph(graph);
-			}
 
 			//click up outside of an anchor, stop dragging
 			if (e.type == EventType.mouseUp && draggingLink)
@@ -1409,101 +1351,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		return CreateNewNode(newNode, position, t.ToString(), addToNodeList);
 	}
 
-	void DeleteSubmachine(object oid)
-	{
-		int id = (int)oid;
-
-		var subGraphName = currentGraph.subgraphReferences.ElementAt(id);
-
-		if (subGraphName == null)
-			return ;
-
-		var subGraph = parentGraph.FindGraphByName(subGraphName);
-
-		if (id < currentGraph.subgraphReferences.Count && id >= 0)
-			currentGraph.subgraphReferences.RemoveAt(id);
-
-		DeleteSubmachine(subGraph);
-
-		graphNeedReload = true;
-
-		AssetDatabase.SaveAssets();
-
-		EvaluateComputeOrder();
-	}
-
-	void DeleteSubmachine(PWNodeGraph submachine)
-	{
-		if (submachine == null)
-			return ;
-		
-		//remove all its nodes:
-		foreach (var subgraphNode in submachine.nodes)
-			DeleteNode(subgraphNode);
-
-		//remove input and output:
-		if (submachine.inputNode != null)
-			DeleteNode(submachine.inputNode);
-		if (submachine.outputNode != null)
-			DeleteNode(submachine.outputNode);
-		if (submachine.externalGraphNode != null)
-			DeleteNode(submachine.externalGraphNode);
-
-		//remove inner submachines:
-		foreach (var subsubgraph in submachine.subgraphReferences)
-			DeleteSubmachine(parentGraph.FindGraphByName(subsubgraph));
-
-		//and finaly destroy the submachine:
-		DestroyImmediate(submachine, true);
-	}
-
-	void CreatePWMachine(object mousePosition)
-	{
-		int	subgraphlocalNodeIdCount = 0;
-		
-		//calculate the subgraph starting window id count:
-		int i = 0;
-		PWNodeGraph g = currentGraph;
-		while (g != null)
-		{
-			i++;
-			g = parentGraph.FindGraphByName(g.parentReference);
-		}
-		subgraphlocalNodeIdCount = i * 1000000 + (currentGraph.localNodeIdCount++ * 10000);
-
-		Vector2 pos = -currentGraph.graphDecalPosition + (Vector2)mousePosition;
-		PWNodeGraph subgraph = ScriptableObject.CreateInstance< PWNodeGraph >();
-		InitializeNewGraph(subgraph);
-		subgraph.externalGraphNode = CreateNewNode(typeof(PWNodeGraphExternal), pos);
-		//link external and internal nodes:
-		(subgraph.externalGraphNode as PWNodeGraphExternal).InitGraphOut(subgraph.inputNode, subgraph.outputNode);
-		(subgraph.outputNode as PWNodeGraphOutput).InitExternalNode(subgraph.externalGraphNode);
-		subgraph.localNodeIdCount = subgraphlocalNodeIdCount;
-		subgraph.presetChoosed = true;
-		subgraph.parentReference = currentGraph.name;
-		subgraph.externalName = "PW sub-machine";
-
-		//copy the current layout:
-		subgraph.h1.handlerPosition = currentGraph.h1.handlerPosition;
-		subgraph.h2.handlerPosition = currentGraph.h2.handlerPosition;
-
-		//assign new unique name
-		subgraph.name = "sub" + currentGraph.localNodeIdCount + "-" + currentGraph.externalName;
-		subgraph.externalGraphNode.externalName = subgraph.name;
-
-		//save object to disk
-		AssetDatabase.AddObjectToAsset(subgraph, currentGraph);
-		AssetDatabase.SaveAssets();
-
-		//add this new graph to the global graph storage
-		currentGraph.subgraphReferences.Add(subgraph.name);
-		parentGraph.graphInstancies[subgraph.name] = subgraph;
-
-		AssetDatabase.Refresh();
-
-		currentGraph.nodesDictionary[subgraph.externalGraphNode.nodeId] = subgraph.externalGraphNode;
-	}
-
 	void DeleteSelectedNodes()
 	{
 		List< PWNode > nodeToRemove = new List< PWNode >();
@@ -1525,11 +1372,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		{
 			currentGraph.nodes.Remove(n);
 			DeleteNode(n);
-		}
-		foreach (var g in graphToRemove)
-		{
-			currentGraph.subgraphReferences.Remove(g.name);
-			DeleteSubmachine(g);
 		}
 	}
 
@@ -1723,7 +1565,6 @@ public class ProceduralWorldsWindow : EditorWindow {
             {
                 // Now create the menu, add items and show it
                 GenericMenu menu = new GenericMenu();
-				menu.AddItem(new GUIContent("New submachine"), false, CreatePWMachine, e.mousePosition);
 				foreach (var nodeCat in nodeSelectorList)
 				{
 					string menuString = "Create new/" + nodeCat.Key + "/";
@@ -1754,8 +1595,6 @@ public class ProceduralWorldsWindow : EditorWindow {
                 menu.AddSeparator("");
 				if (mouseAboveNodeIndex != -1)
 					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
-				else if (mouseAboveSubmachineIndex != -1)
-					menu.AddItem(new GUIContent("Delete submachine"), false, DeleteSubmachine, mouseAboveSubmachineIndex);
 				else
 					menu.AddDisabledItem(new GUIContent("Delete node"));
 					
@@ -1770,12 +1609,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 					string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
 					menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
 				}
-
-				menu.AddSeparator("");
-				if (currentGraph.parentReference != null)
-					menu.AddItem(new GUIContent("Go to parent"), false, () => SwitchGraph(parentGraph.FindGraphByName(currentGraph.parentReference)));
-				else
-					menu.AddDisabledItem(new GUIContent("Go to parent"));
 
                 menu.ShowAsContext();
                 e.Use();
@@ -1799,12 +1632,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 			foreach (var gNode in currentGraph.nodes)
 				gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.nodeId);
-			foreach (var subGraphName in currentGraph.subgraphReferences)
-			{
-				PWNodeGraph g = parentGraph.FindGraphByName(subGraphName);
-				if (g != null)
-					g.externalGraphNode.computeOrder = EvaluateComputeOrder(false, 1, g.externalGraphNode.nodeId);
-			}
 
 			currentGraph.outputNode.computeOrder = EvaluateComputeOrder(false, 1, currentGraph.outputNode.nodeId);
 
@@ -1846,7 +1673,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		return ret;
 	}
 	
-
 	string GetUniqueName(string name)
 	{
 		while (true)
