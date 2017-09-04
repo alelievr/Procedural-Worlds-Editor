@@ -8,7 +8,9 @@ namespace PW
 {
 	public class PWGUIObjectPreview {
 	
-		public PreviewRenderUtility		preview;
+		public readonly string		GameObjectPreviewName = "__PreviewObject";
+
+		public PreviewRenderUtility	preview;
 	
 		private List< GameObject >	renderObjects = new List< GameObject >();
 		private bool				showSceneHiddenObjects;
@@ -66,7 +68,10 @@ namespace PW
 	
 			var toAdd = new List< GameObject >();
 			foreach (var ro in renderObjects)
+			{
+				ro.name = GameObjectPreviewName;
 				ExpandRenderObjects(ro, toAdd);
+			}
 			
 			renderObjects = renderObjects.Concat(toAdd).ToList();
 		
@@ -135,12 +140,14 @@ namespace PW
 			preview.BeginPreview(rect, GUIStyle.none);
 	
 			foreach (var obj in renderObjects)
-				obj.SetActive(true);
+				if (obj != null)
+					obj.SetActive(true);
 	
 			cam.Render();
 	
 			foreach (var obj in renderObjects)
-				obj.SetActive(false);
+				if (obj != null)
+					obj.SetActive(false);
 	
 			preview.EndAndDrawPreview(rect);
 		}

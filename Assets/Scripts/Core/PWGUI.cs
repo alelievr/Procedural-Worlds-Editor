@@ -825,7 +825,7 @@ namespace PW.Core
 					fieldSettings.textures = new Texture2D[textureArray.depth];
 				for (int i = 0; i < textureArray.depth; i++)
 				{
-					Texture2D tex = new Texture2D(textureArray.width, textureArray.height, textureArray.format, false);
+					Texture2D tex = new Texture2D(textureArray.width, textureArray.height, TextureFormat.ARGB32, false);
 					tex.SetPixels(textureArray.GetPixels(i));
 					tex.Apply();
 					fieldSettings.textures[i] = tex;

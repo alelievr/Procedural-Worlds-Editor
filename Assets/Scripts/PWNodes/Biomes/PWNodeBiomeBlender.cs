@@ -137,6 +137,9 @@ namespace PW.Node
 
 		void	LoadBiomeTexture2DArray(BiomeData biomeData, bool forceReload)
 		{
+			if (biomeData == null)
+				return ;
+			
 			string	assetFilePath = System.IO.Path.Combine(GetGraphPath(), GetGraphName() + "-Albedo");
 			outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, assetFilePath);
 		}

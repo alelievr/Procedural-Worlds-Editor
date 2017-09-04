@@ -52,6 +52,9 @@ namespace PW
 
 		public static void ApplyBiomeTerrainModifiers(BlendedBiomeTerrain b)
 		{
+			if (b.terrain == null)
+				return ;
+			
 			if (b.terrain.type == SamplerType.Sampler2D)
 			{
 				PWUtils.ResizeSamplerIfNeeded(b.terrain, ref b.biomeTerrain);

@@ -23,8 +23,7 @@ namespace PW.Core
 			int	texCount = texs.Count();
 			if (texCount == 0)
 			{
-				Debug.LogWarning("no textures to create Texture2DArray");
-				return null;
+				return new Texture2DArray(1, 1, 1, TextureFormat.RGBA32, false);
 			}
 			var firstTexture = texs.First();
 			bool mipmap = firstTexture.mipmapCount > 1;
