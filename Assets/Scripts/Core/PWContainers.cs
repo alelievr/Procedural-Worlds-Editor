@@ -530,7 +530,7 @@ namespace PW.Core
 	public class Biome
 	{
 		public BiomeData				biomeDataReference;
-		public PWTerrainOutputMode		mode;
+		public PWGraphTerrainType		mode;
 		public string					name;
 		public Color					previewColor;
 		public short					id;

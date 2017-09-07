@@ -11,8 +11,16 @@ using PW.Core;
 using PW.Node;
 using Object = UnityEngine.Object;
 
+[System.Serializable]
 public class ProceduralWorldsWindow : EditorWindow {
-
+	
+	[SerializeField]
+	public HorizontalSplitView			h1;
+	[SerializeField]
+	public HorizontalSplitView			h2;
+	[SerializeField]
+	public string						searchString = "";
+	
 	//graph, node, anchors and links control and 
 	int					currentPickerWindow;
 	int					mouseAboveNodeIndex;
@@ -61,8 +69,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 	//current and parent graph
 	[SerializeField]
 	public PWNodeGraph	currentGraph;
-	[SerializeField]
-	public PWNodeGraph	parentGraph;
 
 	//node selector and his subclasses
 	[System.NonSerializedAttribute]
@@ -486,7 +492,7 @@ public class ProceduralWorldsWindow : EditorWindow {
 				DrawPresetLineHeader("2D");
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
-					currentGraph.outputType = PWTerrainOutputMode.TopDown2D;
+					currentGraph.outputType = PWGraphTerrainType.TopDown2D;
 					CreateNewNode(typeof(PWNodePerlinNoise2D));
 					PWNode perlin = currentGraph.nodes.Last();
 					perlin.windowRect.position += Vector2.left * 400;
@@ -538,11 +544,11 @@ public class ProceduralWorldsWindow : EditorWindow {
 
 #region Terrain preview processing and rendering
 
-	GameObject GetLoadedPreviewScene(params PWTerrainOutputMode[] allowedTypes)
+	GameObject GetLoadedPreviewScene(params PWGraphTerrainType[] allowedTypes)
 	{
 		GameObject		ret;
 
-		Func< string, PWTerrainOutputMode, GameObject >	TestSceneNametype = (string name, PWTerrainOutputMode type) =>
+		Func< string, PWGraphTerrainType, GameObject >	TestSceneNametype = (string name, PWGraphTerrainType type) =>
 		{
 			ret = GameObject.Find(name);
 			if (ret == null)
@@ -552,40 +558,40 @@ public class ProceduralWorldsWindow : EditorWindow {
 					return ret;
 			return null;
 		};
-		ret = TestSceneNametype(PWConstants.previewSideViewSceneName, PWTerrainOutputMode.SideView2D);
+		ret = TestSceneNametype(PWConstants.previewSideViewSceneName, PWGraphTerrainType.SideView2D);
 		if (ret != null)
 			return ret;
-		ret = TestSceneNametype(PWConstants.previewTopDownSceneName, PWTerrainOutputMode.TopDown2D);
+		ret = TestSceneNametype(PWConstants.previewTopDownSceneName, PWGraphTerrainType.TopDown2D);
 		if (ret != null)
 			return ret;
-		ret = TestSceneNametype(PWConstants.preview3DSceneName, PWTerrainOutputMode.Planar3D);
+		ret = TestSceneNametype(PWConstants.preview3DSceneName, PWGraphTerrainType.Planar3D);
 		if (ret != null)
 			return ret;
 		return null;
 	}
 
-	void ProcessPreviewScene(PWTerrainOutputMode outputType)
+	void ProcessPreviewScene(PWGraphTerrainType outputType)
 	{
 		if (previewScene == null)
 		{
 			//TODO: do the preview for Density field 1D
 			switch (outputType)
 			{
-				case PWTerrainOutputMode.Density2D:
-				case PWTerrainOutputMode.SideView2D:
-					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.Density2D, PWTerrainOutputMode.SideView2D);
+				case PWGraphTerrainType.Density2D:
+				case PWGraphTerrainType.SideView2D:
+					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.Density2D, PWGraphTerrainType.SideView2D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.previewSideViewSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
-				case PWTerrainOutputMode.TopDown2D:
-					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.TopDown2D);
+				case PWGraphTerrainType.TopDown2D:
+					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.TopDown2D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.previewTopDownSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
 				default: //for 3d previewScenes:
-					previewScene = GetLoadedPreviewScene(PWTerrainOutputMode.Cubic3D, PWTerrainOutputMode.Density3D, PWTerrainOutputMode.Planar3D, PWTerrainOutputMode.Spherical3D);
+					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.Cubic3D, PWGraphTerrainType.Density3D, PWGraphTerrainType.Planar3D, PWGraphTerrainType.Spherical3D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.preview3DSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.preview3DSceneName;
@@ -1619,59 +1625,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 #endregion
 
 #region Utils and miscellaneous
-
-	//Dictionary< nodeId, dependencyWeight >
-	Dictionary< int, int > nodeComputeOrderCount = new Dictionary< int, int >();
-	int EvaluateComputeOrder(bool first = true, int depth = 0, int nodeId = -1)
-	{
-		//Recursively evaluate compute order for each nodes:
-		if (first)
-		{
-			nodeComputeOrderCount.Clear();
-			currentGraph.inputNode.computeOrder = 0;
-
-			foreach (var gNode in currentGraph.nodes)
-				gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.nodeId);
-
-			currentGraph.outputNode.computeOrder = EvaluateComputeOrder(false, 1, currentGraph.outputNode.nodeId);
-
-			currentGraph.UpdateComputeOrder();
-
-			currentGraph.RebakeGraphParts();
-
-			return 0;
-		}
-
-		//check if we the node have already been computed:
-		if (nodeComputeOrderCount.ContainsKey(nodeId))
-			return nodeComputeOrderCount[nodeId];
-
-		var node = FindNodeById(nodeId);
-		if (node == null)
-			return 0;
-
-		//check if the window have all these inputs to work:
-		if (!node.CheckRequiredAnchorLink())
-			return -1;
-
-		//compute dependency weight:
-		int	ret = 1;
-		foreach (var dep in node.GetDependencies())
-		{
-			int d = EvaluateComputeOrder(false, depth + 1, dep.nodeId);
-
-			//if dependency does not have enought datas to compute result, abort calculus.
-			if (d == -1)
-			{
-				ret = -1;
-				break ;
-			}
-			ret += d;
-		}
-
-		nodeComputeOrderCount[nodeId] = ret;
-		return ret;
-	}
 	
 	string GetUniqueName(string name)
 	{
@@ -1711,16 +1664,6 @@ public class ProceduralWorldsWindow : EditorWindow {
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 		EditorGUIUtility.PingObject(currentGraph);
-	}
-
-	void SwitchGraph(PWNodeGraph graph)
-	{
-		if (graph == null)
-			return ;
-		currentGraph.isVisibleInEditor = false;
-		StopDragLink(false);
-		currentGraph = graph;
-		currentGraph.isVisibleInEditor = true;
 	}
 
 	void GetWindowStyleFromType(Type t, out GUIStyle windowStyle, out GUIStyle windowSelectedStyle)

@@ -13,7 +13,7 @@ namespace PW.Node
 		[PWOffset(20)]
 		public BiomeData			inputBiome;
 		
-		public PWTerrainOutputMode	outputMode;
+		public PWGraphTerrainType	outputMode;
 		
 		//inputs for 2D topdown map
 		[PWInput("Surfaces")]
@@ -40,10 +40,10 @@ namespace PW.Node
 		[SerializeField]
 		Rect						colorPreviewRect;
 
-		static Dictionary< PWTerrainOutputMode, List< string > > propertiesPerOutputType = new Dictionary< PWTerrainOutputMode, List< string > >()
+		static Dictionary< PWGraphTerrainType, List< string > > propertiesPerOutputType = new Dictionary< PWGraphTerrainType, List< string > >()
 		{
-			{ PWTerrainOutputMode.TopDown2D, new List< string >() {"terrainSurface"} },
-			{ PWTerrainOutputMode.Planar3D, new List< string >() {""} },
+			{ PWGraphTerrainType.TopDown2D, new List< string >() {"terrainSurface"} },
+			{ PWGraphTerrainType.Planar3D, new List< string >() {""} },
 		};
 
 		void UpdateOutputType()
@@ -64,7 +64,7 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			PWTerrainOutputMode	oldTerrainMode = outputMode;
+			PWGraphTerrainType	oldTerrainMode = outputMode;
 				outputMode = GetTerrainOutputMode();
 			if (outputMode != oldTerrainMode)
 				UpdateOutputType();

@@ -1502,14 +1502,14 @@ namespace PW
 			return nodes.ToList();
 		}
 
-		protected void				RequestProcessing(int nodeId)
+		protected void			RequestProcessing(int nodeId)
 		{
 			if (!currentGraph.RequestProcessing(nodeId))
 				Debug.Log("failed to request computing of node " + nodeId + ": not found in the current graph");
 			return ;
 		}
 
-		protected PWTerrainOutputMode	GetTerrainOutputMode()
+		protected PWGraphTerrainType	GetTerrainOutputMode()
 		{
 			return currentGraph.outputType;
 		}
@@ -1609,7 +1609,7 @@ namespace PW
 			if (node == null)
 				return ;
 
-			if (depth > 10)
+			if (depth > 100)
 			{
 				Debug.LogWarning("too many recursive search, aborting !");
 				return ;
