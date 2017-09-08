@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
-using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
-using System;
 using UnityEngine;
 
 using Debug = UnityEngine.Debug;
-using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, System.Collections.Generic.Dictionary< string, System.Reflection.FieldInfo > >;
 using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 
 namespace PW.Core
@@ -38,7 +35,6 @@ namespace PW.Core
 		[System.NonSerialized]
 		protected IOrderedEnumerable< PWNode >	computeOrderSortedNodes = null;
 		[System.NonSerialized]
-		protected NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
 		protected Dictionary< int, PWNode >		nodesDictionary = new Dictionary< int, PWNode >();
 
 
@@ -51,26 +47,38 @@ namespace PW.Core
         //input and output nodes:
         public PWNodeGraphInput					inputNode;
         public PWNodeGraphOutput				outputNode;
+
+		//GraphProcessor to Process and ProcessOnce the graph
+		[System.NonSerialized]
+		private PWGraphProcessor				graphProcessor = new PWGraphProcessor();
+
+
+		//public delegates:
+		public delegate void OnLinkAction(PWNode from, PWNode to);
+
+
+		//node events:
+		public event System.Action				OnNodeRemoved;
+		public event System.Action				OnNodeAdded;
+		//link events:
+		public event OnLinkAction				OnLinkDragged;
+		public event OnLinkAction				OnNodeLinked;
+		public event OnLinkAction				OnNodeUnLinked;
+		//parameter events:
+		public event System.Action				OnSeedChanged;
+		public event System.Action				OnChunkSizeChanged;
+		public event System.Action				OnStepChanged;
+		public event System.Action				OnChunkPositionChanged;
+		//graph events:
+		public event System.Action				OnGraphStructureChanged;
 	
 	#endregion
-	
-	#region OnEnable and OnDisable
-	
-		void BakeNode(Type t)
-		{
-			var dico = new Dictionary< string, FieldInfo >();
-			bakedNodeFields[t.AssemblyQualifiedName] = dico;
-	
-			foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-				dico[field.Name] = field;
-		}
-	
+
 		public virtual void OnEnable()
 		{
-			//bake node fields to accelerate data transfer from node to node.
-			bakedNodeFields.Clear();
-			foreach (var nodeType in PWNodeTypeProvider.GetAllNodeTypes())
-				BakeNode(nodeType);
+			Debug.Log("OnEnable graph !");
+
+			graphProcessor.Initialize();
 
 			//add all existing nodes to the nodesDictionary
 			for (int i = 0; i < nodes.Count; i++)
@@ -79,185 +87,67 @@ namespace PW.Core
 				nodesDictionary[inputNode.nodeId] = inputNode;
 			if (outputNode != null)
 				nodesDictionary[outputNode.nodeId] = outputNode;
+			
+			//Events attach
+			OnGraphStructureChanged += GraphStructureChangedCallback;
+			OnNodeLinked += LinkChangedCallback;
+			OnNodeUnLinked += LinkChangedCallback;
+			OnNodeRemoved += NodeCountChanged;
+			OnNodeAdded += NodeCountChanged;
 		}
 
 		public virtual void OnDisable()
 		{
-			
-		}
-
-	#endregion
-
-	#region Process and ProcessOnce
-
-		//Check errors when transferring values from a node to another
-		bool CheckProcessErrors(PWLink link, PWNode node)
-		{
-			if (!realMode)
-			{
-				if (!nodesDictionary.ContainsKey(link.distantNodeId))
-				{
-					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") not found in nodes dictionary");
-					return true;
-				}
-
-				if (nodesDictionary[link.distantNodeId] == null)
-				{
-					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") is null in nodes dictionary");
-					return true;
-				}
-
-				if (!bakedNodeFields.ContainsKey(link.localClassAQName)
-					|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
-					|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
-				{
-					Debug.LogError("[PW Process] Can't find field: " + link.localName + " in " + link.localClassAQName + " OR " + link.distantName + " in " + link.distantClassAQName);
-					return true;
-				}
-					
-				if (bakedNodeFields[link.localClassAQName][link.localName].GetValue(node) == null)
-				{
-					Debug.Log("[PW Process] tring to assign null value from " + link.localClassAQName + "." + link.localName);
-					return true;
-				}
-			}
-
-			return false;
-		}
-		
-		void TrySetValue(FieldInfo prop, object val, PWNode target)
-		{
-			if (realMode)
-				prop.SetValue(target, val);
-			else
-				try {
-					prop.SetValue(target, val);
-				} catch (Exception e) {
-					Debug.LogError(e);
-				}
-		}
-	
-		void ProcessNodeLinks(PWNode node)
-		{
-			var links = node.GetLinks();
-
-			foreach (var link in links)
-			{
-				//if we are in real mode, we check all errors and discard if there is any.
-				if (CheckProcessErrors(link, node))
-					continue ;
-				
-				var target = nodesDictionary[link.distantNodeId];
-				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
-				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
-	
-				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.nodeId);
-				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
-				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
-
-				// simple assignation, without multi-anchor
-				if (link.distantIndex == -1 && link.localIndex == -1)
-					TrySetValue(prop, val, target);
-				//distant link is a multi-anchor
-				else if (link.distantIndex != -1 && link.localIndex == -1)
-				{
-					PWValues values = (PWValues)prop.GetValue(target);
-	
-					if (values != null)
-					{
-						if (!values.AssignAt(link.distantIndex, val, link.localName))
-							Debug.Log("failed to set distant indexed field value: " + link.distantName);
-					}
-				}
-				//local link is a multi-anchor
-				else if (link.distantIndex == -1 && link.localIndex != -1 && val != null)
-				{
-					object localVal = ((PWValues)val).At(link.localIndex);
-
-					TrySetValue(prop, localVal, target);
-				}
-				// both are multi-anchors
-				else if (val != null)
-				{
-					PWValues values = (PWValues)prop.GetValue(target);
-					object localVal = ((PWValues)val).At(link.localIndex);
-	
-					if (values != null)
-					{
-						// Debug.Log("assigned total multi");
-						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
-							Debug.Log("failed to set distant indexed field value: " + link.distantName);
-					}
-				}
-			}
-		}
-	
-		float ProcessNode(PWNode node)
-		{
-			float	calculTime = 0;
-
-			//if you are in editor mode, update the process time of the node
-			if (!realMode)
-			{
-				Stopwatch	st = new Stopwatch();
-
-				st.Start();
-				node.Process();
-				st.Stop();
-
-				node.processTime = st.ElapsedMilliseconds;
-				calculTime = node.processTime;
-			}
-			else
-				node.Process();
-
-			if (realMode)
-				node.EndFrameUpdate();
-			
-			ProcessNodeLinks(node);
-
-			return calculTime;
+			//Events detach
+			OnGraphStructureChanged -= GraphStructureChangedCallback;
+			OnNodeLinked -= LinkChangedCallback;
+			OnNodeUnLinked -= LinkChangedCallback;
+			OnNodeRemoved -= NodeCountChanged;
+			OnNodeAdded -= NodeCountChanged;
 		}
 
 		public float Process()
 		{
-			float		calculTime = 0f;
-
-			if (computeOrderSortedNodes == null)
-				UpdateComputeOrder();
-			
-			foreach (var node in computeOrderSortedNodes)
-			{
-				//ignore unlinked nodes
-				if (node.computeOrder < 0)
-					continue ;
-				
-				if (realMode)
-					node.BeginFrameUpdate();
-				
-				calculTime += ProcessNode(node);
-			}
-			return calculTime;
+			graphProcessor.UpdateNodeDictionary(nodesDictionary);
+			return graphProcessor.Process(this);
 		}
 
-		//call all processOnce functions
 		public void	ProcessOnce()
 		{
 			Debug.LogWarning("Process once called !");
-			
-			if (computeOrderSortedNodes == null)
-				UpdateComputeOrder();
+			graphProcessor.UpdateNodeDictionary(nodesDictionary);
+			graphProcessor.ProcessOnce(this);
+		}
 
-			foreach (var node in computeOrderSortedNodes)
-			{
-				//ignore unlinked nodes
-				if (node.computeOrder < 0)
-					continue ;
-				
-				node.OnNodeProcessOnce();
+		public void Export(string filePath)
+		{
 
-				ProcessNodeLinks(node);
-			}
+		}
+
+		public void Import(string filePath, bool wipeDatas = false)
+		{
+
+		}
+
+		public bool Execute(string command)
+		{
+			return false;
+		}
+
+		public bool SetInput(string fieldName, object value)
+		{
+			return false;
+		}
+	
+	#region Events handlers
+
+		//retarget link and node events to GraphStructure event
+		void		LinkChangedCallback(PWNode from, PWNode to) { OnGraphStructureChanged(); }
+		void		NodeCountChanged() { OnGraphStructureChanged(); }
+
+		void		GraphStructureChangedCallback()
+		{
+			UpdateComputeOrder();
 		}
 
 	#endregion
@@ -288,7 +178,10 @@ namespace PW.Core
 	
 			var node = FindNodeById(nodeId);
 			if (node == null)
+			{
+				Debug.LogWarning("[PW ComputeOrder] node (" + nodeId + ") not found ");
 				return 0;
+			}
 	
 			//check if the window have all these inputs to work:
 			if (!node.CheckRequiredAnchorLink())
@@ -326,31 +219,44 @@ namespace PW.Core
 
 	#endregion
 
-	#region Misc
+	#region Nodes control API
 
-		public void Export(string filePath)
+		public bool		IsRealMode()
 		{
-
+			return realMode;
 		}
 
-		public void Import(string filePath, bool wipeDatas = false)
-		{
-
-		}
-
-		public bool Execute(string command)
-		{
-			return false;
-		}
-
-		public bool SetInput(string fieldName, object value)
-		{
-			return false;
-		}
-
-		public PWNode FindNodeById(int nodeId)
+		public PWNode	FindNodeById(int nodeId)
 		{
 			return nodesDictionary[nodeId];
+		}
+
+		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()
+		{
+			return computeOrderSortedNodes;
+		}
+
+		public bool		AddNode(PWNode newNode, bool force = false)
+		{
+			if (!force && nodesDictionary.ContainsKey(newNode.id))
+				return false;
+			nodesDictionary[newNode.id] = newNode;
+			OnNodeAdded();
+			return true;
+		}
+
+		public bool		RemoveNode(PWNode removeNode)
+		{
+			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
+			nodes.Remove(removeNode);
+			OnNodeRemoved();
+			return nodesDictionary.Remove(item.Key);
+		}
+		
+		public bool		RemoveNode(int nodeId)
+		{
+			OnNodeRemoved();
+			return nodesDictionary.Remove(nodeId);
 		}
 
 	#endregion

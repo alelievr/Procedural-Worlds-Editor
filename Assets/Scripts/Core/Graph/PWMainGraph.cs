@@ -26,15 +26,16 @@ namespace PW.Core
 		public Vector2					selectorScrollPosition;
 		public float					maxStep;
 
+		//tell if the user choose a preset (first screen)
 		public bool						presetChoosed;
 
+		//chunk relative datas
 		public int						chunkSize;
 		public float					step;
 		public float					geologicTerrainStep;
 
 		public PWGraphTerrainType		outputType;
 		public PWGraphProcessMode		processMode;
-
 
 		[System.NonSerialized]
 		Vector3							currentChunkPosition;
@@ -65,7 +66,10 @@ namespace PW.Core
 			base.OnEnable();
 		}
 
-		public override void On
+		public override void OnDisable()
+		{
+			base.OnDisable();
+		}
 
     }
 }

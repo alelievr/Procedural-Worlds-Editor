@@ -18,7 +18,7 @@ namespace PW
 		public int						renderDistance;
 		public int						chunkSize;
 		public PWChunkLoadPatternMode	loadPatternMode;
-		public PWNodeGraph				graph;
+		public PWMainGraph				graph;
 		public PWTerrainStorage			terrainStorage;
 		public float					terrainScale = .1f; //10 cm per point
 		
@@ -37,7 +37,7 @@ namespace PW
 			InitGraph(graph);
 		}
 
-		public void InitGraph(PWNodeGraph graph)
+		public void InitGraph(PWMainGraph graph)
 		{
 			if (graph != null)
 				this.graph = graph;

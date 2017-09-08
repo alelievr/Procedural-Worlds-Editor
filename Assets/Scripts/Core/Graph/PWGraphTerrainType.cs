@@ -12,7 +12,6 @@ namespace PW.Core
 		Planar3D,
 		Spherical3D,
 		Cubic3D,
-		Mesh,
 		Count,
 	}
 }

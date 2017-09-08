@@ -110,7 +110,7 @@ namespace PW
 		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
 
 		[System.NonSerialized]
-		public PWNodeGraph		currentGraph;
+		public PWMainGraph		currentGraph;
 
 		[System.NonSerialized]
 		private PWNode			reloadRequestFromNode;
@@ -1034,13 +1034,6 @@ namespace PW
 			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
 		}
 
-		public void UpdateLinkMode(PWLink link, PWNodeProcessMode newMode)
-		{
-			link.mode = newMode;
-
-			//find the dependency attached to this link:
-		}
-
 	#endregion
 
 	#region Editor utils
@@ -1632,7 +1625,7 @@ namespace PW
 			return null;
 		}
 
-		public void		UpdateCurrentGraph(PWNodeGraph ng)
+		public void		UpdateCurrentGraph(PWMainGraph ng)
 		{
 			currentGraph = ng;
 		}
