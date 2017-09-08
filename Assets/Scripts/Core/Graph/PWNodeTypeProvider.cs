@@ -6,9 +6,9 @@ using PW.Node;
 
 namespace PW.Core
 {
-    public class PWNodeTypeProvider
+    public static class PWNodeTypeProvider
     {
-        List< Type > allNodeTypes = new List< Type > {
+        static List< Type > allNodeTypes = new List< Type > {
 			//Primitives:
             typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
 
@@ -33,7 +33,7 @@ namespace PW.Core
             typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
 		};
 
-        public IEnumerable< Type >  GetAllNodeTypes()
+        public static  IEnumerable< Type >  GetAllNodeTypes()
         {
             return allNodeTypes;
         }

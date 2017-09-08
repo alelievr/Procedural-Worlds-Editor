@@ -53,8 +53,89 @@ namespace PW.Core
         public PWNodeGraphOutput				outputNode;
 	
 	#endregion
-		
+	
+	#region OnEnable and OnDisable
+	
+		void BakeNode(Type t)
+		{
+			var dico = new Dictionary< string, FieldInfo >();
+			bakedNodeFields[t.AssemblyQualifiedName] = dico;
+	
+			foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+				dico[field.Name] = field;
+		}
+	
+		public virtual void OnEnable()
+		{
+			//bake node fields to accelerate data transfer from node to node.
+			bakedNodeFields.Clear();
+			foreach (var nodeType in PWNodeTypeProvider.GetAllNodeTypes())
+				BakeNode(nodeType);
+
+			//add all existing nodes to the nodesDictionary
+			for (int i = 0; i < nodes.Count; i++)
+				nodesDictionary[nodes[i].nodeId] = nodes[i];
+			if (inputNode != null)
+				nodesDictionary[inputNode.nodeId] = inputNode;
+			if (outputNode != null)
+				nodesDictionary[outputNode.nodeId] = outputNode;
+		}
+
+		public virtual void OnDisable()
+		{
+			
+		}
+
+	#endregion
+
 	#region Process and ProcessOnce
+
+		//Check errors when transferring values from a node to another
+		bool CheckProcessErrors(PWLink link, PWNode node)
+		{
+			if (!realMode)
+			{
+				if (!nodesDictionary.ContainsKey(link.distantNodeId))
+				{
+					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") not found in nodes dictionary");
+					return true;
+				}
+
+				if (nodesDictionary[link.distantNodeId] == null)
+				{
+					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") is null in nodes dictionary");
+					return true;
+				}
+
+				if (!bakedNodeFields.ContainsKey(link.localClassAQName)
+					|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
+					|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
+				{
+					Debug.LogError("[PW Process] Can't find field: " + link.localName + " in " + link.localClassAQName + " OR " + link.distantName + " in " + link.distantClassAQName);
+					return true;
+				}
+					
+				if (bakedNodeFields[link.localClassAQName][link.localName].GetValue(node) == null)
+				{
+					Debug.Log("[PW Process] tring to assign null value from " + link.localClassAQName + "." + link.localName);
+					return true;
+				}
+			}
+
+			return false;
+		}
+		
+		void TrySetValue(FieldInfo prop, object val, PWNode target)
+		{
+			if (realMode)
+				prop.SetValue(target, val);
+			else
+				try {
+					prop.SetValue(target, val);
+				} catch (Exception e) {
+					Debug.LogError(e);
+				}
+		}
 	
 		void ProcessNodeLinks(PWNode node)
 		{
@@ -62,50 +143,23 @@ namespace PW.Core
 
 			foreach (var link in links)
 			{
-				if (!nodesDictionary.ContainsKey(link.distantNodeId))
-					continue;
+				//if we are in real mode, we check all errors and discard if there is any.
+				if (CheckProcessErrors(link, node))
+					continue ;
 				
-				if (link.mode == PWNodeProcessMode.RequestForProcess)
-					continue ;
-
 				var target = nodesDictionary[link.distantNodeId];
-	
-				if (target == null)
-					continue ;
+				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
+				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
 	
 				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.nodeId);
 				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
-				
-				//ignore old links not removed cause of property removed in a script at compilation
-				if (!realMode)
-					if (!bakedNodeFields.ContainsKey(link.localClassAQName)
-						|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
-						|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
-						{
-							Debug.LogError("Can't find field: " + link.localName + " in " + link.localClassAQName + " OR " + link.distantName + " in " + link.distantClassAQName);
-							continue ;
-						}
-
-				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
-				if (val == null)
-					Debug.Log("null value of node: " + node.GetType() + " of field: " + link.localName);
-				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
-
 				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
 
 				// simple assignation, without multi-anchor
 				if (link.distantIndex == -1 && link.localIndex == -1)
-				{
-					if (realMode)
-						prop.SetValue(target, val);
-					else
-						try {
-							prop.SetValue(target, val);
-						} catch (Exception e) {
-							Debug.LogError(e);
-						}
-				}
-				else if (link.distantIndex != -1 && link.localIndex == -1) //distant link is a multi-anchor
+					TrySetValue(prop, val, target);
+				//distant link is a multi-anchor
+				else if (link.distantIndex != -1 && link.localIndex == -1)
 				{
 					PWValues values = (PWValues)prop.GetValue(target);
 	
@@ -115,22 +169,15 @@ namespace PW.Core
 							Debug.Log("failed to set distant indexed field value: " + link.distantName);
 					}
 				}
-				else if (link.distantIndex == -1 && link.localIndex != -1 && val != null) //local link is a multi-anchor
+				//local link is a multi-anchor
+				else if (link.distantIndex == -1 && link.localIndex != -1 && val != null)
 				{
 					object localVal = ((PWValues)val).At(link.localIndex);
 
-					if (realMode)
-						prop.SetValue(target, localVal);
-					else
-					{
-						try {
-							prop.SetValue(target, localVal);
-						} catch {
-							Debug.LogWarning("can't assign " + link.localName + " to " + link.distantName);
-						}
-					}
+					TrySetValue(prop, localVal, target);
 				}
-				else if (val != null) // both are multi-anchors
+				// both are multi-anchors
+				else if (val != null)
 				{
 					PWValues values = (PWValues)prop.GetValue(target);
 					object localVal = ((PWValues)val).At(link.localIndex);
@@ -174,32 +221,19 @@ namespace PW.Core
 
 		public float Process()
 		{
-			//TODO: processMode
 			float		calculTime = 0f;
 
 			if (computeOrderSortedNodes == null)
 				UpdateComputeOrder();
-
-			if (terrainDetail.biomeDetailMask != 0 && processMode == PWGraphProcessMode.Normal)
-				BakeNeededGeologicDatas();
 			
 			foreach (var node in computeOrderSortedNodes)
 			{
-				//ignore unlink nodes
+				//ignore unlinked nodes
 				if (node.computeOrder < 0)
 					continue ;
-
-				//TODO: uncomment when TerrainBuilder node will be OK
-				// if (processMode == PWGraphProcessMode.Geologic && type == typeof(PWNodeTerrainBuilder))
-					// return ;
 				
 				if (realMode)
 					node.BeginFrameUpdate();
-				
-				//if node outputs is only in RequestForProcess mode, avoid the computing
-				var links = node.GetLinks();
-				if (links.Count > 0 && !links.Any(l => l.mode == PWNodeProcessMode.AutoProcess))
-					continue ;
 				
 				calculTime += ProcessNode(node);
 			}
@@ -216,6 +250,7 @@ namespace PW.Core
 
 			foreach (var node in computeOrderSortedNodes)
 			{
+				//ignore unlinked nodes
 				if (node.computeOrder < 0)
 					continue ;
 				
@@ -243,8 +278,6 @@ namespace PW.Core
 					gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.nodeId);
 	
 				outputNode.computeOrder = EvaluateComputeOrder(false, 1, outputNode.nodeId);
-	
-				UpdateComputeOrder();
 	
 				return 0;
 			}
@@ -282,11 +315,42 @@ namespace PW.Core
 
 		public void	UpdateComputeOrder()
 		{
+			EvaluateComputeOrder();
+
 			computeOrderSortedNodes = nodesDictionary
 					//select all nodes building an object with node value and graph name (if needed)
 					.Select(kp => kp.Value)
 					//sort the resulting list by computeOrder:
 					.OrderBy(n => n.computeOrder);
+		}
+
+	#endregion
+
+	#region Misc
+
+		public void Export(string filePath)
+		{
+
+		}
+
+		public void Import(string filePath, bool wipeDatas = false)
+		{
+
+		}
+
+		public bool Execute(string command)
+		{
+			return false;
+		}
+
+		public bool SetInput(string fieldName, object value)
+		{
+			return false;
+		}
+
+		public PWNode FindNodeById(int nodeId)
+		{
+			return nodesDictionary[nodeId];
 		}
 
 	#endregion

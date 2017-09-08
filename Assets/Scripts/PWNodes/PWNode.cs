@@ -14,13 +14,6 @@ using PW.Node;
 namespace PW
 {
 	[System.SerializableAttribute]
-	public enum PWNodeProcessMode
-	{
-		AutoProcess,
-		RequestForProcess,
-	}
-
-	[System.SerializableAttribute]
 	public class PWNode : ScriptableObject
 	{
 		public static int	windowRenderOrder = 0;
@@ -58,7 +51,6 @@ namespace PW
 		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
 		public bool		isDependent { get; private set; }
 		public bool		realMode { get { return currentGraph != null ? currentGraph.realMode : false; }}
-		public PWNodeProcessMode	processMode;
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
