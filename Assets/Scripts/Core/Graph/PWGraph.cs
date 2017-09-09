@@ -39,7 +39,7 @@ namespace PW.Core
 
 
         //editor datas:
-		public Vector2							graphDecalPosition;
+		public Vector2							panPosition;
 		public int								localNodeIdCount;
         public PWGUIManager						PWGUI;
 
@@ -66,9 +66,6 @@ namespace PW.Core
 		public event OnLinkAction				OnNodeUnLinked;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
-		public event System.Action				OnChunkSizeChanged;
-		public event System.Action				OnStepChanged;
-		public event System.Action				OnChunkPositionChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
 	

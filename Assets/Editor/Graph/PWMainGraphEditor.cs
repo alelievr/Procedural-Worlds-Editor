@@ -12,7 +12,9 @@ using PW.Node;
 using Object = UnityEngine.Object;
 
 [System.Serializable]
-public class ProceduralWorldsWindow : PWGraphEditor {
+public class PWMainGraphEditor : PWGraphEditor {
+
+	PWMainGraph							mainGraph;
 	
 	[SerializeField]
 	public HorizontalSplitView			h1;
@@ -39,10 +41,6 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 	[System.NonSerializedAttribute]
 	PWNode				mouseAboveNode;
 	
-	//list of all links
-	int					linkIndex;
-	List< PWLink >		currentLinks = new List< PWLink >();
-
 	//events fields
 	Vector2				lastMousePosition;
 	Vector2				windowSize;
@@ -104,7 +102,6 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 #region Internal editor styles and textures
 
 	private static Texture2D	resizeHandleTexture;
-	private static Texture2D	nodeEditorBackgroundTexture;
 	private static Texture2D	defaultBackgroundTexture;
 
 	private static Texture2D	preset2DSideViewTexture;
@@ -130,39 +127,13 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 	static GUIStyle		panelBackgroundStyle;
 	static GUIStyle		nodeGraphWidowStyle;
 
-	static GUISkin		PWGUISkin;
-
-	public GUIStyle breadcrumbsButtonStyle;
-	public GUIStyle	breadcrumbsButtonLeftStyle;
 	public GUIStyle toolbarSearchCancelButtonStyle;
 	public GUIStyle toolbarSearchTextStyle;
 	public GUIStyle toolbarStyle;
 	public GUIStyle nodeSelectorTitleStyle;
 	public GUIStyle	nodeSelectorCaseStyle;
 	public GUIStyle	selectionStyle;
-	public GUIStyle	prefixLabelStyle;
 
-	public GUIStyle	testNodeWinow;
-	public GUIStyle blueNodeWindow;
-	public GUIStyle blueNodeWindowSelected;
-	public GUIStyle greenNodeWindow;
-	public GUIStyle greenNodeWindowSelected;
-	public GUIStyle yellowNodeWindow;
-	public GUIStyle yellowNodeWindowSelected;
-	public GUIStyle orangeNodeWindow;
-	public GUIStyle orangeNodeWindowSelected;
-	public GUIStyle redNodeWindow;
-	public GUIStyle redNodeWindowSelected;
-	public GUIStyle cyanNodeWindow;
-	public GUIStyle cyanNodeWindowSelected;
-	public GUIStyle purpleNodeWindow;
-	public GUIStyle purpleNodeWindowSelected;
-	public GUIStyle pinkNodeWindow;
-	public GUIStyle pinkNodeWindowSelected;
-	public GUIStyle greyNodeWindow;
-	public GUIStyle greyNodeWindowSelected;
-	public GUIStyle whiteNodeWindow;
-	public GUIStyle whiteNodeWindowSelected;
 
 #endregion
 
@@ -172,8 +143,6 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 	static void Init()
 	{
 		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
-
-		window.SaveNewGraph();
 
 		window.Show();
 	}
@@ -211,6 +180,8 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 	public override void OnEnable()
 	{
 		base.OnEnable();
+
+		mainGraph = graph as PWMainGraph;
 
 		GeneratePWAssets();
 
@@ -325,6 +296,40 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 
 #endregion
 
+//Manage to do something with this:
+
+/*			if (e.type == EventType.Layout)
+			{
+				graph.ForeachAllNodes(n => n.BeginFrameUpdate(), true, true);
+
+				if (graphNeedReload)
+				{
+					graphNeedReload = false;
+					
+					terrainMaterializer.DestroyAllChunks();
+
+					//load another instance of the current graph to separate calls:
+					if (terrainMaterializer.graph != null && terrainMaterializer.graph.GetHashCode() != graph.GetHashCode())
+						DestroyImmediate(terrainMaterializer.graph);
+					terrainMaterializer.InitGraph(CloneGraph(graph));
+
+					Debug.Log("graph: " + graph.GetHashCode() + " , terrainMat: " + terrainMaterializer.graph.GetHashCode());
+					//process the instance of the graph in our editor so we can see datas on chunk 0, 0, 0
+					graph.realMode = false;
+					graph.ForeachAllNodes(n => n.Updategraph(graph));
+					graph.UpdateChunkPosition(Vector3.zero);
+
+					if (graphNeedReloadOnce)
+						graph.ProcessGraphOnce();
+					graphNeedReloadOnce = false;
+
+					graph.ProcessGraph();
+				}
+				//updateChunks will update and generate new chunks if needed.
+				//TODOMAYBE: remove this when workers will be added to the Terrain.
+				terrainMaterializer.UpdateChunks();
+			}*/
+
 #region Node and OrderingGroup Utils
 
 	void OnWindowResize()
@@ -438,549 +443,4 @@ public class ProceduralWorldsWindow : PWGraphEditor {
 
 #endregion
 
-#region Anchor and Links utils
-
-	void HighlightDeleteAnchor(PWAnchorInfo anchor)
-	{
-		//anchor is input type.
-		PWLink link = FindLinkFromAnchor(anchor);
-
-		if (link != null)
-			link.linkHighlight = PWLinkHighlight.DeleteAndReset;
-	}
-
-	void BeginDragLink()
-	{
-		startDragAnchor = mouseAboveAnchorInfo;
-		draggingLink = true;
-		if (startDragAnchor.anchorType == PWAnchorType.Input)
-		{
-			var links = FindLinksFromAnchor(startDragAnchor);
-
-			if (links != null)
-				foreach (var link in links)
-					link.linkHighlight = PWLinkHighlight.Delete;
-		}
-	}
-
-	void StopDragLink(bool linked)
-	{
-		draggingLink = false;
-
-		if (linked)
-		{
-			//if we are linking to an input:
-			if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Input && mouseAboveAnchorInfo.linkCount != 0)
-			{
-				PWLink link = FindLinkFromAnchor(mouseAboveAnchorInfo);
-
-				if (link == null) //link was not created / canceled by the node
-					return ;
-
-				var from = FindNodeById(link.localNodeId);
-				var to = FindNodeById(link.distantNodeId);
-				
-				from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
-				to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
-			}
-			else if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output && startDragAnchor.linkCount != 0)
-			{
-				var inputNode = FindNodeById(startDragAnchor.nodeId);
-
-				//find the link with inputNode:
-				var toRemoveLink = FindLinkFromAnchor(startDragAnchor);
-
-				var outputNode = FindNodeById(toRemoveLink.localNodeId);
-
-				//delete links:
-				outputNode.DeleteLink(mouseAboveAnchorInfo.anchorId, inputNode, startDragAnchor.anchorId);
-
-				//delete dependencies:
-				inputNode.DeleteDependency(toRemoveLink.localNodeId, toRemoveLink.localAnchorId);
-			}
-		}
-		else if (startDragAnchor.linkCount != 0)
-		{
-			PWLink link = FindLinkFromAnchor(startDragAnchor);
-
-			//disable delete highlight for link
-			if (link != null)
-				link.linkHighlight = PWLinkHighlight.None;
-		}
-	}
-
-	IEnumerable< PWLink > FindLinksFromAnchor(PWAnchorInfo anchor)
-	{
-		if (anchor.anchorType == PWAnchorType.Input)
-		{
-			//find the anchor node
-			var node = FindNodeById(anchor.nodeId);
-			if (node == null)
-				return null;
-
-			//get dependencies of this anchor
-			var deps = node.GetDependencies(anchor.anchorId);
-			if (deps.Count() == 0)
-				return null;
-
-			//get the linked window from the dependency
-			var linkNode = FindNodeById(deps.First().nodeId);
-			if (linkNode == null)
-				return null;
-
-			//find the link of each dependency
-			List< PWLink > links = new List< PWLink >();
-			foreach (var dep in deps)
-				links.Add(linkNode.GetLink(dep.anchorId, node.nodeId, dep.connectedAnchorId));
-			return links;
-		}
-		else
-			return null;
-	}
-
-	PWLink FindLinkFromAnchor(PWAnchorInfo anchor)
-	{
-		var links = FindLinksFromAnchor(anchor);
-
-		if (links == null || links.Count() == 0)
-			return null;
-		return links.First();
-	}
-
-	void DeleteAllAnchorLinks()
-	{
-		var node = FindNodeById(mouseAboveAnchorInfo.nodeId);
-		if (node == null)
-			return ;
-		var anchorConnections = node.GetAnchorConnections(mouseAboveAnchorInfo.anchorId);
-		foreach (var ac in anchorConnections)
-		{
-			var n = FindNodeById(ac.first);
-			if (n != null)
-			{
-				if (mouseAboveAnchorInfo.anchorType == PWAnchorType.Output)
-					n.DeleteDependency(mouseAboveAnchorInfo.nodeId, mouseAboveAnchorInfo.anchorId);
-				else
-					n.DeleteLink(ac.second, node, mouseAboveAnchorInfo.anchorId);
-			}
-		}
-		node.DeleteAllLinkOnAnchor(mouseAboveAnchorInfo.anchorId);
-		
-		EvaluateComputeOrder();
-	}
-
-	void DeleteLink(object l)
-	{
-		PWLink	link = l  as PWLink;
-
-		var from = FindNodeById(link.localNodeId);
-		var to = FindNodeById(link.distantNodeId);
-
-		from.DeleteLink(link.localAnchorId, to, link.distantAnchorId);
-		to.DeleteLink(link.distantAnchorId, from, link.localAnchorId);
-		
-		EvaluateComputeOrder();
-	}
-
-	void UpdateLinkMode(PWLink link, PWNodeProcessMode newMode)
-	{
-		link.mode = newMode;
-
-        var node = FindNodeById(link.distantNodeId);
-		var dep = node.GetDependency(link.distantAnchorId, link.localNodeId, link.localAnchorId);
-        dep.mode = newMode;
-		
-		currentGraph.RebakeGraphParts();
-	}
-
-#endregion
-
-#region Contextual menu rendering
-
-	void DrawContextualMenu(Rect graphNodeRect)
-	{
-		Event	e = Event.current;
-        if (e.type == EventType.ContextClick)
-        {
-            Vector2 mousePos = e.mousePosition;
-            EditorGUI.DrawRect(graphNodeRect, Color.green);
-
-            if (graphNodeRect.Contains(mousePos))
-            {
-                // Now create the menu, add items and show it
-                GenericMenu menu = new GenericMenu();
-				foreach (var nodeCat in nodeSelectorList)
-				{
-					string menuString = "Create new/" + nodeCat.Key + "/";
-					foreach (var nodeClass in nodeCat.Value.nodes)
-						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
-				}
-				menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - currentGraph.graphDecalPosition);
-				if (mouseAboveOrderingGroup != null)
-					menu.AddItem(new GUIContent("Delete ordering group"), false, DeleteOrderingGroup);
-				else
-					menu.AddDisabledItem(new GUIContent("Delete ordering group"));
-
-                menu.AddSeparator("");
-				if (mouseAboveNodeAnchor)
-				{
-					menu.AddItem(new GUIContent("New Link"), false, BeginDragLink);
-					menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
-				}
-
-				var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
-				if (hoveredLink != null)
-				{
-					menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
-				}
-				else
-					menu.AddDisabledItem(new GUIContent("Link"));
-
-                menu.AddSeparator("");
-				if (mouseAboveNodeIndex != -1)
-					menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
-				else
-					menu.AddDisabledItem(new GUIContent("Delete node"));
-					
-				int selectedNodeCount = 0;
-				currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; });
-
-				if (selectedNodeCount != 0)
-				{
-					string deleteNodeString = (selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
-					menu.AddItem(new GUIContent(deleteNodeString), false, DeleteSelectedNodes);
-
-					string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
-					menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
-				}
-
-                menu.ShowAsContext();
-                e.Use();
-            }
-        }
-	}
-
-#endregion
-
-#region Utils and miscellaneous
-	
-	string GetUniqueName(string name)
-	{
-		while (true)
-		{
-			if (!currentGraph.nodes.Any(p => p.name == name))
-				return name;
-			name += "*";
-		}
-	}
-
-	PWNode FindNodeById(int id)
-	{
-		return currentGraph.FindNodebyId(id);
-	}
-
-	void OnDestroy()
-	{
-		AssetDatabase.SaveAssets();
-		currentGraph.isVisibleInEditor = false;
-	}
-
-	//If this function is called, it means there is not yet a saved instance of currentGraph
-	void SaveNewGraph()
-	{
-		if (currentGraph.saveName != null)
-			return ;
-		
-		if (!Directory.Exists(PWConstants.resourcePath))
-			Directory.CreateDirectory(PWConstants.resourcePath);
-
-		currentGraph.saveName = "New ProceduralWorld";
-		currentGraph.name = currentGraph.saveName;
-		string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(PWConstants.resourcePath, currentGraph.saveName + ".asset"));
-
-		AssetDatabase.CreateAsset(currentGraph, assetPathAndName);
-		AssetDatabase.SaveAssets();
-		AssetDatabase.Refresh();
-		EditorGUIUtility.PingObject(currentGraph);
-	}
-
-	void GetWindowStyleFromType(Type t, out GUIStyle windowStyle, out GUIStyle windowSelectedStyle)
-	{
-		if (t == typeof(PWNodeGraphExternal) || t == typeof(PWNodeGraphInput) || t == typeof(PWNodeGraphOutput))
-		{
-			windowStyle = whiteNodeWindow;
-			windowSelectedStyle = whiteNodeWindowSelected;
-			return ;
-		}
-		foreach (var nodeCat in nodeSelectorList)
-		{
-			foreach (var nodeInfo in nodeCat.Value.nodes)
-			{
-				if (t == nodeInfo.nodeType)
-				{
-					windowStyle = nodeInfo.windowStyle;
-					windowSelectedStyle = nodeInfo.windowSelectedStyle;
-					return ;
-				}
-			}
-		}
-		windowStyle = greyNodeWindow;
-		windowSelectedStyle = greyNodeWindowSelected;
-	}
-
-	PWNodeGraph CloneGraph(PWNodeGraph graph)
-	{
-		PWNodeGraph	newGraph = Object.Instantiate< PWNodeGraph >(graph);
-
-		newGraph.nodes.Clear();
-		foreach (var node in graph.nodes)
-		{
-			var n = Object.Instantiate< PWNode >(node);
-			n.UpdateCurrentGraph(newGraph);
-			newGraph.nodes.Add(n);
-		}
-		newGraph.OnEnable();
-		return newGraph;
-	}
-
-#endregion
-
-#region Draw utils functions and Ressource generation
-
-	static void GeneratePWAssets()
-	{
-		Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
-			Texture2D	ret;
-			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			ret.wrapMode = TextureWrapMode.Repeat;
-			ret.SetPixel(0, 0, c);
-			ret.Apply();
-			return ret;
-		};
-
-		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-			return Resources.Load< Texture2D >(ressourcePath);
-        };
-
-		//generate background colors:
-        Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
-		Color resizeHandleColor = EditorGUIUtility.isProSkin
-			? new Color32(56, 56, 56, 255)
-            : new Color32(130, 130, 130, 255);
-		
-		//load backgrounds and colors as texture
-		resizeHandleTexture = CreateTexture2DColor(resizeHandleColor);
-		defaultBackgroundTexture = CreateTexture2DColor(defaultBackgroundColor);
-		nodeEditorBackgroundTexture = CreateTexture2DFromFile("nodeEditorBackground");
-
-		//loading preset panel images
-		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
-		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
-		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
-		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
-		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
-		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
-		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
-		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
-		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
-
-		//icons and utils
-		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
-		fileIconTexture = CreateTexture2DFromFile("ic_file");
-		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
-		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
-		
-		//style
-		nodeGraphWidowStyle = new GUIStyle();
-		nodeGraphWidowStyle.normal.background = defaultBackgroundTexture;
-
-		//generating green-red gradient
-        GradientColorKey[] gck;
-        GradientAlphaKey[] gak;
-        greenRedGradient = new Gradient();
-        gck = new GradientColorKey[2];
-        gck[0].color = Color.green;
-        gck[0].time = 0.0F;
-        gck[1].color = Color.red;
-        gck[1].time = 1.0F;
-        gak = new GradientAlphaKey[2];
-        gak[0].alpha = 1.0F;
-        gak[0].time = 0.0F;
-        gak[1].alpha = 1.0F;
-        gak[1].time = 1.0F;
-        greenRedGradient.SetKeys(gck, gak);
-	}
-
-	void LoadCustomStyles()
-	{
-		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
-
-		//initialize if null
-		if (navBarBackgroundStyle == null || breadcrumbsButtonStyle == null || blueNodeWindow == null)
-		{
-			breadcrumbsButtonStyle = new GUIStyle("GUIEditor.BreadcrumbMid");
-			breadcrumbsButtonLeftStyle = new GUIStyle("GUIEditor.BreadcrumbLeft");
-	
-			toolbarStyle = new GUIStyle("Toolbar");
-			toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
-			toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
-
-			nodeSelectorTitleStyle = PWGUISkin.FindStyle("NodeSelectorTitle");
-			nodeSelectorCaseStyle = PWGUISkin.FindStyle("NodeSelectorCase");
-
-			selectionStyle = PWGUISkin.FindStyle("Selection");
-
-			navBarBackgroundStyle = PWGUISkin.FindStyle("NavBarBackground");
-			panelBackgroundStyle = PWGUISkin.FindStyle("PanelBackground");
-	
-			testNodeWinow = PWGUISkin.FindStyle("TestNodeWindow");
-
-			prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
-	
-			blueNodeWindow = PWGUISkin.FindStyle("BlueNodeWindow");
-			blueNodeWindowSelected = PWGUISkin.FindStyle("BlueNodeWindowSelected");
-			greenNodeWindow = PWGUISkin.FindStyle("GreenNodeWindow");
-			greenNodeWindowSelected = PWGUISkin.FindStyle("GreenNodeWindowSelected");
-			yellowNodeWindow = PWGUISkin.FindStyle("YellowNodeWindow");
-			yellowNodeWindowSelected = PWGUISkin.FindStyle("YellowNodeWindowSelected");
-			orangeNodeWindow = PWGUISkin.FindStyle("OrangeNodeWindow");
-			orangeNodeWindowSelected = PWGUISkin.FindStyle("OrangeNodeWindowSelected");
-			redNodeWindow = PWGUISkin.FindStyle("RedNodeWindow");
-			redNodeWindowSelected = PWGUISkin.FindStyle("RedNodeWindowSelected");
-			cyanNodeWindow = PWGUISkin.FindStyle("CyanNodeWindow");
-			cyanNodeWindowSelected = PWGUISkin.FindStyle("CyanNodeWindowSelected");
-			purpleNodeWindow = PWGUISkin.FindStyle("PurpleNodeWindow");
-			purpleNodeWindowSelected = PWGUISkin.FindStyle("PurpleNodeWindowSelected");
-			pinkNodeWindow = PWGUISkin.FindStyle("PinkNodeWindow");
-			pinkNodeWindowSelected = PWGUISkin.FindStyle("PinkNodeWindowSelected");
-			greyNodeWindow = PWGUISkin.FindStyle("GreyNodeWindow");
-			greyNodeWindowSelected = PWGUISkin.FindStyle("GreyNodeWindowSelected");
-			whiteNodeWindow = PWGUISkin.FindStyle("WhiteNodeWindow");
-			whiteNodeWindowSelected = PWGUISkin.FindStyle("WhiteNodeWindowSelected");
-			
-			//copy all custom styles to the new style
-			string[] stylesToCopy = {"RL"};
-			PWGUISkin.customStyles = PWGUISkin.customStyles.Concat(
-				GUI.skin.customStyles.Where(
-					style => stylesToCopy.Any(
-						styleName => style.name.Contains(styleName) && !PWGUISkin.customStyles.Any(
-							s => s.name.Contains(styleName)
-						)
-					)
-				)
-			).ToArray();
-		}
-			
-		//set the custom style for the editor
-		GUI.skin = PWGUISkin;
-	}
-
-    void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
-    {
-		Event e = Event.current;
-
-		int		id;
-		if (link == null)
-			id = -1;
-		else
-			id = GUIUtility.GetControlID((link.localName + link.distantName + index).GetHashCode(), FocusType.Passive);
-
-        Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
-        Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
-		
-		Vector3 startDir = Vector3.right;;
-		Vector3 endDir = Vector3.left;;
-
-		float	tanPower = 50;
-
-        Vector3 startTan = startPos + startDir * tanPower;
-        Vector3 endTan = endPos + endDir * tanPower;
-
-		if (link != null && !draggingNode && String.IsNullOrEmpty(GUI.GetNameOfFocusedControl()))
-		{
-			switch (e.GetTypeForControl(id))
-			{
-				case EventType.MouseDown:
-					if (link.linkHighlight == PWLinkHighlight.Delete)
-						break ;
-					if (!draggingLink && HandleUtility.nearestControl == id && (e.button == 0 || e.button == 1))
-					{
-						GUIUtility.hotControl = id;
-						//unselect all others links:
-						foreach (var l in currentLinks)
-							l.selected = false;
-						link.selected = true;
-						link.linkHighlight = PWLinkHighlight.Selected;
-					}
-					break ;
-			}
-			if (HandleUtility.nearestControl == id)
-			{
-				Debug.Log("bezier curve take the control !");
-				GUIUtility.hotControl = id;
-				link.hover = true;
-			}
-		}
-
-		HandleUtility.AddControl(id, HandleUtility.DistancePointBezier(e.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
-		if (e.type == EventType.Repaint)
-		{
-			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
-			PWNodeProcessMode m = (link != null) ? link.mode : PWNodeProcessMode.AutoProcess;
-			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
-			{
-				case PWLinkType.Sampler3D:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s, m);
-					break ;
-				case PWLinkType.ThreeChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
-					break ;
-				case PWLinkType.FourChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 16, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
-					break ;
-				default:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s, m);
-					break ;
-			}
-			if (link != null && link.linkHighlight == PWLinkHighlight.DeleteAndReset)
-				link.linkHighlight = PWLinkHighlight.None;
-			if (link != null && !link.selected && link.linkHighlight == PWLinkHighlight.Selected)
-				link.linkHighlight = PWLinkHighlight.None;
-		}
-    }
-
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWNodeProcessMode linkMode)
-	{
-		switch (linkHighlight)
-		{
-			case PWLinkHighlight.Selected:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorPalette.GetColor("selectedNode"), null, width + 3);
-				break;
-			case PWLinkHighlight.Delete:
-			case PWLinkHighlight.DeleteAndReset:
-				Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .0f, .0f, 1), null, width + 2);
-				break ;
-		}
-		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
-
-		if (linkMode == PWNodeProcessMode.RequestForProcess)
-		{
-			Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
-			Vector2 pauseSize = new Vector2(20, 20);
-			Matrix4x4 savedGUIMatrix = GUI.matrix;
-			Rect pauseRect = new Rect((Vector2)points[2] - pauseSize / 2, pauseSize);
-			float angle = Vector2.Angle((startPos.y > endPos.y) ? startPos - endPos : endPos - startPos, Vector2.right);
-			GUIUtility.RotateAroundPivot(angle, points[2]);
-			GUI.color = c;
-            GUI.DrawTexture(pauseRect, pauseIconTexture);
-			GUI.color = Color.white;
-			GUI.matrix = savedGUIMatrix;
-        }
-	}
-#endregion
 }

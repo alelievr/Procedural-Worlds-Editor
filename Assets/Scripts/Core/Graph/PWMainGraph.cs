@@ -47,6 +47,12 @@ namespace PW.Core
 		[System.NonSerialized]
 		public GeologicBakedDatas		geologicBakedDatas = new GeologicBakedDatas();
 		
+
+		//parameter events:
+		public event System.Action				OnChunkSizeChanged;
+		public event System.Action				OnStepChanged;
+		public event System.Action				OnChunkPositionChanged;
+		
 		void		BakeNeededGeologicDatas()
 		{
 			float		oldStep = step;
