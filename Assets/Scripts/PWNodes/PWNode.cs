@@ -14,7 +14,7 @@ using PW.Node;
 namespace PW
 {
 	[System.SerializableAttribute]
-	public class PWNode : ScriptableObject
+	public partial class PWNode : ScriptableObject
 	{
 		public static int	windowRenderOrder = 0;
 
@@ -42,13 +42,12 @@ namespace PW
 		public bool		stepHasChanged = false;
 		public bool		inputHasChanged = false;
 		public bool		outputHasChanged = false;
-		public bool		justReloaded = false;
 		public bool		notifyDataChanged = false;
 		public bool		notifyBiomeDataChanged = false;
 		public bool		biomeReloadRequested = false;
 		public bool		reloadRequested = false;
 		public bool		forceReload = false;
-		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || justReloaded || reloadRequested || forceReload;}}
+		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || reloadRequested || forceReload;}}
 		public bool		isDependent { get; private set; }
 		public bool		realMode { get { return currentGraph != null ? currentGraph.realMode : false; }}
 
@@ -81,8 +80,6 @@ namespace PW
 		int					maxAnchorRenderHeight;
 		[SerializeField]
 		string				firstInitialization;
-
-		bool				windowShouldClose = false;
 
 		Vector3				oldChunkPosition;
 		int					oldSeed;
@@ -125,32 +122,15 @@ namespace PW
 
 	#region OnEnable, OnDisable, data initialization and baking
 
-		public PWNode()
+		public void OnEnable()
 		{
+			LoadAssets();
+			
 			LoadFieldAttributes();
 
 			BakeNodeFields();
 
 			delayedChanges.Clear();
-		}
-
-		public void OnEnable()
-		{
-			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-				return Resources.Load< Texture2D >(ressourcePath);
-			};
-			
-			if (errorIcon == null)
-			{
-				errorIcon = CreateTexture2DFromFile("ic_error");
-				editIcon = CreateTexture2DFromFile("ic_edit");
-				nodeAutoProcessModeIcon = CreateTexture2DFromFile("ic_autoProcess");
-				nodeRequestForProcessIcon = CreateTexture2DFromFile("ic_requestForProcess");
-			}
-			
-			LoadFieldAttributes();
-
-			BakeNodeFields();
 			
 			//this will be true only if the object instance does not came from a serialized object.
 			if (firstInitialization == null)
@@ -161,175 +141,13 @@ namespace PW
 				renamable = false;
 				maxAnchorRenderHeight = 0;
 				PWGUI = new PWGUIManager();
-				processMode = PWNodeProcessMode.AutoProcess;
 
-				OnNodeCreateOnce();
+				OnNodeCreation();
 
 				firstInitialization = "initialized";
 			}
 
-			justReloaded = true;
-		}
-		
-		void BakeNodeFields()
-		{
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-
-			bakedNodeFields.Clear();
-			foreach (var fInfo in fInfos)
-				bakedNodeFields[fInfo.Name] = fInfo;
-		}
-
-		void LoadFieldAttributes()
-		{
-			//get input variables
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-			List< string > actualFields = new List< string >();
-			foreach (var field in fInfos)
-			{
-				actualFields.Add(field.Name);
-				if (!propertyDatas.ContainsKey(field.Name))
-					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
-				
-				PWAnchorData	data = propertyDatas[field.Name];
-				Color			backgroundColor = PWColorPalette.GetAnchorColorByType(field.FieldType);
-				PWAnchorType	anchorType = PWAnchorType.None;
-				string			name = "";
-				Vector2			offset = Vector2.zero;
-				int				multiPadding = 0;
-				
-				//default anchor values
-				data.multiple = false;
-				data.generic = false;
-				data.required = true;
-
-				data.anchorInstance = field.GetValue(this);
-				System.Object[] attrs = field.GetCustomAttributes(true);
-				foreach (var attr in attrs)
-				{
-					PWInput			inputAttr = attr as PWInput;
-					PWOutput		outputAttr = attr as PWOutput;
-					PWColor			colorAttr = attr as PWColor;
-					PWOffset		offsetAttr = attr as PWOffset;
-					PWMultiple		multipleAttr = attr as PWMultiple;
-					PWGeneric		genericAttr = attr as PWGeneric;
-					PWMirror		mirrorAttr = attr as PWMirror;
-					PWNotRequired	notRequiredAttr = attr as PWNotRequired;
-
-					if (inputAttr != null)
-					{
-						anchorType = PWAnchorType.Input;
-						if (inputAttr.name != null)
-						{
-							name = inputAttr.name;
-							data.anchorName = inputAttr.name;
-						}
-					}
-					if (outputAttr != null)
-					{
-						anchorType = PWAnchorType.Output;
-						if (outputAttr.name != null)
-						{
-							name = outputAttr.name;
-							data.anchorName = outputAttr.name;
-						}
-					}
-					if (colorAttr != null)
-						backgroundColor = colorAttr.color;
-					if (offsetAttr != null)
-					{
-						offset = offsetAttr.offset;
-						multiPadding = offsetAttr.multiPadding;
-					}
-					if (multipleAttr != null)
-					{
-						//check if field is PWValues type otherwise do not implement multi-anchor
-						data.generic = true;
-						data.multiple = true;
-						data.allowedTypes = multipleAttr.allowedTypes;
-						data.minMultipleValues = multipleAttr.minValues;
-						data.maxMultipleValues = multipleAttr.maxValues;
-					}
-					if (genericAttr != null)
-					{
-						data.allowedTypes = genericAttr.allowedTypes;
-						data.generic = true;
-					}
-					if (mirrorAttr != null)
-						data.mirroredField = mirrorAttr.fieldName;
-					if (notRequiredAttr != null)
-						data.required = false;
-				}
-				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
-					propertyDatas.Remove(field.Name);
-				else
-				{
-					if (data.required && anchorType == PWAnchorType.Output)
-						data.required = false;
-					//protection against stupid UpdateMultiProp remove all anchors
-					if (data.multiple && data.multi.Count == 0)
-						data.AddNewAnchor(backgroundColor, field.Name.GetHashCode());
-					data.classAQName = GetType().AssemblyQualifiedName;
-					data.fieldName = field.Name;
-					data.anchorType = anchorType;
-					data.type = (SerializableType)field.FieldType;
-					data.first.color = (SerializableColor)backgroundColor;
-					data.first.linkType = GetLinkTypeFromType(field.FieldType);
-					data.first.name = name;
-					data.offset = offset;
-					data.nodeId = nodeId;
-					data.multiPadding = multiPadding;
-
-					//add missing values to instance of list:
-
-					if (data.multiple && data.anchorInstance != null)
-					{
-						//add minimum number of anchors to render:
-						if (data.multipleValueCount < data.minMultipleValues)
-							for (int i = data.multipleValueCount; i < data.minMultipleValues; i++)
-								data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i + 1);
-
-						var PWValuesInstance = data.anchorInstance as PWValues;
-
-						if (PWValuesInstance != null)
-							while (PWValuesInstance.Count < data.multipleValueCount)
-								PWValuesInstance.Add(null);
-					}
-					else if (data.multiple)
-						Debug.LogWarning("Uninitialized PWmultiple field in class " + GetType() + ": " + data.fieldName);
-				}
-			}
-
-			//Check mirrored fields compatibility and if node do not need input to work:
-			foreach (var kp in propertyDatas)
-			{
-				if (!String.IsNullOrEmpty(kp.Value.mirroredField))
-				{
-					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
-					{
-						var type = propertyDatas[kp.Value.mirroredField].type;
-						if (type != kp.Value.type)
-						{
-							Debug.LogWarning("incompatible mirrored type in " + GetType());
-							kp.Value.mirroredField = null;
-							continue ;
-						}
-					}
-					else
-						kp.Value.mirroredField = null;
-				}
-			}
-
-			UpdateDependentStatus();
-
-			//remove inhexistants dictionary entries:
-			var toRemoveKeys = new List< string >();
-			foreach (var kp in propertyDatas)
-				if (!actualFields.Contains(kp.Key))
-					toRemoveKeys.Add(kp.Key);
-			foreach (var toRemoveKey in toRemoveKeys)
-				propertyDatas.Remove(toRemoveKey);
+			OnNodeEnable();
 		}
 
 		public void OnDisable()
@@ -354,414 +172,23 @@ namespace PW
 
 	#region inheritence virtual API
 
-		public virtual void OnNodeAwake()
-		{
-		}
+		public virtual void OnNodeAwake() {}
 
-		public virtual void OnNodeCreate()
-		{
-		}
+		public virtual void OnNodeCreation() {}
 
-		public virtual void OnNodeCreateOnce()
-		{
-		}
+		public virtual void OnNodeEnable() {}
 
-		public virtual void OnNodeProcess()
-		{
-		}
+		public virtual void OnNodeProcess() {}
 
-		public virtual void OnNodeDisable()
-		{
-		}
+		public virtual void OnNodeDisable() {}
 
-		public virtual void OnNodeDelete()
-		{
-		}
+		public virtual void OnNodeDelete() {}
 
-		public virtual void OnNodeProcessOnce()
-		{
-		}
+		public virtual void OnNodeProcessOnce() {}
 
-		public virtual bool	OnNodeAnchorLink(string propName, int index)
-		{
-			return true;
-		}
+		public virtual bool	OnNodeAnchorLink(string propName, int index) { return true; }
 
-		public virtual void OnNodeAnchorUnlink(string propName, int index)
-		{
-		}
-
-	#endregion
-
-	#region Node rendering and processing
-
-		#if UNITY_EDITOR
-		public void OnWindowGUI(int id)
-		{
-			var e = Event.current;
-
-			if (boxAnchorStyle == null)
-			{
-				boxAnchorStyle = new GUIStyle(GUI.skin.box);
-				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
-				anchorTexture = GUI.skin.box.normal.background;
-				anchorDisabledTexture = GUI.skin.box.active.background;
-				renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
-				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
-				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
-				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
-				#if DEBUG_NODE
-				debugStyle = GUI.skin.FindStyle("Debug");
-				#endif
-			}
-
-			//update the PWGUI window rect with this window rect:
-			PWGUI.currentWindowRect = windowRect;
-			PWGUI.StartFrame();
-
-			// set the header of the window as draggable:
-			int width = (int) windowRect.width;
-			Rect dragRect = new Rect(30, 0, width, 20);
-			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
-				isDragged = true;
-			if (e.type == EventType.MouseUp)
-				isDragged = false;
-			if (id != -1 && e.button == 0 && !windowNameEdit)
-				GUI.DragWindow(dragRect);
-
-			int	debugViewH = 0;
-			#if DEBUG_NODE
-				EditorGUILayout.BeginVertical(debugStyle);
-				EditorGUILayout.LabelField("Id: " + nodeId + " | Compute order: " + computeOrder);
-				EditorGUILayout.LabelField("type: " + GetType());
-				EditorGUILayout.LabelField("isDependent: " + isDependent);
-				EditorGUILayout.LabelField("Dependencies:");
-				foreach (var dep in depencendies)
-					EditorGUILayout.LabelField("    " + dep.nodeId + " : " + dep.anchorId);
-				EditorGUILayout.LabelField("Links:");
-				foreach (var l in links)
-					EditorGUILayout.LabelField("    " + l.distantNodeId + " : " + l.distantAnchorId);
-				EditorGUILayout.EndVertical();
-				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
-			#endif
-
-			GUILayout.BeginVertical(innerNodePaddingStyle);
-			{
-				OnNodeGUI();
-
-				EditorGUIUtility.labelWidth = 0;
-			}
-			GUILayout.EndVertical();
-
-			int viewH = (int)GUILayoutUtility.GetLastRect().height;
-			if (e.type == EventType.Repaint)
-				viewHeight = viewH + debugViewH;
-
-			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
-				
-			if (e.type == EventType.Repaint)
-				viewHeight += 24;
-			
-			ProcessAnchors();
-			RenderAnchors();
-
-			delayedChanges.Update();
-
-			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
-			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
-				selected = !selected;
-				
-			if (e.type == EventType.Layout)
-				EndFrameUpdate();
-		}
-		#endif
-
-		public virtual void	OnNodeGUI()
-		{
-			EditorGUILayout.LabelField("empty node");
-		}
-
-		public void Process()
-		{
-			foreach (var kp in propertyDatas)
-				if (!String.IsNullOrEmpty(kp.Value.mirroredField))
-				{
-					var val = kp.Value.anchorInstance;
-					if (propertyDatas.ContainsKey(kp.Value.mirroredField))
-					{
-						var mirroredProp = propertyDatas[kp.Value.mirroredField];
-						bakedNodeFields[mirroredProp.fieldName].SetValue(this, val);
-					}
-				}
-
-			OnNodeProcess();
-		}
-
-	#endregion
-
-	#region Anchor rendering and processing
-
-		void ProcessAnchor(
-			PWAnchorData data,
-			PWAnchorData.PWAnchorMultiData singleAnchor,
-			ref Rect inputAnchorRect,
-			ref Rect outputAnchorRect,
-			ref PWAnchorInfo ret,
-			int index = -1)
-		{
-			Rect anchorRect = (data.anchorType == PWAnchorType.Input) ? inputAnchorRect : outputAnchorRect;
-
-			singleAnchor.anchorRect = anchorRect;
-			if (singleAnchor.forcedY != -1)
-			{
-				singleAnchor.anchorRect.y = singleAnchor.forcedY;
-				anchorRect.y = singleAnchor.forcedY;
-			}
-
-			if (!ret.mouseAbove)
-			{
-				ret = new PWAnchorInfo(data.fieldName, PWUtils.DecalRect(singleAnchor.anchorRect, graphDecal + windowRect.position),
-					singleAnchor.color, data.type,
-					data.anchorType, nodeId, singleAnchor.id,
-					data.classAQName, index,
-					data.generic, data.allowedTypes,
-					singleAnchor.linkType, singleAnchor.linkCount);
-			}
-			if (anchorRect.Contains(Event.current.mousePosition))
-				ret.mouseAbove = true;
-		}
-
-		void ProcessAnchors()
-		{
-			PWAnchorInfo ret = new PWAnchorInfo();
-			
-			int		anchorWidth = 13;
-			int		anchorHeight = 13;
-			int		anchorMargin = 2;
-
-			Rect	inputAnchorRect = new Rect(3, 20 + anchorMargin, anchorWidth, anchorHeight);
-			Rect	outputAnchorRect = new Rect(windowRect.size.x - anchorWidth - 3, 20 + anchorMargin, anchorWidth, anchorHeight);
-
-			//if there is more values in PWValues than the available anchor count, create new anchors:
-			ForeachPWAnchorDatas((data) => {
-				if (data.anchorType == PWAnchorType.Input && data.multiple && data.anchorInstance != null && !data.forcedAnchorNumber)
-				{
-					if (((PWValues)data.anchorInstance).Count >= data.multi.Count)
-						data.AddNewAnchor(data.fieldName.GetHashCode() + data.multi.Count, false);
-				}
-			});
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				//process anchor event and calcul rect position if visible
-				if (singleAnchor.visibility != PWVisibility.Gone)
-				{
-					if (singleAnchor.visibility != PWVisibility.Gone && i <= 0)
-					{
-						if (data.anchorType == PWAnchorType.Input)
-							inputAnchorRect.position += data.offset;
-						else if (data.anchorType == PWAnchorType.Output)
-							outputAnchorRect.position += data.offset;
-					}
-					if (singleAnchor.visibility != PWVisibility.Gone && i != -1)
-					{
-						if (data.anchorType == PWAnchorType.Input)
-							inputAnchorRect.position += new Vector2(0, data.multiPadding);
-						else if (data.anchorType == PWAnchorType.Output)
-							outputAnchorRect.position += new Vector2(0, data.multiPadding);
-					}
-					if (singleAnchor.visibility == PWVisibility.Visible)
-						ProcessAnchor(data, singleAnchor, ref inputAnchorRect, ref outputAnchorRect, ref ret, i);
-					if (singleAnchor.visibility != PWVisibility.Gone && singleAnchor.forcedY == -1)
-					{
-						if (data.anchorType == PWAnchorType.Input)
-							inputAnchorRect.position += Vector2.up * (18 + anchorMargin);
-						else if (data.anchorType == PWAnchorType.Output)
-							outputAnchorRect.position += Vector2.up * (18 + anchorMargin);
-					}
-				}
-			});
-			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.position.y - 20, outputAnchorRect.position.y - 20);
-			anchorUnderMouse = ret;
-		}
-
-		public PWAnchorInfo GetAnchorUnderMouse()
-		{
-			return anchorUnderMouse;
-		}
-		
-		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
-		{
-			//if anchor have not been processed:
-			if (singleAnchor == null || boxAnchorStyle == null)
-				return ;
-
-			string anchorName = (data.multiple) ? singleAnchor.name : data.anchorName;
-
-			/*if (data.multiple && data.anchorType == PWAnchorType.Input)
-			{
-				if (singleAnchor.additional)
-					anchorName = "+";
-				else
-					anchorName += index;
-			}*/
-
-			switch (singleAnchor.highlighMode)
-			{
-				case PWAnchorHighlight.AttachAdd:
-					GUI.color = anchorAttachAddColor;
-					break ;
-				case PWAnchorHighlight.AttachNew:
-					GUI.color = anchorAttachNewColor;
-					break ;
-				case PWAnchorHighlight.AttachReplace:
-					GUI.color = anchorAttachReplaceColor;
-					break ;
-				case PWAnchorHighlight.None:
-				default:
-					GUI.color = singleAnchor.color;
-					break ;
-
-			}
-			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
-
-			#if !HIDE_ANCHOR_LABEL
-				if (!String.IsNullOrEmpty(anchorName))
-				{
-					Rect	anchorNameRect = singleAnchor.anchorRect;
-					Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
-					if (data.anchorType == PWAnchorType.Input)
-						anchorNameRect.position += new Vector2(-6, -2);
-					else
-						anchorNameRect.position += new Vector2(-textSize.x + 4, -2);
-					anchorNameRect.size = textSize + new Vector2(15, 4); //add the anchorLabel size
-					GUI.depth = 10;
-					GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
-				}
-			#endif
-			GUI.color = Color.white;
-			
-			if (!singleAnchor.enabled)
-				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);
-
-			//reset the Highlight:
-			singleAnchor.highlighMode = PWAnchorHighlight.None;
-
-			if (data.required && singleAnchor.linkCount == 0
-				&& (!data.multiple || (data.multiple && index < data.minMultipleValues)))
-			{
-				Rect errorIconRect = new Rect(singleAnchor.anchorRect);
-				errorIconRect.size = Vector2.one * 17;
-				errorIconRect.position += new Vector2(-6, -10);
-				GUI.color = Color.red;
-				GUI.DrawTexture(errorIconRect, errorIcon);
-				GUI.color = Color.white;
-			}
-
-			#if DEBUG_ANCHOR
-				Rect anchorSideRect = singleAnchor.anchorRect;
-				if (data.anchorType == PWAnchorType.Input)
-				{
-					anchorSideRect.size += new Vector2(100, 20);
-				}
-				else
-				{
-					anchorSideRect.position -= new Vector2(100, 0);
-					anchorSideRect.size += new Vector2(100, 20);
-				}
-				GUI.Label(anchorSideRect, (long)singleAnchor.id + " | " + singleAnchor.linkCount);
-			#endif
-		}
-		
-		public void RenderAnchors()
-		{
-			var e = Event.current;
-
-			//rendering anchors
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				//draw anchor:
-				if (singleAnchor.visibility != PWVisibility.Gone)
-				{
-					if (singleAnchor.visibility == PWVisibility.Visible)
-						RenderAnchor(data, singleAnchor, i);
-					if (singleAnchor.visibility == PWVisibility.InvisibleWhenLinking)
-						singleAnchor.visibility = PWVisibility.Visible;
-				}
-			});
-			
-			//rendering node rename field	
-			if (renamable)
-			{
-				Vector2	winSize = windowRect.size;
-				Rect	renameRect = new Rect(0, 0, winSize.x, 18);
-				Rect	renameIconRect = new Rect(winSize.x - 28, 3, 12, 12);
-				string	renameNodeField = "renameWindow";
-
-				GUI.color = Color.black * .9f;
-				GUI.DrawTexture(renameIconRect, editIcon);
-				GUI.color = Color.white;
-
-				if (windowNameEdit)
-				{
-					GUI.SetNextControlName(renameNodeField);
-					externalName = GUI.TextField(renameRect, externalName, renameNodeTextFieldStyle);
-	
-					if (e.type == EventType.MouseDown && !renameRect.Contains(e.mousePosition))
-					{
-						windowNameEdit = false;
-						GUI.FocusControl(null);
-					}
-					if (GUI.GetNameOfFocusedControl() == renameNodeField)
-					{
-						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Escape)
-						{
-							windowNameEdit = false;
-							GUI.FocusControl(null);
-							e.Use();
-						}
-					}
-				}
-				
-				if (renameIconRect.Contains(e.mousePosition))
-				{
-					if (e.type == EventType.Used) //used by drag
-					{
-						windowNameEdit = true;
-						GUI.FocusControl(renameNodeField);
-						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-						if (te != null)
-							te.SelectAll();
-					}
-					else if (e.type == EventType.MouseDown)
-						windowNameEdit = false;
-				}
-			}
-			
-			//render the process mode icon
-			int		processIconSize = 25;
-			Rect	processModeRect = new Rect(8, 2, processIconSize, processIconSize);
-			if (processMode == PWNodeProcessMode.AutoProcess)
-				GUI.Label(processModeRect, new GUIContent("", nodeAutoProcessModeIcon, "Auto process mode, click to switch to request for process mode"));
-			else
-				GUI.Label(processModeRect, new GUIContent("", nodeRequestForProcessIcon, "Request for process mode, click to switch to auto process mode"));
-			if (e.type == EventType.MouseDown && processModeRect.Contains(e.mousePosition))
-			{
-				processMode = (processMode == PWNodeProcessMode.AutoProcess) ? PWNodeProcessMode.RequestForProcess : PWNodeProcessMode.AutoProcess;
-				
-				//change all my link modes to the type of the linked node:
-				foreach (var link in links)
-				{
-					var linkedNode = FindNodeById(link.distantNodeId);
-
-					if (linkedNode != null)
-						link.mode = processMode;
-				}
-
-				//change all the dependencies mode if needed:
-				UpdateDependenciesMode();
-
-				e.Use();
-			}
-		}
+		public virtual void OnNodeAnchorUnlink(string propName, int index) {}
 
 	#endregion
 	
@@ -1146,38 +573,6 @@ namespace PW
 					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
 		}
-
-		public void		BeginFrameUpdate()
-		{
-			if (oldSeed != seed)
-				seedHasChanged = true;
-			if (oldChunkPosition != chunkPosition)
-				positionHasChanged = true;
-			if (oldChunkSize != chunkSize)
-				chunkSizeHasChanged = true;
-			if (oldStep != step)
-				stepHasChanged = true;
-		}
-
-		public void		EndFrameUpdate()
-		{
-			//reset values at the end of the frame
-			oldSeed = seed;
-			oldChunkPosition = chunkPosition;
-			oldChunkSize = chunkSize;
-			oldStep = step;
-			inputHasChanged = false;
-			outputHasChanged = false;
-			justReloaded = false;
-			forceReload = false;
-			seedHasChanged = false;
-			positionHasChanged = false;
-			chunkSizeHasChanged = false;
-			reloadRequested = false;
-			biomeReloadRequested = false;
-			stepHasChanged = false;
-			reloadRequestFromNode = null;
-		}
 		
 		public void		DisplayHiddenMultipleAnchors(bool display = true)
 		{
@@ -1185,11 +580,6 @@ namespace PW
 				if (data.multiple)
 					data.displayHiddenMultipleAnchors = display;
 			});
-		}
-
-		public bool		WindowShouldClose()
-		{
-			return windowShouldClose;
 		}
 
 		public bool		CheckRequiredAnchorLink()
@@ -1202,21 +592,6 @@ namespace PW
 					ret = false;
 			});
 			return ret;
-		}
-
-		public void		SetNodeId(int id)
-		{
-			nodeId = id;
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				data.nodeId = id;
-			});
-		}
-
-		public void RunNodeAwake()
-		{
-			OnNodeAwake();
-			OnNodeCreate();
-			unserializeInitialized = true;
 		}
 
 		public void UpdateGraphDecal(Vector2 graphDecal)
@@ -1487,13 +862,6 @@ namespace PW
 			return nodes.ToList();
 		}
 
-		protected void			RequestProcessing(int nodeId)
-		{
-			if (!currentGraph.RequestProcessing(nodeId))
-				Debug.Log("failed to request computing of node " + nodeId + ": not found in the current graph");
-			return ;
-		}
-
 		protected PWGraphTerrainType	GetTerrainOutputMode()
 		{
 			return currentGraph.outputType;
@@ -1521,7 +889,7 @@ namespace PW
 
 		public void OnGUI()
 		{
-			EditorGUILayout.LabelField("You are on the wrong window !");
+			EditorGUILayout.LabelField("You are in the wrong window !");
 		}
 		
 		public void OnInspectorGUI()
@@ -1585,37 +953,6 @@ namespace PW
 					callback(data.Value);
 			}
 		}
-		
-		void UpdateDependenciesMode(PWNode node = null, int depth = 0)
-		{
-			if (node == null && depth == 0)
-				node = this;
-
-			if (node == null)
-				return ;
-
-			if (depth > 100)
-			{
-				Debug.LogWarning("too many recursive search, aborting !");
-				return ;
-			}
-			
-			foreach (var dep in node.depencendies) {
-				var depNode = FindNodeById(dep.nodeId);
-
-				bool allRequestMode = depNode.GetLinks().All(l => {
-						var depNodeLink = FindNodeById(l.distantNodeId);
-						return depNodeLink.processMode == PWNodeProcessMode.RequestForProcess;
-					}
-				);
-				
-				if (allRequestMode)
-					depNode.processMode = PWNodeProcessMode.RequestForProcess;
-				else
-					depNode.processMode = PWNodeProcessMode.AutoProcess;
-				UpdateDependenciesMode(depNode, depth + 1);
-			}
-		}
 
 		PWNode			FindNodeById(int nodeId)
 		{
@@ -1630,27 +967,6 @@ namespace PW
 			currentGraph = ng;
 		}
 
-		public static PWLinkType GetLinkTypeFromType(Type fieldType)
-		{
-			if (fieldType == typeof(Sampler2D))
-				return PWLinkType.Sampler2D;
-			if (fieldType == typeof(Sampler3D))
-				return PWLinkType.Sampler3D;
-			if (fieldType == typeof(Vector3) || fieldType == typeof(Vector3i))
-				return PWLinkType.ThreeChannel;
-			if (fieldType == typeof(Vector4))
-				return PWLinkType.FourChannel;
-			return PWLinkType.BasicData;
-		}
-
-		PWAnchorType			InverAnchorType(PWAnchorType type)
-		{
-			if (type == PWAnchorType.Input)
-				return PWAnchorType.Output;
-			else if (type == PWAnchorType.Output)
-				return PWAnchorType.Input;
-			return PWAnchorType.None;
-		}
 
 		public PWAnchorData		GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
 		{
@@ -1676,28 +992,6 @@ namespace PW
 			index = retIndex;
 			singleAnchorData = s;
 			return ret;
-		}
-
-		Color GetAnchorDominantColor(PWAnchorInfo from, PWAnchorInfo to)
-		{
-			if (from.anchorColor.Compare(PWColorPalette.GetColor("greyAnchor")) || from.anchorColor.Compare(PWColorPalette.GetColor("whiteAnchor")))
-				return to.anchorColor;
-			if (to.anchorColor.Compare(PWColorPalette.GetColor("greyAnchor")) || to.anchorColor.Compare(PWColorPalette.GetColor("whiteAnchor")))
-				return from.anchorColor;
-			return to.anchorColor;
-		}
-
-		Color FindColorFromtypes(SerializableType[] types)
-		{
-			Color defaultColor = PWColorPalette.GetColor("defaultAnchor");
-
-			foreach (var type in types)
-			{
-				Color c = PWColorPalette.GetAnchorColorByType(type.GetType());
-				if (!c.Compare(defaultColor))
-					return c;
-			}
-			return defaultColor;
 		}
 
 		public override string ToString()

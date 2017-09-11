@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using PW.Node;
 
 //Right node selector
 public partial class PWMainGraphEditor {

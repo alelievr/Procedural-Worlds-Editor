@@ -6,55 +6,55 @@ using UnityEngine;
 namespace PW.Core
 {
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWInput : Attribute
+	public class PWInputAttribute : Attribute
 	{
 		public string	name = null;
 		
-		public PWInput()
+		public PWInputAttribute()
 		{
 		}
 		
-		public PWInput(string fieldName)
+		public PWInputAttribute(string fieldName)
 		{
 			name = fieldName;
 		}
 	}
 	
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWOutput : Attribute
+	public class PWOutputAttribute : Attribute
 	{
 		public string	name = null;
 
-		public PWOutput()
+		public PWOutputAttribute()
 		{
 		}
 		
-		public PWOutput(string fieldName)
+		public PWOutputAttribute(string fieldName)
 		{
 			name = fieldName;
 		}
 	}
 	
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWOffset : Attribute
+	public class PWOffsetAttribute : Attribute
 	{
 		public Vector2	offset;
 		public int		multiPadding = 0;
 		
-		public PWOffset(int x, int y, int multiPadding)
+		public PWOffsetAttribute(int x, int y, int multiPadding)
 		{
 			offset.x = x;
 			offset.y = y;
 			this.multiPadding = multiPadding;
 		}
 
-		public PWOffset(int x, int y)
+		public PWOffsetAttribute(int x, int y)
 		{
 			offset.x = x;
 			offset.y = y;
 		}
 		
-		public PWOffset(int y)
+		public PWOffsetAttribute(int y)
 		{
 			offset.x = 0;
 			offset.y = y;
@@ -62,11 +62,11 @@ namespace PW.Core
 	}
 	
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWColor : Attribute
+	public class PWColorAttribute : Attribute
 	{
 		public Color		color;
 
-		public PWColor(float r, float g, float b)
+		public PWColorAttribute(float r, float g, float b)
 		{
 			color.r = r * .8f;
 			color.g = g * .8f;
@@ -74,7 +74,7 @@ namespace PW.Core
 			color.a = 1;
 		}
 
-		public PWColor(float r, float g, float b, float a)
+		public PWColorAttribute(float r, float g, float b, float a)
 		{
 			color.r = r;
 			color.g = g;
@@ -84,20 +84,20 @@ namespace PW.Core
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWMultiple : Attribute
+	public class PWMultipleAttribute : Attribute
 	{
 		public SerializableType[]	allowedTypes;
 		public int		minValues;
 		public int		maxValues;
 		
-		public PWMultiple(int min, int max, params Type[] allowedTypes)
+		public PWMultipleAttribute(int min, int max, params Type[] allowedTypes)
 		{
 			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
 			minValues = min;
 			maxValues = max;
 		}
 
-		public PWMultiple(int min, params Type[] allowedTypes)
+		public PWMultipleAttribute(int min, params Type[] allowedTypes)
 		{
 			List< SerializableType > ts = new List< SerializableType >();
 			foreach (var t in allowedTypes)
@@ -107,7 +107,7 @@ namespace PW.Core
 			maxValues = 100;
 		}
 		
-		public PWMultiple(params Type[] allowedTypes)
+		public PWMultipleAttribute(params Type[] allowedTypes)
 		{
 			List< SerializableType > ts = new List< SerializableType >();
 			foreach (var t in allowedTypes)
@@ -119,11 +119,11 @@ namespace PW.Core
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWGeneric : Attribute
+	public class PWGenericAttribute : Attribute
 	{
 		public SerializableType[]	allowedTypes;
 
-		public PWGeneric(params Type[] allowedTypes)
+		public PWGenericAttribute(params Type[] allowedTypes)
 		{
 			this.allowedTypes = new SerializableType[allowedTypes.Length];
 			for (int i = 0; i < allowedTypes.Length; i++)
@@ -132,19 +132,8 @@ namespace PW.Core
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWMirror : Attribute
+	public class PWNotRequiredAttribute : Attribute
 	{
-		public string	fieldName;
-
-		public PWMirror(string fieldName)
-		{
-			this.fieldName = fieldName;
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Field)]
-	public class PWNotRequired : Attribute
-	{
-		public PWNotRequired() {}
+		public PWNotRequiredAttribute() {}
 	}
 }

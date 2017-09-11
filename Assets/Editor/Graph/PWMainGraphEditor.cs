@@ -12,7 +12,7 @@ using PW.Node;
 using Object = UnityEngine.Object;
 
 [System.Serializable]
-public class PWMainGraphEditor : PWGraphEditor {
+public partial class PWMainGraphEditor : PWGraphEditor {
 
 	PWMainGraph							mainGraph;
 	
@@ -142,7 +142,7 @@ public class PWMainGraphEditor : PWGraphEditor {
 	[MenuItem("Window/Procedural Worlds")]
 	static void Init()
 	{
-		ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow (typeof (ProceduralWorldsWindow));
+		PWMainGraphEditor window = (PWMainGraphEditor)EditorWindow.GetWindow (typeof (PWMainGraphEditor));
 
 		window.Show();
 	}
@@ -198,8 +198,10 @@ public class PWMainGraphEditor : PWGraphEditor {
 	//call all rendering methods:
     public override void OnGUI()
     {
+		//render the whole graph
+		base.OnGUI();
+
 		var e = Event.current;
-		LoadCustomStyles();
 
 		//prevent popup events to influence the rest of the GUI
 		PWPopup.eventType = e.type;
@@ -253,20 +255,18 @@ public class PWMainGraphEditor : PWGraphEditor {
 	
 		DrawNodeGraphCore();
 
-		currentGraph.h1.UpdateMinMax(position.width / 2, position.width - 3);
-		currentGraph.h2.UpdateMinMax(50, position.width / 2);
+		h1.UpdateMinMax(position.width / 2, position.width - 3);
+		h2.UpdateMinMax(50, position.width / 2);
 
-		currentGraph.h1.Begin();
-		Rect p1 = currentGraph.h2.Begin(defaultBackgroundTexture);
+		h1.Begin();
+		Rect p1 = h2.Begin(defaultBackgroundTexture);
 		DrawLeftBar(p1);
-		Rect g = currentGraph.h2.Split(resizeHandleTexture);
+		Rect g = h2.Split(resizeHandleTexture);
 		DrawNodeGraphHeader(g);
-		currentGraph.h2.End();
-		Rect p2 = currentGraph.h1.Split(resizeHandleTexture);
+		h2.End();
+		Rect p2 = h1.Split(resizeHandleTexture);
 		DrawSelector(p2);
-		currentGraph.h1.End();
-
-		DrawContextualMenu(g);
+		h1.End();
 
 		//FIXME
 		if (!editorNeedRepaint)
@@ -279,19 +279,8 @@ public class PWMainGraphEditor : PWGraphEditor {
 			editorNeedRepaint = false;
 		}
 
-		currentGraph.assetPath = AssetDatabase.GetAssetPath(currentGraph);
-		currentMousePosition = e.mousePosition;
-
 		//render all opened popups (at the end cause the have to be above other infos)
 		PWPopup.RenderAll(ref editorNeedRepaint);
-		
-		if (GUI.changed && e.type == EventType.Layout)
-		{
-			EditorUtility.SetDirty(this);
-			EditorUtility.SetDirty(currentGraph);
-			AssetDatabase.SaveAssets();
-			Debug.Log("saved all assets !");
-		}
     }
 
 #endregion

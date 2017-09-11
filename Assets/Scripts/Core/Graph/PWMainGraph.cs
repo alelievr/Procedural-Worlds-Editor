@@ -52,6 +52,9 @@ namespace PW.Core
 		public event System.Action				OnChunkSizeChanged;
 		public event System.Action				OnStepChanged;
 		public event System.Action				OnChunkPositionChanged;
+		//button triggered events:
+		public event System.Action				OnReload;
+		public event System.Action				OnForceReload;
 		
 		void		BakeNeededGeologicDatas()
 		{

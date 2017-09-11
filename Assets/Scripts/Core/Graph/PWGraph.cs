@@ -54,20 +54,26 @@ namespace PW.Core
 
 
 		//public delegates:
-		public delegate void OnLinkAction(PWNode from, PWNode to);
+		public delegate void OnLinkAction(PWNodeConnection link);
+		public delegate void OnNodeReloadRequest(PWNode from);
 
 
 		//node events:
 		public event System.Action				OnNodeRemoved;
 		public event System.Action				OnNodeAdded;
+		public event System.Action				OnNodeSelected;
+		public event System.Action				OnNodeUnSelected;
 		//link events:
 		public event OnLinkAction				OnLinkDragged;
 		public event OnLinkAction				OnNodeLinked;
 		public event OnLinkAction				OnNodeUnLinked;
+		public event OnLinkAction				OnLinkSelected;
+		public event OnLinkAction				OnLinkUnSelected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
+		public event OnNodeReloadRequest		OnNodeReloadRequested;
 	
 	#endregion
 
@@ -89,8 +95,8 @@ namespace PW.Core
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnNodeLinked += LinkChangedCallback;
 			OnNodeUnLinked += LinkChangedCallback;
-			OnNodeRemoved += NodeCountChanged;
-			OnNodeAdded += NodeCountChanged;
+			OnNodeRemoved += NodeCountChangedCallback;
+			OnNodeAdded += NodeCountChangedCallback;
 		}
 
 		public virtual void OnDisable()
@@ -99,8 +105,8 @@ namespace PW.Core
 			OnGraphStructureChanged -= GraphStructureChangedCallback;
 			OnNodeLinked -= LinkChangedCallback;
 			OnNodeUnLinked -= LinkChangedCallback;
-			OnNodeRemoved -= NodeCountChanged;
-			OnNodeAdded -= NodeCountChanged;
+			OnNodeRemoved -= NodeCountChangedCallback;
+			OnNodeAdded -= NodeCountChangedCallback;
 		}
 
 		public float Process()
@@ -135,21 +141,6 @@ namespace PW.Core
 		{
 			return false;
 		}
-	
-	#region Events handlers
-
-		//retarget link and node events to GraphStructure event
-		void		LinkChangedCallback(PWNode from, PWNode to) { OnGraphStructureChanged(); }
-		void		NodeCountChanged() { OnGraphStructureChanged(); }
-
-		void		GraphStructureChangedCallback()
-		{
-			UpdateComputeOrder();
-		}
-
-	#endregion
-
-	#region UpdateComputeOrder
 	
 		//Dictionary< nodeId, dependencyWeight >
 		Dictionary< int, int > nodeComputeOrderCount = new Dictionary< int, int >();
@@ -212,6 +203,32 @@ namespace PW.Core
 					.Select(kp => kp.Value)
 					//sort the resulting list by computeOrder:
 					.OrderBy(n => n.computeOrder);
+		}
+
+		public void NodeReloadRequest(PWNode from, System.Type target)
+		{
+
+		}
+
+		public void NodeReloadRequest(PWNode from)
+		{
+
+		}
+		
+		public void NodeReloadRequest(PWNode from, PWNode to)
+		{
+
+		}
+	
+	#region Events handlers
+
+		//retarget link and node events to GraphStructure event
+		void		LinkChangedCallback(PWNodeConnection link) { OnGraphStructureChanged(); }
+		void		NodeCountChangedCallback() { OnGraphStructureChanged(); }
+
+		void		GraphStructureChangedCallback()
+		{
+			UpdateComputeOrder();
 		}
 
 	#endregion

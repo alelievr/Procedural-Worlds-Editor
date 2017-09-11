@@ -65,8 +65,6 @@ namespace PW.Core
 		public int					multipleValueCount;
 		//instance of the field
 		public object				anchorInstance;
-		//field to copy values and anchor.
-		public string				mirroredField;
 		//current number of rendered anchors:
 		public bool					displayHiddenMultipleAnchors;
 		//if the anchor value is required to compute result:
