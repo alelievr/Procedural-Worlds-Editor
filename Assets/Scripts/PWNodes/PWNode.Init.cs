@@ -10,6 +10,14 @@ namespace PW
 {
 	public partial class PWNode
 	{
+		//backed datas about properties and nodes
+		[System.Serializable]
+		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
+		[SerializeField]
+		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
+
+		[NonSerializedAttribute]
+		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
 	
 		void LoadAssets()
 		{
@@ -130,7 +138,7 @@ namespace PW
 					data.first.linkType = GetLinkTypeFromType(field.FieldType);
 					data.first.name = name;
 					data.offset = offset;
-					data.nodeId = nodeId;
+					data.nodeId = id;
 					data.multiPadding = multiPadding;
 
 					//add missing values to instance of list:
@@ -163,6 +171,38 @@ namespace PW
 			foreach (var toRemoveKey in toRemoveKeys)
 				propertyDatas.Remove(toRemoveKey);
 		}
-	
+
+		//retarget "Reload" button in the editor to the internal event OnReload:
+		void ReloadCallback() { OnReload(null); }
+
+		//retarget OnNodeLinkedCallback if this node was linked:
+		void NodeLinkedCallback(PWNodeLink link)
+		{
+			if (link.from == this || link.to == this)
+				OnNodeLinked();
+		}
+
+		//retarget OnNodeUnlinkedCallback if this node was linked:
+		void NodeUnlinkedCallback(PWNodeLink link)
+		{
+			if (link.from == this || link.to == this)
+				OnNodeUnlinked();
+		}
+
+		void BindEvents()
+		{
+			graph.OnReload += ReloadCallback;
+			graph.OnClickNowhere += OnClickedOutside;
+			graph.OnNodeLinked += NodeLinkedCallback;
+			graph.OnNodeUnlinked += NodeUnlinkedCallback;
+		}
+
+		void UnBindEvents()
+		{
+			graph.OnReload -= ReloadCallback;
+			graph.OnClickNowhere -= OnClickedOutside;
+			graph.OnNodeLinked -= NodeLinkedCallback;
+			graph.OnNodeUnlinked -= NodeUnlinkedCallback;
+		}
 	}
 }

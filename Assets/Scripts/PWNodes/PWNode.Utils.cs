@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using PW.Core;
+using PW.Node;
 
 //Utils for PWNode class
 namespace PW
@@ -53,5 +54,15 @@ namespace PW
 				return PWLinkType.FourChannel;
 			return PWLinkType.BasicData;
 		}
+		
+		void UpdateDependentStatus()
+		{
+			isDependent = false;
+			ForeachPWAnchors((data, singleAnchor, i) => {
+				if (data.anchorType == PWAnchorType.Input && data.required && singleAnchor.visibility == PWVisibility.Visible)
+					isDependent = true;
+			}, false, false);
+		}
+
 	}
 }

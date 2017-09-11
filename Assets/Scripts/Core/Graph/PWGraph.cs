@@ -54,7 +54,7 @@ namespace PW.Core
 
 
 		//public delegates:
-		public delegate void OnLinkAction(PWNodeConnection link);
+		public delegate void OnLinkAction(PWNodeLink link);
 		public delegate void OnNodeReloadRequest(PWNode from);
 
 
@@ -62,18 +62,19 @@ namespace PW.Core
 		public event System.Action				OnNodeRemoved;
 		public event System.Action				OnNodeAdded;
 		public event System.Action				OnNodeSelected;
-		public event System.Action				OnNodeUnSelected;
+		public event System.Action				OnNodeUnselected;
 		//link events:
 		public event OnLinkAction				OnLinkDragged;
 		public event OnLinkAction				OnNodeLinked;
-		public event OnLinkAction				OnNodeUnLinked;
+		public event OnLinkAction				OnNodeUnlinked;
 		public event OnLinkAction				OnLinkSelected;
-		public event OnLinkAction				OnLinkUnSelected;
+		public event OnLinkAction				OnLinkUnselected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
 		public event OnNodeReloadRequest		OnNodeReloadRequested;
+		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
 	
 	#endregion
 
@@ -85,16 +86,16 @@ namespace PW.Core
 
 			//add all existing nodes to the nodesDictionary
 			for (int i = 0; i < nodes.Count; i++)
-				nodesDictionary[nodes[i].nodeId] = nodes[i];
+				nodesDictionary[nodes[i].id] = nodes[i];
 			if (inputNode != null)
-				nodesDictionary[inputNode.nodeId] = inputNode;
+				nodesDictionary[inputNode.id] = inputNode;
 			if (outputNode != null)
-				nodesDictionary[outputNode.nodeId] = outputNode;
+				nodesDictionary[outputNode.id] = outputNode;
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnNodeLinked += LinkChangedCallback;
-			OnNodeUnLinked += LinkChangedCallback;
+			OnNodeUnlinked += LinkChangedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
 		}
@@ -104,7 +105,7 @@ namespace PW.Core
 			//Events detach
 			OnGraphStructureChanged -= GraphStructureChangedCallback;
 			OnNodeLinked -= LinkChangedCallback;
-			OnNodeUnLinked -= LinkChangedCallback;
+			OnNodeUnlinked -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
 		}
@@ -233,7 +234,7 @@ namespace PW.Core
 
 	#endregion
 
-	#region Nodes control API
+	#region Nodes API
 
 		public bool		IsRealMode()
 		{
@@ -271,6 +272,12 @@ namespace PW.Core
 		{
 			OnNodeRemoved();
 			return nodesDictionary.Remove(nodeId);
+		}
+
+		public IEnumerable< PWNode > GetNodeChildsRecursive(PWNode begin)
+		{
+			//TODO using the new (actually non-existing) node-link system.
+			return null;
 		}
 
 	#endregion

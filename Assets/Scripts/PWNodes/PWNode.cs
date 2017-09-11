@@ -16,14 +16,12 @@ namespace PW
 	[System.SerializableAttribute]
 	public partial class PWNode : ScriptableObject
 	{
-		public static int	windowRenderOrder = 0;
-
 		public string	nodeTypeName;
-		public Rect		windowRect;
-		public int		nodeId;
-		public bool		renamable;
-		public int		computeOrder;
-		public int		viewHeight;
+		public Rect		windowRect = new Rect(400, 400, 200, 50);
+		public int		id;
+		public bool		renamable = false;
+		public int		computeOrder = 0;
+		public int		viewHeight = 0;
 		public bool		specialButtonClick = false;
 		public bool		isDragged = false;
 		public Vector3	chunkPosition = Vector3.zero;
@@ -31,25 +29,13 @@ namespace PW
 		public int		seed;
 		public float	step;
 		public float	processTime = 0f;
-		public string	externalName;
+		new public string name;
 		[SerializeField]
-		public PWGUIManager	PWGUI;
+		public PWGUIManager	PWGUI = new PWGUIManager();
 
 		//useful state bools
-		public bool		seedHasChanged = false;
-		public bool		positionHasChanged = false;
-		public bool		chunkSizeHasChanged = false;
-		public bool		stepHasChanged = false;
-		public bool		inputHasChanged = false;
-		public bool		outputHasChanged = false;
-		public bool		notifyDataChanged = false;
-		public bool		notifyBiomeDataChanged = false;
-		public bool		biomeReloadRequested = false;
-		public bool		reloadRequested = false;
-		public bool		forceReload = false;
-		public bool		needUpdate { get { return seedHasChanged || positionHasChanged || chunkSizeHasChanged || stepHasChanged || inputHasChanged || reloadRequested || forceReload;}}
 		public bool		isDependent { get; private set; }
-		public bool		realMode { get { return currentGraph != null ? currentGraph.realMode : false; }}
+		public bool		realMode { get { return graph.IsRealMode(); } }
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
@@ -70,23 +56,16 @@ namespace PW
 		static Texture2D	nodeAutoProcessModeIcon = null;
 		static Texture2D	nodeRequestForProcessIcon = null;
 
-		static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
-		static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
-		static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
+		// static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
+		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
+		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
 		[SerializeField]
 		Vector2				graphDecal;
 		[SerializeField]
-		int					maxAnchorRenderHeight;
+		int					maxAnchorRenderHeight = 0;
 		[SerializeField]
 		string				firstInitialization;
-
-		Vector3				oldChunkPosition;
-		int					oldSeed;
-		int					oldChunkSize;
-		float				oldStep;
-
-		PWAnchorInfo		anchorUnderMouse;
 
 		[NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
@@ -97,20 +76,8 @@ namespace PW
 		[SerializeField]
 		List< PWDependency >		depencendies = new List< PWDependency >(); //List< nodeId, anchorId >
 
-		//backed datas about properties and nodes
-		[System.Serializable]
-		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
-		[SerializeField]
-		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
-
-		[NonSerializedAttribute]
-		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
-
 		[System.NonSerialized]
-		public PWMainGraph		currentGraph;
-
-		[System.NonSerialized]
-		private PWNode			reloadRequestFromNode;
+		public PWMainGraph		graph;
 
 		[System.NonSerialized]
 		public bool		unserializeInitialized = false;
@@ -119,6 +86,78 @@ namespace PW
 		public bool		selected = false;
 
 	#endregion
+	
+		public delegate void			Reload(PWNode from);
+		public delegate void			NodeLink();
+		public delegate void			MessageReceived(PWNode from, object message);
+
+		private event Reload			OnReload;
+		private event MessageReceived	OnMessageReceived;
+		private event NodeLink			OnNodeLinked;
+		private event NodeLink			OnNodeUnlinked;
+
+		//default notify reload will be sent to all node childs.
+		public void NotifyReload()
+		{
+			var nodes = graph.GetNodeChildsRecursive(this);
+
+			foreach (var node in nodes)
+				node.OnReload(this);
+		}
+		
+		//send reload event to all node of the specified type
+		public void NotifyReload(Type targetType)
+		{
+			var nodes = from node in graph.nodes
+						where node.GetType() == targetType
+						select node;
+			
+			foreach (var node in nodes)
+				node.OnReload(this);
+		}
+
+		//send reload to all nodes with a computeOrder smaller than minComputeOrder.
+		public void NotifyReload(int minComputeOrder)
+		{
+			var nodes = from node in graph.nodes
+						where node.computeOrder >= minComputeOrder
+						select node;
+
+			foreach (var node in nodes)
+				node.OnReload(this);
+		}
+
+		public void NotifyReload(PWNode node)
+		{
+			node.OnReload(this);
+		}
+
+		public void NotifyReload(IEnumerable< PWNode > nodes)
+		{
+			foreach (var node in nodes)
+				node.OnReload(this);
+		}
+
+		public void SendMessage(PWNode target, object message)
+		{
+			target.OnMessageReceived(this, message);
+		}
+		
+		public void SendMessage(Type targetType, object message)
+		{
+			var nodes = from node in graph.nodes
+						where node.GetType() == targetType
+						select node;
+						
+			foreach (var node in nodes)
+				node.OnMessageReceived(this, message);
+		}
+		
+		public void SendMessage(IEnumerable< PWNode > nodes, object message)
+		{
+			foreach (var node in nodes)
+				node.OnMessageReceived(this, message);
+		}
 
 	#region OnEnable, OnDisable, data initialization and baking
 
@@ -130,18 +169,13 @@ namespace PW
 
 			BakeNodeFields();
 
+			BindEvents();
+
 			delayedChanges.Clear();
 			
-			//this will be true only if the object instance does not came from a serialized object.
+			//Will be called only at the creation of the node.
 			if (firstInitialization == null)
 			{
-				computeOrder = 0;
-				windowRect = new Rect(400, 400, 200, 50);
-				viewHeight = 0;
-				renamable = false;
-				maxAnchorRenderHeight = 0;
-				PWGUI = new PWGUIManager();
-
 				OnNodeCreation();
 
 				firstInitialization = "initialized";
@@ -152,20 +186,8 @@ namespace PW
 
 		public void OnDisable()
 		{
+			UnBindEvents();
 			OnNodeDisable();
-		}
-
-		void UpdateDependentStatus()
-		{
-			isDependent = false;
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (data.anchorType == PWAnchorType.Input && data.required && singleAnchor.visibility == PWVisibility.Visible)
-				{
-					if (GetType() == typeof(PWNodeBiomeSurface))
-						Debug.Log("node is dependent with field: " + data.fieldName);
-					isDependent = true;
-				}
-			}, false, false);
 		}
 
 	#endregion
@@ -192,277 +214,6 @@ namespace PW
 
 	#endregion
 	
-	#region Links management and utils
-
-		public List< PWLink > GetLinks()
-		{
-			return links;
-		}
-		
-		public IEnumerable< PWLink > GetLinks(int localAnchorId)
-		{
-			return links.Where(l => l.localAnchorId == localAnchorId);
-		}
-
-		public PWLink GetLink(int anchorId, int targetNodeId, int targetAnchorId)
-		{
-			return links.FirstOrDefault(l => l.localAnchorId == anchorId
-				&& l.distantNodeId == targetNodeId
-				&& l.distantAnchorId == targetAnchorId);
-		}
-
-		PWLinkType		GetLinkType(Type from, Type to)
-		{
-			if (from == typeof(Sampler2D) || to == typeof(Sampler2D))
-				return PWLinkType.Sampler2D;
-			if (from == typeof(Sampler3D) || to == typeof(Sampler3D))
-				return PWLinkType.Sampler3D;
-			if (from == typeof(float) || to == typeof(float))
-				return PWLinkType.BasicData;
-			if (from.IsSubclassOf(typeof(ChunkData)) || to.IsSubclassOf(typeof(ChunkData)))
-				return PWLinkType.ChunkData;
-			if (from == typeof(Vector2) || to == typeof(Vector2))
-				return PWLinkType.TwoChannel;
-			if (from == typeof(Vector3) || to == typeof(Vector3))
-				return PWLinkType.ThreeChannel;
-			if (from == typeof(Vector4) || to == typeof(Vector4))
-				return PWLinkType.FourChannel;
-			return PWLinkType.BasicData;
-		}
-
-		public bool		AttachLink(PWAnchorInfo from, PWAnchorInfo to)
-		{
-			//quit if types are not compatible
-			if (!AnchorAreAssignable(from, to))
-				return false;
-			if (from.anchorType == to.anchorType)
-				return false;
-			if (from.nodeId == to.nodeId)
-				return false;
-			
-			//if link was revoked by the node's code
-			if (!OnNodeAnchorLink(from.fieldName, from.propIndex))
-				return false;
-
-			//we store output links:
-			if (from.anchorType == PWAnchorType.Output)
-			{
-				outputHasChanged = true;
-				links.Add(new PWLink(
-					to.nodeId, to.anchorId, to.fieldName, to.classAQName, to.propIndex,
-					from.nodeId, from.anchorId, from.fieldName, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
-					GetLinkType(from.fieldType, to.fieldType))
-				);
-				//mark local output anchors as linked:
-				ForeachPWAnchors((data, singleAnchor, i) => {
-					if (singleAnchor.id == from.anchorId)
-						singleAnchor.linkCount++;
-				});
-			}
-			else //input links are stored as depencencies:
-			{
-				inputHasChanged = true;
-				ForeachPWAnchors((data, singleAnchor, i) => {
-					if (singleAnchor.id == from.anchorId)
-					{
-						singleAnchor.linkCount++;
-						//if data was added to multi-anchor:
-						if (data.multiple && data.anchorInstance != null)
-						{
-							if (i == data.multipleValueCount)
-								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
-						}
-						if (!String.IsNullOrEmpty(data.mirroredField))
-						{
-							//no need to check if anchorInstance is null because is is assigned from mirrored property.
-							var mirroredProp = propertyDatas[data.mirroredField];
-							if ((Type)mirroredProp.type == typeof(PWValues))
-								mirroredProp.AddNewAnchor(mirroredProp.fieldName.GetHashCode() + i + 1);
-						}
-					}
-				});
-				depencendies.Add(new PWDependency(to.nodeId, to.anchorId, from.anchorId));
-			}
-			return true;
-		}
-
-		public void AttachLink(string myAnchor, PWNode target, string targetAnchor)
-		{
-			if (!propertyDatas.ContainsKey(myAnchor) || !target.propertyDatas.ContainsKey(targetAnchor))
-			{
-				Debug.LogWarning("property not found: \"" + targetAnchor + "\" in " + target);
-				return ;
-			}
-
-			PWAnchorData fromAnchor = propertyDatas[myAnchor];
-			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
-
-			PWAnchorInfo from = new PWAnchorInfo(
-					fromAnchor.fieldName, new Rect(), fromAnchor.first.color,
-					fromAnchor.type, fromAnchor.anchorType, fromAnchor.nodeId,
-					fromAnchor.first.id, fromAnchor.classAQName,
-					(fromAnchor.multiple) ? 0 : -1, fromAnchor.generic, fromAnchor.allowedTypes,
-					fromAnchor.first.linkType, fromAnchor.first.linkCount
-			);
-			PWAnchorInfo to = new PWAnchorInfo(
-				toAnchor.fieldName, new Rect(), toAnchor.first.color,
-				toAnchor.type, toAnchor.anchorType, toAnchor.nodeId,
-				toAnchor.first.id, toAnchor.classAQName,
-				(toAnchor.multiple) ? 0 : -1, toAnchor.generic, toAnchor.allowedTypes,
-				toAnchor.first.linkType, toAnchor.first.linkCount
-			);
-
-			AttachLink(from, to);
-		}
-		
-		public void		DeleteAllLinkOnAnchor(int anchorId)
-		{
-			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == anchorId;
-				if (delete)
-					OnNodeAnchorUnlink(l.localName, l.localIndex);
-				return delete;
-			});
-			if (DeleteDependencies(d => d.connectedAnchorId == anchorId) == 0)
-			{
-				PWAnchorData.PWAnchorMultiData singleAnchorData;
-				GetAnchorData(anchorId, out singleAnchorData);
-				singleAnchorData.linkCount = 0;
-			}
-		}
-
-		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
-		{
-			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == myAnchorId && l.distantNodeId == distantWindow.nodeId && l.distantAnchorId == distantAnchorId;
-				if (delete)
-					OnNodeAnchorUnlink(l.localName, l.localIndex);
-				return delete;
-			});
-			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
-			if (DeleteDependencies(d => d.nodeId == distantWindow.nodeId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
-			{
-				PWAnchorData.PWAnchorMultiData	singleAnchorData;
-				
-				GetAnchorData(myAnchorId, out singleAnchorData);
-				if (singleAnchorData != null)
-					singleAnchorData.linkCount--;
-			}
-		}
-		
-		public void		DeleteLinkByWindowTarget(int targetNodeId)
-		{
-			PWAnchorData.PWAnchorMultiData singleAnchorData;
-			for (int i = 0; i < links.Count; i++)
-				if (links[i].distantNodeId == targetNodeId)
-				{
-					OnNodeAnchorUnlink(links[i].localName, links[i].localIndex);
-					GetAnchorData(links[i].localAnchorId, out singleAnchorData);
-					if (singleAnchorData == null)
-						continue ;
-					singleAnchorData.linkCount--;
-					links.RemoveAt(i--);
-				}
-		}
-		
-		public void		DeleteAllLinks(bool callback = true)
-		{
-			if (callback)
-				foreach (var l in links)
-					OnNodeAnchorUnlink(l.localName, l.localIndex);
-			links.Clear();
-			depencendies.Clear();
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				singleAnchor.linkCount = 0;
-			});
-		}
-
-	#endregion
-
-	#region dependencies management and utils
-
-		int		DeleteDependencies(Func< PWDependency, bool > pred)
-		{
-			PWAnchorData.PWAnchorMultiData	singleAnchor;
-			PWAnchorData.PWAnchorMultiData	multiAnchor;
-			PWAnchorData					data;
-			int								index;
-			int								nDeleted = 0;
-
-			depencendies.RemoveAll(d => {
-				bool delete = pred(d);
-				if (delete)
-				{
-					data = GetAnchorData(d.connectedAnchorId, out singleAnchor, out index);
-					if (data == null)
-						return delete;
-					OnNodeAnchorUnlink(data.fieldName, index);
-					singleAnchor.linkCount--;
-					nDeleted++;
-					if (data.multiple)
-					{
-						PWValues vals = bakedNodeFields[data.fieldName].GetValue(this) as PWValues;
-						vals.AssignAt(index, null, null);
-						for (int i = vals.Count - 1; i != 0 && i >= data.minMultipleValues ; i--)
-						{
-							int id = data.fieldName.GetHashCode() + i;
-							if (GetAnchorData(id, out multiAnchor) != null && multiAnchor.linkCount == 0)
-							{
-								vals.RemoveAt(i);
-								data.multi.RemoveAt(i);
-								data.multipleValueCount--;
-								if (GetAnchorData(id + 1, out multiAnchor) != null)
-									multiAnchor.id--;
-							}
-							else if (GetAnchorData(id, out multiAnchor) != null)
-								break ;
-						}
-					}
-					else
-						bakedNodeFields[data.fieldName].SetValue(this, null);
-				}
-				return delete;
-			});
-			return nDeleted;
-		}
-
-		public void		DeleteDependency(int targetNodeId, int distantAnchorId)
-		{
-			DeleteDependencies(d => d.nodeId == targetNodeId && d.anchorId == distantAnchorId);
-		}
-
-		public void		DeleteDependenciesByWindowTarget(int targetNodeId)
-		{
-			DeleteDependencies(d => d.nodeId == targetNodeId);
-		}
-		
-		public List< Pair < int, int > >	GetAnchorConnections(int anchorId)
-		{
-			return depencendies.Where(d => d.connectedAnchorId == anchorId)
-					.Select(d => new Pair< int, int >(d.nodeId, d.anchorId))
-					.Concat(links.Where(l => l.localAnchorId == anchorId)
-						.Select(l => new Pair< int, int >(l.distantNodeId, l.distantAnchorId))
-					).ToList();
-		}
-
-		public List< PWDependency >	GetDependencies()
-		{
-			return depencendies;
-		}
-
-		public IEnumerable< PWDependency > GetDependencies(int anchorId)
-		{
-			return depencendies.Where(d => d.connectedAnchorId == anchorId);
-		}
-
-		public PWDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
-		{
-			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
-		}
-
-	#endregion
-
 	#region Editor utils
 
 		static bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
@@ -646,241 +397,6 @@ namespace PW
 
 	#endregion
 
-	#region Node property / anchor API
-
-		/* Utils function to manipulate PWnode variables */
-
-		public void				UpdatePropEnabled(string propertyName, bool enabled, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return ;
-				anchors[index].enabled = true;
-			}
-		}
-
-		public void				UpdatePropName(string propertyName, string newName, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return ;
-				anchors[index].name = newName;
-			}
-		}
-
-		public void				UpdatePropBackgroundColor(string propertyName, Color newColor, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return ;
-				anchors[index].color = (SerializableColor)newColor;
-			}
-		}
-
-		public void				UpdatePropVisibility(string propertyName, PWVisibility visibility, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return ;
-				anchors[index].visibility = visibility;
-			}
-			UpdateDependentStatus();
-		}
-
-		public void				UpdatePropPosition(string propertyName, float y, int index = -1)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return ;
-				anchors[index].forcedY = y;
-			}
-			UpdateDependentStatus();
-		}
-
-		public void				UpdateMultiProp(string propertyName, int newCount, params string[] newNames)
-		{
-			if (!propertyDatas.ContainsKey(propertyName))
-				return ;
-			if (!propertyDatas[propertyName].multiple)
-				return ;
-				
-			var prop = propertyDatas[propertyName];
-			
-			if (prop.multi.Count == newCount && (newNames == null || newNames.Length == 0)) //alreadythe good name of anchors.
-				return ;
-
-			prop.forcedAnchorNumber = true;
-			prop.RemoveAllAnchors();
-			prop.minMultipleValues = 0;
-			prop.anchorInstance = bakedNodeFields[propertyName].GetValue(this);
-			
-			PWValues values = prop.anchorInstance as PWValues;
-			if (prop.anchorInstance != null)
-				values.Clear();
-
-			for (int i = 0; i < newCount; i++)
-			{
-				prop.AddNewAnchor(prop.fieldName.GetHashCode() + i);
-				if (newNames != null && i < newNames.Length)
-					prop.multi[i].name = newNames[i];
-				prop.multi[i].color = (SerializableColor)FindColorFromtypes(prop.allowedTypes);
-			}
-		}
-
-		public bool				RequestRemoveLink(string propertyName, int index = 0)
-		{
-			if (!propertyDatas.ContainsKey(propertyName))
-				return false;
-			
-			var prop = propertyDatas[propertyName];
-
-			if (index >= prop.multi.Count || index < 0)
-				return false;
-
-			if (currentGraph == null)
-				return false;
-
-			var links = GetLinks(prop.multi[index].id);
-			var toRemove = new List< PWLink >();
-			foreach (var link in links)
-				toRemove.Add(link);
-			foreach (var link in toRemove)
-			{
-				var linkedNode = FindNodeById(link.distantNodeId);
-
-				linkedNode.DeleteLink(link.distantAnchorId, this, link.localAnchorId);
-				DeleteLink(link.localAnchorId, linkedNode, link.distantAnchorId);
-			}
-			return true;
-		}
-
-		public int				GetPropLinkCount(string propertyName, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return -1;
-				return anchors[index].linkCount;
-			}
-			return -1;
-		}
-
-		public Rect?			GetAnchorRect(string propertyName, int index = 0)
-		{
-			if (propertyDatas.ContainsKey(propertyName))
-			{
-				var anchors = propertyDatas[propertyName].multi;
-				if (anchors.Count <= index)
-					return null;
-				return PWUtils.DecalRect(anchors[index].anchorRect, graphDecal + windowRect.position);
-			}
-			return null;
-		}
-
-		public Rect?			GetAnchorRect(int id)
-		{
-			foreach (var propKP in propertyDatas)
-				foreach (var anchor in propKP.Value.multi)
-					if (anchor.id == id)
-						return PWUtils.DecalRect(anchor.anchorRect, graphDecal + windowRect.position);
-			return null;
-		}
-
-		public PWAnchorData		GetAnchorData(string propName)
-		{
-			if (propertyDatas.ContainsKey(propName))
-				return propertyDatas[propName];
-			return null;
-		}
-
-		public int?				GetAnchorId(PWAnchorType anchorType, int index)
-		{
-			var multiAnchorList =	from p in propertyDatas
-									where p.Value.anchorType == anchorType
-									select p.Value.multi;
-			
-			int i = 0;
-			foreach (var anchorList in multiAnchorList)
-				foreach (var anchor in anchorList)
-					if (anchor.visibility == PWVisibility.Visible)
-					{
-						if (index == i)
-							return anchor.id;
-						i++;
-					}
-			return null;
-		}
-
-		public PWNode			GetFirstNodeAttachedToAnchor(int anchorId)
-		{
-			return GetNodesAttachedToAnchor(anchorId).FirstOrDefault();
-		}
-
-		public List< PWNode >	GetNodesAttachedToAnchor(int anchorId)
-		{
-			return links.Where(l => l.localAnchorId == anchorId).Select(l => FindNodeById(l.distantNodeId)).ToList();
-		}
-
-		public List< PWNode > 	GetOutputNodes()
-		{
-			var nodes = links.Select(l => FindNodeById(l.distantNodeId)).Where(n => n != null);
-			List< PWNode > finalList = new List< PWNode >();
-
-			foreach (var node in nodes)
-			{
-				if (node.GetType() == typeof(PWNodeGraphExternal))
-					finalList.AddRange((node as PWNodeGraphExternal).graphInput.GetOutputNodes());
-				else
-					finalList.Add(node);
-			}
-			return finalList;
-		}
-
-		public List< PWNode >	GetInputNodes()
-		{
-			var nodes = depencendies.Select(d => FindNodeById(d.nodeId)).Where(n => n != null);
-			List< PWNode > finalList = new List< PWNode >();
-			
-			foreach (var node in nodes)
-			{
-				if (node.GetType() == typeof(PWNodeGraphExternal))
-					finalList.AddRange(((node as PWNodeGraphExternal).graphOutput.GetInputNodes()));
-				else
-					finalList.Add(node);
-			}
-			return nodes.ToList();
-		}
-
-		protected PWGraphTerrainType	GetTerrainOutputMode()
-		{
-			return currentGraph.outputType;
-		}
-
-		protected string				GetGraphName()
-		{
-			return currentGraph.externalName;
-		}
-
-		protected string				GetGraphPath()
-		{
-			if (currentGraph.assetPath != null)
-				return System.IO.Path.GetDirectoryName(currentGraph.assetPath);
-			return null;
-		}
-
-	#endregion
-
 	#region Unused (for the moment) overrided functions
 		public void OnDestroy()
 		{
@@ -954,52 +470,11 @@ namespace PW
 			}
 		}
 
-		PWNode			FindNodeById(int nodeId)
-		{
-			if (currentGraph != null)
-				return currentGraph.nodesDictionary[nodeId];
-			Debug.Log("currentGraph null !");
-			return null;
-		}
-
-		public void		UpdateCurrentGraph(PWMainGraph ng)
-		{
-			currentGraph = ng;
-		}
-
-
-		public PWAnchorData		GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData)
-		{
-			int				index;
-			
-			return GetAnchorData(id, out singleAnchorData, out index);
-		}
-
-		public PWAnchorData	GetAnchorData(int id, out PWAnchorData.PWAnchorMultiData singleAnchorData, out int index)
-		{
-			PWAnchorData					ret = null;
-			PWAnchorData.PWAnchorMultiData	s = null;
-			int								retIndex = 0;
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (singleAnchor.id == id)
-				{
-					s = singleAnchor;
-					ret = data;
-					retIndex = i;
-				}
-			}, true);
-			index = retIndex;
-			singleAnchorData = s;
-			return ret;
-		}
-
 		public override string ToString()
 		{
 			return "[" + GetType() + "] " + externalName;
 		}
 
 	#endregion
-
     }
 }
