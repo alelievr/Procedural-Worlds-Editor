@@ -16,26 +16,27 @@ namespace PW
 	[System.SerializableAttribute]
 	public partial class PWNode : ScriptableObject
 	{
-		public string	nodeTypeName;
 		public Rect		windowRect = new Rect(400, 400, 200, 50);
 		public int		id;
 		public bool		renamable = false;
 		public int		computeOrder = 0;
-		public int		viewHeight = 0;
-		public bool		specialButtonClick = false;
-		public bool		isDragged = false;
-		public Vector3	chunkPosition = Vector3.zero;
-		public int		chunkSize = 16;
-		public int		seed;
-		public float	step;
 		public float	processTime = 0f;
+		public string	classQAName;
 		new public string name;
+
+		public bool		isDragged = false;
+
 		[SerializeField]
-		public PWGUIManager	PWGUI = new PWGUIManager();
+		protected PWGUIManager	PWGUI = new PWGUIManager();
 
 		//useful state bools
-		public bool		isDependent { get; private set; }
-		public bool		realMode { get { return graph.IsRealMode(); } }
+		protected bool		isDependent { get; private set; }
+		protected bool		realMode { get { return graph.IsRealMode(); } }
+
+		protected Vector3	chunkPosition { get { return mainGraph.chunkPosition; } }
+		protected int		chunkSize { get { return mainGraph.chunkSize; } }
+		protected int		seed { get { return graph.seed; } }
+		protected float	step { get { return mainGraph.step; } }
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
@@ -60,8 +61,7 @@ namespace PW
 		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
 		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
-		[SerializeField]
-		Vector2				graphDecal;
+		Vector2				graphPan { get => graph.panPosition; }
 		[SerializeField]
 		int					maxAnchorRenderHeight = 0;
 		[SerializeField]
@@ -70,14 +70,11 @@ namespace PW
 		[NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
 
-		//node links and deps
-		[SerializeField]
-		List< PWLink >				links = new List< PWLink >();
-		[SerializeField]
-		List< PWDependency >		depencendies = new List< PWDependency >(); //List< nodeId, anchorId >
-
 		[System.NonSerialized]
-		public PWMainGraph		graph;
+		public PWGraph			graph;
+		public PWMainGraph		mainGraph { get => graph as PWMainGraph; }
+		public PWBiomeGraph		biomeGraph { get => graph as PWBiomeGraph; }
+		//TODO: data and mesh graphs
 
 		[System.NonSerialized]
 		public bool		unserializeInitialized = false;
@@ -171,6 +168,9 @@ namespace PW
 
 			BindEvents();
 
+			//load the class QA name:
+			classQAName = GetType().AssemblyQualifiedName;
+
 			delayedChanges.Clear();
 			
 			//Will be called only at the creation of the node.
@@ -215,78 +215,6 @@ namespace PW
 	#endregion
 	
 	#region Editor utils
-
-		static bool			AnchorAreAssignable(Type fromType, PWAnchorType fromAnchorType, bool fromGeneric, SerializableType[] fromAllowedTypes, PWAnchorInfo to, bool verbose = false)
-		{
-			bool ret = false;
-
-			if ((fromType != typeof(PWValues) && to.fieldType != typeof(PWValues)) //exclude PWValues to simple assignation (we need to check with allowedTypes)
-				&& (fromType.IsAssignableFrom(to.fieldType) || fromType == typeof(object) || to.fieldType == typeof(object)))
-			{
-				if (verbose)
-					Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString());
-				return true;
-			}
-
-			if (fromGeneric || to.generic)
-			{
-				if (verbose)
-					Debug.Log("from type is generic");
-				SerializableType[] types = (fromGeneric) ? fromAllowedTypes : to.allowedTypes;
-				Type secondType = (fromGeneric) ? to.fieldType : fromType;
-				foreach (Type firstT in types)
-					if (fromGeneric && to.generic)
-					{
-						if (verbose)
-							Debug.Log("to type is generic");
-							
-						if (firstT == typeof(object))
-						{
-							ret = true;
-							break ;
-						}
-
-						foreach (Type toT in to.allowedTypes)
-						{
-							if (verbose)
-								Debug.Log("checking assignable from " + firstT + " to " + toT);
-
-							if (toT == typeof(object))
-							{
-								ret = true;
-								break ;
-							}
-
-							if (firstT.IsAssignableFrom(toT))
-								ret = true;
-						}
-					}
-					else
-					{
-						if (verbose)
-							Debug.Log("checking assignable from " + firstT + " to " + secondType);
-						if (firstT.IsAssignableFrom(secondType))
-							ret = true;
-					}
-			}
-			else
-			{
-				if (verbose)
-					Debug.Log("non-generic types, checking assignable from " + fromType + " to " + to.fieldType);
-				if (fromType.IsAssignableFrom(to.fieldType) || to.fieldType.IsAssignableFrom(fromType))
-					ret = true;
-			}
-			if (verbose)
-				Debug.Log("result: " + ret);
-			return ret;
-		}
-
-		public static bool		AnchorAreAssignable(PWAnchorInfo from, PWAnchorInfo to, bool verbose = false)
-		{
-			if (from.anchorType == to.anchorType)
-				return false;
-			return AnchorAreAssignable(from.fieldType, from.anchorType, from.generic, from.allowedTypes, to, verbose);
-		}
 
 		public void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
 		{
@@ -345,11 +273,6 @@ namespace PW
 			return ret;
 		}
 
-		public void UpdateGraphDecal(Vector2 graphDecal)
-		{
-			this.graphDecal = graphDecal;
-		}
-
 		public void OnClickedOutside()
 		{
 			if (Event.current.button == 0)
@@ -376,23 +299,6 @@ namespace PW
 							singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
 				}
 			});
-		}
-
-		public void			SetReloadReuqestedNode(PWNode n)
-		{
-			reloadRequestFromNode = n;
-		}
-
-		protected Type		GetReloadRequestType()
-		{
-			if (reloadRequestFromNode != null)
-				return reloadRequestFromNode.GetType();
-			return null;
-		}
-
-		protected PWNode	GetReloadRequestNode()
-		{
-			return reloadRequestFromNode;
 		}
 
 	#endregion
@@ -472,7 +378,7 @@ namespace PW
 
 		public override string ToString()
 		{
-			return "[" + GetType() + "] " + externalName;
+			return "[" + GetType() + "] " + name;
 		}
 
 	#endregion

@@ -191,7 +191,9 @@ namespace PW
 
 		void BindEvents()
 		{
-			graph.OnReload += ReloadCallback;
+			//if the node is used in a PWMainGraph:
+			if (mainGraph != null)
+				mainGraph.OnReload += ReloadCallback;
 			graph.OnClickNowhere += OnClickedOutside;
 			graph.OnNodeLinked += NodeLinkedCallback;
 			graph.OnNodeUnlinked += NodeUnlinkedCallback;
@@ -199,7 +201,9 @@ namespace PW
 
 		void UnBindEvents()
 		{
-			graph.OnReload -= ReloadCallback;
+			//if the node is used in a PWMainGraph:
+			if (mainGraph != null)
+				mainGraph.OnReload -= ReloadCallback;
 			graph.OnClickNowhere -= OnClickedOutside;
 			graph.OnNodeLinked -= NodeLinkedCallback;
 			graph.OnNodeUnlinked -= NodeUnlinkedCallback;

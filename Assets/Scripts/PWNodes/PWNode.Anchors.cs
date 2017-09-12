@@ -41,8 +41,6 @@ namespace PW
 
 		void ProcessAnchors()
 		{
-			PWAnchorInfo ret = new PWAnchorInfo();
-			
 			int		anchorWidth = 13;
 			int		anchorHeight = 13;
 			int		anchorMargin = 2;

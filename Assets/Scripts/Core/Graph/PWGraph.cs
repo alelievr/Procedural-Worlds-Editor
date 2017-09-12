@@ -65,6 +65,7 @@ namespace PW.Core
 		public event System.Action				OnNodeUnselected;
 		//link events:
 		public event OnLinkAction				OnLinkDragged;
+		public event OnLinkAction				OnLinkCanceled;
 		public event OnLinkAction				OnNodeLinked;
 		public event OnLinkAction				OnNodeUnlinked;
 		public event OnLinkAction				OnLinkSelected;
@@ -154,9 +155,9 @@ namespace PW.Core
 				inputNode.computeOrder = 0;
 	
 				foreach (var gNode in nodes)
-					gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.nodeId);
+					gNode.computeOrder = EvaluateComputeOrder(false, 1, gNode.id);
 	
-				outputNode.computeOrder = EvaluateComputeOrder(false, 1, outputNode.nodeId);
+				outputNode.computeOrder = EvaluateComputeOrder(false, 1, outputNode.id);
 	
 				return 0;
 			}
@@ -224,7 +225,7 @@ namespace PW.Core
 	#region Events handlers
 
 		//retarget link and node events to GraphStructure event
-		void		LinkChangedCallback(PWNodeConnection link) { OnGraphStructureChanged(); }
+		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback() { OnGraphStructureChanged(); }
 
 		void		GraphStructureChangedCallback()

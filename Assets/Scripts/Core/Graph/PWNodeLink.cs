@@ -15,5 +15,5 @@ public class PWNodeLink {
 	public bool				selected;
 
 	//TODO: store anchors:
-
+	public PWAnchor
 }

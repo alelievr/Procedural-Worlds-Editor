@@ -31,6 +31,7 @@ namespace PW.Core
 
 		//chunk relative datas
 		public int						chunkSize;
+		public Vector3					chunkPosition;
 		public float					step;
 		public float					geologicTerrainStep;
 

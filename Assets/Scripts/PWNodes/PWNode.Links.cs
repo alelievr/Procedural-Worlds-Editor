@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 using PW;
 using PW.Core;
 
@@ -10,6 +11,9 @@ namespace PW
 {
 	public partial class PWNode
 	{
+		public PWAnchor		inputAnchors;
+		public PWAnchor		outputAnchors;
+
 		//links:
 		public PWLink GetLink(int anchorId, int targetNodeId, int targetAnchorId)
 		{
@@ -54,7 +58,6 @@ namespace PW
 			//we store output links:
 			if (from.anchorType == PWAnchorType.Output)
 			{
-				outputHasChanged = true;
 				links.Add(new PWLink(
 					to.nodeId, to.anchorId, to.fieldName, to.classAQName, to.propIndex,
 					from.nodeId, from.anchorId, from.fieldName, from.classAQName, from.propIndex, GetAnchorDominantColor(from, to),
@@ -68,7 +71,6 @@ namespace PW
 			}
 			else //input links are stored as depencencies:
 			{
-				inputHasChanged = true;
 				ForeachPWAnchors((data, singleAnchor, i) => {
 					if (singleAnchor.id == from.anchorId)
 					{
@@ -78,13 +80,6 @@ namespace PW
 						{
 							if (i == data.multipleValueCount)
 								data.AddNewAnchor(data.fieldName.GetHashCode() + i + 1);
-						}
-						if (!String.IsNullOrEmpty(data.mirroredField))
-						{
-							//no need to check if anchorInstance is null because is is assigned from mirrored property.
-							var mirroredProp = propertyDatas[data.mirroredField];
-							if ((Type)mirroredProp.type == typeof(PWValues))
-								mirroredProp.AddNewAnchor(mirroredProp.fieldName.GetHashCode() + i + 1);
 						}
 					}
 				});
@@ -141,13 +136,13 @@ namespace PW
 		public void		DeleteLink(int myAnchorId, PWNode distantWindow, int distantAnchorId)
 		{
 			links.RemoveAll(l => {
-				bool delete = l.localAnchorId == myAnchorId && l.distantNodeId == distantWindow.nodeId && l.distantAnchorId == distantAnchorId;
+				bool delete = l.localAnchorId == myAnchorId && l.distantNodeId == distantWindow.id && l.distantAnchorId == distantAnchorId;
 				if (delete)
 					OnNodeAnchorUnlink(l.localName, l.localIndex);
 				return delete;
 			});
 			//delete dependency and if it's not a dependency, decrement the linkCount of the link.
-			if (DeleteDependencies(d => d.nodeId == distantWindow.nodeId && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
+			if (DeleteDependencies(d => d.nodeId == distantWindow.id && d.connectedAnchorId == myAnchorId && d.anchorId == distantAnchorId) == 0)
 			{
 				PWAnchorData.PWAnchorMultiData	singleAnchorData;
 				

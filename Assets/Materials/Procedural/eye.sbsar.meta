@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: d04758929699e47d28d4ac5009167de6
-timeCreated: 1500560153
+timeCreated: 1505169406
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -23,7 +23,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: $randomseed
       value:
-        scalar[0]: 2924
+        scalar[0]: 6991
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -44,7 +44,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: hue_shift
       value:
-        scalar[0]: 0
+        scalar[0]: 0.612
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -72,49 +72,49 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: size
       value:
-        scalar[0]: 0.007
+        scalar[0]: 0.175
         scalar[1]: 0.174
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: aperture
       value:
-        scalar[0]: 0.138
+        scalar[0]: 0.212
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: noise_intensity
       value:
-        scalar[0]: 1
+        scalar[0]: 0.294
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: stains
       value:
-        scalar[0]: 1
+        scalar[0]: 0.504
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: veins
       value:
-        scalar[0]: 0.369
+        scalar[0]: 1
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: red_eyes
       value:
-        scalar[0]: 0.087
+        scalar[0]: 0.118
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: cataract
       value:
-        scalar[0]: 0.125
+        scalar[0]: 0.087
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0

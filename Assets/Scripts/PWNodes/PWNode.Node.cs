@@ -9,6 +9,8 @@ namespace PW
 	//Node rendering, event processing and Process callback()
 	public partial class PWNode
 	{
+		public int		viewHeight = 0; //to keep ???
+
 		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
 		{

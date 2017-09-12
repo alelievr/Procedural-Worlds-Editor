@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: de5eba349e5104b5bacf26da2de80169
-timeCreated: 1497128748
+timeCreated: 1505169434
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -51,7 +51,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: $randomseed
       value:
-        scalar[0]: 2187
+        scalar[0]: 2804
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -141,118 +141,64 @@ SubstanceImporter:
       generateAllOutputs: 0
       animationUpdateRate: 0
     materialProperties:
-      serializedVersion: 2
+      serializedVersion: 3
       texEnvs:
-      - first:
-          name: _BumpMap
-        second:
+      - _BumpMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _DetailAlbedoMap
-        second:
+      - _DetailAlbedoMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _DetailMask
-        second:
+      - _DetailMask:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _DetailNormalMap
-        second:
+      - _DetailNormalMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _EmissionMap
-        second:
+      - _EmissionMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _MainTex
-        second:
+      - _MainTex:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _MetallicGlossMap
-        second:
+      - _MetallicGlossMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _OcclusionMap
-        second:
+      - _OcclusionMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
-      - first:
-          name: _ParallaxMap
-        second:
+      - _ParallaxMap:
           texture: {instanceID: 0}
           scale: {x: 1, y: 1}
           offset: {x: 0, y: 0}
       floats:
-      - first:
-          name: _BumpScale
-        second: 1
-      - first:
-          name: _Cutoff
-        second: 0.5
-      - first:
-          name: _DetailNormalMapScale
-        second: 1
-      - first:
-          name: _DstBlend
-        second: 0
-      - first:
-          name: _GlossMapScale
-        second: 1
-      - first:
-          name: _Glossiness
-        second: 0.5
-      - first:
-          name: _GlossyReflections
-        second: 1
-      - first:
-          name: _Metallic
-        second: 0
-      - first:
-          name: _Mode
-        second: 0
-      - first:
-          name: _OcclusionStrength
-        second: 1
-      - first:
-          name: _Parallax
-        second: 0.02
-      - first:
-          name: _SmoothnessTextureChannel
-        second: 0
-      - first:
-          name: _SpecularHighlights
-        second: 1
-      - first:
-          name: _SrcBlend
-        second: 1
-      - first:
-          name: _UVSec
-        second: 0
-      - first:
-          name: _ZWrite
-        second: 1
+      - _BumpScale: 1
+      - _Cutoff: 0.5
+      - _DetailNormalMapScale: 1
+      - _DstBlend: 0
+      - _GlossMapScale: 1
+      - _Glossiness: 0.5
+      - _GlossyReflections: 1
+      - _Metallic: 0
+      - _Mode: 0
+      - _OcclusionStrength: 1
+      - _Parallax: 0.02
+      - _SmoothnessTextureChannel: 0
+      - _SpecularHighlights: 1
+      - _SrcBlend: 1
+      - _UVSec: 0
+      - _ZWrite: 1
       colors:
-      - first:
-          name: _Color
-        second: {r: 1, g: 1, b: 1, a: 1}
-      - first:
-          name: _EmissionColor
-        second: {r: 0, g: 0, b: 0, a: 1}
+      - _Color: {r: 1, g: 1, b: 1, a: 1}
+      - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     textureParameters:
     - name: zebra_skin_basecolor
       alphaSource: 6
@@ -274,21 +220,37 @@ SubstanceImporter:
       filterMode: 1
       aniso: 1
       wrapMode: 0
+    - name: zebra_skin_diffuse
+      alphaSource: 6
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    - name: zebra_skin_specular
+      alphaSource: 7
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    - name: zebra_skin_glossiness
+      alphaSource: 0
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    - name: zebra_skin_roughness
+      alphaSource: 0
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
     textureAssignments:
-    - shaderProp:
-        name: _BumpMap
-      material: {instanceID: 0}
-      baseUID: 133886652
-    - shaderProp:
-        name: _MainTex
+    - shaderProp: _MainTex
       material: {instanceID: 0}
       baseUID: 133886650
-    - shaderProp:
-        name: _MetallicGlossMap
+    - shaderProp: _BumpMap
+      material: {instanceID: 0}
+      baseUID: 133886652
+    - shaderProp: _MetallicGlossMap
       material: {instanceID: 0}
       baseUID: 133886624
-    - shaderProp:
-        name: _ParallaxMap
+    - shaderProp: _ParallaxMap
       material: {instanceID: 0}
       baseUID: 133886628
     buildTargetSettings:
