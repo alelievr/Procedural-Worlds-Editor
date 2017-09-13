@@ -31,12 +31,12 @@ namespace PW
 
 		//useful state bools
 		protected bool		isDependent { get; private set; }
-		protected bool		realMode { get { return graph.IsRealMode(); } }
+		protected bool		realMode { get { return graphRef.IsRealMode(); } }
 
-		protected Vector3	chunkPosition { get { return mainGraph.chunkPosition; } }
-		protected int		chunkSize { get { return mainGraph.chunkSize; } }
-		protected int		seed { get { return graph.seed; } }
-		protected float	step { get { return mainGraph.step; } }
+		protected Vector3	chunkPosition { get { return mainGraphRef.chunkPosition; } }
+		protected int		chunkSize { get { return mainGraphRef.chunkSize; } }
+		protected int		seed { get { return graphRef.seed; } }
+		protected float	step { get { return mainGraphRef.step; } }
 
 	#region Internal Node datas and style
 		static GUIStyle		boxAnchorStyle = null;
@@ -61,7 +61,7 @@ namespace PW
 		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
 		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
-		Vector2				graphPan { get => graph.panPosition; }
+		Vector2				graphPan { get { return graphRef.panPosition; } }
 		[SerializeField]
 		int					maxAnchorRenderHeight = 0;
 		[SerializeField]
@@ -71,9 +71,9 @@ namespace PW
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
 
 		[System.NonSerialized]
-		public PWGraph			graph;
-		public PWMainGraph		mainGraph { get => graph as PWMainGraph; }
-		public PWBiomeGraph		biomeGraph { get => graph as PWBiomeGraph; }
+		public PWGraph			graphRef;
+		public PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
+		public PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 		//TODO: data and mesh graphs
 
 		[System.NonSerialized]
@@ -96,7 +96,7 @@ namespace PW
 		//default notify reload will be sent to all node childs.
 		public void NotifyReload()
 		{
-			var nodes = graph.GetNodeChildsRecursive(this);
+			var nodes = graphRef.GetNodeChildsRecursive(this);
 
 			foreach (var node in nodes)
 				node.OnReload(this);
@@ -105,7 +105,7 @@ namespace PW
 		//send reload event to all node of the specified type
 		public void NotifyReload(Type targetType)
 		{
-			var nodes = from node in graph.nodes
+			var nodes = from node in graphRef.nodes
 						where node.GetType() == targetType
 						select node;
 			
@@ -116,7 +116,7 @@ namespace PW
 		//send reload to all nodes with a computeOrder smaller than minComputeOrder.
 		public void NotifyReload(int minComputeOrder)
 		{
-			var nodes = from node in graph.nodes
+			var nodes = from node in graphRef.nodes
 						where node.computeOrder >= minComputeOrder
 						select node;
 
@@ -142,7 +142,7 @@ namespace PW
 		
 		public void SendMessage(Type targetType, object message)
 		{
-			var nodes = from node in graph.nodes
+			var nodes = from node in graphRef.nodes
 						where node.GetType() == targetType
 						select node;
 						
@@ -154,6 +154,16 @@ namespace PW
 		{
 			foreach (var node in nodes)
 				node.OnMessageReceived(this, message);
+		}
+
+		public void OnAfterDeserialize(PWGraph graph)
+		{
+			this.graphRef = graph;
+			
+			foreach (var anchorField in inputAnchors)
+				anchorField.OnAfterDeserialize(this);
+			foreach (var anchorField in outputAnchors)
+				anchorField.OnAfterDeserialize(this);
 		}
 
 	#region OnEnable, OnDisable, data initialization and baking

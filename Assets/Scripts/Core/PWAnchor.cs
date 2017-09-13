@@ -1,98 +1,69 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace PW.Core
 {
 	[System.SerializableAttribute]
-	public enum PWAnchorType
-	{
-		Input,
-		Output,
-		None,
-	}
-
-	[System.SerializableAttribute]
-	public enum PWAnchorHighlight
-	{
-		None,
-		AttachNew,				//link will be attached to unlinked anchor
-		AttachReplace,			//link will replace actual anchor link
-		AttachAdd,				//link will be added to anchor links
-	}
-
-	[System.SerializableAttribute]
 	public class PWAnchor
 	{
-		//node instance where the anchor is.
-		public PWNode						nodeRef;
-		
-		//list of rendered anchors:
-		public List< PWAnchorData >			fieldAnchors = new List< PWAnchorData >();
-		
-		//instance of the field
-		public object						fieldInstance;
+		//GUID of the anchor, used to identify anchors in NodeLinkTable
+		public string				GUID;
 
-		//name of the attached propery / name specified in PW I/O.
-		public string						fieldName;
-		//anchor type (input / output)
-		public PWAnchorType					anchorType;
-		//anchor field type
-		public SerializableType				fieldType;
+		//AnchorField instance attached to this anchor
+		[System.NonSerialized]
+		public PWAnchorField		anchorFieldRef;
+		//Node instance attached to this anchor
+		[System.NonSerialized]
+		public PWNode				nodeRef;
 
-		//anchor name if specified in PWInput or PWOutput else null
-		public string						anchorName;
-		//the visual offset of the anchor
-		public Vector2						offset;
-		//the visual padding between multiple anchor of the same field
-		public int							multiPadding;
+		//anchor connections:
+		[System.NonSerialized]
+		public List< PWNodeLink >	links = new List< PWNodeLink >();
 
-		//properties for multiple anchors:
-		public SerializableType[]			allowedTypes;
-		//min allowed input values
-		public int							minMultipleValues;
-		//max allowed values
-		public int							maxMultipleValues;
+		//anchor name
+		public string				name = null;
+		//enabled ?
+		public bool					enabled = true;
+		//links connected to this anchor
+		public int					linkCount = 0;
+		//link type for visual bezier curve style
+		public PWLinkType			linkType = PWLinkType.BasicData;
 
-		//if the anchor value is required to compute result
-		public bool							required;
-		//if the anchor is selected
-		public bool							selected;
+		//hightlight mode (for replace / new / delete link visualization)
+		public PWAnchorHighlight	highlighMode = PWAnchorHighlight.None;
+		//visual rect of the anchor
+		public Rect					anchorRect;
+		//anchor color
+		public PWColorPalette		colorPalette;
+		//anchor visibility
+		public PWVisibility			visibility = PWVisibility.Visible;
+		//override default y anchor position
+		public float				forcedY = -1;
 
-		[System.SerializableAttribute]
-		public class PWAnchorData
+		public void OnBeforeDeserialized(PWAnchorField anchorField)
 		{
-			//anchor connections:
-			public PWNodeLink			links;
-			//anchor instance attached to this anchorfield
-			public PWAnchor				anchorRef;
+			anchorFieldRef = anchorField;
+			nodeRef = anchorField.nodeRef;
 
-			//anchor name
-			public string				name = null;
-			//enabled ?
-			public bool					enabled = true;
-			//links connected to this anchor
-			public int					linkCount = 0;
-			//link type for visual bezier curve style
-			public PWLinkType			linkType = PWLinkType.BasicData;
+			var nodeLinkTable = nodeRef.graphRef.nodeLinkTable;
+			var linkGUIDs = nodeLinkTable.GetLinkGUIDsFromAnchorGUID();
 
-			//hightlight mode (for replace / new / delete link visualization)
-			public PWAnchorHighlight	highlighMode = PWAnchorHighlight.None;
-			//visual rect of the anchor
-			public Rect					anchorRect;
-			//anchor color
-			public PWColorPalette		colorPalette;
-			//anchor visibility
-			public PWVisibility			visibility = PWVisibility.Visible;
-			//override default y anchor position
-			public float				forcedY = -1;
+			foreach (var linkGUID in linkGUIDs)
+			{
+				var linkInstance = nodeLinkTable.GetLinkFromGUID(linkGUID);
 
-			public PWAnchorData() {}
+				if (anchorFieldRef.type == PWAnchorType.Input)
+					linkInstance.fromAnchor = this;
+				else
+					linkInstance.toAnchor = this;
+			}
 		}
 
-		public void RemoveAllAnchors()
+		//called only once (when the anchor is created)
+		public void Initialize()
 		{
-			fieldAnchors.Clear();
+			GUID = System.Guid.CreateNew().ToString();
 		}
 	}
 }

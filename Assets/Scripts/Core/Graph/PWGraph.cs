@@ -9,7 +9,7 @@ using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 
 namespace PW.Core
 {
-    public class PWGraph : ScriptableObject {
+    public class PWGraph : ScriptableObject, ISerializationCallbackReceiver {
     
 	#region Graph Datas
 
@@ -28,6 +28,21 @@ namespace PW.Core
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		public int								seed;
+
+
+		//Link table, store all connections between node's anchors.
+		//Why i choose to store node links in a separate container instead of
+		//	dirrectly inside anchors which is much more simple ?
+		//	Well ... It's because unity's serialization system sucks :D
+		//	Indeed i need in my graph to use only one instance of PWNodeLink per link
+		//	and with the unity serialization system, if i store the same instance of a class
+		//	in two location (which will append if i store the link in anchors cauz there is
+		//	two anchors per link) unity, during deserialization, will create two instances
+		//	of the link so the link is not anymore a link but two non-connected links.
+		//	So i decided to use a linkTable which store in one place the instances of links
+		//	and use GUIDs to save links references in anchors so i can get them back using 
+		//	this container.
+		public PWNodeLinkTable					nodeLinkTable = new PWNodeLinkTable();
         
 		
 		//protected internal graph datas:
@@ -47,10 +62,6 @@ namespace PW.Core
         //input and output nodes:
         public PWNodeGraphInput					inputNode;
         public PWNodeGraphOutput				outputNode;
-
-		//GraphProcessor to Process and ProcessOnce the graph
-		[System.NonSerialized]
-		private PWGraphProcessor				graphProcessor = new PWGraphProcessor();
 
 
 		//public delegates:
@@ -92,6 +103,11 @@ namespace PW.Core
 				nodesDictionary[inputNode.id] = inputNode;
 			if (outputNode != null)
 				nodesDictionary[outputNode.id] = outputNode;
+			
+			//Send OnAfterSerialize here because when graph's OnEnable function is
+			//	called, all it's nodes are already deserialized.
+			foreach (var node in nodes)
+				node.OnAfterDeserialize(this);
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
