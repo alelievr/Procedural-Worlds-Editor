@@ -41,29 +41,39 @@ namespace PW.Core
 		//override default y anchor position
 		public float				forcedY = -1;
 
-		public void OnBeforeDeserialized(PWAnchorField anchorField)
+		public void OnAfterDeserialized(PWAnchorField anchorField)
 		{
 			anchorFieldRef = anchorField;
 			nodeRef = anchorField.nodeRef;
 
 			var nodeLinkTable = nodeRef.graphRef.nodeLinkTable;
-			var linkGUIDs = nodeLinkTable.GetLinkGUIDsFromAnchorGUID();
+			var linkGUIDs = nodeLinkTable.GetLinkGUIDsFromAnchorGUID(GUID);
 
 			foreach (var linkGUID in linkGUIDs)
 			{
 				var linkInstance = nodeLinkTable.GetLinkFromGUID(linkGUID);
 
-				if (anchorFieldRef.type == PWAnchorType.Input)
+				if (anchorFieldRef.anchorType == PWAnchorType.Input)
 					linkInstance.fromAnchor = this;
 				else
 					linkInstance.toAnchor = this;
+				
+				links.Add(linkInstance);
 			}
+			
+			foreach (var link in links)
+				link.OnAfterDeserialize();
 		}
 
 		//called only once (when the anchor is created)
 		public void Initialize()
 		{
-			GUID = System.Guid.CreateNew().ToString();
+			GUID = System.Guid.NewGuid().ToString();
+		}
+
+		override public string ToString()
+		{
+			return "Anchor [" + GUID + "]";
 		}
 	}
 }

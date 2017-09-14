@@ -59,9 +59,24 @@ namespace PW.Core
 		//if the anchor is selected
 		public bool							selected;
 
-		public void RemoveAllAnchors()
+		public void RemoveAnchor(string GUID)
 		{
-			anchors.Clear();
+			if (anchors.RemoveAll(a => a.GUID == GUID) != 1)
+				Debug.LogWarning("Failed to remove the anchor at GUID: " + GUID);
+		}
+
+		public PWAnchor CreateNewAnchor()
+		{
+			PWAnchor	newAnchor = new PWAnchor();
+
+			newAnchor.Initialize();
+			anchors.Add(newAnchor);
+			return newAnchor;
+		}
+
+		public PWAnchor	GetAnchorFromGUID(string anchorGUID)
+		{
+			return anchors.FirstOrDefault(a => a.GUID == anchorGUID);
 		}
 
 		public void OnAfterDeserialize(PWNode node)
@@ -69,7 +84,7 @@ namespace PW.Core
 			nodeRef = node;
 
 			foreach (var anchor in anchors)
-				anchor.OnBeforeDeserialized(this);
+				anchor.OnAfterDeserialized(this);
 		}
 	}
 }

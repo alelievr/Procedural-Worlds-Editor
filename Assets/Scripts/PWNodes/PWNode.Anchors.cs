@@ -90,11 +90,6 @@ namespace PW
 			anchorUnderMouse = ret;
 		}
 
-		public PWAnchorInfo GetAnchorUnderMouse()
-		{
-			return anchorUnderMouse;
-		}
-		
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
 			//if anchor have not been processed:

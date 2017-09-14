@@ -9,7 +9,7 @@ using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 
 namespace PW.Core
 {
-    public class PWGraph : ScriptableObject, ISerializationCallbackReceiver {
+    public class PWGraph : ScriptableObject {
     
 	#region Graph Datas
 
@@ -45,10 +45,12 @@ namespace PW.Core
 		public PWNodeLinkTable					nodeLinkTable = new PWNodeLinkTable();
         
 		
-		//protected internal graph datas:
+		//internal graph datas:
+		[SerializeField]
+		private PWGraphProcessor				graphProcessor = new PWGraphProcessor();
 		protected bool					    	realMode;
 		[System.NonSerialized]
-		protected IOrderedEnumerable< PWNode >	computeOrderSortedNodes = null;
+		protected IOrderedEnumerable< PWNode >	computeOrderSortedNodes;
 		[System.NonSerialized]
 		protected Dictionary< int, PWNode >		nodesDictionary = new Dictionary< int, PWNode >();
 
@@ -108,6 +110,9 @@ namespace PW.Core
 			//	called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
 				node.OnAfterDeserialize(this);
+
+			//Build compute order list:
+			UpdateComputeOrder();
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
@@ -161,6 +166,7 @@ namespace PW.Core
 		}
 	
 		//Dictionary< nodeId, dependencyWeight >
+		[System.NonSerialized]
 		Dictionary< int, int > nodeComputeOrderCount = new Dictionary< int, int >();
 		int EvaluateComputeOrder(bool first = true, int depth = 0, int nodeId = -1)
 		{
@@ -221,21 +227,6 @@ namespace PW.Core
 					.Select(kp => kp.Value)
 					//sort the resulting list by computeOrder:
 					.OrderBy(n => n.computeOrder);
-		}
-
-		public void NodeReloadRequest(PWNode from, System.Type target)
-		{
-
-		}
-
-		public void NodeReloadRequest(PWNode from)
-		{
-
-		}
-		
-		public void NodeReloadRequest(PWNode from, PWNode to)
-		{
-
 		}
 	
 	#region Events handlers

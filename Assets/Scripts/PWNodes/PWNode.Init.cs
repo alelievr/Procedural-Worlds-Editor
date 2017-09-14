@@ -45,6 +45,7 @@ namespace PW
 
 		void LoadFieldAttributes()
 		{
+			//TODO: generate one PWAnchorField per actual fields.
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -71,9 +72,9 @@ namespace PW
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
-					PWInputAttribute			inputAttr = attr as PWInputAttribute;
+					PWInputAttribute		inputAttr = attr as PWInputAttribute;
 					PWOutputAttribute		outputAttr = attr as PWOutputAttribute;
-					PWColorAttribute			colorAttr = attr as PWColorAttribute;
+					PWColorAttribute		colorAttr = attr as PWColorAttribute;
 					PWOffsetAttribute		offsetAttr = attr as PWOffsetAttribute;
 					PWMultipleAttribute		multipleAttr = attr as PWMultipleAttribute;
 					PWGenericAttribute		genericAttr = attr as PWGenericAttribute;
@@ -175,38 +176,46 @@ namespace PW
 		//retarget "Reload" button in the editor to the internal event OnReload:
 		void ReloadCallback() { OnReload(null); }
 
+		void ForceReloadCallback() { /*TODO*/ }
+
 		//retarget OnNodeLinkedCallback if this node was linked:
 		void NodeLinkedCallback(PWNodeLink link)
 		{
-			if (link.from == this || link.to == this)
+			if (link.fromNode == this || link.toNode == this)
 				OnNodeLinked();
 		}
 
 		//retarget OnNodeUnlinkedCallback if this node was linked:
 		void NodeUnlinkedCallback(PWNodeLink link)
 		{
-			if (link.from == this || link.to == this)
+			if (link.fromNode == this || link.toNode == this)
 				OnNodeUnlinked();
 		}
 
 		void BindEvents()
 		{
 			//if the node is used in a PWMainGraph:
-			if (mainGraph != null)
-				mainGraph.OnReload += ReloadCallback;
-			graph.OnClickNowhere += OnClickedOutside;
-			graph.OnNodeLinked += NodeLinkedCallback;
-			graph.OnNodeUnlinked += NodeUnlinkedCallback;
+			if (mainGraphRef != null)
+			{
+				mainGraphRef.OnReload += ReloadCallback;
+				mainGraphRef.OnForceReload += ForceReloadCallback;
+			}
+			graphRef.OnClickNowhere += OnClickedOutside;
+			graphRef.OnNodeLinked += NodeLinkedCallback;
+			graphRef.OnNodeUnlinked += NodeUnlinkedCallback;
 		}
 
 		void UnBindEvents()
 		{
 			//if the node is used in a PWMainGraph:
-			if (mainGraph != null)
-				mainGraph.OnReload -= ReloadCallback;
-			graph.OnClickNowhere -= OnClickedOutside;
-			graph.OnNodeLinked -= NodeLinkedCallback;
-			graph.OnNodeUnlinked -= NodeUnlinkedCallback;
+			if (mainGraphRef != null)
+			{
+				mainGraphRef.OnReload -= ReloadCallback;
+				mainGraphRef.OnForceReload -= ForceReloadCallback;
+			}
+			graphRef.OnClickNowhere -= OnClickedOutside;
+			graphRef.OnNodeLinked -= NodeLinkedCallback;
+			graphRef.OnNodeUnlinked -= NodeUnlinkedCallback;
 		}
 	}
 }

@@ -224,9 +224,7 @@ namespace PW
 
 	#endregion
 	
-	#region Editor utils
-
-		public void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
+		void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
 		{
 			PWAnchorType anchorType = InverAnchorType(toLink.anchorType);
 
@@ -311,8 +309,6 @@ namespace PW
 			});
 		}
 
-	#endregion
-
 	#region Unused (for the moment) overrided functions
 		public void OnDestroy()
 		{
@@ -329,8 +325,6 @@ namespace PW
 			EditorGUILayout.LabelField("nope !");
 		}
 	#endregion
-
-	#region Utils and Miscellaneous
 
 		void			ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false, bool instanceValueCount = true)
 		{
@@ -388,9 +382,7 @@ namespace PW
 
 		public override string ToString()
 		{
-			return "[" + GetType() + "] " + name;
+			return "node " + name + "[" + GetType() + "]";
 		}
-
-	#endregion
     }
 }
