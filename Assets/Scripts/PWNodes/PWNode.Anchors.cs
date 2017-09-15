@@ -89,31 +89,7 @@ namespace PW
 			maxAnchorRenderHeight = (int)Mathf.Max(inputAnchorRect.position.y - 20, outputAnchorRect.position.y - 20);
 			anchorUnderMouse = ret;
 		}
-
-		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
-		{
-			if (!singleAnchor.enabled)
-				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);
-
-			//reset the Highlight:
-			singleAnchor.highlighMode = PWAnchorHighlight.None;
-
-
-			#if DEBUG_ANCHOR
-				Rect anchorSideRect = singleAnchor.anchorRect;
-				if (data.anchorType == PWAnchorType.Input)
-				{
-					anchorSideRect.size += new Vector2(100, 20);
-				}
-				else
-				{
-					anchorSideRect.position -= new Vector2(100, 0);
-					anchorSideRect.size += new Vector2(100, 20);
-				}
-				GUI.Label(anchorSideRect, (long)singleAnchor.id + " | " + singleAnchor.linkCount);
-			#endif
-		}
-		
+	
 		public void RenderAnchors()
 		{
 			var e = Event.current;
@@ -123,9 +99,9 @@ namespace PW
 			Rect		inputAcnhorRect = new Rect(windowHorizontalPadding, windowHeaderSize, 120, -1);
 			Rect		outputAnchorRect = new Rect(windowRect.width - windowHorizontalPadding, windowHeaderSize, -120, -1);
 
-			foreach (var anchorField in inputAnchors)
+			foreach (var anchorField in inputAnchorFields)
 				anchorField.Render(ref inputAcnhorRect);
-			foreach (var anchorField in outputAnchors)
+			foreach (var anchorField in outputAnchorFields)
 				anchorField.Render(ref outputAnchorRect);
 		}
 	}

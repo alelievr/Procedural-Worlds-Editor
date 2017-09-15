@@ -38,26 +38,18 @@ namespace PW.Core
 	[AttributeUsage(AttributeTargets.Field)]
 	public class PWOffsetAttribute : Attribute
 	{
-		public Vector2	offset;
+		public int		offset;
 		public int		multiPadding = 0;
 		
-		public PWOffsetAttribute(int x, int y, int multiPadding)
+		public PWOffsetAttribute(int y, int multiPadding)
 		{
-			offset.x = x;
-			offset.y = y;
+			offset = y;
 			this.multiPadding = multiPadding;
 		}
 
-		public PWOffsetAttribute(int x, int y)
-		{
-			offset.x = x;
-			offset.y = y;
-		}
-		
 		public PWOffsetAttribute(int y)
 		{
-			offset.x = 0;
-			offset.y = y;
+			offset = y;
 		}
 	}
 	

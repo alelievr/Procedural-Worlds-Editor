@@ -34,6 +34,8 @@ namespace PW
 		protected bool			isDragged = false;
 		protected bool			isDependent { get; private set; }
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
+		//tell if the node have required unlinked input and so can't Process()
+		public bool				canWork = false;
 
 
 		//Graph datas accessors:
@@ -102,9 +104,13 @@ namespace PW
 		protected event NodeLinkAction			OnDraggedLinkQuitAnchor;
 
 		//fired when a link is selected
-		protected event LinkAction				OnLinkSelected;
+		public event LinkAction					OnLinkSelected;
 		//fired when a link is unselected
-		protected event LinkAction				OnLinkUnselected;
+		public event LinkAction					OnLinkUnselected;
+		//fired when a link is cerated
+		public event LinkAction					OnLinkCreated;
+		//fired when a link is removed
+		public event LinkAction					OnLinkRemoved;
 
 		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
@@ -194,6 +200,8 @@ namespace PW
 			BakeNodeFields();
 
 			BindEvents();
+
+			UpdateWorkStatus();
 
 			//load the class QA name:
 			classQAName = GetType().AssemblyQualifiedName;
@@ -290,63 +298,33 @@ namespace PW
 			}
 			
 			foreach (var anchorField in anchorFields)
-				anchorField.DisableIfUnlinkable(acnhor);
+				anchorField.DisableIfUnlinkable(anchor);
 		}
 
-		void		ResetAnchorHighlight()
+		void		ResetUnlinkableAnchors()
 		{
-
+			foreach (var anchorField in inputAnchorFields)
+				anchorField.ResetLinkable();
+			foreach (var anchorField in outputAnchorFields)
+				anchorField.ResetLinkable();
 		}
 	
-		void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
+		bool			UpdateWorkStatus()
 		{
-			PWAnchorType anchorType = InverAnchorType(toLink.anchorType);
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				//Hide anchors and highlight when mouse hover
-				// Debug.Log(data.nodeId + ":" + data.fieldName + ": " + AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, true));
-				if (data.nodeId != toLink.nodeId
-					&& data.anchorType == anchorType
-					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
+			foreach (var anchorField in inputAnchorFields)
+				if (anchorField.required)
 				{
-					if (singleAnchor.anchorRect.Contains(Event.current.mousePosition))
-						if (singleAnchor.visibility == PWVisibility.Visible)
-						{
-							singleAnchor.highlighMode = PWAnchorHighlight.AttachNew;
-							if (singleAnchor.linkCount > 0)
-							{
-								//if anchor is locked:
-								if (data.anchorType == PWAnchorType.Input)
-									singleAnchor.highlighMode = PWAnchorHighlight.AttachReplace;
-								else
-									singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
-							}
-						}
+					if (anchorField.anchors.Count < anchorField.minMultipleValues)
+						return false;
+					
+					foreach (var anchor in anchorField.anchors)
+						if (anchor.linkCount == 0)
+							return false;
 				}
-			});
-		}
-		
-		public void		DisplayHiddenMultipleAnchors(bool display = true)
-		{
-			ForeachPWAnchorDatas((data) => {
-				if (data.multiple)
-					data.displayHiddenMultipleAnchors = display;
-			});
+			return true;
 		}
 
-		public bool		CheckRequiredAnchorLink()
-		{
-			bool	ret = true;
-
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (data.required && singleAnchor.linkCount == 0
-						&& (!data.multiple || (data.multiple && i < data.minMultipleValues)))
-					ret = false;
-			});
-			return ret;
-		}
-
-		public void OnClickedOutside()
+		void OnClickedOutside()
 		{
 			if (Event.current.button == 0)
 			{
@@ -356,22 +334,6 @@ namespace PW
 			if (Event.current.button == 0 && !Event.current.shift)
 				selected = false;
 			isDragged = false;
-		}
-
-		public void AnchorBeingLinked(int anchorId)
-		{
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (singleAnchor.id == anchorId)
-				{
-					if (singleAnchor.linkCount == 0)
-						singleAnchor.highlighMode = PWAnchorHighlight.AttachNew;
-					else
-						if (data.anchorType == PWAnchorType.Input)
-							singleAnchor.highlighMode = PWAnchorHighlight.AttachReplace;
-						else
-							singleAnchor.highlighMode = PWAnchorHighlight.AttachAdd;
-				}
-			});
 		}
 
 	#region Unused (for the moment) overrided functions
@@ -390,60 +352,6 @@ namespace PW
 			EditorGUILayout.LabelField("nope !");
 		}
 	#endregion
-
-		void			ForeachPWAnchors(Action< PWAnchorData, PWAnchorData.PWAnchorMultiData, int > callback, bool showAdditional = false, bool instanceValueCount = true)
-		{
-			foreach (var PWAnchorData in propertyDatas)
-			{
-				var data = PWAnchorData.Value;
-				if (data.multiple)
-				{
-					if (data.anchorInstance == null)
-					{
-						if (!bakedNodeFields.ContainsKey(data.fieldName))
-						{
-							Debug.LogError("key not found in bakedNodeFields: " + data.fieldName + " in node " + GetType());
-							continue ;
-						}
-						data.anchorInstance = bakedNodeFields[data.fieldName].GetValue(this);
-						if (data.anchorInstance == null)
-							continue ;
-						else
-							data.multipleValueCount = (data.anchorInstance as PWValues).Count;
-					}
-
-					int anchorCount;
-					if (instanceValueCount && !data.forcedAnchorNumber)
-						anchorCount = Mathf.Max(data.minMultipleValues, ((PWValues)data.anchorInstance).Count);
-					else
-						anchorCount = data.multi.Count;
-					if (data.anchorType == PWAnchorType.Input && !data.forcedAnchorNumber)
-						if (data.displayHiddenMultipleAnchors || showAdditional)
-							anchorCount++;
-					for (int i = 0; i < anchorCount; i++)
-					{
-						// Debug.Log("i = " + i + ", anchor: " + data.fieldName + ", " + data.forcedAnchorNumber + ", " + GetType());
-						//if multi-anchor instance does not exists, create it:
-						if (data.displayHiddenMultipleAnchors && i == anchorCount - 1)
-							data.multi[i].additional = true;
-						else
-							data.multi[i].additional = false;
-						callback(data, data.multi[i], i);
-					}
-				}
-				else
-					callback(data, data.first, -1);
-			}
-		}
-
-		void 			ForeachPWAnchorDatas(Action< PWAnchorData > callback)
-		{
-			foreach (var data in propertyDatas)
-			{
-				if (data.Value != null)
-					callback(data.Value);
-			}
-		}
 
 		public override string ToString()
 		{

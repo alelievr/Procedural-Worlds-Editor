@@ -3,16 +3,19 @@ using UnityEngine;
 using System;
 using PW.Core;
 
-public enum PWColorPalette  {
-
-	Node1,
-	Node2,
-	Node3,
-	Node4,
-	Node5,
-	Node6,
-	Node7,
-	Node8,
-	Node9,
-
+namespace PW.Core
+{
+	public enum PWColorPalette  {
+	
+		Node1,
+		Node2,
+		Node3,
+		Node4,
+		Node5,
+		Node6,
+		Node7,
+		Node8,
+		Node9,
+	
+	}
 }

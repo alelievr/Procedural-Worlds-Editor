@@ -30,6 +30,10 @@ namespace PW.Core
 		public bool					enabled = true;
 		//number of links connected to this anchor
 		public int					linkCount = 0;
+		//index of the field, valid only if the attached field is a PWValues
+		public int					fieldIndex = -1;
+		//Contains the type in the PWValues at fieldIndex or anchorField.fieldType if field is not a PWValues
+		public SerializableType		fieldType;
 		//link type for visual bezier curve style
 		public PWLinkType			linkType = PWLinkType.BasicData;
 

@@ -12,7 +12,7 @@ namespace PW
 	{
 		//backed datas about properties and nodes
 		[System.Serializable]
-		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorData > {}
+		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorField > {}
 		[SerializeField]
 		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
 
@@ -51,21 +51,14 @@ namespace PW
 			{
 				actualFields.Add(field.Name);
 				if (!propertyDatas.ContainsKey(field.Name))
-					propertyDatas[field.Name] = new PWAnchorData(field.Name, field.Name.GetHashCode());
+					propertyDatas[field.Name] = new PWAnchorField();
 				
-				PWAnchorData	data = propertyDatas[field.Name];
-				Color			backgroundColor = PWColorScheme.GetAnchorColorByType(field.FieldType);
+				PWAnchorField	anchorField = propertyDatas[field.Name];
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = "";
 				Vector2			offset = Vector2.zero;
 				int				multiPadding = 0;
 				
-				//default anchor values
-				data.multiple = false;
-				data.generic = false;
-				data.required = true;
-
-				data.anchorInstance = field.GetValue(this);
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
@@ -83,7 +76,7 @@ namespace PW
 						if (inputAttr.name != null)
 						{
 							name = inputAttr.name;
-							data.anchorName = inputAttr.name;
+							anchorField.anchorName = inputAttr.name;
 						}
 					}
 					if (outputAttr != null)
@@ -92,76 +85,43 @@ namespace PW
 						if (outputAttr.name != null)
 						{
 							name = outputAttr.name;
-							data.anchorName = outputAttr.name;
+							anchorField.anchorName = outputAttr.name;
 						}
 					}
 					if (colorAttr != null)
-						backgroundColor = colorAttr.color;
+						anchorField.color = new SerializableColor(colorAttr.color);
 					if (offsetAttr != null)
 					{
-						offset = offsetAttr.offset;
+						anchorField.offset = offsetAttr.offset;
 						multiPadding = offsetAttr.multiPadding;
 					}
 					if (multipleAttr != null)
 					{
 						//check if field is PWValues type otherwise do not implement multi-anchor
-						data.generic = true;
-						data.multiple = true;
-						data.allowedTypes = multipleAttr.allowedTypes;
-						data.minMultipleValues = multipleAttr.minValues;
-						data.maxMultipleValues = multipleAttr.maxValues;
+						anchorField.allowedTypes = multipleAttr.allowedTypes;
+						anchorField.minMultipleValues = multipleAttr.minValues;
+						anchorField.maxMultipleValues = multipleAttr.maxValues;
 					}
 					if (genericAttr != null)
-					{
-						data.allowedTypes = genericAttr.allowedTypes;
-						data.generic = true;
-					}
+						anchorField.allowedTypes = genericAttr.allowedTypes;
 					if (notRequiredAttr != null)
-						data.required = false;
+						anchorField.required = false;
 				}
 				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
 					propertyDatas.Remove(field.Name);
 				else
 				{
-					if (data.required && anchorType == PWAnchorType.Output)
-						data.required = false;
-					//protection against stupid UpdateMultiProp remove all anchors
-					if (data.multiple && data.multi.Count == 0)
-						data.AddNewAnchor(backgroundColor, field.Name.GetHashCode());
-					data.classAQName = GetType().AssemblyQualifiedName;
-					data.fieldName = field.Name;
-					data.anchorType = anchorType;
-					data.type = (SerializableType)field.FieldType;
-					data.first.color = (SerializableColor)backgroundColor;
-					data.first.linkType = GetLinkTypeFromType(field.FieldType);
-					data.first.name = name;
-					data.offset = offset;
-					data.nodeId = id;
-					data.multiPadding = multiPadding;
-
-					//add missing values to instance of list:
-
-					if (data.multiple && data.anchorInstance != null)
-					{
-						//add minimum number of anchors to render:
-						if (data.multipleValueCount < data.minMultipleValues)
-							for (int i = data.multipleValueCount; i < data.minMultipleValues; i++)
-								data.AddNewAnchor(backgroundColor, field.Name.GetHashCode() + i + 1);
-
-						var PWValuesInstance = data.anchorInstance as PWValues;
-
-						if (PWValuesInstance != null)
-							while (PWValuesInstance.Count < data.multipleValueCount)
-								PWValuesInstance.Add(null);
-					}
-					else if (data.multiple)
-						Debug.LogWarning("Uninitialized PWmultiple field in class " + GetType() + ": " + data.fieldName);
+					anchorField.CreateNewAnchor();
+					anchorField.fieldName = field.Name;
+					anchorField.anchorType = anchorType;
+					anchorField.fieldType = (SerializableType)field.FieldType;
+					anchorField.nodeRef = this;
 				}
 			}
 
 			UpdateDependentStatus();
 
-			//remove inhexistants dictionary entries:
+			//remove inhexistants field dictionary entries (for renamed variables):
 			var toRemoveKeys = new List< string >();
 			foreach (var kp in propertyDatas)
 				if (!actualFields.Contains(kp.Key))
@@ -184,54 +144,72 @@ namespace PW
 		void LinkCanceled(PWNodeLink link)
 		{
 			//reset the highlight mode on anchors:
-			ResetAnchorHighlight();
+			ResetUnlinkableAnchors();
 		}
 
 		void DraggedLinkOverAnchorCallback(PWAnchor anchor)
 		{
-			//TODO: update the anchor highlight
+			if (anchor.anchorType == PWAnchorType.Input)
+			{
+				if (anchor.linkCount == 1)
+					anchor.highlighMode = PWAnchorHighlight.AttachReplace;
+				else
+					anchor.highlighMode = PWAnchorHighlight.AttachNew;
+			}
+			else
+			{
+				if (anchor.linkCount > 0)
+					anchor.highlighMode = PWAnchorHighlight.AttachAdd;
+				else
+					anchor.highlighMode = PWAnchorHighlight.AttachNew;
+			}
+			
 			//TODO: snap the dragged link
 		}
 
 		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
 		{
 			//TODO: update the anchor highlight
+			anchor.highlighMode = PWAnchorHighlight.None;
 		}
 
 		void AnchorLinkedCallback(PWAnchor anchor)
 		{
 			//TODO: create the link
 
-			// graphRef.RaiseOnNodeLinked(newLink);
+			//update canWork bool
+			UpdateWorkStatus();
+			// OnLinkCreated(link);
 		}
 
 		void AnchorUnlinkedCallback(PWAnchor anchor)
 		{
 			//TODO: unlink the anchor, remove the link.
-			
-			// graphRef.RaiseOnLinkRemoved(link);
 
 			//raise internal event 
+			// OnLinkRemoved(link);
 		}
 
 		void LinkSelectedCallback(PWNodeLink link)
 		{
-			graphRef.RaiseOnLinkSelected(link);
+			Debug.Log("Link slected");
 		}
 
 		void LinkUnselectedCallback(PWNodeLink link)
 		{
-			graphRef.RaiseOnLinkUnselected(link);
+			Debug.Log("link unselected");
 		}
 
 		void NodeSelectedCallback(PWNode node)
 		{
-			selected = true;
+			if (node == this)
+				selected = true;
 		}
 
 		void NodeUnselectedCallback(PWNode node)
 		{
-			selected = false;
+			if (node == this)
+				selected = false;
 		}
 
 		void BindEvents()

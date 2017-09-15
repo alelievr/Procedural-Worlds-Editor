@@ -22,6 +22,14 @@ namespace PW
 			a = c.a;
 		}
 
+		public SerializableColor(float r, float g, float b, float a)
+		{
+			this.r = r;
+			this.g = g;
+			this.b = b;
+			this.a = a;
+		}
+
 		public SerializableColor(Color32 c)
 		{
 			r = c.r / 255f;

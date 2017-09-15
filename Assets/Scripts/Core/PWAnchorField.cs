@@ -9,6 +9,7 @@ namespace PW.Core
 	{
 		Input,
 		Output,
+		None,
 	}
 
 	[System.SerializableAttribute]
@@ -40,25 +41,29 @@ namespace PW.Core
 		public PWAnchorType					anchorType;
 		//anchor field type
 		public SerializableType				fieldType;
+		//debug mode:
+		public bool							debug = false;
 
 		//anchor name if specified in PWInput or PWOutput else null
 		public string						anchorName;
 		//the visual offset of the anchor
-		public int							offset;
+		public int							offset = 0;
 		//the visual padding between multiple anchor of the same field
-		public int							padding;
+		public int							padding = 0;
+		//anchor custom color if set
+		public SerializableColor			color = new SerializableColor(0, 0, 0, 0);
 
 		//properties for multiple anchors:
 		public SerializableType[]			allowedTypes;
 		//min allowed input values
-		public int							minMultipleValues;
+		public int							minMultipleValues = 1;
 		//max allowed values
-		public int							maxMultipleValues;
+		public int							maxMultipleValues = 1;
 
 		//if the anchor value is required to compute result
-		public bool							required;
+		public bool							required = true;
 		//if the anchor is selected
-		public bool							selected;
+		public bool							selected = false;
 
 		public void		RemoveAnchor(string GUID)
 		{
@@ -150,7 +155,8 @@ namespace PW.Core
 			if (anchor.isLinkable)
 				GUI.color = highlightModeToColor[anchor.highlighMode];
 			else
-				GUI.color = PWColorScheme.GetColor(PWColorScheme.disabledAnchorColor);
+				GUI.color = PWColorScheme.disabledAnchorColor;
+			// GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture); //???
 
 			//Draw the anchor:
 			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);
@@ -181,6 +187,8 @@ namespace PW.Core
 			}
 			
 			//debug:
+			// if (debug)
+				// GUI.Label(anchorSideRect, (long)singleAnchor.id + " | " + singleAnchor.linkCount);
 		}
 
 		public void Render(ref Rect renderRect)
@@ -194,6 +202,30 @@ namespace PW.Core
 				RenderAnchor(anchor, ref renderRect, index++);
 				renderRect.y += padding;
 			}
+		}
+
+		//disable anchors which are unlinkable with the anchor in parameter
+		public void DisableIfUnlinkable(PWAnchor anchorToLink)
+		{
+			foreach (var anchor in anchors)
+			{
+				if (!PWAnchorUtils.AnchorAreAssignable(anchor, anchorToLink))
+					anchor.isLinkable = false;
+			}
+		}
+
+		//disable all anchor to mark them as unlinkable.
+		public void DisableLinkable()
+		{
+			foreach (var anchor in anchors)
+				anchor.isLinkable = false;
+		}
+
+		//reset the anchor state, re-enable it if it was disable by DisableIfUnlinkable()
+		public void ResetLinkable()
+		{
+			foreach (var anchor in anchors)
+				anchor.isLinkable = true;
 		}
 
 	#endregion
