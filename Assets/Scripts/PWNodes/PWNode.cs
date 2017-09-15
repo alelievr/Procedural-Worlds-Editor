@@ -1,8 +1,4 @@
-﻿// #define DEBUG_NODE
-// #define DEBUG_ANCHOR
-// #define HIDE_ANCHOR_LABEL
-
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using System;
 using System.Linq;
@@ -16,56 +12,62 @@ namespace PW
 	[System.SerializableAttribute]
 	public partial class PWNode : ScriptableObject
 	{
-		public Rect		windowRect = new Rect(400, 400, 200, 50);
-		public int		id;
-		public bool		renamable = false;
-		public int		computeOrder = 0;
-		public float	processTime = 0f;
-		public string	classQAName;
-		new public string name;
+		//Node datas:
+		public Rect				windowRect = new Rect(400, 400, 200, 50);
+		public int				id;
+		public bool				renamable = false;
+		public int				computeOrder = 0;
+		public float			processTime = 0f;
+		public string			classQAName;
+		new public string		name;
 
-		public bool		isDragged = false;
-
+		//GUI utils to provide custom fields for Samplers, Range ...
 		[SerializeField]
 		protected PWGUIManager	PWGUI = new PWGUIManager();
 
-		//useful state bools
-		protected bool		isDependent { get; private set; }
-		protected bool		realMode { get { return graphRef.IsRealMode(); } }
 
-		protected Vector3	chunkPosition { get { return mainGraphRef.chunkPosition; } }
-		protected int		chunkSize { get { return mainGraphRef.chunkSize; } }
-		protected int		seed { get { return graphRef.seed; } }
-		protected float	step { get { return mainGraphRef.step; } }
+		//Useful state bools:
+		protected bool			isDragged = false;
+		protected bool			isDependent { get; private set; }
+		protected bool			realMode { get { return graphRef.IsRealMode(); } }
+
+
+		//Graph datas accessors:
+		protected Vector3		chunkPosition { get { return mainGraphRef.chunkPosition; } }
+		protected int			chunkSize { get { return mainGraphRef.chunkSize; } }
+		protected int			seed { get { return graphRef.seed; } }
+		protected float			step { get { return mainGraphRef.step; } }
+
+
+		//Debug variables:
+		[SerializeField]
+		protected bool			nodeDebug = false;
+		[SerializeField]
+		protected bool			linkDebug = false;
+		[SerializeField]
+		protected bool			anchorDebug = false;
 
 	#region Internal Node datas and style
-		static GUIStyle		boxAnchorStyle = null;
-		static GUIStyle 	renameNodeTextFieldStyle = null;
-		static GUIStyle		inputAnchorLabelStyle = null;
-		static GUIStyle		outputAnchorLabelStyle = null;
+		static GUIStyle			boxAnchorStyle = null;
+		static GUIStyle 		renameNodeTextFieldStyle = null;
+		static GUIStyle			inputAnchorLabelStyle = null;
+		static GUIStyle			outputAnchorLabelStyle = null;
 		#if DEBUG_NODE
-		static GUIStyle		debugStyle = null;
+		static GUIStyle			debugStyle = null;
 		#endif
-		public GUIStyle		windowStyle;
-		public GUIStyle		windowSelectedStyle;
+		public GUIStyle			windowStyle;
+		public GUIStyle			windowSelectedStyle;
 		public static GUIStyle	innerNodePaddingStyle = null;
 		
-		static Texture2D	errorIcon = null;
-		static Texture2D	editIcon = null;
-		static Texture2D	anchorTexture = null;
-		static Texture2D	anchorDisabledTexture = null;
-		static Texture2D	nodeAutoProcessModeIcon = null;
-		static Texture2D	nodeRequestForProcessIcon = null;
+		static Texture2D		editIcon = null;
 
 		// static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
 		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
 		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
-		Vector2				graphPan { get { return graphRef.panPosition; } }
+		Vector2					graphPan { get { return graphRef.panPosition; } }
 		[SerializeField]
-		int					maxAnchorRenderHeight = 0;
-		[SerializeField]
-		string				firstInitialization;
+		int						maxAnchorRenderHeight = 0;
 
 		[NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
@@ -76,11 +78,8 @@ namespace PW
 		public PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 		//TODO: data and mesh graphs
 
-		[System.NonSerialized]
-		public bool		unserializeInitialized = false;
-
-		public bool		windowNameEdit = false;
-		public bool		selected = false;
+		public bool				windowNameEdit = false;
+		public bool				selected = false;
 
 	#endregion
 	
@@ -183,15 +182,17 @@ namespace PW
 
 			delayedChanges.Clear();
 			
-			//Will be called only at the creation of the node.
-			if (firstInitialization == null)
-			{
-				OnNodeCreation();
-
-				firstInitialization = "initialized";
-			}
-
 			OnNodeEnable();
+		}
+
+		//called only once, when the node is created
+		public void Initialize()
+		{
+			//generate "unique" id for node:
+			byte[] bytes = System.Guid.NewGuid().ToByteArray();
+			id = (int)bytes[0] | (int)bytes[1] << 8 | (int)bytes[2] << 16 | (int)bytes[3] << 24;
+
+			OnNodeCreation();
 		}
 
 		public void OnDisable()

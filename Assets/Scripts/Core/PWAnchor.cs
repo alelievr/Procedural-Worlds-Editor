@@ -33,7 +33,7 @@ namespace PW.Core
 		//hightlight mode (for replace / new / delete link visualization)
 		public PWAnchorHighlight	highlighMode = PWAnchorHighlight.None;
 		//visual rect of the anchor
-		public Rect					anchorRect;
+		public Rect					rect;
 		//anchor color
 		public PWColorPalette		colorPalette;
 		//anchor visibility

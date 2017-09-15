@@ -67,27 +67,28 @@ namespace PW.Core
 
 
 		//public delegates:
-		public delegate void OnLinkAction(PWNodeLink link);
-		public delegate void OnNodeReloadRequest(PWNode from);
+		public delegate void LinkAction(PWNodeLink link);
+		public delegate void NodeReloadRequestAction(PWNode from);
+		public delegate void NodeAction(int nodeId);
 
 
 		//node events:
-		public event System.Action				OnNodeRemoved;
-		public event System.Action				OnNodeAdded;
-		public event System.Action				OnNodeSelected;
-		public event System.Action				OnNodeUnselected;
+		public event NodeAction					OnNodeRemoved;
+		public event NodeAction					OnNodeAdded;
+		public event NodeAction					OnNodeSelected;
+		public event NodeAction					OnNodeUnselected;
 		//link events:
-		public event OnLinkAction				OnLinkDragged;
-		public event OnLinkAction				OnLinkCanceled;
-		public event OnLinkAction				OnNodeLinked;
-		public event OnLinkAction				OnNodeUnlinked;
-		public event OnLinkAction				OnLinkSelected;
-		public event OnLinkAction				OnLinkUnselected;
+		public event LinkAction					OnLinkDragged;
+		public event LinkAction					OnLinkCanceled;
+		public event LinkAction					OnNodeLinked;
+		public event LinkAction					OnNodeUnlinked;
+		public event LinkAction					OnLinkSelected;
+		public event LinkAction					OnLinkUnselected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
-		public event OnNodeReloadRequest		OnNodeReloadRequested;
+		public event NodeReloadRequestAction	OnNodeReloadRequested;
 		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
 	
 	#endregion
@@ -233,7 +234,7 @@ namespace PW.Core
 
 		//retarget link and node events to GraphStructure event
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
-		void		NodeCountChangedCallback() { OnGraphStructureChanged(); }
+		void		NodeCountChangedCallback(int n) { OnGraphStructureChanged(); }
 
 		void		GraphStructureChangedCallback()
 		{
@@ -259,12 +260,12 @@ namespace PW.Core
 			return computeOrderSortedNodes;
 		}
 
-		public bool		AddNode(PWNode newNode, bool force = false)
+		public bool	CreateNewNode(System.Type nodeType, Vector2 position)
 		{
-			if (!force && nodesDictionary.ContainsKey(newNode.id))
-				return false;
+			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
+			newNode.Initialize();
 			nodesDictionary[newNode.id] = newNode;
-			OnNodeAdded();
+			OnNodeAdded(newNode.id);
 			return true;
 		}
 
@@ -272,13 +273,14 @@ namespace PW.Core
 		{
 			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
 			nodes.Remove(removeNode);
-			OnNodeRemoved();
+			OnNodeRemoved(removeNode.id);
 			return nodesDictionary.Remove(item.Key);
 		}
 		
 		public bool		RemoveNode(int nodeId)
 		{
-			OnNodeRemoved();
+			//sending this event will cause the node remove self.
+			OnNodeRemoved(nodeId);
 			return nodesDictionary.Remove(nodeId);
 		}
 

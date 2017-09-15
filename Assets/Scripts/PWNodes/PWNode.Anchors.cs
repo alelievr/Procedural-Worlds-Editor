@@ -92,51 +92,9 @@ namespace PW
 
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
-			//if anchor have not been processed:
-			if (singleAnchor == null || boxAnchorStyle == null)
-				return ;
-
-			string anchorName = (data.multiple) ? singleAnchor.name : data.anchorName;
-
-			/*if (data.multiple && data.anchorType == PWAnchorType.Input)
-			{
-				if (singleAnchor.additional)
-					anchorName = "+";
-				else
-					anchorName += index;
-			}*/
-
-			switch (singleAnchor.highlighMode)
-			{
-				case PWAnchorHighlight.AttachAdd:
-					GUI.color = anchorAttachAddColor;
-					break ;
-				case PWAnchorHighlight.AttachNew:
-					GUI.color = anchorAttachNewColor;
-					break ;
-				case PWAnchorHighlight.AttachReplace:
-					GUI.color = anchorAttachReplaceColor;
-					break ;
-				case PWAnchorHighlight.None:
-				default:
-					GUI.color = singleAnchor.color;
-					break ;
-
-			}
-			GUI.DrawTexture(singleAnchor.anchorRect, anchorTexture, ScaleMode.ScaleToFit);
-
 			#if !HIDE_ANCHOR_LABEL
 				if (!String.IsNullOrEmpty(anchorName))
 				{
-					Rect	anchorNameRect = singleAnchor.anchorRect;
-					Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
-					if (data.anchorType == PWAnchorType.Input)
-						anchorNameRect.position += new Vector2(-6, -2);
-					else
-						anchorNameRect.position += new Vector2(-textSize.x + 4, -2);
-					anchorNameRect.size = textSize + new Vector2(15, 4); //add the anchorLabel size
-					GUI.depth = 10;
-					GUI.Label(anchorNameRect, anchorName, (data.anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
 				}
 			#endif
 			GUI.color = Color.white;
@@ -147,16 +105,6 @@ namespace PW
 			//reset the Highlight:
 			singleAnchor.highlighMode = PWAnchorHighlight.None;
 
-			if (data.required && singleAnchor.linkCount == 0
-				&& (!data.multiple || (data.multiple && index < data.minMultipleValues)))
-			{
-				Rect errorIconRect = new Rect(singleAnchor.anchorRect);
-				errorIconRect.size = Vector2.one * 17;
-				errorIconRect.position += new Vector2(-6, -10);
-				GUI.color = Color.red;
-				GUI.DrawTexture(errorIconRect, errorIcon);
-				GUI.color = Color.white;
-			}
 
 			#if DEBUG_ANCHOR
 				Rect anchorSideRect = singleAnchor.anchorRect;
@@ -177,65 +125,15 @@ namespace PW
 		{
 			var e = Event.current;
 
-			//rendering anchors
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				//draw anchor:
-				if (singleAnchor.visibility != PWVisibility.Gone)
-				{
-					if (singleAnchor.visibility == PWVisibility.Visible)
-						RenderAnchor(data, singleAnchor, i);
-					if (singleAnchor.visibility == PWVisibility.InvisibleWhenLinking)
-						singleAnchor.visibility = PWVisibility.Visible;
-				}
-			});
-			
-			//rendering node rename field	
-			if (renamable)
-			{
-				Vector2	winSize = windowRect.size;
-				Rect	renameRect = new Rect(0, 0, winSize.x, 18);
-				Rect	renameIconRect = new Rect(winSize.x - 28, 3, 12, 12);
-				string	renameNodeField = "renameWindow";
+			int			windowHeaderSize = windowStyle.border.top + windowStyle.margin.top;
+			int			windowHorizontalPadding = 15;
+			Rect		inputAcnhorRect = new Rect(windowHorizontalPadding, windowHeaderSize, 120, -1);
+			Rect		outputAnchorRect = new Rect(windowRect.width - windowHorizontalPadding, windowHeaderSize, -120, -1);
 
-				GUI.color = Color.black * .9f;
-				GUI.DrawTexture(renameIconRect, editIcon);
-				GUI.color = Color.white;
-
-				if (windowNameEdit)
-				{
-					GUI.SetNextControlName(renameNodeField);
-					externalName = GUI.TextField(renameRect, externalName, renameNodeTextFieldStyle);
-	
-					if (e.type == EventType.MouseDown && !renameRect.Contains(e.mousePosition))
-					{
-						windowNameEdit = false;
-						GUI.FocusControl(null);
-					}
-					if (GUI.GetNameOfFocusedControl() == renameNodeField)
-					{
-						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Escape)
-						{
-							windowNameEdit = false;
-							GUI.FocusControl(null);
-							e.Use();
-						}
-					}
-				}
-				
-				if (renameIconRect.Contains(e.mousePosition))
-				{
-					if (e.type == EventType.Used) //used by drag
-					{
-						windowNameEdit = true;
-						GUI.FocusControl(renameNodeField);
-						var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-						if (te != null)
-							te.SelectAll();
-					}
-					else if (e.type == EventType.MouseDown)
-						windowNameEdit = false;
-				}
-			}
+			foreach (var anchorField in inputAnchors)
+				anchorField.Render(ref inputAcnhorRect);
+			foreach (var anchorField in outputAnchors)
+				anchorField.Render(ref outputAnchorRect);
 		}
 	}
 }

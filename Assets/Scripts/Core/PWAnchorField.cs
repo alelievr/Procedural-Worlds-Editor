@@ -9,7 +9,6 @@ namespace PW.Core
 	{
 		Input,
 		Output,
-		None,
 	}
 
 	[System.SerializableAttribute]
@@ -35,6 +34,8 @@ namespace PW.Core
 
 		//name of the attached propery / name specified in PW I/O.
 		public string						fieldName;
+		//name given in the constructor of the attribute
+		public string						name;
 		//anchor type (input / output)
 		public PWAnchorType					anchorType;
 		//anchor field type
@@ -43,9 +44,9 @@ namespace PW.Core
 		//anchor name if specified in PWInput or PWOutput else null
 		public string						anchorName;
 		//the visual offset of the anchor
-		public Vector2						offset;
+		public int							offset;
 		//the visual padding between multiple anchor of the same field
-		public int							multiPadding;
+		public int							padding;
 
 		//properties for multiple anchors:
 		public SerializableType[]			allowedTypes;
@@ -86,5 +87,79 @@ namespace PW.Core
 			foreach (var anchor in anchors)
 				anchor.OnAfterDeserialized(this);
 		}
+
+	#region Anchor style
+		
+		static Texture2D	errorIcon = null;
+		static Texture2D	anchorTexture = null;
+		static Texture2D	anchorDisabledTexture = null;
+
+	#endregion
+
+	#region Anchor rendering
+
+		Dictionary< PWAnchorHighlight, Color > highlightModeToColor = new Dictionary< PWAnchorHighlight, Color > {
+			{ PWAnchorHighlight.AttachAdd, Color.green },
+			{ PWAnchorHighlight.AttachNew, Color.blue },
+			{ PWAnchorHighlight.AttachReplace, Color.yellow },
+		};
+
+		void RenderAnchor(PWAnchor anchor, ref Rect renderRect, int index)
+		{
+			//anchor name:
+			string anchorName = name;
+
+			if (string.IsNullOrEmpty(name) && anchors.Count > 1)
+				anchorName += " #" + index;
+
+			//highlight mode to GUI color:
+			if (anchor.highlighMode != PWAnchorHighlight.None)
+				GUI.color = highlightModeToColor[anchor.highlighMode];
+
+			//Draw the anchor:
+			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);
+			
+			//Draw the anchor name if not null
+			if (string.IsNullOrEmpty(name))
+			{
+				Rect	anchorNameRect = anchor.rect;
+				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
+				if (anchorType == PWAnchorType.Input)
+					anchorNameRect.position += new Vector2(-6, -2);
+				else
+					anchorNameRect.position += new Vector2(-textSize.x + 4, -2);
+				anchorNameRect.size = textSize + new Vector2(15, 4); //add the anchorLabel size
+				GUI.depth = 10;
+				GUI.Label(anchorNameRect, anchorName, (anchorType == PWAnchorType.Input) ? inputAnchorLabelStyle : outputAnchorLabelStyle);
+			}
+
+			//error display (required unlinked anchors)
+			if (anchor.visibility == PWVisibility.Visible && required && anchor.linkCount == 0)
+			{
+				Rect errorIconRect = new Rect(anchor.rect);
+				errorIconRect.size = Vector2.one * 17;
+				errorIconRect.position += new Vector2(-6, -10);
+				GUI.color = Color.red;
+				GUI.DrawTexture(errorIconRect, errorIcon);
+				GUI.color = Color.white;
+			}
+			
+			//debug:
+		}
+
+		public void Render(ref Rect renderRect)
+		{
+			int index = 0;
+
+			renderRect.y += offset;
+
+			foreach (var anchor in anchors)
+			{
+				RenderAnchor(anchor, ref renderRect, index++);
+				renderRect.y += padding;
+			}
+		}
+
+	#endregion
 	}
 }

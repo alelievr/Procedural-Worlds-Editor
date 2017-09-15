@@ -33,6 +33,11 @@ namespace PW
 				nodeRequestForProcessIcon = CreateTexture2DFromFile("ic_requestForProcess");
 			}
 		}
+
+		void LoadStyles()
+		{
+			
+		}
 		
 		void BakeNodeFields()
 		{
