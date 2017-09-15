@@ -60,7 +60,7 @@ namespace PW.Core
 		//if the anchor is selected
 		public bool							selected;
 
-		public void RemoveAnchor(string GUID)
+		public void		RemoveAnchor(string GUID)
 		{
 			if (anchors.RemoveAll(a => a.GUID == GUID) != 1)
 				Debug.LogWarning("Failed to remove the anchor at GUID: " + GUID);
@@ -70,7 +70,7 @@ namespace PW.Core
 		{
 			PWAnchor	newAnchor = new PWAnchor();
 
-			newAnchor.Initialize();
+			newAnchor.Initialize(this);
 			anchors.Add(newAnchor);
 			return newAnchor;
 		}
@@ -80,9 +80,9 @@ namespace PW.Core
 			return anchors.FirstOrDefault(a => a.GUID == anchorGUID);
 		}
 
-		public void OnAfterDeserialize(PWNode node)
+		public void		OnAfterDeserialize(PWNode node)
 		{
-			nodeRef = node;
+			Initialize(node);
 
 			foreach (var anchor in anchors)
 				anchor.OnAfterDeserialized(this);
@@ -90,15 +90,49 @@ namespace PW.Core
 
 	#region Anchor style
 		
-		static Texture2D	errorIcon = null;
-		static Texture2D	anchorTexture = null;
-		static Texture2D	anchorDisabledTexture = null;
+		static bool				styleLoaded = false;
+		static Texture2D		errorIcon = null;
+		static Texture2D		anchorTexture = null;
+		static Texture2D		anchorDisabledTexture = null;
+		
+		static GUIStyle			inputAnchorLabelStyle = null;
+		static GUIStyle			outputAnchorLabelStyle = null;
+		static GUIStyle			boxAnchorStyle = null;
 
 	#endregion
 
 	#region Anchor rendering
 
+		public void OnEnable()
+		{
+			if (!styleLoaded)
+				LoadStylesAndAssets();
+		}
+
+		public void Initialize(PWNode node)
+		{
+			nodeRef = node;
+		}
+
+		void LoadStylesAndAssets()
+		{
+			//styles:
+			boxAnchorStyle = new GUIStyle(GUI.skin.box);
+			boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
+			anchorTexture = GUI.skin.box.normal.background;
+			anchorDisabledTexture = GUI.skin.box.active.background;
+			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
+			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
+			styleLoaded = true;
+			
+			//assets:
+			errorIcon = Resources.Load< Texture2D >("ic_error");
+		}
+
+		public void OnDisable() {}
+
 		Dictionary< PWAnchorHighlight, Color > highlightModeToColor = new Dictionary< PWAnchorHighlight, Color > {
+			{ PWAnchorHighlight.None, Color.white },
 			{ PWAnchorHighlight.AttachAdd, Color.green },
 			{ PWAnchorHighlight.AttachNew, Color.blue },
 			{ PWAnchorHighlight.AttachReplace, Color.yellow },
@@ -109,12 +143,14 @@ namespace PW.Core
 			//anchor name:
 			string anchorName = name;
 
-			if (string.IsNullOrEmpty(name) && anchors.Count > 1)
+			if (!string.IsNullOrEmpty(name) && anchors.Count > 1)
 				anchorName += " #" + index;
 
 			//highlight mode to GUI color:
-			if (anchor.highlighMode != PWAnchorHighlight.None)
+			if (anchor.isLinkable)
 				GUI.color = highlightModeToColor[anchor.highlighMode];
+			else
+				GUI.color = PWColorScheme.GetColor(PWColorScheme.disabledAnchorColor);
 
 			//Draw the anchor:
 			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);

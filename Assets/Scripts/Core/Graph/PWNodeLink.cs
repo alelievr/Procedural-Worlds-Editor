@@ -23,8 +23,10 @@ namespace PW.Core
 	
 		//anchor where the link is connected:
 		[System.NonSerialized]
+		//from where the link is conected, this anchor will always be an Input anchor
 		public PWAnchor			fromAnchor;
 		[System.NonSerialized]
+		//this anchor will always be an Output anchor.
 		public PWAnchor			toAnchor;
 		[System.NonSerialized]
 		public PWNode			fromNode;

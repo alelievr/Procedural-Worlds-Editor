@@ -92,13 +92,6 @@ namespace PW
 
 		void RenderAnchor(PWAnchorData data, PWAnchorData.PWAnchorMultiData singleAnchor, int index)
 		{
-			#if !HIDE_ANCHOR_LABEL
-				if (!String.IsNullOrEmpty(anchorName))
-				{
-				}
-			#endif
-			GUI.color = Color.white;
-			
 			if (!singleAnchor.enabled)
 				GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture);
 

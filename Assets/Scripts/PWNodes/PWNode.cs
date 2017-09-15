@@ -21,6 +21,10 @@ namespace PW
 		public string			classQAName;
 		new public string		name;
 
+		//AnchorField lists
+		public List< PWAnchorField >	inputAnchorFields;
+		public List< PWAnchorField >	outputAnchorFields;
+
 		//GUI utils to provide custom fields for Samplers, Range ...
 		[SerializeField]
 		protected PWGUIManager	PWGUI = new PWGUIManager();
@@ -48,13 +52,8 @@ namespace PW
 		protected bool			anchorDebug = false;
 
 	#region Internal Node datas and style
-		static GUIStyle			boxAnchorStyle = null;
 		static GUIStyle 		renameNodeTextFieldStyle = null;
-		static GUIStyle			inputAnchorLabelStyle = null;
-		static GUIStyle			outputAnchorLabelStyle = null;
-		#if DEBUG_NODE
 		static GUIStyle			debugStyle = null;
-		#endif
 		public GUIStyle			windowStyle;
 		public GUIStyle			windowSelectedStyle;
 		public static GUIStyle	innerNodePaddingStyle = null;
@@ -83,14 +82,31 @@ namespace PW
 
 	#endregion
 	
-		public delegate void			Reload(PWNode from);
-		public delegate void			NodeLink();
-		public delegate void			MessageReceived(PWNode from, object message);
+		public delegate void					ReloadAction(PWNode from);
+		public delegate void					NodeLinkAction(PWAnchor anchor);
+		public delegate void					MessageReceivedAction(PWNode from, object message);
+		public delegate void					LinkAction(PWNodeLink link);
 
-		private event Reload			OnReload;
-		private event MessageReceived	OnMessageReceived;
-		private event NodeLink			OnNodeLinked;
-		private event NodeLink			OnNodeUnlinked;
+		//fired when the node received a NotifyReload() or the user pressed Reload button in editor.
+		protected event ReloadAction			OnReload;
+		//fired when the node receive a SendMessage()
+		protected event MessageReceivedAction	OnMessageReceived;
+
+		//fired when this node was linked
+		protected event NodeLinkAction			OnAnchorLinked;
+		//fired when this node was unlinked
+		protected event NodeLinkAction			OnAnchorUnlinked;
+		//fired when the dragged link is above an anchor
+		protected event NodeLinkAction			OnDraggedLinkOverAnchor;
+		//fired when the dragged link quit the zone above the anchor
+		protected event NodeLinkAction			OnDraggedLinkQuitAnchor;
+
+		//fired when a link is selected
+		protected event LinkAction				OnLinkSelected;
+		//fired when a link is unselected
+		protected event LinkAction				OnLinkUnselected;
+
+		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
 		//default notify reload will be sent to all node childs.
 		public void NotifyReload()
@@ -159,17 +175,19 @@ namespace PW
 		{
 			this.graphRef = graph;
 			
-			foreach (var anchorField in inputAnchors)
+			foreach (var anchorField in inputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
-			foreach (var anchorField in outputAnchors)
+			foreach (var anchorField in outputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
 		}
 
-	#region OnEnable, OnDisable, data initialization and baking
+	#region OnEnable, OnDisable, Initialize
 
 		public void OnEnable()
 		{
 			LoadAssets();
+
+			LoadStyles();
 			
 			LoadFieldAttributes();
 
@@ -183,14 +201,19 @@ namespace PW
 			delayedChanges.Clear();
 			
 			OnNodeEnable();
+
+			OnAnchorEnable();
 		}
 
 		//called only once, when the node is created
-		public void Initialize()
+		public void Initialize(PWGraph graph)
 		{
 			//generate "unique" id for node:
 			byte[] bytes = System.Guid.NewGuid().ToByteArray();
 			id = (int)bytes[0] | (int)bytes[1] << 8 | (int)bytes[2] << 16 | (int)bytes[3] << 24;
+
+			//set the graph reference:
+			graphRef = graph;
 
 			OnNodeCreation();
 		}
@@ -199,6 +222,7 @@ namespace PW
 		{
 			UnBindEvents();
 			OnNodeDisable();
+			OnAnchorDisable();
 		}
 
 	#endregion
@@ -224,6 +248,55 @@ namespace PW
 		public virtual void OnNodeAnchorUnlink(string propName, int index) {}
 
 	#endregion
+
+		void		OnAnchorEnable()
+		{
+			foreach (var anchorField in inputAnchorFields)
+				anchorField.OnEnable();
+			foreach (var anchorField in outputAnchorFields)
+				anchorField.OnEnable();
+		}
+
+		void		OnAnchorDisable()
+		{
+			foreach (var anchorField in inputAnchorFields)
+				anchorField.OnDisable();
+			foreach (var anchorField in outputAnchorFields)
+				anchorField.OnDisable();
+		}
+
+		void		CreateAnchorField(PWAnchorType type)
+		{
+			PWAnchorField newAnchorField = new PWAnchorField();
+
+			newAnchorField.Initialize(this);
+			newAnchorField.OnEnable();
+		}
+
+		void		DisableUnlinkableAnchors(PWNodeLink link)
+		{
+			List< PWAnchorField >	anchorFields;
+			PWAnchor				anchor;
+
+			if (link.fromAnchor != null)
+			{
+				anchorFields = inputAnchorFields;
+				anchor = link.toAnchor;
+			}
+			else
+			{
+				anchorFields = outputAnchorFields;
+				anchor = link.fromAnchor;
+			}
+			
+			foreach (var anchorField in anchorFields)
+				anchorField.DisableIfUnlinkable(acnhor);
+		}
+
+		void		ResetAnchorHighlight()
+		{
+
+		}
 	
 		void		HighlightLinkableAnchorsTo(PWAnchorInfo toLink)
 		{
@@ -236,11 +309,6 @@ namespace PW
 					&& data.anchorType == anchorType
 					&& AnchorAreAssignable(data.type, data.anchorType, data.generic, data.allowedTypes, toLink, false))
 				{
-					if (data.multiple)
-					{
-						//display additional anchor to attach on next rendering
-						data.displayHiddenMultipleAnchors = true;
-					}
 					if (singleAnchor.anchorRect.Contains(Event.current.mousePosition))
 						if (singleAnchor.visibility == PWVisibility.Visible)
 						{
@@ -255,10 +323,6 @@ namespace PW
 							}
 						}
 				}
-				else if (singleAnchor.visibility == PWVisibility.Visible
-					&& singleAnchor.id != toLink.anchorId
-					&& singleAnchor.linkCount == 0)
-					singleAnchor.visibility = PWVisibility.InvisibleWhenLinking;
 			});
 		}
 		

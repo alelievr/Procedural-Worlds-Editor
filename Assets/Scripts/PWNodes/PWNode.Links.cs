@@ -11,8 +11,6 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		public List< PWAnchorField >	inputAnchors;
-		public List< PWAnchorField >	outputAnchors;
 
 		//links:
 		public PWLink GetLink(int anchorId, int targetNodeId, int targetAnchorId)

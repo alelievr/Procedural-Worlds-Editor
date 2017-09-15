@@ -16,21 +16,6 @@ namespace PW
 		{
 			var e = Event.current;
 
-			if (boxAnchorStyle == null)
-			{
-				boxAnchorStyle = new GUIStyle(GUI.skin.box);
-				boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
-				anchorTexture = GUI.skin.box.normal.background;
-				anchorDisabledTexture = GUI.skin.box.active.background;
-				renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
-				inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
-				outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
-				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
-				#if DEBUG_NODE
-				debugStyle = GUI.skin.FindStyle("Debug");
-				#endif
-			}
-
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
 			PWGUI.StartFrame();

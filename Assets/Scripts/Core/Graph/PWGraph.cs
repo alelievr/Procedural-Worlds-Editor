@@ -68,8 +68,7 @@ namespace PW.Core
 
 		//public delegates:
 		public delegate void LinkAction(PWNodeLink link);
-		public delegate void NodeReloadRequestAction(PWNode from);
-		public delegate void NodeAction(int nodeId);
+		public delegate void NodeAction(PWNode node);
 
 
 		//node events:
@@ -80,15 +79,14 @@ namespace PW.Core
 		//link events:
 		public event LinkAction					OnLinkDragged;
 		public event LinkAction					OnLinkCanceled;
-		public event LinkAction					OnNodeLinked;
-		public event LinkAction					OnNodeUnlinked;
+		public event LinkAction					OnLinkCreated;
+		public event LinkAction					OnLinkRemoved;
 		public event LinkAction					OnLinkSelected;
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
-		public event NodeReloadRequestAction	OnNodeReloadRequested;
 		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
 	
 	#endregion
@@ -117,8 +115,8 @@ namespace PW.Core
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
-			OnNodeLinked += LinkChangedCallback;
-			OnNodeUnlinked += LinkChangedCallback;
+			OnLinkCreated += LinkChangedCallback;
+			OnLinkRemoved += LinkChangedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
 		}
@@ -127,8 +125,8 @@ namespace PW.Core
 		{
 			//Events detach
 			OnGraphStructureChanged -= GraphStructureChangedCallback;
-			OnNodeLinked -= LinkChangedCallback;
-			OnNodeUnlinked -= LinkChangedCallback;
+			OnLinkCreated -= LinkChangedCallback;
+			OnLinkRemoved -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
 		}
@@ -234,12 +232,21 @@ namespace PW.Core
 
 		//retarget link and node events to GraphStructure event
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
-		void		NodeCountChangedCallback(int n) { OnGraphStructureChanged(); }
+		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
 		void		GraphStructureChangedCallback()
 		{
 			UpdateComputeOrder();
 		}
+
+		//Event bridges to raise events from other classes:
+		public void RaiseOnLinkSelected(PWNodeLink link) { OnLinkSelected(link); }
+		public void RaiseOnLinkUnselected(PWNodeLink link) { OnLinkUnselected(link); }
+		public void RaiseOnLinkRemoved(PWNodeLink link) { OnLinkRemoved(link); }
+		public void RaiseOnLinkCreated(PWNodeLink link) { OnLinkCreated(link); }
+
+		public void RaiseOnNodeSelected(PWNode node) { OnNodeSelected(node); }
+		public void RaiseOnNodeUnselected(PWNode node) { OnNodeUnselected(node); }
 
 	#endregion
 
@@ -263,9 +270,9 @@ namespace PW.Core
 		public bool	CreateNewNode(System.Type nodeType, Vector2 position)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
-			newNode.Initialize();
+			newNode.Initialize(this);
 			nodesDictionary[newNode.id] = newNode;
-			OnNodeAdded(newNode.id);
+			OnNodeAdded(newNode);
 			return true;
 		}
 
@@ -273,14 +280,14 @@ namespace PW.Core
 		{
 			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
 			nodes.Remove(removeNode);
-			OnNodeRemoved(removeNode.id);
+			OnNodeRemoved(removeNode);
 			return nodesDictionary.Remove(item.Key);
 		}
 		
 		public bool		RemoveNode(int nodeId)
 		{
 			//sending this event will cause the node remove self.
-			OnNodeRemoved(nodeId);
+			OnNodeRemoved(nodesDictionary[nodeId]);
 			return nodesDictionary.Remove(nodeId);
 		}
 

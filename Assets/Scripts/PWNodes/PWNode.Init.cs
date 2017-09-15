@@ -21,22 +21,14 @@ namespace PW
 	
 		void LoadAssets()
 		{
-			Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-				return Resources.Load< Texture2D >(ressourcePath);
-			};
-			
-			if (errorIcon == null)
-			{
-				errorIcon = CreateTexture2DFromFile("ic_error");
-				editIcon = CreateTexture2DFromFile("ic_edit");
-				nodeAutoProcessModeIcon = CreateTexture2DFromFile("ic_autoProcess");
-				nodeRequestForProcessIcon = CreateTexture2DFromFile("ic_requestForProcess");
-			}
+			editIcon = Resources.Load< Texture2D >("ic_edit");
 		}
 
 		void LoadStyles()
 		{
-			
+			renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
+			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
+			debugStyle = GUI.skin.FindStyle("Debug");
 		}
 		
 		void BakeNodeFields()
@@ -183,22 +175,68 @@ namespace PW
 
 		void ForceReloadCallback() { /*TODO*/ }
 
-		//retarget OnNodeLinkedCallback if this node was linked:
-		void NodeLinkedCallback(PWNodeLink link)
+		void LinkDragged(PWNodeLink link)
 		{
-			if (link.fromNode == this || link.toNode == this)
-				OnNodeLinked();
+			//disable non-linkable anchors:
+			DisableUnlinkableAnchors(link);
 		}
 
-		//retarget OnNodeUnlinkedCallback if this node was linked:
-		void NodeUnlinkedCallback(PWNodeLink link)
+		void LinkCanceled(PWNodeLink link)
 		{
-			if (link.fromNode == this || link.toNode == this)
-				OnNodeUnlinked();
+			//reset the highlight mode on anchors:
+			ResetAnchorHighlight();
+		}
+
+		void DraggedLinkOverAnchorCallback(PWAnchor anchor)
+		{
+			//TODO: update the anchor highlight
+			//TODO: snap the dragged link
+		}
+
+		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
+		{
+			//TODO: update the anchor highlight
+		}
+
+		void AnchorLinkedCallback(PWAnchor anchor)
+		{
+			//TODO: create the link
+
+			// graphRef.RaiseOnNodeLinked(newLink);
+		}
+
+		void AnchorUnlinkedCallback(PWAnchor anchor)
+		{
+			//TODO: unlink the anchor, remove the link.
+			
+			// graphRef.RaiseOnLinkRemoved(link);
+
+			//raise internal event 
+		}
+
+		void LinkSelectedCallback(PWNodeLink link)
+		{
+			graphRef.RaiseOnLinkSelected(link);
+		}
+
+		void LinkUnselectedCallback(PWNodeLink link)
+		{
+			graphRef.RaiseOnLinkUnselected(link);
+		}
+
+		void NodeSelectedCallback(PWNode node)
+		{
+			selected = true;
+		}
+
+		void NodeUnselectedCallback(PWNode node)
+		{
+			selected = false;
 		}
 
 		void BindEvents()
 		{
+			//graph events:
 			//if the node is used in a PWMainGraph:
 			if (mainGraphRef != null)
 			{
@@ -206,8 +244,18 @@ namespace PW
 				mainGraphRef.OnForceReload += ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere += OnClickedOutside;
-			graphRef.OnNodeLinked += NodeLinkedCallback;
-			graphRef.OnNodeUnlinked += NodeUnlinkedCallback;
+			graphRef.OnLinkDragged += LinkDragged;
+			graphRef.OnLinkCanceled += LinkCanceled;
+			graphRef.OnNodeSelected += NodeSelectedCallback;
+			graphRef.OnNodeUnselected += NodeUnselectedCallback;
+
+			//node events:
+			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
+			OnDraggedLinkQuitAnchor += DraggedLinkQuitAnchorCallbck;
+			OnLinkSelected += LinkSelectedCallback;
+			OnLinkUnselected += LinkUnselectedCallback;
+			OnAnchorLinked += AnchorLinkedCallback;
+			OnAnchorUnlinked += AnchorUnlinkedCallback;
 		}
 
 		void UnBindEvents()
@@ -219,8 +267,18 @@ namespace PW
 				mainGraphRef.OnForceReload -= ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere -= OnClickedOutside;
-			graphRef.OnNodeLinked -= NodeLinkedCallback;
-			graphRef.OnNodeUnlinked -= NodeUnlinkedCallback;
+			graphRef.OnLinkDragged -= LinkDragged;
+			graphRef.OnLinkCanceled -= LinkCanceled;
+			graphRef.OnNodeSelected -= NodeSelectedCallback;
+			graphRef.OnNodeUnselected -= NodeUnselectedCallback;
+			
+			//node events:
+			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;
+			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;
+			OnLinkSelected -= LinkSelectedCallback;
+			OnLinkUnselected -= LinkUnselectedCallback;
+			OnAnchorUnlinked -= AnchorUnlinkedCallback;
+			OnAnchorLinked -= AnchorLinkedCallback;
 		}
 	}
 }
