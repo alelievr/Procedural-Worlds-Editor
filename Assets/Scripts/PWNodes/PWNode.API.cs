@@ -6,8 +6,8 @@ using PW.Core;
 namespace PW
 {
 	public partial class PWNode {
-	
-		public void				UpdatePropEnabled(string propertyName, bool enabled, int index = 0)
+
+		public void				SetAnchorEnabled(string fieldName, bool enabled, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))
 			{
@@ -17,7 +17,7 @@ namespace PW
 				anchors[index].enabled = true;
 			}
 		}
-
+	
 		public void				UpdatePropName(string propertyName, string newName, int index = 0)
 		{
 			if (propertyDatas.ContainsKey(propertyName))

@@ -145,6 +145,12 @@ namespace PW.Core
 
 		void RenderAnchor(PWAnchor anchor, ref Rect renderRect, int index)
 		{
+			//visual parameters for anchors:
+			Vector2		anchorSize = new Vector2(13, 13);
+			Vector2		margin = new Vector2(0, 2);
+
+			anchor.rect = new Rect(renderRect.min + margin, anchorSize);
+
 			//anchor name:
 			string anchorName = name;
 
@@ -194,13 +200,19 @@ namespace PW.Core
 		public void Render(ref Rect renderRect)
 		{
 			int index = 0;
+			int	anchorDefaultPadding = 18;
 
 			renderRect.y += offset;
 
 			foreach (var anchor in anchors)
 			{
-				RenderAnchor(anchor, ref renderRect, index++);
-				renderRect.y += padding;
+				//render anchor if visible
+				if (anchor.visibility == PWVisibility.Visible)
+					RenderAnchor(anchor, ref renderRect, index++);
+
+				//if anchor is not gone, increment the padding for next anchor
+				if (anchor.visibility != PWVisibility.Gone)
+					renderRect.y += padding + anchorDefaultPadding;
 			}
 		}
 
