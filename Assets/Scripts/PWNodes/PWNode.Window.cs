@@ -63,8 +63,8 @@ namespace PW
 			if (e.type == EventType.Repaint)
 				viewHeight += 24;
 			
-			ProcessAnchors();
 			RenderAnchors();
+			ProcessAnchorEvents();
 
 			delayedChanges.Update();
 

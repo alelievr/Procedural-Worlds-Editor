@@ -18,7 +18,7 @@ namespace PW.Core
 		[SerializeField]
 		AnchorLinkTable	anchorLinkTable = new AnchorLinkTable();
 	
-		public void AddLink(string anchorGUID, PWNodeLink link)
+		public void				AddLink(string anchorGUID, PWNodeLink link)
 		{
 			linkTable[link.GUID] = link;
 
@@ -28,12 +28,15 @@ namespace PW.Core
 			anchorLinkTable[anchorGUID].Add(link.GUID);
 		}
 
-		public void RemoveLink(string anchorGUID, PWNodeLink link)
+		//this method will be called twice per link removed, one per link's anchor.
+		public void				RemoveLink(PWNodeLink link)
 		{
 			if (!linkTable.Remove(link.GUID))
 				Debug.LogWarning("[LinkTable] Attempt to remove inexistent link at GUID: " + link.GUID);
-			if (!anchorLinkTable[anchorGUID].Remove(link.GUID))
-				Debug.LogWarning("[LiknTable] Attempt to remove inexistent link " + link.GUID + " in anchor " + anchorGUID);
+			if (!anchorLinkTable[link.fromAnchor.GUID].Remove(link.GUID))
+				Debug.LogWarning("[LiknTable] Attempt to remove inexistent link " + link.GUID + " in anchor " + link.fromAnchor);
+			if (!anchorLinkTable[link.toAnchor.GUID].Remove(link.GUID))
+				Debug.LogWarning("[LiknTable] Attempt to remove inexistent link " + link.GUID + " in anchor " + link.toAnchor);
 		}
 	
 		public List< string >    GetLinkGUIDsFromAnchorGUID(string anchorGUID)

@@ -11,15 +11,6 @@ namespace PW
 {
 	public partial class PWNode
 	{
-
-		//links:
-		public PWLink GetLink(int anchorId, int targetNodeId, int targetAnchorId)
-		{
-			return links.FirstOrDefault(l => l.localAnchorId == anchorId
-				&& l.distantNodeId == targetNodeId
-				&& l.distantAnchorId == targetAnchorId);
-		}
-
 		PWLinkType		GetLinkType(Type from, Type to)
 		{
 			if (from == typeof(Sampler2D) || to == typeof(Sampler2D))
@@ -88,14 +79,14 @@ namespace PW
 
 		public void AttachLink(string myAnchor, PWNode target, string targetAnchor)
 		{
-			if (!propertyDatas.ContainsKey(myAnchor) || !target.propertyDatas.ContainsKey(targetAnchor))
+			if (!anchorFields.ContainsKey(myAnchor) || !target.anchorFields.ContainsKey(targetAnchor))
 			{
 				Debug.LogWarning("property not found: \"" + targetAnchor + "\" in " + target);
 				return ;
 			}
 
-			PWAnchorData fromAnchor = propertyDatas[myAnchor];
-			PWAnchorData toAnchor = target.propertyDatas[targetAnchor];
+			PWAnchorData fromAnchor = anchorFields[myAnchor];
+			PWAnchorData toAnchor = target.anchorFields[targetAnchor];
 
 			PWAnchorInfo from = new PWAnchorInfo(
 					fromAnchor.fieldName, new Rect(), fromAnchor.first.color,
@@ -256,6 +247,12 @@ namespace PW
 		public PWDependency			GetDependency(int dependencyAnchorId, int nodeId, int anchorId)
 		{
 			return depencendies.FirstOrDefault(d => d.connectedAnchorId == dependencyAnchorId && d.anchorId == anchorId && d.nodeId == nodeId);
+		}
+		
+		public void RemoveLink(PWNodeLink link)
+		{
+			//fire this event will trigger the graph and it will call anchor to remove link datas.
+			OnLinkRemoved(link);
 		}
 	}
 }

@@ -43,7 +43,7 @@ namespace PW.Core
 		//visual rect of the anchor
 		public Rect					rect;
 		//anchor color
-		public PWColorPalette		colorPalette;
+		public Color				color; //no need of SerializableColor ?
 		//anchor visibility
 		public PWVisibility			visibility = PWVisibility.Visible;
 		//override default y anchor position
@@ -86,11 +86,18 @@ namespace PW.Core
 				link.OnAfterDeserialize();
 		}
 
+		public void RemoveLink(PWNodeLink link)
+		{
+			if (!links.Remove(link))
+				Debug.LogWarning("[PWAnchor] failed to remove the link: " + link);
+		}
+
 		//called only once (when the anchor is created)
 		public void Initialize(PWAnchorField anchorField)
 		{
 			GUID = System.Guid.NewGuid().ToString();
 			anchorFieldRef = anchorField;
+			color = anchorField.color;
 			nodeRef = anchorField.nodeRef;
 		}
 

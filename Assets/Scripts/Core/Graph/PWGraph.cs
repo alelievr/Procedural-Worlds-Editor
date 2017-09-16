@@ -59,6 +59,7 @@ namespace PW.Core
 		public Vector2							panPosition;
 		public int								localNodeIdCount;
         public PWGUIManager						PWGUI;
+		public PWGraphEditorState				editorState;
 
 
         //input and output nodes:
@@ -296,6 +297,14 @@ namespace PW.Core
 			//sending this event will cause the node remove self.
 			OnNodeRemoved(node);
 			return nodesDictionary.Remove(nodeId);
+		}
+
+		public void		RemoveLink(PWNodeLink link)
+		{
+			OnLinkRemoved(link);
+			link.fromAnchor.RemoveLink(link);
+			link.toAnchor.RemoveLink(link);
+			nodeLinkTable.RemoveLink(link);
 		}
 
 		void AttachNodeEvents(PWNode node)

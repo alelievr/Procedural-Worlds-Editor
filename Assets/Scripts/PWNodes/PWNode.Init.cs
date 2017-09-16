@@ -12,9 +12,9 @@ namespace PW
 	{
 		//backed datas about properties and nodes
 		[System.Serializable]
-		public class PropertyDataDictionary : SerializableDictionary< string, PWAnchorField > {}
+		public class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
 		[SerializeField]
-		protected PropertyDataDictionary			propertyDatas = new PropertyDataDictionary();
+		protected AnchorFieldDictionary			anchorFields = new AnchorFieldDictionary();
 
 		[NonSerializedAttribute]
 		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
@@ -50,10 +50,10 @@ namespace PW
 			foreach (var field in fInfos)
 			{
 				actualFields.Add(field.Name);
-				if (!propertyDatas.ContainsKey(field.Name))
-					propertyDatas[field.Name] = new PWAnchorField();
+				if (!anchorFields.ContainsKey(field.Name))
+					anchorFields[field.Name] = new PWAnchorField();
 				
-				PWAnchorField	anchorField = propertyDatas[field.Name];
+				PWAnchorField	anchorField = anchorFields[field.Name];
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = "";
 				Vector2			offset = Vector2.zero;
@@ -108,7 +108,7 @@ namespace PW
 						anchorField.required = false;
 				}
 				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
-					propertyDatas.Remove(field.Name);
+					anchorFields.Remove(field.Name);
 				else
 				{
 					anchorField.CreateNewAnchor();
@@ -123,11 +123,11 @@ namespace PW
 
 			//remove inhexistants field dictionary entries (for renamed variables):
 			var toRemoveKeys = new List< string >();
-			foreach (var kp in propertyDatas)
+			foreach (var kp in anchorFields)
 				if (!actualFields.Contains(kp.Key))
 					toRemoveKeys.Add(kp.Key);
 			foreach (var toRemoveKey in toRemoveKeys)
-				propertyDatas.Remove(toRemoveKey);
+				anchorFields.Remove(toRemoveKey);
 		}
 
 		//retarget "Reload" button in the editor to the internal event OnReload:
@@ -135,7 +135,7 @@ namespace PW
 
 		void ForceReloadCallback() { /*TODO*/ }
 
-		void LinkDragged(PWNodeLink link)
+		void LinkDraggedCallback(PWNodeLink link)
 		{
 			//disable non-linkable anchors:
 			DisableUnlinkableAnchors(link);
@@ -212,6 +212,14 @@ namespace PW
 				selected = false;
 		}
 
+		void LinkRemovedCalllback(PWNodeLink link)
+		{
+			if (link.fromNode == this)
+				link.fromAnchor.RemoveLink(link);
+			else if (link.toNode == this)
+				link.toAnchor.RemoveLink(link);
+		}
+
 		void BindEvents()
 		{
 			//graph events:
@@ -222,7 +230,8 @@ namespace PW
 				mainGraphRef.OnForceReload += ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere += OnClickedOutside;
-			graphRef.OnLinkDragged += LinkDragged;
+			graphRef.OnLinkDragged += LinkDraggedCallback;
+			graphRef.OnLinkRemoved += LinkRemovedCalllback;
 			graphRef.OnLinkCanceled += LinkCanceled;
 			graphRef.OnNodeSelected += NodeSelectedCallback;
 			graphRef.OnNodeUnselected += NodeUnselectedCallback;
@@ -245,7 +254,8 @@ namespace PW
 				mainGraphRef.OnForceReload -= ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere -= OnClickedOutside;
-			graphRef.OnLinkDragged -= LinkDragged;
+			graphRef.OnLinkDragged -= LinkDraggedCallback;
+			graphRef.OnLinkRemoved -= LinkRemovedCalllback;
 			graphRef.OnLinkCanceled -= LinkCanceled;
 			graphRef.OnNodeSelected -= NodeSelectedCallback;
 			graphRef.OnNodeUnselected -= NodeUnselectedCallback;
@@ -255,8 +265,8 @@ namespace PW
 			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;
 			OnLinkSelected -= LinkSelectedCallback;
 			OnLinkUnselected -= LinkUnselectedCallback;
-			OnAnchorUnlinked -= AnchorUnlinkedCallback;
 			OnAnchorLinked -= AnchorLinkedCallback;
+			OnAnchorUnlinked -= AnchorUnlinkedCallback;
 		}
 	}
 }

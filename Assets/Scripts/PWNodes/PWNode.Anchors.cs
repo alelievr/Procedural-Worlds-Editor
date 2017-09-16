@@ -9,6 +9,8 @@ namespace PW
 {
 	public partial class PWNode
 	{
+		PWAnchorEvent		anchorEvent;
+
 		public void RenderAnchors()
 		{
 			var e = Event.current;
@@ -22,6 +24,33 @@ namespace PW
 				anchorField.Render(ref inputAcnhorRect);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.Render(ref outputAnchorRect);
+		}
+
+		public void ProcessAnchorEvents()
+		{
+			var				e = Event.current;
+			PWAnchorEvent	oldAnchorEvent = anchorEvent;
+
+			foreach (var anchorField in inputAnchorFields)
+				anchorField.ProcessEvent(ref anchorEvent);
+			foreach (var anchorField in outputAnchorFields)
+				anchorField.ProcessEvent(ref anchorEvent);
+
+			if (e.type == EventType.MouseUp)
+			{
+				if (graphRef.editorState.isDraggingLink)
+					OnAnchorLinked(anchorEvent.anchorUnderMouse);
+			}
+			if (graphRef.editorState.isDraggingLink)
+			{
+				if (oldAnchorEvent.anchorUnderMouse != anchorEvent.anchorUnderMouse)
+				{
+					if (anchorEvent.anchorUnderMouse == null)
+						OnDraggedLinkQuitAnchor(oldAnchorEvent.anchorUnderMouse);
+					else
+						OnDraggedLinkOverAnchor(anchorEvent.anchorUnderMouse);
+				}
+			}
 		}
 	}
 }

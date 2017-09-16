@@ -74,9 +74,9 @@ namespace PW
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
 
 		[System.NonSerialized]
-		public PWGraph			graphRef;
-		public PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
-		public PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
+		protected PWGraph			graphRef;
+		protected PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
+		protected PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 		//TODO: data and mesh graphs
 
 		public bool				windowNameEdit = false;

@@ -51,7 +51,7 @@ namespace PW.Core
 		//the visual padding between multiple anchor of the same field
 		public int							padding = 0;
 		//anchor custom color if set
-		public SerializableColor			color = new SerializableColor(0, 0, 0, 0);
+		public Color						color = new Color(0, 0, 0, 0); //SerializableColor needed ?
 
 		//properties for multiple anchors:
 		public SerializableType[]			allowedTypes;
@@ -67,8 +67,20 @@ namespace PW.Core
 
 		public void		RemoveAnchor(string GUID)
 		{
-			if (anchors.RemoveAll(a => a.GUID == GUID) != 1)
+			int index = anchors.FindIndex(a => a.GUID == GUID);
+
+			if (index == -1)
 				Debug.LogWarning("Failed to remove the anchor at GUID: " + GUID);
+			RemoveAnchor(index);
+		}
+
+		public void		RemoveAnchor(int index)
+		{
+			var links = anchors[index].links;
+
+			foreach (var link in links)
+				nodeRef.RemoveLink(link);
+			anchors.RemoveAt(index);
 		}
 
 		public PWAnchor CreateNewAnchor()
@@ -106,7 +118,7 @@ namespace PW.Core
 
 	#endregion
 
-	#region Anchor rendering
+	#region Anchor rendering and event processing
 
 		public void OnEnable()
 		{
@@ -238,6 +250,15 @@ namespace PW.Core
 		{
 			foreach (var anchor in anchors)
 				anchor.isLinkable = true;
+		}
+
+		public void ProcessEvent(ref PWAnchorEvent anchorEvent)
+		{
+			var e = Event.current;
+
+			foreach (var anchor in anchors)
+				if (anchor.rect.Contains(e.mousePosition))
+					anchorEvent.anchorUnderMouse = anchor;
 		}
 
 	#endregion
