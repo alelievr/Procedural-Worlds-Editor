@@ -34,8 +34,12 @@ namespace PW.Core
 		public PWNode			toNode;
 
 		//called once (when link is created only)
-		public void Initialize()
+		public void Initialize(PWAnchor fromAnchor, PWAnchor toAnchor)
 		{
+			this.fromAnchor = fromAnchor;
+			this.toAnchor = toAnchor;
+			fromNode = fromAnchor.nodeRef;
+			toNode = toAnchor.nodeRef;
 			GUID = System.Guid.NewGuid().ToString();
 		}
 

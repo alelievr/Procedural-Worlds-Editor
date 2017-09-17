@@ -220,6 +220,20 @@ namespace PW
 				link.toAnchor.RemoveLink(link);
 		}
 
+		void LinkCreatedCallback(PWNodeLink link)
+		{
+			if (link.fromNode == this)
+				link.fromAnchor.AddLink(link);
+			else if (link.toNode == this)
+				link.toAnchor.AddLink(link);
+		}
+
+		void NodeRemovedCallback(PWNode node)
+		{
+			if (node == this)
+				RemoveSelf();
+		}
+
 		void BindEvents()
 		{
 			//graph events:
@@ -235,6 +249,7 @@ namespace PW
 			graphRef.OnLinkCanceled += LinkCanceled;
 			graphRef.OnNodeSelected += NodeSelectedCallback;
 			graphRef.OnNodeUnselected += NodeUnselectedCallback;
+			graphRef.OnNodeRemoved += NodeRemovedCallback;
 
 			//node events:
 			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
@@ -259,6 +274,7 @@ namespace PW
 			graphRef.OnLinkCanceled -= LinkCanceled;
 			graphRef.OnNodeSelected -= NodeSelectedCallback;
 			graphRef.OnNodeUnselected -= NodeUnselectedCallback;
+			graphRef.OnNodeRemoved -= NodeRemovedCallback;
 			
 			//node events:
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;

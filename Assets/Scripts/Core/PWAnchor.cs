@@ -78,7 +78,7 @@ namespace PW.Core
 				else
 					linkInstance.toAnchor = this;
 				
-				links.Add(linkInstance);
+				AddLink(linkInstance);
 			}
 			
 			//propagate the OnAfterDeserialize event.
@@ -90,6 +90,11 @@ namespace PW.Core
 		{
 			if (!links.Remove(link))
 				Debug.LogWarning("[PWAnchor] failed to remove the link: " + link);
+		}
+
+		public void AddLink(PWNodeLink link)
+		{
+			links.Add(link);
 		}
 
 		//called only once (when the anchor is created)

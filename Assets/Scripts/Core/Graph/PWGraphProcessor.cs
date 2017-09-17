@@ -38,7 +38,7 @@ namespace PW.Core
 	#endregion
 
 		//Check errors when transferring values from a node to another
-		bool CheckProcessErrors(PWLink link, PWNode node, bool realMode)
+		bool CheckProcessErrors(PWNodeLink link, PWNode node, bool realMode)
 		{
 			if (!realMode)
 			{
@@ -86,13 +86,16 @@ namespace PW.Core
 	
 		void ProcessNodeLinks(PWNode node, bool realMode)
 		{
-			var links = node.GetLinks();
+			var links = node.GetOutputLinks();
 
 			foreach (var link in links)
 			{
 				//if we are in real mode, we check all errors and discard if there is any.
 				if (CheckProcessErrors(link, node, realMode))
 					continue ;
+
+				//distant -> from
+				//local -> to
 				
 				var target = nodesDictionary[link.distantNodeId];
 				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);

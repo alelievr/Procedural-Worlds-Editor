@@ -59,6 +59,7 @@ namespace PW.Core
 		public Vector2							panPosition;
 		public int								localNodeIdCount;
         public PWGUIManager						PWGUI;
+		[System.NonSerialized]
 		public PWGraphEditorState				editorState;
 
 
@@ -203,7 +204,7 @@ namespace PW.Core
 			}
 	
 			//check if the window have all these inputs to work:
-			if (!node.CheckRequiredAnchorLink())
+			if (!node.canWork)
 				return -1;
 	
 			//compute dependency weight:
@@ -243,10 +244,16 @@ namespace PW.Core
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 		void		LinkSelectedCallback(PWNodeLink link) { OnLinkSelected(link); }
 		void		LinkUnselectedCallback(PWNodeLink link) { OnLinkUnselected(link); }
-		void		LinkCreatedCallback(PWNodeLink link) { OnLinkCreated(link); }
-		void		LinkRemovedCallback(PWNodeLink link) { OnLinkRemoved(link); }
+		void		LinkRemovedCallback(PWNodeLink link) { RemoveLink(link); }
+
+		void		AnchorLinkedCallback(PWAnchor anchor) { CreateLink(anchor); }
 
 		void		GraphStructureChangedCallback() { UpdateComputeOrder(); }
+
+		void		AnchorLinked(PWAnchor anchor)
+		{
+
+		}
 
 		// public void RaiseOnNodeSelected(PWNode node) { OnNodeSelected(node); }
 		// public void RaiseOnNodeUnselected(PWNode node) { OnNodeUnselected(node); }
@@ -307,11 +314,45 @@ namespace PW.Core
 			nodeLinkTable.RemoveLink(link);
 		}
 
+		//Create a link from the anchor where the link was dragged and the parameter
+		public PWNodeLink	CreateLink(PWAnchor anchor)
+		{
+			PWAnchor fromAnchor = editorState.startedLinkAnchor;
+
+			if (fromAnchor == null || anchor == null)
+				return null;
+			
+			return CreateLink(fromAnchor, anchor);
+		}
+
+		public PWNodeLink	CreateLink(PWAnchor fromAnchor, PWAnchor toAnchor)
+		{
+			PWNodeLink link = new PWNodeLink();
+			PWAnchor	fAnchor = fromAnchor;
+			PWAnchor	tAnchor = toAnchor;
+			
+			//swap anchors if input/output are reversed
+			if (fromAnchor.anchorType != PWAnchorType.Output)
+				tAnchor = fromAnchor;
+			if (toAnchor.anchorType != PWAnchorType.Input)
+				fAnchor = toAnchor;
+
+			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
+			{
+				Debug.LogWarning("[PWGraph] attemp to create a link between unlinkable anchors");
+				return null;
+			}
+
+			link.Initialize(fAnchor, tAnchor);
+			nodeLinkTable.AddLink(link);
+			return link;
+		}
+
 		void AttachNodeEvents(PWNode node)
 		{
 			node.OnLinkSelected += LinkSelectedCallback;
 			node.OnLinkUnselected += LinkUnselectedCallback;
-			node.OnLinkCreated += LinkCreatedCallback;
+			node.OnAnchorLinked += AnchorLinkedCallback;
 			node.OnLinkRemoved += LinkRemovedCallback;
 		}
 
@@ -319,7 +360,7 @@ namespace PW.Core
 		{
 			node.OnLinkSelected -= LinkSelectedCallback;
 			node.OnLinkUnselected -= LinkUnselectedCallback;
-			node.OnLinkCreated -= LinkCreatedCallback;
+			node.OnAnchorLinked -= AnchorLinkedCallback;
 			node.OnLinkRemoved -= LinkRemovedCallback;
 		}
 

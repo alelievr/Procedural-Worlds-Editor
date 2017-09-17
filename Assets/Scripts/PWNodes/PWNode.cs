@@ -74,7 +74,7 @@ namespace PW
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
 
 		[System.NonSerialized]
-		protected PWGraph			graphRef;
+		public PWGraph				graphRef;
 		protected PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
 		protected PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 		//TODO: data and mesh graphs
@@ -95,22 +95,23 @@ namespace PW
 		protected event MessageReceivedAction	OnMessageReceived;
 
 		//fired when this node was linked
-		protected event NodeLinkAction			OnAnchorLinked;
+		public event NodeLinkAction				OnAnchorLinked;
 		//fired when this node was unlinked
 		protected event NodeLinkAction			OnAnchorUnlinked;
 		//fired when the dragged link is above an anchor
 		protected event NodeLinkAction			OnDraggedLinkOverAnchor;
 		//fired when the dragged link quit the zone above the anchor
 		protected event NodeLinkAction			OnDraggedLinkQuitAnchor;
-
-		//fired when a link is selected
-		public event LinkAction					OnLinkSelected;
-		//fired when a link is unselected
-		public event LinkAction					OnLinkUnselected;
-		//fired when a link is cerated
-		public event LinkAction					OnLinkCreated;
+		
+		//fired when a link attached to this node is created
+		private event LinkAction				OnLinkCreated;
 		//fired when a link is removed
 		public event LinkAction					OnLinkRemoved;
+
+		//fired when a link attached to this node is selected
+		public event LinkAction					OnLinkSelected;
+		//fired when a link attached to this node is unselected
+		public event LinkAction					OnLinkUnselected;
 
 		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
@@ -309,7 +310,7 @@ namespace PW
 				anchorField.ResetLinkable();
 		}
 	
-		bool			UpdateWorkStatus()
+		bool		UpdateWorkStatus()
 		{
 			foreach (var anchorField in inputAnchorFields)
 				if (anchorField.required)
@@ -324,7 +325,13 @@ namespace PW
 			return true;
 		}
 
-		void OnClickedOutside()
+		public void	RemoveSelf()
+		{
+			RemoveAllLinks();
+			Destroy(this);
+		}
+
+		void		OnClickedOutside()
 		{
 			if (Event.current.button == 0)
 			{
@@ -337,12 +344,12 @@ namespace PW
 		}
 
 	#region Unused (for the moment) overrided functions
-		public void OnDestroy()
+		public void	OnDestroy()
 		{
 			// Debug.Log("node " + nodeTypeName + " detroyed !");
 		}
 
-		public void OnGUI()
+		public void	OnGUI()
 		{
 			EditorGUILayout.LabelField("You are in the wrong window !");
 		}
