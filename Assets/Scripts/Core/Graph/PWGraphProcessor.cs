@@ -42,29 +42,32 @@ namespace PW.Core
 		{
 			if (!realMode)
 			{
-				if (!nodesDictionary.ContainsKey(link.distantNodeId))
+				if (!nodesDictionary.ContainsKey(link.toNode.id))
 				{
-					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") not found in nodes dictionary");
+					Debug.LogError("[PW Process] " + "node id (" + link.toNode.id + ") not found in nodes dictionary");
 					return true;
 				}
 
-				if (nodesDictionary[link.distantNodeId] == null)
+				if (nodesDictionary[link.toNode.id] == null)
 				{
-					Debug.LogError("[PW Process] " + "node id (" + link.distantNodeId + ") is null in nodes dictionary");
+					Debug.LogError("[PW Process] " + "node id (" + link.toNode.id + ") is null in nodes dictionary");
 					return true;
 				}
 
-				if (!bakedNodeFields.ContainsKey(link.localClassAQName)
-					|| !bakedNodeFields[link.localClassAQName].ContainsKey(link.localName)
-					|| !bakedNodeFields[link.distantClassAQName].ContainsKey(link.distantName))
+				if (!bakedNodeFields.ContainsKey(link.fromNode.classQAName)
+					|| !bakedNodeFields[link.fromNode.classQAName].ContainsKey(link.fromAnchor.fieldName)
+					|| !bakedNodeFields[link.toNode.classQAName].ContainsKey(link.toAnchor.fieldName))
 				{
-					Debug.LogError("[PW Process] Can't find field: " + link.localName + " in " + link.localClassAQName + " OR " + link.distantName + " in " + link.distantClassAQName);
+					Debug.LogError("[PW Process] Can't find field: "
+						+ link.fromAnchor.fieldName + " in " + link.fromNode.classQAName
+						+ " OR " + link.toAnchor.fieldName + " in " + link.toNode.classQAName);
 					return true;
 				}
 					
-				if (bakedNodeFields[link.localClassAQName][link.localName].GetValue(node) == null)
+				if (bakedNodeFields[link.fromNode.classQAName][link.fromAnchor.fieldName].GetValue(node) == null)
 				{
-					Debug.Log("[PW Process] tring to assign null value from " + link.localClassAQName + "." + link.localName);
+					Debug.Log("[PW Process] tring to assign null value from "
+						+ link.fromNode.classQAName + "." + link.fromAnchor.fieldName);
 					return true;
 				}
 			}
@@ -80,7 +83,7 @@ namespace PW.Core
 				try {
 					prop.SetValue(target, val);
 				} catch (Exception e) {
-					Debug.LogError(e);
+					Debug.LogError("[PWGraph Processor] " + e);
 				}
 		}
 	
@@ -94,49 +97,52 @@ namespace PW.Core
 				if (CheckProcessErrors(link, node, realMode))
 					continue ;
 
-				//distant -> from
-				//local -> to
+				//distant -> to
+				//local -> from
 				
-				var target = nodesDictionary[link.distantNodeId];
-				var val = bakedNodeFields[link.localClassAQName][link.localName].GetValue(node);
-				var prop = bakedNodeFields[link.distantClassAQName][link.distantName];
+				var target = nodesDictionary[link.toNode.id];
+				var val = bakedNodeFields[link.fromNode.classQAName][link.fromAnchor.fieldName].GetValue(node);
+				var prop = bakedNodeFields[link.toNode.classQAName][link.toAnchor.fieldName];
 	
-				// Debug.Log("local: " + link.localClassAQName + " / " + node.GetType() + " / " + node.nodeId);
+				// Debug.Log("local: " + link.fromNode.classQAName + " / " + node.GetType() + " / " + node.nodeId);
 				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
 				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
 
-				// simple assignation, without multi-anchor
-				if (link.distantIndex == -1 && link.localIndex == -1)
+				//Without multi-anchor, simple assignation
+				if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex == -1)
 					TrySetValue(prop, val, target, realMode);
-				//distant link is a multi-anchor
-				else if (link.distantIndex != -1 && link.localIndex == -1)
+				
+				//Distant anchor is a multi-anchor
+				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
 				{
 					PWValues values = (PWValues)prop.GetValue(target);
 	
 					if (values != null)
 					{
-						if (!values.AssignAt(link.distantIndex, val, link.localName))
-							Debug.Log("failed to set distant indexed field value: " + link.distantName);
+						if (!values.AssignAt(link.toAnchor.fieldIndex, val, link.fromAnchor.name))
+							Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
 					}
 				}
-				//local link is a multi-anchor
-				else if (link.distantIndex == -1 && link.localIndex != -1 && val != null)
+
+				//Local link is a multi-anchor
+				else if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex != -1 && val != null)
 				{
-					object localVal = ((PWValues)val).At(link.localIndex);
+					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
 
 					TrySetValue(prop, localVal, target, realMode);
 				}
-				// both are multi-anchors
+
+				//Both are multi-anchors
 				else if (val != null)
 				{
 					PWValues values = (PWValues)prop.GetValue(target);
-					object localVal = ((PWValues)val).At(link.localIndex);
+					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
 	
 					if (values != null)
 					{
 						// Debug.Log("assigned total multi");
-						if (!values.AssignAt(link.distantIndex, localVal, link.localName))
-							Debug.Log("failed to set distant indexed field value: " + link.distantName);
+						if (!values.AssignAt(link.toAnchor.fieldIndex, localVal, link.fromAnchor.name))
+							Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
 					}
 				}
 			}
@@ -161,9 +167,6 @@ namespace PW.Core
 			else
 				node.Process();
 
-			if (realMode)
-				node.EndFrameUpdate();
-			
 			ProcessNodeLinks(node, realMode);
 
 			return calculTime;
@@ -182,9 +185,6 @@ namespace PW.Core
 				//ignore unlinked nodes
 				if (node.computeOrder < 0)
 					continue ;
-				
-				if (realMode)
-					node.BeginFrameUpdate();
 				
 				calculTime += ProcessNode(node, realMode);
 			}

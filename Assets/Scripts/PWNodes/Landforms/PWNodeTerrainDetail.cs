@@ -12,9 +12,9 @@ namespace PW.Node
 		[PWOutput]
 		public TerrainDetail	outputDetail = new TerrainDetail();
 	
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Terrain Detail";
+			name = "Terrain Detail";
 		}
 
 		public override void OnNodeGUI()

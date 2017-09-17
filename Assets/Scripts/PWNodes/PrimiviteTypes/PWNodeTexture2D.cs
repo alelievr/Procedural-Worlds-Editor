@@ -27,9 +27,9 @@ namespace PW.Node
 
 		PWGUIMaterialPreview	matPreview;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Texture 2D";
+			name = "Texture 2D";
 			matPreview = new PWGUIMaterialPreview();
 		}
 

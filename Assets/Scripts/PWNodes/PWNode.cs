@@ -70,7 +70,7 @@ namespace PW
 		[SerializeField]
 		int						maxAnchorRenderHeight = 0;
 
-		[NonSerialized]
+		[System.NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
 
 		[System.NonSerialized]
@@ -90,7 +90,9 @@ namespace PW
 		public delegate void					LinkAction(PWNodeLink link);
 
 		//fired when the node received a NotifyReload() or the user pressed Reload button in editor.
-		protected event ReloadAction			OnReload;
+		public event ReloadAction				OnReload;
+		//fired jstu after OnReload event;
+		public event ReloadAction				OnPostReload;
 		//fired when the node receive a SendMessage()
 		protected event MessageReceivedAction	OnMessageReceived;
 
@@ -113,6 +115,13 @@ namespace PW
 		//fired when a link attached to this node is unselected
 		public event LinkAction					OnLinkUnselected;
 
+		//fired only when realMode is false, just after OnNodeProcess is called;
+		public event Action						OnPostProcess;
+
+		//event relay, to simplify custom graph events:
+		// public event Action< int >				OnChunkSizeChanged;
+		// public event Action< int >				OnChunkPositionChanged;
+
 		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
 		//default notify reload will be sent to all node childs.
@@ -121,7 +130,7 @@ namespace PW
 			var nodes = graphRef.GetNodeChildsRecursive(this);
 
 			foreach (var node in nodes)
-				node.OnReload(this);
+				node.Reload(this);
 		}
 		
 		//send reload event to all node of the specified type
@@ -132,7 +141,7 @@ namespace PW
 						select node;
 			
 			foreach (var node in nodes)
-				node.OnReload(this);
+				node.Reload(this);
 		}
 
 		//send reload to all nodes with a computeOrder smaller than minComputeOrder.
@@ -143,18 +152,24 @@ namespace PW
 						select node;
 
 			foreach (var node in nodes)
-				node.OnReload(this);
+				node.Reload(this);
 		}
 
 		public void NotifyReload(PWNode node)
 		{
-			node.OnReload(this);
+			node.Reload(this);
 		}
 
 		public void NotifyReload(IEnumerable< PWNode > nodes)
 		{
 			foreach (var node in nodes)
-				node.OnReload(this);
+				node.Reload(this);
+		}
+
+		public void Reload(PWNode from)
+		{
+			OnReload(from);
+			OnPostReload(from);
 		}
 
 		public void SendMessage(PWNode target, object message)
@@ -203,6 +218,9 @@ namespace PW
 			BindEvents();
 
 			UpdateWorkStatus();
+
+			//set the PWGUI current node:
+			PWGUI.SetNode(this);
 
 			//load the class QA name:
 			classQAName = GetType().AssemblyQualifiedName;

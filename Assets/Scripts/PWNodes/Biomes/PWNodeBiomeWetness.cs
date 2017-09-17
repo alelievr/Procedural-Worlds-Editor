@@ -6,7 +6,7 @@ namespace PW.Node
 {
 	public class PWNodeBiomeWetness : PWNode {
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			
 		}

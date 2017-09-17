@@ -10,7 +10,7 @@ namespace PW.Node
 		[PWInput]
 		public object		obj;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			name = "Debug log node";
 			renamable = true;

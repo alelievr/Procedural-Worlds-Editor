@@ -27,17 +27,12 @@ namespace PW.Node
 
 		const string		delayedUpdateKey = "delayedUpdate";
 
-		public override void OnNodeCreateOnce()
+		public override void OnNodeCreation()
 		{
 			mapMin = 0;
 			mapMax = 100;
 			waterLevel = 50;
-			externalName = "Water level";
-		}
-
-		public override void OnNodeCreate()
-		{
-			delayedChanges.BindCallback(delayedUpdateKey, (obj) => { notifyBiomeDataChanged = true; });
+			name = "Water level";
 		}
 
 		void UpdateGradient()
@@ -83,7 +78,7 @@ namespace PW.Node
 						mapMax = EditorGUILayout.FloatField("to", mapMax);
 						EditorGUILayout.EndHorizontal();
 	
-						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, needUpdate, false, FilterMode.Point);
+						PWGUI.Sampler2DPreview(terrainNoise as Sampler2D, false, FilterMode.Point);
 					}
 					else
 					{

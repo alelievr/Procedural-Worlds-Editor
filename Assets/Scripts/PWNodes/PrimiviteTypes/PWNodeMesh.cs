@@ -18,10 +18,10 @@ namespace PW.Node
 		[SerializeField]
 		bool				displayPreview;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			renamable = true;
-			externalName = "mesh";
+			name = "mesh";
 
 			meshRenderObject = new GameObject("MeshNodeRenderer", typeof(MeshRenderer), typeof(MeshFilter));
 			previewMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");

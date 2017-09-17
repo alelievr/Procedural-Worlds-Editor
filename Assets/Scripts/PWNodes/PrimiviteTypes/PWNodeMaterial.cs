@@ -15,10 +15,10 @@ namespace PW.Node
 		[SerializeField]
 		bool					showSceneHiddenObjects = false;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			renamable = true;
-			externalName = "Material";
+			name = "Material";
 			
 			matPreview = new PWGUIMaterialPreview(outputMaterial);
 		}

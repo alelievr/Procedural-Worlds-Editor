@@ -82,6 +82,8 @@ namespace PW
 		public void Process()
 		{
 			OnNodeProcess();
+			if (!realMode)
+				OnPostProcess();
 		}
 	}
 }

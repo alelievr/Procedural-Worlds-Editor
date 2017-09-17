@@ -62,9 +62,9 @@ namespace PW.Node
 			"albedo", "normal", "diffuse", "opacity", "smoothness", "metallic", "roughness"
 		};
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Surface maps";
+			name = "Surface maps";
 			UpdateInputVisibilities();
 		}
 

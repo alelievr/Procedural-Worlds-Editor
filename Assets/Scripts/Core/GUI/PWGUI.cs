@@ -52,6 +52,53 @@ namespace PW.Core
 		[SerializeField]
 		List< PWGUISettings >	settingsStorage;
 		int						currentSettingCount = 0;
+
+		PWNode				attachedNode;
+
+		public void SetNode(PWNode node)
+		{
+			if (node != null)
+			{
+				attachedNode = node;
+				node.OnPostReload += ReloadTextures;
+				node.OnPostProcess += ReloadTextures;
+			}
+		}
+
+		public PWGUIManager() {}
+
+		~PWGUIManager()
+		{
+			if (attachedNode != null)
+			{
+				attachedNode.OnPostReload -= ReloadTextures;
+				attachedNode.OnPostProcess -= ReloadTextures;
+			}
+		}
+
+		void ReloadTextures(PWNode node) { ReloadTextures(); }
+
+		void ReloadTextures()
+		{
+			foreach (var setting in settingsStorage)
+			{
+				switch (setting.fieldType)
+				{
+					case PWGUIFieldType.Sampler2DPreview:
+						UpdateSampler2D(setting);
+						break ;
+					case PWGUIFieldType.BiomeMapPreview:
+						UpdateBiomeMap2D(setting);
+						break ;
+					default:
+						break ;
+				}
+				if (setting.texture != null)
+				{
+					//TODO: call the recalculate function specific to field type
+				}
+			}
+		}
 		
 	#region Color field
 
@@ -106,8 +153,8 @@ namespace PW.Core
 			var fieldSettings = GetGUISettingData(() => {
 				PWGUISettings colorSettings = new PWGUISettings();
 
+				colorSettings.fieldType = PWGUIFieldType.Color;
 				colorSettings.c = (SerializableColor)localColor;
-
 				return colorSettings;
 			});
 
@@ -156,19 +203,19 @@ namespace PW.Core
 						GUI.DrawTexture(colorPickerThumbRect, colorPickerThumb);
 	
 						byte r, g, b, a;
-						PWColorPalette.ColorToByte(fieldSettings.c, out r, out g, out b, out a);
+						PWColorScheme.ColorToByte(fieldSettings.c, out r, out g, out b, out a);
 						EditorGUIUtility.labelWidth = 20;
 						r = (byte)EditorGUILayout.IntSlider("R", r, 0, 255);
 						g = (byte)EditorGUILayout.IntSlider("G", g, 0, 255);
 						b = (byte)EditorGUILayout.IntSlider("B", b, 0, 255);
 						a = (byte)EditorGUILayout.IntSlider("A", a, 0, 255);
-						fieldSettings.c = (SerializableColor)PWColorPalette.ByteToColor(r, g, b, a);
+						fieldSettings.c = (SerializableColor)PWColorScheme.ByteToColor(r, g, b, a);
 						EditorGUIUtility.labelWidth = 0;
 	
 						EditorGUILayout.Space();
 	
 						//hex field
-						int hex = PWColorPalette.ColorToHex(fieldSettings.c, false); //get color without alpha
+						int hex = PWColorScheme.ColorToHex(fieldSettings.c, false); //get color without alpha
 						EditorGUIUtility.labelWidth = 80;
 						EditorGUI.BeginChangeCheck();
 						string hexColor = EditorGUILayout.TextField("Hex color", hex.ToString("X6"));
@@ -181,7 +228,7 @@ namespace PW.Core
 						if (hexColor == "")
 							hexColor = "0";
 						hex = int.Parse(a.ToString("X2") + hexColor, System.Globalization.NumberStyles.HexNumber);
-						fieldSettings.c = (SerializableColor)PWColorPalette.HexToColor(hex, false);
+						fieldSettings.c = (SerializableColor)PWColorScheme.HexToColor(hex, false);
 	
 						if (e.isMouse && localColorPickerRect.Contains(e.mousePosition))
 							e.Use();
@@ -284,7 +331,7 @@ namespace PW.Core
 			
 			if (editable)
 			{
-				GUI.color = (fieldSettings.active) ? PWColorPalette.GetColor("selected") : Color.white;
+				GUI.color = (fieldSettings.active) ? PWColorScheme.GetColor("selected") : Color.white;
 				GUI.DrawTexture(iconRect, ic_edit);
 				GUI.color = Color.white;
 			}
@@ -495,6 +542,7 @@ namespace PW.Core
 			//create or load texture settings
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();
+				state.fieldType = PWGUIFieldType.TexturePreview;
 				state.filterMode = FilterMode.Bilinear;
 				state.scaleMode = ScaleMode.ScaleToFit;
 				state.scaleAspect = 1;
@@ -582,17 +630,17 @@ namespace PW.Core
 
 	#region Sampler2DPreview field
 		
-		public void Sampler2DPreview(Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
+		public void Sampler2DPreview(Sampler2D samp, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
-			Sampler2DPreview((GUIContent)null, samp, update, settings, fm);
+			Sampler2DPreview((GUIContent)null, samp, settings, fm);
 		}
 		
-		public void Sampler2DPreview(string prefix, Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
+		public void Sampler2DPreview(string prefix, Sampler2D samp, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
-			Sampler2DPreview(new GUIContent(prefix), samp, update, settings, fm);
+			Sampler2DPreview(new GUIContent(prefix), samp, settings, fm);
 		}
 		
-		public void Sampler2DPreview(GUIContent prefix, Sampler2D samp, bool update, bool settings = true, FilterMode fm = FilterMode.Bilinear)
+		public void Sampler2DPreview(GUIContent prefix, Sampler2D samp, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
 			var e = Event.current;
@@ -605,6 +653,7 @@ namespace PW.Core
 
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();
+				state.fieldType = PWGUIFieldType.Sampler2DPreview;
 				state.filterMode = fm;
 				state.debug = false;
 				state.gradient = new SerializableGradient(
@@ -615,6 +664,8 @@ namespace PW.Core
 				);
 				return state;
 			});
+
+			fieldSettings.sampler2D = samp;
 
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
@@ -700,14 +751,8 @@ namespace PW.Core
 				fieldSettings.texture.filterMode = fm;
 
 			//update the texture with the gradient
-			if (update || fieldSettings.update)
-			{
-				samp.Foreach((x, y, val) => {
-					tex.SetPixel(x, y, gradient.Evaluate(Mathf.Clamp01(val)));
-				}, true);
-				tex.Apply();
-				fieldSettings.update = false;
-			}
+			if (fieldSettings.update)
+				UpdateSampler2D(fieldSettings);
 
 			if (fieldSettings.debug)
 			{
@@ -728,16 +773,25 @@ namespace PW.Core
 			}
 		}
 
+		void UpdateSampler2D(PWGUISettings fieldSettings)
+		{
+			fieldSettings.sampler2D.Foreach((x, y, val) => {
+				fieldSettings.texture.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
+			}, true);
+			fieldSettings.texture.Apply();
+			fieldSettings.update = false;
+		}
+
 	#endregion
 
 	#region BiomeMapPreview field
 	
-		public void BiomeMap2DPreview(BiomeData map, bool update, bool settings = true, bool debug = true)
+		public void BiomeMap2DPreview(BiomeData map, bool settings = true, bool debug = true)
 		{
-			BiomeMap2DPreview(new GUIContent(), map, update, settings, debug);
+			BiomeMap2DPreview(new GUIContent(), map, settings, debug);
 		}
 
-		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool update, bool settings = true, bool debug = true)
+		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool settings = true, bool debug = true)
 		{
 			if (biomeData.biomeIds == null)
 			{
@@ -748,39 +802,47 @@ namespace PW.Core
 			int texSize = biomeData.biomeIds.size;
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();
+				state.fieldType = PWGUIFieldType.BiomeMapPreview;
 				state.filterMode = FilterMode.Point;
 				state.debug = debug;
-				update = true;
 				return state;
 			});
+
+			fieldSettings.biomeData = biomeData;
 
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
 				fieldSettings.texture.filterMode = FilterMode.Point;
 			}
+
+			if (fieldSettings.update)
+				UpdateBiomeMap2D(fieldSettings);
+
+			TexturePreview(fieldSettings.texture, false, false, false);
+		}
+
+		void UpdateBiomeMap2D(PWGUISettings fieldSettings)
+		{
+			var map = fieldSettings.biomeData.biomeIds;
+			int texSize = map.size;
 			
 			if (texSize != fieldSettings.texture.width)
 				fieldSettings.texture.Resize(texSize, texSize, TextureFormat.RGBA32, false);
+			
+			for (int x = 0; x < texSize; x++)
+				for (int y = 0; y < texSize; y++)
+				{
+					var blendInfo = map.GetBiomeBlendInfo(x, y);
+					var biome = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
+					if (biome == null)
+						continue ;
+					Color firstBiomeColor = biome.previewColor;
 
-			if (update || fieldSettings.update)
-			{
-				for (int x = 0; x < texSize; x++)
-					for (int y = 0; y < texSize; y++)
-					{
-						var blendInfo = map.GetBiomeBlendInfo(x, y);
-						var biome = biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
-						if (biome == null)
-							continue ;
-						Color firstBiomeColor = biome.previewColor;
-
-						//TODO: second biome color:
-						fieldSettings.texture.SetPixel(x, y, firstBiomeColor);
-					}
-				fieldSettings.texture.Apply();
-			}
-
-			TexturePreview(fieldSettings.texture, false, false, false);
+					//TODO: second biome color:
+					fieldSettings.texture.SetPixel(x, y, firstBiomeColor);
+				}
+			fieldSettings.texture.Apply();
 		}
 	#endregion
 

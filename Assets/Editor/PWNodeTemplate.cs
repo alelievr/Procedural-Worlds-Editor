@@ -8,9 +8,9 @@ namespace PW.Node
 {
 	public class PWNodeTemplate : PWNode {
 	
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "your node name";
+			name = "your node name";
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
 		}
 

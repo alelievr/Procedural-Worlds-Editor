@@ -102,5 +102,18 @@ namespace PW
 		{
 			return inputAnchorFields.Select(o => o.nodeRef);
 		}
+
+		public PWAnchor					GetAnchor(string fieldName, int index = 0)
+		{
+			return GetAnchorFromField(fieldName, index);
+		}
+
+		public IEnumerable< PWNode >	GetNodesAttachedToAnchor(PWAnchor anchor)
+		{
+			//TODO bake these data to prevent GC
+			return (anchor.anchorType == PWAnchorType.Input) ?
+				from l in anchor.links select l.toNode : 
+				from l in anchor.links select l.fromNode;
+		}
 	}
 }

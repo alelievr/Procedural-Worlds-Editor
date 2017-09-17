@@ -11,15 +11,6 @@ namespace PW
 	public partial class PWNode
 	{
 
-		Color GetAnchorDominantColor(PWAnchorInfo from, PWAnchorInfo to)
-		{
-			if (from.anchorColor.Compare(PWColorScheme.GetColor("greyAnchor")) || from.anchorColor.Compare(PWColorScheme.GetColor("whiteAnchor")))
-				return to.anchorColor;
-			if (to.anchorColor.Compare(PWColorScheme.GetColor("greyAnchor")) || to.anchorColor.Compare(PWColorScheme.GetColor("whiteAnchor")))
-				return from.anchorColor;
-			return to.anchorColor;
-		}
-
 		Color FindColorFromtypes(SerializableType[] types)
 		{
 			Color defaultColor = PWColorScheme.GetColor("defaultAnchor");
@@ -55,13 +46,5 @@ namespace PW
 			return PWLinkType.BasicData;
 		}
 		
-		void UpdateDependentStatus()
-		{
-			isDependent = false;
-			ForeachPWAnchors((data, singleAnchor, i) => {
-				if (data.anchorType == PWAnchorType.Input && data.required && singleAnchor.visibility == PWVisibility.Visible)
-					isDependent = true;
-			}, false, false);
-		}
 	}
 }

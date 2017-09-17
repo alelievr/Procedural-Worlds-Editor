@@ -28,11 +28,21 @@ namespace PW.Node
 		[SerializeField]
 		bool				biomeCoverageRecap = false;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Biome blender";
+			name = "Biome blender";
 
 			InitOrUpdatePreview();
+		}
+
+		public override void OnNodeEnable()
+		{
+			OnReload += BuildBiomeTree;
+		}
+
+		public override void OnNodeDisable()
+		{
+			OnReload -= BuildBiomeTree;
 		}
 
 		void InitOrUpdatePreview()
@@ -68,7 +78,7 @@ namespace PW.Node
 				if ((biomePreviewFoldout = EditorGUILayout.Foldout(biomePreviewFoldout, "Biome id map")))
 				{
 					if (biomeData.biomeIds != null)
-						PWGUI.BiomeMap2DPreview(biomeData, needUpdate || forceReload || biomeReloadRequested);
+						PWGUI.BiomeMap2DPreview(biomeData);
 					//TODO: biome 3D preview
 				}
 			}
@@ -99,7 +109,7 @@ namespace PW.Node
 				return ;
 			
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt || forceReload || biomeReloadRequested)
+			if (!biomeData.biomeTree.isBuilt)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
@@ -114,6 +124,11 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.windMap = biomeData.windRef;
 			outputBlendedBiomeTerrain.lightingMap = biomeData.lighting;
 			outputBlendedBiomeTerrain.airMap = biomeData.airRef;
+		}
+		
+		void BuildBiomeTree(PWNode from)
+		{
+			inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTree.BuildTree(inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTreeStartPoint);
 		}
 		
 		public override void OnNodeProcessOnce()

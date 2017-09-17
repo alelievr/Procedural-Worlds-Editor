@@ -52,6 +52,7 @@ namespace PW.Core
 
 		//anchor type
 		public PWAnchorType			anchorType { get { return anchorFieldRef.anchorType; } }
+		public string				fieldName { get { return anchorFieldRef.fieldName; } }
 
 		
 		//Editor variable:
@@ -61,7 +62,7 @@ namespace PW.Core
 
 		public void OnAfterDeserialized(PWAnchorField anchorField)
 		{
-			Initialize(anchorField);
+			Init(anchorField);
 
 			//we use the LinkTable in the graph to get the only instance of link stored
 			//	to know why, take a look at the PWGraph.cs file.
@@ -101,6 +102,11 @@ namespace PW.Core
 		public void Initialize(PWAnchorField anchorField)
 		{
 			GUID = System.Guid.NewGuid().ToString();
+			Init(anchorField);
+		}
+
+		void Init(PWAnchorField anchorField)
+		{
 			anchorFieldRef = anchorField;
 			color = anchorField.color;
 			nodeRef = anchorField.nodeRef;

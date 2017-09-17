@@ -17,9 +17,9 @@ namespace PW.Node
 		[SerializeField]
 		bool					showSceneHiddenObjects = false;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "GameObject";
+			name = "GameObject";
 			renamable = true;
 			objectPreview.UpdateObjects(previewGO);
 

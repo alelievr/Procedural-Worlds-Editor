@@ -209,9 +209,9 @@ namespace PW.Core
 	
 			//compute dependency weight:
 			int	ret = 1;
-			foreach (var dep in node.GetDependencies())
+			foreach (var dep in node.GetInputNodes())
 			{
-				int d = EvaluateComputeOrder(false, depth + 1, dep.nodeId);
+				int d = EvaluateComputeOrder(false, depth + 1, dep.id);
 	
 				//if dependency does not have enought datas to compute result, abort calculus.
 				if (d == -1)
@@ -252,12 +252,9 @@ namespace PW.Core
 
 		void		AnchorLinked(PWAnchor anchor)
 		{
-
+			
 		}
-
-		// public void RaiseOnNodeSelected(PWNode node) { OnNodeSelected(node); }
-		// public void RaiseOnNodeUnselected(PWNode node) { OnNodeUnselected(node); }
-
+		
 	#endregion
 
 	#region Nodes API

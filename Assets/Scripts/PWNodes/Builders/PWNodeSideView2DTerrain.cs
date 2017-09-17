@@ -12,7 +12,7 @@ namespace PW.Node
 		[PWOutput]
 		public SideView2DData	terrainOutput;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			name = "2D SideView terrain";
 			texture = new Sampler2D(chunkSize, step);

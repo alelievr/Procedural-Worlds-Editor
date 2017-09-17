@@ -21,11 +21,11 @@ namespace PW.Node
 		[SerializeField]
 		float				mapMax;
 
-		public override void OnNodeCreateOnce()
+		public override void OnNodeCreation()
 		{
 			mapMin = 0;
 			mapMax = 100;
-			externalName = "Terrain to BiomeData";
+			name = "Terrain to BiomeData";
 		}
 		
 		public override void OnNodeGUI()

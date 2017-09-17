@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
+using System.Linq;
 using System;
 using PW.Core;
 using PW;
@@ -133,7 +134,7 @@ namespace PW.Biomator
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
 			{
 				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
-				int					outputLinksCount = bSwitch.GetLinks().Count;
+				int					outputLinksCount = bSwitch.GetOutputLinks().Count();
 				int					childIndex = 0;
 				List< PWNode >		outputNodeList = new List< PWNode >();
 
@@ -142,25 +143,25 @@ namespace PW.Biomator
 				switch (bSwitch.switchMode)
 				{
 					case BiomeSwitchMode.Water:
-						int?	terrestrialAnchorId = node.GetAnchorId(PWAnchorType.Output, 0);
-						int?	aquaticAnchorId = node.GetAnchorId(PWAnchorType.Output, 1);
+						PWAnchor	terrestrialAnchor = node.GetAnchor("outputBiomes", 0);
+						PWAnchor	aquaticAnchor = node.GetAnchor("outputBiomes", 1);
 
-						if (terrestrialAnchorId != null)
+						if (terrestrialAnchor != null)
 						{
-							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchorId.Value);
+							var nodes = node.GetNodesAttachedToAnchor(terrestrialAnchor);
 							outputNodeList.AddRange(nodes);
 							// Debug.Log("terrestrialNodes: " + nodes[0].nodeId);
-							for (int i = 0; i < nodes.Count; i++)
+							for (int i = 0; i < nodes.Count(); i++)
 								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial", Color.black);
 							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
 						}
 						//get all nodes on the first anchor:
-						if (aquaticAnchorId != null)
+						if (aquaticAnchor != null)
 						{
-							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchorId.Value);
+							var nodes = node.GetNodesAttachedToAnchor(aquaticAnchor);
 							// Debug.Log("aquaticNodes: " + nodes[0].nodeId);
 							outputNodeList.AddRange(nodes);
-							for (int i = 0; i < nodes.Count; i++)
+							for (int i = 0; i < nodes.Count(); i++)
 								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic", Color.blue);
 							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
 						}
@@ -171,13 +172,10 @@ namespace PW.Biomator
 
 						for (int anchorIndex = 0; anchorIndex < bSwitch.switchDatas.Count; anchorIndex++)
 						{
-							int? anchorId = node.GetAnchorId(PWAnchorType.Output, anchorIndex);
+							PWAnchor anchor = node.GetAnchor("outpuBiomes", anchorIndex);
 							var sData = bSwitch.switchDatas[anchorIndex];
 
-							if (anchorId == null)
-								continue ;
-
-							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchorId.Value);
+							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchor);
 							outputNodeList.AddRange(attachedNodesToAnchor);
 
 							// if (attachedNodesToAnchor.Count == 0)

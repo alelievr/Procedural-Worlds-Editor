@@ -43,9 +43,9 @@ namespace PW.Node
 			}
 		}
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "2D TopDown terrain";
+			name = "2D TopDown terrain";
 			terrainOutput = new TopDown2DData();
 		}
 

@@ -78,6 +78,7 @@ namespace PW
 
 		public IEnumerable< PWNodeLink >	GetOutputLinks()
 		{
+			//TODO: bake this to avoid GC
 			return	from oaf in outputAnchorFields
 					from oa in oaf.anchors
 					from l in oa.links
@@ -86,6 +87,7 @@ namespace PW
 
 		public IEnumerable< PWNodeLink >	GetInputLinks()
 		{
+			//TODO: bake this to avoid GC
 			return	from oaf in inputAnchorFields
 					from oa in oaf.anchors
 					from l in oa.links

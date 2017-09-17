@@ -31,7 +31,7 @@ namespace PW.Node
 	
 		bool			intify = false;
 	
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			//override window width
 			windowRect.width = 150;

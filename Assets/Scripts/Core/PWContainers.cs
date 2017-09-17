@@ -628,11 +628,24 @@ namespace PW.Core
 	**	PWNode render settings
 	*/
 
+	public enum PWGUIFieldType
+	{
+		Color,
+		Text,
+		Slider,
+		IntSlider,
+		TexturePreview,
+		Sampler2DPreview,
+		BiomeMapPreview,
+		Texture2DArrayPreview,
+	}
+
 	[Serializable]
 	public class PWGUISettings
 	{
-		public bool		active {get;  private set;}
-		public Vector2	windowPosition;
+		public bool				active {get;  private set;}
+		public Vector2			windowPosition;
+		public PWGUIFieldType	fieldType;
 
 		[System.NonSerializedAttribute]
 		public object	oldState = null;
@@ -672,6 +685,12 @@ namespace PW.Core
 		//Editor utils:
 		[System.NonSerialized]
 		public int					popupHeight;
+
+		//Sampler value to update textures:
+		[System.NonSerialized]
+		public Sampler2D			sampler2D;
+		[System.NonSerialized]
+		public BiomeData			biomeData;
 		
 		public PWGUISettings()
 		{

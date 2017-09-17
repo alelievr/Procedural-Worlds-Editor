@@ -11,9 +11,9 @@ namespace PW.Node
 		[PWOutput]
 		public Color		outputColor;
 	
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Color";
+			name = "Color";
 		}
 
 		public override void OnNodeGUI()

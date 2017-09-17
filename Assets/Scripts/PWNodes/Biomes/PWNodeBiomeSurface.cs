@@ -32,9 +32,9 @@ namespace PW.Node
 			LayerAndSlopeSurface,
 		}
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Biome surface";
+			name = "Biome surface";
 			layerList = new ReorderableList(surfaces.biomeLayers, typeof(BiomeSurfaceLayer));
 
 			layerList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4;

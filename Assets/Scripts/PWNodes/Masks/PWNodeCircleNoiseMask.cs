@@ -20,12 +20,12 @@ namespace PW.Node
 		Sampler2D			mask;
 		Texture2D			maskTexture;
 
-		public override void OnNodeCreateOnce()
+		public override void OnNodeCreation()
 		{
 			name = "2D noise mask";
 		}
 
-		public override	void OnNodeCreate()
+		public override	void OnNodeEnable()
 		{
 			mask = new Sampler2D(chunkSize, step);
 		}
@@ -83,11 +83,8 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (needUpdate)
-			{
-				CreateNoiseMask();
-				samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
-			}
+			CreateNoiseMask();
+			samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
 			output = samp;
 		}
 	}

@@ -21,9 +21,9 @@ namespace PW.Node
 		[SerializeField]
 		int						lastRequiredInputCount;
 	
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Biome Terrain";
+			name = "Biome Terrain";
 
 			modifierList = new ReorderableList(outputBiomeTerrain.terrainModifiers, typeof(BiomeTerrainModifer), true, true, true, true);
 

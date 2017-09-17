@@ -10,7 +10,7 @@ namespace PW.Core
 		[PWMultiple(0, typeof(object))]
 		public PWValues				outputValues = new PWValues();
 		
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 
 		}

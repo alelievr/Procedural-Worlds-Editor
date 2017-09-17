@@ -119,7 +119,7 @@ namespace PW
 				}
 			}
 
-			UpdateDependentStatus();
+			UpdateWorkStatus();
 
 			//remove inhexistants field dictionary entries (for renamed variables):
 			var toRemoveKeys = new List< string >();
@@ -131,7 +131,7 @@ namespace PW
 		}
 
 		//retarget "Reload" button in the editor to the internal event OnReload:
-		void ReloadCallback() { OnReload(null); }
+		void GraphReloadCallback() { Reload(null); }
 
 		void ForceReloadCallback() { /*TODO*/ }
 
@@ -240,7 +240,7 @@ namespace PW
 			//if the node is used in a PWMainGraph:
 			if (mainGraphRef != null)
 			{
-				mainGraphRef.OnReload += ReloadCallback;
+				mainGraphRef.OnReload += GraphReloadCallback;
 				mainGraphRef.OnForceReload += ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere += OnClickedOutside;
@@ -265,7 +265,7 @@ namespace PW
 			//if the node is used in a PWMainGraph:
 			if (mainGraphRef != null)
 			{
-				mainGraphRef.OnReload -= ReloadCallback;
+				mainGraphRef.OnReload -= GraphReloadCallback;
 				mainGraphRef.OnForceReload -= ForceReloadCallback;
 			}
 			graphRef.OnClickNowhere -= OnClickedOutside;

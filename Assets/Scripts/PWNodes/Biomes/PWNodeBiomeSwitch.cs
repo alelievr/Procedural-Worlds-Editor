@@ -77,7 +77,7 @@ namespace PW.Node
 
 		[PWOutput]
 		[PWMultiple(typeof(BiomeData))]
-		[PWOffset(0, 53, 16)]
+		[PWOffset(53, 16)]
 		public PWValues			outputBiomes = new PWValues();
 
 		public BiomeSwitchMode			switchMode;
@@ -100,7 +100,7 @@ namespace PW.Node
 
 		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			name = "Biome switch";
 			biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));

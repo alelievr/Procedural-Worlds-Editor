@@ -22,9 +22,9 @@ namespace PW.Node
 		[SerializeField]
 		SerializableAnimationCurve	sCurve = new SerializableAnimationCurve();
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Curve";
+			name = "Curve";
 			curve = (AnimationCurve)sCurve;
 		}
 

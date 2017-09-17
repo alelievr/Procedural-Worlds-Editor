@@ -40,35 +40,13 @@ namespace PW.Node
 		[SerializeField]
 		Rect						colorPreviewRect;
 
-		static Dictionary< PWGraphTerrainType, List< string > > propertiesPerOutputType = new Dictionary< PWGraphTerrainType, List< string > >()
+		public override void OnNodeCreation()
 		{
-			{ PWGraphTerrainType.TopDown2D, new List< string >() {"terrainSurface"} },
-			{ PWGraphTerrainType.Planar3D, new List< string >() {""} },
-		};
-
-		void UpdateOutputType()
-		{
-			foreach (var kp in propertiesPerOutputType)
-				if (outputMode == kp.Key)
-					foreach (var propName in kp.Value)
-						UpdatePropVisibility(propName, PWVisibility.Visible);
-				else
-					foreach (var propName in kp.Value)
-						UpdatePropVisibility(propName, PWVisibility.Gone);
-		}
-
-		public override void OnNodeCreate()
-		{
-			externalName = "Biome binder";
+			name = "Biome binder";
 		}
 
 		public override void OnNodeGUI()
 		{
-			PWGraphTerrainType	oldTerrainMode = outputMode;
-				outputMode = GetTerrainOutputMode();
-			if (outputMode != oldTerrainMode)
-				UpdateOutputType();
-
 			EditorGUILayout.BeginHorizontal();
 			if (outputBiome != null)
 			{

@@ -18,7 +18,7 @@ namespace PW.Node
 		[SerializeField]
 		float				persistanceMax;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			name = "Perlin noise 2D";
 			output = new Sampler2D(chunkSize, step);

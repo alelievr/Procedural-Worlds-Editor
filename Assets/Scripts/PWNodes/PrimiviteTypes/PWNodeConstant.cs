@@ -42,10 +42,10 @@ namespace PW.Node
 			{ConstantType.Vector4, "outv4"},
 		};
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
 			renamable = true;
-			externalName = "Constant";
+			name = "Constant";
 
 			UpdateConstantType();
 		}

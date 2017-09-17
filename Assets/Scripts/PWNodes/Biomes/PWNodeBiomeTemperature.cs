@@ -33,9 +33,9 @@ namespace PW.Node
 		[SerializeField]
 		bool					internalTemperatureMap = true;
 
-		public override void OnNodeCreate()
+		public override void OnNodeCreation()
 		{
-			externalName = "Temperature node";
+			name = "Temperature node";
 
 			temperatureGradient = PWUtils.CreateGradient(
 				new KeyValuePair< float, Color >(0f, Color.blue),
