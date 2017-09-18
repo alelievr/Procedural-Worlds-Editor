@@ -256,8 +256,6 @@ namespace PW
 
 	#region inheritence virtual API
 
-		public virtual void OnNodeAwake() {}
-
 		public virtual void OnNodeCreation() {}
 
 		public virtual void OnNodeEnable() {}

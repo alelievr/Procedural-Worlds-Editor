@@ -40,7 +40,7 @@ namespace PW
 				anchor.color = newColor;
 		}
 
-		public void				UpdatePropVisibility(string fieldName, PWVisibility visibility, int index = 0)
+		public void				SetAnchorVisibility(string fieldName, PWVisibility visibility, int index = 0)
 		{
 			PWAnchor	anchor = GetAnchorFromField(fieldName, index);
 
@@ -48,7 +48,7 @@ namespace PW
 				anchor.visibility = visibility;
 		}
 
-		public void				UpdateMultiProp(string fieldName, int newCount, params string[] newNames)
+		public void				SetMultiAnchor(string fieldName, int newCount, params string[] newNames)
 		{
 			if (!anchorFields.ContainsKey(fieldName))
 				return ;
@@ -71,6 +71,14 @@ namespace PW
 				for (int i = 0; i < newNames.Length; i++)
 					anchorField.anchors[i].name = newNames[i];
 			}
+		}
+
+		public void				SetAnchorPosition(string fieldName, int y, int index = 0)
+		{
+			PWAnchor	anchor = GetAnchorFromField(fieldName, index);
+
+			if (anchor != null)
+				anchor.forcedY = y;
 		}
 
 		public int				GetAnchorLinkCount(string fieldName, int index = 0)

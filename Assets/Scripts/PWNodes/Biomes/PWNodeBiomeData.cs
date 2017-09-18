@@ -10,10 +10,12 @@ namespace PW.Node
 
 		[PWInput("Terrain input")]
 		[PWOffset(5)]
+		[System.NonSerialized]
 		public Sampler			terrain;
 
 		[PWOutput("Biome datas")]
 		[PWOffset(5)]
+		[System.NonSerialized]
 		public BiomeData		outputBiome;
 		
 		[SerializeField]
@@ -26,6 +28,11 @@ namespace PW.Node
 			mapMin = 0;
 			mapMax = 100;
 			name = "Terrain to BiomeData";
+		}
+
+		public override void OnNodeEnable()
+		{
+			CreateNewBiome();
 		}
 		
 		public override void OnNodeGUI()
@@ -58,16 +65,10 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (outputBiome == null || forceReload)
-				CreateNewBiome();
-
-			if (needUpdate || reloadRequested)
+			if (terrain != null && terrain.type == SamplerType.Sampler2D)
 			{
-				if (terrain != null && terrain.type == SamplerType.Sampler2D)
-				{
-					//terrain mapping
-					outputBiome.terrain = PWNoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true);
-				}
+				//terrain mapping
+				outputBiome.terrain = PWNoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true);
 			}
 		}
 	}

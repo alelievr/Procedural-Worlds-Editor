@@ -68,14 +68,14 @@ namespace PW.Node
 		{
 			if (isMaterialOutput)
 			{
-				UpdatePropVisibility("outputTexture", PWVisibility.Gone);
-				UpdatePropVisibility("outputMaterial", PWVisibility.Visible);
+				SetAnchorVisibility("outputTexture", PWVisibility.Gone);
+				SetAnchorVisibility("outputMaterial", PWVisibility.Visible);
 				RequestRemoveLink("outputTexture");
 			}
 			else
 			{
-				UpdatePropVisibility("outputTexture", PWVisibility.Visible);
-				UpdatePropVisibility("outputMaterial", PWVisibility.Gone);
+				SetAnchorVisibility("outputTexture", PWVisibility.Visible);
+				SetAnchorVisibility("outputMaterial", PWVisibility.Gone);
 				RequestRemoveLink("outputMaterial");
 			}
 		}

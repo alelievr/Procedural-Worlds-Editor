@@ -21,6 +21,7 @@ namespace PW.Core
 
         //asset datas:
         public string							assetFilePath;
+		public string							PWFolderPath;
         public new string               	    name;
 
 

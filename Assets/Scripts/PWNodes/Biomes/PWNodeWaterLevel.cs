@@ -35,6 +35,16 @@ namespace PW.Node
 			name = "Water level";
 		}
 
+		public override void OnNodeEnable()
+		{
+
+		}
+
+		public override void OnNodeDisable()
+		{
+			
+		}
+
 		void UpdateGradient()
 		{
 			waterGradient = PWUtils.CreateGradient(GradientMode.Fixed, 

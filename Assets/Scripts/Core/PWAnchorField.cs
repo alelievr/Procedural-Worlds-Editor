@@ -161,6 +161,9 @@ namespace PW.Core
 			Vector2		anchorSize = new Vector2(13, 13);
 			Vector2		margin = new Vector2(0, 2);
 
+			if (anchor.forcedY != -1)
+				renderRect.yMin = anchor.forcedY;
+			
 			anchor.rect = new Rect(renderRect.min + margin, anchorSize);
 
 			//anchor name:

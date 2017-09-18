@@ -108,7 +108,7 @@ namespace PW.Node
 
 			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
 
-			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { notifyBiomeDataChanged = true; });
+			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
 				BiomeFieldSwitchData elem = switchDatas[index];
@@ -156,12 +156,12 @@ namespace PW.Node
 			};
 
 			switchList.onReorderCallback += (ReorderableList l) => {
-				notifyBiomeDataChanged = true;
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
 			};
 
 			switchList.onAddCallback += (ReorderableList l) => {
 				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
-				notifyBiomeDataChanged = true;
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
 				UpdateSwitchMode();
 			};
 
@@ -169,7 +169,7 @@ namespace PW.Node
 				if (switchDatas.Count > 1)
 				{
 					switchDatas.RemoveAt(l.index);
-					notifyBiomeDataChanged = true;
+					delayedChanges.UpdateValue(delayedUpdateKey, null);
 					UpdateSwitchMode();
 				}
 			};
@@ -183,9 +183,9 @@ namespace PW.Node
 		void UpdateSwitchMode()
 		{
 			if (switchMode == BiomeSwitchMode.Water)
-				UpdateMultiProp("outputBiomes", 2, "terrestrial", "aquatic");
+				SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
 			else
-				UpdateMultiProp("outputBiomes", switchDatas.Count, null);
+				SetMultiAnchor("outputBiomes", switchDatas.Count, null);
 		}
 
 		Dictionary< BiomeSwitchMode, string > switchModeToName = new Dictionary< BiomeSwitchMode, string >()
@@ -245,7 +245,7 @@ namespace PW.Node
 		public override void OnNodeGUI()
 		{
 			for (int i = 0; i < outputBiomes.Count; i++)
-				UpdatePropVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
+				SetAnchorVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
 				
 			if (biomeRepartitionPreview == null)
 				biomeRepartitionPreview = new Texture2D(previewTextureWidth, 1);
@@ -266,7 +266,7 @@ namespace PW.Node
 				else
 					EditorGUILayout.LabelField("");
 			}
-			if (EditorGUI.EndChangeCheck() || needUpdate || biomeReloadRequested)
+			if (EditorGUI.EndChangeCheck())
 			{
 				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();

@@ -31,33 +31,30 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			name = "Biome blender";
-
-			InitOrUpdatePreview();
 		}
 
 		public override void OnNodeEnable()
 		{
-			OnReload += BuildBiomeTree;
+			OnReload += OnReloadCallback;
+			
+			if (inputBiomes.GetValues< Biome >().Count == 0)
+				return ;
+			
+			//TODO: will not work
+			// if (biome == null)
+				// return ;
+			var biome = inputBiomes.GetValues< Biome >().First().biomeDataReference;
+			var heightSamp = biome.terrainRef;
+			biomeRepartitionPreview = new Texture2D(heightSamp.size, heightSamp.size, TextureFormat.RGBA32, false);
+			biomeRepartitionPreview.filterMode = FilterMode.Point;
+
+			//TODO sampler resizing
+				biomeRepartitionPreview.Resize(heightSamp.size, heightSamp.size);
 		}
 
 		public override void OnNodeDisable()
 		{
-			OnReload -= BuildBiomeTree;
-		}
-
-		void InitOrUpdatePreview()
-		{
-			if (inputBiomes.GetValues< Biome >().Count != 0)
-			{
-				var biome = inputBiomes.GetValues< Biome >().First().biomeDataReference;
-				if (biome == null)
-					return ;
-				var heightSamp = biome.terrainRef;
-				biomeRepartitionPreview = new Texture2D(heightSamp.size, heightSamp.size, TextureFormat.RGBA32, false);
-				biomeRepartitionPreview.filterMode = FilterMode.Point;
-				if (chunkSizeHasChanged)
-					biomeRepartitionPreview.Resize(heightSamp.size, heightSamp.size);
-			}
+			OnReload -= OnReloadCallback;
 		}
 
 		public override void OnNodeGUI()
@@ -93,8 +90,7 @@ namespace PW.Node
 				//TODO: exloit the biome switch tree datas
 			}
 			
-			if (outputBlendedBiomeTerrain.terrainTextureArray == null || forceReload || GetReloadRequestType() == typeof(PWNodeBiomeSurface))
-				LoadBiomeTexture2DArray(biomeData, false);
+			LoadBiomeTexture2DArray(biomeData, false);
 		}
 
 		public override void OnNodeProcess()
@@ -125,8 +121,19 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.lightingMap = biomeData.lighting;
 			outputBlendedBiomeTerrain.airMap = biomeData.airRef;
 		}
+
+		void OnReloadCallback(PWNode from)
+		{
+			//from the editor:
+			if (from = null)
+				BuildBiomeTree();
+			
+			//TODO: improve this:
+			if (from.GetType() == typeof(PWNodeBiomeSwitch))
+				LoadBiomeTexture2DArray(biomeData);
+		}
 		
-		void BuildBiomeTree(PWNode from)
+		void BuildBiomeTree()
 		{
 			inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTree.BuildTree(inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTreeStartPoint);
 		}
@@ -155,7 +162,7 @@ namespace PW.Node
 			if (biomeData == null)
 				return ;
 			
-			string	assetFilePath = System.IO.Path.Combine(GetGraphPath(), GetGraphName() + "-Albedo");
+			string	assetFilePath = graphRef.PWFolderPath + "/" + graphRef.name + "-AlbedoMaps";
 			outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, assetFilePath);
 		}
 	}

@@ -54,10 +54,10 @@ namespace PW.Node
 		{
 			foreach (var propKp in properties)
 				if (propKp.Key == selectedConstantType)
-					UpdatePropVisibility(propKp.Value, PWVisibility.Visible);
+					SetAnchorVisibility(propKp.Value, PWVisibility.Visible);
 				else
 				{
-					UpdatePropVisibility(propKp.Value, PWVisibility.Gone);
+					SetAnchorVisibility(propKp.Value, PWVisibility.Gone);
 					RequestRemoveLink(propKp.Value);
 				}
 		}

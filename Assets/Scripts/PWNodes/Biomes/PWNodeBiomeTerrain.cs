@@ -58,11 +58,11 @@ namespace PW.Node
 						elem.curve = EditorGUI.CurveField(curveRect, (AnimationCurve)elem.curve);
 						break ;
 					case BiomeTerrainModifierType.Max:
-						UpdateMultiProp("inputs", lastRequiredInputCount);
+						SetMultiAnchor("inputs", lastRequiredInputCount);
 						if (Event.current.type == EventType.Repaint)
 							elem.y = rect.y;
-						UpdatePropVisibility("inputs", PWVisibility.Visible, listRequiredInputCout);
-						UpdatePropPosition("inputs", elem.y - 10, listRequiredInputCout);
+						SetAnchorVisibility("inputs", PWVisibility.Visible, listRequiredInputCout);
+						SetAnchorPosition("inputs", (int)elem.y - 10, listRequiredInputCout);
 						listRequiredInputCout++;
 						break ;
 					default:
@@ -75,19 +75,19 @@ namespace PW.Node
 			};
 
 			modifierList.onReorderCallback += (l) => {
-				notifyDataChanged = true;
+				NotifyReload();
 			};
 
 			modifierList.onAddCallback += (l) => {
 				outputBiomeTerrain.terrainModifiers.Add(new BiomeTerrainModifer());
-				notifyDataChanged = true;
+				NotifyReload();
 			};
 
 			modifierList.onRemoveCallback += (l) => {
 				if (outputBiomeTerrain.terrainModifiers.Count >= 1)
 				{
 					outputBiomeTerrain.terrainModifiers.RemoveAt(l.index);
-					notifyDataChanged = true;
+					NotifyReload();
 				}
 			};
 		}
@@ -97,7 +97,7 @@ namespace PW.Node
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 			for (int i = 0; i < modifierList.count; i++)
-				UpdatePropVisibility("inputs", PWVisibility.Invisible, i);
+				SetAnchorVisibility("inputs", PWVisibility.Invisible, i);
 			listRequiredInputCout = 0;
 			modifierList.DoLayoutList();
 			lastRequiredInputCount = listRequiredInputCout;

@@ -47,7 +47,7 @@ namespace PW.Node
 
 			string outFieldName = GetOutputFieldName();
 			foreach (var prop in outputNames)
-				UpdatePropVisibility(prop, (prop == outFieldName) ? PWVisibility.Visible : PWVisibility.Gone);
+				SetAnchorVisibility(prop, (prop == outFieldName) ? PWVisibility.Visible : PWVisibility.Gone);
 		}
 	
 		string			GetModeName()

@@ -65,8 +65,8 @@ namespace PW.Node
 					slopeMap.maxSlope = 180;
 					if (Event.current.type == EventType.Repaint)
 						slopeMap.y = rect.y;
-					UpdateMultiProp("inputSurfaces", surfaces.biomeLayers.Count);
-					UpdatePropPosition("inputSurfaces", slopeMap.y, index);
+					SetMultiAnchor("inputSurfaces", surfaces.biomeLayers.Count);
+					SetAnchorPosition("inputSurfaces", (int)slopeMap.y, index);
 					slopeMap.surfaceMaps = inputSurfaces.At(index) as BiomeSurfaceMaps;
 				}
 			};
@@ -105,8 +105,8 @@ namespace PW.Node
 				if (Event.current.type == EventType.Repaint)
 					elem.y = rect.y;
 
-				UpdatePropPosition("inputSurfaces", elem.y, i);
-				UpdatePropVisibility("inputSurfaces", PWVisibility.Visible, i);
+				SetAnchorPosition("inputSurfaces", (int)elem.y, i);
+				SetAnchorVisibility("inputSurfaces", PWVisibility.Visible, i);
 				elem.surfaceMaps = inputSurfaces.At(inputIndex) as BiomeSurfaceMaps;
 				inputIndex++;
 			};
@@ -129,8 +129,8 @@ namespace PW.Node
 				if (layer.slopeMaps.Count == 0)
 					layer.slopeMaps.Add(new BiomeSurfaceSlopeMaps());
 				var slope = layer.slopeMaps[0];
-				UpdateMultiProp("inputSurfaces", 1);
-				UpdatePropPosition("inputSurfaces", 25, 0);
+				SetMultiAnchor("inputSurfaces", 1);
+				SetAnchorPosition("inputSurfaces", 25, 0);
 				slope.surfaceMaps = inputSurfaces.At(0) as BiomeSurfaceMaps;
 				return ;
 			}
@@ -146,7 +146,7 @@ namespace PW.Node
 			int	slopeCount = 0;
 			foreach (var layer in surfaces.biomeLayers)
 				slopeCount += layer.slopeMaps.Count;
-			UpdateMultiProp("inputSurfaces", slopeCount);
+			SetMultiAnchor("inputSurfaces", slopeCount);
 			foreach (var layer in surfaces.biomeLayers)
 			{
 				if ((layer.foldout = EditorGUILayout.Foldout(layer.foldout, layer.name)))
@@ -157,7 +157,7 @@ namespace PW.Node
 					slopeLists[i].DoLayoutList();
 				}
 				// else
-					// UpdatePropVisibility("inputSurfaces", PWVisibility.Invisible, i);
+					// SetAnchorVisibility("inputSurfaces", PWVisibility.Invisible, i);
 				i++;
 			}
 		}

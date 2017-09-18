@@ -44,7 +44,10 @@ namespace PW.Node
 				new KeyValuePair< float, Color >(.75f, PWColorPalette.orange),
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
-			
+		}
+
+		public override void OnNodeEnable()
+		{
 			UpdateTemperatureMap();
 		}
 
@@ -72,7 +75,7 @@ namespace PW.Node
 			if (fieldUpdate)
 				UpdateTemperatureMap();
 			
-			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, needUpdate, false, FilterMode.Point);
+			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, false, FilterMode.Point);
 
 			if (fieldUpdate)
 			{
@@ -125,9 +128,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (temperatureMap != null || needUpdate)
-				UpdateTemperatureMap();
-			
 			if (inputBiome != null)
 			{
 				inputBiome.temperature = temperatureMap as Sampler2D;

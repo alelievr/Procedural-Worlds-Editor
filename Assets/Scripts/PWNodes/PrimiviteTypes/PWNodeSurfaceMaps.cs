@@ -72,23 +72,23 @@ namespace PW.Node
 		void UpdateInputVisibilities()
 		{
 			foreach (var inputName in inputNames)
-				UpdatePropVisibility(inputName, PWVisibility.Gone);
+				SetAnchorVisibility(inputName, PWVisibility.Gone);
 
 			switch (type)
 			{
 				case SurfaceMapType.Basic:
 					foreach (var inputName in inputNames)
 						if (basicInputFields.Contains(inputName))
-							UpdatePropVisibility(inputName, PWVisibility.Visible);
+							SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
 				case SurfaceMapType.Normal:
 					foreach (var inputName in inputNames)
 						if (normalInputFields.Contains(inputName))
-							UpdatePropVisibility(inputName, PWVisibility.Visible);
+							SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
 				case SurfaceMapType.Complex:
 					foreach (var inputName in inputNames)
-						UpdatePropVisibility(inputName, PWVisibility.Visible);
+						SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
 			}
 		}
