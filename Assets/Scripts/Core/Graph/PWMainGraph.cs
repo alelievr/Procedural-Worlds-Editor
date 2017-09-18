@@ -30,9 +30,6 @@ namespace PW.Core
 		public bool						presetChoosed;
 
 		//chunk relative datas
-		public int						chunkSize;
-		public Vector3					chunkPosition;
-		public float					step;
 		public float					geologicTerrainStep;
 
 		public PWGraphTerrainType		outputType;
@@ -48,14 +45,11 @@ namespace PW.Core
 		[System.NonSerialized]
 		public GeologicBakedDatas		geologicBakedDatas = new GeologicBakedDatas();
 		
-
 		//parameter events:
-		public event System.Action				OnChunkSizeChanged;
-		public event System.Action				OnStepChanged;
-		public event System.Action				OnChunkPositionChanged;
+		public event Action< int >		OnGeologicStepChanged;
 		//button triggered events:
-		public event System.Action				OnReload;
-		public event System.Action				OnForceReload;
+		public event Action				OnReload;
+		public event Action				OnForceReload;
 		
 		void		BakeNeededGeologicDatas()
 		{

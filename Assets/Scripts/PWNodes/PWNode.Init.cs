@@ -49,6 +49,9 @@ namespace PW
 			List< string > actualFields = new List< string >();
 			foreach (var field in fInfos)
 			{
+				//TODO: remove AnchorFields and use inputAnchors and outputAnchors instead
+				//TODO: be careful for PWValues, serialized anchors must not be removed by
+				//		reading field informations.
 				actualFields.Add(field.Name);
 				if (!anchorFields.ContainsKey(field.Name))
 					anchorFields[field.Name] = new PWAnchorField();

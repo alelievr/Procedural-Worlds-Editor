@@ -29,6 +29,9 @@ namespace PW.Core
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		public int								seed;
+		public int								chunkSize;
+		public Vector3							chunkPosition;
+		public float							step;
 
 
 		//Link table, store all connections between node's anchors.
@@ -88,6 +91,9 @@ namespace PW.Core
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
+		public event System.Action				OnChunkSizeChanged;
+		public event System.Action				OnStepChanged;
+		public event System.Action				OnChunkPositionChanged;
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
 		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.

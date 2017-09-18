@@ -128,4 +128,14 @@ namespace PW.Core
 	{
 		public PWNotRequiredAttribute() {}
 	}
+
+	//Copy attribute tell to the graph to try to copy the field when
+	//	it is transfered from a the linked input anchor to this field.
+	//	by default, values are passed by references.
+	//	Can be used only on a PWInput field.
+	[AttributeUsage(AttributeTargets.Field)]
+	public class PWCopyAttribute : Attribute
+	{
+		public PWCopyAttribute() {}
+	}
 }

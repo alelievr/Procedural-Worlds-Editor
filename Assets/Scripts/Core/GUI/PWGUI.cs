@@ -798,7 +798,6 @@ namespace PW.Core
 				Debug.Log("biomeData does not contains biome map 2D");
 				return ;
 			}
-			var map = biomeData.biomeIds;
 			int texSize = biomeData.biomeIds.size;
 			var fieldSettings = GetGUISettingData(() => {
 				var state = new PWGUISettings();

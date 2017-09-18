@@ -36,25 +36,27 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			OnReload += OnReloadCallback;
+			OnChunkSizeChanged += ChunkSizeChanged;
 			
 			if (inputBiomes.GetValues< Biome >().Count == 0)
 				return ;
-			
-			//TODO: will not work
-			// if (biome == null)
-				// return ;
-			var biome = inputBiomes.GetValues< Biome >().First().biomeDataReference;
-			var heightSamp = biome.terrainRef;
-			biomeRepartitionPreview = new Texture2D(heightSamp.size, heightSamp.size, TextureFormat.RGBA32, false);
-			biomeRepartitionPreview.filterMode = FilterMode.Point;
 
-			//TODO sampler resizing
-				biomeRepartitionPreview.Resize(heightSamp.size, heightSamp.size);
+			biomeRepartitionPreview = new Texture2D(chunkSize, chunkSize, TextureFormat.RGBA32, false);
+			biomeRepartitionPreview.filterMode = FilterMode.Point;
 		}
 
-		public override void OnNodeDisable()
+		public void ChunkSizeChanged()
 		{
-			OnReload -= OnReloadCallback;
+			biomeRepartitionPreview.Resize(heightSamp.size, heightSamp.size);
+		}
+
+		public BiomeData	GetBiomeData()
+		{
+			var biomes = inputBiomes.GetValues< Biome >();
+			var biomeRef = biomes.FirstOrDefault(b => b.biomeDataReference != null);
+			if (biomeRef == null)
+				return null;
+			return biomeRef.biomeDataReference;
 		}
 
 		public override void OnNodeGUI()
@@ -124,7 +126,7 @@ namespace PW.Node
 
 		void OnReloadCallback(PWNode from)
 		{
-			//from the editor:
+			//Reload from the editor:
 			if (from = null)
 				BuildBiomeTree();
 			
@@ -164,6 +166,12 @@ namespace PW.Node
 			
 			string	assetFilePath = graphRef.PWFolderPath + "/" + graphRef.name + "-AlbedoMaps";
 			outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, assetFilePath);
+		}
+
+		public override void OnNodeDisable()
+		{
+			OnReload -= OnReloadCallback;
+			OnChunkSizeChanged -= ChunkSizeChanged;
 		}
 	}
 }

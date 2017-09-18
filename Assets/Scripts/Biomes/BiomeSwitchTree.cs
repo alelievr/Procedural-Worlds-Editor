@@ -21,7 +21,7 @@ namespace PW.Biomator
 
 		private Dictionary< int, Biome >	biomePerId = new Dictionary< int, Biome >();
 		private Dictionary< string, Biome >	biomePerName = new Dictionary< string, Biome >();
-		private Dictionary< BiomeSwitchMode, float > biomeCoverage = new Dictionary< BiomeSwitchMode, float >();
+		private Dictionary< PWBiomeSwitchMode, float > biomeCoverage = new Dictionary< PWBiomeSwitchMode, float >();
 
 		private enum SwitchMode
 		{
@@ -36,7 +36,7 @@ namespace PW.Biomator
 			public float				max;
 			public bool					value;
 			public SwitchMode			mode;
-			public BiomeSwitchMode		biomeSwitchMode;
+			public PWBiomeSwitchMode		biomeSwitchMode;
 			public Biome				biome;
 			public Color				previewColor;
 			public string				biomeName;
@@ -48,7 +48,7 @@ namespace PW.Biomator
 				mode = SwitchMode.Unknown;
 			}
 
-			public void SetSwitchValue(float min, float max, BiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
+			public void SetSwitchValue(float min, float max, PWBiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
 			{
 				this.min = min;
 				this.max = max;
@@ -59,7 +59,7 @@ namespace PW.Biomator
 				this.biome = null;
 			}
 			
-			public void SetSwitchValue(bool value, BiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
+			public void SetSwitchValue(bool value, PWBiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
 			{
 				this.value = value;
 				this.mode = SwitchMode.Bool;
@@ -142,7 +142,7 @@ namespace PW.Biomator
 				currentNode.SetChildCount(outputLinksCount);
 				switch (bSwitch.switchMode)
 				{
-					case BiomeSwitchMode.Water:
+					case PWBiomeSwitchMode.Water:
 						PWAnchor	terrestrialAnchor = node.GetAnchor("outputBiomes", 0);
 						PWAnchor	aquaticAnchor = node.GetAnchor("outputBiomes", 1);
 
@@ -153,7 +153,7 @@ namespace PW.Biomator
 							// Debug.Log("terrestrialNodes: " + nodes[0].nodeId);
 							for (int i = 0; i < nodes.Count(); i++)
 								currentNode.GetChildAt(childIndex++).SetSwitchValue(false, bSwitch.switchMode, "terrestrial", Color.black);
-							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
+							biomeCoverage[PWBiomeSwitchMode.Water] += 0.5f;
 						}
 						//get all nodes on the first anchor:
 						if (aquaticAnchor != null)
@@ -163,7 +163,7 @@ namespace PW.Biomator
 							outputNodeList.AddRange(nodes);
 							for (int i = 0; i < nodes.Count(); i++)
 								currentNode.GetChildAt(childIndex++).SetSwitchValue(true, bSwitch.switchMode, "aquatic", Color.blue);
-							biomeCoverage[BiomeSwitchMode.Water] += 0.5f;
+							biomeCoverage[PWBiomeSwitchMode.Water] += 0.5f;
 						}
 
 						break ;
@@ -195,7 +195,7 @@ namespace PW.Biomator
 				childIndex = 0;
 				foreach (var outNode in outputNodeList)
 				{
-					if (bSwitch.switchMode == BiomeSwitchMode.Water)
+					if (bSwitch.switchMode == PWBiomeSwitchMode.Water)
 						Debug.Log("water switch mode output type: " + currentNode.GetChildAt(childIndex) + " [" + childIndex + "] -> " + outNode);
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
 					Type outNodeType = outNode.GetType();
@@ -248,8 +248,8 @@ namespace PW.Biomator
 			st.Start();
 			root = new BiomeSwitchNode();
 			biomeCoverage.Clear();
-			foreach (var switchMode in Enum.GetValues(typeof(BiomeSwitchMode)))
-				biomeCoverage[(BiomeSwitchMode)switchMode] = 0;
+			foreach (var switchMode in Enum.GetValues(typeof(PWBiomeSwitchMode)))
+				biomeCoverage[(PWBiomeSwitchMode)switchMode] = 0;
 			BuildTreeInternal(node, root, 0);
 			st.Stop();
 
@@ -335,19 +335,19 @@ namespace PW.Biomator
 							var child = current.GetChildAt(i);
 							switch (child.biomeSwitchMode)
 							{
-								case BiomeSwitchMode.Water:
+								case PWBiomeSwitchMode.Water:
 									if (child.value == water)
 										{ current = child; goto nextChild; }
 									break ;
-								case BiomeSwitchMode.Height:
+								case PWBiomeSwitchMode.Height:
 									if (height > child.min && height <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
-								case BiomeSwitchMode.Temperature:
+								case PWBiomeSwitchMode.Temperature:
 									if (temp > child.min && temp <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
-								case BiomeSwitchMode.Wetness:
+								case PWBiomeSwitchMode.Wetness:
 									if (wet > child.min && wet <= child.max)
 										{ current = child; goto nextChild; }
 									break ;
@@ -395,7 +395,7 @@ namespace PW.Biomator
 			return biomePerId;
 		}
 
-		public Dictionary< BiomeSwitchMode, float > GetBiomeCoverage()
+		public Dictionary< PWBiomeSwitchMode, float > GetBiomeCoverage()
 		{
 			return biomeCoverage;
 		}

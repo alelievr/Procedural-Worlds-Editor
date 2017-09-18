@@ -21,6 +21,13 @@ namespace PW.Core
 		AttachAdd,				//link will be added to anchor links
 	}
 
+	[System.Serializable]
+	public enum PWTransferType
+	{
+		Reference,
+		Copy,
+	}
+
 	[System.SerializableAttribute]
 	public class PWAnchorField
 	{
@@ -43,6 +50,8 @@ namespace PW.Core
 		public SerializableType				fieldType;
 		//debug mode:
 		public bool							debug = false;
+		//anchor transfer type (when input datas are sent to this anchor)
+		public PWTransferType				transferType = PWTransferType.Reference;
 
 		//anchor name if specified in PWInput or PWOutput else null
 		public string						anchorName;

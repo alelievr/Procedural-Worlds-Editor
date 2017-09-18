@@ -10,35 +10,6 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public enum BiomeSwitchMode
-	{
-		Water,
-		Height,
-		Wetness,
-		Temperature,
-/*		Wind,
-		Lighting,
-		Air,
-		//TODO: one Soil swicth
-		SoilPH,
-		SoilDrainage,
-		SoilNutriment,
-		SoilMineral,
-		SoilClay,
-		SoilSilt,
-		SoilSand,
-		SoilGravel,
-		Custom1,
-		Custom2,
-		Custom3,
-		Custom4,
-		Custom5,
-		Custom6,
-		Custom7,
-		Custom8,
-		Custom9,*/
-	}
-
 	[System.SerializableAttribute]
 	public class BiomeFieldSwitchData
 	{
@@ -73,20 +44,20 @@ namespace PW.Node
 	public class PWNodeBiomeSwitch : PWNode {
 
 		[PWInput]
-		public BiomeData	inputBiome;
+		public BiomeData		inputBiome;
 
 		[PWOutput]
 		[PWMultiple(typeof(BiomeData))]
 		[PWOffset(53, 16)]
 		public PWValues			outputBiomes = new PWValues();
 
-		public BiomeSwitchMode			switchMode;
+		public PWBiomeSwitchMode			switchMode;
 		public List< BiomeFieldSwitchData >	switchDatas = new List< BiomeFieldSwitchData >();
 
 		ReorderableList			switchList;
 		string[]				biomeSwitchModes;
 		[SerializeField]
-		int						selectedBiomeSwitchMode;
+		int						selectedPWBiomeSwitchMode;
 		[SerializeField]
 		bool					error;
 		string					errorString;
@@ -102,8 +73,9 @@ namespace PW.Node
 
 		public override void OnNodeCreation()
 		{
+
 			name = "Biome switch";
-			biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));
+			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 
 			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
@@ -182,21 +154,21 @@ namespace PW.Node
 
 		void UpdateSwitchMode()
 		{
-			if (switchMode == BiomeSwitchMode.Water)
+			if (switchMode == PWBiomeSwitchMode.Water)
 				SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
 			else
 				SetMultiAnchor("outputBiomes", switchDatas.Count, null);
 		}
 
-		Dictionary< BiomeSwitchMode, string > switchModeToName = new Dictionary< BiomeSwitchMode, string >()
+		Dictionary< PWBiomeSwitchMode, string > switchModeToName = new Dictionary< PWBiomeSwitchMode, string >()
 		{
-			{BiomeSwitchMode.Water, "waterHeight"},
-			{BiomeSwitchMode.Wetness, "wetness"},
-			{BiomeSwitchMode.Temperature, "temperature"},
-			// {BiomeSwitchMode.Wind, "wind"},
-			// {BiomeSwitchMode.Lighting, "lighting"},
-			// {BiomeSwitchMode.Air, "air"},
-			{BiomeSwitchMode.Height, "terrain"}
+			{PWBiomeSwitchMode.Water, "waterHeight"},
+			{PWBiomeSwitchMode.Wetness, "wetness"},
+			{PWBiomeSwitchMode.Temperature, "temperature"},
+			// {PWBiomeSwitchMode.Wind, "wind"},
+			// {PWBiomeSwitchMode.Lighting, "lighting"},
+			// {PWBiomeSwitchMode.Air, "air"},
+			{PWBiomeSwitchMode.Height, "terrain"}
 			//soil settings apart.
 		};
 
@@ -259,8 +231,8 @@ namespace PW.Node
 			EditorGUIUtility.labelWidth = 80;
 			EditorGUI.BeginChangeCheck();
 			{
-				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedBiomeSwitchMode, biomeSwitchModes);
-				switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+				selectedPWBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedPWBiomeSwitchMode, biomeSwitchModes);
+				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedPWBiomeSwitchMode]);
 				if (currentSampler != null)
 					EditorGUILayout.LabelField("min: " + currentSampler.min + ", max: " + currentSampler.max);
 				else
@@ -307,7 +279,7 @@ namespace PW.Node
 				}
 				
 				//add water if there is and if switch mode is height:
-				if (!inputBiome.isWaterless && switchMode == BiomeSwitchMode.Height)
+				if (!inputBiome.isWaterless && switchMode == PWBiomeSwitchMode.Height)
 				{
 					float rMax = (inputBiome.waterLevel / range) * previewTextureWidth;
 					for (int x = 0; x < rMax; x++)
@@ -318,7 +290,7 @@ namespace PW.Node
 				updatePreview = false;
 			}
 			
-			if (switchMode != BiomeSwitchMode.Water)
+			if (switchMode != PWBiomeSwitchMode.Water)
 			{
 				switchList.DoLayoutList();
 
