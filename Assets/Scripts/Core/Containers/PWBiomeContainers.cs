@@ -293,7 +293,7 @@ namespace PW.Core
 		public Sampler				lightingMap;
 		public Sampler				airMap;
 
-		public Texture2DArray		terrainTextureArray;
+		public List< PWBiomeGraph >	biomes; //indices correspond to biome ids.
 	}
 	
 }

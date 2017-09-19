@@ -12,7 +12,7 @@ namespace PW.Node
 		//or a button to witch the node type
 
 		[PWInput("Terrain input")]
-		[PWNotRequired]
+		[PWNotRequired, PWCopy]
 		public Sampler		inputTerrain;
 
 		[PWOutput("Terrain output")]
@@ -30,35 +30,32 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			bool updatePreview = false;
+			if (inputTerrain == null)
+			{
+				EditorGUILayout.LabelField("Please connect the input terrain");
+				return ;
+			}
+
 			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
 			EditorGUI.BeginChangeCheck();
 			Rect pos = EditorGUILayout.GetControlRect(false, 100);
 			curve = EditorGUI.CurveField(pos, curve);
 			if (EditorGUI.EndChangeCheck())
 			{
-				updatePreview = true;
-				notifyDataChanged = true;
-				UpdateTerrain();
+				NotifyReload();
+				CurveTerrain(inputTerrain);
 				sCurve.SetAnimationCurve(curve);
 			}
 
-			if (inputTerrain != null)
-			{
-				if (inputTerrain.type == SamplerType.Sampler2D)
-					PWGUI.Sampler2DPreview(outputTerrain as Sampler2D, needUpdate || updatePreview);
-				else
-				{
-				}
-			}
+			PWGUI.SamplerPreview(outputTerrain);
 		}
 
-		void					CurveTerrain(Sampler input, Sampler output)
+		void					CurveTerrain(Sampler samp)
 		{
-			if (input.type == SamplerType.Sampler2D)
+			if (inputTerrain.type == SamplerType.Sampler2D)
 			{
-				(output as Sampler2D).Foreach((x, y, val) => {
-					return curve.Evaluate((input as Sampler2D)[x, y]);
+				(samp as Sampler2D).Foreach((x, y, val) => {
+					return curve.Evaluate(val);
 				});
 			}
 			else
@@ -67,24 +64,17 @@ namespace PW.Node
 			}
 		}
 
-		void					UpdateTerrain()
-		{
-			if (outputTerrain == null)
-				return ;
-
-			if (inputTerrain != null)
-				CurveTerrain(inputTerrain, outputTerrain);
-		}
-
 		public override void	OnNodeProcess()
 		{
-			if (inputTerrain != null)
-				PWUtils.ResizeSamplerIfNeeded(inputTerrain, ref outputTerrain);
-			
-			if (!needUpdate)
+			if (inputTerrain == null)
+			{
+				Debug.LogError("[PWNodeCurve] null inputTerrain received in input !");
 				return ;
+			}
+
+			outputTerrain = inputTerrain;
 			
-			UpdateTerrain();
+			CurveTerrain(outputTerrain);
 		}
 		
 	}

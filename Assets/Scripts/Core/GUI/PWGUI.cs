@@ -203,19 +203,19 @@ namespace PW.Core
 						GUI.DrawTexture(colorPickerThumbRect, colorPickerThumb);
 	
 						byte r, g, b, a;
-						PWColorScheme.ColorToByte(fieldSettings.c, out r, out g, out b, out a);
+						PWColor.ColorToByte(fieldSettings.c, out r, out g, out b, out a);
 						EditorGUIUtility.labelWidth = 20;
 						r = (byte)EditorGUILayout.IntSlider("R", r, 0, 255);
 						g = (byte)EditorGUILayout.IntSlider("G", g, 0, 255);
 						b = (byte)EditorGUILayout.IntSlider("B", b, 0, 255);
 						a = (byte)EditorGUILayout.IntSlider("A", a, 0, 255);
-						fieldSettings.c = (SerializableColor)PWColorScheme.ByteToColor(r, g, b, a);
+						fieldSettings.c = (SerializableColor)PWColor.ByteToColor(r, g, b, a);
 						EditorGUIUtility.labelWidth = 0;
 	
 						EditorGUILayout.Space();
 	
 						//hex field
-						int hex = PWColorScheme.ColorToHex(fieldSettings.c, false); //get color without alpha
+						int hex = PWColor.ColorToHex(fieldSettings.c, false); //get color without alpha
 						EditorGUIUtility.labelWidth = 80;
 						EditorGUI.BeginChangeCheck();
 						string hexColor = EditorGUILayout.TextField("Hex color", hex.ToString("X6"));
@@ -228,7 +228,7 @@ namespace PW.Core
 						if (hexColor == "")
 							hexColor = "0";
 						hex = int.Parse(a.ToString("X2") + hexColor, System.Globalization.NumberStyles.HexNumber);
-						fieldSettings.c = (SerializableColor)PWColorScheme.HexToColor(hex, false);
+						fieldSettings.c = (SerializableColor)PWColor.HexToColor(hex, false);
 	
 						if (e.isMouse && localColorPickerRect.Contains(e.mousePosition))
 							e.Use();
@@ -781,6 +781,27 @@ namespace PW.Core
 			fieldSettings.texture.Apply();
 			fieldSettings.update = false;
 		}
+
+	#endregion
+
+	#region Sampler field
+
+	public void SamplerPreview(Sampler sampler, bool settings = true)
+	{
+		SamplerPreview(null, sampler, settings);
+	}
+
+	public void SamplerPreview(string name, Sampler sampler, bool settings = true)
+	{
+		switch (sampler.type)
+		{
+			case SamplerType.Sampler2D:
+				Sampler2DPreview(name, sampler as Sampler2D, settings);
+				break ;
+			default:
+				break ;
+		}
+	}
 
 	#endregion
 

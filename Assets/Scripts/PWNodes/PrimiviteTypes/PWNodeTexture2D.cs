@@ -70,13 +70,13 @@ namespace PW.Node
 			{
 				SetAnchorVisibility("outputTexture", PWVisibility.Gone);
 				SetAnchorVisibility("outputMaterial", PWVisibility.Visible);
-				RequestRemoveLink("outputTexture");
+				RemoveAllLinksFromAnchor("outputTexture");
 			}
 			else
 			{
 				SetAnchorVisibility("outputTexture", PWVisibility.Visible);
 				SetAnchorVisibility("outputMaterial", PWVisibility.Gone);
-				RequestRemoveLink("outputMaterial");
+				RemoveAllLinksFromAnchor("outputMaterial");
 			}
 		}
 

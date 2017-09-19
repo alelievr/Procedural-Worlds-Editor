@@ -60,7 +60,6 @@ namespace PW
 				PWAnchorType	anchorType = PWAnchorType.None;
 				string			name = "";
 				Vector2			offset = Vector2.zero;
-				int				multiPadding = 0;
 				
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
@@ -96,7 +95,7 @@ namespace PW
 					if (offsetAttr != null)
 					{
 						anchorField.offset = offsetAttr.offset;
-						multiPadding = offsetAttr.multiPadding;
+						anchorField.padding = offsetAttr.padding;
 					}
 					if (multipleAttr != null)
 					{

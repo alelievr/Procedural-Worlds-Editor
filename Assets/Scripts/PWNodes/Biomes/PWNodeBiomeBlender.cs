@@ -16,9 +16,6 @@ namespace PW.Node
 
 		[PWOutput]
 		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
-		//TODO: set the terrain as output.
-
-		//TODO: biome blend range by disponible biomeData fields
 
 		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
@@ -36,7 +33,7 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			OnReload += OnReloadCallback;
-			OnChunkSizeChanged += ChunkSizeChanged;
+			graphRef.OnChunkSizeChanged += ChunkSizeChanged;
 			
 			if (inputBiomes.GetValues< Biome >().Count == 0)
 				return ;
@@ -47,7 +44,7 @@ namespace PW.Node
 
 		public void ChunkSizeChanged()
 		{
-			biomeRepartitionPreview.Resize(heightSamp.size, heightSamp.size);
+			biomeRepartitionPreview.Resize(chunkSize, chunkSize);
 		}
 
 		public BiomeData	GetBiomeData()
@@ -91,8 +88,6 @@ namespace PW.Node
 						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
 				//TODO: exloit the biome switch tree datas
 			}
-			
-			LoadBiomeTexture2DArray(biomeData, false);
 		}
 
 		public override void OnNodeProcess()
@@ -127,12 +122,8 @@ namespace PW.Node
 		void OnReloadCallback(PWNode from)
 		{
 			//Reload from the editor:
-			if (from = null)
+			if (from == null)
 				BuildBiomeTree();
-			
-			//TODO: improve this:
-			if (from.GetType() == typeof(PWNodeBiomeSwitch))
-				LoadBiomeTexture2DArray(biomeData);
 		}
 		
 		void BuildBiomeTree()
@@ -153,25 +144,12 @@ namespace PW.Node
 
 			//build the biome tree:
 			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-			
-			//generate (edit mode) or load (play mode) the albedo texture array for the shader:
-			if (outputBlendedBiomeTerrain.terrainTextureArray == null)
-				LoadBiomeTexture2DArray(biomeData, true);
-		}
-
-		void	LoadBiomeTexture2DArray(BiomeData biomeData, bool forceReload)
-		{
-			if (biomeData == null)
-				return ;
-			
-			string	assetFilePath = graphRef.PWFolderPath + "/" + graphRef.name + "-AlbedoMaps";
-			outputBlendedBiomeTerrain.terrainTextureArray = PWAssets.GenerateOrLoadBiomeTexture2DArray(biomeData.biomeTree, assetFilePath);
 		}
 
 		public override void OnNodeDisable()
 		{
 			OnReload -= OnReloadCallback;
-			OnChunkSizeChanged -= ChunkSizeChanged;
+			graphRef.OnChunkSizeChanged -= ChunkSizeChanged;
 		}
 	}
 }

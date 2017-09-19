@@ -7,7 +7,7 @@ namespace PW.Node
 	public class PWNodeSideView2DTerrain : PWNode {
 	
 		[PWInput]
-		public Sampler2D		texture;
+		public Sampler2D		terrain;
 
 		[PWOutput]
 		public SideView2DData	terrainOutput;
@@ -15,23 +15,22 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			name = "2D SideView terrain";
-			texture = new Sampler2D(chunkSize, step);
 		}
 
 		public override void OnNodeGUI()
 		{
+			if (terrain == null)
+			{
+				EditorGUILayout.LabelField("Please connect the input to a terrain !");
+			}
 			EditorGUILayout.LabelField("MAP:");
 			
-			if (chunkSizeHasChanged)
-				texture = new Sampler2D(chunkSize, step);
-			
-			PWGUI.Sampler2DPreview("perlinControlName", texture, needUpdate);
+			PWGUI.Sampler2DPreview("perlinControlName", terrain);
 		}
 
 		public override void OnNodeProcess()
 		{
 			terrainOutput.size = chunkSize;
-			// terrainOutput.texture = samplerTexture;
 		}
 
 	}

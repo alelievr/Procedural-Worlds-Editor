@@ -10,7 +10,6 @@ public static class PWWorker {
 	public static int			checkTimeout = 10; //ms
 
 	static Queue< Completed >	completedQueue = new Queue< Completed >();
-	static bool					working = false;
 
 	private class Completed
 	{

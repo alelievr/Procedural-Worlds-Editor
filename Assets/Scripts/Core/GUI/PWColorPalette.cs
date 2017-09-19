@@ -7,6 +7,7 @@ namespace PW.Core
 {
 	public enum PWColorPalette  {
 	
+		Default,
 		Node1,
 		Node2,
 		Node3,

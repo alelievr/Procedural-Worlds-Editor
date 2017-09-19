@@ -39,10 +39,10 @@ namespace PW
 
 
 		//Graph datas accessors:
-		protected Vector3		chunkPosition { get { return mainGraphRef.chunkPosition; } }
-		protected int			chunkSize { get { return mainGraphRef.chunkSize; } }
+		protected Vector3		chunkPosition { get { return graphRef.chunkPosition; } }
+		protected int			chunkSize { get { return graphRef.chunkSize; } }
 		protected int			seed { get { return graphRef.seed; } }
-		protected float			step { get { return mainGraphRef.step; } }
+		protected float			step { get { return graphRef.step; } }
 
 
 		//Debug variables:

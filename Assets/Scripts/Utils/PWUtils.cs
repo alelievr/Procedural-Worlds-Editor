@@ -154,29 +154,5 @@ namespace PW
 			Debug.LogWarning(p);
 			localMaxLogWarning++;
 		}
-
-		public static void	ResizeSamplerIfNeeded(Sampler s, ref Sampler sOut)
-		{
-			if (s == null)
-				return ;
-			switch (s.type)
-			{
-				case SamplerType.Sampler2D:
-					if (sOut == null)
-						sOut = new Sampler2D(s.size, s.step);
-					if (s.size != sOut.size)
-						(sOut as Sampler2D).Resize(s.size);
-					break ;
-				case SamplerType.Sampler3D:
-					if (sOut == null)
-						sOut = new Sampler3D(s.size, s.step);
-					if (s.size != sOut.size)
-						(sOut as Sampler2D).Resize(s.size);
-					break ;
-			}
-			sOut.min = s.min;
-			sOut.max = s.max;
-			sOut.step = s.step;
-		}
     }
 }

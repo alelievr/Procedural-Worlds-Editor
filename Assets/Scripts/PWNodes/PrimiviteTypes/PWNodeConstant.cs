@@ -58,7 +58,7 @@ namespace PW.Node
 				else
 				{
 					SetAnchorVisibility(propKp.Value, PWVisibility.Gone);
-					RequestRemoveLink(propKp.Value);
+					RemoveAllLinksFromAnchor(propKp.Value);
 				}
 		}
 

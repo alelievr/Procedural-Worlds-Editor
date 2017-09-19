@@ -36,6 +36,12 @@ namespace PW
 			OnLinkRemoved(link);
 		}
 
+		public void		RemoveAllLinksFromAnchor(string fieldName)
+		{
+			foreach (var anchor in anchorFields[fieldName].anchors)
+				RemoveAllLinksFromAnchor(anchor);
+		}
+
 		public void		RemoveAllLinksFromAnchor(PWAnchor anchor)
 		{
 			foreach (var link in anchor.links)

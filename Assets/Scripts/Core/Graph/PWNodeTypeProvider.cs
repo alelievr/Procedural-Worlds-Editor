@@ -10,15 +10,15 @@ namespace PW.Core
     {
         class NodeTypeInfo
         {
-            public Type				type;
-            public PWColorPalette	color;
-			public string			name;
+            public Type				type = null;
+            public PWColorPalette	color = PWColorPalette.Default;
+			public string			name = null;
         }
 
 		class NodeTypeInfoList
 		{
-			public string	title {get; set;}
-			public List< string >	typeInfos = new List< string >();
+			public string           title {get; set;}
+			public List< NodeTypeInfo >   typeInfos = new List< NodeTypeInfo >();
 		}
 
         static List< Type > allNodeTypes = new List< Type >

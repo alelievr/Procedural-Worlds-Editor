@@ -75,7 +75,7 @@ namespace PW.Node
 			if (EditorGUI.EndChangeCheck())
 			{
 				CreateNoiseMask();
-				notifyDataChanged = true;
+				NotifyReload();
 			}
 			
 			GUILayout.Label(maskTexture);

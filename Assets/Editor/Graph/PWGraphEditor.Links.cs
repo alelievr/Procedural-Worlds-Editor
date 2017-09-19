@@ -3,12 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
 using PW.Node;
+using UnityEditor;
 
 //Links between nodes rendering
 public partial class PWGraphEditor {
+
+	void DrawNodeCurve(PWAnchor anchor, Vector2 endPoint)
+	{
+		
+	}
 	
-    void DrawNodeCurve(Rect start, Rect end, int index, PWLink link)
+    void DrawNodeCurve(PWNodeLink link)
     {
+		if (link == null)
+		{
+			Debug.LogError("[PWGraphEditor] attempt to draw null link !");
+			return ;
+		}
+
 		Event e = Event.current;
 
 		int		id;
@@ -16,6 +28,8 @@ public partial class PWGraphEditor {
 			id = -1;
 		else
 			id = GUIUtility.GetControlID((link.localName + link.distantName + index).GetHashCode(), FocusType.Passive);
+
+		//TODO: integrate eventMasks
 
         Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);
@@ -58,22 +72,21 @@ public partial class PWGraphEditor {
 		if (e.type == EventType.Repaint)
 		{
 			PWLinkHighlight s = (link != null) ? (link.linkHighlight) : PWLinkHighlight.None;
-			PWNodeProcessMode m = (link != null) ? link.mode : PWNodeProcessMode.AutoProcess;
 			switch ((link != null) ? link.linkType : PWLinkType.BasicData)
 			{
 				case PWLinkType.Sampler3D:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 8, s);
 					break ;
 				case PWLinkType.ThreeChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s);
 					break ;
 				case PWLinkType.FourChannel:
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 16, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s, m);
-					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s, m);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(.1f, .1f, .1f), 16, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 0f, 1f), 12, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(0f, 1f, 0f), 8, s);
+					DrawSelectedBezier(startPos, endPos, startTan, endTan, new Color(1f, 0f, 0f), 4, s);
 					break ;
 				default:
 					DrawSelectedBezier(startPos, endPos, startTan, endTan, (link == null) ? startDragAnchor.anchorColor : link.color, 4, s, m);
@@ -86,7 +99,7 @@ public partial class PWGraphEditor {
 		}
     }
 
-	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight, PWNodeProcessMode linkMode)
+	void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, Color c, int width, PWLinkHighlight linkHighlight)
 	{
 		switch (linkHighlight)
 		{
@@ -100,19 +113,16 @@ public partial class PWGraphEditor {
 		}
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 
-		if (linkMode == PWNodeProcessMode.RequestForProcess)
-		{
-			Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
-			Vector2 pauseSize = new Vector2(20, 20);
-			Matrix4x4 savedGUIMatrix = GUI.matrix;
-			Rect pauseRect = new Rect((Vector2)points[2] - pauseSize / 2, pauseSize);
-			float angle = Vector2.Angle((startPos.y > endPos.y) ? startPos - endPos : endPos - startPos, Vector2.right);
-			GUIUtility.RotateAroundPivot(angle, points[2]);
-			GUI.color = c;
-            GUI.DrawTexture(pauseRect, pauseIconTexture);
-			GUI.color = Color.white;
-			GUI.matrix = savedGUIMatrix;
-        }
+			// Vector3[] points = Handles.MakeBezierPoints(startPos, endPos, startTan, endTan, 4);
+			// Vector2 pauseSize = new Vector2(20, 20);
+			// Matrix4x4 savedGUIMatrix = GUI.matrix;
+			// Rect pauseRect = new Rect((Vector2)points[2] - pauseSize / 2, pauseSize);
+			// float angle = Vector2.Angle((startPos.y > endPos.y) ? startPos - endPos : endPos - startPos, Vector2.right);
+			// GUIUtility.RotateAroundPivot(angle, points[2]);
+			// GUI.color = c;
+            // GUI.DrawTexture(pauseRect, pauseIconTexture);
+			// GUI.color = Color.white;
+			// GUI.matrix = savedGUIMatrix;
 	}
 
 }

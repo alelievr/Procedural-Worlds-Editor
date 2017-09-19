@@ -69,20 +69,16 @@ namespace PW.Node
 				}
 			}
 			EditorGUILayout.EndHorizontal();
-
-			if (terrainOutput.albedoMaps != null)
-				PWGUI.Texture2DArrayPreview(terrainOutput.albedoMaps, needUpdate);
 		}
 
 		public override void OnNodeProcess()
 		{
 			//TODO: 3D biome map management
-			BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
+			//TODO: replace this by the PWBiomeGraph
+			// BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
 
 			terrainOutput.biomeMap = inputBlendedBiomes.biomeMap;
 			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
-
-			terrainOutput.albedoMaps = inputBlendedBiomes.terrainTextureArray;
 
 			//TODO: apply geologic layer (rivers / oth)
 

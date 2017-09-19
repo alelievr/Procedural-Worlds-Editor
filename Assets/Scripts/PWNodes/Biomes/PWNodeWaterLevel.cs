@@ -37,7 +37,10 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
+			outputBiome = new BiomeData();
 
+			outputBiome.isWaterless = false;
+			outputBiome.biomeTreeStartPoint = this;
 		}
 
 		public override void OnNodeDisable()
@@ -105,40 +108,36 @@ namespace PW.Node
 
 		void				CreateNewBiome()
 		{
-			outputBiome = new BiomeData();
-
-			outputBiome.isWaterless = false;
-			outputBiome.biomeTreeStartPoint = this;
 		}
 
 		public override void OnNodeProcess()
 		{
-			if (outputBiome == null || forceReload)
-				CreateNewBiome();
-			
-			if (needUpdate || reloadRequested || biomeReloadRequested)
+			if (terrainNoise == null)
 			{
-				outputBiome.terrain = terrainNoise as Sampler2D;
-				outputBiome.terrain3D = terrainNoise as Sampler3D;
-				
-				outputBiome.waterLevel = waterLevel;
-
-				if (terrainNoise != null && terrainNoise.type == SamplerType.Sampler2D)
-				{
-					//terrain mapping
-					outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
-
-					//waterHeight evaluation
-					outputBiome.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-					outputBiome.waterHeight.min = mapMin;
-					outputBiome.waterHeight.max = mapMax;
-					outputBiome.terrain.Foreach((x, y, val) => {
-						outputBiome.waterHeight[x, y] = waterLevel - val;
-					});
-				}
-				else
-					; //TODO
+				Debug.LogError("[PWNodeWaterLevel] null terrain input received !");
+				return ;
 			}
+
+			outputBiome.terrain = terrainNoise as Sampler2D;
+			outputBiome.terrain3D = terrainNoise as Sampler3D;
+			
+			outputBiome.waterLevel = waterLevel;
+
+			if (terrainNoise.type == SamplerType.Sampler2D)
+			{
+				//terrain mapping
+				outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+
+				//waterHeight evaluation
+				outputBiome.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+				outputBiome.waterHeight.min = mapMin;
+				outputBiome.waterHeight.max = mapMax;
+				outputBiome.terrain.Foreach((x, y, val) => {
+					outputBiome.waterHeight[x, y] = waterLevel - val;
+				});
+			}
+			else
+				; //TODO
 		}
 
 		public override void OnNodeProcessOnce()

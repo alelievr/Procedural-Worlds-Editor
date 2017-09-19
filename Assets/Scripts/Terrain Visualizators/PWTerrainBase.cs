@@ -44,11 +44,11 @@ namespace PW
 			else
 				return ;
 			
-			graph.realMode = true;
+			graph.SetRealMode(true);
 			chunkSize = graph.chunkSize;
 			graphOutput = graph.outputNode as PWNodeGraphOutput;
 			graph.UpdateComputeOrder();
-			if (!graph.realMode)
+			if (!graph.IsRealMode())
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
 			if (terrainRoot == null)
 			{
@@ -59,17 +59,17 @@ namespace PW
 					terrainRoot.transform.position = Vector3.zero;
 				}
 			}
-			graph.ProcessGraphOnce();
+			graph.ProcessOnce();
 		}
 
 		public ChunkData RequestChunk(Vector3 pos, int seed)
 		{
 			if (seed != oldSeed)
-				graph.UpdateSeed(seed);
+				graph.seed = seed;
 
-			graph.UpdateChunkPosition(pos);
+			graph.chunkPosition = pos;
 			
-			graph.ProcessGraph();
+			graph.Process();
 
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.

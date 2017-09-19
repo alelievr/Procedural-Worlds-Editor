@@ -41,7 +41,7 @@ namespace PW.Node
 				new KeyValuePair< float, Color >(0f, Color.blue),
 				new KeyValuePair< float, Color >(.25f, Color.cyan),
 				new KeyValuePair< float, Color >(.5f, Color.yellow),
-				new KeyValuePair< float, Color >(.75f, PWColorPalette.orange),
+				new KeyValuePair< float, Color >(.75f, PWColor.orange),
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
 		}

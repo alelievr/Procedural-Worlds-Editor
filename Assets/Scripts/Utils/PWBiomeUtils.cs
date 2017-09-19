@@ -50,7 +50,9 @@ namespace PW
 				EditorGUILayout.LabelField("Terrain: 3D");
 		}
 
-		public static void ApplyBiomeTerrainModifiers(BlendedBiomeTerrain b)
+
+//TODO: remove this
+/*		public static void ApplyBiomeTerrainModifiers(BlendedBiomeTerrain b)
 		{
 			if (b.terrain == null)
 				return ;
@@ -74,7 +76,7 @@ namespace PW
 			//TODO: apply biome terrain modifiers to terrain
 
 			//TODO: apply biome terrain detail (caves / oth)
-		}
+		}*/
 
 		static IEnumerable< Texture2D > GenerateBiomeBlendMaps(BlendedBiomeTerrain b)
 		{

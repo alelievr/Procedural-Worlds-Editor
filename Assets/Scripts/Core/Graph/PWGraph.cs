@@ -28,10 +28,14 @@ namespace PW.Core
         //public internal graph datas:
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
-		public int								seed;
-		public int								chunkSize;
-		public Vector3							chunkPosition;
-		public float							step;
+		[SerializeField] private int			_seed;
+		public int								seed { get { return _seed; } set { OnSeedChanged(); _seed = value; } }
+		[SerializeField] public int				_chunkSize;
+		public int								chunkSize { get { return _chunkSize; } set { OnChunkSizeChanged(); _chunkSize = value; } }
+		[SerializeField] public Vector3			_chunkPosition;
+		public Vector3							chunkPosition { get { return _chunkPosition; } set { OnChunkPositionChanged(); _chunkPosition = value; } }
+		[SerializeField] public float			_step;
+		public float							step { get { return _step; } set { OnStepChanged(); _step = value; } }
 
 
 		//Link table, store all connections between node's anchors.
@@ -269,6 +273,11 @@ namespace PW.Core
 		public bool		IsRealMode()
 		{
 			return realMode;
+		}
+
+		public void		SetRealMode(bool value)
+		{
+			realMode = value;
 		}
 
 		public PWNode	FindNodeById(int nodeId)

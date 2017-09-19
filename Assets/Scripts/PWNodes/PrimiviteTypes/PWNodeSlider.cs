@@ -16,7 +16,7 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			value1 = EditorGUILayout.Slider(value1, min, max);
 			if (EditorGUI.EndChangeCheck())
-				notifyDataChanged = true;
+				NotifyReload();
 		}
 
 		//no process needed, value is alrealy here with slider.

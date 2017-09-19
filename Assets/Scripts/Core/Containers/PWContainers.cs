@@ -29,6 +29,8 @@ namespace PW.Core
 		public BiomeMap3D			biomeMap3D;
 		public Texture2DArray		albedoMaps;
 
+		public List< PWBiomeGraph >	biomes;
+
 		public override string ToString()
 		{
 			return GetType().Name + "(" + size + ")";

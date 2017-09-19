@@ -14,14 +14,14 @@ using Object = UnityEngine.Object;
 [System.Serializable]
 public partial class PWMainGraphEditor : PWGraphEditor {
 
-	PWMainGraph							mainGraph;
+	PWMainGraph						mainGraph;
 	
 	[SerializeField]
-	public HorizontalSplitView			h1;
+	public HorizontalSplitView		h1;
 	[SerializeField]
-	public HorizontalSplitView			h2;
+	public HorizontalSplitView		h2;
 	[SerializeField]
-	public string						searchString = "";
+	public string					searchString = "";
 	
 	//graph, node, anchors and links control and 
 	int					mouseAboveNodeIndex;
@@ -339,54 +339,18 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			return ;
 		}
 
-		node.Remove();
 		currentGraph.RemoveNode(id);
 	}
 
 	void CreateNewNode(object type)
 	{
-		Vector2 pos = -currentGraph.graphDecalPosition + currentMousePosition;
-		CreateNewNode((Type)type, pos, true);
+		Vector2 pos = -currentGraph.panPosition + currentMousePosition;
+		graph.CreateNewNode(type as Type, pos);
 	}
 
-	PWNode	CreateNewNode(PWNode newNode, Vector2 position, string name, bool addToNodeList = false)
+	void CreateNewNode(Type t, Vector2 pos)
 	{
-		position.x = Mathf.RoundToInt(position.x);
-		position.y = Mathf.RoundToInt(position.y);
-
-		//center to the middle of the screen:
-		newNode.windowRect.position = position;
-		newNode.SetNodeId(currentGraph.localNodeIdCount++);
-		newNode.nodeTypeName = name;
-		newNode.chunkSize = currentGraph.chunkSize;
-		newNode.seed = currentGraph.seed;
-		newNode.computeOrder = newNode.isDependent ? -1 : 0;
-		GetWindowStyleFromType(newNode.GetType(), out newNode.windowStyle, out newNode.windowSelectedStyle);
-		newNode.UpdateCurrentGraph(currentGraph);
-		newNode.RunNodeAwake();
-
-		if (String.IsNullOrEmpty(newNode.externalName))
-		{
-			newNode.externalName = newNode.GetType().Name;
-			newNode.name = newNode.GetType().Name;
-		}
-
-		AssetDatabase.AddObjectToAsset(newNode, currentGraph);
-		
-		if (addToNodeList)
-			currentGraph.nodes.Add(newNode);
-		currentGraph.nodesDictionary[newNode.nodeId] = newNode;
-
-		graphNeedReload = true;
-		
-		return newNode;
-	}
-
-	PWNode	CreateNewNode(Type t, Vector2 position, bool addToNodeList = false)
-	{
-		PWNode newNode = ScriptableObject.CreateInstance(t) as PWNode;
-
-		return CreateNewNode(newNode, position, t.ToString(), addToNodeList);
+		graph.CreateNewNode(t, pos);
 	}
 
 	void DeleteSelectedNodes()

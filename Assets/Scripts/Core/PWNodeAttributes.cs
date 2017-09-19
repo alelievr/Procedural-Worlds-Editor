@@ -39,12 +39,12 @@ namespace PW.Core
 	public class PWOffsetAttribute : Attribute
 	{
 		public int		offset;
-		public int		multiPadding = 0;
+		public int		padding = 0;
 		
-		public PWOffsetAttribute(int y, int multiPadding)
+		public PWOffsetAttribute(int y, int padding)
 		{
 			offset = y;
-			this.multiPadding = multiPadding;
+			this.padding = padding;
 		}
 
 		public PWOffsetAttribute(int y)

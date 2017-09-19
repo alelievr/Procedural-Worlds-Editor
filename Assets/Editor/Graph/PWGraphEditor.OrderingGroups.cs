@@ -2,15 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PWGraphEditor.OrderingGroup : MonoBehaviour {
+//Ordering group rendering for PWGraphEditor
+public partial class PWGraphEditor {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

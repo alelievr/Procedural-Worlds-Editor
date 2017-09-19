@@ -75,11 +75,11 @@ namespace PW.Core
 			return false;
 		}
 		
-		void TrySetValue(FieldInfo prop, object val, PWNode target, bool realMode, bool clone = false)
+		void TrySetValue(FieldInfo prop, object val, PWNode target, PWNode from, bool realMode, bool clone = false)
 		{
 			//clone the input variable if requested by input anchor and if possible.
-			if (clone && val.GetType().IsAssignableFrom(typeof(ICloneable)))
-				val = (val as ICloneable).Clone();
+			if (clone && val.GetType().IsAssignableFrom(typeof(Sampler)))
+				val = (val as Sampler).Clone(prop.GetValue(from) as Sampler);
 			
 			if (realMode)
 				prop.SetValue(target, val);
@@ -101,7 +101,6 @@ namespace PW.Core
 				if (CheckProcessErrors(link, node, realMode))
 					continue ;
 
-				var target = nodesDictionary[link.toNode.id];
 				var val = bakedNodeFields[link.fromNode.classQAName][link.fromAnchor.fieldName].GetValue(node);
 				var prop = bakedNodeFields[link.toNode.classQAName][link.toAnchor.fieldName];
 	
@@ -111,12 +110,13 @@ namespace PW.Core
 
 				//Without multi-anchor, simple assignation
 				if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex == -1)
-					TrySetValue(prop, val, target, realMode, (link.toAnchor.transferType == PWTransferType.Copy));
+					TrySetValue(prop, val, link.toNode, link.fromNode, realMode, (link.toAnchor.transferType == PWTransferType.Copy));
 				
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
 				{
-					PWValues values = (PWValues)prop.GetValue(target);
+					PWValues values = (PWValues)prop.GetValue(link.toNode);
+					//TODO: clone data if needed
 	
 					if (values != null)
 					{
@@ -130,17 +130,18 @@ namespace PW.Core
 				{
 					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
 
-					TrySetValue(prop, localVal, target, realMode);
+					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
 				}
 
 				//Both are multi-anchors
 				else if (val != null)
 				{
-					PWValues values = (PWValues)prop.GetValue(target);
+					PWValues values = (PWValues)prop.GetValue(link.toNode);
 					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
 	
 					if (values != null)
 					{
+						//TODO: clone data if needed
 						// Debug.Log("assigned total multi");
 						if (!values.AssignAt(link.toAnchor.fieldIndex, localVal, link.fromAnchor.name))
 							Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
