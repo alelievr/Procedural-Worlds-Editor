@@ -61,5 +61,10 @@ namespace PW.Core
 		{
 			return null;
 		}
+
+        public static void GetAllowedNodesForGraph()
+        {
+            
+        }
 	}
 }

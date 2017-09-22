@@ -59,6 +59,8 @@ namespace PW.Core
 		public int							offset = 0;
 		//the visual padding between multiple anchor of the same field
 		public int							padding = 0;
+		//color palette of the anchor (by default)
+		public PWColorPalette				colorPalette;
 		//anchor custom color if set
 		public Color						color = new Color(0, 0, 0, 0); //SerializableColor needed ?
 

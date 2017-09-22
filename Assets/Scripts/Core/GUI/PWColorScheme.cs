@@ -77,6 +77,12 @@ namespace PW.Core
 		public static Color	GetColor(string key)
 		{
 			return colors[key];
-		}		
+		}
+
+		public static Color GetLinkColor(PWColorPalette palette)
+		{
+			//TODO
+			return Color.white;
+		}
 	}
 }

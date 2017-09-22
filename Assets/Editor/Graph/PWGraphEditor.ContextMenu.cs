@@ -19,26 +19,26 @@ public partial class PWGraphEditor {
 
 			// Now create the menu, add items and show it
 			GenericMenu menu = new GenericMenu();
-			foreach (var nodeCat in nodeSelectorList)
+			foreach (var nodeCat in PWNodeTypeProvider.GetAllowedNodesForGraph(GetType()))
 			{
 				string menuString = "Create new/" + nodeCat.Key + "/";
 				foreach (var nodeClass in nodeCat.Value.nodes)
-					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, CreateNewNode, nodeClass.nodeType);
+					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, graph.CreateNewNode, nodeClass.nodeType);
 			}
-			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.graphDecalPosition);
-			if (mouseAboveOrderingGroup != null)
+			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
+			if (eventInfos.mouseOverOrderingGroup != null)
 				menu.AddItem(new GUIContent("Delete ordering group"), false, DeleteOrderingGroup);
 			else
 				menu.AddDisabledItem(new GUIContent("Delete ordering group"));
 
 			menu.AddSeparator("");
-			if (mouseAboveNodeAnchor)
+			if (eventInfos.mouseOverAnchor != null)
 			{
 				menu.AddItem(new GUIContent("New Link"), false, BeginDragLink);
 				menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
 			}
 
-			var hoveredLink = currentLinks.FirstOrDefault(l => l.hover == true);
+			var hoveredLink = eventInfos.mouseOverNodeLink;
 			if (hoveredLink != null)
 			{
 				menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
@@ -47,17 +47,17 @@ public partial class PWGraphEditor {
 				menu.AddDisabledItem(new GUIContent("Link"));
 
 			menu.AddSeparator("");
-			if (mouseAboveNodeIndex != -1)
-				menu.AddItem(new GUIContent("Delete node"), false, DeleteNode, mouseAboveNodeIndex);
+			if (eventInfos.mouseOverNode != null)
+				menu.AddItem(new GUIContent("Delete node"), false, () => { graph.RemoveNode(eventInfos.mouseOverNode); });
 			else
 				menu.AddDisabledItem(new GUIContent("Delete node"));
 				
-			if (selectedNodeCount != 0)
+			if (eventInfos.selectedNodeCount != 0)
 			{
-				string deleteNodeString = (selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
+				string deleteNodeString = (eventInfos.selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
 				menu.AddItem(new GUIContent(deleteNodeString), false, DeleteSelectedNodes);
 
-				string moveNodeString = (selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
+				string moveNodeString = (eventInfos.selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
 				menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
 			}
 

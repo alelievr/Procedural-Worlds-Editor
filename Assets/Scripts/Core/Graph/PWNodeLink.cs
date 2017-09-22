@@ -33,6 +33,11 @@ namespace PW.Core
 		[System.NonSerialized]
 		public PWNode			toNode;
 
+		//Control id for UnityEditor to select the link:
+		[System.NonSerialized]
+		public int				controlId = -1;
+
+
 		//called once (when link is created only)
 		public void Initialize(PWAnchor fromAnchor, PWAnchor toAnchor)
 		{

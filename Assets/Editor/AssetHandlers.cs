@@ -10,11 +10,16 @@ public class NewBehaviourScript {
 	{
 		Object instance = EditorUtility.InstanceIDToObject(instanceId);
 
-		if (instance.GetType() == typeof(PWNodeGraph))
+		if (instance.GetType() == typeof(PWMainGraph))
 		{
 			//open PWNodeGraph window:
-			ProceduralWorldsWindow window = (ProceduralWorldsWindow)EditorWindow.GetWindow(typeof(ProceduralWorldsWindow));
-			window.currentGraph = instance as PWNodeGraph;
+			PWMainGraphEditor window = (PWMainGraphEditor)EditorWindow.GetWindow(typeof(PWMainGraphEditor));
+			window.graph = instance as PWGraph;
+		}
+		if (instance.GetType() == typeof(PWBiomeGraph))
+		{
+			//TODO: PWBiomeGraph editor
+			// PWBiomeGraphEditor
 		}
 		return false;
 	}

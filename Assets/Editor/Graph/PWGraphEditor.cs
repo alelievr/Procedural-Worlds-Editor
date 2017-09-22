@@ -24,7 +24,7 @@ public partial class PWGraphEditor : EditorWindow {
 	bool						restoreEvent;
 
 	//storage class to gather events for a further use.
-	PWGraphEventInfo			eventInfos = new PWGraphEventInfo();
+	protected PWGraphEventInfo	eventInfos = new PWGraphEventInfo();
 	
 	//editor textures:
 	Texture2D					nodeEditorBackgroundTexture;
@@ -36,6 +36,9 @@ public partial class PWGraphEditor : EditorWindow {
 	
 	//editor skin:
 	public GUISkin				PWGUISkin;
+
+	//custom editor events:
+	public event Action< Vector2 >	OnWindowResize;
 	
 	//current Event:
 	Event e;

@@ -24,20 +24,10 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	public string					searchString = "";
 	
 	//graph, node, anchors and links control and 
-	int					mouseAboveNodeIndex;
-	bool				mouseAboveNodeAnchor;
-	PWOrderingGroup		mouseAboveOrderingGroup;
-	bool				draggingGraph = false;
-	bool				draggingLink = false;
-	bool				draggingNode = false;
-	bool				draggingSelectedNodes = false;
-	bool				draggingSelectedNodesFromContextMenu = false;
 	public bool			graphNeedReload = false;
 	public bool			graphNeedReloadOnce = false;
 	bool				previewMouseDrag = false;
 	bool				editorNeedRepaint = false;
-	PWAnchorInfo		startDragAnchor;
-	PWAnchorInfo		mouseAboveAnchorInfo;
 	[System.NonSerializedAttribute]
 	PWNode				mouseAboveNode;
 	
@@ -252,8 +242,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			if (gtm != null)
 				terrainMaterializer = gtm.GetComponent< PWTerrainBase >();
 		}
-	
-		DrawNodeGraphCore();
 
 		h1.UpdateMinMax(position.width / 2, position.width - 3);
 		h2.UpdateMinMax(50, position.width / 2);
@@ -273,7 +261,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			editorNeedRepaint = e.isMouse || e.type == EventType.ScrollWheel;
 
 		//if event, repaint
-		if ((editorNeedRepaint || draggingGraph || draggingLink || draggingNode))
+		if ((editorNeedRepaint))
 		{
 			Repaint();
 			editorNeedRepaint = false;
@@ -328,70 +316,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 
 		h1.handlerPosition *= r;
 		h2.handlerPosition *= r;
-	}
-
-	void DeleteNode(object oNodeIndex)
-	{
-		int	id = (int)oNodeIndex;
-		if (id < 0 || id > currentGraph.nodes.Count)
-		{
-			Debug.LogWarning("cant remove this node !");
-			return ;
-		}
-
-		currentGraph.RemoveNode(id);
-	}
-
-	void CreateNewNode(object type)
-	{
-		Vector2 pos = -currentGraph.panPosition + currentMousePosition;
-		graph.CreateNewNode(type as Type, pos);
-	}
-
-	void CreateNewNode(Type t, Vector2 pos)
-	{
-		graph.CreateNewNode(t, pos);
-	}
-
-	void DeleteSelectedNodes()
-	{
-		List< PWNode > nodeToRemove = new List< PWNode >();
-		List< PWNodeGraph > graphToRemove = new List< PWNodeGraph >();
-
-		currentGraph.ForeachAllNodes(n => {
-			if (n.selected)
-			{
-				if (n.GetType() == typeof(PWNodeGraphExternal))
-				{
-					//TODO: find graph and remove it
-				}
-				else
-					nodeToRemove.Add(n);
-			}
-		});
-
-		foreach (var n in nodeToRemove)
-		{
-			currentGraph.nodes.Remove(n);
-			DeleteNode(n);
-		}
-	}
-
-	void MoveSelectedNodes()
-	{
-		draggingSelectedNodesFromContextMenu = true;
-		draggingSelectedNodes = true;
-	}
-
-	void CreateNewOrderingGroup(object pos)
-	{
-		currentGraph.orderingGroups.Add(new PWOrderingGroup((Vector2)pos));
-	}
-
-	void DeleteOrderingGroup()
-	{
-		if (mouseAboveOrderingGroup != null)
-			currentGraph.orderingGroups.Remove(mouseAboveOrderingGroup);
 	}
 
 #endregion

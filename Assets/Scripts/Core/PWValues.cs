@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
 
 namespace PW.Core
 {
@@ -13,12 +14,25 @@ namespace PW.Core
 		List< object > values;
 		List< string > names;
 
+		SerializableType[]	allowedTypes;
+
 		public PWValues()
 		{
 			if (values == null)
 				values = new List< object >();
 			if (names == null)
 				names = new List< string >();
+			
+			var attrs = GetType().GetCustomAttributes(false);
+
+			foreach (var attr in attrs)
+			{
+				PWMultipleAttribute multi = attr as PWMultipleAttribute;
+
+				if (multi != null)
+					allowedTypes = multi.allowedTypes;
+			}
+			
 			while (values.Count < valuesCount)
 				Add(null);
 		}
@@ -65,6 +79,11 @@ namespace PW.Core
 	
 		public void Add(object val)
 		{
+			if (!Array.Exists(allowedTypes, t => t.GetType() == val.GetType()))
+			{
+				Debug.LogError("[PWValues] tried to assign non-allowed object type to this PWValues");
+				return ;
+			}
 			valuesCount++;
 			values.Add(val);
 			names.Add(null);

@@ -146,6 +146,7 @@ namespace PW.Core
 			OnLinkRemoved -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
+
 			
 			foreach (var node in nodes)
 				DetachNodeEvents(node);
@@ -265,7 +266,7 @@ namespace PW.Core
 		{
 			
 		}
-		
+
 	#endregion
 
 	#region Nodes API

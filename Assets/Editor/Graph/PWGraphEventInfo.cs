@@ -22,12 +22,13 @@ public class PWGraphEventInfo {
 	//link infos:
 	public bool				isMouseOverLink;
 	public bool				isMouseClickOnLink;
-	public PWNodeConnection	mouseOverNodeConnection;
+	public bool				isDraggingLink;
+	public PWNodeLink		mouseOverNodeLink;
 
 	//anchor infos:
 	public bool				isMouseOverAnchor;
 	public bool				isMouseClickOnAnchor;
-	public PWNodeAnchor		mouseOverNodeAnchor;
+	public PWAnchor			mouseOverAnchor;
 
 	//ordering group infos:
 	public bool				isMouseInsideOrderingGroup;
@@ -52,11 +53,12 @@ public class PWGraphEventInfo {
 
 		isMouseOverLink = false;
 		isMouseClickOnLink = false;
-		mouseOverNodeConnection = null;
+		isDraggingLink = false;
+		mouseOverNodeLink = null;
 
 		isMouseOverAnchor = false;
 		isMouseClickOnAnchor = false;
-		mouseOverNodeAnchor = null;
+		mouseOverAnchor = null;
 
 		isMouseInsideOrderingGroup = false;
 		isMouseClickOnOrderingGroup = false;

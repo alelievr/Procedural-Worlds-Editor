@@ -57,9 +57,6 @@ namespace PW
 					anchorFields[field.Name] = new PWAnchorField();
 				
 				PWAnchorField	anchorField = anchorFields[field.Name];
-				PWAnchorType	anchorType = PWAnchorType.None;
-				string			name = "";
-				Vector2			offset = Vector2.zero;
 				
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
@@ -71,10 +68,11 @@ namespace PW
 					PWMultipleAttribute		multipleAttr = attr as PWMultipleAttribute;
 					PWGenericAttribute		genericAttr = attr as PWGenericAttribute;
 					PWNotRequiredAttribute	notRequiredAttr = attr as PWNotRequiredAttribute;
+					PWCopyAttribute			copyAttr = attr as PWCopyAttribute;
 
 					if (inputAttr != null)
 					{
-						anchorType = PWAnchorType.Input;
+						anchorField.anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
 						{
 							name = inputAttr.name;
@@ -83,13 +81,15 @@ namespace PW
 					}
 					if (outputAttr != null)
 					{
-						anchorType = PWAnchorType.Output;
+						anchorField.anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
 						{
 							name = outputAttr.name;
 							anchorField.anchorName = outputAttr.name;
 						}
 					}
+					if (copyAttr != null)
+						anchorField.transferType = PWTransferType.Copy;
 					if (colorAttr != null)
 						anchorField.color = new SerializableColor(colorAttr.color);
 					if (offsetAttr != null)
@@ -109,13 +109,12 @@ namespace PW
 					if (notRequiredAttr != null)
 						anchorField.required = false;
 				}
-				if (anchorType == PWAnchorType.None) //field does not have a PW attribute
+				if (anchorField.anchorType == PWAnchorType.None) //field does not have a PW attribute
 					anchorFields.Remove(field.Name);
 				else
 				{
 					anchorField.CreateNewAnchor();
 					anchorField.fieldName = field.Name;
-					anchorField.anchorType = anchorType;
 					anchorField.fieldType = (SerializableType)field.FieldType;
 					anchorField.nodeRef = this;
 				}

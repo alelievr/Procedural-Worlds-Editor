@@ -159,4 +159,22 @@ public partial class PWGraphEditor {
 		if (node.WindowShouldClose())
 			DeleteNode(index);
 	}
+	
+	void DeleteSelectedNodes()
+	{
+		List< PWNode > nodeToRemove = new List< PWNode >();
+
+		foreach (var node in graph.nodes)
+			if (node.selected)
+				nodeToRemove.Add(node);
+
+		foreach (var node in nodeToRemove)
+			graph.RemoveNode(node);
+	}
+
+	void MoveSelectedNodes()
+	{
+		Debug.Log("moving from context menu");
+	}
+
 }
