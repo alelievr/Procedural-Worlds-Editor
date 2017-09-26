@@ -9,35 +9,35 @@ using System;
 public partial class PWGraphEditor {
 
 	//editor styles:
-	GUIStyle					prefixLabelStyle;
-	GUIStyle					defaultNodeWinow;
-	GUIStyle					defaultNodeWinowSelected;
+	protected static GUIStyle		prefixLabelStyle;
+	protected static GUIStyle		defaultNodeWinow;
+	protected static GUIStyle		defaultNodeWinowSelected;
 	
 	//editor textures:
-	static Texture2D			nodeEditorBackgroundTexture;
-	private static Texture2D	defaultBackgroundTexture;
+	protected static Texture2D		nodeEditorBackgroundTexture;
+	protected static Texture2D		defaultBackgroundTexture;
 	
 	//editor skin:
-	public GUISkin				PWGUISkin;
+	protected GUISkin				PWGUISkin;
 
 	//color gradient used for compute time displayed under nodes
-	private static Gradient		greenRedGradient;
+	private static Gradient			greenRedGradient;
 	
-	static GUIStyle		whiteText;
-	static GUIStyle		whiteBoldText;
-	static GUIStyle		navBarBackgroundStyle;
-	static GUIStyle		panelBackgroundStyle;
-	static GUIStyle		nodeGraphWidowStyle;
+	static GUIStyle					whiteText; //TODO: replace by EditorStyles.whiteLabel ?
+	static GUIStyle					whiteBoldText; //TODO: same ?
+	static GUIStyle					navBarBackgroundStyle;
+	static GUIStyle					panelBackgroundStyle;
+	static GUIStyle					nodeGraphWidowStyle;
 
-	public GUIStyle		toolbarSearchCancelButtonStyle;
-	public GUIStyle		toolbarSearchTextStyle;
-	public GUIStyle		toolbarStyle;
-	public GUIStyle		nodeSelectorTitleStyle;
-	public GUIStyle		nodeSelectorCaseStyle;
-	public GUIStyle		selectionStyle;
+	public GUIStyle					toolbarSearchCancelButtonStyle;
+	public GUIStyle					toolbarSearchTextStyle;
+	public GUIStyle					toolbarStyle;
+	public GUIStyle					nodeSelectorTitleStyle;
+	public GUIStyle					nodeSelectorCaseStyle;
+	public GUIStyle					selectionStyle;
 
-	public GUIStyle		nodeWindow;
-	public GUIStyle		nodeWindowSelected;
+	public GUIStyle					nodeWindow;
+	public GUIStyle					nodeWindowSelected;
 
 	static void LoadAssets()
 	{
@@ -50,19 +50,12 @@ public partial class PWGraphEditor {
 			return ret;
 		};
 
-		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-			return Resources.Load< Texture2D >(ressourcePath);
-        };
-
 		//generate background colors:
         Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
-		Color resizeHandleColor = EditorGUIUtility.isProSkin
-			? new Color32(56, 56, 56, 255)
-            : new Color32(130, 130, 130, 255);
 		
 		//load backgrounds and colors as texture
 		defaultBackgroundTexture = CreateTexture2DColor(defaultBackgroundColor);
-		nodeEditorBackgroundTexture = CreateTexture2DFromFile("nodeEditorBackground");
+		nodeEditorBackgroundTexture = Resources.Load< Texture2D >("nodeEditorBackground");
 		
 		//style
 		nodeGraphWidowStyle = new GUIStyle();
@@ -106,6 +99,13 @@ public partial class PWGraphEditor {
 
 		nodeWindow = PWGUISkin.FindStyle("NodeWindow");
 		nodeWindowSelected = PWGUISkin.FindStyle("NodeWindowSelected");
+		
+		//TODO: still used ?
+		whiteText = new GUIStyle();
+		whiteText.normal.textColor = Color.white;
+		whiteBoldText = new GUIStyle();
+		whiteBoldText.fontStyle = FontStyle.Bold;
+		whiteBoldText.normal.textColor = Color.white;
 		
 		//set the custom style for the editor
 		GUI.skin = PWGUISkin;

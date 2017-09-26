@@ -69,6 +69,7 @@ namespace PW.Core
         public PWGUIManager						PWGUI;
 		[System.NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents;
+		public float							maxStep;
 
 
         //input and output nodes:
@@ -101,6 +102,9 @@ namespace PW.Core
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
 		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
+		//editor button events:
+		public event System.Action				OnForceReload;
+		public event System.Action				OnForceReloadOnce;
 	
 	#endregion
 
@@ -269,6 +273,8 @@ namespace PW.Core
 
 		public void RaiseOnClickNowhere() { OnClickNowhere(); }
 		public void RaiseOnLinkSelected(PWNodeLink link) { OnLinkSelected(link); }
+		public void RaiseOnForceReload() { OnForceReload(); UpdateComputeOrder(); }
+		public void RaiseOnForceReloadOnce() { OnForceReloadOnce(); }
 
 	#endregion
 
@@ -294,14 +300,14 @@ namespace PW.Core
 			return computeOrderSortedNodes;
 		}
 
-		public bool	CreateNewNode(System.Type nodeType, Vector2 position)
+		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			newNode.Initialize(this);
 			AttachNodeEvents(newNode);
 			nodesDictionary[newNode.id] = newNode;
 			OnNodeAdded(newNode);
-			return true;
+			return newNode;
 		}
 
 		public bool		RemoveNode(PWNode removeNode)

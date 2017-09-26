@@ -66,6 +66,8 @@ namespace PW
 			RenderAnchors();
 			ProcessAnchorEvents();
 
+			RenderLinks();
+
 			delayedChanges.Update();
 
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);

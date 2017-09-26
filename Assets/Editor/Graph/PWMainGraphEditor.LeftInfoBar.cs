@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 //Left info bar + current selected node Info
 public partial class PWMainGraphEditor {
@@ -12,7 +13,7 @@ public partial class PWMainGraphEditor {
 
 		//add the texturepreviewRect size:
 		Rect previewRect = new Rect(0, 0, currentRect.width, currentRect.width);
-		currentGraph.leftBarScrollPosition = EditorGUILayout.BeginScrollView(currentGraph.leftBarScrollPosition, GUILayout.ExpandWidth(true));
+		mainGraph.leftBarScrollPosition = EditorGUILayout.BeginScrollView(mainGraph.leftBarScrollPosition, GUILayout.ExpandWidth(true));
 		{
 			EditorGUILayout.BeginHorizontal(GUILayout.Height(currentRect.width), GUILayout.ExpandHeight(true));
 			EditorGUILayout.EndHorizontal();
@@ -23,11 +24,11 @@ public partial class PWMainGraphEditor {
 				chunkRenderDistance = EditorGUILayout.IntSlider("chunk Render distance", chunkRenderDistance, 0, 24);
 				terrainMaterializer.renderDistance = chunkRenderDistance;
 
-				if (currentGraph == null)
+				if (mainGraph == null)
 					OnEnable();
 
 				GUI.SetNextControlName("PWName");
-				currentGraph.externalName = EditorGUILayout.TextField("ProceduralWorld name: ", currentGraph.externalName);
+				mainGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", mainGraph.name);
 
 				if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
 					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
@@ -51,65 +52,37 @@ public partial class PWMainGraphEditor {
 				//seed
 				EditorGUI.BeginChangeCheck();
 				GUI.SetNextControlName("seed");
-				parentGraph.seed = EditorGUILayout.IntField("Seed", parentGraph.seed);
-				if (EditorGUI.EndChangeCheck())
-				{
-					parentGraph.UpdateSeed(parentGraph.seed);
-					graphNeedReload = true;
-				}
+				graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
 				
 				//chunk size:
 				EditorGUI.BeginChangeCheck();
 				GUI.SetNextControlName("chunk size");
-				parentGraph.chunkSize = EditorGUILayout.IntField("Chunk size", parentGraph.chunkSize);
-				parentGraph.chunkSize = Mathf.Clamp(parentGraph.chunkSize, 1, 1024);
-				if (EditorGUI.EndChangeCheck())
-				{
-					parentGraph.UpdateChunkSize(parentGraph.chunkSize);
-					graphNeedReload = true;
-				}
-				terrainMaterializer.chunkSize = parentGraph.chunkSize;
+				graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
+				graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
+				
+				terrainMaterializer.chunkSize = graph.chunkSize;
 
 				//step:
 				EditorGUI.BeginChangeCheck();
 				float min = 0.1f;
 				EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
-				parentGraph.PWGUI.Slider(ref parentGraph.step, ref min, ref parentGraph.maxStep, 0.01f, false, true);
+				graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
 				EditorGUILayout.EndHorizontal();
-				if (EditorGUI.EndChangeCheck())
-				{
-					parentGraph.UpdateStep(parentGraph.step);
-					graphNeedReload = true;
-				}
 
 				EditorGUILayout.Separator();
 
-				EditorGUI.BeginChangeCheck();
-				parentGraph.PWGUI.Slider("Geological terrain step: ", ref parentGraph.geologicTerrainStep, 4, 64);
-				parentGraph.PWGUI.IntSlider("Geological search distance: ", ref parentGraph.geologicDistanceCheck, 1, 4);
-				if (EditorGUI.EndChangeCheck())
-					graphNeedReload = true;
+				mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+				mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
 
 				EditorGUILayout.Separator();
 
 				EditorGUILayout.BeginHorizontal();
 				{
 					if (GUILayout.Button("Force reload"))
-					{
-						parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
-						graphNeedReload = true;
-						EvaluateComputeOrder();
-						Debug.Log("graph reloaded !");
-					}
+						mainGraph.RaiseOnForceReload();
 					if (GUILayout.Button("Force reload Once"))
-					{
-						parentGraph.ForeachAllNodes(n => n.forceReload = true, true, true);
-						graphNeedReload = true;
-						graphNeedReloadOnce = true;
-						EvaluateComputeOrder();
-						Debug.Log("graph fully reloaded !");
-					}
+						mainGraph.RaiseOnForceReloadOnce();
 				}
 				EditorGUILayout.EndHorizontal();
 

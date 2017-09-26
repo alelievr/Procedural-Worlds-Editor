@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
+using PW;
 using System;
 
 //Top Left terrain preview
@@ -45,9 +46,8 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			//TODO: do the preview for Density field 1D
 			switch (outputType)
 			{
-				case PWGraphTerrainType.Density2D:
 				case PWGraphTerrainType.SideView2D:
-					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.Density2D, PWGraphTerrainType.SideView2D);
+					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.SideView2D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.previewSideViewSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.previewTopDownSceneName;
@@ -59,7 +59,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 					previewScene.name = PWConstants.previewTopDownSceneName;
 					break ;
 				default: //for 3d previewScenes:
-					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.Cubic3D, PWGraphTerrainType.Density3D, PWGraphTerrainType.Planar3D, PWGraphTerrainType.Spherical3D);
+					previewScene = GetLoadedPreviewScene(PWGraphTerrainType.Cubic3D, PWGraphTerrainType.Planar3D, PWGraphTerrainType.Spherical3D);
 					if (previewScene == null)
 						previewScene = Instantiate(Resources.Load(PWConstants.preview3DSceneName, typeof(GameObject)) as GameObject);
 					previewScene.name = PWConstants.preview3DSceneName;

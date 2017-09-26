@@ -58,8 +58,8 @@ namespace PW.Node
 			GUILayout.Space(GUI.skin.label.lineHeight * 3);
 
 			EditorGUI.BeginChangeCheck();
-			PWGUI.Slider("height multiplier: ", ref terrainHeightMultiplier, -1, 1);
-			PWGUI.Slider(new GUIContent("water multiplier: "), ref waterMultiplier, -1, 1);
+			terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
+			waterMultiplier = PWGUI.Slider(new GUIContent("water multiplier: "), waterMultiplier, -1, 1);
 
 			EditorGUILayout.LabelField("temperature limits:");
 			EditorGUILayout.BeginHorizontal();

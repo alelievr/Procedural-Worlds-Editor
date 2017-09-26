@@ -45,7 +45,8 @@ public partial class PWGraphEditor {
 		if (node.windowRect.Contains(e.mousePosition - graph.panPosition))
 			editorEvents.mouseOverNode = node;
 
-		//end dragging:
+		//managed somewhere else
+		/*//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
 				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
 			if (mouseAboveAnchor.mouseAbove && PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchor))
@@ -77,48 +78,10 @@ public partial class PWGraphEditor {
 				}
 			}
 
-		if (mouseAboveAnchor.mouseAbove)
-			mouseAboveAnchorInfo = mouseAboveAnchor;
-			
 		//if you press the mouse above an anchor, start the link drag
 		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown && e.button == 0)
 			BeginDragLink();
-		
-		if (mouseAboveAnchor.mouseAbove
-				&& draggingLink
-				&& startDragAnchor.anchorId != mouseAboveAnchorInfo.anchorId
-				&& PWNode.AnchorAreAssignable(mouseAboveAnchor, startDragAnchor))
-			HighlightDeleteAnchor(mouseAboveAnchor);
-
-		//draw links:
-		var links = node.GetLinks();
-		int		i = 0;
-		Handles.BeginGUI();
-		foreach (var link in links)
-		{
-			// Debug.Log("link: " + link.localNodeId + ":" + link.localAnchorId + " to " + link.distantNodeId + ":" + link.distantAnchorId);
-			var fromWindow = FindNodeById(link.localNodeId);
-			var toWindow = FindNodeById(link.distantNodeId);
-
-			if (toWindow == null) //invalid window ids
-			{
-				node.DeleteLinkByWindowTarget(link.distantNodeId);
-				Debug.LogWarning("window not found: " + link.distantNodeId);
-				continue ;
-			}
-			Rect? fromAnchor = fromWindow.GetAnchorRect(link.localAnchorId);
-			Rect? toAnchor = toWindow.GetAnchorRect(link.distantAnchorId);
-			if (fromAnchor != null && toAnchor != null)
-			{
-				DrawNodeCurve(fromAnchor.Value, toAnchor.Value, i++, link);
-				if (currentLinks.Count <= linkIndex)
-					currentLinks.Add(link);
-				else
-					currentLinks[linkIndex] = link;
-				linkIndex++;
-			}
-		}
-		Handles.EndGUI();
+		*/
 
 		//display the process time of the window (if not 0)
 		if (node.processTime > Mathf.Epsilon)

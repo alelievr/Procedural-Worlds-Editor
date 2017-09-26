@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using System;
 using PW;
 using PW.Core;
@@ -21,7 +22,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		EditorGUILayout.BeginVertical();
 		GUILayout.FlexibleSpace();
 		EditorGUI.indentLevel = 5;
-		EditorGUILayout.LabelField(header, whiteText);
+		EditorGUILayout.LabelField(header, EditorStyles.whiteLabel);
 		EditorGUI.indentLevel = 0;
 		GUILayout.FlexibleSpace();
 		EditorGUILayout.EndVertical();
@@ -36,14 +37,11 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			if (tex != null)
 				if (GUILayout.Button(tex, GUILayout.Width(100), GUILayout.Height(100)))
 				{
-					currentGraph.presetChoosed = true;
-					graphNeedReload = true;
+					mainGraph.presetChoosed = true;
 					callback();
-					currentGraph.UpdateStep(parentGraph.step);
-					currentGraph.UpdateChunkSize(parentGraph.chunkSize);
-					currentGraph.UpdateSeed(parentGraph.seed);
+					graph.UpdateComputeOrder();
 				}
-			EditorGUILayout.LabelField(description, whiteText);
+			EditorGUILayout.LabelField(description, EditorStyles.whiteLabel);
 			EditorGUI.EndDisabledGroup();
 			GUILayout.FlexibleSpace();
 		}
@@ -64,7 +62,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			if (GUILayout.Button("Load graph"))
 			{
 				currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
-				EditorGUIUtility.ShowObjectPicker< PWNodeGraph >(null, false, "", currentPickerWindow);
+				EditorGUIUtility.ShowObjectPicker< PWGraph >(null, false, "", currentPickerWindow);
 			}
 			
 			if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
@@ -74,7 +72,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				if (selected != null)
 				{
 					Debug.Log("graph " + selected.name + " loaded");
-					currentGraph = (PWNodeGraph)selected;
+					graph = (PWGraph)selected;
 				}
 			}
 		}
@@ -94,18 +92,18 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				DrawPresetLineHeader("2D");
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
-					currentGraph.outputType = PWGraphTerrainType.TopDown2D;
-					CreateNewNode(typeof(PWNodePerlinNoise2D));
-					PWNode perlin = currentGraph.nodes.Last();
+					mainGraph.outputType = PWGraphTerrainType.TopDown2D;
+
+					PWNode perlin = mainGraph.nodes.Last();
 					perlin.windowRect.position += Vector2.left * 400;
 					CreateNewNode(typeof(PWNodeTopDown2DTerrain));
-					PWNode terrain = currentGraph.nodes.Last();
+					PWNode terrain = mainGraph.nodes.Last();
 
 					//FIXME
 					// perlin.AttachLink("output", terrain, "texture");
 					// terrain.AttachLink("texture", perlin, "output");
-					terrain.AttachLink("terrainOutput", currentGraph.outputNode, "inputValues");
-					currentGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
+					terrain.AttachLink("terrainOutput", mainGraph.outputNode, "inputValues");
+					mainGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();

@@ -381,32 +381,32 @@ namespace PW.Core
 
 	#region Slider and IntSlider field
 
-		public void Slider(ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public float Slider(float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
-			Slider("", ref value, ref min, ref max, step, editableMin, editableMax, styles);
+			return Slider("", value, ref min, ref max, step, editableMin, editableMax, styles);
 		}
 		
-		public void Slider(ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		public float Slider(float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
-			Slider("", ref value, ref min, ref max, step, false, false, styles);
+			return Slider("", value, ref min, ref max, step, false, false, styles);
 		}
 		
-		public void Slider(string name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		public float Slider(string name, float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
-			Slider(new GUIContent(name), ref value, min, max, step, styles);
+			return Slider(new GUIContent(name), value, min, max, step, styles);
 		}
 		
-		public void Slider(GUIContent name, ref float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
+		public float Slider(GUIContent name, float value, float min, float max, float step = 0.01f, params PWGUIStyle[] styles)
 		{
-			Slider(name, ref value, ref min, ref max, step, false, false, styles);
+			return Slider(name, value, ref min, ref max, step, false, false, styles);
 		}
 		
-		public void Slider(string name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public float Slider(string name, float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
-			Slider(new GUIContent(name), ref value, ref min, ref max, step, editableMin, editableMax, styles);
+			return Slider(new GUIContent(name), value, ref min, ref max, step, editableMin, editableMax, styles);
 		}
 	
-		public void Slider(GUIContent name, ref float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public float Slider(GUIContent name, float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			int		sliderLabelWidth = 30;
 			var		e = Event.current;
@@ -471,37 +471,39 @@ namespace PW.Core
 				EditorGUILayout.EndHorizontal();
 			}
 			EditorGUILayout.EndVertical();
+
+			return step;
 		}
 		
-		public void IntSlider(ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public int IntSlider(int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
-			IntSlider((GUIContent)null, ref value, ref min, ref max, step, false, false, styles);
+			return IntSlider((GUIContent)null, value, ref min, ref max, step, false, false, styles);
 		}
 		
-		public void IntSlider(string name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public int IntSlider(string name, int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
-			IntSlider(new GUIContent(name), ref value, min, max, step, styles);
+			return IntSlider(new GUIContent(name), value, min, max, step, styles);
 		}
 
-		public void IntSlider(GUIContent name, ref int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
+		public int IntSlider(GUIContent name, int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
 		{
-			IntSlider(name, ref value, ref min, ref max, step, false, false, styles);
+			return IntSlider(name, value, ref min, ref max, step, false, false, styles);
 		}
 		
-		public void IntSlider(string name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public int IntSlider(string name, int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
-			IntSlider(new GUIContent(name), ref value, ref min, ref max, step, editableMin, editableMax, styles);
+			return IntSlider(new GUIContent(name), value, ref min, ref max, step, editableMin, editableMax, styles);
 		}
 	
-		public void IntSlider(GUIContent name, ref int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
+		public int IntSlider(GUIContent name, int value, ref int min, ref int max, int step = 1, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
 			float		v = value;
 			float		m_min = min;
 			float		m_max = max;
-			Slider(name, ref v, ref m_min, ref m_max, step, editableMin, editableMax, styles);
-			value = (int)v;
+			value = (int)Slider(name, v, ref m_min, ref m_max, step, editableMin, editableMax, styles);
 			min = (int)m_min;
 			max = (int)m_max;
+			return value;
 		}
 	
 	#endregion

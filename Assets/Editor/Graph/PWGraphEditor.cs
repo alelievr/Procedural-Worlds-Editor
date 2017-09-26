@@ -13,7 +13,7 @@ using Debug = UnityEngine.Debug;
 [System.Serializable]
 public partial class PWGraphEditor : EditorWindow {
 
-	//the reference to the graph;
+	//the reference to the graph in public for the AssetHandlers class
 	public PWGraph				graph;
 
 	//event masks, zones where the graph will not process events,
@@ -205,6 +205,16 @@ public partial class PWGraphEditor : EditorWindow {
 		{
 			graph.editorEvents.isPanning = true;
 			graph.panPosition += e.delta;
+		}
+		
+		//esc key event:
+		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+		{
+			if (editorEvents.isDraggingLink)
+				StopDragLink(false);
+			editorEvents.isSelecting = false;
+			editorEvents.isDraggingLink = false;
+			editorEvents.isDraggingNewLink = false;
 		}
 	}
 

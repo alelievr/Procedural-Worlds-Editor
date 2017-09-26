@@ -32,7 +32,7 @@ public class HorizontalSplitView {
 		maxWidth = max;
 	}
 
-	public Rect Begin(Texture2D background = null)
+	public Rect Begin()
 	{
 		Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 		
@@ -46,7 +46,7 @@ public class HorizontalSplitView {
 		return savedBeginRect;
 	}
 
-	public Rect Split(Texture2D resizeHandleTex = null)
+	public Rect Split(Color resizeColor)
 	{
 		EditorGUILayout.EndVertical();
 		
@@ -54,7 +54,7 @@ public class HorizontalSplitView {
 		
 		Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
 		Rect handleCatchRect = new Rect(internHandlerPosition - 1, availableRect.y, 6f, availableRect.height);
-		GUI.DrawTexture(handleRect, resizeHandleTex);
+		EditorGUI.DrawRect(handleRect, resizeColor);
 		EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
 
 		if (Event.current.type == EventType.mouseDown && handleCatchRect.Contains(Event.current.mousePosition))

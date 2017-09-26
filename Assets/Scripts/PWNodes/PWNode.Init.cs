@@ -134,7 +134,9 @@ namespace PW
 		//retarget "Reload" button in the editor to the internal event OnReload:
 		void GraphReloadCallback() { Reload(null); }
 
-		void ForceReloadCallback() { /*TODO*/ }
+		void ForceReloadCallback() { Reload(null); }
+
+		void ForceReloadOnceCallback() { /*TODO*/ }
 
 		void LinkDraggedCallback(PWNodeLink link)
 		{
@@ -239,11 +241,8 @@ namespace PW
 		{
 			//graph events:
 			//if the node is used in a PWMainGraph:
-			if (mainGraphRef != null)
-			{
-				mainGraphRef.OnReload += GraphReloadCallback;
-				mainGraphRef.OnForceReload += ForceReloadCallback;
-			}
+			mainGraphRef.OnForceReload += ForceReloadCallback;
+			mainGraphRef.OnForceReloadOnce += ForceReloadOnceCallback;
 			graphRef.OnClickNowhere += OnClickedOutside;
 			graphRef.OnLinkDragged += LinkDraggedCallback;
 			graphRef.OnLinkRemoved += LinkRemovedCalllback;
@@ -264,11 +263,8 @@ namespace PW
 		void UnBindEvents()
 		{
 			//if the node is used in a PWMainGraph:
-			if (mainGraphRef != null)
-			{
-				mainGraphRef.OnReload -= GraphReloadCallback;
-				mainGraphRef.OnForceReload -= ForceReloadCallback;
-			}
+			mainGraphRef.OnForceReload -= GraphReloadCallback;
+			mainGraphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
 			graphRef.OnClickNowhere -= OnClickedOutside;
 			graphRef.OnLinkDragged -= LinkDraggedCallback;
 			graphRef.OnLinkRemoved -= LinkRemovedCalllback;

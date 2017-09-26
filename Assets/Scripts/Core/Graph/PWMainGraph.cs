@@ -24,7 +24,6 @@ namespace PW.Core
 		//Editor datas:
 		public Vector2					leftBarScrollPosition;
 		public Vector2					selectorScrollPosition;
-		public float					maxStep;
 
 		//tell if the user choose a preset (first screen)
 		public bool						presetChoosed;
@@ -48,8 +47,6 @@ namespace PW.Core
 		//parameter events:
 		public event Action< int >		OnGeologicStepChanged;
 		//button triggered events:
-		public event Action				OnReload;
-		public event Action				OnForceReload;
 		
 		void		BakeNeededGeologicDatas()
 		{

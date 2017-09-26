@@ -29,29 +29,4 @@ public partial class PWGraphEditor {
 	{
 		editorEvents.mouseOverNode.RemoveAllLinksFromAnchor(editorEvents.mouseOverAnchor);
 	}
-
-	//TODO: remove and create new window style on GIMP
-	void GetWindowStyleFromType(Type t, out GUIStyle windowStyle, out GUIStyle windowSelectedStyle)
-	{
-		if (t == typeof(PWNodeGraphExternal) || t == typeof(PWNodeGraphInput) || t == typeof(PWNodeGraphOutput))
-		{
-			windowStyle = whiteNodeWindow;
-			windowSelectedStyle = whiteNodeWindowSelected;
-			return ;
-		}
-		foreach (var nodeCat in nodeSelectorList)
-		{
-			foreach (var nodeInfo in nodeCat.Value.nodes)
-			{
-				if (t == nodeInfo.nodeType)
-				{
-					windowStyle = nodeInfo.windowStyle;
-					windowSelectedStyle = nodeInfo.windowSelectedStyle;
-					return ;
-				}
-			}
-		}
-		windowStyle = greyNodeWindow;
-		windowSelectedStyle = greyNodeWindowSelected;
-	}
 }

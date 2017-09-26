@@ -14,6 +14,7 @@ using Object = UnityEngine.Object;
 [System.Serializable]
 public partial class PWMainGraphEditor : PWGraphEditor {
 
+	[SerializeField]
 	PWMainGraph						mainGraph;
 	
 	[SerializeField]
@@ -24,8 +25,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	public string					searchString = "";
 	
 	//graph, node, anchors and links control and 
-	public bool			graphNeedReload = false;
-	public bool			graphNeedReloadOnce = false;
 	bool				previewMouseDrag = false;
 	bool				editorNeedRepaint = false;
 	[System.NonSerializedAttribute]
@@ -46,10 +45,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	Rect				selectionRect;
 	[System.NonSerializedAttribute]
 	bool				selecting = false;
-
-	//current and parent graph
-	[SerializeField]
-	public PWMainGraph	currentGraph;
 
 	//node selector and his subclasses
 	[System.NonSerializedAttribute]
@@ -150,38 +145,18 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		graph.processMode = PWGraphProcessMode.Normal;
 	}*/
 
+	Color resizeHandleColor;
 	public override void OnEnable()
 	{
 		base.OnEnable();
 
 		mainGraph = graph as PWMainGraph;
 		
-		//load style: to move
-		resizeHandleTexture = CreateTexture2DColor(resizeHandleColor);
-
-		//loading preset panel images
-		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
-		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
-		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
-		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
-		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
-		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
-		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
-		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
-		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+		LoadStyles();
 		
-		//icons and utils
-		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
-		fileIconTexture = CreateTexture2DFromFile("ic_file");
-		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
-		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
-
-		GeneratePWAssets();
+		LoadAssets();
 
 		InitializeNodeSelector();
-
-		//force graph to reload all chunks (just after compiled)
-		graphNeedReload = true;
 	}
 
 #endregion
@@ -203,41 +178,25 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			e.type = EventType.Ignore;
 
 		//update the current GUI settings storage and clear drawed popup list:
-		currentGraph.PWGUI.StartFrame();
+		mainGraph.PWGUI.StartFrame();
 		if (e.type == EventType.Layout)
 			PWPopup.ClearAll();
 
 		//text colors:
-		whiteText = new GUIStyle();
-		whiteText.normal.textColor = Color.white;
-		whiteBoldText = new GUIStyle();
-		whiteBoldText.fontStyle = FontStyle.Bold;
-		whiteBoldText.normal.textColor = Color.white;
 
 		if (windowSize != Vector2.zero && windowSize != position.size)
 			OnWindowResize();
 		
 		windowSize = position.size;
 		
-		if (!currentGraph.presetChoosed)
+		if (!mainGraph.presetChoosed)
 		{
 			DrawPresetPanel();
 			return ;
 		}
 		
-		//esc key event:
-		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
-		{
-			if (draggingLink)
-				StopDragLink(false);
-			selecting = false;
-			draggingSelectedNodes = false;
-			draggingSelectedNodesFromContextMenu = false;
-			draggingNode = false;
-		}
-
 		if (e.type == EventType.Layout)
-			ProcessPreviewScene(currentGraph.outputType);
+			ProcessPreviewScene(mainGraph.outputType);
 
 		if (terrainMaterializer == null)
 		{
@@ -250,12 +209,12 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		h2.UpdateMinMax(50, position.width / 2);
 
 		h1.Begin();
-		Rect p1 = h2.Begin(defaultBackgroundTexture);
+		Rect p1 = h2.Begin();
 		DrawLeftBar(p1);
-		Rect g = h2.Split(resizeHandleTexture);
+		Rect g = h2.Split(resizeHandleColor);
 		DrawNodeGraphHeader(g);
 		h2.End();
-		Rect p2 = h1.Split(resizeHandleTexture);
+		Rect p2 = h1.Split(resizeHandleColor);
 		DrawSelector(p2);
 		h1.End();
 
@@ -310,8 +269,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				terrainMaterializer.UpdateChunks();
 			}*/
 
-#region Node and OrderingGroup Utils
-
+//TODO: eventize
 	void OnWindowResize()
 	{
 		//calcul the ratio for the window move:
@@ -321,6 +279,39 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		h2.handlerPosition *= r;
 	}
 
-#endregion
+	void LoadStyles()
+	{
+	}
+
+	void LoadAssets()
+	{
+		
+		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
+			return Resources.Load< Texture2D >(ressourcePath);
+        };
+		
+
+		//load style: to move
+		resizeHandleColor = EditorGUIUtility.isProSkin
+			? new Color32(56, 56, 56, 255)
+            : new Color32(130, 130, 130, 255);
+
+		//loading preset panel images
+		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
+		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
+		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
+		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
+		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
+		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
+		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
+		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
+		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+		
+		//icons and utils
+		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
+		fileIconTexture = CreateTexture2DFromFile("ic_file");
+		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
+		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
+	}
 
 }

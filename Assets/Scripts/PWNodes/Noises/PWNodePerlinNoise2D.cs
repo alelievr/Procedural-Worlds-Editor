@@ -43,8 +43,8 @@ namespace PW.Node
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				PWGUI.Slider("Persistance: ", ref persistance, ref persistanceMin, ref persistanceMax);
-				PWGUI.IntSlider("Octaves: ", ref octaves, 0, 16);
+				persistance = PWGUI.Slider("Persistance: ", persistance, ref persistanceMin, ref persistanceMax);
+				octaves = PWGUI.IntSlider("Octaves: ", octaves, 0, 16);
 			}
 			if (EditorGUI.EndChangeCheck())
 				NotifyReload();
