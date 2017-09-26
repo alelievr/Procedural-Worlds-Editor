@@ -13,30 +13,36 @@ public class PWGraphEditorEventInfo {
 	public Vector2			selectionStartPoint;
 	public bool				isDraggingSelectedNodes;
 	public int				selectedNodeCount;
+	public bool				isPanning;
+	public bool				isDraggingNewLink;
+	public PWAnchor			startedLinkAnchor;
 
 	//node infos:
-	public bool				isMouseOverNode;
+	public bool				isMouseOverNode { get { return mouseOverNode != null; } }
 	public bool				isDraggingNode;
 	public bool				isMouseClickOnNode;
 	public PWNode			mouseOverNode;
 
 	//link infos:
-	public bool				isMouseOverLink;
+	public bool				isMouseOverLink { get { return mouseOverLink != null; } }
 	public bool				isMouseClickOnLink;
 	public bool				isDraggingLink;
 	public PWNodeLink		mouseOverLink;
 
 	//anchor infos:
-	public bool				isMouseOverAnchor;
+	public bool				isMouseOverAnchor { get { return mouseOverAnchor != null; } }
 	public bool				isMouseClickOnAnchor;
 	public PWAnchor			mouseOverAnchor;
 
 	//ordering group infos:
-	public bool				isMouseOverOrderingGroup;
+	public bool				isMouseOverOrderingGroup { get { return mouseOverOrderingGroup != null; } }
 	public bool				isMouseClickOnOrderingGroup;	//not implemented
 	public bool				isDraggingOrderingGroup;		//not implemented
 	public bool				isResizingOrderingGroup;		//not implemented
 	public PWOrderingGroup	mouseOverOrderingGroup;
+
+	public bool				isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
+	public bool				isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
 
 	public PWGraphEditorEventInfo() { Reset(); }
 
@@ -47,23 +53,22 @@ public class PWGraphEditorEventInfo {
 		isSelecting = false;
 		selectionStartPoint = Vector2.zero;
 		isDraggingSelectedNodes = false;
+		isPanning = false;
+		isDraggingNewLink = false;
+		startedLinkAnchor = null;
 		selectedNodeCount = 0;
 
-		isMouseOverNode = false;
 		isMouseClickOnNode = false;
 		isDraggingNode = false;
 		mouseOverNode = null;
 
-		isMouseOverLink = false;
 		isMouseClickOnLink = false;
 		isDraggingLink = false;
 		mouseOverLink = null;
 
-		isMouseOverAnchor = false;
 		isMouseClickOnAnchor = false;
 		mouseOverAnchor = null;
 
-		isMouseOverOrderingGroup = false;
 		isMouseClickOnOrderingGroup = false;
 		isDraggingOrderingGroup = false;
 		isResizingOrderingGroup = false;
@@ -74,20 +79,17 @@ public class PWGraphEditorEventInfo {
 	public void Reset()
 	{
 		isMouseClickOutside = false;
+		isPanning = false;
 		
-		isMouseOverNode = false;
 		isMouseClickOnNode = false;
 		mouseOverNode = null;
 		
-		isMouseOverLink = false;
 		isMouseClickOnLink = false;
 		mouseOverLink = null;
 
-		isMouseOverAnchor = false;
 		isMouseClickOnAnchor = false;
 		mouseOverAnchor = null;
 		
-		isMouseOverOrderingGroup = false;
 		isMouseClickOnOrderingGroup = false;
 		mouseOverOrderingGroup = null;
 	}

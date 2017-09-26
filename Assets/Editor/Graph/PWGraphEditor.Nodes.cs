@@ -17,23 +17,22 @@ public partial class PWGraphEditor {
 		if (node.windowNameEdit)
 			name = "";
 
+		//node grid snapping when pressing cmd/crtl 
 		if (node.isDragged && ((!MacOS && e.control) || (MacOS && e.command)))
 		{
 			Vector2 pos = node.windowRect.position;
+			//aproximative grid cell size
 			float	snapPixels = 25.6f;
 
 			pos.x = Mathf.RoundToInt(Mathf.RoundToInt(pos.x / snapPixels) * snapPixels);
 			pos.y = Mathf.RoundToInt(Mathf.RoundToInt(pos.y / snapPixels) * snapPixels);
 			node.windowRect.position = pos;
 		}
-		node.UpdateGraphDecal(currentGraph.graphDecalPosition);
-		node.windowRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
+
+		//move the node if panPosition changed:
+		node.windowRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
 		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
-		if (node.windowRect.Contains(e.mousePosition))
-			mouseAboveNode = node;
-		else if (e.type == EventType.MouseDown)
-			node.OnClickedOutside();
-		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
+		node.windowRect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 	}
 
 	void RenderNode(int id, PWNode node)
@@ -42,34 +41,9 @@ public partial class PWGraphEditor {
 
 		DisplayDecaledNode(id, node, name);
 
-		if (node.windowRect.Contains(e.mousePosition - currentGraph.graphDecalPosition))
-		{
-			mouseAboveNodeIndex = index;
-		}
-
-		//highlight, hide, add all linkable anchors:
-		if (draggingLink)
-			node.HighlightLinkableAnchorsTo(startDragAnchor);
-		node.DisplayHiddenMultipleAnchors(draggingLink);
-
-		//process envent, state and position for node anchors:
-		var mouseAboveAnchor = node.GetAnchorUnderMouse();
-		if (mouseAboveAnchor.mouseAbove)
-			mouseAboveAnchorLocal = true;
-
-		if (!mouseDraggingWindowLocal)
-			if (node.isDragged)
-			{
-				if (node.selected)
-				{
-					int	selectedNodeCount = 0;
-	
-					currentGraph.ForeachAllNodes(n => { if (n.selected) selectedNodeCount++; }, false, true);
-					if (selectedNodeCount != 0)
-						draggingSelectedNodes = true;
-				}
-				mouseDraggingWindowLocal = true;
-			}
+		//check if the mouse is over this node
+		if (node.windowRect.Contains(e.mousePosition - graph.panPosition))
+			editorEvents.mouseOverNode = node;
 
 		//end dragging:
 		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
@@ -81,6 +55,7 @@ public partial class PWGraphEditor {
 				//TODO: manage the AttachLink return values, if one of them is false, delete the link.
 
 				//attach link to the node:
+				graph.CreateLink();
 				bool linkNotRevoked = node.AttachLink(mouseAboveAnchor, startDragAnchor);
 
 				if (linkNotRevoked)

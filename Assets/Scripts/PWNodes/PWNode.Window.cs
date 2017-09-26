@@ -71,6 +71,9 @@ namespace PW
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				selected = !selected;
+
+			
+			//fill the graph event infos:
 		}
 		#endif
 

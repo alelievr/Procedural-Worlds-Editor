@@ -152,7 +152,7 @@ namespace PW.Core
 			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
 			PWGUI.ColorPicker(colorPickerRect, ref color, false);
 
-			if ((eventInfo.isMouseOverOrderingGroup = (orderGroupWorldRect.Contains(e.mousePosition))))
+			if (orderGroupWorldRect.Contains(e.mousePosition))
 				eventInfo.mouseOverOrderingGroup = this;
 		}
 	}

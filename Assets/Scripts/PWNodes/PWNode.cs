@@ -31,9 +31,9 @@ namespace PW
 
 
 		//Useful state bools:
-		protected bool			isDragged = false;
 		protected bool			isDependent { get; private set; }
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
+		public bool				isDragged = false;
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
 
@@ -54,21 +54,21 @@ namespace PW
 		protected bool			anchorDebug = false;
 
 	#region Internal Node datas and style
-		static GUIStyle 		renameNodeTextFieldStyle = null;
-		static GUIStyle			debugStyle = null;
-		public GUIStyle			windowStyle;
-		public GUIStyle			windowSelectedStyle;
-		public static GUIStyle	innerNodePaddingStyle = null;
+		static GUIStyle 			renameNodeTextFieldStyle = null;
+		static GUIStyle				debugStyle = null;
+		public GUIStyle				windowStyle;
+		public GUIStyle				windowSelectedStyle;
+		public static GUIStyle		innerNodePaddingStyle = null;
 		
-		static Texture2D		editIcon = null;
+		static Texture2D			editIcon = null;
 
 		// static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
 		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
 		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
-		Vector2					graphPan { get { return graphRef.panPosition; } }
+		Vector2						graphPan { get { return graphRef.panPosition; } }
 		[SerializeField]
-		int						maxAnchorRenderHeight = 0;
+		int							maxAnchorRenderHeight = 0;
 
 		[System.NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
@@ -79,8 +79,8 @@ namespace PW
 		protected PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 		//TODO: data and mesh graphs
 
-		public bool				windowNameEdit = false;
-		public bool				selected = false;
+		public bool					windowNameEdit = false;
+		public bool					selected = false;
 
 	#endregion
 	

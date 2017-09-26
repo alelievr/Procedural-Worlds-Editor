@@ -13,6 +13,7 @@ public partial class PWGraphEditor {
 	void ContextMenu()
 	{
 		Event	e = Event.current;
+
         if (e.type == EventType.ContextClick)
         {
             Vector2 mousePos = e.mousePosition;
@@ -26,38 +27,38 @@ public partial class PWGraphEditor {
 					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, graph.CreateNewNode, nodeClass.nodeType);
 			}
 			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
-			if (eventInfos.mouseOverOrderingGroup != null)
+			if (editorEvents.mouseOverOrderingGroup != null)
 				menu.AddItem(new GUIContent("Delete ordering group"), false, DeleteOrderingGroup);
 			else
 				menu.AddDisabledItem(new GUIContent("Delete ordering group"));
 
 			menu.AddSeparator("");
-			if (eventInfos.mouseOverAnchor != null)
+			if (editorEvents.mouseOverAnchor != null)
 			{
 				menu.AddItem(new GUIContent("New Link"), false, BeginDragLink);
 				menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
 			}
 
-			var hoveredLink = eventInfos.mouseOverNodeLink;
+			var hoveredLink = editorEvents.mouseOverLink;
 			if (hoveredLink != null)
 			{
-				menu.AddItem(new GUIContent("Delete link"), false, DeleteLink, hoveredLink);
+				menu.AddItem(new GUIContent("Delete link"), false, () => { graph.RemoveLink(hoveredLink); });
 			}
 			else
 				menu.AddDisabledItem(new GUIContent("Link"));
 
 			menu.AddSeparator("");
-			if (eventInfos.mouseOverNode != null)
-				menu.AddItem(new GUIContent("Delete node"), false, () => { graph.RemoveNode(eventInfos.mouseOverNode); });
+			if (editorEvents.mouseOverNode != null)
+				menu.AddItem(new GUIContent("Delete node"), false, () => { graph.RemoveNode(editorEvents.mouseOverNode); });
 			else
 				menu.AddDisabledItem(new GUIContent("Delete node"));
 				
-			if (eventInfos.selectedNodeCount != 0)
+			if (editorEvents.selectedNodeCount != 0)
 			{
-				string deleteNodeString = (eventInfos.selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
+				string deleteNodeString = (editorEvents.selectedNodeCount == 1) ? "delete selected node" : "delete selected nodes";
 				menu.AddItem(new GUIContent(deleteNodeString), false, DeleteSelectedNodes);
 
-				string moveNodeString = (eventInfos.selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
+				string moveNodeString = (editorEvents.selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
 				menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
 			}
 

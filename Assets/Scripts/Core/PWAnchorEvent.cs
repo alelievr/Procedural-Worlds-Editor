@@ -7,5 +7,10 @@ namespace PW.Core
 	public struct PWAnchorEvent
 	{
 		public PWAnchor		anchorUnderMouse;
+
+		public void Reset()
+		{
+			anchorUnderMouse = null;
+		}
 	}
 }

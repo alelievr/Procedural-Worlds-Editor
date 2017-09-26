@@ -30,11 +30,11 @@ namespace PW.Core
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		[SerializeField] private int			_seed;
 		public int								seed { get { return _seed; } set { OnSeedChanged(); _seed = value; } }
-		[SerializeField] public int				_chunkSize;
+		[SerializeField] private int			_chunkSize;
 		public int								chunkSize { get { return _chunkSize; } set { OnChunkSizeChanged(); _chunkSize = value; } }
-		[SerializeField] public Vector3			_chunkPosition;
+		[SerializeField] private Vector3		_chunkPosition;
 		public Vector3							chunkPosition { get { return _chunkPosition; } set { OnChunkPositionChanged(); _chunkPosition = value; } }
-		[SerializeField] public float			_step;
+		[SerializeField] private float			_step;
 		public float							step { get { return _step; } set { OnStepChanged(); _step = value; } }
 
 
@@ -68,7 +68,7 @@ namespace PW.Core
 		public int								localNodeIdCount;
         public PWGUIManager						PWGUI;
 		[System.NonSerialized]
-		public PWGraphEditorState				editorState;
+		public PWGraphEditorEventInfo			editorEvents;
 
 
         //input and output nodes:
@@ -334,7 +334,7 @@ namespace PW.Core
 		//Create a link from the anchor where the link was dragged and the parameter
 		public PWNodeLink	CreateLink(PWAnchor anchor)
 		{
-			PWAnchor fromAnchor = editorState.startedLinkAnchor;
+			PWAnchor fromAnchor = editorEvents.startedLinkAnchor;
 
 			if (fromAnchor == null || anchor == null)
 				return null;

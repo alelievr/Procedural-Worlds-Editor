@@ -9,8 +9,6 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		PWAnchorEvent		anchorEvent;
-
 		public void RenderAnchors()
 		{
 			var e = Event.current;
@@ -28,27 +26,28 @@ namespace PW
 
 		public void ProcessAnchorEvents()
 		{
-			var				e = Event.current;
-			PWAnchorEvent	oldAnchorEvent = anchorEvent;
+			Event					e = Event.current;
+			PWGraphEditorEventInfo	editorEvents = graphRef.editorEvents;
+			PWGraphEditorEventInfo	oldEventInfos = editorEvents;
 
+			//process events on every anchors:
 			foreach (var anchorField in inputAnchorFields)
-				anchorField.ProcessEvent(ref anchorEvent);
+				anchorField.ProcessEvent(ref editorEvents);
 			foreach (var anchorField in outputAnchorFields)
-				anchorField.ProcessEvent(ref anchorEvent);
+				anchorField.ProcessEvent(ref editorEvents);
 
-			if (e.type == EventType.MouseUp)
+			//link anchor event is we release the mouse with a draggingLink.
+			if (e.type == EventType.MouseUp && editorEvents.isDraggingLink)
+				OnAnchorLinked(editorEvents.mouseOverAnchor);
+
+			if (editorEvents.isDraggingLink)
 			{
-				if (graphRef.editorState.isDraggingLink)
-					OnAnchorLinked(anchorEvent.anchorUnderMouse);
-			}
-			if (graphRef.editorState.isDraggingLink)
-			{
-				if (oldAnchorEvent.anchorUnderMouse != anchorEvent.anchorUnderMouse)
+				if (oldEventInfos.mouseOverAnchor != editorEvents.mouseOverAnchor)
 				{
-					if (anchorEvent.anchorUnderMouse == null)
-						OnDraggedLinkQuitAnchor(oldAnchorEvent.anchorUnderMouse);
+					if (editorEvents.mouseOverAnchor == null)
+						OnDraggedLinkQuitAnchor(oldEventInfos.mouseOverAnchor);
 					else
-						OnDraggedLinkOverAnchor(anchorEvent.anchorUnderMouse);
+						OnDraggedLinkOverAnchor(editorEvents.mouseOverAnchor);
 				}
 			}
 		}

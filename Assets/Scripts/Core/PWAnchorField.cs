@@ -266,13 +266,13 @@ namespace PW.Core
 				anchor.isLinkable = true;
 		}
 
-		public void ProcessEvent(ref PWAnchorEvent anchorEvent)
+		public void ProcessEvent(ref PWGraphEditorEventInfo anchorEvent)
 		{
 			var e = Event.current;
 
 			foreach (var anchor in anchors)
 				if (anchor.rect.Contains(e.mousePosition))
-					anchorEvent.anchorUnderMouse = anchor;
+					anchorEvent.mouseOverAnchor = anchor;
 		}
 
 	#endregion

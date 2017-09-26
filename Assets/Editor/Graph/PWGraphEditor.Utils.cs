@@ -8,30 +8,26 @@ using PW.Node;
 
 using Debug = UnityEngine.Debug;
 
+//TODO: remove this file
+
 //Utils for graph editor
 public partial class PWGraphEditor {
 	
 	void BeginDragLink()
 	{
-		graph.editorState.startedLinkAnchor = eventInfos.mouseOverAnchor;
-		graph.editorState.isDraggingLink = true;
+		editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
+		editorEvents.isDraggingLink = true;
 	}
 
 	void StopDragLink(bool linked)
 	{
 		//TODO: maybe fusion this two structure (the one in the graph must not exist)
-		eventInfos.isDraggingLink = false;
-		graph.editorState.isDraggingLink = false;
+		editorEvents.isDraggingLink = false;
 	}
 
 	void DeleteAllAnchorLinks()
 	{
-		eventInfos.mouseOverNode.RemoveAllLinksFromAnchor(eventInfos.mouseOverAnchor);
-	}
-
-	void DeleteLink(object l)
-	{
-		graph.RemoveLink(l as PWNodeLink);
+		editorEvents.mouseOverNode.RemoveAllLinksFromAnchor(editorEvents.mouseOverAnchor);
 	}
 
 	//TODO: remove and create new window style on GIMP
