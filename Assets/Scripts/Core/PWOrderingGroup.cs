@@ -59,14 +59,14 @@ namespace PW.Core
 			movepadTexture = Resources.Load("movepad") as Texture2D;
 		}
 
-		public bool Render(Vector2 graphDecal, Vector2 screenSize)
+		public void Render(Vector2 graphDecal, Vector2 screenSize, ref PWGraphEditorEventInfo eventInfo)
 		{
 			var e = Event.current;
 			Rect screen = new Rect(-graphDecal, screenSize);
 
 			//check if ordering group is not visible
 			if (!orderGroupRect.Overlaps(screen))
-				return false;
+				return ;
 			
 			if (orderingGroupStyle == null)
 				LoadStyles();
@@ -152,7 +152,8 @@ namespace PW.Core
 			Rect colorPickerRect = new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - 30, orderGroupWorldRect.y + 10, 20, 20);
 			PWGUI.ColorPicker(colorPickerRect, ref color, false);
 
-			return (orderGroupWorldRect.Contains(e.mousePosition));
+			if ((eventInfo.isMouseOverOrderingGroup = (orderGroupWorldRect.Contains(e.mousePosition))))
+				eventInfo.mouseOverOrderingGroup = this;
 		}
 	}
 }

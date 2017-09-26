@@ -45,6 +45,10 @@ namespace PW
 				return PWLinkType.FourChannel;
 			return PWLinkType.BasicData;
 		}
-		
+
+		public void Duplicate()
+		{
+			Debug.Log("TODO :) !");
+		}
 	}
 }

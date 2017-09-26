@@ -51,7 +51,7 @@ public partial class PWGraphEditor {
 				{
 					GUIUtility.hotControl = link.controlId;
 					//unselect all others links:
-					OnLinkSelected(link);
+					graph.RaiseOnLinkSelected(link);
 					link.selected = true;
 					link.highlight = PWLinkHighlight.Selected;
 				}

@@ -5,12 +5,13 @@ using PW;
 using PW.Core;
 using PW.Node;
 
-public class PWGraphEventInfo {
+public class PWGraphEditorEventInfo {
 
 	//graph infos:
 	public bool				isMouseClickOutside;
 	public bool				isSelecting;
-	public bool				isDraggingSelected;
+	public Vector2			selectionStartPoint;
+	public bool				isDraggingSelectedNodes;
 	public int				selectedNodeCount;
 
 	//node infos:
@@ -23,7 +24,7 @@ public class PWGraphEventInfo {
 	public bool				isMouseOverLink;
 	public bool				isMouseClickOnLink;
 	public bool				isDraggingLink;
-	public PWNodeLink		mouseOverNodeLink;
+	public PWNodeLink		mouseOverLink;
 
 	//anchor infos:
 	public bool				isMouseOverAnchor;
@@ -31,19 +32,21 @@ public class PWGraphEventInfo {
 	public PWAnchor			mouseOverAnchor;
 
 	//ordering group infos:
-	public bool				isMouseInsideOrderingGroup;
-	public bool				isMouseClickOnOrderingGroup;
-	public bool				isDraggingOrderingGroup;
-	public bool				isResizingOrderingGroup;
+	public bool				isMouseOverOrderingGroup;
+	public bool				isMouseClickOnOrderingGroup;	//not implemented
+	public bool				isDraggingOrderingGroup;		//not implemented
+	public bool				isResizingOrderingGroup;		//not implemented
 	public PWOrderingGroup	mouseOverOrderingGroup;
 
-	public PWGraphEventInfo() { Reset(); }
+	public PWGraphEditorEventInfo() { Reset(); }
 
-	public void Reset()
+	//init defaut values
+	public void Init()
 	{
 		isMouseClickOutside = false;
 		isSelecting = false;
-		isDraggingSelected = false;
+		selectionStartPoint = Vector2.zero;
+		isDraggingSelectedNodes = false;
 		selectedNodeCount = 0;
 
 		isMouseOverNode = false;
@@ -54,16 +57,38 @@ public class PWGraphEventInfo {
 		isMouseOverLink = false;
 		isMouseClickOnLink = false;
 		isDraggingLink = false;
-		mouseOverNodeLink = null;
+		mouseOverLink = null;
 
 		isMouseOverAnchor = false;
 		isMouseClickOnAnchor = false;
 		mouseOverAnchor = null;
 
-		isMouseInsideOrderingGroup = false;
+		isMouseOverOrderingGroup = false;
 		isMouseClickOnOrderingGroup = false;
 		isDraggingOrderingGroup = false;
 		isResizingOrderingGroup = false;
+		mouseOverOrderingGroup = null;
+	}
+
+	//events that will be reset each frames
+	public void Reset()
+	{
+		isMouseClickOutside = false;
+		
+		isMouseOverNode = false;
+		isMouseClickOnNode = false;
+		mouseOverNode = null;
+		
+		isMouseOverLink = false;
+		isMouseClickOnLink = false;
+		mouseOverLink = null;
+
+		isMouseOverAnchor = false;
+		isMouseClickOnAnchor = false;
+		mouseOverAnchor = null;
+		
+		isMouseOverOrderingGroup = false;
+		isMouseClickOnOrderingGroup = false;
 		mouseOverOrderingGroup = null;
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using PW.Core;
 using PW.Node;
 using PW;
@@ -11,13 +12,12 @@ public partial class PWGraphEditor {
 	void DisplayDecaledNode(int id, PWNode node, string name)
 	{
 		var		e = Event.current;
-		bool 	Mac = SystemInfo.operatingSystem.Contains("Mac");
 		
 		//if you are editing the node name, hide the current name.
 		if (node.windowNameEdit)
 			name = "";
 
-		if (node.isDragged && ((!Mac && e.control) || (Mac && e.command)))
+		if (node.isDragged && ((!MacOS && e.control) || (MacOS && e.command)))
 		{
 			Vector2 pos = node.windowRect.position;
 			float	snapPixels = 25.6f;
@@ -36,7 +36,7 @@ public partial class PWGraphEditor {
 		node.windowRect = PWUtils.DecalRect(decaledRect, -currentGraph.graphDecalPosition);
 	}
 
-	void RenderNode(int id, PWNode node, string name, int index, ref bool mouseAboveAnchorLocal, ref bool mouseDraggingWindowLocal)
+	void RenderNode(int id, PWNode node)
 	{
 		Event	e = Event.current;
 
@@ -149,15 +149,11 @@ public partial class PWGraphEditor {
 		if (node.processTime > Mathf.Epsilon)
 		{
 			GUIStyle gs = new GUIStyle();
-			Rect msRect = PWUtils.DecalRect(node.windowRect, currentGraph.graphDecalPosition);
+			Rect msRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
 			msRect.position += new Vector2(msRect.size.x / 2 - 10, msRect.size.y + 5);
 			gs.normal.textColor = greenRedGradient.Evaluate(node.processTime / 20); //20ms ok, after is red
 			GUI.Label(msRect, node.processTime + " ms", gs);
 		}
-
-		//check if user have pressed the close button of this window:
-		if (node.WindowShouldClose())
-			DeleteNode(index);
 	}
 	
 	void DeleteSelectedNodes()

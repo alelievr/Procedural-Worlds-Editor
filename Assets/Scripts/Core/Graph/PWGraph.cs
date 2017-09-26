@@ -267,6 +267,9 @@ namespace PW.Core
 			
 		}
 
+		public void RaiseOnClickNowhere() { OnClickNowhere(); }
+		public void RaiseOnLinkSelected(PWNodeLink link) { OnLinkSelected(link); }
+
 	#endregion
 
 	#region Nodes API

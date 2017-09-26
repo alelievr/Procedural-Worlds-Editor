@@ -92,7 +92,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 #region Internal editor styles and textures
 
 	private static Texture2D	resizeHandleTexture;
-	private static Texture2D	defaultBackgroundTexture;
 
 	private static Texture2D	preset2DSideViewTexture;
 	private static Texture2D	preset2DTopDownViewTexture;
@@ -108,23 +107,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	private static Texture2D	fileIconTexture;
 	private static Texture2D	pauseIconTexture;
 	private static Texture2D	eyeIconTexture;
-
-	private static Gradient		greenRedGradient;
 	
-	static GUIStyle		whiteText;
-	static GUIStyle		whiteBoldText;
-	static GUIStyle		navBarBackgroundStyle;
-	static GUIStyle		panelBackgroundStyle;
-	static GUIStyle		nodeGraphWidowStyle;
-
-	public GUIStyle toolbarSearchCancelButtonStyle;
-	public GUIStyle toolbarSearchTextStyle;
-	public GUIStyle toolbarStyle;
-	public GUIStyle nodeSelectorTitleStyle;
-	public GUIStyle	nodeSelectorCaseStyle;
-	public GUIStyle	selectionStyle;
-
-
 #endregion
 
 #region Initialization and data baking
@@ -172,6 +155,26 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		base.OnEnable();
 
 		mainGraph = graph as PWMainGraph;
+		
+		//load style: to move
+		resizeHandleTexture = CreateTexture2DColor(resizeHandleColor);
+
+		//loading preset panel images
+		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
+		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
+		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
+		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
+		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
+		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
+		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
+		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
+		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
+		
+		//icons and utils
+		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
+		fileIconTexture = CreateTexture2DFromFile("ic_file");
+		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
+		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
 
 		GeneratePWAssets();
 
