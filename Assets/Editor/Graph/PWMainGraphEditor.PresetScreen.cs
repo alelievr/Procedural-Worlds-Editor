@@ -92,23 +92,12 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				DrawPresetLineHeader("2D");
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
-					PWGraphBuilder(graph)
-						.AddNode(typeof(PWNodePerlinNoise2D), "perlin")
-						.AddNode(typeof(PWNodeTopDown2DTerrain), "terrain")
+					PWGraphBuilder.FromGraph(graph)
+						.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
+						.NewNode(typeof(PWNodeTopDown2DTerrain), "terrain")
 						.Link("perlin", "terrain")
-						.Flush();
+						.Execute();
 					mainGraph.outputType = PWGraphTerrainType.TopDown2D;
-
-					PWNode perlin = mainGraph.nodes.Last();
-					perlin.windowRect.position += Vector2.left * 400;
-					CreateNewNode(typeof(PWNodeTopDown2DTerrain));
-					PWNode terrain = mainGraph.nodes.Last();
-
-					//FIXME
-					// perlin.AttachLink("output", terrain, "texture");
-					// terrain.AttachLink("texture", perlin, "output");
-					terrain.AttachLink("terrainOutput", mainGraph.outputNode, "inputValues");
-					mainGraph.outputNode.AttachLink("inputValues", terrain, "terrainOutput");
 				}, false);
 				DrawPresetLine(null, "", () => {});
 				EditorGUILayout.EndHorizontal();

@@ -1,0 +1,3 @@
+NewNode PerlinNoise2D at (0, 0) as perlin2D
+NewNode TopDown2D at (50, 0) as terrain
+Link perlin2D to terrain

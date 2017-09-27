@@ -44,40 +44,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	[System.NonSerializedAttribute]
 	Rect				selectionRect;
 
-	[System.SerializableAttribute]
-	private class PWNodeStorageCategory
-	{
-		public string					color;
-		public List< PWNodeStorage >	nodes;
-
-		public PWNodeStorageCategory(string color) : this()
-		{
-			this.color = color;
-		}
-
-		public PWNodeStorageCategory()
-		{
-			nodes = new List< PWNodeStorage >();
-		}
-	}
-
-	[System.SerializableAttribute]
-	private class PWNodeStorage
-	{
-		public string		name;
-		public System.Type	nodeType;
-		public GUIStyle		windowStyle;
-		public GUIStyle		windowSelectedStyle;
-		
-		public PWNodeStorage(string n, System.Type type, GUIStyle ws, GUIStyle wss)
-		{
-			name = n;
-			nodeType = type;
-			windowStyle = ws;
-			windowSelectedStyle = wss;
-		}
-	}
-
 #region Internal editor styles and textures
 
 	private static Texture2D	resizeHandleTexture;
@@ -94,14 +60,13 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 
 	private static Texture2D	rencenterIconTexture;
 	private static Texture2D	fileIconTexture;
-	private static Texture2D	pauseIconTexture;
 	private static Texture2D	eyeIconTexture;
 	
 #endregion
 
 #region Initialization and data baking
 
-	[MenuItem("Window/Procedural Worlds")]
+	[MenuItem("Procedural Worlds/Main graph")]
 	static void Init()
 	{
 		PWMainGraphEditor window = (PWMainGraphEditor)EditorWindow.GetWindow (typeof (PWMainGraphEditor));
@@ -302,7 +267,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		//icons and utils
 		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
 		fileIconTexture = CreateTexture2DFromFile("ic_file");
-		pauseIconTexture = CreateTexture2DFromFile("ic_pause");
 		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
 	}
 
