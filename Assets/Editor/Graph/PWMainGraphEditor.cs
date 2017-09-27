@@ -43,12 +43,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	//multi-node selection
 	[System.NonSerializedAttribute]
 	Rect				selectionRect;
-	[System.NonSerializedAttribute]
-	bool				selecting = false;
-
-	//node selector and his subclasses
-	[System.NonSerializedAttribute]
-	Dictionary< string, PWNodeStorageCategory > nodeSelectorList = new Dictionary< string, PWNodeStorageCategory >();
 
 	[System.SerializableAttribute]
 	private class PWNodeStorageCategory
@@ -155,8 +149,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		LoadStyles();
 		
 		LoadAssets();
-
-		InitializeNodeSelector();
 	}
 
 #endregion

@@ -22,9 +22,9 @@ public partial class PWGraphEditor {
 			GenericMenu menu = new GenericMenu();
 			foreach (var nodeCat in PWNodeTypeProvider.GetAllowedNodesForGraph(GetType()))
 			{
-				string menuString = "Create new/" + nodeCat.Key + "/";
-				foreach (var nodeClass in nodeCat.Value.nodes)
-					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, graph.CreateNewNode, nodeClass.nodeType);
+				string menuString = "Create new/" + nodeCat.title + "/";
+				foreach (var nodeClass in nodeCat.typeInfos)
+					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => { graph.CreateNewNode(nodeClass.type, -graph.panPosition + e.mousePosition); });
 			}
 			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
 			if (editorEvents.mouseOverOrderingGroup != null)

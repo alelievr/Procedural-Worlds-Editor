@@ -10,20 +10,6 @@ namespace PW
 {
 	public partial class PWNode
 	{
-
-		Color FindColorFromtypes(SerializableType[] types)
-		{
-			Color defaultColor = PWColorScheme.GetColor("defaultAnchor");
-
-			foreach (var type in types)
-			{
-				Color c = PWColorScheme.GetAnchorColorByType(type.GetType());
-				if (!c.Compare(defaultColor))
-					return c;
-			}
-			return defaultColor;
-		}
-
 		PWAnchorType			InverAnchorType(PWAnchorType type)
 		{
 			if (type == PWAnchorType.Input)

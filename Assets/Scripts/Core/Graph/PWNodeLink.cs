@@ -13,7 +13,7 @@ namespace PW.Core
 		public string			GUID;
 	
 		//ColorPalette of the link
-		public PWColorPalette	colorPalette;
+		public PWColorSchemeName colorSchemeName;
 		//link type
 		public PWLinkType		type;
 		//link hightlight mode 

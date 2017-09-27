@@ -172,11 +172,13 @@ namespace PW.Core
 		public void Export(string filePath)
 		{
 
+			Debug.Log("TODO");
 		}
 
 		public void Import(string filePath, bool wipeDatas = false)
 		{
 
+			Debug.Log("TODO");
 		}
 
 		public bool Execute(string command)
@@ -186,6 +188,7 @@ namespace PW.Core
 
 		public bool SetInput(string fieldName, object value)
 		{
+			Debug.Log("TODO");
 			return false;
 		}
 	

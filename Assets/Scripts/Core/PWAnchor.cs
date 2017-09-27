@@ -54,7 +54,7 @@ namespace PW.Core
 		public PWAnchorType			anchorType { get { return anchorFieldRef.anchorType; } }
 		public string				fieldName { get { return anchorFieldRef.fieldName; } }
 		public PWTransferType		transferType { get { return anchorFieldRef.transferType; } }
-		public PWColorPalette		colorPalette { get { return anchorFieldRef.colorPalette; } }
+		public PWColorSchemeName	colorSchemeName { get { return anchorFieldRef.colorSchemeName; } }
 
 		
 		//Editor variable:

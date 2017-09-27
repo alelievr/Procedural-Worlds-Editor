@@ -60,7 +60,7 @@ namespace PW.Core
 		//the visual padding between multiple anchor of the same field
 		public int							padding = 0;
 		//color palette of the anchor (by default)
-		public PWColorPalette				colorPalette;
+		public PWColorSchemeName			colorSchemeName;
 		//anchor custom color if set
 		public Color						color = new Color(0, 0, 0, 0); //SerializableColor needed ?
 
@@ -187,7 +187,7 @@ namespace PW.Core
 			if (anchor.isLinkable)
 				GUI.color = highlightModeToColor[anchor.highlighMode];
 			else
-				GUI.color = PWColorScheme.disabledAnchorColor;
+				GUI.color = PWColorTheme.disabledAnchorColor;
 			// GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture); //???
 
 			//Draw the anchor:

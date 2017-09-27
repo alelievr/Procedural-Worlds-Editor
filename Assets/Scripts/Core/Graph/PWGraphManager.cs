@@ -14,7 +14,7 @@ namespace PW.Core
     
         //Biome graph settings:
         public static string        PWBiomeGraphPath = "Assets/ProceduralWorlds/Resources/Biomes";
-        public static string        PWBiomeGraphDefaultFileName = "New Proceduralbiome.asset";
+        public static string        PWBiomeGraphDefaultFileName = "New ProceduralBiome.asset";
     
         public static void CreateMainGraph(string fileName = null)
         {
@@ -30,6 +30,11 @@ namespace PW.Core
             PWMainGraph mg = ScriptableObject.CreateInstance< PWMainGraph >();
             
             AssetDatabase.CreateAsset(mg, path);
+        }
+
+        public static void ExportAsCommands(PWGraph graph)
+        {
+
         }
     }
 }

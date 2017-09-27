@@ -116,7 +116,7 @@ namespace PW
 		void DrawNodeCurve(PWAnchor anchor, Vector2 endPoint)
 		{
 			Vector3 startPos = new Vector3(anchor.rect.x + anchor.rect.width, anchor.rect.y + anchor.rect.height / 2, 0);
-			DrawSelectedBezier(startPos, endPoint, startPos + Vector3.right * tanPower, Vector3.zero, anchor.colorPalette, 4, PWLinkHighlight.None);
+			DrawSelectedBezier(startPos, endPoint, startPos + Vector3.right * tanPower, Vector3.zero, anchor.colorSchemeName, 4, PWLinkHighlight.None);
 		}
 		
 		void DrawNodeCurve(PWNodeLink link)
@@ -166,7 +166,7 @@ namespace PW
 			HandleUtility.AddControl(link.controlId, HandleUtility.DistancePointBezier(e.mousePosition, startPos, endPos, startTan, endTan) / 1.5f);
 			if (e.type == EventType.Repaint)
 			{
-				DrawSelectedBezier(startPos, endPos, startTan, endTan, link.colorPalette, 4, link.highlight);
+				DrawSelectedBezier(startPos, endPos, startTan, endTan, link.colorSchemeName, 4, link.highlight);
 	
 				if (link != null && link.highlight == PWLinkHighlight.DeleteAndReset)
 					link.highlight = PWLinkHighlight.None;
@@ -176,19 +176,19 @@ namespace PW
 			}
 		}
 	
-		void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, PWColorPalette colorPalette, int width, PWLinkHighlight highlight)
+		void	DrawSelectedBezier(Vector3 startPos, Vector3 endPos, Vector3 startTan, Vector3 endTan, PWColorSchemeName colorSchemeName, int width, PWLinkHighlight highlight)
 		{
 			switch (highlight)
 			{
 				case PWLinkHighlight.Selected:
-					Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorScheme.GetColor("selectedNode"), null, width + 3);
+					Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorTheme.selectedColor, null, width + 3);
 	;				break ;
 				case PWLinkHighlight.Delete:
 				case PWLinkHighlight.DeleteAndReset:
-					Handles.DrawBezier(startPos, endPos, startTan, endTan, new Color(1f, .0f, .0f, 1), null, width + 2);
+					Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorTheme.deletedColor, null, width + 2);
 					break ;
 			}
-			Color c = PWColorScheme.GetLinkColor(colorPalette);
+			Color c = PWColorTheme.GetLinkColor(colorSchemeName);
 			Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 		}
 	}

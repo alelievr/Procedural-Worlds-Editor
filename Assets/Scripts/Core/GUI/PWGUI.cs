@@ -331,7 +331,7 @@ namespace PW.Core
 			
 			if (editable)
 			{
-				GUI.color = (fieldSettings.active) ? PWColorScheme.GetColor("selected") : Color.white;
+				GUI.color = (fieldSettings.active) ? PWColorTheme.selectedColor : Color.white;
 				GUI.DrawTexture(iconRect, ic_edit);
 				GUI.color = Color.white;
 			}

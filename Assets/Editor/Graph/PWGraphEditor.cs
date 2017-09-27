@@ -207,6 +207,21 @@ public partial class PWGraphEditor : EditorWindow {
 			graph.panPosition += e.delta;
 		}
 		
+		if (e.type == EventType.MouseDown) //if event is mouse down
+		{
+			if (!editorEvents.isMouseOverSomething //if mouse is not above something
+				&& e.button == 0
+				&& !e.command
+				&& !e.control)
+				editorEvents.isSelecting = true;
+		}
+		if (e.type == EventType.MouseUp)
+		{
+			editorEvents.isSelecting = false;
+			editorEvents.isPanning = false;
+			editorEvents.isDraggingSelectedNodes = false;
+		}
+		
 		//esc key event:
 		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
 		{

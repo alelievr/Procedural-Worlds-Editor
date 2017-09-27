@@ -23,21 +23,21 @@ public partial class PWGraphEditor {
 	//color gradient used for compute time displayed under nodes
 	private static Gradient			greenRedGradient;
 	
-	static GUIStyle					whiteText; //TODO: replace by EditorStyles.whiteLabel ?
-	static GUIStyle					whiteBoldText; //TODO: same ?
-	static GUIStyle					navBarBackgroundStyle;
-	static GUIStyle					panelBackgroundStyle;
-	static GUIStyle					nodeGraphWidowStyle;
+	protected static GUIStyle		whiteText; //TODO: replace by EditorStyles.whiteLabel ?
+	protected static GUIStyle		whiteBoldText; //TODO: same ?
+	protected static GUIStyle		navBarBackgroundStyle;
+	protected static GUIStyle		panelBackgroundStyle;
+	protected static GUIStyle		nodeGraphWidowStyle;
 
-	public GUIStyle					toolbarSearchCancelButtonStyle;
-	public GUIStyle					toolbarSearchTextStyle;
-	public GUIStyle					toolbarStyle;
-	public GUIStyle					nodeSelectorTitleStyle;
-	public GUIStyle					nodeSelectorCaseStyle;
-	public GUIStyle					selectionStyle;
+	protected GUIStyle				toolbarSearchCancelButtonStyle;
+	protected GUIStyle				toolbarSearchTextStyle;
+	protected GUIStyle				toolbarStyle;
+	protected GUIStyle				nodeSelectorTitleStyle;
+	protected GUIStyle				nodeSelectorCaseStyle;
+	protected GUIStyle				selectionStyle;
 
-	public GUIStyle					nodeWindow;
-	public GUIStyle					nodeWindowSelected;
+	protected GUIStyle				nodeWindow;
+	protected GUIStyle				nodeWindowSelected;
 
 	static void LoadAssets()
 	{

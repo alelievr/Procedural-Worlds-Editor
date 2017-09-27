@@ -18,10 +18,10 @@ public partial class PWMainGraphEditor {
 			{
 				//recenter the graph
 				if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-					currentGraph.graphDecalPosition = Vector2.zero;
+					mainGraph.panPosition = Vector2.zero;
 				//ping the current PW object in the project window
 				if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-					EditorGUIUtility.PingObject(currentGraph);
+					EditorGUIUtility.PingObject(mainGraph);
 				//Show every hidden object in your hierarchy
 				if (GUILayout.Button(eyeIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 				{
@@ -41,42 +41,8 @@ public partial class PWMainGraphEditor {
 	
 			#if (DEBUG_GRAPH)
 			foreach (var node in nodes)
-				GUI.DrawTexture(PWUtils.DecalRect(node.rect, graphDecalPosition), debugTexture1);
+				GUI.DrawTexture(PWUtils.DecalRect(node.rect, panPosition), debugTexture1);
 			#endif
-	
-			if (e.type == EventType.MouseDown) //if event is mouse down
-			{
-				//TODO: remove the graph header height
-				if (graphRect.Contains(e.mousePosition))
-				{
-					if (e.button == 2 || (e.command && e.button == 0))
-						draggingGraph = true;
-				}
-				if (!mouseAboveNodeAnchor //if mouse is not above a node anchor
-					&& mouseAboveNodeIndex == -1 //and mouse is notabove a node
-					&& e.button == 0
-					&& !e.command
-					&& !e.control)
-				{
-					selecting = true;
-					selectionRect.position = e.mousePosition;
-					selectionRect.size = Vector2.zero;
-				}
-			}
-			if (e.type == EventType.MouseUp)
-			{
-				selecting = false;
-				draggingGraph = false;
-				previewMouseDrag = false;
-				draggingSelectedNodes = false;
-				draggingSelectedNodesFromContextMenu = false;
-			}
-			if (e.type == EventType.Layout)
-			{
-				if (draggingGraph)
-					currentGraph.graphDecalPosition += e.mousePosition - lastMousePosition;
-				lastMousePosition = e.mousePosition;
-			}
 		}
 		EditorGUILayout.EndVertical();
 	}
