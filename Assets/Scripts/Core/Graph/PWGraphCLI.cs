@@ -60,6 +60,53 @@ namespace PW.Core
 			}
 		}
 
+		static class PWGraphTokenSequence
+		{
+			public static List< PWGraphToken > newNode = new List< PWGraphToken >() {
+				PWGraphToken.NewNodeCommand, PWGraphToken.NameValue
+			};
+
+			public static List< PWGraphToken > newNodePositionOption = new List< PWGraphToken >() {
+				PWGraphToken.At, PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.Comma, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis
+			};
+
+			public static List< PWGraphToken > newNodeNameOption = new List< PWGraphToken >() {
+				PWGraphToken.As, PWGraphToken.NameValue
+			};
+
+			public static List< PWGraphToken > newLink = new List< PWGraphToken >() {
+				PWGraphToken.LinkCommand, PWGraphToken.NameValue, PWGraphToken.To, PWGraphToken.NameValue
+			};
+		}
+
+		class PWGraphCommandTokenSequence
+		{
+			public PWGraphCommandType			type;
+			public List< PWGraphToken >			requiredTokens = null;
+			
+			public int							requiredOptionCount = 0;
+			public List< List< PWGraphToken > >	optionTokens = null;
+		}
+
+		static class PWGraphValidCommandTokenSequence
+		{
+			public static List< PWGraphCommandTokenSequence > validSequences = new List< PWGraphCommandTokenSequence >()
+			{
+				//Node command
+				new PWGraphCommandTokenSequence() {
+					type = PWGraphCommandType.NewNode,
+					requiredTokens = PWGraphTokenSequence.newNode,
+					requiredOptionCount = 1,
+					optionTokens = new List< List< PWGraphToken > > { PWGraphTokenSequence.newNodeNameOption, PWGraphTokenSequence.newNodePositionOption }
+				},
+				//Link command
+				new PWGraphCommandTokenSequence() {
+					type = PWGraphCommandType.Link,
+					requiredTokens = PWGraphTokenSequence.newLink,
+				}
+			};
+		}
+
 		List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >()
 		{
 			new PWGraphTokenDefinition(PWGraphToken.ClosedParenthesis, @"^\)"),
@@ -73,19 +120,6 @@ namespace PW.Core
 			new PWGraphTokenDefinition(PWGraphToken.OpenParenthesis, @"^\("),
 			new PWGraphTokenDefinition(PWGraphToken.At, @"^at"),
 			new PWGraphTokenDefinition(PWGraphToken.IntValue, @"^\d+"),
-		};
-
-		//TODO: better things
-		List< List< PWGraphToken > >	validTokenLines = new List< List< PWGraphToken > >()
-		{
-			new List< PWGraphToken >()
-				{ PWGraphToken.NewNodeCommand, PWGraphToken.NodeTypeName, PWGraphToken.As, PWGraphToken.NameValue },
-			new List< PWGraphToken >()
-				{ PWGraphToken.NewNodeCommand, PWGraphToken.NodeTypeName, PWGraphToken.At, PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.Comma, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis, PWGraphToken.As, PWGraphToken.NameValue },
-			new List< PWGraphToken >()
-				{ PWGraphToken.NewNodeCommand, PWGraphToken.NodeTypeName, PWGraphToken.As, PWGraphToken.NameValue, PWGraphToken.At, PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.Comma, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis },
-			new List< PWGraphToken >()
-				{ PWGraphToken.LinkCommand, PWGraphToken.NameValue, PWGraphToken.To, PWGraphToken.NameValue},
 		};
 
 		PWGraphTokenMatch	Match(ref string line)
@@ -109,20 +143,30 @@ namespace PW.Core
 		{
 			PWGraphCommand	ret = null;
 
-			foreach (var validTokenList in validTokenLines)
+			foreach (var validTokenList in PWGraphValidCommandTokenSequence.validSequences)
 			{
-				if (tokens.Count != validTokenList.Count)
+				if (validTokenList.requiredTokens.Count > tokens.Count)
 					continue ;
 				
-				for (int i = 0; i < validTokenList.Count; i++)
+				for (int i = 0; i < validTokenList.requiredTokens.Count; i++)
+					if (tokens[i].token != validTokenList.requiredTokens[i])
+						goto skipLoop;
+				
+				foreach (var optionTokenList in validTokenList.optionTokens)
 				{
-					if (tokens[i].token != validTokenList[i])
-						break ;
-					else if (i == validTokenList.Count - 1)
+					for (int i = 0; i < optionTokenList.Count; i++)
 					{
-						ret = new PWGraphCommand();
+						if (tokens[i].token != optionTokenList[i])
+							goto skipLoop;
+						else if (i == optionTokenList.Count - 1)
+						{
+							ret = new PWGraphCommand();
+						}
 					}
 				}
+
+				skipLoop:
+				continue ;
 			}
 
 			if (ret == null)
