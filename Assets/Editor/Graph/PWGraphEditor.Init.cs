@@ -106,9 +106,6 @@ public partial class PWGraphEditor {
 		whiteBoldText = new GUIStyle();
 		whiteBoldText.fontStyle = FontStyle.Bold;
 		whiteBoldText.normal.textColor = Color.white;
-		
-		//set the custom style for the editor
-		GUI.skin = PWGUISkin;
 	}
 
 }

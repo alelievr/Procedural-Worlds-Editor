@@ -17,7 +17,6 @@ namespace PW.Core
 		Geologic,	//output a structure containing all maps for a chunk (terrain, wet, temp, biomes, ...)
 	}
 
-	[CreateAssetMenu(fileName = "New ProceduralWorld", menuName = "Procedural World", order = 1)]
 	[System.SerializableAttribute]
 	public class PWMainGraph : PWGraph {
 
@@ -62,6 +61,16 @@ namespace PW.Core
 			step = oldStep;
 		}
 
+		public override void Initialize()
+		{
+			base.Initialize();
+			
+			geologicTerrainStep = 8;
+			geologicDistanceCheck = 2;
+	
+			processMode = PWGraphProcessMode.Normal;
+		}
+
 		public override void OnEnable()
 		{
 			base.OnEnable();
@@ -71,6 +80,5 @@ namespace PW.Core
 		{
 			base.OnDisable();
 		}
-
     }
 }

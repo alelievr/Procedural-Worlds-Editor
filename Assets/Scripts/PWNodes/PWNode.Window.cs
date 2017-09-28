@@ -15,6 +15,9 @@ namespace PW
 		public void OnWindowGUI(int id)
 		{
 			var e = Event.current;
+			
+			if (innerNodePaddingStyle == null)
+				LoadStyles();
 
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;

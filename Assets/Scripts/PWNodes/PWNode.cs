@@ -22,8 +22,8 @@ namespace PW
 		new public string		name;
 
 		//AnchorField lists
-		public List< PWAnchorField >	inputAnchorFields;
-		public List< PWAnchorField >	outputAnchorFields;
+		public List< PWAnchorField >	inputAnchorFields = new List< PWAnchorField >();
+		public List< PWAnchorField >	outputAnchorFields = new List< PWAnchorField >();
 
 		//GUI utils to provide custom fields for Samplers, Range ...
 		[SerializeField]
@@ -56,9 +56,9 @@ namespace PW
 	#region Internal Node datas and style
 		static GUIStyle 			renameNodeTextFieldStyle = null;
 		static GUIStyle				debugStyle = null;
+		static GUIStyle				innerNodePaddingStyle = null;
 		public GUIStyle				windowStyle;
 		public GUIStyle				windowSelectedStyle;
-		public static GUIStyle		innerNodePaddingStyle = null;
 		
 		static Texture2D			editIcon = null;
 
@@ -196,11 +196,17 @@ namespace PW
 		public void OnAfterDeserialize(PWGraph graph)
 		{
 			this.graphRef = graph;
+
+			BindEvents();
 			
 			foreach (var anchorField in inputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
+				
+			OnNodeEnable();
+
+			OnAnchorEnable();
 		}
 
 	#region OnEnable, OnDisable, Initialize
@@ -208,14 +214,10 @@ namespace PW
 		public void OnEnable()
 		{
 			LoadAssets();
-
-			LoadStyles();
 			
 			LoadFieldAttributes();
 
 			BakeNodeFields();
-
-			BindEvents();
 
 			UpdateWorkStatus();
 
@@ -226,10 +228,6 @@ namespace PW
 			classQAName = GetType().AssemblyQualifiedName;
 
 			delayedChanges.Clear();
-			
-			OnNodeEnable();
-
-			OnAnchorEnable();
 		}
 
 		//called only once, when the node is created

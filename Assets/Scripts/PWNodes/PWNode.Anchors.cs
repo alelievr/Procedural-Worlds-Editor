@@ -9,6 +9,8 @@ namespace PW
 {
 	public partial class PWNode
 	{
+		PWGraphEditorEventInfo	oldEventInfos;
+
 		public void RenderAnchors()
 		{
 			var e = Event.current;
@@ -28,7 +30,8 @@ namespace PW
 		{
 			Event					e = Event.current;
 			PWGraphEditorEventInfo	editorEvents = graphRef.editorEvents;
-			PWGraphEditorEventInfo	oldEventInfos = editorEvents;
+			
+			oldEventInfos = editorEvents.Clone(oldEventInfos);
 
 			//process events on every anchors:
 			foreach (var anchorField in inputAnchorFields)

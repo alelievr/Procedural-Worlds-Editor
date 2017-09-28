@@ -1,6 +1,4 @@
-﻿// #define		DEBUG_GRAPH
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -15,7 +13,7 @@ using Object = UnityEngine.Object;
 public partial class PWMainGraphEditor : PWGraphEditor {
 
 	[SerializeField]
-	PWMainGraph						mainGraph;
+	PWMainGraph						mainGraph { get { return graph as PWMainGraph; } }
 	
 	[SerializeField]
 	public HorizontalSplitView		h1;
@@ -77,39 +75,12 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 /*	void InitializeNewGraph(PWNodeGraph graph)
 	{
 		//setup splitted panels:
-		graph.h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
-		graph.h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
-
-		graph.graphDecalPosition = Vector2.zero;
-
-		graph.realMode = false;
-		graph.presetChoosed = false;
-		
-		graph.localNodeIdCount = 0;
-		graph.chunkSize = 16;
-		graph.step = 1;
-		graph.maxStep = 4;
-		graph.geologicTerrainStep = 8;
-		graph.geologicDistanceCheck = 2;
-		
-		graph.outputNode = CreateNewNode(typeof(PWNodeGraphOutput), new Vector2(position.width - 100, (int)(position.height / 2)));
-		graph.inputNode = CreateNewNode(typeof(PWNodeGraphInput), new Vector2(50, (int)(position.height / 2)));
-
-		graph.firstInitialization = "initialized";
-		graph.PWGUI = new PWGUIManager();
-
-		graph.saveName = null;
-		graph.externalName = "New ProceduralWorld";
-
-		graph.processMode = PWGraphProcessMode.Normal;
 	}*/
 
 	Color resizeHandleColor;
 	public override void OnEnable()
 	{
 		base.OnEnable();
-
-		mainGraph = graph as PWMainGraph;
 		
 		LoadStyles();
 		

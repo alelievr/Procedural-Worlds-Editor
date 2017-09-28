@@ -29,13 +29,13 @@ namespace PW.Core
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		[SerializeField] private int			_seed;
-		public int								seed { get { return _seed; } set { OnSeedChanged(); _seed = value; } }
+		public int								seed { get { return _seed; } set { if (OnSeedChanged != null) OnSeedChanged(); _seed = value; } }
 		[SerializeField] private int			_chunkSize;
-		public int								chunkSize { get { return _chunkSize; } set { OnChunkSizeChanged(); _chunkSize = value; } }
+		public int								chunkSize { get { return _chunkSize; } set { if (OnChunkSizeChanged != null) OnChunkSizeChanged(); _chunkSize = value; } }
 		[SerializeField] private Vector3		_chunkPosition;
-		public Vector3							chunkPosition { get { return _chunkPosition; } set { OnChunkPositionChanged(); _chunkPosition = value; } }
+		public Vector3							chunkPosition { get { return _chunkPosition; } set { if (OnChunkPositionChanged != null) OnChunkPositionChanged(); _chunkPosition = value; } }
 		[SerializeField] private float			_step;
-		public float							step { get { return _step; } set { OnStepChanged(); _step = value; } }
+		public float							step { get { return _step; } set { if (OnStepChanged != null) OnStepChanged(); _step = value; } }
 
 
 		//Link table, store all connections between node's anchors.
@@ -65,16 +65,19 @@ namespace PW.Core
 
         //editor datas:
 		public Vector2							panPosition;
-		public int								localNodeIdCount;
-        public PWGUIManager						PWGUI;
+        public PWGUIManager						PWGUI = new PWGUIManager();
 		[System.NonSerialized]
-		public PWGraphEditorEventInfo			editorEvents;
+		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
 		public float							maxStep;
 
 
         //input and output nodes:
         public PWNodeGraphInput					inputNode;
         public PWNodeGraphOutput				outputNode;
+
+		
+		//useful variables:
+		[SerializeField] bool					initialized = false;
 
 
 		//public delegates:
@@ -108,8 +111,33 @@ namespace PW.Core
 	
 	#endregion
 
+		//this method must only be called when a new graph is created from PWgraphManager class
+		public virtual void Initialize()
+		{
+			//initialize the graph pan position
+			panPosition = Vector2.zero;
+	
+			realMode = false;
+			// presetChoosed = false;
+			
+			//default values:
+			chunkSize = 16;
+			step = 1;
+			maxStep = 4;
+			name = "New ProceduralWorld";
+			
+			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(-100, 0));
+			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(50, 0));
+			
+			initialized = true;
+		}
+
 		public virtual void OnEnable()
 		{
+			//check if the object have been initialized, if not, quit.
+			if (!initialized)
+				return ;
+
 			Debug.Log("OnEnable graph !");
 
 			graphProcessor.Initialize();
@@ -117,17 +145,15 @@ namespace PW.Core
 			//add all existing nodes to the nodesDictionary
 			for (int i = 0; i < nodes.Count; i++)
 				nodesDictionary[nodes[i].id] = nodes[i];
-			if (inputNode != null)
-				nodesDictionary[inputNode.id] = inputNode;
-			if (outputNode != null)
-				nodesDictionary[outputNode.id] = outputNode;
+			nodesDictionary[inputNode.id] = inputNode;
+			nodesDictionary[outputNode.id] = outputNode;
 			
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			//	called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
 				node.OnAfterDeserialize(this);
 
-			//Build compute order list:
+			//Build compute order list
 			UpdateComputeOrder();
 			
 			//Attach node's events
@@ -202,6 +228,7 @@ namespace PW.Core
 			if (first)
 			{
 				nodeComputeOrderCount.Clear();
+
 				inputNode.computeOrder = 0;
 	
 				foreach (var gNode in nodes)
@@ -304,13 +331,21 @@ namespace PW.Core
 			return computeOrderSortedNodes;
 		}
 
+		public T		CreateNewNode< T >(Vector2 position) where T : PWNode
+		{
+			return CreateNewNode(typeof(T), position) as T;
+		}
+
 		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			newNode.Initialize(this);
 			AttachNodeEvents(newNode);
 			nodesDictionary[newNode.id] = newNode;
-			OnNodeAdded(newNode);
+
+			if (OnNodeAdded != null)
+				OnNodeAdded(newNode);
+			
 			return newNode;
 		}
 
@@ -319,7 +354,10 @@ namespace PW.Core
 			DetachNodeEvents(removeNode);
 			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
 			nodes.Remove(removeNode);
-			OnNodeRemoved(removeNode);
+			
+			if (OnNodeRemoved != null)
+				OnNodeRemoved(removeNode);
+			
 			return nodesDictionary.Remove(item.Key);
 		}
 		
@@ -329,13 +367,18 @@ namespace PW.Core
 
 			DetachNodeEvents(node);
 			//sending this event will cause the node remove self.
-			OnNodeRemoved(node);
+
+			if (OnNodeRemoved != null)
+				OnNodeRemoved(node);
+			
 			return nodesDictionary.Remove(nodeId);
 		}
 
 		public void		RemoveLink(PWNodeLink link)
 		{
-			OnLinkRemoved(link);
+			if (OnLinkRemoved != null)
+				OnLinkRemoved(link);
+			
 			link.fromAnchor.RemoveLink(link);
 			link.toAnchor.RemoveLink(link);
 			nodeLinkTable.RemoveLink(link);

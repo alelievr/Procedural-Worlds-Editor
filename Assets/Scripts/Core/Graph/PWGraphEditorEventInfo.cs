@@ -4,8 +4,9 @@ using UnityEngine;
 using PW;
 using PW.Core;
 using PW.Node;
+using System.Reflection;
 
-public class PWGraphEditorEventInfo {
+public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 
 	//graph infos:
 	public bool				isMouseClickOutside;
@@ -41,13 +42,22 @@ public class PWGraphEditorEventInfo {
 	public bool				isResizingOrderingGroup;		//not implemented
 	public PWOrderingGroup	mouseOverOrderingGroup;
 
-	public bool				isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
-	public bool				isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
+    public bool isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
+    public bool isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
 
-	public PWGraphEditorEventInfo() { Reset(); }
+	static PropertyInfo[] propList;
+
+	public PWGraphEditorEventInfo()
+	{
+		//initialize self proper list for Clone method
+		if (propList == null)
+			propList = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+		
+		Init();
+	}
 
 	//init defaut values
-	public void Init()
+	void Init()
 	{
 		isMouseClickOutside = false;
 		isSelecting = false;
@@ -92,5 +102,16 @@ public class PWGraphEditorEventInfo {
 		
 		isMouseClickOnOrderingGroup = false;
 		mouseOverOrderingGroup = null;
+	}
+
+	public PWGraphEditorEventInfo Clone(PWGraphEditorEventInfo oldObject = null)
+	{
+		if (oldObject == null)
+			oldObject = new PWGraphEditorEventInfo();
+		
+		foreach (var prop in propList)
+			prop.SetValue(oldObject, prop.GetValue(this, null), null);
+		
+		return oldObject;
 	}
 }

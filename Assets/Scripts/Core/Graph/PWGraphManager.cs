@@ -28,11 +28,18 @@ namespace PW.Core
                 Directory.CreateDirectory(PWMainGraphPath);
             
             PWMainGraph mg = ScriptableObject.CreateInstance< PWMainGraph >();
+
+            mg.Initialize();
             
-            AssetDatabase.CreateAsset(mg, path);
+            ProjectWindowUtil.CreateAsset(mg, path);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = mg;
         }
 
-        public static void ExportAsCommands(PWGraph graph)
+        public static void CreateBiomeGraph(string fileName = null)
         {
 
         }

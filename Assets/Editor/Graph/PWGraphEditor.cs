@@ -41,19 +41,27 @@ public partial class PWGraphEditor : EditorWindow {
 		LoadStyles();
 
 		LoadAssets();
-
-		graph.editorEvents.Init();
 	}
 
 	//draw the default node graph:
 	public virtual void OnGUI()
 	{
+		if (graph == null)
+		{
+			//TODO: rework this
+			Debug.Log("NULL graph !");
+			return ;
+		}
+
 		e = Event.current;
+		
+		//set the skin for the current window
+		GUI.skin = PWGUISkin;
 
 		//render the graph in the background:
 		GUI.depth = -10;
 
-		graph.editorEvents.Reset();
+		editorEvents.Reset();
 
 		//disable events if mouse is above an eventMask Rect.
 		//TODO: test this
@@ -87,9 +95,30 @@ public partial class PWGraphEditor : EditorWindow {
 		GUI.depth = 0;
 	}
 
+	//TODO: move elsewhere
+	public void LoadGraph(string file)
+	{
+		LoadGraph(AssetDatabase.LoadAssetAtPath< PWGraph >(file));
+	}
+
+	public void LoadGraph(PWGraph graph)
+	{
+		graph.OnNodeAdded += OnNodeAddedCallback;
+		graph.OnNodeRemoved += OnNodeRemovedCallback;
+	}
+
+	public void UnloadGraph()
+	{
+		graph.OnNodeAdded -= OnNodeAddedCallback;
+		graph.OnNodeRemoved -= OnNodeRemovedCallback;
+
+		DestroyImmediate(graph);
+	}
+
 	public virtual void OnDisable()
 	{
-		
+		//destroy the graph so it's not loaded in the void.
+		UnloadGraph();
 	}
 
 	bool MaskEvents()
@@ -126,19 +155,19 @@ public partial class PWGraphEditor : EditorWindow {
 	void SelectAndDrag()
 	{
 		//rendering the selection rect
-		if (graph.editorEvents.isSelecting)
+		if (editorEvents.isSelecting)
 		{
-			Rect posiviteSelectionRect = PWUtils.CreateRect(e.mousePosition, graph.editorEvents.selectionStartPoint);
+			Rect posiviteSelectionRect = PWUtils.CreateRect(e.mousePosition, editorEvents.selectionStartPoint);
 			Rect decaledSelectionRect = PWUtils.DecalRect(posiviteSelectionRect, -graph.panPosition);
 			selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
 
 			//iterature throw all nodes of the graph and check if the selection overlaps
 			graph.nodes.ForEach(n => n.selected = decaledSelectionRect.Overlaps(n.windowRect));
-			graph.editorEvents.selectedNodeCount = graph.nodes.Count(n => n.selected);
+			editorEvents.selectedNodeCount = graph.nodes.Count(n => n.selected);
 		}
 
 		//multiple window drag:
-		if (e.type == EventType.MouseDrag && graph.editorEvents.isDraggingSelectedNodes)
+		if (e.type == EventType.MouseDrag && editorEvents.isDraggingSelectedNodes)
 		{
 				graph.nodes.ForEach(n => {
 				if (n.selected)
@@ -166,9 +195,7 @@ public partial class PWGraphEditor : EditorWindow {
 	
 			//display the graph input and output:
 			RenderNode(nodeId++, graph.outputNode);
-	
-			if (graph.inputNode != null)
-				RenderNode(nodeId++, graph.outputNode);
+			RenderNode(nodeId++, graph.inputNode);
 		}
 		EndWindows();
 	}
@@ -188,7 +215,7 @@ public partial class PWGraphEditor : EditorWindow {
 		}
 		
 		//click up outside of an anchor, stop dragging
-		if (e.type == EventType.mouseUp && graph.editorEvents.isDraggingLink)
+		if (e.type == EventType.mouseUp && editorEvents.isDraggingLink)
 			StopDragLink(false);
 			
 		//duplicate selected items if cmd+d
@@ -201,9 +228,9 @@ public partial class PWGraphEditor : EditorWindow {
 
 		//graph panning
 		//if the event is a drag then it has't been used before
-		if (e.type == EventType.mouseDrag && !graph.editorEvents.isDraggingSomething)
+		if (e.type == EventType.mouseDrag && !editorEvents.isDraggingSomething)
 		{
-			graph.editorEvents.isPanning = true;
+			editorEvents.isPanning = true;
 			graph.panPosition += e.delta;
 		}
 		
@@ -247,10 +274,10 @@ public partial class PWGraphEditor : EditorWindow {
 	
 		//unselect all selected links if click beside.
 		if (e.type == EventType.MouseDown
-				&& !graph.editorEvents.isMouseOverAnchor
-				&& !graph.editorEvents.isMouseOverNode
-				&& !graph.editorEvents.isMouseOverLink
-				&& !graph.editorEvents.isMouseOverOrderingGroup)
+				&& !editorEvents.isMouseOverAnchor
+				&& !editorEvents.isMouseOverNode
+				&& !editorEvents.isMouseOverLink
+				&& !editorEvents.isMouseOverOrderingGroup)
 			graph.RaiseOnClickNowhere();
 	}
 }

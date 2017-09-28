@@ -15,14 +15,15 @@ public partial class PWGraphEditor {
 	
 	void BeginDragLink()
 	{
-		editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
-		editorEvents.isDraggingLink = true;
+		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
+		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
+		graph.editorEvents.isDraggingLink = true;
 	}
 
 	void StopDragLink(bool linked)
 	{
 		//TODO: maybe fusion this two structure (the one in the graph must not exist)
-		editorEvents.isDraggingLink = false;
+		graph.editorEvents.isDraggingLink = false;
 	}
 
 	void DeleteAllAnchorLinks()

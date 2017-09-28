@@ -43,7 +43,7 @@ public partial class PWGraphEditor {
 
 		//check if the mouse is over this node
 		if (node.windowRect.Contains(e.mousePosition - graph.panPosition))
-			editorEvents.mouseOverNode = node;
+			graph.editorEvents.mouseOverNode = node;
 
 		//managed somewhere else
 		/*//end dragging:
@@ -109,6 +109,16 @@ public partial class PWGraphEditor {
 	void MoveSelectedNodes()
 	{
 		Debug.Log("moving from context menu");
+	}
+
+	void OnNodeAddedCallback(PWNode node)
+	{
+
+	}
+
+	void OnNodeRemovedCallback(PWNode node)
+	{
+
 	}
 
 }
