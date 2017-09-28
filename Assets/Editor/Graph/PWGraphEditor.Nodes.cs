@@ -9,13 +9,9 @@ using PW;
 //Nodes rendering
 public partial class PWGraphEditor {
 
-	void DisplayDecaledNode(int id, PWNode node, string name)
+	void DisplayDecaledNode(int id, PWNode node)
 	{
 		var		e = Event.current;
-		
-		//if you are editing the node name, hide the current name.
-		if (node.windowNameEdit)
-			name = "";
 
 		//node grid snapping when pressing cmd/crtl 
 		if (node.isDragged && ((!MacOS && e.control) || (MacOS && e.command)))
@@ -31,7 +27,7 @@ public partial class PWGraphEditor {
 
 		//move the node if panPosition changed:
 		node.windowRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, name, (node.selected) ? node.windowSelectedStyle : node.windowStyle, GUILayout.Height(node.viewHeight));
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, node.name, (node.selected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 		node.windowRect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 	}
 
@@ -39,7 +35,9 @@ public partial class PWGraphEditor {
 	{
 		Event	e = Event.current;
 
-		DisplayDecaledNode(id, node, name);
+		Debug.Log("node: " + node);
+
+		DisplayDecaledNode(id, node);
 
 		//check if the mouse is over this node
 		if (node.windowRect.Contains(e.mousePosition - graph.panPosition))
@@ -113,12 +111,13 @@ public partial class PWGraphEditor {
 
 	void OnNodeAddedCallback(PWNode node)
 	{
-
+		AssetDatabase.AddObjectToAsset(node, graph);
+		Debug.Log("Added node to asset !");
 	}
 
 	void OnNodeRemovedCallback(PWNode node)
 	{
-
+		DestroyImmediate(node, true);
 	}
 
 }

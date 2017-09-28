@@ -36,8 +36,8 @@ public partial class PWGraphEditor {
 	protected GUIStyle				nodeSelectorCaseStyle;
 	protected GUIStyle				selectionStyle;
 
-	protected GUIStyle				nodeWindow;
-	protected GUIStyle				nodeWindowSelected;
+	protected GUIStyle				nodeStyle;
+	protected GUIStyle				nodeSelectedStyle;
 
 	static void LoadAssets()
 	{
@@ -97,8 +97,8 @@ public partial class PWGraphEditor {
 
 		prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
 
-		nodeWindow = PWGUISkin.FindStyle("NodeWindow");
-		nodeWindowSelected = PWGUISkin.FindStyle("NodeWindowSelected");
+		nodeStyle = PWGUISkin.FindStyle("Node");
+		nodeSelectedStyle = PWGUISkin.FindStyle("NodeSelected");
 		
 		//TODO: still used ?
 		whiteText = new GUIStyle();

@@ -9,6 +9,7 @@ using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 
 namespace PW.Core
 {
+	[System.Serializable]
     public class PWGraph : ScriptableObject {
     
 	#region Graph Datas
@@ -77,7 +78,7 @@ namespace PW.Core
 
 		
 		//useful variables:
-		[SerializeField] bool					initialized = false;
+		public bool								initialized = false;
 
 
 		//public delegates:
@@ -114,6 +115,8 @@ namespace PW.Core
 		//this method must only be called when a new graph is created from PWgraphManager class
 		public virtual void Initialize()
 		{
+			Debug.LogWarning("Initialized graph !");
+
 			//initialize the graph pan position
 			panPosition = Vector2.zero;
 	
@@ -138,7 +141,7 @@ namespace PW.Core
 			if (!initialized)
 				return ;
 
-			Debug.Log("OnEnable graph !");
+			Debug.Log("OnEnable graph, node count: " + nodes.Count);
 
 			graphProcessor.Initialize();
 
@@ -339,8 +342,12 @@ namespace PW.Core
 		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
+			
 			newNode.Initialize(this);
+
 			AttachNodeEvents(newNode);
+
+			nodes.Add(newNode);
 			nodesDictionary[newNode.id] = newNode;
 
 			if (OnNodeAdded != null)

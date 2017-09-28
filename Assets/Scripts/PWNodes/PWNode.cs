@@ -57,8 +57,7 @@ namespace PW
 		static GUIStyle 			renameNodeTextFieldStyle = null;
 		static GUIStyle				debugStyle = null;
 		static GUIStyle				innerNodePaddingStyle = null;
-		public GUIStyle				windowStyle;
-		public GUIStyle				windowSelectedStyle;
+		static GUIStyle				nodeStyle = null;
 		
 		static Texture2D			editIcon = null;
 
@@ -197,6 +196,11 @@ namespace PW
 		{
 			this.graphRef = graph;
 
+			Debug.Log("OnAfterDeserialize for node: " + GetType());
+			
+			//try to load styles here:
+			LoadStyles();
+
 			BindEvents();
 			
 			foreach (var anchorField in inputAnchorFields)
@@ -220,6 +224,8 @@ namespace PW
 			BakeNodeFields();
 
 			UpdateWorkStatus();
+
+			Debug.Log("Node OnEnable: " + GetType());
 
 			//set the PWGUI current node:
 			PWGUI.SetNode(this);
@@ -342,7 +348,8 @@ namespace PW
 		public void	RemoveSelf()
 		{
 			RemoveAllLinks();
-			Destroy(this);
+
+			//the node instance will be removed by the editor at the same time that it's asset
 		}
 
 		void		OnClickedOutside()

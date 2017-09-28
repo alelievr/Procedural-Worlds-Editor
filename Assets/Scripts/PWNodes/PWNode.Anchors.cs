@@ -15,7 +15,7 @@ namespace PW
 		{
 			var e = Event.current;
 
-			int			windowHeaderSize = windowStyle.border.top + windowStyle.margin.top;
+			int			windowHeaderSize = nodeStyle.border.top + nodeStyle.margin.top;
 			int			windowHorizontalPadding = 15;
 			Rect		inputAcnhorRect = new Rect(windowHorizontalPadding, windowHeaderSize, 120, -1);
 			Rect		outputAnchorRect = new Rect(windowRect.width - windowHorizontalPadding, windowHeaderSize, -120, -1);

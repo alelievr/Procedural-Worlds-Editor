@@ -24,11 +24,16 @@ namespace PW
 			editIcon = Resources.Load< Texture2D >("ic_edit");
 		}
 
-		void LoadStyles()
+		public void LoadStyles()
 		{
+			//check if style was already initialized:
+			if (innerNodePaddingStyle != null)
+				return ;
+
 			renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
 			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
 			debugStyle = GUI.skin.FindStyle("Debug");
+			nodeStyle = GUI.skin.FindStyle("Node");
 		}
 		
 		void BakeNodeFields()
@@ -241,8 +246,8 @@ namespace PW
 		{
 			//graph events:
 			//if the node is used in a PWMainGraph:
-			mainGraphRef.OnForceReload += ForceReloadCallback;
-			mainGraphRef.OnForceReloadOnce += ForceReloadOnceCallback;
+			graphRef.OnForceReload += ForceReloadCallback;
+			graphRef.OnForceReloadOnce += ForceReloadOnceCallback;
 			graphRef.OnClickNowhere += OnClickedOutside;
 			graphRef.OnLinkDragged += LinkDraggedCallback;
 			graphRef.OnLinkRemoved += LinkRemovedCalllback;
@@ -263,8 +268,8 @@ namespace PW
 		void UnBindEvents()
 		{
 			//if the node is used in a PWMainGraph:
-			mainGraphRef.OnForceReload -= GraphReloadCallback;
-			mainGraphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
+			graphRef.OnForceReload -= GraphReloadCallback;
+			graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
 			graphRef.OnClickNowhere -= OnClickedOutside;
 			graphRef.OnLinkDragged -= LinkDraggedCallback;
 			graphRef.OnLinkRemoved -= LinkRemovedCalllback;

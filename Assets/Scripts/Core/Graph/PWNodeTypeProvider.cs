@@ -133,6 +133,7 @@ namespace PW.Core
 			else if (graphType == typeof(PWBiomeGraph))
 				return biomeGraphInfoList;
 			//TODO: other types of graph
+			Debug.LogError("Could not find allowed nodes for the graph " + graphType);
 			return null;
         }
 	}

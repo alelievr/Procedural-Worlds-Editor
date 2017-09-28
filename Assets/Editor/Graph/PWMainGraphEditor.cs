@@ -16,9 +16,9 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	PWMainGraph						mainGraph { get { return graph as PWMainGraph; } }
 	
 	[SerializeField]
-	public HorizontalSplitView		h1;
+	HorizontalSplitView				h1;
 	[SerializeField]
-	public HorizontalSplitView		h2;
+	HorizontalSplitView				h2;
 	[SerializeField]
 	public string					searchString = "";
 	
@@ -85,6 +85,15 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		LoadStyles();
 		
 		LoadAssets();
+
+		OnWindowResize += WindowResizeCallback;
+	}
+
+	public override void OnDisable()
+	{
+		base.OnDisable();
+
+		OnWindowResize -= WindowResizeCallback;
 	}
 
 #endregion
@@ -109,13 +118,6 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		mainGraph.PWGUI.StartFrame();
 		if (e.type == EventType.Layout)
 			PWPopup.ClearAll();
-
-		//text colors:
-
-		if (windowSize != Vector2.zero && windowSize != position.size)
-			OnWindowResize();
-		
-		windowSize = position.size;
 		
 		if (!mainGraph.presetChoosed)
 		{
@@ -198,7 +200,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 			}*/
 
 //TODO: eventize
-	void OnWindowResize()
+	void WindowResizeCallback(Vector2 newSize)
 	{
 		//calcul the ratio for the window move:
 		float r = position.size.x / windowSize.x;
@@ -213,11 +215,12 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 
 	void LoadAssets()
 	{
+		h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
+		h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
 		
 		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
 			return Resources.Load< Texture2D >(ressourcePath);
         };
-		
 
 		//load style: to move
 		resizeHandleColor = EditorGUIUtility.isProSkin

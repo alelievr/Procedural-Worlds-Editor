@@ -29,14 +29,15 @@ public partial class PWGraphEditor : EditorWindow {
 	
 	//current Event:
 	Event						e;
+	
+	protected Vector2			windowSize;
 
+	//Is the editor on MacOS ?
 	bool 						MacOS;
 
 	public virtual void OnEnable()
 	{
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
-
-		Debug.Log("OnEnable graph editor");
 
 		LoadStyles();
 
@@ -93,6 +94,13 @@ public partial class PWGraphEditor : EditorWindow {
 
 		//reset to default the depth
 		GUI.depth = 0;
+
+		//TODO: fix ?
+		if (e.type == EventType.Repaint)
+			Repaint();
+		
+		//save the size of the window
+		windowSize = position.size;
 	}
 
 	//TODO: move elsewhere
@@ -103,8 +111,19 @@ public partial class PWGraphEditor : EditorWindow {
 
 	public void LoadGraph(PWGraph graph)
 	{
+		this.graph = graph;
+		
 		graph.OnNodeAdded += OnNodeAddedCallback;
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
+
+		//set the skin for the node style initialization
+		GUI.skin = PWGUISkin;
+
+		if (!graph.initialized)
+		{
+			graph.Initialize();
+			graph.OnEnable();
+		}
 	}
 
 	public void UnloadGraph()
@@ -112,7 +131,7 @@ public partial class PWGraphEditor : EditorWindow {
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
 
-		DestroyImmediate(graph);
+		Resources.UnloadAsset(graph);
 	}
 
 	public virtual void OnDisable()
@@ -159,7 +178,10 @@ public partial class PWGraphEditor : EditorWindow {
 		{
 			Rect posiviteSelectionRect = PWUtils.CreateRect(e.mousePosition, editorEvents.selectionStartPoint);
 			Rect decaledSelectionRect = PWUtils.DecalRect(posiviteSelectionRect, -graph.panPosition);
-			selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
+
+			//draw selection rect
+			if (e.type == EventType.Repaint)
+				selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
 
 			//iterature throw all nodes of the graph and check if the selection overlaps
 			graph.nodes.ForEach(n => n.selected = decaledSelectionRect.Overlaps(n.windowRect));
@@ -258,6 +280,12 @@ public partial class PWGraphEditor : EditorWindow {
 			editorEvents.isDraggingLink = false;
 			editorEvents.isDraggingNewLink = false;
 		}
+		
+		
+		if (windowSize != Vector2.zero && windowSize != position.size)
+			if (OnWindowResize != null)
+				OnWindowResize(position.size);
+		
 	}
 
 	void UnMaskEvents()

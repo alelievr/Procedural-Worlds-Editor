@@ -3,7 +3,7 @@ using UnityEditor;
 using PW;
 
 [CustomEditor(typeof(PWTerrainStorage))]
-public class PWTerrainStorageEditor : Editor {
+public class PWTerrainStorageCustomInspector : Editor {
  
 	PWTerrainStorage 	terrain;
 

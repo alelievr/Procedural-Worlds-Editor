@@ -16,9 +16,6 @@ namespace PW
 		{
 			var e = Event.current;
 			
-			if (innerNodePaddingStyle == null)
-				LoadStyles();
-
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
 			PWGUI.StartFrame();
