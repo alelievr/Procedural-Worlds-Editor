@@ -16,6 +16,9 @@ namespace PW
 		{
 			var e = Event.current;
 			
+			if (!styleLoaded)
+				LoadStyles();
+			
 			//update the PWGUI window rect with this window rect:
 			PWGUI.currentWindowRect = windowRect;
 			PWGUI.StartFrame();
@@ -23,6 +26,12 @@ namespace PW
 			// set the header of the window as draggable:
 			int width = (int) windowRect.width;
 			Rect dragRect = new Rect(30, 0, width, 20);
+			
+			Rect debugIconRect = dragRect;
+			int	debugIconSize = 16;
+			debugIconRect.position += new Vector2(width - debugIconSize, 0);
+			GUI.DrawTexture(debugIconRect, debugIcon);
+
 			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
 				isDragged = true;
 			if (e.type == EventType.MouseUp)
@@ -72,7 +81,7 @@ namespace PW
 
 			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
-				selected = !selected;
+				isSelected = !isSelected;
 
 			
 			//fill the graph event infos:

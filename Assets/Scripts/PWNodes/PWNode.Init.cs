@@ -10,6 +10,15 @@ namespace PW
 {
 	public partial class PWNode
 	{
+		static GUIStyle 			renameNodeTextFieldStyle = null;
+		static GUIStyle				debugStyle = null;
+		static GUIStyle				innerNodePaddingStyle = null;
+		static GUIStyle				nodeStyle = null;
+		static bool					styleLoaded = false;
+		
+		static Texture2D			editIcon = null;
+		static Texture2D			debugIcon = null;
+
 		//backed datas about properties and nodes
 		[System.Serializable]
 		public class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
@@ -22,6 +31,7 @@ namespace PW
 		void LoadAssets()
 		{
 			editIcon = Resources.Load< Texture2D >("ic_edit");
+			debugIcon = Resources.Load< Texture2D >("ic_settings");
 		}
 
 		public void LoadStyles()
@@ -34,6 +44,8 @@ namespace PW
 			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
 			debugStyle = GUI.skin.FindStyle("Debug");
 			nodeStyle = GUI.skin.FindStyle("Node");
+
+			styleLoaded = true;
 		}
 		
 		void BakeNodeFields()
@@ -211,13 +223,13 @@ namespace PW
 		void NodeSelectedCallback(PWNode node)
 		{
 			if (node == this)
-				selected = true;
+				isSelected = true;
 		}
 
 		void NodeUnselectedCallback(PWNode node)
 		{
 			if (node == this)
-				selected = false;
+				isSelected = false;
 		}
 
 		void LinkRemovedCalllback(PWNodeLink link)

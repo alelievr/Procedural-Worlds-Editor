@@ -36,6 +36,7 @@ namespace PW
 		public bool				isDragged = false;
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
+		public bool				isSelected = false;
 
 
 		//Graph datas accessors:
@@ -54,23 +55,16 @@ namespace PW
 		protected bool			anchorDebug = false;
 
 	#region Internal Node datas and style
-		static GUIStyle 			renameNodeTextFieldStyle = null;
-		static GUIStyle				debugStyle = null;
-		static GUIStyle				innerNodePaddingStyle = null;
-		static GUIStyle				nodeStyle = null;
-		
-		static Texture2D			editIcon = null;
-
-		// static Color		anchorAttachAddColor = new Color(.1f, .1f, .9f);
-		// static Color		anchorAttachNewColor = new Color(.1f, .9f, .1f);
-		// static Color		anchorAttachReplaceColor = new Color(.9f, .1f, .1f);
 
 		Vector2						graphPan { get { return graphRef.panPosition; } }
 		[SerializeField]
 		int							maxAnchorRenderHeight = 0;
 
+
+		//Utils
 		[System.NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
+
 
 		[System.NonSerialized]
 		public PWGraph				graphRef;
@@ -79,7 +73,6 @@ namespace PW
 		//TODO: data and mesh graphs
 
 		public bool					windowNameEdit = false;
-		public bool					selected = false;
 
 	#endregion
 	
@@ -198,9 +191,6 @@ namespace PW
 
 			Debug.Log("OnAfterDeserialize for node: " + GetType());
 			
-			//try to load styles here:
-			LoadStyles();
-
 			BindEvents();
 			
 			foreach (var anchorField in inputAnchorFields)
@@ -239,9 +229,14 @@ namespace PW
 		//called only once, when the node is created
 		public void Initialize(PWGraph graph)
 		{
+			Debug.LogWarning("Node Initialize !");
+
 			//generate "unique" id for node:
 			byte[] bytes = System.Guid.NewGuid().ToByteArray();
 			id = (int)bytes[0] | (int)bytes[1] << 8 | (int)bytes[2] << 16 | (int)bytes[3] << 24;
+
+			//set the node name:
+			name = PWNodeTypeProvider.GetNodeName(GetType());
 
 			//set the graph reference:
 			graphRef = graph;
@@ -251,6 +246,7 @@ namespace PW
 
 		public void OnDisable()
 		{
+			Debug.Log("Node " + GetType() + "Disable");
 			UnBindEvents();
 			OnNodeDisable();
 			OnAnchorDisable();
@@ -360,7 +356,7 @@ namespace PW
 				GUI.FocusControl(null);
 			}
 			if (Event.current.button == 0 && !Event.current.shift)
-				selected = false;
+				isSelected = false;
 			isDragged = false;
 		}
 

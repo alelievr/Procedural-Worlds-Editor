@@ -11,7 +11,7 @@ using PW.Node;
 using Debug = UnityEngine.Debug;
 
 [System.Serializable]
-public partial class PWGraphEditor : EditorWindow {
+public partial class PWGraphEditor : PWEditorWindow {
 
 	//the reference to the graph in public for the AssetHandlers class
 	public PWGraph				graph;
@@ -21,6 +21,10 @@ public partial class PWGraphEditor : EditorWindow {
 	public List< Rect >			eventMasks = new List< Rect >();
 	EventType					savedEventType;
 	bool						restoreEvent;
+	
+
+	[System.NonSerialized] Vector2	scale = Vector2.one;
+	[System.NonSerialized] Vector2	lastPivotPosition = Vector2.zero;
 
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
 
@@ -35,18 +39,28 @@ public partial class PWGraphEditor : EditorWindow {
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 
-	public virtual void OnEnable()
+	public override void OnEnable()
 	{
-		MacOS = SystemInfo.operatingSystem.Contains("Mac");
+		base.OnEnable();
 
-		LoadStyles();
+		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
 		LoadAssets();
 	}
 
-	//draw the default node graph:
-	public virtual void OnGUI()
+	public override void OnGUIEnable()
 	{
+		LoadStyles();
+
+		if (graph != null)
+			LoadGraph(graph);
+	}
+
+	//draw the default node graph:
+	public override void OnGUI()
+	{
+		base.OnGUI();
+
 		if (graph == null)
 		{
 			//TODO: rework this
@@ -59,10 +73,18 @@ public partial class PWGraphEditor : EditorWindow {
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
 
-		//render the graph in the background:
-		GUI.depth = -10;
-
 		editorEvents.Reset();
+
+		Matrix4x4 oldGUIMatrix = GUI.matrix;
+
+		GUIUtility.ScaleAroundPivot(scale, lastPivotPosition);
+		if (e.type == EventType.ScrollWheel)
+		{
+			scale *= 1 - (e.delta.y / 100f);
+			lastPivotPosition = position.size / 2;
+		}
+
+		Debug.Log("pan position: " + graph.panPosition);
 
 		//disable events if mouse is above an eventMask Rect.
 		//TODO: test this
@@ -98,6 +120,8 @@ public partial class PWGraphEditor : EditorWindow {
 		//TODO: fix ?
 		if (e.type == EventType.Repaint)
 			Repaint();
+
+		GUI.matrix = oldGUIMatrix;
 		
 		//save the size of the window
 		windowSize = position.size;
@@ -134,10 +158,13 @@ public partial class PWGraphEditor : EditorWindow {
 		Resources.UnloadAsset(graph);
 	}
 
-	public virtual void OnDisable()
+	public override void OnDisable()
 	{
+		base.OnDisable();
+
 		//destroy the graph so it's not loaded in the void.
-		UnloadGraph();
+		if (graph != null)
+			UnloadGraph();
 	}
 
 	bool MaskEvents()
@@ -184,15 +211,15 @@ public partial class PWGraphEditor : EditorWindow {
 				selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
 
 			//iterature throw all nodes of the graph and check if the selection overlaps
-			graph.nodes.ForEach(n => n.selected = decaledSelectionRect.Overlaps(n.windowRect));
-			editorEvents.selectedNodeCount = graph.nodes.Count(n => n.selected);
+			graph.nodes.ForEach(n => n.isSelected = decaledSelectionRect.Overlaps(n.windowRect));
+			editorEvents.selectedNodeCount = graph.nodes.Count(n => n.isSelected);
 		}
 
 		//multiple window drag:
 		if (e.type == EventType.MouseDrag && editorEvents.isDraggingSelectedNodes)
 		{
 				graph.nodes.ForEach(n => {
-				if (n.selected)
+				if (n.isSelected)
 					n.windowRect.position += e.delta;
 				});
 		}

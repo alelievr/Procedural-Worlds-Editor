@@ -27,15 +27,13 @@ public partial class PWGraphEditor {
 
 		//move the node if panPosition changed:
 		node.windowRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, node.name, (node.selected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
+		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 		node.windowRect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 	}
 
 	void RenderNode(int id, PWNode node)
 	{
 		Event	e = Event.current;
-
-		Debug.Log("node: " + node);
 
 		DisplayDecaledNode(id, node);
 
@@ -97,7 +95,7 @@ public partial class PWGraphEditor {
 		List< PWNode > nodeToRemove = new List< PWNode >();
 
 		foreach (var node in graph.nodes)
-			if (node.selected)
+			if (node.isSelected)
 				nodeToRemove.Add(node);
 
 		foreach (var node in nodeToRemove)
@@ -112,12 +110,14 @@ public partial class PWGraphEditor {
 	void OnNodeAddedCallback(PWNode node)
 	{
 		AssetDatabase.AddObjectToAsset(node, graph);
+		AssetDatabase.SaveAssets();
 		Debug.Log("Added node to asset !");
 	}
 
 	void OnNodeRemovedCallback(PWNode node)
 	{
 		DestroyImmediate(node, true);
+		AssetDatabase.SaveAssets();
 	}
 
 }

@@ -44,7 +44,7 @@ public partial class PWMainGraphEditor {
 				}
 				GUILayout.EndHorizontal();
 				
-				foreach (var nodeCategory in PWNodeTypeProvider.GetAllowedNodesForGraph(GetType()))
+				foreach (var nodeCategory in PWNodeTypeProvider.GetAllowedNodesForGraph(graph.GetType()))
 				{
 					DrawSelectorCase(nodeCategory.title, nodeCategory.colorSchemeName, true);
 					foreach (var nodeCase in nodeCategory.typeInfos.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))

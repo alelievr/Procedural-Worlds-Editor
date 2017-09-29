@@ -73,6 +73,9 @@ namespace PW.Core
 
 		static List< PWNodeTypeInfoList > nodeInfoList = new List< PWNodeTypeInfoList >
 		{
+			new PWNodeTypeInfoList(0, "Graph", PWColorSchemeName.Default,
+				"Input", typeof(PWNodeGraphInput),
+				"Output", typeof(PWNodeGraphOutput)),
 			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Primitive types", PWColorSchemeName.Alizarin,
 				"Slider", typeof(PWNodeSlider),
 				"Constant", typeof(PWNodeConstant),
@@ -136,5 +139,14 @@ namespace PW.Core
 			Debug.LogError("Could not find allowed nodes for the graph " + graphType);
 			return null;
         }
+
+		public static string GetNodeName(Type t)
+		{
+			foreach (var nil in nodeInfoList)
+				foreach (var ni in nil.typeInfos)
+					if (ni.type == t)
+						return ni.name;
+			return t.Name;
+		}
 	}
 }
