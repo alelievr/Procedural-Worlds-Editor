@@ -22,10 +22,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 	EventType					savedEventType;
 	bool						restoreEvent;
 	
-
-	[System.NonSerialized] Vector2	scale = Vector2.one;
-	[System.NonSerialized] Vector2	lastPivotPosition = Vector2.zero;
-
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
 
 	//custom editor events:
@@ -75,53 +71,43 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 		editorEvents.Reset();
 
-		Matrix4x4 oldGUIMatrix = GUI.matrix;
-
-		GUIUtility.ScaleAroundPivot(scale, lastPivotPosition);
-		if (e.type == EventType.ScrollWheel)
+		EditorGUIExtension.BeginZoomArea(graph.scale, position);
 		{
-			scale *= 1 - (e.delta.y / 100f);
-			lastPivotPosition = position.size / 2;
+			//disable events if mouse is above an eventMask Rect.
+			//TODO: test this
+			if (MaskEvents())
+				return ;
+	
+			//draw the background:
+			RenderBackground();
+	
+			//manage selection:
+			SelectAndDrag();
+	
+			//graph rendering
+			EditorGUILayout.BeginHorizontal(); //is it useful ?
+			{
+				RenderOrderingGroups();
+				RenderNodes();
+			}
+			EditorGUILayout.EndHorizontal();
+	
+			ContextMenu();
+	
+			//fill and process remaining events if there is
+			ManageEvents();
+	
+			//restore masked events:
+			UnMaskEvents();
+	
+			//reset to default the depth
+			GUI.depth = 0;
+	
+			//TODO: fix ?
+			if (e.type == EventType.Repaint)
+				Repaint();
 		}
-
-		Debug.Log("pan position: " + graph.panPosition);
-
-		//disable events if mouse is above an eventMask Rect.
-		//TODO: test this
-		if (MaskEvents())
-			return ;
-
-		//draw the background:
-		RenderBackground();
-
-		//manage selection:
-		SelectAndDrag();
-
-		//graph rendering
-		EditorGUILayout.BeginHorizontal(); //is it useful ?
-		{
-			RenderOrderingGroups();
-			RenderNodes();
-			RenderLinks();
-		}
-		EditorGUILayout.EndHorizontal();
-
-		ContextMenu();
-
-		//fill and process remaining events if there is
-		ManageEvents();
-
-		//restore masked events:
-		UnMaskEvents();
-
-		//reset to default the depth
-		GUI.depth = 0;
-
-		//TODO: fix ?
-		if (e.type == EventType.Repaint)
-			Repaint();
-
-		GUI.matrix = oldGUIMatrix;
+		EditorGUIExtension.EndZoomArea();
 		
 		//save the size of the window
 		windowSize = position.size;
@@ -135,6 +121,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	public void LoadGraph(PWGraph graph)
 	{
+		Debug.Log("graph initi: " + graph.initialized);
+		Debug.Log("Loading graph: " + graph.inputNode + "/" + graph.outputNode);
 		this.graph = graph;
 		
 		graph.OnNodeAdded += OnNodeAddedCallback;
@@ -147,7 +135,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 		{
 			graph.Initialize();
 			graph.OnEnable();
+			EditorUtility.SetDirty(graph);
+			AssetDatabase.SaveAssets();
 		}
+		Debug.Log("graph initi: " + graph.initialized);
 	}
 
 	public void UnloadGraph()
@@ -249,11 +240,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		EndWindows();
 	}
 
-	void RenderLinks()
-	{
-
-	}
-
 	void ManageEvents()
 	{
 		//we save with the s key
@@ -279,18 +265,28 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//if the event is a drag then it has't been used before
 		if (e.type == EventType.mouseDrag && !editorEvents.isDraggingSomething)
 		{
-			editorEvents.isPanning = true;
-			graph.panPosition += e.delta;
+			//mouse middle button or left click + cmd on mac and left click + control on other OS
+			if (e.button == 2 || (e.button == 0 && ((MacOS && e.command) || (!MacOS && e.control))))
+			{
+				editorEvents.isPanning = true;
+				graph.panPosition += e.delta;
+			}
 		}
 		
+		//Graph selection start event 
 		if (e.type == EventType.MouseDown) //if event is mouse down
 		{
 			if (!editorEvents.isMouseOverSomething //if mouse is not above something
 				&& e.button == 0
 				&& !e.command
 				&& !e.control)
+			{
+				editorEvents.selectionStartPoint = e.mousePosition;
 				editorEvents.isSelecting = true;
+			}
 		}
+
+		//on mouse button up
 		if (e.type == EventType.MouseUp)
 		{
 			editorEvents.isSelecting = false;
@@ -308,11 +304,17 @@ public partial class PWGraphEditor : PWEditorWindow {
 			editorEvents.isDraggingNewLink = false;
 		}
 		
-		
+		//fire the resize event
 		if (windowSize != Vector2.zero && windowSize != position.size)
 			if (OnWindowResize != null)
 				OnWindowResize(position.size);
 		
+		//zoom
+		if (e.type == EventType.ScrollWheel)
+		{
+			graph.scale *= 1 - (e.delta.y / 100f);
+			graph.scale = Mathf.Clamp(graph.scale, .2f, 2);
+		}
 	}
 
 	void UnMaskEvents()

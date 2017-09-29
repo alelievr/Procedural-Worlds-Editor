@@ -5,6 +5,16 @@ using UnityEditor;
 using PW.Core;
 using System;
 
+static class PWGraphCustomInspectorUtils
+{
+	public static void Open< T >(PWGraph graph) where T : PWGraphEditor
+	{
+		PWGraphEditor editor = EditorWindow.GetWindow< T >();
+		editor.LoadGraph(graph);
+		editor.Show();
+	}
+}
+
 [CustomEditor(typeof(PWMainGraph))]
 public class PWGraphCustomInspector : Editor {
 
@@ -12,11 +22,10 @@ public class PWGraphCustomInspector : Editor {
 	{
 		EditorGUILayout.LabelField("You can't edit graph datas from the inspector");
 		if (GUILayout.Button("Open Graph editor"))
-		{
-			EditorWindow.GetWindow(typeof(PWMainGraphEditor)).Show();
-		}
+			PWGraphCustomInspectorUtils.Open< PWMainGraphEditor >(target as PWGraph);
 	}
 }
+
 [CustomEditor(typeof(PWBiomeGraph))]
 public class PWBiomeCustomInspector : Editor {
 
@@ -24,8 +33,6 @@ public class PWBiomeCustomInspector : Editor {
 	{
 		EditorGUILayout.LabelField("You can't edit graph datas from the inspector");
 		if (GUILayout.Button("Open Graph editor"))
-		{
-			EditorWindow.GetWindow(typeof(PWBiomeGraphEditor)).Show();
-		}
+			PWGraphCustomInspectorUtils.Open< PWBiomeGraphEditor >(target as PWGraph);
 	}
 }

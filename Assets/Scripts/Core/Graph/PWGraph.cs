@@ -66,6 +66,7 @@ namespace PW.Core
 
         //editor datas:
 		public Vector2							panPosition;
+		public float							scale = 1;
         public PWGUIManager						PWGUI = new PWGUIManager();
 		[System.NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
@@ -129,8 +130,8 @@ namespace PW.Core
 			maxStep = 4;
 			name = "New ProceduralWorld";
 			
-			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(-100, 0));
 			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(50, 0));
+			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(-100, 0));
 			
 			initialized = true;
 		}

@@ -238,6 +238,9 @@ namespace PW
 			//set the node name:
 			name = PWNodeTypeProvider.GetNodeName(GetType());
 
+			//set the name of the scriptableObject
+			base.name = name;
+
 			//set the graph reference:
 			graphRef = graph;
 

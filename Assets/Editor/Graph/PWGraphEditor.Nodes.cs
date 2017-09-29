@@ -111,6 +111,7 @@ public partial class PWGraphEditor {
 	{
 		AssetDatabase.AddObjectToAsset(node, graph);
 		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
 		Debug.Log("Added node to asset !");
 	}
 
@@ -118,6 +119,7 @@ public partial class PWGraphEditor {
 	{
 		DestroyImmediate(node, true);
 		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
 	}
 
 }
