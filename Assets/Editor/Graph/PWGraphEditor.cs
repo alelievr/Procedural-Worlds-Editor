@@ -32,6 +32,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 	
 	protected Vector2			windowSize;
 
+	bool						saved;
+
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 
@@ -42,8 +44,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
 		LoadAssets();
-		
-		GUIScaleUtility.Init();
 	}
 
 	public override void OnGUIEnable()
@@ -71,12 +71,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
 
-		editorEvents.Reset();
-
 		Rect pos = position;
 		pos.position = Vector2.zero;
-		GUIScaleUtility.BeginScale(ref pos, position.size / 2, 1 / graph.scale, true, false);
-		// EditorGUIExtension.BeginZoomArea(graph.scale, position);
+		// GUIScaleUtility.BeginScale(ref pos, position.size / 2, 1 / graph.scale, true, false);
+		EditorGUIExtension.BeginZoomArea(graph.scale, position);
 		{
 			//disable events if mouse is above an eventMask Rect.
 			//TODO: test this
@@ -112,8 +110,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 			if (e.type == EventType.Repaint)
 				Repaint();
 		}
-		GUIScaleUtility.EndScale();
-		// EditorGUIExtension.EndZoomArea();
+		// GUIScaleUtility.EndScale();
+		EditorGUIExtension.EndZoomArea();
 
 		EditorGUILayout.LabelField("OUT ZOOM AREA");
 		
@@ -143,8 +141,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		{
 			graph.Initialize();
 			graph.OnEnable();
-			EditorUtility.SetDirty(graph);
-			AssetDatabase.SaveAssets();
+			SaveGraph();
 		}
 		Debug.Log("graph initi: " + graph.initialized);
 	}
@@ -153,6 +150,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 	{
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
+
+		SaveGraph();
 
 		Resources.UnloadAsset(graph);
 	}
@@ -164,6 +163,13 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//destroy the graph so it's not loaded in the void.
 		if (graph != null)
 			UnloadGraph();
+	}
+
+	void SaveGraph()
+	{
+		saved = true;
+		EditorUtility.SetDirty(graph);
+		AssetDatabase.SaveAssets();
 	}
 
 	bool MaskEvents()
@@ -239,6 +245,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 	{
 		foreach (var orderingGroup in graph.orderingGroups)
 			orderingGroup.Render(graph.panPosition, position.size, ref graph.editorEvents);
+
+		//if the mouse was not over an ordering group this frame
+		if (!editorEvents.isMouseOverOrderingGroupFrame)
+			editorEvents.mouseOverOrderingGroup = null;
 	}
 
 	void RenderNodes()
@@ -261,6 +271,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	void ManageEvents()
 	{
+		//do not process events if we are in layout / repaint
+		if (e.type == EventType.Repaint || e.type == EventType.Layout)
+			return ;
+
 		//we save with the s key
 		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 		{
@@ -285,7 +299,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		if (e.type == EventType.mouseDrag && !editorEvents.isDraggingSomething)
 		{
 			//mouse middle button or left click + cmd on mac and left click + control on other OS
-			if (e.button == 2 || (e.button == 0 && ((MacOS && e.command) || (!MacOS && e.control))))
+			if (e.button == 2 || (e.button == 0 && e.command))
 			{
 				editorEvents.isPanning = true;
 				graph.panPosition += e.delta;
@@ -308,6 +322,18 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//on mouse button up
 		if (e.type == EventType.MouseUp)
 		{
+			Debug.Log(editorEvents.isPanning);
+			if (editorEvents.isDraggingNode)
+				Undo.RecordObject(graph, "drag node");
+			if (editorEvents.isPanning)
+				Undo.RecordObject(graph, "graph pan");
+			if (editorEvents.isDraggingOrderingGroup)
+				Undo.RecordObject(graph, "ordering graph drag");
+			if (GUI.changed)
+				Undo.RecordObject(graph, "something chanegd");
+			
+			editorEvents.isDraggingNode = false;
+			editorEvents.isDraggingOrderingGroup = false;
 			editorEvents.isSelecting = false;
 			editorEvents.isPanning = false;
 			editorEvents.isDraggingSelectedNodes = false;
@@ -318,6 +344,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		{
 			if (editorEvents.isDraggingLink)
 				StopDragLink(false);
+
 			editorEvents.isSelecting = false;
 			editorEvents.isDraggingLink = false;
 			editorEvents.isDraggingNewLink = false;
@@ -334,6 +361,24 @@ public partial class PWGraphEditor : PWEditorWindow {
 			graph.scale *= 1 - (e.delta.y / 100f);
 			graph.scale = Mathf.Clamp(graph.scale, .2f, 2);
 		}
+
+		//undo and redo
+		if (e.command && e.type == EventType.KeyDown)
+		{
+			if (e.keyCode == KeyCode.Z)
+			{
+				Undo.PerformUndo();
+				e.Use();
+			}
+			if ((e.keyCode == KeyCode.Z && e.shift) || e.keyCode == KeyCode.Y)
+			{
+				Undo.PerformRedo();
+				e.Use();
+			}
+		}
+
+		//reset events for the next frame
+		editorEvents.Reset();
 	}
 
 	void UnMaskEvents()

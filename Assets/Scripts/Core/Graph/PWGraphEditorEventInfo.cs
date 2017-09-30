@@ -37,6 +37,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 
 	//ordering group infos:
 	public bool				isMouseOverOrderingGroup { get { return mouseOverOrderingGroup != null; } }
+	public bool				isMouseOverOrderingGroupFrame;
 	public bool				isMouseClickOnOrderingGroup;	//not implemented
 	public bool				isDraggingOrderingGroup;		//not implemented
 	public bool				isResizingOrderingGroup;		//not implemented
@@ -80,6 +81,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		mouseOverAnchor = null;
 
 		isMouseClickOnOrderingGroup = false;
+		isMouseOverOrderingGroupFrame = false;
 		isDraggingOrderingGroup = false;
 		isResizingOrderingGroup = false;
 		mouseOverOrderingGroup = null;
@@ -89,7 +91,6 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 	public void Reset()
 	{
 		isMouseClickOutside = false;
-		isPanning = false;
 		
 		isMouseClickOnNode = false;
 		mouseOverNode = null;
@@ -101,7 +102,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		mouseOverAnchor = null;
 		
 		isMouseClickOnOrderingGroup = false;
-		mouseOverOrderingGroup = null;
+		isMouseOverOrderingGroupFrame = false;
 	}
 
 	public PWGraphEditorEventInfo Clone(PWGraphEditorEventInfo oldObject = null)

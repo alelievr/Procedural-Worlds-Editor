@@ -14,7 +14,7 @@ public partial class PWGraphEditor {
 		var		e = Event.current;
 
 		//node grid snapping when pressing cmd/crtl 
-		if (node.isDragged && ((!MacOS && e.control) || (MacOS && e.command)))
+		if (node.isDragged && e.command)
 		{
 			Vector2 pos = node.windowRect.position;
 			//aproximative grid cell size
