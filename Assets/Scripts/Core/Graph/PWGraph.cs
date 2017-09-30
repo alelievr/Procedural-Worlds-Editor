@@ -66,7 +66,7 @@ namespace PW.Core
 
         //editor datas:
 		public Vector2							panPosition;
-		public float							scale = 1;
+		public float							scale = 2;
         public PWGUIManager						PWGUI = new PWGUIManager();
 		[System.NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();

@@ -42,6 +42,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
 		LoadAssets();
+		
+		GUIScaleUtility.Init();
 	}
 
 	public override void OnGUIEnable()
@@ -71,7 +73,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 		editorEvents.Reset();
 
-		EditorGUIExtension.BeginZoomArea(graph.scale, position);
+		Rect pos = position;
+		pos.position = Vector2.zero;
+		GUIScaleUtility.BeginScale(ref pos, position.size / 2, 1 / graph.scale, true, false);
+		// EditorGUIExtension.BeginZoomArea(graph.scale, position);
 		{
 			//disable events if mouse is above an eventMask Rect.
 			//TODO: test this
@@ -79,7 +84,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 				return ;
 	
 			//draw the background:
-			RenderBackground();
+			// RenderBackground();
 	
 			//manage selection:
 			SelectAndDrag();
@@ -107,7 +112,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 			if (e.type == EventType.Repaint)
 				Repaint();
 		}
-		EditorGUIExtension.EndZoomArea();
+		GUIScaleUtility.EndScale();
+		// EditorGUIExtension.EndZoomArea();
+
+		EditorGUILayout.LabelField("OUT ZOOM AREA");
 		
 		//save the size of the window
 		windowSize = position.size;
@@ -180,13 +188,24 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	void RenderBackground()
 	{
-		float	scale = 2f;
+		float	backgroundScale = 2f;
+		int		backgroundTileSize = nodeEditorBackgroundTexture.width;
 		
-		GUI.DrawTextureWithTexCoords(
-			new Rect(graph.panPosition.x % 128 - 128, graph.panPosition.y % 128 - 128, maxSize.x, maxSize.y),
-			nodeEditorBackgroundTexture, new Rect(0, 0, (maxSize.x / nodeEditorBackgroundTexture.width) * scale,
-			(maxSize.y / nodeEditorBackgroundTexture.height) * scale)
+		Rect	position = new Rect(
+			graph.panPosition.x % backgroundTileSize - backgroundTileSize,
+			graph.panPosition.y % backgroundTileSize - backgroundTileSize,
+			maxSize.x * 10,
+			maxSize.y * 10
 		);
+
+		Rect	texCoord = new Rect(
+			0,
+			0,
+			(maxSize.x * 10 / nodeEditorBackgroundTexture.width) * backgroundScale,
+			(maxSize.y * 10 / nodeEditorBackgroundTexture.height) * backgroundScale
+		);
+		
+		GUI.DrawTextureWithTexCoords(position, nodeEditorBackgroundTexture, texCoord);
 	}
 
 	void SelectAndDrag()
