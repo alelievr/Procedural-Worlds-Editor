@@ -146,6 +146,8 @@ namespace PW
 					toRemoveKeys.Add(kp.Key);
 			foreach (var toRemoveKey in toRemoveKeys)
 				anchorFields.Remove(toRemoveKey);
+
+			//TODO: update input and output anchors lists
 		}
 
 		//retarget "Reload" button in the editor to the internal event OnReload:

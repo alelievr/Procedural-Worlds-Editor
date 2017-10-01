@@ -82,7 +82,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 				return ;
 	
 			//draw the background:
-			// RenderBackground();
+			RenderBackground();
 	
 			//manage selection:
 			SelectAndDrag();

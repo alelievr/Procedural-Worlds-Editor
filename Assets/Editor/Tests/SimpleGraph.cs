@@ -9,7 +9,7 @@ using System.IO;
 public class SimpleGraph {
 
 	[Test]
-	public void SimpleGraphSimplePasses() {
+	public void MainGraphCreation() {
 
 		string fileName = "TestGraph";
 		string path = PWGraphManager.PWMainGraphPath + "/" + fileName + ".asset";
