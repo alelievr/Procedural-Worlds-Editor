@@ -73,8 +73,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 		Rect pos = position;
 		pos.position = Vector2.zero;
-		// GUIScaleUtility.BeginScale(ref pos, position.size / 2, 1 / graph.scale, true, false);
-		EditorGUIExtension.BeginZoomArea(graph.scale, position);
+		graph.zoomPanCorrection = GUIScaleUtility.BeginScale(ref pos, pos.size / 2, 1f / graph.scale, false);
 		{
 			//disable events if mouse is above an eventMask Rect.
 			//TODO: test this
@@ -110,8 +109,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 			if (e.type == EventType.Repaint)
 				Repaint();
 		}
-		// GUIScaleUtility.EndScale();
-		EditorGUIExtension.EndZoomArea();
+		GUIScaleUtility.EndScale();
 
 		EditorGUILayout.LabelField("OUT ZOOM AREA");
 		

@@ -65,8 +65,10 @@ namespace PW.Core
 
 
         //editor datas:
-		public Vector2							panPosition;
+		[SerializeField] Vector2				_panPosition;
+		public Vector2							panPosition { get { return _panPosition + zoomPanCorrection; } set { _panPosition = value - zoomPanCorrection; } }
 		public float							scale = 2;
+		public Vector2							zoomPanCorrection;
         public PWGUIManager						PWGUI = new PWGUIManager();
 		[System.NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
