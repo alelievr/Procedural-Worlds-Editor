@@ -24,6 +24,7 @@ namespace PW
 		//AnchorField lists
 		public List< PWAnchorField >	inputAnchorFields = new List< PWAnchorField >();
 		public List< PWAnchorField >	outputAnchorFields = new List< PWAnchorField >();
+		public IEnumerable< PWAnchorField > anchorFields { get { foreach (var ia in inputAnchorFields) yield return ia; foreach (var ao in outputAnchorFields) yield return ao; } }
 
 		//GUI utils to provide custom fields for Samplers, Range ...
 		[SerializeField]
@@ -211,9 +212,12 @@ namespace PW
 			
 			LoadFieldAttributes();
 
-			BakeNodeFields();
+			UpdateAnchorProperties();
 
 			UpdateWorkStatus();
+
+			foreach (var anchor in anchorFields)
+				anchor.OnEnable();
 
 			Debug.Log("Node OnEnable: " + GetType());
 
@@ -249,6 +253,9 @@ namespace PW
 
 		public void OnDisable()
 		{
+			foreach (var anchor in anchorFields)
+				anchor.OnDisable();
+
 			Debug.Log("Node " + GetType() + "Disable");
 			UnBindEvents();
 			OnNodeDisable();

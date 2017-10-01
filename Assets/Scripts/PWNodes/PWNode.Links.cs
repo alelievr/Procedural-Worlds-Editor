@@ -41,7 +41,7 @@ namespace PW
 
 		public void		RemoveAllLinksFromAnchor(string fieldName)
 		{
-			foreach (var anchor in anchorFields[fieldName].anchors)
+			foreach (var anchor in anchorFieldDictionary[fieldName].anchors)
 				RemoveAllLinksFromAnchor(anchor);
 		}
 
@@ -79,7 +79,7 @@ namespace PW
 		
 		public void		RemoveAllLinks()
 		{
-			foreach (var anchorField in inputAnchorFields.Concat(outputAnchorFields))
+			foreach (var anchorField in anchorFields)
 				foreach (var anchor in anchorField.anchors)
 					foreach (var link in anchor.links)
 						RemoveLink(link);

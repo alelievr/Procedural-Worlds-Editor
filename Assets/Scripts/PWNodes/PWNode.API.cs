@@ -10,9 +10,9 @@ namespace PW
 
 		PWAnchor				GetAnchorFromField(string fieldName, int index = 0)
 		{
-			if (anchorFields.ContainsKey(fieldName))
-				if (anchorFields[fieldName].anchors.Count < index)
-					return anchorFields[fieldName].anchors[index];
+			if (anchorFieldDictionary.ContainsKey(fieldName))
+				if (anchorFieldDictionary[fieldName].anchors.Count < index)
+					return anchorFieldDictionary[fieldName].anchors[index];
 			return null;
 		}
 
@@ -50,10 +50,10 @@ namespace PW
 
 		public void				SetMultiAnchor(string fieldName, int newCount, params string[] newNames)
 		{
-			if (!anchorFields.ContainsKey(fieldName))
+			if (!anchorFieldDictionary.ContainsKey(fieldName))
 				return ;
 			
-			var anchorField = anchorFields[fieldName];
+			var anchorField = anchorFieldDictionary[fieldName];
 
 			if (anchorField.anchors.Count > newCount)
 			{

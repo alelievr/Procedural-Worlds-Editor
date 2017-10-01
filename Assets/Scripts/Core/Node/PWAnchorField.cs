@@ -36,9 +36,6 @@ namespace PW.Core
 		
 		//list of rendered anchors:
 		public List< PWAnchor >				anchors = new List< PWAnchor >();
-		
-		//instance of the field
-		public object						fieldInstance;
 
 		//name of the attached propery / name specified in PW I/O.
 		public string						fieldName;
@@ -53,8 +50,6 @@ namespace PW.Core
 		//anchor transfer type (when input datas are sent to this anchor)
 		public PWTransferType				transferType = PWTransferType.Reference;
 
-		//anchor name if specified in PWInput or PWOutput else null
-		public string						anchorName;
 		//the visual offset of the anchor
 		public int							offset = 0;
 		//the visual padding between multiple anchor of the same field
@@ -75,6 +70,9 @@ namespace PW.Core
 		public bool							required = true;
 		//if the anchor is selected
 		public bool							selected = false;
+		//if the anchor is linked to a field
+		[System.NonSerialized]
+		public bool							fieldValidated = false;
 
 		public void		RemoveAnchor(string GUID)
 		{
@@ -155,6 +153,8 @@ namespace PW.Core
 			
 			//assets:
 			errorIcon = Resources.Load< Texture2D >("ic_error");
+
+			Debug.LogWarning("loaded assets !: " + errorIcon);
 		}
 
 		public void OnDisable() {}

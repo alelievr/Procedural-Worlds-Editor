@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System;
 using System.Reflection;
@@ -19,15 +20,12 @@ namespace PW
 		static Texture2D			editIcon = null;
 		static Texture2D			debugIcon = null;
 
-		//backed datas about properties and nodes
+		//anchor 
 		[System.Serializable]
 		public class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
 		[SerializeField]
-		protected AnchorFieldDictionary			anchorFields = new AnchorFieldDictionary();
+		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
-		[NonSerializedAttribute]
-		protected Dictionary< string, FieldInfo >	bakedNodeFields = new Dictionary< string, FieldInfo >();
-	
 		void LoadAssets()
 		{
 			editIcon = Resources.Load< Texture2D >("ic_edit");
@@ -48,32 +46,20 @@ namespace PW
 			styleLoaded = true;
 		}
 		
-		void BakeNodeFields()
-		{
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-
-			bakedNodeFields.Clear();
-			foreach (var fInfo in fInfos)
-				bakedNodeFields[fInfo.Name] = fInfo;
-		}
-
 		void LoadFieldAttributes()
 		{
-			//TODO: generate one PWAnchorField per actual fields.
 			//get input variables
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
 			List< string > actualFields = new List< string >();
 			foreach (var field in fInfos)
 			{
-				//TODO: remove AnchorFields and use inputAnchors and outputAnchors instead
-				//TODO: be careful for PWValues, serialized anchors must not be removed by
-				//		reading field informations.
+				// reading field informations.
 				actualFields.Add(field.Name);
-				if (!anchorFields.ContainsKey(field.Name))
-					anchorFields[field.Name] = new PWAnchorField();
+				if (!anchorFieldDictionary.ContainsKey(field.Name))
+					anchorFieldDictionary[field.Name] = new PWAnchorField();
 				
-				PWAnchorField	anchorField = anchorFields[field.Name];
+				PWAnchorField	anchorField = anchorFieldDictionary[field.Name];
 				
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
@@ -91,19 +77,13 @@ namespace PW
 					{
 						anchorField.anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
-						{
 							name = inputAttr.name;
-							anchorField.anchorName = inputAttr.name;
-						}
 					}
 					if (outputAttr != null)
 					{
 						anchorField.anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
-						{
 							name = outputAttr.name;
-							anchorField.anchorName = outputAttr.name;
-						}
 					}
 					if (copyAttr != null)
 						anchorField.transferType = PWTransferType.Copy;
@@ -127,7 +107,7 @@ namespace PW
 						anchorField.required = false;
 				}
 				if (anchorField.anchorType == PWAnchorType.None) //field does not have a PW attribute
-					anchorFields.Remove(field.Name);
+					anchorFieldDictionary.Remove(field.Name);
 				else
 				{
 					anchorField.CreateNewAnchor();
@@ -137,17 +117,67 @@ namespace PW
 				}
 			}
 
-			UpdateWorkStatus();
-
 			//remove inhexistants field dictionary entries (for renamed variables):
 			var toRemoveKeys = new List< string >();
-			foreach (var kp in anchorFields)
+			foreach (var kp in anchorFieldDictionary)
 				if (!actualFields.Contains(kp.Key))
 					toRemoveKeys.Add(kp.Key);
 			foreach (var toRemoveKey in toRemoveKeys)
-				anchorFields.Remove(toRemoveKey);
+				anchorFieldDictionary.Remove(toRemoveKey);
+		}
 
-			//TODO: update input and output anchors lists
+		void UpdateAnchorProperties()
+		{
+			//we check if an anchor have been update (field name changed)
+			// and then remove it from the anchor list and take the new field attributes
+			// we do the same for every properties
+			foreach (var anchorFieldKP in anchorFieldDictionary)
+			{
+				var af = anchorFieldKP.Value;
+
+				foreach (var anchor in anchorFields)
+				{
+					//we find the field in inputAnchors corresponding to af
+					if (anchor.anchorType == af.anchorType && anchor.fieldName == af.fieldName)
+					{
+						//we update the values we have in our input/output anchorFileds with the new fresh field values
+						anchor.name = af.name;
+						anchor.fieldType = af.fieldType;
+						anchor.debug = af.debug;
+						anchor.transferType = af.transferType;
+						anchor.offset = af.offset;
+						anchor.padding = af.padding;
+						anchor.colorSchemeName = af.colorSchemeName;
+						anchor.color = af.color;
+						anchor.allowedTypes = af.allowedTypes;
+						anchor.minMultipleValues = af.minMultipleValues;
+						anchor.maxMultipleValues = af.maxMultipleValues;
+						anchor.required = af.required;
+
+						//we tell that the anchor have been linked to an actual field
+						anchor.fieldValidated = true;
+						af.fieldValidated = true;
+					}
+				}
+			}
+
+			//we remove every anchors that is not anymore linked with a field
+			inputAnchorFields.RemoveAll(a => !a.fieldValidated);
+			outputAnchorFields.RemoveAll(a => !a.fieldValidated);
+
+			//we add new fields to the input/output anchors list
+			foreach (var anchorFieldKP in anchorFieldDictionary)
+			{
+				var af = anchorFieldKP.Value;
+				//if the field was not found in both input and output anchor lists
+				if (!af.fieldValidated)
+				{
+					if (af.anchorType == PWAnchorType.Input)
+						inputAnchorFields.Add(af);
+					else
+						outputAnchorFields.Add(af);
+				}
+			}
 		}
 
 		//retarget "Reload" button in the editor to the internal event OnReload:
