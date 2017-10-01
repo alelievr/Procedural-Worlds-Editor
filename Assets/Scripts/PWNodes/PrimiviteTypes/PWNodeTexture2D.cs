@@ -30,6 +30,10 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			name = "Texture 2D";
+		}
+
+		public override void OnNodeEnable()
+		{
 			matPreview = new PWGUIMaterialPreview();
 		}
 

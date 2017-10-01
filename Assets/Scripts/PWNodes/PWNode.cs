@@ -13,13 +13,14 @@ namespace PW
 	public partial class PWNode : ScriptableObject
 	{
 		//Node datas:
-		public Rect				windowRect = new Rect(400, 400, 200, 50);
-		public int				id;
-		public bool				renamable = false;
-		public int				computeOrder = 0;
-		public float			processTime = 0f;
-		public string			classQAName;
-		new public string		name;
+		public Rect					rect = new Rect(400, 400, 200, 50);
+		public int					id;
+		public bool					renamable = false;
+		public int					computeOrder = 0;
+		public float				processTime = 0f;
+		public string				classQAName;
+		public PWColorSchemeName	colorSchemeName;
+		new public string			name;
 
 		//AnchorField lists
 		public List< PWAnchorField >	inputAnchorFields = new List< PWAnchorField >();
@@ -215,9 +216,6 @@ namespace PW
 			UpdateAnchorProperties();
 
 			UpdateWorkStatus();
-
-			foreach (var anchor in anchorFields)
-				anchor.OnEnable();
 
 			Debug.Log("Node OnEnable: " + GetType());
 

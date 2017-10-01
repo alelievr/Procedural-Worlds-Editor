@@ -93,7 +93,6 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		isMouseClickOutside = false;
 		
 		isMouseClickOnNode = false;
-		mouseOverNode = null;
 		
 		isMouseClickOnLink = false;
 		mouseOverLink = null;

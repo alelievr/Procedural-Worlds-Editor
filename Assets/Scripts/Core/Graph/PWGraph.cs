@@ -183,7 +183,6 @@ namespace PW.Core
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
 
-			
 			foreach (var node in nodes)
 				DetachNodeEvents(node);
 		}
@@ -346,6 +345,10 @@ namespace PW.Core
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			
+			position.x = Mathf.RoundToInt(position.x);
+			position.y = Mathf.RoundToInt(position.y);
+			newNode.rect.position = position;
+			
 			newNode.Initialize(this);
 
 			AttachNodeEvents(newNode);
@@ -358,9 +361,18 @@ namespace PW.Core
 			
 			return newNode;
 		}
+		
+		public bool		RemoveNode(int nodeId)
+		{
+			return RemoveNode(nodesDictionary[nodeId]);
+		}
 
 		public bool		RemoveNode(PWNode removeNode)
 		{
+			//can't delete an input/output node
+			if (removeNode == inputNode || removeNode == outputNode)
+				return false;
+			
 			DetachNodeEvents(removeNode);
 			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
 			nodes.Remove(removeNode);
@@ -369,19 +381,6 @@ namespace PW.Core
 				OnNodeRemoved(removeNode);
 			
 			return nodesDictionary.Remove(item.Key);
-		}
-		
-		public bool		RemoveNode(int nodeId)
-		{
-			PWNode node = nodesDictionary[nodeId];
-
-			DetachNodeEvents(node);
-			//sending this event will cause the node remove self.
-
-			if (OnNodeRemoved != null)
-				OnNodeRemoved(node);
-			
-			return nodesDictionary.Remove(nodeId);
 		}
 
 		public void		RemoveLink(PWNodeLink link)

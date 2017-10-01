@@ -225,7 +225,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 				selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
 
 			//iterature throw all nodes of the graph and check if the selection overlaps
-			graph.nodes.ForEach(n => n.isSelected = decaledSelectionRect.Overlaps(n.windowRect));
+			graph.nodes.ForEach(n => n.isSelected = decaledSelectionRect.Overlaps(n.rect));
 			editorEvents.selectedNodeCount = graph.nodes.Count(n => n.isSelected);
 		}
 
@@ -234,7 +234,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		{
 				graph.nodes.ForEach(n => {
 				if (n.isSelected)
-					n.windowRect.position += e.delta;
+					n.rect.position += e.delta;
 				});
 		}
 	}

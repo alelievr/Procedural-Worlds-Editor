@@ -41,6 +41,11 @@ namespace PW.Core
 		{
 			return colorSchemes[csn].linkColor;
 		}
+
+		public static Color GetAnchorColor(PWColorSchemeName csn)
+		{
+			return colorSchemes[csn].anchorColor;
+		}
 		
 		public static Color GetNodeColor(PWColorSchemeName csn)
 		{

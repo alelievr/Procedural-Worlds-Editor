@@ -16,19 +16,19 @@ public partial class PWGraphEditor {
 		//node grid snapping when pressing cmd/crtl 
 		if (node.isDragged && e.command)
 		{
-			Vector2 pos = node.windowRect.position;
+			Vector2 pos = node.rect.position;
 			//aproximative grid cell size
 			float	snapPixels = 25.6f;
 
 			pos.x = Mathf.RoundToInt(Mathf.RoundToInt(pos.x / snapPixels) * snapPixels);
 			pos.y = Mathf.RoundToInt(Mathf.RoundToInt(pos.y / snapPixels) * snapPixels);
-			node.windowRect.position = pos;
+			node.rect.position = pos;
 		}
 
 		//move the node if panPosition changed:
-		node.windowRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
-		Rect decaledRect = GUILayout.Window(id, node.windowRect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
-		node.windowRect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
+		node.rect = PWUtils.DecalRect(node.rect, graph.panPosition);
+		Rect decaledRect = GUILayout.Window(id, node.rect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
+		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 	}
 
 	void RenderNode(int id, PWNode node)
@@ -38,7 +38,7 @@ public partial class PWGraphEditor {
 		DisplayDecaledNode(id, node);
 
 		//check if the mouse is over this node
-		if (node.windowRect.Contains(e.mousePosition - graph.panPosition))
+		if (node.rect.Contains(e.mousePosition - graph.panPosition))
 			graph.editorEvents.mouseOverNode = node;
 
 		//managed somewhere else
@@ -83,7 +83,7 @@ public partial class PWGraphEditor {
 		if (node.processTime > Mathf.Epsilon)
 		{
 			GUIStyle gs = new GUIStyle();
-			Rect msRect = PWUtils.DecalRect(node.windowRect, graph.panPosition);
+			Rect msRect = PWUtils.DecalRect(node.rect, graph.panPosition);
 			msRect.position += new Vector2(msRect.size.x / 2 - 10, msRect.size.y + 5);
 			gs.normal.textColor = greenRedGradient.Evaluate(node.processTime / 20); //20ms ok, after is red
 			GUI.Label(msRect, node.processTime + " ms", gs);

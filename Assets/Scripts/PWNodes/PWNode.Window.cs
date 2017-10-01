@@ -17,14 +17,18 @@ namespace PW
 			var e = Event.current;
 			
 			if (!styleLoaded)
+			{
 				LoadStyles();
+				foreach (var anchor in anchorFields)
+					anchor.LoadStylesAndAssets();
+			}
 			
 			//update the PWGUI window rect with this window rect:
-			PWGUI.currentWindowRect = windowRect;
+			PWGUI.currentWindowRect = rect;
 			PWGUI.StartFrame();
 
 			// set the header of the window as draggable:
-			int width = (int) windowRect.width;
+			int width = (int) rect.width;
 			Rect dragRect = new Rect(30, 0, width, 20);
 			
 			Rect debugIconRect = dragRect;
@@ -79,7 +83,7 @@ namespace PW
 
 			delayedChanges.Update();
 
-			Rect selectRect = new Rect(10, 18, windowRect.width - 20, windowRect.height - 18);
+			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				isSelected = !isSelected;
 

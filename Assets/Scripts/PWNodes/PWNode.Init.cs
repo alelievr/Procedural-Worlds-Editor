@@ -30,6 +30,9 @@ namespace PW
 		{
 			editIcon = Resources.Load< Texture2D >("ic_edit");
 			debugIcon = Resources.Load< Texture2D >("ic_settings");
+			
+			//set the color scheme name for this node type
+			colorSchemeName = PWNodeTypeProvider.GetNodeColor(GetType());
 		}
 
 		public void LoadStyles()
@@ -110,6 +113,7 @@ namespace PW
 					anchorFieldDictionary.Remove(field.Name);
 				else
 				{
+					anchorField.colorSchemeName = colorSchemeName;
 					anchorField.CreateNewAnchor();
 					anchorField.fieldName = field.Name;
 					anchorField.fieldType = (SerializableType)field.FieldType;
@@ -312,15 +316,18 @@ namespace PW
 		void UnBindEvents()
 		{
 			//if the node is used in a PWMainGraph:
-			graphRef.OnForceReload -= GraphReloadCallback;
-			graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
-			graphRef.OnClickNowhere -= OnClickedOutside;
-			graphRef.OnLinkDragged -= LinkDraggedCallback;
-			graphRef.OnLinkRemoved -= LinkRemovedCalllback;
-			graphRef.OnLinkCanceled -= LinkCanceled;
-			graphRef.OnNodeSelected -= NodeSelectedCallback;
-			graphRef.OnNodeUnselected -= NodeUnselectedCallback;
-			graphRef.OnNodeRemoved -= NodeRemovedCallback;
+			if (graphRef != null)
+			{
+				graphRef.OnForceReload -= GraphReloadCallback;
+				graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
+				graphRef.OnClickNowhere -= OnClickedOutside;
+				graphRef.OnLinkDragged -= LinkDraggedCallback;
+				graphRef.OnLinkRemoved -= LinkRemovedCalllback;
+				graphRef.OnLinkCanceled -= LinkCanceled;
+				graphRef.OnNodeSelected -= NodeSelectedCallback;
+				graphRef.OnNodeUnselected -= NodeUnselectedCallback;
+				graphRef.OnNodeRemoved -= NodeRemovedCallback;
+			}
 			
 			//node events:
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;

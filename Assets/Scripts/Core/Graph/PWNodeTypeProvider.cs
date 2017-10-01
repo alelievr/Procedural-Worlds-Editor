@@ -140,13 +140,23 @@ namespace PW.Core
 			return null;
         }
 
-		public static string GetNodeName(Type t)
+		static T GetNodeInfo< T >(Type t, Func< PWNodeTypeInfo, PWNodeTypeInfoList, T > fun)
 		{
 			foreach (var nil in nodeInfoList)
 				foreach (var ni in nil.typeInfos)
 					if (ni.type == t)
-						return ni.name;
-			return t.Name;
+						return fun(ni, nil);
+			return fun(null, null);
+		}
+
+		public static string GetNodeName(Type t)
+		{
+			return GetNodeInfo(t, (ni, nil) => (ni == null) ? t.Name : ni.name);
+		}
+
+		public static PWColorSchemeName GetNodeColor(Type t)
+		{
+			return GetNodeInfo(t, (ni, nil) => (nil == null) ? PWColorSchemeName.Default : nil.colorSchemeName);
 		}
 	}
 }

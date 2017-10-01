@@ -34,7 +34,7 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			//override window width
-			windowRect.width = 150;
+			rect.width = 150;
 		}
 
 		void 			UpdateOutputVisibility()

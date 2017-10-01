@@ -24,7 +24,7 @@ public partial class PWGraphEditor {
 			{
 				string menuString = "Create new/" + nodeCat.title + "/";
 				foreach (var nodeClass in nodeCat.typeInfos)
-					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => { graph.CreateNewNode(nodeClass.type, -graph.panPosition + e.mousePosition); });
+					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => { graph.CreateNewNode(nodeClass.type, -graph.panPosition + e.mousePosition); Debug.Log("pos: " + -graph.panPosition + e.mousePosition); });
 			}
 			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
 			if (editorEvents.mouseOverOrderingGroup != null)
@@ -61,6 +61,9 @@ public partial class PWGraphEditor {
 				string moveNodeString = (editorEvents.selectedNodeCount == 1) ? "move selected node" : "move selected nodes";
 				menu.AddItem(new GUIContent(moveNodeString), false, MoveSelectedNodes);
 			}
+
+			menu.AddSeparator("");
+			menu.AddItem(new GUIContent("Recenter the graph"), false, () => { graph.scale = 1; graph.panPosition = Vector2.zero; });
 
 			menu.ShowAsContext();
 			e.Use();

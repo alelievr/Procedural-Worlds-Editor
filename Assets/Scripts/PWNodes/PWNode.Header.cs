@@ -21,7 +21,7 @@ namespace PW
 			//rendering node rename field
 			if (renamable)
 			{
-				Vector2	winSize = windowRect.size;
+				Vector2	winSize = rect.size;
 				Rect	renameRect = new Rect(0, 0, winSize.x, 18);
 				Rect	renameIconRect = new Rect(winSize.x - 28, 3, 12, 12);
 				string	renameNodeField = "renameWindow";

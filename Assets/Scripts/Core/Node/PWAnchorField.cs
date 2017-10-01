@@ -33,6 +33,7 @@ namespace PW.Core
 	{
 		//node instance where the anchor is.
 		public PWNode						nodeRef;
+		public PWGraph						graphRef { get { return nodeRef.graphRef; } }
 		
 		//list of rendered anchors:
 		public List< PWAnchor >				anchors = new List< PWAnchor >();
@@ -116,6 +117,7 @@ namespace PW.Core
 
 	#region Anchor style
 		
+		[System.NonSerialized]
 		static bool				styleLoaded = false;
 		static Texture2D		errorIcon = null;
 		static Texture2D		anchorTexture = null;
@@ -131,8 +133,7 @@ namespace PW.Core
 
 		public void OnEnable()
 		{
-			if (!styleLoaded)
-				LoadStylesAndAssets();
+
 		}
 
 		public void Initialize(PWNode node)
@@ -140,21 +141,22 @@ namespace PW.Core
 			nodeRef = node;
 		}
 
-		void LoadStylesAndAssets()
+		public void LoadStylesAndAssets()
 		{
+			if (styleLoaded)
+				return ;
+			
 			//styles:
 			boxAnchorStyle = new GUIStyle(GUI.skin.box);
 			boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			anchorTexture = GUI.skin.box.normal.background;
+			Debug.Log("anchor Texture: " + anchorTexture);
 			anchorDisabledTexture = GUI.skin.box.active.background;
 			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
-			styleLoaded = true;
 			
 			//assets:
 			errorIcon = Resources.Load< Texture2D >("ic_error");
-
-			Debug.LogWarning("loaded assets !: " + errorIcon);
 		}
 
 		public void OnDisable() {}
@@ -183,11 +185,20 @@ namespace PW.Core
 			if (!string.IsNullOrEmpty(name) && anchors.Count > 1)
 				anchorName += " #" + index;
 
-			//highlight mode to GUI color:
-			if (anchor.isLinkable)
-				GUI.color = highlightModeToColor[anchor.highlighMode];
+			//anchor color:
+			if (anchor.color != new Color(0, 0, 0, 0))
+				GUI.color = anchor.color;
 			else
-				GUI.color = PWColorTheme.disabledAnchorColor;
+				GUI.color = PWColorTheme.GetAnchorColor(anchor.colorSchemeName);
+
+			//highlight mode to GUI color:
+			if (graphRef.editorEvents.isDraggingLink || graphRef.editorEvents.isDraggingNewLink)
+			{
+				if (anchor.isLinkable)
+					GUI.color = highlightModeToColor[anchor.highlighMode];
+				else
+					GUI.color = PWColorTheme.disabledAnchorColor;
+			}
 			// GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture); //???
 
 			//Draw the anchor:

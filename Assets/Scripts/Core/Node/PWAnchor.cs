@@ -18,10 +18,11 @@ namespace PW.Core
 		[System.NonSerialized]
 		public PWNode				nodeRef;
 
-
 		//anchor connections:
 		[System.NonSerialized]
 		public List< PWNodeLink >	links = new List< PWNodeLink >();
+		//list of link GUIDs
+		public List< string >		linkGUIDs = new List< string >();
 
 
 		//anchor name
@@ -69,7 +70,6 @@ namespace PW.Core
 			//we use the LinkTable in the graph to get the only instance of link stored
 			//	to know why, take a look at the PWGraph.cs file.
 			var nodeLinkTable = nodeRef.graphRef.nodeLinkTable;
-			var linkGUIDs = nodeLinkTable.GetLinkGUIDsFromAnchorGUID(GUID);
 
 			//here we set the anchor references in the link cauz they can't be serialized.
 			foreach (var linkGUID in linkGUIDs)
@@ -81,7 +81,7 @@ namespace PW.Core
 				else
 					linkInstance.toAnchor = this;
 				
-				AddLink(linkInstance);
+				links.Add(linkInstance);
 			}
 			
 			//propagate the OnAfterDeserialize event.
@@ -91,12 +91,14 @@ namespace PW.Core
 
 		public void RemoveLink(PWNodeLink link)
 		{
-			if (!links.Remove(link))
+			if (!linkGUIDs.Remove(link.GUID))
 				Debug.LogWarning("[PWAnchor] failed to remove the link: " + link);
+			links.Remove(link);
 		}
 
 		public void AddLink(PWNodeLink link)
 		{
+			linkGUIDs.Add(link.GUID);
 			links.Add(link);
 		}
 

@@ -15,10 +15,13 @@ namespace PW.Core
 			linkColor = nodeColor;
 			selectorHeaderColor = nodeColor * 1.1f;
 			selectorCellColor = nodeColor * 0.9f;
+			anchorColor = nodeColor;
 		}
 		
 		//node header color
 		public Color	nodeColor;
+		//anchor color
+		public Color	anchorColor;
 		//link color
 		public Color	linkColor;
 		//node selector header color
