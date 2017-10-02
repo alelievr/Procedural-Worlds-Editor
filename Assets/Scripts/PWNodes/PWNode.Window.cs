@@ -79,11 +79,6 @@ namespace PW
 			RenderAnchors();
 			ProcessAnchorEvents();
 
-			if (editorEvents.isMouseClickOnAnchor)
-				OnAnchor
-
-			RenderLinks();
-
 			delayedChanges.Update();
 
 			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);

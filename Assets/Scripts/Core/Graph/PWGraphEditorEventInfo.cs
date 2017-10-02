@@ -27,6 +27,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 
 	//link infos:
 	public bool				isMouseOverLink { get { return mouseOverLink != null; } }
+	public bool				isMouseOverLinkFrame;
 	public bool				isMouseClickOnLink;
 	public bool				isDraggingLink;
 	public PWNodeLink		mouseOverLink;
@@ -77,6 +78,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		mouseOverNode = null;
 
 		isMouseClickOnLink = false;
+		isMouseOverLinkFrame = false;
 		isDraggingLink = false;
 		mouseOverLink = null;
 
@@ -100,7 +102,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		isMouseOverNodeFrame = false;
 		
 		isMouseClickOnLink = false;
-		mouseOverLink = null;
+		isMouseOverLinkFrame = false;
 
 		isMouseClickOnAnchor = false;
 		isMouseOverAnchorFrame = false;

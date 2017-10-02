@@ -80,7 +80,7 @@ namespace PW
 	#endregion
 	
 		public delegate void					ReloadAction(PWNode from);
-		public delegate void					NodeLinkAction(PWAnchor anchor);
+		public delegate void					AnchorAction(PWAnchor anchor);
 		public delegate void					MessageReceivedAction(PWNode from, object message);
 		public delegate void					LinkAction(PWNodeLink link);
 
@@ -92,13 +92,13 @@ namespace PW
 		protected event MessageReceivedAction	OnMessageReceived;
 
 		//fired when this node was linked
-		public event NodeLinkAction				OnAnchorLinked;
+		public event AnchorAction				OnAnchorLinked;
 		//fired when this node was unlinked
-		protected event NodeLinkAction			OnAnchorUnlinked;
+		protected event AnchorAction			OnAnchorUnlinked;
 		//fired when the dragged link is above an anchor
-		protected event NodeLinkAction			OnDraggedLinkOverAnchor;
+		protected event AnchorAction			OnDraggedLinkOverAnchor;
 		//fired when the dragged link quit the zone above the anchor
-		protected event NodeLinkAction			OnDraggedLinkQuitAnchor;
+		protected event AnchorAction			OnDraggedLinkQuitAnchor;
 		
 		//fired when a link attached to this node is created
 		private event LinkAction				OnLinkCreated;

@@ -87,13 +87,11 @@ public partial class PWGraphEditor : PWEditorWindow {
 			SelectAndDrag();
 	
 			//graph rendering
-			EditorGUILayout.BeginHorizontal(); //is it useful ?
-			{
-				RenderOrderingGroups();
-				RenderNodes();
-			}
-			EditorGUILayout.EndHorizontal();
+			RenderOrderingGroups();
+			RenderLinks();
+			RenderNodes();
 	
+			//context menu
 			ContextMenu();
 	
 			//fill and process remaining events if there is
@@ -101,9 +99,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 	
 			//restore masked events:
 			UnMaskEvents();
-	
-			//reset to default the depth
-			GUI.depth = 0;
 	
 			//TODO: fix ?
 			if (e.type == EventType.Repaint)
@@ -130,7 +125,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		this.graph = graph;
 		
 		graph.OnNodeAdded += OnNodeAddedCallback;
-		graph.OnLinkDragged += OnLinkDraggedCallback;
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
 
 		//set the skin for the node style initialization
@@ -145,16 +139,10 @@ public partial class PWGraphEditor : PWEditorWindow {
 		Debug.Log("graph initi: " + graph.initialized);
 	}
 
-	void OnLinkDraggedCallback(PWNodeLink link)
-	{
-
-	}
-
 	public void UnloadGraph()
 	{
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
-		graph.OnLinkDragged -= OnLinkDraggedCallback;
 
 		SaveGraph();
 
@@ -280,8 +268,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//if mouse was not over an anchor this frame, unset mouseOver
 		if (!editorEvents.isMouseOverAnchorFrame)
 			editorEvents.mouseOverAnchor = null;
-		
-		//TODO: do the same for links
 	}
 
 	void ManageEvents()
