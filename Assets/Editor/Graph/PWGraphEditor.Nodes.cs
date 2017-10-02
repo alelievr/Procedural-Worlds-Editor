@@ -9,7 +9,7 @@ using PW;
 //Nodes rendering
 public partial class PWGraphEditor {
 
-	void DisplayDecaledNode(int id, PWNode node)
+	void RenderDecaledNode(int id, PWNode node)
 	{
 		var		e = Event.current;
 
@@ -35,11 +35,14 @@ public partial class PWGraphEditor {
 	{
 		Event	e = Event.current;
 
-		DisplayDecaledNode(id, node);
+		RenderDecaledNode(id, node);
 
 		//check if the mouse is over this node
 		if (node.rect.Contains(e.mousePosition - graph.panPosition))
+		{
 			graph.editorEvents.mouseOverNode = node;
+			graph.editorEvents.isMouseOverNodeFrame = true;
+		}
 
 		//managed somewhere else
 		/*//end dragging:

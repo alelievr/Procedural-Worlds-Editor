@@ -79,6 +79,9 @@ namespace PW
 			RenderAnchors();
 			ProcessAnchorEvents();
 
+			if (editorEvents.isMouseClickOnAnchor)
+				OnAnchor
+
 			RenderLinks();
 
 			delayedChanges.Update();

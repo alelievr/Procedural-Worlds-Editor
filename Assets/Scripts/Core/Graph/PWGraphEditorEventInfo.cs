@@ -20,6 +20,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 
 	//node infos:
 	public bool				isMouseOverNode { get { return mouseOverNode != null; } }
+	public bool				isMouseOverNodeFrame;
 	public bool				isDraggingNode;
 	public bool				isMouseClickOnNode;
 	public PWNode			mouseOverNode;
@@ -32,6 +33,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 
 	//anchor infos:
 	public bool				isMouseOverAnchor { get { return mouseOverAnchor != null; } }
+	public bool				isMouseOverAnchorFrame;
 	public bool				isMouseClickOnAnchor;
 	public PWAnchor			mouseOverAnchor;
 
@@ -70,6 +72,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		selectedNodeCount = 0;
 
 		isMouseClickOnNode = false;
+		isMouseOverNodeFrame = false;
 		isDraggingNode = false;
 		mouseOverNode = null;
 
@@ -78,6 +81,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		mouseOverLink = null;
 
 		isMouseClickOnAnchor = false;
+		isMouseOverAnchorFrame = false;
 		mouseOverAnchor = null;
 
 		isMouseClickOnOrderingGroup = false;
@@ -93,12 +97,13 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		isMouseClickOutside = false;
 		
 		isMouseClickOnNode = false;
+		isMouseOverNodeFrame = false;
 		
 		isMouseClickOnLink = false;
 		mouseOverLink = null;
 
 		isMouseClickOnAnchor = false;
-		mouseOverAnchor = null;
+		isMouseOverAnchorFrame = false;
 		
 		isMouseClickOnOrderingGroup = false;
 		isMouseOverOrderingGroupFrame = false;

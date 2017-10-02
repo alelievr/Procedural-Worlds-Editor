@@ -46,6 +46,7 @@ namespace PW
 		protected int			chunkSize { get { return graphRef.chunkSize; } }
 		protected int			seed { get { return graphRef.seed; } }
 		protected float			step { get { return graphRef.step; } }
+		protected PWGraphEditorEventInfo editorEvents { get { return graphRef.editorEvents; } }
 
 
 		//Debug variables:
@@ -101,8 +102,10 @@ namespace PW
 		
 		//fired when a link attached to this node is created
 		private event LinkAction				OnLinkCreated;
-		//fired when a link is removed
+		//fired when a link attached to this is removed
 		public event LinkAction					OnLinkRemoved;
+		//fired when an anchor on this node starts to drag a link
+		public event LinkAction					OnLinkDragged;
 
 		//fired when a link attached to this node is selected
 		public event LinkAction					OnLinkSelected;

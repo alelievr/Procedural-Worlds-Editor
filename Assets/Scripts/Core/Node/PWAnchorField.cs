@@ -133,7 +133,6 @@ namespace PW.Core
 
 		public void OnEnable()
 		{
-
 		}
 
 		public void Initialize(PWNode node)
@@ -205,7 +204,7 @@ namespace PW.Core
 			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);
 			
 			//Draw the anchor name if not null
-			if (string.IsNullOrEmpty(name))
+			if (!string.IsNullOrEmpty(name))
 			{
 				Rect	anchorNameRect = anchor.rect;
 				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
@@ -219,7 +218,10 @@ namespace PW.Core
 			}
 
 			//error display (required unlinked anchors)
-			if (anchor.visibility == PWVisibility.Visible && required && anchor.linkCount == 0)
+			if (anchor.visibility == PWVisibility.Visible
+					&& required
+					&& anchor.anchorType == PWAnchorType.Input
+					&& anchor.linkCount == 0)
 			{
 				Rect errorIconRect = new Rect(anchor.rect);
 				errorIconRect.size = Vector2.one * 17;
@@ -277,13 +279,18 @@ namespace PW.Core
 				anchor.isLinkable = true;
 		}
 
-		public void ProcessEvent(ref PWGraphEditorEventInfo anchorEvent)
+		public void ProcessEvent(ref PWGraphEditorEventInfo editorEvents)
 		{
 			var e = Event.current;
 
 			foreach (var anchor in anchors)
 				if (anchor.rect.Contains(e.mousePosition))
-					anchorEvent.mouseOverAnchor = anchor;
+				{
+					editorEvents.mouseOverAnchor = anchor;
+					editorEvents.isMouseOverAnchorFrame = true;
+					if (e.type == EventType.MouseDown)
+						editorEvents.isMouseClickOnAnchor = true;
+				}
 		}
 
 	#endregion

@@ -297,6 +297,7 @@ namespace PW.Core
 		void		LinkSelectedCallback(PWNodeLink link) { OnLinkSelected(link); }
 		void		LinkUnselectedCallback(PWNodeLink link) { OnLinkUnselected(link); }
 		void		LinkRemovedCallback(PWNodeLink link) { RemoveLink(link); }
+		void		LinkDraggedCallback(PWNodeLink link) { OnLinkDragged(link); }
 
 		void		AnchorLinkedCallback(PWAnchor anchor) { CreateLink(anchor); }
 
@@ -433,6 +434,7 @@ namespace PW.Core
 			node.OnLinkUnselected += LinkUnselectedCallback;
 			node.OnAnchorLinked += AnchorLinkedCallback;
 			node.OnLinkRemoved += LinkRemovedCallback;
+			node.OnLinkDragged += LinkDraggedCallback;
 		}
 
 		void DetachNodeEvents(PWNode node)
