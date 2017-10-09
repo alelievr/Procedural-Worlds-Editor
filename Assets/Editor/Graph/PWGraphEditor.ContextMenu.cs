@@ -35,7 +35,7 @@ public partial class PWGraphEditor {
 			menu.AddSeparator("");
 			if (editorEvents.mouseOverAnchor != null)
 			{
-				menu.AddItem(new GUIContent("New Link"), false, BeginDragLink);
+				menu.AddItem(new GUIContent("New Link"), false, StartDragLink);
 				menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
 			}
 

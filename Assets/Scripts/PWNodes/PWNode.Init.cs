@@ -6,6 +6,8 @@ using System;
 using System.Reflection;
 using PW.Core;
 
+using PW.Node;
+
 //Initialization and data baking for PWNode
 namespace PW
 {
@@ -80,13 +82,13 @@ namespace PW
 					{
 						anchorField.anchorType = PWAnchorType.Input;
 						if (inputAttr.name != null)
-							name = inputAttr.name;
+							anchorField.name = inputAttr.name;
 					}
 					if (outputAttr != null)
 					{
 						anchorField.anchorType = PWAnchorType.Output;
 						if (outputAttr.name != null)
-							name = outputAttr.name;
+							anchorField.name = outputAttr.name;
 					}
 					if (copyAttr != null)
 						anchorField.transferType = PWTransferType.Copy;

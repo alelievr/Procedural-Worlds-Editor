@@ -8,14 +8,14 @@ using PW.Node;
 
 using Debug = UnityEngine.Debug;
 
-//TODO: remove this file
+//TODO: remove this file and create another for events and editor states
 
 //Utils for graph editor
 public partial class PWGraphEditor {
 	
-	void BeginDragLink()
+	void StartDragLink()
 	{
-		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
+		Debug.Log("Start dragging link");
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
 	}

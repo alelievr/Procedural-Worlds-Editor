@@ -282,6 +282,11 @@ public partial class PWGraphEditor : PWEditorWindow {
 			e.Use();
 			AssetDatabase.SaveAssets();
 		}
+
+		//begin to darg a link if clicked on anchor and nothing else is started
+		if (editorEvents.isMouseClickOnAnchor && !editorEvents.isPanning && !editorEvents.isDraggingSomething)
+			StartDragLink();
+		
 		
 		//click up outside of an anchor, stop dragging
 		if (e.type == EventType.mouseUp && editorEvents.isDraggingLink)

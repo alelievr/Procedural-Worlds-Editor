@@ -17,6 +17,7 @@ public partial class PWGraphEditor {
 			//render the dragged link
 			if (editorEvents.isDraggingLink || editorEvents.isDraggingNewLink)
 			{
+				Debug.Log("startLinkedAnchor: " + editorEvents.startedLinkAnchor);
 				Vector3 startPos = editorEvents.startedLinkAnchor.rect.center;
 				DrawSelectedBezier(
 					startPos,

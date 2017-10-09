@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using PW.Node;
 
 namespace PW.Core
 {
@@ -107,12 +108,20 @@ namespace PW.Core
 			return anchors.FirstOrDefault(a => a.GUID == anchorGUID);
 		}
 
+		List< string >	deserializedAnchors = new List< string >();
+
 		public void		OnAfterDeserialize(PWNode node)
 		{
-			Initialize(node);
+			if (anchors.Count == 0)
+				Debug.LogWarning("ZEro ength anchors in anchorFIeld in node " + nodeRef);
+			
+			Init(node);
 
 			foreach (var anchor in anchors)
+			{
+				deserializedAnchors.Add(anchor.GUID);
 				anchor.OnAfterDeserialized(this);
+			}
 		}
 
 	#region Anchor style
@@ -135,7 +144,14 @@ namespace PW.Core
 		{
 		}
 
+		//called only when the anchorField is created
 		public void Initialize(PWNode node)
+		{
+			Init(node);
+		}
+
+		//called each time the anchorField is deserialized;
+		public void Init(PWNode node)
 		{
 			nodeRef = node;
 		}
@@ -167,6 +183,7 @@ namespace PW.Core
 			{ PWAnchorHighlight.AttachReplace, Color.yellow },
 		};
 
+		//the anchor passed to ths function must be in the `anchors` list
 		void RenderAnchor(PWAnchor anchor, ref Rect renderRect, int index)
 		{
 			//visual parameters for anchors:
