@@ -11,11 +11,11 @@ using Debug = UnityEngine.Debug;
 //TODO: remove this file and create another for events and editor states
 
 //Utils for graph editor
-public partial class PWGraphEditor {
+public partial class PWGraphEditor
+{
 	
 	void StartDragLink()
 	{
-		Debug.Log("Start dragging link");
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
 	}

@@ -41,8 +41,10 @@ namespace PW.Core
 
 		//hightlight mode (for replace / new / delete link visualization)
 		public PWAnchorHighlight	highlighMode = PWAnchorHighlight.None;
-		//visual rect of the anchor
+		//visual rect of the anchor (from node)
 		public Rect					rect;
+		//visual rect of the anchor (from the graph)
+		public Rect					rectInGraph { get { return PWUtils.DecalRect(rect, nodeRef.rect.position + nodeRef.graphRef.panPosition); } }
 		//anchor color
 		public Color				color; //no need of SerializableColor ?
 		//anchor visibility
@@ -51,7 +53,7 @@ namespace PW.Core
 		public float				forcedY = -1;
 
 
-		//anchor type
+		//anchor field accessors
 		public PWAnchorType			anchorType { get { return anchorFieldRef.anchorType; } }
 		public string				fieldName { get { return anchorFieldRef.fieldName; } }
 		public PWTransferType		transferType { get { return anchorFieldRef.transferType; } }

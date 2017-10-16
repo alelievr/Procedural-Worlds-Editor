@@ -77,6 +77,13 @@ namespace PW
 
 		public bool					windowNameEdit = false;
 
+		//Serialization system:
+		[System.NonSerialized]
+		private	bool				deserializtionAlreadyNotified = false;
+		//tell if the node was enabled
+		[System.NonSerialized]
+		private bool				isEnabled = false;
+
 	#endregion
 	
 		public delegate void					ReloadAction(PWNode from);
@@ -190,28 +197,20 @@ namespace PW
 				node.OnMessageReceived(this, message);
 		}
 
-		public void OnAfterDeserialize(PWGraph graph)
+		public void OnAfterGraphDeserialize(PWGraph graph)
 		{
 			this.graphRef = graph;
 
-			Debug.Log("OnAfterDeserialize for node: " + GetType());
-			
-			BindEvents();
-			
-			foreach (var anchorField in inputAnchorFields)
-				anchorField.OnAfterDeserialize(this);
-			foreach (var anchorField in outputAnchorFields)
-				anchorField.OnAfterDeserialize(this);
-				
-			OnNodeEnable();
-
-			OnAnchorEnable();
+			if (isEnabled)
+				OnAfterNodeAndGraphDeserialized();
 		}
 
 	#region OnEnable, OnDisable, Initialize
 
 		public void OnEnable()
 		{
+			isEnabled = true;
+
 			LoadAssets();
 			
 			LoadFieldAttributes();
@@ -229,6 +228,30 @@ namespace PW
 			classQAName = GetType().AssemblyQualifiedName;
 
 			delayedChanges.Clear();
+
+			if (graphRef != null)
+				OnAfterNodeAndGraphDeserialized();
+			
+			OnNodeEnable();
+
+			OnAnchorEnable();
+		}
+
+		//here both our node and graph have been deserialized, we can now use it's datas
+		void OnAfterNodeAndGraphDeserialized()
+		{
+			if (deserializtionAlreadyNotified)
+				return ;
+			
+			BindEvents();
+
+			deserializtionAlreadyNotified = true;
+
+			//call the AfterDeserialize functions for anchors
+			foreach (var anchorField in inputAnchorFields)
+				anchorField.OnAfterDeserialize(this);
+			foreach (var anchorField in outputAnchorFields)
+				anchorField.OnAfterDeserialize(this);
 		}
 
 		//called only once, when the node is created

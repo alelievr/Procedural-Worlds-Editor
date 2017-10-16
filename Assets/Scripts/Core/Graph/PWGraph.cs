@@ -157,7 +157,7 @@ namespace PW.Core
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			//	called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
-				node.OnAfterDeserialize(this);
+				node.OnAfterGraphDeserialize(this);
 
 			//Build compute order list
 			UpdateComputeOrder();

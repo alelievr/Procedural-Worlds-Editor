@@ -166,7 +166,7 @@ namespace PW
 					}
 				}
 			}
-
+			
 			//we remove every anchors that is not anymore linked with a field
 			inputAnchorFields.RemoveAll(a => !a.fieldValidated);
 			outputAnchorFields.RemoveAll(a => !a.fieldValidated);

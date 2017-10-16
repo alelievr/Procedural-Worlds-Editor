@@ -12,18 +12,15 @@ public partial class PWGraphEditor {
 		//process link creation, drag and select events + draw links
 		void RenderLinks()
 		{
-			ProcessAnchorLinkEvents();
-
 			//render the dragged link
 			if (editorEvents.isDraggingLink || editorEvents.isDraggingNewLink)
 			{
-				Debug.Log("startLinkedAnchor: " + editorEvents.startedLinkAnchor);
-				Vector3 startPos = editorEvents.startedLinkAnchor.rect.center;
+				Vector3 startPos = editorEvents.startedLinkAnchor.rectInGraph.center;
 				DrawSelectedBezier(
 					startPos,
 					e.mousePosition,
 					startPos + Vector3.right * tanPower,
-					Vector3.zero,
+					e.mousePosition,
 					editorEvents.startedLinkAnchor.colorSchemeName,
 					5,
 					PWLinkHighlight.None);
@@ -35,21 +32,6 @@ public partial class PWGraphEditor {
 			
 			if (!editorEvents.isMouseOverLinkFrame)
 				editorEvents.mouseOverLink = null;
-		}
-
-		void ProcessAnchorLinkEvents()
-		{
-			if (!editorEvents.isMouseOverAnchor)
-				return ;
-			
-			//if an anchor was clicked, start a dragLink
-			if (e.type == EventType.MouseDown)
-				editorEvents.isDraggingNewLink = true;
-			
-			if (e.type == EventType.MouseUp && editorEvents.isDraggingNewLink)
-			{
-				editorEvents.isDraggingNewLink = false;
-			}
 		}
 
 		void RenderNodeLinks(PWNode node)

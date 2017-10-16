@@ -36,6 +36,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	//Is the editor on MacOS ?
 	bool 						MacOS;
+	//Is the command (on MacOs) or control (on other OSs) is pressed
+	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
 
 	public override void OnEnable()
 	{
@@ -120,8 +122,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	public void LoadGraph(PWGraph graph)
 	{
-		Debug.Log("graph initi: " + graph.initialized);
-		Debug.Log("Loading graph: " + graph.inputNode + "/" + graph.outputNode);
+		Debug.Log("graph init: " + graph.initialized);
 		this.graph = graph;
 		
 		graph.OnNodeAdded += OnNodeAddedCallback;
@@ -267,7 +268,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		
 		//if mouse was not over an anchor this frame, unset mouseOver
 		if (!editorEvents.isMouseOverAnchorFrame)
-			editorEvents.mouseOverAnchor = null;
+				editorEvents.mouseOverAnchor = null;
 	}
 
 	void ManageEvents()
@@ -293,7 +294,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 			StopDragLink(false);
 			
 		//duplicate selected items if cmd+d
-		if (e.command && e.keyCode == KeyCode.D && e.type == EventType.KeyDown)
+		if (commandOSKey && e.keyCode == KeyCode.D && e.type == EventType.KeyDown)
 		{
 			graph.nodes.ForEach(n => n.Duplicate());
 
@@ -305,7 +306,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		if (e.type == EventType.mouseDrag && !editorEvents.isDraggingSomething)
 		{
 			//mouse middle button or left click + cmd on mac and left click + control on other OS
-			if (e.button == 2 || (e.button == 0 && e.command))
+			if (e.button == 2 || (e.button == 0 && commandOSKey))
 			{
 				editorEvents.isPanning = true;
 				graph.panPosition += e.delta;
@@ -317,8 +318,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		{
 			if (!editorEvents.isMouseOverSomething //if mouse is not above something
 				&& e.button == 0
-				&& !e.command
-				&& !e.control)
+				&& e.modifiers == EventModifiers.None)
 			{
 				editorEvents.selectionStartPoint = e.mousePosition;
 				editorEvents.isSelecting = true;
@@ -328,7 +328,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//on mouse button up
 		if (e.type == EventType.MouseUp)
 		{
-			Debug.Log(editorEvents.isPanning);
 			if (editorEvents.isDraggingNode)
 				Undo.RecordObject(graph, "drag node");
 			if (editorEvents.isPanning)
@@ -369,7 +368,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		}
 
 		//undo and redo
-		if (e.command && e.type == EventType.KeyDown)
+		if (commandOSKey && e.type == EventType.KeyDown)
 		{
 			if (e.keyCode == KeyCode.Z)
 			{
