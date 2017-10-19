@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Linq;
 using UnityEngine;
+using System;
 
 using Debug = UnityEngine.Debug;
 using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
@@ -95,7 +96,7 @@ namespace PW.Core
 		public event NodeAction					OnNodeSelected;
 		public event NodeAction					OnNodeUnselected;
 		//link events:
-		public event LinkAction					OnLinkDragged;
+		public event Action< PWAnchor >			OnLinkDragged;
 		public event LinkAction					OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnLinkRemoved;
@@ -162,10 +163,6 @@ namespace PW.Core
 			//Build compute order list
 			UpdateComputeOrder();
 			
-			//Attach node's events
-			foreach (var node in nodes)
-				AttachNodeEvents(node);
-			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnLinkCreated += LinkChangedCallback;
@@ -182,9 +179,6 @@ namespace PW.Core
 			OnLinkRemoved -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
-
-			foreach (var node in nodes)
-				DetachNodeEvents(node);
 		}
 
 		public float Process()
@@ -294,10 +288,6 @@ namespace PW.Core
 		//retarget link and node events to GraphStructure event
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
-		void		LinkSelectedCallback(PWNodeLink link) { OnLinkSelected(link); }
-		void		LinkUnselectedCallback(PWNodeLink link) { OnLinkUnselected(link); }
-		void		LinkRemovedCallback(PWNodeLink link) { RemoveLink(link); }
-		void		LinkDraggedCallback(PWNodeLink link) { OnLinkDragged(link); }
 
 		void		AnchorLinkedCallback(PWAnchor anchor) { CreateLink(anchor); }
 
@@ -308,10 +298,12 @@ namespace PW.Core
 			
 		}
 
-		public void RaiseOnClickNowhere() { OnClickNowhere(); }
+		//event accessors for PWGraphEditor
+		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
 		public void RaiseOnLinkSelected(PWNodeLink link) { OnLinkSelected(link); }
-		public void RaiseOnForceReload() { OnForceReload(); UpdateComputeOrder(); }
-		public void RaiseOnForceReloadOnce() { OnForceReloadOnce(); }
+		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); }
+		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); }
+		public void RaiseOnLinkDragged(PWAnchor anchor) { if (OnLinkDragged != null) OnLinkDragged(anchor); }
 
 	#endregion
 
@@ -352,8 +344,6 @@ namespace PW.Core
 			
 			newNode.Initialize(this);
 
-			AttachNodeEvents(newNode);
-
 			nodes.Add(newNode);
 			nodesDictionary[newNode.id] = newNode;
 
@@ -374,7 +364,6 @@ namespace PW.Core
 			if (removeNode == inputNode || removeNode == outputNode)
 				return false;
 			
-			DetachNodeEvents(removeNode);
 			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
 			nodes.Remove(removeNode);
 			
@@ -426,23 +415,6 @@ namespace PW.Core
 			link.Initialize(fAnchor, tAnchor);
 			nodeLinkTable.AddLink(link);
 			return link;
-		}
-
-		void AttachNodeEvents(PWNode node)
-		{
-			node.OnLinkSelected += LinkSelectedCallback;
-			node.OnLinkUnselected += LinkUnselectedCallback;
-			node.OnAnchorLinked += AnchorLinkedCallback;
-			node.OnLinkRemoved += LinkRemovedCallback;
-			node.OnLinkDragged += LinkDraggedCallback;
-		}
-
-		void DetachNodeEvents(PWNode node)
-		{
-			node.OnLinkSelected -= LinkSelectedCallback;
-			node.OnLinkUnselected -= LinkUnselectedCallback;
-			node.OnAnchorLinked -= AnchorLinkedCallback;
-			node.OnLinkRemoved -= LinkRemovedCallback;
 		}
 
 		public IEnumerable< PWNode > GetNodeChildsRecursive(PWNode begin)

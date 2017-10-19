@@ -9,7 +9,7 @@ namespace PW.Core
 
 		public static Color		selectedColor = new Color(0.000f, 0.000f, 0.804f);
 		public static Color		deletedColor = new Color(1, 0, 0);
-		public static Color		disabledAnchorColor = new Color(.7f, .7f, .7f);
+		public static Color		disabledAnchorColor = new Color(.2f, .2f, .2f);
 
 		public class PWColorSchemeDict : Dictionary< PWColorSchemeName, PWColorScheme > {}
 

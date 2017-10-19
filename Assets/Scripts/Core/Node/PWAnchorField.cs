@@ -177,7 +177,6 @@ namespace PW.Core
 		public void OnDisable() {}
 
 		Dictionary< PWAnchorHighlight, Color > highlightModeToColor = new Dictionary< PWAnchorHighlight, Color > {
-			{ PWAnchorHighlight.None, Color.white },
 			{ PWAnchorHighlight.AttachAdd, Color.green },
 			{ PWAnchorHighlight.AttachNew, Color.blue },
 			{ PWAnchorHighlight.AttachReplace, Color.yellow },
@@ -210,10 +209,13 @@ namespace PW.Core
 			//highlight mode to GUI color:
 			if (graphRef.editorEvents.isDraggingLink || graphRef.editorEvents.isDraggingNewLink)
 			{
-				if (anchor.isLinkable)
-					GUI.color = highlightModeToColor[anchor.highlighMode];
-				else
-					GUI.color = PWColorTheme.disabledAnchorColor;
+				if (anchor.highlighMode != PWAnchorHighlight.None)
+				{
+					if (anchor.isLinkable)
+						GUI.color = highlightModeToColor[anchor.highlighMode];
+					else
+						GUI.color = PWColorTheme.disabledAnchorColor;
+				}
 			}
 			// GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture); //???
 
@@ -277,7 +279,7 @@ namespace PW.Core
 		{
 			foreach (var anchor in anchors)
 			{
-				if (!PWAnchorUtils.AnchorAreAssignable(anchor, anchorToLink))
+				if (!PWAnchorUtils.AnchorAreAssignable(anchorToLink, anchor, true))
 					anchor.isLinkable = false;
 			}
 		}

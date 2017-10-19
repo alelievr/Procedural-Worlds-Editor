@@ -47,9 +47,9 @@ namespace PW
 			{
 				if (oldEventInfos.mouseOverAnchor != editorEvents.mouseOverAnchor)
 				{
-					if (editorEvents.mouseOverAnchor == null)
+					if (editorEvents.mouseOverAnchor == null && OnDraggedLinkQuitAnchor != null)
 						OnDraggedLinkQuitAnchor(oldEventInfos.mouseOverAnchor);
-					else
+					else if (OnDraggedLinkOverAnchor != null)
 						OnDraggedLinkOverAnchor(editorEvents.mouseOverAnchor);
 				}
 			}

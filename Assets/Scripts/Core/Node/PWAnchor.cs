@@ -34,7 +34,8 @@ namespace PW.Core
 		//index of the field, valid only if the attached field is a PWValues
 		public int					fieldIndex = -1;
 		//Contains the type in the PWValues at fieldIndex or anchorField.fieldType if field is not a PWValues
-		public SerializableType		fieldType;
+		[SerializeField] SerializableType	_fieldType;
+		public SerializableType		fieldType { get { return (_fieldType == null) ? anchorFieldRef.fieldType : _fieldType; } set { _fieldType = value; } }
 		//link type for visual bezier curve style
 		public PWLinkType			linkType = PWLinkType.BasicData;
 

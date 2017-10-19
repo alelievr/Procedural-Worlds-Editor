@@ -34,7 +34,7 @@ namespace PW
 		public void RemoveLink(PWNodeLink link)
 		{
 			//fire this event will trigger the graph and it will call anchor to remove link datas.
-			OnLinkRemoved(link);
+			graphRef.RemoveLink(link);
 		}
 
 		public void		RemoveAllLinksFromAnchor(string fieldName)

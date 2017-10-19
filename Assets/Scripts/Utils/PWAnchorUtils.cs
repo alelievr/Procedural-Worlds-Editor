@@ -5,7 +5,8 @@ using System;
 
 namespace PW.Core
 {
-	public static class PWAnchorUtils {
+	public static class PWAnchorUtils
+	{
 	
 		static bool				AreAssignable(Type from, Type to)
 		{
@@ -28,9 +29,12 @@ namespace PW.Core
 
 			Type fromType = from.fieldType;
 			Type toType = to.fieldType;
-			
+
 			if (verbose)
-				Debug.Log(fromType.ToString() + " is assignable from " + to.fieldType.ToString() + ": " + AreAssignable(fromType, toType));
+			{
+				Debug.Log("fromType: " + fromType + ", toType: " + toType);
+				Debug.Log(fromType.ToString() + " is assignable from " + toType.ToString() + ": " + AreAssignable(fromType, toType));
+			}
 			return AreAssignable(fromType, toType);
 		}
 	

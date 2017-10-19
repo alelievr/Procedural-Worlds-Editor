@@ -99,25 +99,13 @@ namespace PW
 		protected event MessageReceivedAction	OnMessageReceived;
 
 		//fired when this node was linked
-		public event AnchorAction				OnAnchorLinked;
+		protected event AnchorAction			OnAnchorLinked;
 		//fired when this node was unlinked
 		protected event AnchorAction			OnAnchorUnlinked;
 		//fired when the dragged link is above an anchor
 		protected event AnchorAction			OnDraggedLinkOverAnchor;
 		//fired when the dragged link quit the zone above the anchor
 		protected event AnchorAction			OnDraggedLinkQuitAnchor;
-		
-		//fired when a link attached to this node is created
-		private event LinkAction				OnLinkCreated;
-		//fired when a link attached to this is removed
-		public event LinkAction					OnLinkRemoved;
-		//fired when an anchor on this node starts to drag a link
-		public event LinkAction					OnLinkDragged;
-
-		//fired when a link attached to this node is selected
-		public event LinkAction					OnLinkSelected;
-		//fired when a link attached to this node is unselected
-		public event LinkAction					OnLinkUnselected;
 
 		//fired only when realMode is false, just after OnNodeProcess is called;
 		public event Action						OnPostProcess;
@@ -332,24 +320,21 @@ namespace PW
 			newAnchorField.OnEnable();
 		}
 
-		void		DisableUnlinkableAnchors(PWNodeLink link)
+		void		DisableUnlinkableAnchors(PWAnchor anchor)
 		{
 			List< PWAnchorField >	anchorFields;
-			PWAnchor				anchor;
 
-			if (link.fromAnchor != null)
-			{
+			if (anchor.anchorType == PWAnchorType.Output)
 				anchorFields = inputAnchorFields;
-				anchor = link.toAnchor;
-			}
 			else
-			{
 				anchorFields = outputAnchorFields;
-				anchor = link.fromAnchor;
-			}
 			
 			foreach (var anchorField in anchorFields)
+			{
 				anchorField.DisableIfUnlinkable(anchor);
+				if (GetType() == typeof(PWNodeGraphOutput))
+					Debug.Log("anchor linkable: " + anchorField.anchors[0].isLinkable);
+			}
 		}
 
 		void		ResetUnlinkableAnchors()

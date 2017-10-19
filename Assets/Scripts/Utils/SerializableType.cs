@@ -35,13 +35,28 @@ public class SerializableType {
 		return new SerializableType(t);
 	}
 
+	public static bool IsNull(SerializableType st)
+	{
+		if (object.ReferenceEquals(st, null))
+			return true;
+		return st.GetType() == null;
+	}
+
 	public static bool operator==(SerializableType st1, SerializableType st2)
 	{
+		if (IsNull(st1))
+			return IsNull(st2);
+		if (IsNull(st2))
+			return IsNull(st1);
 		return st1.typeString == st2.typeString;
 	}
 	
 	public static bool operator!=(SerializableType st1, SerializableType st2)
 	{
+		if (IsNull(st1))
+			return IsNull(st2);
+		if (IsNull(st2))
+			return IsNull(st1);
 		return st1.typeString != st2.typeString;
 	}
 

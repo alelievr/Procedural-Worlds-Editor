@@ -18,6 +18,7 @@ public partial class PWGraphEditor
 	{
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
+		graph.RaiseOnLinkDragged(graph.editorEvents.startedLinkAnchor);
 	}
 
 	void StopDragLink(bool linked)
