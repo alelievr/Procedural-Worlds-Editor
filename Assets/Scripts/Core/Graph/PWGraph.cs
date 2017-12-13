@@ -11,7 +11,8 @@ using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 namespace PW.Core
 {
 	[System.Serializable]
-    public class PWGraph : ScriptableObject {
+    public class PWGraph : ScriptableObject
+	{
     
 	#region Graph Datas
 
@@ -97,7 +98,7 @@ namespace PW.Core
 		public event NodeAction					OnNodeUnselected;
 		//link events:
 		public event Action< PWAnchor >			OnLinkDragged;
-		public event LinkAction					OnLinkCanceled;
+		public event Action						OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnLinkRemoved;
 		public event LinkAction					OnLinkSelected;
@@ -304,6 +305,7 @@ namespace PW.Core
 		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); }
 		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); }
 		public void RaiseOnLinkDragged(PWAnchor anchor) { if (OnLinkDragged != null) OnLinkDragged(anchor); }
+		public void RaiseOnLinkCancenled() { if (OnLinkCanceled != null) OnLinkCanceled(); }
 
 	#endregion
 
@@ -405,6 +407,8 @@ namespace PW.Core
 				tAnchor = fromAnchor;
 			if (toAnchor.anchorType != PWAnchorType.Input)
 				fAnchor = toAnchor;
+			
+			Debug.Log("create link !");
 
 			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
 			{

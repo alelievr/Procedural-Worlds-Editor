@@ -196,14 +196,11 @@ namespace PW
 		void LinkDraggedCallback(PWAnchor fromAnchor)
 		{
 			//disable non-linkable anchors:
-			Debug.Log("DisabledIfUnlinkable");
 			if (fromAnchor.nodeRef != this)
-			{
 				DisableUnlinkableAnchors(fromAnchor);
-			}
 		}
 
-		void LinkCanceled(PWNodeLink link)
+		void LinkCanceled()
 		{
 			//reset the highlight mode on anchors:
 			ResetUnlinkableAnchors();
@@ -231,6 +228,7 @@ namespace PW
 
 		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
 		{
+			Debug.Log("OLOL");
 			//TODO: update the anchor highlight
 			anchor.highlighMode = PWAnchorHighlight.None;
 		}

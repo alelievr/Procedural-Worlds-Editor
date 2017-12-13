@@ -288,7 +288,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		if (editorEvents.isMouseClickOnAnchor && !editorEvents.isPanning && !editorEvents.isDraggingSomething)
 			StartDragLink();
 		
-		
 		//click up outside of an anchor, stop dragging
 		if (e.type == EventType.mouseUp && editorEvents.isDraggingLink)
 			StopDragLink(false);

@@ -33,7 +33,7 @@ namespace PW.Core
 			if (verbose)
 			{
 				Debug.Log("fromType: " + fromType + ", toType: " + toType);
-				Debug.Log(fromType.ToString() + " is assignable from " + toType.ToString() + ": " + AreAssignable(fromType, toType));
+				Debug.Log(fromType.ToString() + " can be placed into " + toType.ToString() + ": " + AreAssignable(fromType, toType));
 			}
 			return AreAssignable(fromType, toType);
 		}

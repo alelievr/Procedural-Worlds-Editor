@@ -24,7 +24,11 @@ public partial class PWGraphEditor
 	void StopDragLink(bool linked)
 	{
 		//TODO: maybe fusion this two structure (the one in the graph must not exist)
+		Debug.Log("linked: " + linked);
 		graph.editorEvents.isDraggingLink = false;
+
+		if (!linked)
+			graph.RaiseOnLinkCancenled();
 	}
 
 	void DeleteAllAnchorLinks()

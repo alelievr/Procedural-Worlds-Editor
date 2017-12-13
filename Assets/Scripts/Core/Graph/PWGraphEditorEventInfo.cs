@@ -49,14 +49,8 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
     public bool isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
     public bool isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
 
-	static FieldInfo[] propList;
-
 	public PWGraphEditorEventInfo()
 	{
-		//initialize self proper list for Clone method
-		if (propList == null)
-			propList = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-		
 		Init();
 	}
 
@@ -116,13 +110,8 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		if (oldObject == null)
 			oldObject = new PWGraphEditorEventInfo();
 		
-		foreach (var prop in propList)
-		{
-			object val = prop.GetValue(this);
-
-			if (val != null)
-				prop.SetValue(oldObject, val);
-		}
+		//here copy just what we need to copy (save som code lines :p)
+		oldObject.mouseOverAnchor = mouseOverAnchor;
 		
 		return oldObject;
 	}

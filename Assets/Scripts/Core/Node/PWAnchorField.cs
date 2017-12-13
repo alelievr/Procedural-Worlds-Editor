@@ -264,8 +264,8 @@ namespace PW.Core
 
 			foreach (var anchor in anchors)
 			{
-				//render anchor if visible
-				if (anchor.visibility == PWVisibility.Visible)
+				//render anchor if visible and linkable
+				if (anchor.visibility == PWVisibility.Visible && anchor.isLinkable)
 					RenderAnchor(anchor, ref renderRect, index++);
 
 				//if anchor is not gone, increment the padding for next anchor
@@ -301,6 +301,7 @@ namespace PW.Core
 		public void ProcessEvent(ref PWGraphEditorEventInfo editorEvents)
 		{
 			var e = Event.current;
+			bool contains = false;
 
 			foreach (var anchor in anchors)
 				if (anchor.rect.Contains(e.mousePosition))
@@ -309,7 +310,15 @@ namespace PW.Core
 					editorEvents.isMouseOverAnchorFrame = true;
 					if (e.type == EventType.MouseDown)
 						editorEvents.isMouseClickOnAnchor = true;
+					contains = true;
 				}
+			
+			//clean anchor field if the old anchor was in this anchorField
+			if (!contains)
+			{
+				if (anchors.Contains(editorEvents.mouseOverAnchor))
+					editorEvents.mouseOverAnchor = null;
+			}
 		}
 
 	#endregion

@@ -330,11 +330,7 @@ namespace PW
 				anchorFields = outputAnchorFields;
 			
 			foreach (var anchorField in anchorFields)
-			{
 				anchorField.DisableIfUnlinkable(anchor);
-				if (GetType() == typeof(PWNodeGraphOutput))
-					Debug.Log("anchor linkable: " + anchorField.anchors[0].isLinkable);
-			}
 		}
 
 		void		ResetUnlinkableAnchors()
