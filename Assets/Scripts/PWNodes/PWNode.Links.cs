@@ -45,8 +45,8 @@ namespace PW
 
 		public void		RemoveAllLinksFromAnchor(PWAnchor anchor)
 		{
-			foreach (var link in anchor.links)
-				RemoveLink(link);
+			for (int i = 0; i < anchor.links.Count; i++)
+				RemoveLink(anchor.links[i]);
 		}
 
 		public void		RemoveLinkFromAnchors(PWAnchor fromAnchor, PWAnchor toAnchor)

@@ -3,7 +3,7 @@
 	"configurations":[ 
 		{
 			"name":"Unity",
-			"type":"mono",
+			"type":"unity",
 			"request":"attach",
 			"address":"localhost",
 			"port":34999

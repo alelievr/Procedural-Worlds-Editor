@@ -79,7 +79,7 @@ namespace PW.Core
 
 			if (dragRect.Contains(e.mousePosition))
 			{
-				if (e.type == EventType.MouseDown)
+				if (e.type == EventType.MouseDown && e.button == 0)
 					dragging = true;
 			}
 			if (closeIconRect.Contains(e.mousePosition))

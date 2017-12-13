@@ -98,6 +98,9 @@ public partial class PWGraphEditor : PWEditorWindow {
 	
 			//fill and process remaining events if there is
 			ManageEvents();
+
+			//reset events for the next frame
+			editorEvents.Reset();
 	
 			//restore masked events:
 			UnMaskEvents();
@@ -107,8 +110,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 				Repaint();
 		}
 		GUIScaleUtility.EndScale();
-
-		EditorGUILayout.LabelField("OUT ZOOM AREA");
 		
 		//save the size of the window
 		windowSize = position.size;
@@ -122,11 +123,11 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	public void LoadGraph(PWGraph graph)
 	{
-		Debug.Log("graph init: " + graph.initialized);
 		this.graph = graph;
 		
 		graph.OnNodeAdded += OnNodeAddedCallback;
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
+		graph.OnLinkCreated += OnLinkCreated;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
@@ -137,13 +138,13 @@ public partial class PWGraphEditor : PWEditorWindow {
 			graph.OnEnable();
 			SaveGraph();
 		}
-		Debug.Log("graph initi: " + graph.initialized);
 	}
 
 	public void UnloadGraph()
 	{
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
+		graph.OnLinkCreated -= OnLinkCreated;
 
 		SaveGraph();
 
@@ -280,8 +281,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//we save with the s key
 		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.S)
 		{
-			e.Use();
 			AssetDatabase.SaveAssets();
+			e.Use();
 		}
 
 		//begin to darg a link if clicked on anchor and nothing else is started
@@ -291,7 +292,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//click up outside of an anchor, stop dragging
 		if (e.type == EventType.mouseUp && editorEvents.isDraggingLink)
 			StopDragLink(false);
-			
+		
 		//duplicate selected items if cmd+d
 		if (commandOSKey && e.keyCode == KeyCode.D && e.type == EventType.KeyDown)
 		{
@@ -380,29 +381,25 @@ public partial class PWGraphEditor : PWEditorWindow {
 				e.Use();
 			}
 		}
+		
+		//must be placed at the end of the function
+		//unselect all selected links and raise an event for nodes if click beside.
+		Debug.Log(editorEvents.isMouseOverNode);
+		if (e.type == EventType.MouseDown
+				&& !editorEvents.isMouseOverAnchor
+				&& !editorEvents.isMouseOverNode
+				&& !editorEvents.isMouseOverLink
+				&& !editorEvents.isMouseOverOrderingGroup)
+		{
+			graph.RaiseOnClickNowhere();
 
-		//reset events for the next frame
-		editorEvents.Reset();
+			UnselectAllLinks();
+		}
 	}
 
 	void UnMaskEvents()
 	{
 		if (restoreEvent)
 			e.type = savedEventType;
-	}
-
-	void DrawNodeGraphCore()
-	{
-		Event		e = Event.current;
-
-		Rect snappedToAnchorMouseRect = new Rect((int)e.mousePosition.x, (int)e.mousePosition.y, 0, 0);
-	
-		//unselect all selected links if click beside.
-		if (e.type == EventType.MouseDown
-				&& !editorEvents.isMouseOverAnchor
-				&& !editorEvents.isMouseOverNode
-				&& !editorEvents.isMouseOverLink
-				&& !editorEvents.isMouseOverOrderingGroup)
-			graph.RaiseOnClickNowhere();
 	}
 }

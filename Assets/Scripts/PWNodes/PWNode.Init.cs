@@ -228,18 +228,17 @@ namespace PW
 
 		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
 		{
-			Debug.Log("OLOL");
 			//TODO: update the anchor highlight
 			anchor.highlighMode = PWAnchorHighlight.None;
 		}
 
 		void AnchorLinkedCallback(PWAnchor anchor)
 		{
-			//TODO: create the link
+			//CreateLink will raise the OnLinkCreated event in the graph and create the link
+			PWNodeLink link = graphRef.CreateLink(anchor);
 
 			//update canWork bool
 			UpdateWorkStatus();
-			// OnLinkCreated(link);
 		}
 
 		void AnchorUnlinkedCallback(PWAnchor anchor)
@@ -264,24 +263,14 @@ namespace PW
 
 		void LinkRemovedCalllback(PWNodeLink link)
 		{
-			if (link.fromNode == this)
-				link.fromAnchor.RemoveLink(link);
-			else if (link.toNode == this)
-				link.toAnchor.RemoveLink(link);
 		}
 
 		void LinkCreatedCallback(PWNodeLink link)
 		{
 			if (link.fromNode == this)
-			{
 				link.fromAnchor.AddLink(link);
-				OnAnchorLinked(link.fromAnchor);
-			}
 			else if (link.toNode == this)
-			{
 				link.toAnchor.AddLink(link);
-				OnAnchorLinked(link.toAnchor);
-			}
 		}
 
 		void NodeRemovedCallback(PWNode node)
@@ -298,14 +287,14 @@ namespace PW
 			graphRef.OnForceReloadOnce += ForceReloadOnceCallback;
 			graphRef.OnClickNowhere += OnClickedOutside;
 			graphRef.OnLinkDragged += LinkDraggedCallback;
-			graphRef.OnLinkRemoved += LinkRemovedCalllback;
-			graphRef.OnLinkCreated += LinkCreatedCallback;
+			// graphRef.OnLinkRemoved += LinkRemovedCalllback; //unused
+ 			graphRef.OnLinkCreated += LinkCreatedCallback;
 			graphRef.OnLinkCanceled += LinkCanceled;
 			graphRef.OnNodeSelected += NodeSelectedCallback;
 			graphRef.OnNodeUnselected += NodeUnselectedCallback;
 			graphRef.OnNodeRemoved += NodeRemovedCallback;
 
-			//node events:
+			//local node events:
 			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor += DraggedLinkQuitAnchorCallbck;
 			OnAnchorLinked += AnchorLinkedCallback;
@@ -321,7 +310,7 @@ namespace PW
 				graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
 				graphRef.OnClickNowhere -= OnClickedOutside;
 				graphRef.OnLinkDragged -= LinkDraggedCallback;
-				graphRef.OnLinkRemoved -= LinkRemovedCalllback;
+				// graphRef.OnLinkRemoved -= LinkRemovedCalllback; //unused
 				graphRef.OnLinkCreated -= LinkCreatedCallback;
 				graphRef.OnLinkCanceled -= LinkCanceled;
 				graphRef.OnNodeSelected -= NodeSelectedCallback;
@@ -329,7 +318,7 @@ namespace PW
 				graphRef.OnNodeRemoved -= NodeRemovedCallback;
 			}
 			
-			//node events:
+			//local node events:
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;
 			OnAnchorLinked -= AnchorLinkedCallback;

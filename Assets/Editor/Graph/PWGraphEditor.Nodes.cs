@@ -7,7 +7,8 @@ using PW.Node;
 using PW;
 
 //Nodes rendering
-public partial class PWGraphEditor {
+public partial class PWGraphEditor
+{
 
 	void RenderDecaledNode(int id, PWNode node)
 	{

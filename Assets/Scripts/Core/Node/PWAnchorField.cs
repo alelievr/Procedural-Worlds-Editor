@@ -279,7 +279,7 @@ namespace PW.Core
 		{
 			foreach (var anchor in anchors)
 			{
-				if (!PWAnchorUtils.AnchorAreAssignable(anchorToLink, anchor, true))
+				if (!PWAnchorUtils.AnchorAreAssignable(anchorToLink, anchor))
 					anchor.isLinkable = false;
 			}
 		}
@@ -308,7 +308,7 @@ namespace PW.Core
 				{
 					editorEvents.mouseOverAnchor = anchor;
 					editorEvents.isMouseOverAnchorFrame = true;
-					if (e.type == EventType.MouseDown)
+					if (e.type == EventType.MouseDown && e.button == 0)
 						editorEvents.isMouseClickOnAnchor = true;
 					contains = true;
 				}

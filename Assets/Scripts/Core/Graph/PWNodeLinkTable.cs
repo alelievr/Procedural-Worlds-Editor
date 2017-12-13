@@ -56,5 +56,11 @@ namespace PW.Core
 		{
 			Debug.Log("Before serialization: dict keys: " + linkTable.Count);
 		}
+
+		public IEnumerable< PWNodeLink > GetLinks()
+		{
+			foreach (var linkKp in linkTable)
+				yield return linkKp.Value;
+		}
 	}
 }

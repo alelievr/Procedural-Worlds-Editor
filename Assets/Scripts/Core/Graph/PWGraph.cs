@@ -101,7 +101,6 @@ namespace PW.Core
 		public event Action						OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnLinkRemoved;
-		public event LinkAction					OnLinkSelected;
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
 		public event System.Action				OnSeedChanged;
@@ -290,8 +289,6 @@ namespace PW.Core
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
-		void		AnchorLinkedCallback(PWAnchor anchor) { CreateLink(anchor); }
-
 		void		GraphStructureChangedCallback() { UpdateComputeOrder(); }
 
 		void		AnchorLinked(PWAnchor anchor)
@@ -301,7 +298,6 @@ namespace PW.Core
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
-		public void RaiseOnLinkSelected(PWNodeLink link) { OnLinkSelected(link); }
 		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); }
 		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); }
 		public void RaiseOnLinkDragged(PWAnchor anchor) { if (OnLinkDragged != null) OnLinkDragged(anchor); }
@@ -407,8 +403,6 @@ namespace PW.Core
 				tAnchor = fromAnchor;
 			if (toAnchor.anchorType != PWAnchorType.Input)
 				fAnchor = toAnchor;
-			
-			Debug.Log("create link !");
 
 			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
 			{
@@ -418,6 +412,13 @@ namespace PW.Core
 
 			link.Initialize(fAnchor, tAnchor);
 			nodeLinkTable.AddLink(link);
+
+			//raise link creation event
+			OnLinkCreated(link);
+
+			if (Event.current != null)
+				Event.current.Use();
+
 			return link;
 		}
 
