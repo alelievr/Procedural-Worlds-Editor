@@ -156,8 +156,10 @@ namespace PW
 
 		public void Reload(PWNode from)
 		{
-			OnReload(from);
-			OnPostReload(from);
+			if (OnReload != null)
+				OnReload(from);
+			if (OnPostReload != null)
+				OnPostReload(from);
 		}
 
 		public void SendMessage(PWNode target, object message)
@@ -201,8 +203,6 @@ namespace PW
 
 			UpdateAnchorProperties();
 
-			UpdateWorkStatus();
-
 			if (debug)
 				Debug.Log("Node OnEnable: " + GetType());
 
@@ -216,6 +216,8 @@ namespace PW
 
 			if (graphRef != null)
 				OnAfterNodeAndGraphDeserialized();
+
+			UpdateWorkStatus();
 			
 			OnNodeEnable();
 
@@ -345,19 +347,27 @@ namespace PW
 				anchorField.ResetLinkable();
 		}
 	
-		bool		UpdateWorkStatus()
+		void		UpdateWorkStatus()
 		{
+			canWork = false;
+
 			foreach (var anchorField in inputAnchorFields)
+			{
 				if (anchorField.required)
 				{
 					if (anchorField.anchors.Count < anchorField.minMultipleValues)
-						return false;
+						return ;
 					
 					foreach (var anchor in anchorField.anchors)
 						if (anchor.linkCount == 0)
-							return false;
+						{
+							Debug.Log("nope for " + GetType());
+							return ;
+						}
 				}
-			return true;
+			}
+			
+			canWork = true;
 		}
 
 		public void	RemoveSelf()

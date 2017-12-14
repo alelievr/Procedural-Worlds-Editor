@@ -91,15 +91,11 @@ namespace PW.Core
 					linkToRemove.Add(linkGUID);
 					continue ;
 				}
-
-				if (anchorFieldRef.anchorType == PWAnchorType.Input)
-					linkInstance.fromAnchor = this;
-				else
-					linkInstance.toAnchor = this;
 				
 				links.Add(linkInstance);
 			}
 
+			//removes ghost links (normally never appends)
 			foreach (var linkGUID in linkToRemove)
 			{
 				Debug.LogError("[PWAnchor] Removing link GUID " + linkGUID + " from the link list cauz it was destroyed");
@@ -109,7 +105,7 @@ namespace PW.Core
 			
 			//propagate the OnAfterDeserialize event.
 			foreach (var link in links)
-				link.OnAfterDeserialize();
+				link.OnAfterDeserialize(this);
 		}
 
 		//remove the link reference stored inside this anchor

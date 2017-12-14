@@ -157,6 +157,7 @@ namespace PW.Core
 			nodesDictionary[inputNode.id] = inputNode;
 			nodesDictionary[outputNode.id] = outputNode;
 			
+			return;
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
@@ -446,8 +447,23 @@ namespace PW.Core
 
 		public IEnumerable< PWNode > GetNodeChildsRecursive(PWNode begin)
 		{
-			//TODO using the new (actually non-existing) node-link system.
-			return null;
+			Stack< PWNode > nodeStack = new Stack< PWNode >();
+
+			nodeStack.Push(begin);
+
+			while (nodeStack.Count != 0)
+			{
+				var node = nodeStack.Pop();
+
+				foreach (var outputNode in node.GetOutputNodes())
+				{
+					Debug.Log("outputNode: " + outputNode);
+					nodeStack.Push(outputNode);
+				}
+				
+				if (node != begin)
+					yield return node;
+			}
 		}
 
 	#endregion

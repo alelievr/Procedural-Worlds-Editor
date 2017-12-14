@@ -103,7 +103,10 @@ namespace PW
 
 		public IEnumerable< PWNode > 	GetOutputNodes()
 		{
-			return outputAnchorFields.Select(o => o.nodeRef);
+			foreach (var outputAnchorField in outputAnchorFields)
+				foreach (var outputAnchor in outputAnchorField.anchors)
+					foreach (var link in outputAnchor.links)
+						yield return link.toNode;
 		}
 
 		public IEnumerable< PWNode >	GetInputNodes()

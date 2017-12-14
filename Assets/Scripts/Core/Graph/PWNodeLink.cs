@@ -49,11 +49,17 @@ namespace PW.Core
 		}
 
 		//this function will be called twiced, from the two linked anchors
-		public void OnAfterDeserialize()
+		// and so will receive two different anchor in parameter
+		public void OnAfterDeserialize(PWAnchor anchor)
 		{
+			if (anchor.anchorType == PWAnchorType.Output)
+				fromAnchor = anchor;
+			else
+				toAnchor = anchor;
+			
 			if (fromAnchor != null)
 				fromNode = fromAnchor.nodeRef;
-			if (toNode != null)
+			if (toAnchor != null)
 				toNode = toAnchor.nodeRef;
 		}
 
