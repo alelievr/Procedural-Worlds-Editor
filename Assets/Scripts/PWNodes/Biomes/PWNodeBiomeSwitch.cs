@@ -47,9 +47,8 @@ namespace PW.Node
 		public BiomeData		inputBiome;
 
 		[PWOutput]
-		[PWMultiple(typeof(BiomeData))]
 		[PWOffset(53, 16)]
-		public PWValues			outputBiomes = new PWValues();
+		public PWArray< BiomeData >	outputBiomes = new PWArray< BiomeData >();
 
 		public PWBiomeSwitchMode			switchMode;
 		public List< BiomeFieldSwitchData >	switchDatas = new List< BiomeFieldSwitchData >();

@@ -68,11 +68,7 @@ namespace PW.Core
 		//is this anchor a multiple anchor
 		public bool							multiple = false;
 		//allowed type input for multiple anchor
-		public SerializableType[]			allowedTypes;
-		//min allowed input values
-		public int							minMultipleValues = 1;
-		//max allowed values
-		public int							maxMultipleValues = 1;
+		public SerializableType				allowedType;
 
 		//if the anchor value is required to compute result
 		public bool							required = true;
@@ -129,20 +125,6 @@ namespace PW.Core
 				deserializedAnchors.Add(anchor.GUID);
 				anchor.OnAfterDeserialized(this);
 			}
-
-
-			//add the number of entries corresponding to the number of anchors in the PWValues field
-			/*if (multiple)
-			{
-				Debug.Log("fildValue: " + fieldValue);
-
-				PWValues vs = (PWValues)fieldValue;
-
-				vs.Clear();
-
-				for (int i = 0; i < anchors.Count; i++)
-					vs.AssignAt(i, null, fieldName, true);
-			}*/
 		}
 
 	#region Anchor style

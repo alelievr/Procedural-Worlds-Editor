@@ -7,10 +7,9 @@ namespace PW.Core
 	public class PWNodeGraphOutput : PWNode {
 
 		//allow everything as output type
-		[PWMultiple(1, typeof(object))]
 		[PWInput]
 		[PWOffset(0, 20)]
-		public PWValues				inputValues = new PWValues();
+		public PWArray< object >	inputValues = new PWArray< object >();
 
 		public override void OnNodeCreation()
 		{
@@ -19,8 +18,8 @@ namespace PW.Core
 
 		public override void OnNodeGUI()
 		{
-			var names = inputValues.GetNames< object >();
-			var values = inputValues.GetValues< object >();
+			var names = inputValues.GetNames();
+			var values = inputValues.GetValues();
 
 			EditorGUILayout.LabelField("names: [" + names.Count + "]");
 			for (int i = 0; i < values.Count; i++)

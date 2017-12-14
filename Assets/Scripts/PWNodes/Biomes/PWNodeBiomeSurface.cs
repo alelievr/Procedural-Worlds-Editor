@@ -11,8 +11,7 @@ namespace PW.Node
 	public class PWNodeBiomeSurface : PWNode {
 	
 		[PWInput, PWNotRequired]
-		[PWMultiple(1, typeof(BiomeSurfaceMaps))]
-		public PWValues			inputSurfaces = new PWValues();
+		public PWArray< BiomeSurfaceMaps >	inputSurfaces = new PWArray< BiomeSurfaceMaps >();
 
 		[PWOutput]
 		public BiomeSurfaces	surfaces = new BiomeSurfaces();

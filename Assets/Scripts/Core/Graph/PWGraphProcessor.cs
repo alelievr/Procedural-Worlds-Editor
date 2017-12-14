@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 using Debug = UnityEngine.Debug;
 using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, System.Collections.Generic.Dictionary< string, System.Reflection.FieldInfo > >;
@@ -96,6 +97,9 @@ namespace PW.Core
 		{
 			var links = node.GetOutputLinks();
 
+			if (!realMode)
+				Profiler.BeginSample("Process node links " + node);
+
 			foreach (var link in links)
 			{
 				//if we are in real mode, we check all errors and discard if there is any.
@@ -116,20 +120,21 @@ namespace PW.Core
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
 				{
-					PWValues values = (PWValues)prop.GetValue(link.toNode);
-					//TODO: clone data if needed
-	
-					if (values != null)
-					{
-						if (!values.AssignAt(link.toAnchor.fieldIndex, val, link.fromAnchor.name, true))
-							Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
-					}
+					
+					var pwArray = prop.GetValue(link.toNode);
+
+					//TODO: bake this abomination
+					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, false});
+
+					if (!b)
+						Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
 				}
 
 				//Local link is a multi-anchor
 				else if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex != -1 && val != null)
 				{
-					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
+					//TODO: bake this abomination
+					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 
 					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
 				}
@@ -137,18 +142,18 @@ namespace PW.Core
 				//Both are multi-anchors
 				else if (val != null)
 				{
-					PWValues values = (PWValues)prop.GetValue(link.toNode);
-					object localVal = ((PWValues)val).At(link.fromAnchor.fieldIndex);
+					//TODO: brun these abomination
+					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 	
-					if (values != null)
-					{
-						//TODO: clone data if needed
-						// Debug.Log("assigned total multi");
-						if (!values.AssignAt(link.toAnchor.fieldIndex, localVal, link.fromAnchor.name))
-							Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
-					}
+					var pwArray = prop.GetValue(link.toNode);
+					var assign = pwArray.GetType().GetMethod("AssignAt");
+					if (!(bool)assign.Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, localVal, link.fromAnchor.name, false}))
+						Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
 				}
 			}
+
+			if (!realMode)
+				Profiler.EndSample();
 		}
 	
 		float ProcessNode(PWNode node, bool realMode)
@@ -158,6 +163,7 @@ namespace PW.Core
 			//if you are in editor mode, update the process time of the node
 			if (!realMode)
 			{
+				Profiler.BeginSample("Process node " + node);
 				Stopwatch	st = new Stopwatch();
 
 				st.Start();
@@ -171,6 +177,9 @@ namespace PW.Core
 				node.Process();
 
 			ProcessNodeLinks(node, realMode);
+
+			if (!realMode)
+				Profiler.EndSample();
 
 			return calculTime;
 		}

@@ -10,9 +10,8 @@ namespace PW.Node
 {
 	public class PWNodeBiomeBlender : PWNode {
 
-		[PWMultiple(1, typeof(Biome))]
 		[PWInput]
-		public PWValues		inputBiomes = new PWValues();
+		public PWArray< Biome >		inputBiomes = new PWArray< Biome >();
 
 		[PWOutput]
 		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
@@ -35,7 +34,7 @@ namespace PW.Node
 			OnReload += OnReloadCallback;
 			graphRef.OnChunkSizeChanged += ChunkSizeChanged;
 			
-			if (inputBiomes.GetValues< Biome >().Count == 0)
+			if (inputBiomes.GetValues().Count == 0)
 				return ;
 
 			biomeRepartitionPreview = new Texture2D(chunkSize, chunkSize, TextureFormat.RGBA32, false);
@@ -49,7 +48,7 @@ namespace PW.Node
 
 		public BiomeData	GetBiomeData()
 		{
-			var biomes = inputBiomes.GetValues< Biome >();
+			var biomes = inputBiomes.GetValues();
 			var biomeRef = biomes.FirstOrDefault(b => b.biomeDataReference != null);
 			if (biomeRef == null)
 				return null;
@@ -58,7 +57,7 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			var biomes = inputBiomes.GetValues< Biome >();
+			var biomes = inputBiomes.GetValues();
 			BiomeData biomeData = null;
 			if (biomes.Count == 0 || biomes.First() == null)
 				EditorGUILayout.LabelField("biomes not connected !");
@@ -92,10 +91,10 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (inputBiomes.Count == 0 || inputBiomes.GetValues< Biome >().First() == null)
+			if (inputBiomes.Count == 0 || inputBiomes.GetValues().First() == null)
 				return ;
 
-			var biomes = inputBiomes.GetValues< Biome >();
+			var biomes = inputBiomes.GetValues();
 			var biomeData = biomes[0].biomeDataReference;
 
 			if (biomeData == null)
@@ -128,12 +127,12 @@ namespace PW.Node
 		
 		void BuildBiomeTree()
 		{
-			inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTree.BuildTree(inputBiomes.GetValues< Biome >()[0].biomeDataReference.biomeTreeStartPoint);
+			inputBiomes.GetValues()[0].biomeDataReference.biomeTree.BuildTree(inputBiomes.GetValues()[0].biomeDataReference.biomeTreeStartPoint);
 		}
 		
 		public override void OnNodeProcessOnce()
 		{
-			var biomes = inputBiomes.GetValues< Biome >();
+			var biomes = inputBiomes.GetValues();
 			var biomeData = biomes[0].biomeDataReference;
 
 			if (biomeData == null)

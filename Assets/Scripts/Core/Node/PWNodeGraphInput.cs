@@ -4,11 +4,11 @@ using UnityEditor;
 namespace PW.Core
 {
 	[System.SerializableAttribute]
-	public class PWNodeGraphInput : PWNode {
+	public class PWNodeGraphInput : PWNode
+	{
 
 		[PWOutput]
-		[PWMultiple(0, typeof(object))]
-		public PWValues				outputValues = new PWValues();
+		public PWArray< object >				outputValues = new PWArray< object >();
 		
 		public override void OnNodeCreation()
 		{
@@ -18,8 +18,8 @@ namespace PW.Core
 		public override void OnNodeGUI()
 		{
 			EditorGUILayout.LabelField("inputs:");
-			var names = outputValues.GetNames< object >();
-			var values = outputValues.GetValues< object >();
+			var names = outputValues.GetNames();
+			var values = outputValues.GetValues();
 
 			if (names != null && values != null)
 			{

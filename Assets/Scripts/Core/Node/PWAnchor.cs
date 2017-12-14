@@ -31,9 +31,9 @@ namespace PW.Core
 		public bool					enabled = true;
 		//number of links connected to this anchor
 		public int					linkCount { get { return links.Count; } }
-		//index of the field, valid only if the attached field is a PWValues
+		//index of the field, valid only if the attached field is a PWArray
 		public int					fieldIndex = -1;
-		//Contains the type in the PWValues at fieldIndex or anchorField.fieldType if field is not a PWValues
+		//Contains the type in the PWArray at fieldIndex or anchorField.fieldType if field is not a PWArray
 		[SerializeField] SerializableType	_fieldType;
 		public SerializableType		fieldType { get { return (_fieldType == null) ? anchorFieldRef.fieldType : _fieldType; } set { _fieldType = value; } }
 		//link type for visual bezier curve style

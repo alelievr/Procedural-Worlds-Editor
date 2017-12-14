@@ -361,9 +361,6 @@ namespace PW
 			{
 				if (anchorField.required)
 				{
-					if (anchorField.anchors.Count < anchorField.minMultipleValues)
-						return ;
-					
 					foreach (var anchor in anchorField.anchors)
 						if (anchor.linkCount == 0)
 						{

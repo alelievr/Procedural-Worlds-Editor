@@ -66,6 +66,19 @@ namespace PW
 				
 				PWAnchorField	anchorField = anchorFieldDictionary[field.Name];
 				
+				//detect multi-anchor with PWArray<T> type
+				if (field.FieldType.IsGenericType)
+				{
+					if (field.FieldType.GetGenericTypeDefinition() == typeof(PWArray<>))
+					{
+						//check if field is PWArray type otherwise do not implement multi-anchor
+						//provide the template type here:
+						anchorField.allowedType = (SerializableType)field.FieldType.GetGenericArguments()[0];
+						Debug.Log("allowedType: " + anchorField.allowedType);
+						anchorField.multiple = true;
+					}
+				}
+				
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
@@ -73,8 +86,6 @@ namespace PW
 					PWOutputAttribute		outputAttr = attr as PWOutputAttribute;
 					PWColorAttribute		colorAttr = attr as PWColorAttribute;
 					PWOffsetAttribute		offsetAttr = attr as PWOffsetAttribute;
-					PWMultipleAttribute		multipleAttr = attr as PWMultipleAttribute;
-					PWGenericAttribute		genericAttr = attr as PWGenericAttribute;
 					PWNotRequiredAttribute	notRequiredAttr = attr as PWNotRequiredAttribute;
 					PWCopyAttribute			copyAttr = attr as PWCopyAttribute;
 
@@ -99,16 +110,6 @@ namespace PW
 						anchorField.offset = offsetAttr.offset;
 						anchorField.padding = offsetAttr.padding;
 					}
-					if (multipleAttr != null)
-					{
-						//check if field is PWValues type otherwise do not implement multi-anchor
-						anchorField.allowedTypes = multipleAttr.allowedTypes;
-						anchorField.minMultipleValues = multipleAttr.minValues;
-						anchorField.maxMultipleValues = multipleAttr.maxValues;
-						anchorField.multiple = true;
-					}
-					if (genericAttr != null)
-						anchorField.allowedTypes = genericAttr.allowedTypes;
 					if (notRequiredAttr != null)
 						anchorField.required = false;
 				}
@@ -161,9 +162,7 @@ namespace PW
 						anchor.padding = af.padding;
 						anchor.colorSchemeName = af.colorSchemeName;
 						anchor.color = af.color;
-						anchor.allowedTypes = af.allowedTypes;
-						anchor.minMultipleValues = af.minMultipleValues;
-						anchor.maxMultipleValues = af.maxMultipleValues;
+						anchor.allowedType = af.allowedType;
 						anchor.required = af.required;
 						anchor.multiple = af.multiple;
 

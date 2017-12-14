@@ -13,9 +13,9 @@ namespace PW.Core
 			if (to == typeof(object))
 				return true;
 
-			if (to == typeof(PWValues))
+			if (to == typeof(PWArray<>))
 			{
-				//TODO: check for allowed types from PWValues
+				//TODO: check for allowed types from PWArray
 				return true;
 			}
 

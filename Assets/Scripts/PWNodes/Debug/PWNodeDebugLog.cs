@@ -23,9 +23,9 @@ namespace PW.Node
 			{
 				Type	objType = obj.GetType();
 				EditorGUILayout.LabelField(obj.ToString());
-				if (objType == typeof(PWValues))
+				if (objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(PWArray<>))
 				{
-					var pwv = obj as PWValues;
+					var pwv = obj as PWArray< object >;
 
 					for (int i = 0; i < pwv.Count; i++)
 					{

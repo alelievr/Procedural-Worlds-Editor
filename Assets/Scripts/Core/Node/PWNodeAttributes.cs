@@ -76,54 +76,6 @@ namespace PW.Core
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class PWMultipleAttribute : Attribute
-	{
-		public SerializableType[]	allowedTypes;
-		public int		minValues;
-		public int		maxValues;
-		
-		public PWMultipleAttribute(int min, int max, params Type[] allowedTypes)
-		{
-			this.allowedTypes = allowedTypes.Cast< SerializableType >().ToArray();
-			minValues = min;
-			maxValues = max;
-		}
-
-		public PWMultipleAttribute(int min, params Type[] allowedTypes)
-		{
-			List< SerializableType > ts = new List< SerializableType >();
-			foreach (var t in allowedTypes)
-				ts.Add((SerializableType)t);
-			this.allowedTypes = ts.ToArray();
-			minValues = min;
-			maxValues = 100;
-		}
-		
-		public PWMultipleAttribute(params Type[] allowedTypes)
-		{
-			List< SerializableType > ts = new List< SerializableType >();
-			foreach (var t in allowedTypes)
-				ts.Add((SerializableType)t);
-			this.allowedTypes = ts.ToArray();
-			minValues = 0;
-			maxValues = 100;
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Field)]
-	public class PWGenericAttribute : Attribute
-	{
-		public SerializableType[]	allowedTypes;
-
-		public PWGenericAttribute(params Type[] allowedTypes)
-		{
-			this.allowedTypes = new SerializableType[allowedTypes.Length];
-			for (int i = 0; i < allowedTypes.Length; i++)
-				this.allowedTypes[i] = (SerializableType)allowedTypes[i];
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Field)]
 	public class PWNotRequiredAttribute : Attribute
 	{
 		public PWNotRequiredAttribute() {}

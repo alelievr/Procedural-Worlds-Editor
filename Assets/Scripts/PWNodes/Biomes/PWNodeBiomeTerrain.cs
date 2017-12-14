@@ -7,11 +7,11 @@ using UnityEditorInternal;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeTerrain : PWNode {
+	public class PWNodeBiomeTerrain : PWNode
+	{
 
 		[PWInput]
-		[PWMultiple(typeof(object))]
-		public PWValues			inputs = new PWValues();
+		public PWArray< object >			inputs = new PWArray< object >();
 
 		[PWOutput("Terrain modifiers")]
 		public BiomeTerrain		outputBiomeTerrain = new BiomeTerrain();
