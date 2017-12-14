@@ -24,6 +24,9 @@ namespace PW
 				anchorField.Render(ref inputAcnhorRect);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.Render(ref outputAnchorRect);
+			
+			viewHeight = (int)Mathf.Max(viewHeight, inputAcnhorRect.yMax);
+			viewHeight = (int)Mathf.Max(viewHeight, outputAnchorRect.yMax);
 		}
 
 		public void ProcessAnchorEvents()

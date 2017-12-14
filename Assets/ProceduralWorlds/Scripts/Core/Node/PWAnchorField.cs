@@ -284,10 +284,39 @@ namespace PW.Core
 				if (anchor.visibility != PWVisibility.Gone)
 					renderRect.y += padding + anchorDefaultPadding;
 			}
+
+			//if this anchor field is a multiple input, check if all our anchors are linked
+			// and if so, add a new one
+			if (multiple && anchorType == PWAnchorType.Input)
+			{
+				if (anchors.All(a => a.linkCount > 0))
+					CreateNewAnchor();
+
+				//if there are more than 1 unlinked anchor, delete the others:
+				if (anchors.Count(a => a.linkCount == 0) > 1)
+					RemoveDuplicatedUnlinkedAnchors();
+			}
+		}
+
+		void RemoveDuplicatedUnlinkedAnchors()
+		{
+			bool first = true;
+			List< string > anchorsToRemove = new List< string >();
+
+			foreach (var anchor in anchors)
+				if (anchor.linkCount == 0)
+				{
+					if (first)
+						first = false;
+					else
+						anchorsToRemove.Add(anchor.GUID);
+				}
+			foreach (var guid in anchorsToRemove)
+				RemoveAnchor(guid);
 		}
 
 		//disable anchors which are unlinkable with the anchor in parameter
-		public void DisableIfUnlinkable(PWAnchor anchorToLink)
+		public void DisableIfUnlinkable(PWAnchor anchorToLink	)
 		{
 			foreach (var anchor in anchors)
 			{

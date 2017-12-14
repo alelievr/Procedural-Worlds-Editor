@@ -120,11 +120,11 @@ namespace PW.Core
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
 				{
-					
 					var pwArray = prop.GetValue(link.toNode);
 
+					//TODO: value not cloned here
 					//TODO: bake this abomination
-					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, false});
+					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
 
 					if (!b)
 						Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
@@ -142,12 +142,13 @@ namespace PW.Core
 				//Both are multi-anchors
 				else if (val != null)
 				{
+					//TODO: value not cloned here
 					//TODO: brun these abomination
 					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 	
 					var pwArray = prop.GetValue(link.toNode);
 					var assign = pwArray.GetType().GetMethod("AssignAt");
-					if (!(bool)assign.Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, localVal, link.fromAnchor.name, false}))
+					if (!(bool)assign.Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, localVal, link.fromAnchor.name, true}))
 						Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
 				}
 			}

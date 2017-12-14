@@ -279,7 +279,7 @@ namespace PW
 				anchor.OnDisable();
 
 			if (debug)
-				Debug.Log("Node " + GetType() + "Disable");
+				Debug.Log("Node " + GetType() + " Disable");
 			
 			UnBindEvents();
 			OnNodeDisable();

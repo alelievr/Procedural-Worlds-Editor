@@ -8,7 +8,6 @@ namespace PW.Core
 
 		//allow everything as output type
 		[PWInput]
-		[PWOffset(0, 20)]
 		public PWArray< object >	inputValues = new PWArray< object >();
 
 		public override void OnNodeCreation()

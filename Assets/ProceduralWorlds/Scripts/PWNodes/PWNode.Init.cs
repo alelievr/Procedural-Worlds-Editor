@@ -66,15 +66,13 @@ namespace PW
 				
 				PWAnchorField	anchorField = anchorFieldDictionary[field.Name];
 				
-				//detect multi-anchor with PWArray<T> type
+				//detect multi-anchor by checking for PWArray<T> type
 				if (field.FieldType.IsGenericType)
 				{
 					if (field.FieldType.GetGenericTypeDefinition() == typeof(PWArray<>))
 					{
-						//check if field is PWArray type otherwise do not implement multi-anchor
 						//provide the template type here:
 						anchorField.allowedType = (SerializableType)field.FieldType.GetGenericArguments()[0];
-						Debug.Log("allowedType: " + anchorField.allowedType);
 						anchorField.multiple = true;
 					}
 				}
@@ -125,7 +123,6 @@ namespace PW
 					anchorField.fieldName = field.Name;
 					anchorField.fieldType = (SerializableType)field.FieldType;
 					anchorField.fieldValue = field.GetValue(this);
-					Debug.Log("field value: " + anchorField.fieldValue);
 					anchorField.nodeRef = this;
 				}
 			}

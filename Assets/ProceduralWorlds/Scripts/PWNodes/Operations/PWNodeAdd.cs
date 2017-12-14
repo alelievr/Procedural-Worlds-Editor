@@ -27,16 +27,16 @@ namespace PW.Node
 		{
 			EditorGUIUtility.labelWidth = 100;
 
-			fOutput = 0;
-
-
 			EditorGUILayout.LabelField("result: " + fOutput);
 		}
 
 		public override void OnNodeProcess()
 		{
+			fOutput = 0;
 			foreach (var val in values)
 				fOutput += val;
+			
+			Debug.Log("Processing Add node");
 
 			if (intify)
 				fOutput = Mathf.RoundToInt(fOutput);

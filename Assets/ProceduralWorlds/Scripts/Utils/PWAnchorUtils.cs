@@ -13,7 +13,7 @@ namespace PW.Core
 			if (to == typeof(object))
 				return true;
 
-			if (to == typeof(PWArray<>))
+			if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(PWArray<>))
 			{
 				//TODO: check for allowed types from PWArray
 				return true;
