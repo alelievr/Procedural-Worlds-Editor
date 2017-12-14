@@ -37,7 +37,10 @@ namespace PW
 			GUI.DrawTexture(debugIconRect, debugIcon);
 
 			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
+			{
 				isDragged = true;
+				editorEvents.isDraggingNode = true;
+			}
 			if (e.type == EventType.MouseUp)
 				isDragged = false;
 			if (id != -1 && e.button == 0 && !windowNameEdit)
@@ -84,9 +87,6 @@ namespace PW
 			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				isSelected = !isSelected;
-
-			
-			//fill the graph event infos:
 		}
 		#endif
 

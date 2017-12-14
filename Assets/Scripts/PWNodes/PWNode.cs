@@ -18,7 +18,7 @@ namespace PW
 		public bool					renamable = false;
 		public int					computeOrder = 0;
 		public float				processTime = 0f;
-		public string				classQAName;
+		public string				classAQName;
 		public PWColorSchemeName	colorSchemeName;
 		new public string			name;
 
@@ -51,11 +51,7 @@ namespace PW
 
 		//Debug variables:
 		[SerializeField]
-		protected bool			nodeDebug = false;
-		[SerializeField]
-		protected bool			linkDebug = false;
-		[SerializeField]
-		protected bool			anchorDebug = false;
+		public bool				debug = false;
 
 	#region Internal Node datas and style
 
@@ -79,7 +75,7 @@ namespace PW
 
 		//Serialization system:
 		[System.NonSerialized]
-		private	bool				deserializtionAlreadyNotified = false;
+		private	bool				deserializationAlreadyNotified = false;
 		//tell if the node was enabled
 		[System.NonSerialized]
 		private bool				isEnabled = false;
@@ -207,13 +203,14 @@ namespace PW
 
 			UpdateWorkStatus();
 
-			Debug.Log("Node OnEnable: " + GetType());
+			if (debug)
+				Debug.Log("Node OnEnable: " + GetType());
 
 			//set the PWGUI current node:
 			PWGUI.SetNode(this);
 
 			//load the class QA name:
-			classQAName = GetType().AssemblyQualifiedName;
+			classAQName = GetType().AssemblyQualifiedName;
 
 			delayedChanges.Clear();
 
@@ -228,12 +225,12 @@ namespace PW
 		//here both our node and graph have been deserialized, we can now use it's datas
 		void OnAfterNodeAndGraphDeserialized()
 		{
-			if (deserializtionAlreadyNotified)
+			if (deserializationAlreadyNotified)
 				return ;
 			
 			BindEvents();
 
-			deserializtionAlreadyNotified = true;
+			deserializationAlreadyNotified = true;
 
 			//call the AfterDeserialize functions for anchors
 			foreach (var anchorField in inputAnchorFields)
@@ -245,7 +242,8 @@ namespace PW
 		//called only once, when the node is created
 		public void Initialize(PWGraph graph)
 		{
-			Debug.LogWarning("Node Initialize !");
+			if (debug)
+				Debug.LogWarning("Node " + GetType() + "Initialize !");
 
 			//generate "unique" id for node:
 			byte[] bytes = System.Guid.NewGuid().ToByteArray();
@@ -260,6 +258,10 @@ namespace PW
 			//set the graph reference:
 			graphRef = graph;
 
+			//initialize anchors
+			OnAfterNodeAndGraphDeserialized();
+
+			//call virtual NodeCreation method
 			OnNodeCreation();
 		}
 
@@ -268,7 +270,9 @@ namespace PW
 			foreach (var anchor in anchorFields)
 				anchor.OnDisable();
 
-			Debug.Log("Node " + GetType() + "Disable");
+			if (debug)
+				Debug.Log("Node " + GetType() + "Disable");
+			
 			UnBindEvents();
 			OnNodeDisable();
 			OnAnchorDisable();

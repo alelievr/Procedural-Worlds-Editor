@@ -54,20 +54,20 @@ namespace PW.Core
 					return true;
 				}
 
-				if (!bakedNodeFields.ContainsKey(link.fromNode.classQAName)
-					|| !bakedNodeFields[link.fromNode.classQAName].ContainsKey(link.fromAnchor.fieldName)
-					|| !bakedNodeFields[link.toNode.classQAName].ContainsKey(link.toAnchor.fieldName))
+				if (!bakedNodeFields.ContainsKey(link.fromNode.classAQName)
+					|| !bakedNodeFields[link.fromNode.classAQName].ContainsKey(link.fromAnchor.fieldName)
+					|| !bakedNodeFields[link.toNode.classAQName].ContainsKey(link.toAnchor.fieldName))
 				{
 					Debug.LogError("[PW Process] Can't find field: "
-						+ link.fromAnchor.fieldName + " in " + link.fromNode.classQAName
-						+ " OR " + link.toAnchor.fieldName + " in " + link.toNode.classQAName);
+						+ link.fromAnchor.fieldName + " in " + link.fromNode.classAQName
+						+ " OR " + link.toAnchor.fieldName + " in " + link.toNode.classAQName);
 					return true;
 				}
 					
-				if (bakedNodeFields[link.fromNode.classQAName][link.fromAnchor.fieldName].GetValue(node) == null)
+				if (bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node) == null)
 				{
 					Debug.Log("[PW Process] tring to assign null value from "
-						+ link.fromNode.classQAName + "." + link.fromAnchor.fieldName);
+						+ link.fromNode.classAQName + "." + link.fromAnchor.fieldName);
 					return true;
 				}
 			}
@@ -101,10 +101,10 @@ namespace PW.Core
 				if (CheckProcessErrors(link, node, realMode))
 					continue ;
 
-				var val = bakedNodeFields[link.fromNode.classQAName][link.fromAnchor.fieldName].GetValue(node);
-				var prop = bakedNodeFields[link.toNode.classQAName][link.toAnchor.fieldName];
+				var val = bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node);
+				var prop = bakedNodeFields[link.toNode.classAQName][link.toAnchor.fieldName];
 	
-				// Debug.Log("local: " + link.fromNode.classQAName + " / " + node.GetType() + " / " + node.nodeId);
+				// Debug.Log("local: " + link.fromNode.classAQName + " / " + node.GetType() + " / " + node.nodeId);
 				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
 				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
 

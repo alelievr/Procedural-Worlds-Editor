@@ -191,51 +191,79 @@ namespace PW
 
 		void ForceReloadCallback() { Reload(null); }
 
-		void ForceReloadOnceCallback() { /*TODO*/ }
+		void ForceReloadOnceCallback() { Debug.Log("force reload once: TODO"); }
 
-		void LinkDraggedCallback(PWAnchor fromAnchor)
+		void LinkStartDragCallback(PWAnchor fromAnchor)
 		{
 			//disable non-linkable anchors:
 			if (fromAnchor.nodeRef != this)
 				DisableUnlinkableAnchors(fromAnchor);
 		}
 
-		void LinkCanceled()
+		void LinkStopDragCallback()
+		{
+			//reset anchor highlight
+			ResetUnlinkableAnchors();
+
+			//reset link highlight
+			foreach (var anchorField in anchorFields)
+				foreach (var anchor in anchorField.anchors)
+					foreach (var link in anchor.links)
+						link.ResetHighlight();
+		}
+
+		void LinkCanceledCallback()
 		{
 			//reset the highlight mode on anchors:
-			ResetUnlinkableAnchors();
 		}
 
 		void DraggedLinkOverAnchorCallback(PWAnchor anchor)
 		{
+			if (!PWAnchorUtils.AnchorAreAssignable(editorEvents.startedLinkAnchor, anchor))
+				return ;
+
+			//update anchor highlight
 			if (anchor.anchorType == PWAnchorType.Input)
 			{
-				if (anchor.linkCount == 1)
+				if (anchor.linkCount >= 1)
+				{
+					//highlight links with delete color
+					foreach (var link in anchor.links)
+						link.highlight = PWLinkHighlight.Delete;
 					anchor.highlighMode = PWAnchorHighlight.AttachReplace;
+				}
 				else
 					anchor.highlighMode = PWAnchorHighlight.AttachNew;
 			}
 			else
 			{
+				//highlight our link with delete color
+				foreach (var link in editorEvents.startedLinkAnchor.links)
+					link.highlight = PWLinkHighlight.Delete;
+				
 				if (anchor.linkCount > 0)
 					anchor.highlighMode = PWAnchorHighlight.AttachAdd;
 				else
 					anchor.highlighMode = PWAnchorHighlight.AttachNew;
 			}
-			
-			//TODO: snap the dragged link
 		}
 
 		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
 		{
 			//TODO: update the anchor highlight
 			anchor.highlighMode = PWAnchorHighlight.None;
+
+			//reset link hightlight
+			foreach (var link in anchor.links)
+				link.ResetHighlight();
+			foreach (var link in editorEvents.startedLinkAnchor.links)
+				link.ResetHighlight();
 		}
 
 		void AnchorLinkedCallback(PWAnchor anchor)
 		{
 			//CreateLink will raise the OnLinkCreated event in the graph and create the link
-			PWNodeLink link = graphRef.CreateLink(anchor);
+			graphRef.SafeCreateLink(anchor);
 
 			//update canWork bool
 			UpdateWorkStatus();
@@ -271,6 +299,8 @@ namespace PW
 				link.fromAnchor.AddLink(link);
 			else if (link.toNode == this)
 				link.toAnchor.AddLink(link);
+			
+			ResetUnlinkableAnchors();
 		}
 
 		void NodeRemovedCallback(PWNode node)
@@ -282,14 +312,14 @@ namespace PW
 		void BindEvents()
 		{
 			//graph events:
-			//if the node is used in a PWMainGraph:
 			graphRef.OnForceReload += ForceReloadCallback;
 			graphRef.OnForceReloadOnce += ForceReloadOnceCallback;
 			graphRef.OnClickNowhere += OnClickedOutside;
-			graphRef.OnLinkDragged += LinkDraggedCallback;
+			graphRef.OnLinkStartDragged += LinkStartDragCallback;
+			graphRef.OnLinkStopDragged += LinkStopDragCallback;
 			// graphRef.OnLinkRemoved += LinkRemovedCalllback; //unused
- 			graphRef.OnLinkCreated += LinkCreatedCallback;
-			graphRef.OnLinkCanceled += LinkCanceled;
+			graphRef.OnLinkCreated += LinkCreatedCallback;
+			graphRef.OnLinkCanceled += LinkCanceledCallback;
 			graphRef.OnNodeSelected += NodeSelectedCallback;
 			graphRef.OnNodeUnselected += NodeUnselectedCallback;
 			graphRef.OnNodeRemoved += NodeRemovedCallback;
@@ -303,16 +333,18 @@ namespace PW
 
 		void UnBindEvents()
 		{
-			//if the node is used in a PWMainGraph:
+			//graph events:
+			//null check because this function may be called without the node being initialized
 			if (graphRef != null)
 			{
 				graphRef.OnForceReload -= GraphReloadCallback;
 				graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
 				graphRef.OnClickNowhere -= OnClickedOutside;
-				graphRef.OnLinkDragged -= LinkDraggedCallback;
+				graphRef.OnLinkStartDragged -= LinkStartDragCallback;
+				graphRef.OnLinkStopDragged -= LinkStopDragCallback;
 				// graphRef.OnLinkRemoved -= LinkRemovedCalllback; //unused
 				graphRef.OnLinkCreated -= LinkCreatedCallback;
-				graphRef.OnLinkCanceled -= LinkCanceled;
+				graphRef.OnLinkCanceled -= LinkCanceledCallback;
 				graphRef.OnNodeSelected -= NodeSelectedCallback;
 				graphRef.OnNodeUnselected -= NodeUnselectedCallback;
 				graphRef.OnNodeRemoved -= NodeRemovedCallback;

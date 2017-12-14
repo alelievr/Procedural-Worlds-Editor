@@ -18,21 +18,22 @@ public partial class PWGraphEditor
 	{
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
-		graph.RaiseOnLinkDragged(graph.editorEvents.startedLinkAnchor);
+		graph.RaiseOnLinkStartDragged(graph.editorEvents.startedLinkAnchor);
 	}
 
 	void StopDragLink(bool linked)
 	{
-		//TODO: maybe fusion this two structure (the one in the graph must not exist)
 		Debug.Log("linked: " + linked);
 		graph.editorEvents.isDraggingLink = false;
 
 		if (!linked)
 			graph.RaiseOnLinkCancenled();
+		
+		graph.RaiseOnLinkStopDragged();
 	}
 
 	void DeleteAllAnchorLinks()
 	{
-		editorEvents.mouseOverNode.RemoveAllLinksFromAnchor(editorEvents.mouseOverAnchor);
+		editorEvents.mouseOverAnchor.RemoveAllLinks();
 	}
 }

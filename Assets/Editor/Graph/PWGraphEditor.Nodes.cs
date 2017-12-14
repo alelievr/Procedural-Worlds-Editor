@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using PW.Core;
 using PW.Node;
 using PW;
@@ -30,6 +31,15 @@ public partial class PWGraphEditor
 		node.rect = PWUtils.DecalRect(node.rect, graph.panPosition);
 		Rect decaledRect = GUILayout.Window(id, node.rect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
+
+		if (node.debug)
+		{
+			Rect debugRect = decaledRect;
+			debugRect.y -= 20;
+			EditorGUI.LabelField(debugRect, "comp order: " + node.computeOrder + " | can work: " + node.canWork);
+
+			//more debug here ?
+		}
 	}
 
 	void RenderNode(int id, PWNode node)
@@ -44,44 +54,6 @@ public partial class PWGraphEditor
 			graph.editorEvents.mouseOverNode = node;
 			graph.editorEvents.isMouseOverNodeFrame = true;
 		}
-
-		//managed somewhere else
-		/*//end dragging:
-		if ((e.type == EventType.mouseUp && draggingLink == true) //standard drag start
-				|| (e.type == EventType.MouseDown && draggingLink == true)) //drag started with context menu
-			if (mouseAboveAnchor.mouseAbove && PWNode.AnchorAreAssignable(startDragAnchor, mouseAboveAnchor))
-			{
-				StopDragLink(true);
-
-				//TODO: manage the AttachLink return values, if one of them is false, delete the link.
-
-				//attach link to the node:
-				graph.CreateLink();
-				bool linkNotRevoked = node.AttachLink(mouseAboveAnchor, startDragAnchor);
-
-				if (linkNotRevoked)
-				{
-					var win = FindNodeById(startDragAnchor.nodeId);
-					if (win != null)
-					{
-						//remove link if it was revoked.
-						if (!win.AttachLink(startDragAnchor, mouseAboveAnchor))
-							node.DeleteLink(mouseAboveAnchor.anchorId, win, startDragAnchor.anchorId);
-						
-						graphNeedReload = true;
-					}
-					else
-						Debug.LogWarning("window id not found: " + startDragAnchor.nodeId);
-					
-					//Recalcul the compute order:
-					EvaluateComputeOrder();
-				}
-			}
-
-		//if you press the mouse above an anchor, start the link drag
-		if (mouseAboveAnchor.mouseAbove && e.type == EventType.MouseDown && e.button == 0)
-			BeginDragLink();
-		*/
 
 		//display the process time of the window (if not 0)
 		if (node.processTime > Mathf.Epsilon)

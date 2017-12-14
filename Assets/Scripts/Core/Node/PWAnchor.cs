@@ -30,7 +30,7 @@ namespace PW.Core
 		//enabled ?
 		public bool					enabled = true;
 		//number of links connected to this anchor
-		public int					linkCount = 0;
+		public int					linkCount { get { return links.Count; } }
 		//index of the field, valid only if the attached field is a PWValues
 		public int					fieldIndex = -1;
 		//Contains the type in the PWValues at fieldIndex or anchorField.fieldType if field is not a PWValues
@@ -65,6 +65,9 @@ namespace PW.Core
 		[System.NonSerialized]
 		public bool					isLinkable = true;
 
+		//debug variables:
+		public bool					debug;
+
 
 		public void OnAfterDeserialized(PWAnchorField anchorField)
 		{
@@ -74,10 +77,20 @@ namespace PW.Core
 			//	to know why, take a look at the PWGraph.cs file.
 			var nodeLinkTable = nodeRef.graphRef.nodeLinkTable;
 
+			//only used when a part of a link was not well destroyed, technically never
+			var linkToRemove = new List< string >();
+
 			//here we set the anchor references in the link cauz they can't be serialized.
 			foreach (var linkGUID in linkGUIDs)
 			{
 				var linkInstance = nodeLinkTable.GetLinkFromGUID(linkGUID);
+			
+				//if link does not exists, skip it and add it to the remove list
+				if (linkInstance == null)
+				{
+					linkToRemove.Add(linkGUID);
+					continue ;
+				}
 
 				if (anchorFieldRef.anchorType == PWAnchorType.Input)
 					linkInstance.fromAnchor = this;
@@ -86,17 +99,33 @@ namespace PW.Core
 				
 				links.Add(linkInstance);
 			}
+
+			foreach (var linkGUID in linkToRemove)
+			{
+				Debug.LogError("[PWAnchor] Removing link GUID " + linkGUID + " from the link list cauz it was destroyed");
+
+				linkGUIDs.Remove(linkGUID);
+			}
 			
 			//propagate the OnAfterDeserialize event.
 			foreach (var link in links)
 				link.OnAfterDeserialize();
 		}
 
-		public void RemoveLink(PWNodeLink link)
+		//remove the link reference stored inside this anchor
+		public void RemoveLinkReference(PWNodeLink link)
 		{
-			if (!linkGUIDs.Remove(link.GUID))
-				Debug.LogWarning("[PWAnchor] failed to remove the link: " + link);
+			linkGUIDs.Remove(link.GUID);
 			links.Remove(link);
+		}
+		
+		//remove all links attached to this anchor
+		public void RemoveAllLinks()
+		{
+			int count = links.Count;
+
+			for (int i = 0; i < count; i++)
+				nodeRef.graphRef.RemoveLink(links[0]);
 		}
 
 		public void AddLink(PWNodeLink link)

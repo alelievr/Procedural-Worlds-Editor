@@ -27,8 +27,9 @@ namespace PW.Core
 			if (from.anchorType == to.anchorType)
 				return false;
 
-			Type fromType = from.fieldType;
-			Type toType = to.fieldType;
+			//swap anchor if from is input and to is output
+			Type fromType = (from.anchorType == PWAnchorType.Output) ? from.fieldType : to.fieldType;
+			Type toType = (to.anchorType == PWAnchorType.Input) ? to.fieldType : from.fieldType;
 
 			if (verbose)
 			{

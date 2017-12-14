@@ -16,6 +16,9 @@ public class SerializableType {
 	
 	public new Type GetType()
 	{
+		if (typeString == null)
+			return null;
+		
 		return Type.GetType(typeString);
 	}
 
@@ -69,5 +72,10 @@ public class SerializableType {
     {
     	return typeString.GetHashCode();
     }
+
+	public override string ToString()
+	{
+		return Type.GetType(typeString).ToString();
+	}
 
 }

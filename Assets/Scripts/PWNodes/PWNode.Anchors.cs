@@ -40,8 +40,9 @@ namespace PW
 				anchorField.ProcessEvent(ref editorEvents);
 
 			//link anchor event is we release the mouse with a draggingLink.
-			if (e.type == EventType.MouseUp && editorEvents.isDraggingLink)
-				OnAnchorLinked(editorEvents.mouseOverAnchor);
+			if (editorEvents.isMouseOverAnchor)
+				if (e.type == EventType.MouseUp && editorEvents.isDraggingLink)
+					OnAnchorLinked(editorEvents.mouseOverAnchor);
 
 			if (editorEvents.isDraggingLink)
 			{

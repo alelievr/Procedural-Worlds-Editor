@@ -56,6 +56,14 @@ namespace PW.Core
 			if (toNode != null)
 				toNode = toAnchor.nodeRef;
 		}
+
+		public void ResetHighlight()
+		{
+			if (selected)
+				highlight = PWLinkHighlight.Selected;
+			else
+				highlight = PWLinkHighlight.None;
+		}
 	
 		override public string ToString()
 		{

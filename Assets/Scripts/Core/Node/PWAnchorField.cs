@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using PW.Node;
+using UnityEditor;
 
 namespace PW.Core
 {
@@ -206,6 +207,7 @@ namespace PW.Core
 			else
 				GUI.color = PWColorTheme.GetAnchorColor(anchor.colorSchemeName);
 
+
 			//highlight mode to GUI color:
 			if (graphRef.editorEvents.isDraggingLink || graphRef.editorEvents.isDraggingNewLink)
 			{
@@ -251,8 +253,17 @@ namespace PW.Core
 			}
 			
 			//debug:
-			// if (debug)
-				// GUI.Label(anchorSideRect, (long)singleAnchor.id + " | " + singleAnchor.linkCount);
+			if (anchor.debug)
+			{
+				GUIContent debugContent = new GUIContent("lc: " + anchor.linkCount);
+
+				Rect debugRect = anchor.rect;
+					debugRect.xMax += 50;
+				if (anchor.anchorType == PWAnchorType.Output)
+					debugRect.x -= EditorStyles.label.CalcSize(debugContent).x;
+				EditorGUI.DrawRect(debugRect, Color.white * .8f);
+				GUI.Label(debugRect, debugContent);
+			}
 		}
 
 		public void Render(ref Rect renderRect)

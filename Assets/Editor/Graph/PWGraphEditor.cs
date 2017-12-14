@@ -335,7 +335,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 			if (editorEvents.isDraggingOrderingGroup)
 				Undo.RecordObject(graph, "ordering graph drag");
 			if (GUI.changed)
-				Undo.RecordObject(graph, "something chanegd");
+				Undo.RecordObject(graph, "something changed");
 			
 			editorEvents.isDraggingNode = false;
 			editorEvents.isDraggingOrderingGroup = false;
@@ -384,7 +384,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		
 		//must be placed at the end of the function
 		//unselect all selected links and raise an event for nodes if click beside.
-		Debug.Log(editorEvents.isMouseOverNode);
 		if (e.type == EventType.MouseDown
 				&& !editorEvents.isMouseOverAnchor
 				&& !editorEvents.isMouseOverNode

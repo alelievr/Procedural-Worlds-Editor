@@ -41,13 +41,11 @@ public partial class PWGraphEditor
 		Vector3 startPos = new Vector3(anchorRect.x + anchorRect.width, anchorRect.y + anchorRect.height / 2, 0);
 		Vector3 startDir = Vector3.right;
 
-		Debug.Log("mouseOverAnchor: " + editorEvents.isMouseOverAnchor);
 		if (anchorSnapping && editorEvents.isMouseOverAnchor)
 		{
 			var toAnchor = editorEvents.mouseOverAnchor;
 			var fromAnchor = editorEvents.startedLinkAnchor;
 
-			Debug.Log("snap !");
 			if (PWAnchorUtils.AnchorAreAssignable(fromAnchor, toAnchor))
 				endPoint = toAnchor.rectInGraph.center;
 		}
@@ -81,7 +79,7 @@ public partial class PWGraphEditor
 
 		if (e.type == EventType.mouseDown && !editorEvents.isMouseOverAnchor)
 		{
-			if (HandleUtility.nearestControl == link.controlId && (e.button == 0 || e.button == 1))
+			if (HandleUtility.nearestControl == link.controlId && e.button == 0)
 			{
 				GUIUtility.hotControl = link.controlId;
 

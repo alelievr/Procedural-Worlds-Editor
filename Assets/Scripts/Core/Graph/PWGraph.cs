@@ -97,7 +97,9 @@ namespace PW.Core
 		public event NodeAction					OnNodeSelected;
 		public event NodeAction					OnNodeUnselected;
 		//link events:
-		public event Action< PWAnchor >			OnLinkDragged;
+		//fired when a link start to be dragged
+		public event Action< PWAnchor >			OnLinkStartDragged;
+		public event Action						OnLinkStopDragged;
 		public event Action						OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnLinkRemoved;
@@ -156,7 +158,7 @@ namespace PW.Core
 			nodesDictionary[outputNode.id] = outputNode;
 			
 			//Send OnAfterSerialize here because when graph's OnEnable function is
-			//	called, all it's nodes are already deserialized.
+			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
 				node.OnAfterGraphDeserialize(this);
 
@@ -291,17 +293,13 @@ namespace PW.Core
 
 		void		GraphStructureChangedCallback() { UpdateComputeOrder(); }
 
-		void		AnchorLinked(PWAnchor anchor)
-		{
-			
-		}
-
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
 		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); }
 		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); }
-		public void RaiseOnLinkDragged(PWAnchor anchor) { if (OnLinkDragged != null) OnLinkDragged(anchor); }
+		public void RaiseOnLinkStartDragged(PWAnchor anchor) { if (OnLinkStartDragged != null) OnLinkStartDragged(anchor); }
 		public void RaiseOnLinkCancenled() { if (OnLinkCanceled != null) OnLinkCanceled(); }
+		public void RaiseOnLinkStopDragged() { if (OnLinkStopDragged != null) OnLinkStopDragged(); }
 
 	#endregion
 
@@ -376,37 +374,61 @@ namespace PW.Core
 			if (OnLinkRemoved != null)
 				OnLinkRemoved(link);
 			
-			link.fromAnchor.RemoveLink(link);
-			link.toAnchor.RemoveLink(link);
+			link.fromAnchor.RemoveLinkReference(link);
+			link.toAnchor.RemoveLinkReference(link);
 			nodeLinkTable.RemoveLink(link);
 		}
-
+		
 		//Create a link from the anchor where the link was dragged and the parameter
 		public PWNodeLink	CreateLink(PWAnchor anchor)
 		{
-			PWAnchor fromAnchor = editorEvents.startedLinkAnchor;
-
-			if (fromAnchor == null || anchor == null)
-				return null;
-			
-			return CreateLink(fromAnchor, anchor);
+			return CreateLink(editorEvents.startedLinkAnchor, anchor);
 		}
 
+		//SafeCreateLink will create link and delete other overlapping links if there are
+		public PWNodeLink	SafeCreateLink(PWAnchor anchor)
+		{
+			return SafeCreateLink(editorEvents.startedLinkAnchor, anchor);
+		}
+
+		public PWNodeLink	SafeCreateLink(PWAnchor fromAnchor, PWAnchor toAnchor)
+		{
+			PWAnchor	fAnchor = fromAnchor;
+			PWAnchor	tAnchor = toAnchor;
+
+			//swap anchors if input/output are reversed
+			if (fromAnchor.anchorType != PWAnchorType.Output)
+			{
+				tAnchor = fromAnchor;
+				fAnchor = toAnchor;
+			}
+
+			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
+				return null;
+			
+			if (tAnchor.linkCount > 0)
+				tAnchor.RemoveAllLinks();
+			
+			return CreateLink(fAnchor, tAnchor);
+		}
+
+		//create a link without checking for duplication
 		public PWNodeLink	CreateLink(PWAnchor fromAnchor, PWAnchor toAnchor)
 		{
-			PWNodeLink link = new PWNodeLink();
+			PWNodeLink	link = new PWNodeLink();
 			PWAnchor	fAnchor = fromAnchor;
 			PWAnchor	tAnchor = toAnchor;
 			
 			//swap anchors if input/output are reversed
 			if (fromAnchor.anchorType != PWAnchorType.Output)
+			{
 				tAnchor = fromAnchor;
-			if (toAnchor.anchorType != PWAnchorType.Input)
 				fAnchor = toAnchor;
+			}
 
 			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
 			{
-				Debug.LogWarning("[PWGraph] attemp to create a link between unlinkable anchors");
+				Debug.LogWarning("[PWGraph] attemp to create a link between unlinkable anchors: " + fAnchor.fieldType + " into " + tAnchor.fieldType);
 				return null;
 			}
 

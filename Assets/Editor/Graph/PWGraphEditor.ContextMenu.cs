@@ -8,7 +8,23 @@ using PW.Node;
 using Debug = UnityEngine.Debug;
 
 //Utils for graph editor
-public partial class PWGraphEditor {
+public partial class PWGraphEditor
+{
+
+	GUIContent	newOrderingGroupContent = new GUIContent("New Ordering group");
+	GUIContent	deleteOrderingGroupContent = new GUIContent("Delete Ordering group");
+
+	GUIContent	newLinkContent = new GUIContent("New Link");
+	GUIContent	deleteAllLinksContent = new GUIContent("Delete all links");
+	GUIContent	deleteLinkContent = new GUIContent("Delete link");
+	
+	GUIContent	deleteNodeContent = new GUIContent("Delete node");
+
+	GUIContent	debugNodeContent = new GUIContent("Debug/Node");
+	GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
+
+	GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
+
 
 	void ContextMenu()
 	{
@@ -26,32 +42,31 @@ public partial class PWGraphEditor {
 				foreach (var nodeClass in nodeCat.typeInfos)
 					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => { graph.CreateNewNode(nodeClass.type, -graph.panPosition + e.mousePosition); Debug.Log("pos: " + -graph.panPosition + e.mousePosition); });
 			}
-			menu.AddItem(new GUIContent("New Ordering group"), false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
+			menu.AddItem(newOrderingGroupContent, false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
 			if (editorEvents.mouseOverOrderingGroup != null)
-				menu.AddItem(new GUIContent("Delete ordering group"), false, DeleteOrderingGroup);
+				menu.AddItem(deleteOrderingGroupContent, false, DeleteOrderingGroup);
 			else
-				menu.AddDisabledItem(new GUIContent("Delete ordering group"));
+				menu.AddDisabledItem(deleteOrderingGroupContent);
 
 			menu.AddSeparator("");
+
 			if (editorEvents.mouseOverAnchor != null)
 			{
-				menu.AddItem(new GUIContent("New Link"), false, StartDragLink);
-				menu.AddItem(new GUIContent("Delete all links"), false, DeleteAllAnchorLinks);
+				menu.AddItem(newLinkContent, false, StartDragLink);
+				menu.AddItem(deleteAllLinksContent, false, DeleteAllAnchorLinks);
 			}
 
 			var hoveredLink = editorEvents.mouseOverLink;
 			if (hoveredLink != null)
-			{
-				menu.AddItem(new GUIContent("Delete link"), false, () => { graph.RemoveLink(hoveredLink); });
-			}
+				menu.AddItem(deleteLinkContent, false, () => { graph.RemoveLink(hoveredLink); });
 			else
-				menu.AddDisabledItem(new GUIContent("Link"));
+				menu.AddDisabledItem(deleteLinkContent);
 
 			menu.AddSeparator("");
 			if (editorEvents.mouseOverNode != null)
-				menu.AddItem(new GUIContent("Delete node"), false, () => { graph.RemoveNode(editorEvents.mouseOverNode); });
+				menu.AddItem(deleteNodeContent, false, () => { graph.RemoveNode(editorEvents.mouseOverNode); });
 			else
-				menu.AddDisabledItem(new GUIContent("Delete node"));
+				menu.AddDisabledItem(deleteNodeContent);
 				
 			if (editorEvents.selectedNodeCount != 0)
 			{
@@ -63,7 +78,21 @@ public partial class PWGraphEditor {
 			}
 
 			menu.AddSeparator("");
-			menu.AddItem(new GUIContent("Recenter the graph"), false, () => { graph.scale = 1; graph.panPosition = Vector2.zero; });
+
+			var hoveredNode = editorEvents.mouseOverNode;
+			if (hoveredNode != null)
+				menu.AddItem(debugNodeContent, hoveredNode.debug, () => { hoveredNode.debug = !hoveredNode.debug; });
+			else
+				menu.AddDisabledItem(debugNodeContent);
+			
+			var hoveredAnchor = editorEvents.mouseOverAnchor;
+			if (hoveredAnchor != null)
+				menu.AddItem(debugAnchorContent, hoveredAnchor.debug, () => { hoveredAnchor.debug = !hoveredAnchor.debug; });
+			else
+				menu.AddDisabledItem(debugAnchorContent);
+
+			menu.AddSeparator("");
+			menu.AddItem(recenterGraphContent, false, () => { graph.scale = 1; graph.panPosition = Vector2.zero; });
 
 			menu.ShowAsContext();
 			e.Use();
