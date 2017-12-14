@@ -32,7 +32,6 @@ public static class PWGraphManager
         //Create the graph, this will call OnEnable too but since the graph is not initialized this will do nothing.
         T mg = ScriptableObject.CreateInstance< T >();
 
-        Debug.Log("path: " + path);
         //Create the asset file and let the user rename it
         ProjectWindowUtil.CreateAsset(mg, path);
 

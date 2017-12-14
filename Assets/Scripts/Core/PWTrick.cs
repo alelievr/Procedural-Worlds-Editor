@@ -1,4 +1,10 @@
-﻿#if !UNITY_EDITOR
+﻿//What a dirty file ....
+//This is almost all functions from the UNityEditor namespace, for runtime compilation
+//This code will never be executed, it's just here to compile with the UnityEditor
+//namespace at runtime (required by the PWNode classes)
+
+
+#if !UNITY_EDITOR
 using System;
 using UnityEngine;
 using System.Collections.Generic;

@@ -112,13 +112,19 @@ namespace PW
 
 		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
-		//default notify reload will be sent to all node childs.
+		//default notify reload will be sent to all node childs
+		//also fire a Process event for the target nodes
 		public void NotifyReload()
 		{
-			var nodes = graphRef.GetNodeChildsRecursive(this);
+			var nodes = graphRef.GetNodeChildsRecursive(this).ToList();
 
 			foreach (var node in nodes)
 				node.Reload(this);
+			
+			//add our node to the process pass
+			nodes.Add(this);
+
+			graphRef.ProcessNodes(nodes);
 		}
 		
 		//send reload event to all node of the specified type
@@ -216,8 +222,6 @@ namespace PW
 
 			if (graphRef != null)
 				OnAfterNodeAndGraphDeserialized();
-
-			UpdateWorkStatus();
 			
 			OnNodeEnable();
 
@@ -239,6 +243,8 @@ namespace PW
 				anchorField.OnAfterDeserialize(this);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
+				
+			UpdateWorkStatus();
 		}
 
 		//called only once, when the node is created

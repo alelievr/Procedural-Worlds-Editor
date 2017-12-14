@@ -110,6 +110,15 @@ public partial class PWGraphEditor : PWEditorWindow {
 				Repaint();
 		}
 		GUIScaleUtility.EndScale();
+
+		if (GUILayout.Button("Update compute order"))
+			graph.UpdateComputeOrder();
+		
+		if (GUILayout.Button("Process"))
+			graph.Process();
+		
+		if (GUILayout.Button("process once"))
+			graph.ProcessOnce();
 		
 		//save the size of the window
 		windowSize = position.size;

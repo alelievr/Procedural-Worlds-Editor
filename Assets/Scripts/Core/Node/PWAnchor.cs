@@ -135,6 +135,10 @@ namespace PW.Core
 		{
 			GUID = System.Guid.NewGuid().ToString();
 			Init(anchorField);
+
+			//if we can have multiple anchors, we set the fieldIndex value
+			if (anchorField.multiple)
+				fieldIndex = anchorField.anchors.Count;
 		}
 
 		void Init(PWAnchorField anchorField)

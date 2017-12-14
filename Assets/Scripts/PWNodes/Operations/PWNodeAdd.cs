@@ -6,7 +6,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeAdd : PWNode {
+	public class PWNodeAdd : PWNode
+	{
 	
 		[PWMultiple(2, typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4))]
 		[PWInput]

@@ -33,7 +33,8 @@ namespace PW
 		
 		public void RemoveLink(PWNodeLink link)
 		{
-			//fire this event will trigger the graph and it will call anchor to remove link datas.
+			//call this function will fire an event which trigger the graph and causes anchors to remove link datas.
+			// and remove the link
 			graphRef.RemoveLink(link);
 		}
 
@@ -76,10 +77,10 @@ namespace PW
 		
 		public void		RemoveAllLinks()
 		{
+
 			foreach (var anchorField in anchorFields)
 				foreach (var anchor in anchorField.anchors)
-					foreach (var link in anchor.links)
-						RemoveLink(link);
+					anchor.RemoveAllLinks();
 		}
 
 		public IEnumerable< PWNodeLink >	GetOutputLinks()

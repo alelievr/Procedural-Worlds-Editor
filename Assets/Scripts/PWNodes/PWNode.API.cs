@@ -111,7 +111,10 @@ namespace PW
 
 		public IEnumerable< PWNode >	GetInputNodes()
 		{
-			return inputAnchorFields.Select(o => o.nodeRef);
+			foreach (var inputAnchorField in inputAnchorFields)
+				foreach (var anchor in inputAnchorField.anchors)
+					foreach (var link in anchor.links)
+						yield return link.fromNode;
 		}
 
 		public PWAnchor					GetAnchor(string fieldName, int index = 0)

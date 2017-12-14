@@ -80,6 +80,9 @@ namespace PW.Core
 
 		void ReloadTextures()
 		{
+			if (settingsStorage == null)
+				return ;
+			
 			foreach (var setting in settingsStorage)
 			{
 				switch (setting.fieldType)

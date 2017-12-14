@@ -48,6 +48,8 @@ namespace PW.Core
 		public PWAnchorType					anchorType;
 		//anchor field type
 		public SerializableType				fieldType;
+		//value of the field
+		public object						fieldValue;
 		//debug mode:
 		public bool							debug = false;
 		//anchor transfer type (when input datas are sent to this anchor)
@@ -63,6 +65,9 @@ namespace PW.Core
 		public Color						color = new Color(0, 0, 0, 0); //SerializableColor needed ?
 
 		//properties for multiple anchors:
+		//is this anchor a multiple anchor
+		public bool							multiple = false;
+		//allowed type input for multiple anchor
 		public SerializableType[]			allowedTypes;
 		//min allowed input values
 		public int							minMultipleValues = 1;
@@ -99,6 +104,7 @@ namespace PW.Core
 		{
 			PWAnchor	newAnchor = new PWAnchor();
 
+			Debug.LogWarning("anchor create called !");
 			newAnchor.Initialize(this);
 			anchors.Add(newAnchor);
 			return newAnchor;
@@ -114,7 +120,7 @@ namespace PW.Core
 		public void		OnAfterDeserialize(PWNode node)
 		{
 			if (anchors.Count == 0)
-				Debug.LogWarning("ZEro ength anchors in anchorFIeld in node " + nodeRef);
+				Debug.LogWarning("Zero length anchors in anchorField in node " + nodeRef);
 			
 			Init(node);
 
@@ -123,6 +129,20 @@ namespace PW.Core
 				deserializedAnchors.Add(anchor.GUID);
 				anchor.OnAfterDeserialized(this);
 			}
+
+
+			//add the number of entries corresponding to the number of anchors in the PWValues field
+			/*if (multiple)
+			{
+				Debug.Log("fildValue: " + fieldValue);
+
+				PWValues vs = (PWValues)fieldValue;
+
+				vs.Clear();
+
+				for (int i = 0; i < anchors.Count; i++)
+					vs.AssignAt(i, null, fieldName, true);
+			}*/
 		}
 
 	#region Anchor style
@@ -166,7 +186,6 @@ namespace PW.Core
 			boxAnchorStyle = new GUIStyle(GUI.skin.box);
 			boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			anchorTexture = GUI.skin.box.normal.background;
-			Debug.Log("anchor Texture: " + anchorTexture);
 			anchorDisabledTexture = GUI.skin.box.active.background;
 			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
@@ -255,7 +274,7 @@ namespace PW.Core
 			//debug:
 			if (anchor.debug)
 			{
-				GUIContent debugContent = new GUIContent("lc: " + anchor.linkCount);
+				GUIContent debugContent = new GUIContent("c:" + anchor.linkCount + "|i:" + anchor.fieldIndex);
 
 				Rect debugRect = anchor.rect;
 					debugRect.xMax += 50;

@@ -157,7 +157,6 @@ namespace PW.Core
 			nodesDictionary[inputNode.id] = inputNode;
 			nodesDictionary[outputNode.id] = outputNode;
 			
-			return;
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
@@ -195,6 +194,12 @@ namespace PW.Core
 			Debug.LogWarning("Process once called !");
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			graphProcessor.ProcessOnce(this);
+		}
+
+		public void ProcessNodes(List< PWNode > nodes)
+		{
+			graphProcessor.UpdateNodeDictionary(nodesDictionary);
+			graphProcessor.ProcessNodes(this, nodes);
 		}
 
 		public void Export(string filePath)
@@ -456,10 +461,7 @@ namespace PW.Core
 				var node = nodeStack.Pop();
 
 				foreach (var outputNode in node.GetOutputNodes())
-				{
-					Debug.Log("outputNode: " + outputNode);
 					nodeStack.Push(outputNode);
-				}
 				
 				if (node != begin)
 					yield return node;

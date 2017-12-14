@@ -11,7 +11,8 @@ using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, Syste
 
 namespace PW.Core
 {
-	public class PWGraphProcessor {
+	public class PWGraphProcessor
+	{
 
 		NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
 		Dictionary< int, PWNode >	nodesDictionary;
@@ -120,7 +121,7 @@ namespace PW.Core
 	
 					if (values != null)
 					{
-						if (!values.AssignAt(link.toAnchor.fieldIndex, val, link.fromAnchor.name))
+						if (!values.AssignAt(link.toAnchor.fieldIndex, val, link.fromAnchor.name, true))
 							Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
 					}
 				}
@@ -176,8 +177,8 @@ namespace PW.Core
 
 		public float Process(PWGraph graph)
 		{
-			float		calculTime = 0f;
-			bool		realMode = graph.IsRealMode();
+			float	calculTime = 0f;
+			bool	realMode = graph.IsRealMode();
 
 			if (graph.GetComputeSortedNodes() == null)
 				graph.UpdateComputeOrder();
@@ -190,6 +191,25 @@ namespace PW.Core
 				
 				calculTime += ProcessNode(node, realMode);
 			}
+			return calculTime;
+		}
+
+		public float ProcessNodes(PWGraph graph, List< PWNode > nodes)
+		{
+			float	calculTime = 0f;
+			bool	realMode = graph.IsRealMode();
+
+			//sort nodes by compute order:
+			nodes.Sort((n1, n2) => n1.computeOrder.CompareTo(n2.computeOrder));
+
+			foreach(var node in nodes)
+			{
+				if (node.computeOrder < 0)
+					continue ;
+				
+				calculTime += ProcessNode(node, realMode);
+			}
+
 			return calculTime;
 		}
 		

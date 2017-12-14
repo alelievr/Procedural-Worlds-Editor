@@ -13,6 +13,12 @@ namespace PW.Core
 			if (to == typeof(object))
 				return true;
 
+			if (to == typeof(PWValues))
+			{
+				//TODO: check for allowed types from PWValues
+				return true;
+			}
+
 			if (from == to)
 				return true;
 			

@@ -105,6 +105,7 @@ namespace PW
 						anchorField.allowedTypes = multipleAttr.allowedTypes;
 						anchorField.minMultipleValues = multipleAttr.minValues;
 						anchorField.maxMultipleValues = multipleAttr.maxValues;
+						anchorField.multiple = true;
 					}
 					if (genericAttr != null)
 						anchorField.allowedTypes = genericAttr.allowedTypes;
@@ -115,10 +116,15 @@ namespace PW
 					anchorFieldDictionary.Remove(field.Name);
 				else
 				{
+					//create anchor in this anchorField if there is not existing one
+					if (anchorField.anchors.Count == 0)
+						anchorField.CreateNewAnchor();
+
 					anchorField.colorSchemeName = colorSchemeName;
-					anchorField.CreateNewAnchor();
 					anchorField.fieldName = field.Name;
 					anchorField.fieldType = (SerializableType)field.FieldType;
+					anchorField.fieldValue = field.GetValue(this);
+					Debug.Log("field value: " + anchorField.fieldValue);
 					anchorField.nodeRef = this;
 				}
 			}
@@ -159,6 +165,7 @@ namespace PW
 						anchor.minMultipleValues = af.minMultipleValues;
 						anchor.maxMultipleValues = af.maxMultipleValues;
 						anchor.required = af.required;
+						anchor.multiple = af.multiple;
 
 						//we tell that the anchor have been linked to an actual field
 						anchor.fieldValidated = true;
