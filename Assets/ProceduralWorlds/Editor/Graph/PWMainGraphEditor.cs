@@ -143,7 +143,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		DrawNodeGraphHeader(g);
 		h2.End();
 		Rect p2 = h1.Split(resizeHandleColor);
-		base.OnNodeSelectorGUI(p2);
+		nodeSelectorBar.DrawNodeSelector(p2);
 		h1.End();
 
 		//render all opened popups (at the end cause the have to be above other infos)

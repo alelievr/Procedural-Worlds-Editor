@@ -99,7 +99,12 @@ namespace PW.Node
 			for (int i = 0; i < modifierList.count; i++)
 				SetAnchorVisibility("inputs", PWVisibility.Invisible, i);
 			listRequiredInputCout = 0;
-			modifierList.DoLayoutList();
+
+			using (new DefaultGUISkin())
+			{
+				modifierList.DoLayoutList();
+			}
+
 			lastRequiredInputCount = listRequiredInputCout;
 		}
 

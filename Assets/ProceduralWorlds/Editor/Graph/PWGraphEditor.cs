@@ -7,11 +7,13 @@ using System.Linq;
 using PW;
 using PW.Core;
 using PW.Node;
+using PW.Editor;
 
 using Debug = UnityEngine.Debug;
 
 [System.Serializable]
-public partial class PWGraphEditor : PWEditorWindow {
+public partial class PWGraphEditor : PWEditorWindow
+{
 
 	//the reference to the graph in public for the AssetHandlers class
 	public PWGraph				graph;
@@ -23,28 +25,38 @@ public partial class PWGraphEditor : PWEditorWindow {
 	bool						restoreEvent;
 	
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
-
-	//custom editor events:
-	public event Action< Vector2 >	OnWindowResize;
 	
 	//current Event:
 	Event						e;
 	
+	//size of the current window, updated each frame
 	protected Vector2			windowSize;
 
+	//Is the asset saved ?
 	bool						saved;
-
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
 
+	//Layout additional windows
+	protected PWGraphOptionBar			optionBar;
+	protected PWGraphNodeSelectorBar	nodeSelectorBar;
+	protected PWGraphTerrainPreviewBar	terrainPreviewBar;
+
+
+	//custom editor events:
+	public event Action< Vector2 >	OnWindowResize;
+
+
 	public override void OnEnable()
 	{
 		base.OnEnable();
 
+		//provide the MacOS bool
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
+		//clear event masks
 		eventMasks.Clear();
 
 		LoadAssets();
@@ -127,12 +139,20 @@ public partial class PWGraphEditor : PWEditorWindow {
 	{
 		this.graph = graph;
 		
+		//attach to graph events
 		graph.OnNodeAdded += OnNodeAddedCallback;
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
 		graph.OnLinkCreated += OnLinkCreated;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
+
+		Debug.Log("Load Graph !");
+		//update graph in views:
+		optionBar = new PWGraphOptionBar(graph);
+		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);
+		terrainPreviewBar = new PWGraphTerrainPreviewBar(graph);
+		nodeSelectorBar.LoadStyles();
 
 		if (!graph.initialized)
 		{

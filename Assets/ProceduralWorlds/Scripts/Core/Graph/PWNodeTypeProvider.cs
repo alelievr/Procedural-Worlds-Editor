@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace PW.Core
 {
+
     public static class PWNodeTypeProvider
     {
 		static readonly int				PWMainGraph =	1 << 0;
@@ -129,15 +130,19 @@ namespace PW.Core
             return allNodeTypes;
         }
 
-        public static List< PWNodeTypeInfoList > GetAllowedNodesForGraph(Type graphType)
+        public static List< PWNodeTypeInfoList > GetAllowedNodesForGraph(PWGraphType graphType)
         {
-            if (graphType == typeof(PWMainGraph))
-				return mainGraphInfoList;
-			else if (graphType == typeof(PWBiomeGraph))
-				return biomeGraphInfoList;
-			//TODO: other types of graph
-			Debug.LogError("Could not find allowed nodes for the graph " + graphType);
-			return null;
+			switch (graphType)
+			{
+				case PWGraphType.Main:
+					return mainGraphInfoList;
+				case PWGraphType.Biome:
+					return biomeGraphInfoList;
+				//TODO: other type of graph
+				default:
+					Debug.LogError("Could not find allowed nodes for the graph " + graphType);
+					return null;
+			}
         }
 
 		static T GetNodeInfo< T >(Type t, Func< PWNodeTypeInfo, PWNodeTypeInfoList, T > fun)

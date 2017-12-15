@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW;
+using PW.Core;
 
 public class PWBiomeGraphEditor : PWGraphEditor
 {
@@ -30,7 +31,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		base.OnGUI();
 
 		//draw the node selector
-		base.OnNodeSelectorGUI(nodeSelectorRect);
+		nodeSelectorBar.DrawNodeSelector(nodeSelectorRect);
 	}
 
 	public override void OnDisable()

@@ -4,6 +4,8 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
+namespace PW.Editor
+{
 	public static class GUIScaleUtility
 	{
 		// cache the reflected methods
@@ -333,3 +335,4 @@ using System.Reflection;
 
 		#endregion
 	}
+}

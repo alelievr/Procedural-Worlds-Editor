@@ -15,8 +15,8 @@ public partial class PWGraphEditor
 	protected static GUIStyle		defaultNodeWinowSelected;
 	
 	//editor textures:
-	protected static Texture2D		nodeEditorBackgroundTexture;
-	protected static Texture2D		defaultBackgroundTexture;
+	public static Texture2D			nodeEditorBackgroundTexture;
+	public static Texture2D			defaultBackgroundTexture;
 	
 	//editor skin:
 	protected GUISkin				PWGUISkin;
@@ -27,14 +27,8 @@ public partial class PWGraphEditor
 	protected static GUIStyle		whiteText; //TODO: replace by EditorStyles.whiteLabel ?
 	protected static GUIStyle		whiteBoldText; //TODO: same ?
 	protected static GUIStyle		navBarBackgroundStyle;
-	protected static GUIStyle		panelBackgroundStyle;
 	protected static GUIStyle		nodeGraphWidowStyle;
-
-	protected GUIStyle				toolbarSearchCancelButtonStyle;
-	protected GUIStyle				toolbarSearchTextStyle;
-	protected GUIStyle				toolbarStyle;
-	protected GUIStyle				nodeSelectorTitleStyle;
-	protected GUIStyle				nodeSelectorCaseStyle;
+	
 	protected GUIStyle				selectionStyle;
 
 	protected GUIStyle				nodeStyle;
@@ -84,17 +78,10 @@ public partial class PWGraphEditor
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
 		//initialize if null
-		toolbarStyle = new GUIStyle("Toolbar");
-		toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
-		toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
-
-		nodeSelectorTitleStyle = PWGUISkin.FindStyle("NodeSelectorTitle");
-		nodeSelectorCaseStyle = PWGUISkin.FindStyle("NodeSelectorCase");
 
 		selectionStyle = PWGUISkin.FindStyle("Selection");
 
 		navBarBackgroundStyle = PWGUISkin.FindStyle("NavBarBackground");
-		panelBackgroundStyle = PWGUISkin.FindStyle("PanelBackground");
 
 		prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
 

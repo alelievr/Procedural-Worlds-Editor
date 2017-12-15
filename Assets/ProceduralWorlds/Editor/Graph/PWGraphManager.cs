@@ -6,59 +6,62 @@ using UnityEditor;
 using System;
 using PW.Core;
 
-public static class PWGraphManager
+namespace PW.Editor
 {
-
-    //Main graph settings:
-    public static string        PWMainGraphPath = "Assets/ProceduralWorlds/Resources";
-    public static string        PWMainGraphDefaultFileName = "New ProceduralWorld.asset";
-
-    //Biome graph settings:
-    public static string        PWBiomeGraphPath = "Assets/ProceduralWorlds/Resources/Biomes";
-    public static string        PWBiomeGraphDefaultFileName = "New ProceduralBiome.asset";
-
-    static void CreateGraph< T >(string directory, string fileName) where T : PWGraph
+    public static class PWGraphManager
     {
-        //generate the file path
-        string path = directory + "/" + fileName;
-
-        //Create the directory resource if not exists
-        if (!Directory.Exists(directory))
-            Directory.CreateDirectory(directory);
+    
+        //Main graph settings:
+        public static string        PWMainGraphPath = "Assets/ProceduralWorlds/Resources";
+        public static string        PWMainGraphDefaultFileName = "New ProceduralWorld.asset";
+    
+        //Biome graph settings:
+        public static string        PWBiomeGraphPath = "Assets/ProceduralWorlds/Resources/Biomes";
+        public static string        PWBiomeGraphDefaultFileName = "New ProceduralBiome.asset";
+    
+        static void CreateGraph< T >(string directory, string fileName) where T : PWGraph
+        {
+            //generate the file path
+            string path = directory + "/" + fileName;
+    
+            //Create the directory resource if not exists
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+                
+            //uniquify path
+            path = AssetDatabase.GenerateUniqueAssetPath(path);
             
-        //uniquify path
-        path = AssetDatabase.GenerateUniqueAssetPath(path);
-        
-        //Create the graph, this will call OnEnable too but since the graph is not initialized this will do nothing.
-        T mg = ScriptableObject.CreateInstance< T >();
-
-        //Create the asset file and let the user rename it
-        ProjectWindowUtil.CreateAsset(mg, path);
-
-        //save and refresh Project view
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
-        //focus the project window
-        EditorUtility.FocusProjectWindow();	
-
-        //focus the asset file
-        Selection.activeObject = mg;
-    }
-
-    public static void CreateMainGraph(string fileName = null)
-    {
-        if (fileName == null)
-            fileName = PWMainGraphDefaultFileName;
-        
-        CreateGraph< PWMainGraph >(PWMainGraphPath, fileName);
-    }
-
-    public static void CreateBiomeGraph(string fileName = null)
-    {
-        if (fileName == null)
-            fileName = PWBiomeGraphDefaultFileName;
-        
-        CreateGraph< PWBiomeGraph >(PWBiomeGraphPath, fileName);
+            //Create the graph, this will call OnEnable too but since the graph is not initialized this will do nothing.
+            T mg = ScriptableObject.CreateInstance< T >();
+    
+            //Create the asset file and let the user rename it
+            ProjectWindowUtil.CreateAsset(mg, path);
+    
+            //save and refresh Project view
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+    
+            //focus the project window
+            EditorUtility.FocusProjectWindow();	
+    
+            //focus the asset file
+            Selection.activeObject = mg;
+        }
+    
+        public static void CreateMainGraph(string fileName = null)
+        {
+            if (fileName == null)
+                fileName = PWMainGraphDefaultFileName;
+            
+            CreateGraph< PWMainGraph >(PWMainGraphPath, fileName);
+        }
+    
+        public static void CreateBiomeGraph(string fileName = null)
+        {
+            if (fileName == null)
+                fileName = PWBiomeGraphDefaultFileName;
+            
+            CreateGraph< PWBiomeGraph >(PWBiomeGraphPath, fileName);
+        }
     }
 }

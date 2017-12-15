@@ -36,7 +36,7 @@ public partial class PWGraphEditor
 
 			// Now create the menu, add items and show it
 			GenericMenu menu = new GenericMenu();
-			foreach (var nodeCat in PWNodeTypeProvider.GetAllowedNodesForGraph(graph.GetType()))
+			foreach (var nodeCat in PWNodeTypeProvider.GetAllowedNodesForGraph(graph.graphType))
 			{
 				string menuString = "Create new/" + nodeCat.title + "/";
 				foreach (var nodeClass in nodeCat.typeInfos)

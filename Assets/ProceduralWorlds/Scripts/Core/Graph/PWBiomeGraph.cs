@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace PW.Core
 {
-	public class PWBiomeGraph : PWGraph {
+	public class PWBiomeGraph : PWGraph
+	{
 		
 		public override void Initialize()
 		{
@@ -13,6 +14,7 @@ namespace PW.Core
 
 		public override void OnEnable()
 		{
+			graphType = PWGraphType.Biome;
 			base.OnEnable();
 		}
 

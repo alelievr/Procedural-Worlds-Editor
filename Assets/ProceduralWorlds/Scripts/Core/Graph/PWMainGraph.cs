@@ -18,7 +18,8 @@ namespace PW.Core
 	}
 
 	[System.SerializableAttribute]
-	public class PWMainGraph : PWGraph {
+	public class PWMainGraph : PWGraph
+	{
 
 		//Editor datas:
 		public Vector2					leftBarScrollPosition;
@@ -72,6 +73,7 @@ namespace PW.Core
 
 		public override void OnEnable()
 		{
+			graphType = PWGraphType.Main;
 			base.OnEnable();
 		}
 

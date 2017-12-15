@@ -39,6 +39,7 @@ namespace PW.Core
 		public Vector3							chunkPosition { get { return _chunkPosition; } set { if (OnChunkPositionChanged != null) OnChunkPositionChanged(); _chunkPosition = value; } }
 		[SerializeField] private float			_step;
 		public float							step { get { return _step; } set { if (OnStepChanged != null) OnStepChanged(); _step = value; } }
+		public PWGraphType						graphType;
 
 
 		//Link table, store all connections between node's anchors.
