@@ -152,7 +152,9 @@ public partial class PWGraphEditor : PWEditorWindow
 		optionBar = new PWGraphOptionBar(graph);
 		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);
 		terrainPreviewBar = new PWGraphTerrainPreviewBar(graph);
+		optionBar.LoadStyles();
 		nodeSelectorBar.LoadStyles();
+		terrainPreviewBar.LoadStyles();
 
 		if (!graph.initialized)
 		{

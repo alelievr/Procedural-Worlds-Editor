@@ -26,7 +26,6 @@ public partial class PWGraphEditor
 	
 	protected static GUIStyle		whiteText; //TODO: replace by EditorStyles.whiteLabel ?
 	protected static GUIStyle		whiteBoldText; //TODO: same ?
-	protected static GUIStyle		navBarBackgroundStyle;
 	protected static GUIStyle		nodeGraphWidowStyle;
 	
 	protected GUIStyle				selectionStyle;
@@ -81,7 +80,6 @@ public partial class PWGraphEditor
 
 		selectionStyle = PWGUISkin.FindStyle("Selection");
 
-		navBarBackgroundStyle = PWGUISkin.FindStyle("NavBarBackground");
 
 		prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
 

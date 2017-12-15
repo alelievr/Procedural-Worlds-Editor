@@ -54,10 +54,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	private static Texture2D	preset3DDensityFieldTexture;
 	private static Texture2D	presetMeshTetxure;
 
-	private static Texture2D	rencenterIconTexture;
-	private static Texture2D	fileIconTexture;
-	private static Texture2D	eyeIconTexture;
-	
 #endregion
 
 #region Initialization and data baking
@@ -140,7 +136,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		Rect p1 = h2.Begin();
 		DrawLeftBar(p1);
 		Rect g = h2.Split(resizeHandleColor);
-		DrawNodeGraphHeader(g);
+		optionBar.DrawOptionBar(g);
 		h2.End();
 		Rect p2 = h1.Split(resizeHandleColor);
 		nodeSelectorBar.DrawNodeSelector(p2);
@@ -206,30 +202,21 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
 		h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
 		
-		Func< string, Texture2D > CreateTexture2DFromFile = (string ressourcePath) => {
-			return Resources.Load< Texture2D >(ressourcePath);
-        };
-
 		//load style: to move
 		resizeHandleColor = EditorGUIUtility.isProSkin
 			? new Color32(56, 56, 56, 255)
             : new Color32(130, 130, 130, 255);
 
 		//loading preset panel images
-		preset2DSideViewTexture = CreateTexture2DFromFile("preview2DSideView");
-		preset2DTopDownViewTexture = CreateTexture2DFromFile("preview2DTopDownView");
-		preset3DPlaneTexture = CreateTexture2DFromFile("preview3DPlane");
-		preset3DSphericalTexture = CreateTexture2DFromFile("preview3DSpherical");
-		preset3DCubicTexture = CreateTexture2DFromFile("preview3DCubic");
-		presetMeshTetxure = CreateTexture2DFromFile("previewMesh");
-		preset1DDensityFieldTexture= CreateTexture2DFromFile("preview1DDensityField");
-		preset2DDensityFieldTexture = CreateTexture2DFromFile("preview2DDensityField");
-		preset3DDensityFieldTexture = CreateTexture2DFromFile("preview3DDensityField");
-		
-		//icons and utils
-		rencenterIconTexture = CreateTexture2DFromFile("ic_recenter");
-		fileIconTexture = CreateTexture2DFromFile("ic_file");
-		eyeIconTexture = CreateTexture2DFromFile("ic_eye");
+		preset2DSideViewTexture = Resources.Load< Texture2D >("preview2DSideView");
+		preset2DTopDownViewTexture = Resources.Load< Texture2D >("preview2DTopDownView");
+		preset3DPlaneTexture = Resources.Load< Texture2D >("preview3DPlane");
+		preset3DSphericalTexture = Resources.Load< Texture2D >("preview3DSpherical");
+		preset3DCubicTexture = Resources.Load< Texture2D >("preview3DCubic");
+		presetMeshTetxure = Resources.Load< Texture2D >("previewMesh");
+		preset1DDensityFieldTexture= Resources.Load< Texture2D >("preview1DDensityField");
+		preset2DDensityFieldTexture = Resources.Load< Texture2D >("preview2DDensityField");
+		preset3DDensityFieldTexture = Resources.Load< Texture2D >("preview3DDensityField");
 	}
 
 }

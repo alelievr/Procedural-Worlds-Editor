@@ -13,5 +13,10 @@ namespace PW.Editor
 		{
 			this.graph = graph;
 		}
+
+		public void LoadStyles()
+		{
+			
+		}
 	}
 }
