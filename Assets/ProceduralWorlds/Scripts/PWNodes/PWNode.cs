@@ -359,7 +359,7 @@ namespace PW
 
 			foreach (var anchorField in inputAnchorFields)
 			{
-				if (anchorField.required)
+				if (anchorField.required && !anchorField.multiple)
 				{
 					foreach (var anchor in anchorField.anchors)
 						if (anchor.linkCount == 0)

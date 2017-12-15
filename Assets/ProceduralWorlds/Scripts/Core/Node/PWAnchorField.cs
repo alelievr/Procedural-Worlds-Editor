@@ -242,6 +242,7 @@ namespace PW.Core
 			//error display (required unlinked anchors)
 			if (anchor.visibility == PWVisibility.Visible
 					&& required
+					&& !multiple
 					&& anchor.anchorType == PWAnchorType.Input
 					&& anchor.linkCount == 0)
 			{

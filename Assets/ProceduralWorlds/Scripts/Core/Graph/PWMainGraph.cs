@@ -22,7 +22,6 @@ namespace PW.Core
 
 		//Editor datas:
 		public Vector2					leftBarScrollPosition;
-		public Vector2					selectorScrollPosition;
 
 		//tell if the user choose a preset (first screen)
 		public bool						presetChoosed;

@@ -18,7 +18,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.
-	public List< Rect >			eventMasks = new List< Rect >();
+	public Dictionary< int, Rect >	eventMasks = new Dictionary< int, Rect >();
 	EventType					savedEventType;
 	bool						restoreEvent;
 	
@@ -44,6 +44,8 @@ public partial class PWGraphEditor : PWEditorWindow {
 		base.OnEnable();
 
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
+
+		eventMasks.Clear();
 
 		LoadAssets();
 	}
@@ -111,15 +113,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		}
 		GUIScaleUtility.EndScale();
 
-		if (GUILayout.Button("Update compute order"))
-			graph.UpdateComputeOrder();
-		
-		if (GUILayout.Button("Process"))
-			graph.Process();
-		
-		if (GUILayout.Button("process once"))
-			graph.ProcessOnce();
-		
 		//save the size of the window
 		windowSize = position.size;
 	}
@@ -185,7 +178,7 @@ public partial class PWGraphEditor : PWEditorWindow {
 		if (e.isMouse || e.isKey || e.isScrollWheel)
 		{
 			foreach (var eventMask in eventMasks)
-				if (eventMask.Contains(e.mousePosition))
+				if (eventMask.Value.Contains(e.mousePosition))
 				{
 					//if there is, we say to ignore the event and restore it later
 					restoreEvent = true;
@@ -253,32 +246,6 @@ public partial class PWGraphEditor : PWEditorWindow {
 		//if the mouse was not over an ordering group this frame
 		if (!editorEvents.isMouseOverOrderingGroupFrame)
 			editorEvents.mouseOverOrderingGroup = null;
-	}
-
-	void RenderNodes()
-	{
-		int		nodeId = 0;
-		
-		BeginWindows();
-		{
-			foreach (var node in graph.nodes)
-			{
-				RenderNode(nodeId++, node);
-			}
-	
-			//display the graph input and output:
-			RenderNode(nodeId++, graph.outputNode);
-			RenderNode(nodeId++, graph.inputNode);
-		}
-		EndWindows();
-
-		//if mouse was not over a node this frame, unset mouseOver
-		if (!editorEvents.isMouseOverNodeFrame)
-			editorEvents.mouseOverNode = null;
-		
-		//if mouse was not over an anchor this frame, unset mouseOver
-		if (!editorEvents.isMouseOverAnchorFrame)
-				editorEvents.mouseOverAnchor = null;
 	}
 
 	void ManageEvents()

@@ -65,8 +65,8 @@ public partial class PWGraphEditor
 
 		link.controlId = GUIUtility.GetControlID(FocusType.Passive);
 
-		Rect start = link.toAnchor.rectInGraph;
-		Rect end = link.fromAnchor.rectInGraph;
+		Rect start = link.fromAnchor.rectInGraph;
+		Rect end = link.toAnchor.rectInGraph;
 
 		Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
 		Vector3 endPos = new Vector3(end.x, end.y + end.height / 2, 0);

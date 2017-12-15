@@ -10,7 +10,8 @@ using PW.Node;
 using Object = UnityEngine.Object;
 
 [System.Serializable]
-public partial class PWMainGraphEditor : PWGraphEditor {
+public partial class PWMainGraphEditor : PWGraphEditor
+{
 
 	[SerializeField]
 	PWMainGraph						mainGraph { get { return graph as PWMainGraph; } }
@@ -19,12 +20,9 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 	HorizontalSplitView				h1;
 	[SerializeField]
 	HorizontalSplitView				h2;
-	[SerializeField]
-	public string					searchString = "";
 	
 	//graph, node, anchors and links control and 
 	bool				previewMouseDrag = false;
-	bool				editorNeedRepaint = false;
 	[System.NonSerializedAttribute]
 	PWNode				mouseAboveNode;
 	
@@ -145,22 +143,12 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 		DrawNodeGraphHeader(g);
 		h2.End();
 		Rect p2 = h1.Split(resizeHandleColor);
-		DrawSelector(p2);
+		base.OnNodeSelectorGUI(p2);
 		h1.End();
 
-		//FIXME
-		if (!editorNeedRepaint)
-			editorNeedRepaint = e.isMouse || e.type == EventType.ScrollWheel;
-
-		//if event, repaint
-		if ((editorNeedRepaint))
-		{
-			Repaint();
-			editorNeedRepaint = false;
-		}
-
 		//render all opened popups (at the end cause the have to be above other infos)
-		PWPopup.RenderAll(ref editorNeedRepaint);
+		//TODO: the new popup system
+		// PWPopup.RenderAll(ref editorNeedRepaint);
     }
 
 #endregion

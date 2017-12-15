@@ -42,7 +42,11 @@ namespace PW
 				editorEvents.isDraggingNode = true;
 			}
 			if (e.type == EventType.MouseUp)
+			{
 				isDragged = false;
+				editorEvents.isDraggingNode = false;
+			}
+			
 			if (id != -1 && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 

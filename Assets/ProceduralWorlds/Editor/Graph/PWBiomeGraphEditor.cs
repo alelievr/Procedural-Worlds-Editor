@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using PW;
 
-public class PWBiomeGraphEditor : PWGraphEditor {
+public class PWBiomeGraphEditor : PWGraphEditor
+{
 
 	[MenuItem("Procedural Worlds/Biome graph")]
 	static void Init()
@@ -20,7 +21,16 @@ public class PWBiomeGraphEditor : PWGraphEditor {
 
 	public override void OnGUI()
 	{
+		int selectorWidth = 250;
+		Rect nodeSelectorRect = new Rect(position.width - selectorWidth, 0, selectorWidth, position.height);
+
+		// eventMasks[0] = nodeSelectorRect;
+
+		//draw the node editor
 		base.OnGUI();
+
+		//draw the node selector
+		base.OnNodeSelectorGUI(nodeSelectorRect);
 	}
 
 	public override void OnDisable()

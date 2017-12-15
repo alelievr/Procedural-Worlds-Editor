@@ -30,7 +30,7 @@ namespace PW.Core
 
 		public static bool		AnchorAreAssignable(PWAnchor from, PWAnchor to, bool verbose = false)
 		{
-			if (from.anchorType == to.anchorType)
+			if (from.anchorType == to.anchorType || from.nodeRef == to.nodeRef)
 				return false;
 
 			//swap anchor if from is input and to is output

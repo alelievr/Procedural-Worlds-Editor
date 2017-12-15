@@ -36,8 +36,6 @@ namespace PW.Node
 			foreach (var val in values)
 				fOutput += val;
 			
-			Debug.Log("Processing Add node");
-
 			if (intify)
 				fOutput = Mathf.RoundToInt(fOutput);
 		}

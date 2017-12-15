@@ -66,6 +66,32 @@ public partial class PWGraphEditor
 		}
 	}
 	
+	void RenderNodes()
+	{
+		int		nodeId = 0;
+		
+		BeginWindows();
+		{
+			foreach (var node in graph.nodes)
+			{
+				RenderNode(nodeId++, node);
+			}
+	
+			//display the graph input and output:
+			RenderNode(nodeId++, graph.outputNode);
+			RenderNode(nodeId++, graph.inputNode);
+		}
+		EndWindows();
+
+		//if mouse was not over a node this frame, unset mouseOver
+		if (!editorEvents.isMouseOverNodeFrame)
+			editorEvents.mouseOverNode = null;
+		
+		//if mouse was not over an anchor this frame, unset mouseOver
+		if (!editorEvents.isMouseOverAnchorFrame)
+				editorEvents.mouseOverAnchor = null;
+	}
+	
 	void DeleteSelectedNodes()
 	{
 		List< PWNode > nodeToRemove = new List< PWNode >();

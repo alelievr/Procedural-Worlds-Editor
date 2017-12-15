@@ -6,7 +6,8 @@ using PW.Core;
 using PW.Node;
 using System;
 
-public partial class PWGraphEditor {
+public partial class PWGraphEditor
+{
 
 	//editor styles:
 	protected static GUIStyle		prefixLabelStyle;
