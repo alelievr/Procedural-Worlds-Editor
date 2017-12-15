@@ -50,22 +50,6 @@ namespace PW
 			if (id != -1 && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 
-			int	debugViewH = 0;
-			#if DEBUG_NODE
-				EditorGUILayout.BeginVertical(debugStyle);
-				EditorGUILayout.LabelField("Id: " + nodeId + " | Compute order: " + computeOrder);
-				EditorGUILayout.LabelField("type: " + GetType());
-				EditorGUILayout.LabelField("isDependent: " + isDependent);
-				EditorGUILayout.LabelField("Dependencies:");
-				foreach (var dep in depencendies)
-					EditorGUILayout.LabelField("    " + dep.nodeId + " : " + dep.anchorId);
-				EditorGUILayout.LabelField("Links:");
-				foreach (var l in links)
-					EditorGUILayout.LabelField("    " + l.distantNodeId + " : " + l.distantAnchorId);
-				EditorGUILayout.EndVertical();
-				debugViewH = (int)GUILayoutUtility.GetLastRect().height + 6; //add the padding and margin
-			#endif
-
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
 				OnNodeGUI();
@@ -76,7 +60,7 @@ namespace PW
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)
-				viewHeight = viewH + debugViewH;
+				viewHeight = viewH;
 
 			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
 				

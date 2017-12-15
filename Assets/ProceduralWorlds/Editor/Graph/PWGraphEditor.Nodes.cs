@@ -36,9 +36,9 @@ public partial class PWGraphEditor
 		{
 			Rect debugRect = decaledRect;
 			debugRect.y -= 20;
+			EditorGUI.LabelField(debugRect, "id: " + node.id);
+			debugRect.y -= 20;
 			EditorGUI.LabelField(debugRect, "comp order: " + node.computeOrder + " | can work: " + node.canWork);
-
-			//more debug here ?
 		}
 	}
 

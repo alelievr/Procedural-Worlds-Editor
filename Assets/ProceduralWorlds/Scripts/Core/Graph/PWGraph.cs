@@ -112,6 +112,7 @@ namespace PW.Core
 		//graph events:
 		public event System.Action				OnGraphStructureChanged;
 		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
+		public event System.Action				OnAllNodeReady;
 		//editor button events:
 		public event System.Action				OnForceReload;
 		public event System.Action				OnForceReloadOnce;
@@ -150,20 +151,11 @@ namespace PW.Core
 			Debug.Log("OnEnable graph, node count: " + nodes.Count);
 
 			graphProcessor.Initialize();
-
-			//add all existing nodes to the nodesDictionary
-			for (int i = 0; i < nodes.Count; i++)
-				nodesDictionary[nodes[i].id] = nodes[i];
-			nodesDictionary[inputNode.id] = inputNode;
-			nodesDictionary[outputNode.id] = outputNode;
 			
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
 				node.OnAfterGraphDeserialize(this);
-
-			//Build compute order list
-			UpdateComputeOrder();
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
@@ -171,6 +163,7 @@ namespace PW.Core
 			OnLinkRemoved += LinkChangedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
+			OnAllNodeReady += NodeReadyCallback;
 		}
 
 		public virtual void OnDisable()
@@ -181,6 +174,31 @@ namespace PW.Core
 			OnLinkRemoved -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
+			OnAllNodeReady -= NodeReadyCallback;
+		}
+
+		public void NotifyNodeReady(PWNode node)
+		{
+			//check if one node isn't ready, return
+			if (nodes.Any(n => !n.ready))
+				return ;
+			
+			if (OnAllNodeReady != null)
+				OnAllNodeReady();
+		}
+
+		void NodeReadyCallback()
+		{
+			//when all nodes are ready, we can use their datas
+
+			//add all existing nodes to the nodesDictionary
+			for (int i = 0; i < nodes.Count; i++)
+				nodesDictionary[nodes[i].id] = nodes[i];
+			nodesDictionary[inputNode.id] = inputNode;
+			nodesDictionary[outputNode.id] = outputNode;
+			
+			//Build compute order list
+			UpdateComputeOrder();
 		}
 
 		public float Process()

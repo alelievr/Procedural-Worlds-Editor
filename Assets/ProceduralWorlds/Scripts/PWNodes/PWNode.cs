@@ -33,9 +33,10 @@ namespace PW
 
 
 		//Useful state bools:
-		protected bool			isDependent { get; private set; }
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
 		public bool				isDragged = false;
+		[System.NonSerialized]
+		public bool				ready = false;
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
 		public bool				isSelected = false;
@@ -243,8 +244,12 @@ namespace PW
 				anchorField.OnAfterDeserialize(this);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.OnAfterDeserialize(this);
-				
+
 			UpdateWorkStatus();
+
+			//tell to the graph that this node is ready to work
+			this.ready = true;
+			graphRef.NotifyNodeReady(this);
 		}
 
 		//called only once, when the node is created
