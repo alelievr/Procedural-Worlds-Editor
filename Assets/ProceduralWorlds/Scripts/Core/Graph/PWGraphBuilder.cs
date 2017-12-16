@@ -5,11 +5,12 @@ using System;
 
 namespace PW.Core
 {
-	public class PWGraphBuilder {
+	public class PWGraphBuilder
+	{
 
 		PWGraph	graph;
 
-		List< string >	commands;
+		List< string >	commands = new List< string >();
 	
 		//private constructor so you can't instantiate the class
 		PWGraphBuilder() {}

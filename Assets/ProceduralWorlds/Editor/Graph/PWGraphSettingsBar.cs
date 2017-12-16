@@ -15,7 +15,6 @@ namespace PW.Editor
 		Vector2		scrollbarPosition;
 		
 		//Style datas:
-		Texture2D	defaultBackgroundTexture;
 		GUIStyle	prefixLabelStyle;
 
 		public PWGraphSettingsBar(PWGraph graph)
@@ -32,7 +31,7 @@ namespace PW.Editor
 		{
 			Event	e = Event.current;
 			
-			GUI.DrawTexture(currentRect, defaultBackgroundTexture);
+			GUI.DrawTexture(currentRect, PWGraphEditor.defaultBackgroundTexture);
 	
 			//add the texturepreviewRect size:
 			Rect previewRect = new Rect(0, 0, currentRect.width, currentRect.width);
@@ -75,8 +74,8 @@ namespace PW.Editor
 
 					//TODO: draw graph child specific GUI
 	
-					mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
-					mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+					// mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+					// mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
 	
 					EditorGUILayout.Separator();
 	

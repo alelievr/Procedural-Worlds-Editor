@@ -16,9 +16,6 @@ namespace PW
 	
 		public PWGUIMeshPreview(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Color, float distance = 10)
 		{
-			var flags = BindingFlags.Static | BindingFlags.NonPublic;
-			var propInfo = typeof(Camera).GetProperty("PreviewCullingLayer", flags);
-	
 			previewUtility = new PreviewRenderUtility(true);
 			#if UNITY_2017
 				cam = previewUtility.camera;
@@ -30,7 +27,7 @@ namespace PW
 			cam.farClipPlane = 10000;
 			cam.nearClipPlane = 0.001f;
 			cam.clearFlags = clearFlags;
-			cam.transform.position = (new Vector3(0, 0, -1)).normalized * distance;
+			cam.transform.position = (new Vector3(0, 0, -5)).normalized * distance;
 
 			cam.transform.rotation = Quaternion.Euler(0, 0, 0);
 		}
@@ -78,7 +75,7 @@ namespace PW
 	
 		public void Render(Rect rect, Mesh mesh, Material mat = null)
 		{
-			previewUtility.BeginPreview(rect, "");
+			previewUtility.BeginPreview(rect, GUIStyle.none);
 
 			previewUtility.DrawMesh(mesh, Vector3.zero, Quaternion.identity, mat, 0);
 	

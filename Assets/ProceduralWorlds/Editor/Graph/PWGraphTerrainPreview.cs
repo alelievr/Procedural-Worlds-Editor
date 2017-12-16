@@ -20,8 +20,6 @@ namespace PW.Editor
 	public class PWGraphTerrainPreview
 	{
 		//TODO: protection for multiple graph windows opened at same time
-		
-		public PWTerrainBase	terrainMaterializer;
 
 		//preview fields
 		GameObject				previewScene;
@@ -90,8 +88,6 @@ namespace PW.Editor
 				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
 			if (previewCamera != null && previewCameraRenderTexture != null)
 				previewCamera.targetTexture = previewCameraRenderTexture;
-			if (terrainMaterializer == null)
-				terrainMaterializer = previewScene.GetComponentInChildren< PWTerrainBase >();
 		}
 
 		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainType terrainType)
@@ -118,8 +114,12 @@ namespace PW.Editor
 			{
 				Vector2 move = new Vector2(-e.delta.x / 8, e.delta.y / 8);
 
+				//camera pan movement
 				previewCamera.transform.position += new Vector3(move.x, 0, move.y);
-				terrainMaterializer.position = previewCamera.transform.position;
+
+				//move the terrain materializer so it generate terrain around the camera
+				if (PWGraphTerrainManager.terrainReference != null)
+					PWGraphTerrainManager.terrainReference.transform.position = previewCamera.transform.position;
 				e.Use();
 			}
 		}

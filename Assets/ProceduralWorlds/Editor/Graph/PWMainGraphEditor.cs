@@ -28,7 +28,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	
 	//events fields
 	Vector2				lastMousePosition;
-	Vector2				windowSize;
 	[System.NonSerializedAttribute]
 	Vector2				currentMousePosition;
 
@@ -130,7 +129,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 		h1.Begin();
 		Rect p1 = h2.Begin();
-		DrawLeftBar(p1);
+		settingsBar.DrawSettingsBar(p1);
 		Rect g = h2.Split(resizeHandleColor);
 		optionBar.DrawOptionBar(g);
 		h2.End();
@@ -179,7 +178,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				terrainMaterializer.UpdateChunks();
 			}*/
 
-//TODO: eventize
 	void WindowResizeCallback(Vector2 newSize)
 	{
 		//calcul the ratio for the window move:

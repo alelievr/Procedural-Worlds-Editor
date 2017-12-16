@@ -4,14 +4,12 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeGameObject : PWNode {
+	public class PWNodeGameObject : PWNode
+	{
 
 		[PWOutput("object")]
 		public GameObject		outputGameObject;
-		PWGUIMeshPreview		objectPreview = new PWGUIMeshPreview();
 
-		[SerializeField]
-		GameObject				previewGO;
 		[SerializeField]
 		bool					showPreview;
 		[SerializeField]
@@ -21,27 +19,14 @@ namespace PW.Node
 		{
 			name = "GameObject";
 			renamable = true;
-			objectPreview.UpdateObjects(previewGO);
 
 			UpdateGameObject();
 		}
 
 		void UpdateGameObject()
 		{
-			if (outputGameObject == null || objectPreview == null) 
+			if (outputGameObject == null) 
 				return ;
-			
-			DestroyImmediate(previewGO);
-
-			previewGO = GameObject.Instantiate(outputGameObject, Vector3.zero, Quaternion.identity);
-			Debug.Log("instanciated new GO: " + previewGO);
-			
-			if (showSceneHiddenObjects)
-				previewGO.hideFlags = HideFlags.DontSave;
-			else
-				previewGO.hideFlags = HideFlags.HideAndDontSave;
-			
-			objectPreview.UpdateObjects(previewGO);
 		}
 
 		public override void OnNodeGUI()
@@ -56,13 +41,9 @@ namespace PW.Node
 			if (EditorGUI.EndChangeCheck())
 				UpdateGameObject();
 
+			Texture2D preview = AssetPreview.GetAssetPreview(outputGameObject);
 			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
-				objectPreview.Render();
-		}
-
-		public override void OnNodeDisable()
-		{
-			objectPreview.Cleanup();
+				EditorGUILayout.LabelField(new GUIContent(preview));
 		}
 
 		//no process needed

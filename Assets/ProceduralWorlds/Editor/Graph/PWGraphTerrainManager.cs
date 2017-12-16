@@ -8,9 +8,15 @@ namespace PW.Editor
 {
 	public class PWGraphTerrainManager
 	{
+		//terrain base game object reference
+		public static PWTerrainBase	terrainReference;
+
+		//Graph reference
+		PWGraph				graph;
+
 		PWTerrainBase		terrain;
 
-		PWGraph				graph;
+
 
 		public PWGraphTerrainManager(PWGraph graph)
 		{
@@ -19,11 +25,19 @@ namespace PW.Editor
 
 		public void LoadStyles()
 		{
-			
+
 		}
 	
 		public void DrawTerrainSettings(Rect settingsRect)
 		{
+			if (terrain == null)
+				terrain = GameObject.FindObjectOfType< PWTerrainBase >();
+
+			if (terrain == null)
+				return ;
+
+			terrainReference = terrain;
+
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
 					
 			terrain.chunkSize = graph.chunkSize;

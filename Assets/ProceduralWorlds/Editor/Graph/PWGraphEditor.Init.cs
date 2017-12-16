@@ -15,6 +15,7 @@ public partial class PWGraphEditor
 	
 	//editor textures:
 	public static Texture2D			nodeEditorBackgroundTexture;
+	public static Texture2D			defaultBackgroundTexture;
 	
 	//editor skin:
 	protected GUISkin				PWGUISkin;

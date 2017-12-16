@@ -12,15 +12,16 @@ namespace PW.Node
 
 		[SerializeField]
 		bool					showPreview;
-		[SerializeField]
-		bool					showSceneHiddenObjects = false;
 
 		public override void OnNodeCreation()
 		{
 			renamable = true;
 			name = "Material";
-			
-			matPreview = new PWGUIMaterialPreview(outputMaterial);
+		}
+
+		public override void OnNodeEnable()
+		{
+			matPreview = new PWGUIMaterialPreview();
 		}
 		
 		public override void OnNodeGUI()
@@ -31,11 +32,6 @@ namespace PW.Node
 			outputMaterial = EditorGUILayout.ObjectField(outputMaterial, typeof(Material), false) as Material;
 			if (EditorGUI.EndChangeCheck())
 				matPreview.SetMaterial(outputMaterial);
-			
-			EditorGUI.BeginChangeCheck();
-			showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
-			if (EditorGUI.EndChangeCheck())
-				matPreview.UpdateShowSceneHiddenObjects(showSceneHiddenObjects);
 			
 			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
 				matPreview.Render();

@@ -21,8 +21,6 @@ namespace PW.Node
 		[SerializeField]
 		Vector2					offset;
 		[SerializeField]
-		bool					showSceneHiddenObjects = false;
-		[SerializeField]
 		bool					preview = true;
 
 		PWGUIMaterialPreview	matPreview;
@@ -51,11 +49,6 @@ namespace PW.Node
 					offset = EditorGUILayout.Vector2Field("offset", offset);
 	
 					UpdateMaterialProperties();
-					
-					EditorGUI.BeginChangeCheck();
-					showSceneHiddenObjects = EditorGUILayout.Toggle("Show scene hidden objects", showSceneHiddenObjects);
-					if (EditorGUI.EndChangeCheck())
-						matPreview.UpdateShowSceneHiddenObjects(showSceneHiddenObjects);
 					
 					if ((preview = EditorGUILayout.Foldout(preview, "preview")))
 						matPreview.Render();
