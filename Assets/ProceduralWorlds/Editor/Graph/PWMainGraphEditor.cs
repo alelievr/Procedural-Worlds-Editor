@@ -34,7 +34,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	//terrain materializer
 	PWTerrainBase		terrainMaterializer;
-	int					chunkRenderDistance = 4; //chunk render distance
 
 	//multi-node selection
 	[System.NonSerializedAttribute]
@@ -119,9 +118,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			return ;
 		}
 		
-		if (e.type == EventType.Layout)
-			ProcessPreviewScene(mainGraph.outputType);
-
 		if (terrainMaterializer == null)
 		{
 			GameObject gtm = GameObject.Find("PWPreviewTerrain");

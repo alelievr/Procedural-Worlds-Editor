@@ -10,13 +10,11 @@ public partial class PWGraphEditor
 {
 
 	//editor styles:
-	protected static GUIStyle		prefixLabelStyle;
 	protected static GUIStyle		defaultNodeWinow;
 	protected static GUIStyle		defaultNodeWinowSelected;
 	
 	//editor textures:
 	public static Texture2D			nodeEditorBackgroundTexture;
-	public static Texture2D			defaultBackgroundTexture;
 	
 	//editor skin:
 	protected GUISkin				PWGUISkin;
@@ -76,12 +74,8 @@ public partial class PWGraphEditor
 	{
 		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
 
-		//initialize if null
-
 		selectionStyle = PWGUISkin.FindStyle("Selection");
 
-
-		prefixLabelStyle = PWGUISkin.FindStyle("PrefixLabel");
 
 		nodeStyle = PWGUISkin.FindStyle("Node");
 		nodeSelectedStyle = PWGUISkin.FindStyle("NodeSelected");

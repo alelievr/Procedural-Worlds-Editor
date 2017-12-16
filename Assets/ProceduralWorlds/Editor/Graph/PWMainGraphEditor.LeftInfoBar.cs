@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEditor;
 
 //Left info bar + current selected node Info
-public partial class PWMainGraphEditor {
+public partial class PWMainGraphEditor
+{
 
 	void DrawLeftBar(Rect currentRect)
 	{
@@ -28,7 +29,7 @@ public partial class PWMainGraphEditor {
 					OnEnable();
 
 				GUI.SetNextControlName("PWName");
-				mainGraph.name = EditorGUILayout.TextField("ProceduralWorld name: ", mainGraph.name);
+				graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
 
 				if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
 					&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)

@@ -8,12 +8,14 @@ namespace PW
 	public enum PWChunkLoadPatternMode
 	{
 		CUBIC,
+		// FRUSTUM,
 		// PRIORITY_CUBIC,
 		// PRIORITY_CIRCLE,
 	}
 
 	[System.Serializable]
-	public abstract class PWTerrainBase : MonoBehaviour {
+	public abstract class PWTerrainBase : MonoBehaviour
+	{
 		public Vector3					position;
 		public int						renderDistance;
 		public int						chunkSize;
@@ -33,7 +35,8 @@ namespace PW
 		private	int				oldSeed = 0;
 		private int				WorkerGenerationId = 42;
 		
-		void Start () {
+		void Start ()
+		{
 			InitGraph(graph);
 		}
 

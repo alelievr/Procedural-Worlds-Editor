@@ -10,7 +10,7 @@ namespace PW.Node
 		public Mesh			outputMesh;
 
 		GameObject			meshRenderObject;
-		PWGUIObjectPreview	objectPreview = new PWGUIObjectPreview();
+		PWGUIMeshPreview	objectPreview = new PWGUIMeshPreview();
 		Material			previewMaterial;
 
 		[SerializeField]

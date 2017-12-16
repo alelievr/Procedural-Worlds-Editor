@@ -8,7 +8,7 @@ namespace PW.Node
 
 		[PWOutput("object")]
 		public GameObject		outputGameObject;
-		PWGUIObjectPreview		objectPreview = new PWGUIObjectPreview();
+		PWGUIMeshPreview		objectPreview = new PWGUIMeshPreview();
 
 		[SerializeField]
 		GameObject				previewGO;

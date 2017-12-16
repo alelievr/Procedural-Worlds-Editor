@@ -41,12 +41,16 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	//Layout additional windows
 	protected PWGraphOptionBar			optionBar;
+	protected PWGraphTerrainManager		terrainManager;
 	protected PWGraphNodeSelectorBar	nodeSelectorBar;
-	protected PWGraphTerrainPreviewBar	terrainPreviewBar;
+	protected PWGraphSettingsBar		settingsBar;
 
 
 	//custom editor events:
+	//fired whe the user resize the window
 	public event Action< Vector2 >	OnWindowResize;
+	//fired when a graph is loaded/unloaded
+	public event Action< PWGraph >	OnGraphChanged;
 
 
 	public override void OnEnable()
@@ -147,14 +151,15 @@ public partial class PWGraphEditor : PWEditorWindow
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
 
-		Debug.Log("Load Graph !");
 		//update graph in views:
 		optionBar = new PWGraphOptionBar(graph);
+		terrainManager = new PWGraphTerrainManager(graph);
 		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);
-		terrainPreviewBar = new PWGraphTerrainPreviewBar(graph);
+		settingsBar = new PWGraphSettingsBar(graph);
+		terrainManager.LoadStyles();
 		optionBar.LoadStyles();
 		nodeSelectorBar.LoadStyles();
-		terrainPreviewBar.LoadStyles();
+		settingsBar.LoadStyles();
 
 		if (!graph.initialized)
 		{
@@ -162,6 +167,9 @@ public partial class PWGraphEditor : PWEditorWindow
 			graph.OnEnable();
 			SaveGraph();
 		}
+
+		if (OnGraphChanged != null)
+			OnGraphChanged(graph);
 	}
 
 	public void UnloadGraph()
@@ -173,6 +181,9 @@ public partial class PWGraphEditor : PWEditorWindow
 		SaveGraph();
 
 		Resources.UnloadAsset(graph);
+
+		if (OnGraphChanged != null)
+			OnGraphChanged(null);
 	}
 
 	public override void OnDisable()

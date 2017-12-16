@@ -6,7 +6,7 @@ namespace PW
 {
 	public class PWGUIMaterialPreview {
 	
-		PWGUIObjectPreview		objectPreview;
+		PWGUIMeshPreview		objectPreview;
 
 		GameObject				previewGO;
 
@@ -14,7 +14,7 @@ namespace PW
 
 		public PWGUIMaterialPreview(Material mat = null)
 		{
-			objectPreview = new PWGUIObjectPreview(30, CameraClearFlags.Color, 2);
+			objectPreview = new PWGUIMeshPreview(30, CameraClearFlags.Color, 2);
 			previewGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 			previewGO.hideFlags = HideFlags.HideAndDontSave;
 			if (mat)
