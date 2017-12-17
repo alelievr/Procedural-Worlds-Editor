@@ -28,13 +28,10 @@ namespace PW.Node
 		{
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
-			EditorGUI.BeginChangeCheck();
 			outputMaterial = EditorGUILayout.ObjectField(outputMaterial, typeof(Material), false) as Material;
-			if (EditorGUI.EndChangeCheck())
-				matPreview.SetMaterial(outputMaterial);
 			
 			if ((showPreview = EditorGUILayout.Foldout(showPreview, "preview")))
-				matPreview.Render();
+				matPreview.Render(outputMaterial);
 		}
 		
 		public override void OnNodeDisable()

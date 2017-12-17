@@ -13,8 +13,13 @@ namespace PW
 		Camera						cam;
 
 		Rect						previewRect = new Rect(0, 0, 170, 170);
+
+		bool						isRotating = false;
+		bool						isPanning = false;
+
+		Event						e { get { return Event.current; } }
 	
-		public PWGUIMeshPreview(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Color, float distance = 10)
+		public PWGUIMeshPreview(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Color, float distance = 2.3f)
 		{
 			previewUtility = new PreviewRenderUtility(true);
 			#if UNITY_2017
@@ -27,33 +32,45 @@ namespace PW
 			cam.farClipPlane = 10000;
 			cam.nearClipPlane = 0.001f;
 			cam.clearFlags = clearFlags;
-			cam.transform.position = (new Vector3(0, 0, -5)).normalized * distance;
+			cam.transform.position = (new Vector3(0, 0, -8)).normalized * distance;
 
 			cam.transform.rotation = Quaternion.Euler(0, 0, 0);
 		}
 	
 		void RotateCamera()
 		{
-			var e = Event.current;
-			
 			if (previewRect.Contains(e.mousePosition))
 			{
-				if (e.type == EventType.MouseDrag && e.button == 0)
+				if (e.type == EventType.MouseDown)
 				{
-					cam.transform.Rotate(e.delta);
-					e.Use();
-				}
-				if (e.type == EventType.MouseDrag && e.button == 2)
-				{
-					Vector3 panDirection = cam.transform.right * e.delta.x - cam.transform.up * e.delta.y;
-					cam.transform.position += panDirection / 10;
+					if (e.button == 0 && !e.command)
+						isRotating = true;
+					if (e.button == 2 || (e.button == 0 && e.command))
+						isPanning = true;
 					e.Use();
 				}
 				if (e.type == EventType.ScrollWheel)
 				{
-					cam.transform.position *= 1 + (e.delta.y / 10);
+					cam.transform.position *= 1 + (e.delta.y / 40);
 					e.Use();
 				}
+			}
+			if (e.rawType == EventType.MouseUp)
+			{
+				isPanning = false;
+				isRotating = false;
+			}
+			if (isRotating && e.rawType == EventType.MouseDrag)
+			{
+				cam.transform.RotateAround(Vector3.zero, cam.transform.up, e.delta.x);
+				cam.transform.RotateAround(Vector3.zero, cam.transform.right, e.delta.y);
+				e.Use();
+			}
+			if (isPanning && e.rawType == EventType.MouseDrag)
+			{
+				Vector3 panDirection = cam.transform.right * e.delta.x - cam.transform.up * e.delta.y;
+				cam.transform.position -= panDirection / 50;
+				e.Use();
 			}
 		}
 	
@@ -75,11 +92,15 @@ namespace PW
 	
 		public void Render(Rect rect, Mesh mesh, Material mat = null)
 		{
-			previewUtility.BeginPreview(rect, GUIStyle.none);
-
-			previewUtility.DrawMesh(mesh, Vector3.zero, Quaternion.identity, mat, 0);
-	
-			previewUtility.EndAndDrawPreview(rect);
+			if (e.type == EventType.Repaint)
+			{
+				previewUtility.BeginPreview(rect, GUIStyle.none);
+				{
+					previewUtility.DrawMesh(mesh, Vector3.zero, Quaternion.identity, mat, 0);
+					previewUtility.Render(true, true);
+				}
+				previewUtility.EndAndDrawPreview(rect);
+			}
 		}
 	
 		public void Cleanup()

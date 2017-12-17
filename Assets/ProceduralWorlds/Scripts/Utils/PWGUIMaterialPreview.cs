@@ -11,34 +11,26 @@ namespace PW
 		PWGUIMeshPreview		objectPreview;
 
 		Mesh					previewMesh;
-		Material				previewMaterial;
 
 		bool					showSceneHiddenObjects;
 
-		public PWGUIMaterialPreview(Material mat = null)
+		public PWGUIMaterialPreview(PrimitiveType previewPrimitive = PrimitiveType.Sphere)
 		{
-			objectPreview = new PWGUIMeshPreview(30, CameraClearFlags.Color, 2);
+			objectPreview = new PWGUIMeshPreview();
 
-			//getting access to the primitive sphere mesh
-			//TODO: possibility to choose between different meshes (and meshes in ressources ?)
-			GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			GameObject tmp = GameObject.CreatePrimitive(previewPrimitive);
 			previewMesh = tmp.GetComponent< MeshFilter >().sharedMesh;
 			GameObject.DestroyImmediate(tmp);
 		}
 
-		public void SetMaterial(Material mat)
+		public void Render(Material mat)
 		{
-			previewMaterial = mat;
+			objectPreview.Render(previewMesh, mat);
 		}
 
-		public void Render()
+		public void Render(Rect r, Material mat)
 		{
-			objectPreview.Render(previewMesh, previewMaterial);
-		}
-
-		public void Render(Rect r)
-		{
-			objectPreview.Render(r, previewMesh, previewMaterial);
+			objectPreview.Render(r, previewMesh, mat);
 		}
 
 		public void Cleanup()

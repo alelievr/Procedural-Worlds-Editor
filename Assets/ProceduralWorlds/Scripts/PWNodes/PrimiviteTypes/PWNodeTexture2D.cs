@@ -51,7 +51,7 @@ namespace PW.Node
 					UpdateMaterialProperties();
 					
 					if ((preview = EditorGUILayout.Foldout(preview, "preview")))
-						matPreview.Render();
+						matPreview.Render(outputMaterial);
 				}
 				else if (outputTexture != null)
 					if ((preview = EditorGUILayout.Foldout(preview, "preview")))
@@ -91,7 +91,6 @@ namespace PW.Node
 			outputMaterial.SetTextureScale("_MainTex", tiling);
 			if (outputTexture != null)
 				outputMaterial.SetTexture("_MainTex", outputTexture);
-			matPreview.SetMaterial(outputMaterial);
 		}
 
 		public override void OnNodeProcess()

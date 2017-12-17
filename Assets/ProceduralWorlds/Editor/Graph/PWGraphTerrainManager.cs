@@ -17,7 +17,6 @@ namespace PW.Editor
 		PWTerrainBase		terrain;
 
 
-
 		public PWGraphTerrainManager(PWGraph graph)
 		{
 			this.graph = graph;
