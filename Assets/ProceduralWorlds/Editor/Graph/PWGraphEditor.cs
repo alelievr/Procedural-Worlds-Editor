@@ -41,7 +41,6 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	//Layout additional windows
 	protected PWGraphOptionBar			optionBar;
-	protected PWGraphTerrainManager		terrainManager;
 	protected PWGraphNodeSelectorBar	nodeSelectorBar;
 	protected PWGraphSettingsBar		settingsBar;
 
@@ -140,6 +139,8 @@ public partial class PWGraphEditor : PWEditorWindow
 	public void LoadGraph(PWGraph graph)
 	{
 		this.graph = graph;
+
+		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
 		
 		//attach to graph events
 		graph.OnNodeAdded += OnNodeAddedCallback;
@@ -151,14 +152,11 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		//update graph in views:
 		optionBar = new PWGraphOptionBar(graph);
-		terrainManager = new PWGraphTerrainManager(graph);
 		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);
 		settingsBar = new PWGraphSettingsBar(graph);
-		terrainManager.LoadStyles();
 		optionBar.LoadStyles();
 		nodeSelectorBar.LoadStyles();
 		settingsBar.LoadStyles();
-		Debug.Log("Loaded styles !");
 
 		if (!graph.initialized)
 		{

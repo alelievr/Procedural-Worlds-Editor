@@ -7,6 +7,7 @@ using System;
 
 using Debug = UnityEngine.Debug;
 using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
+using Object = UnityEngine.Object;
 
 namespace PW.Core
 {
@@ -156,7 +157,10 @@ namespace PW.Core
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
+			{
+				Debug.Log("Deserialized node from: " + GetInstanceID() + ": " + node);
 				node.OnAfterGraphDeserialize(this);
+			}
 			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
@@ -180,7 +184,7 @@ namespace PW.Core
 
 		public void NotifyNodeReady(PWNode node)
 		{
-			//check if one node isn't ready, return
+			//if one node isn't ready, return
 			if (nodes.Any(n => !n.ready))
 				return ;
 			
@@ -200,6 +204,54 @@ namespace PW.Core
 			
 			//Build compute order list
 			UpdateComputeOrder();
+		}
+
+		//must be called after a Process() to get back datas
+		public T GetOutput< T >()
+		{
+			//get the PWArray from the graph output node
+			var outputArray = outputNode.inputAnchorFields.First().fieldValue as PWArray< object >;
+			Debug.Log("field value: " + outputArray);
+
+			//find if there are any object in the array of type T
+			foreach (var obj in outputArray)
+				if (obj.GetType().IsAssignableFrom(typeof(T)))
+				{
+					Debug.Log("found output value: " + obj);
+					return (T)obj;
+				}
+			
+			return default(T);
+		}
+
+		//Durty Clone cauz unity ScriptableObject does not implement a Clone method >.<
+		public PWGraph Clone()
+		{
+			//Instancing a new graph fmor this one will duplicate the object but not the nodes
+			// so the OnEnable function will bind this new graph to our nodes, to revert
+			// that we need to clone each nodes and assign them to this new graph.
+			PWGraph clonedGraph = Object.Instantiate(this);
+
+			clonedGraph.nodes.Clear();
+			foreach (var node in nodes)
+				clonedGraph.nodes.Add(Object.Instantiate(node));
+			
+			//reenable the new graph so the new nodes are taken in account
+			clonedGraph.OnDisable();
+			clonedGraph.OnEnable();
+
+			//reenable all clone graph nodes
+			foreach (var node in clonedGraph.nodes)
+			{
+				node.OnDisable();
+				node.OnEnable();
+			}
+
+			//reenable our graph to rebind our nodes to our graph
+			OnDisable();
+			OnEnable();
+
+			return clonedGraph;
 		}
 
 		public float Process()
@@ -235,7 +287,7 @@ namespace PW.Core
 
 		public bool Execute(string command)
 		{
-			
+			Debug.Log("TODO");
 			return false;
 		}
 

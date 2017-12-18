@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System;
 using PW.Core;
 using PW;
 
@@ -19,6 +20,8 @@ namespace PW.Editor
 		
 		//Style datas:
 		GUIStyle				prefixLabelStyle;
+
+		public Action< Rect >	onDrawAdditionalSettings;
 
 		public PWGraphSettingsBar(PWGraph graph)
 		{
@@ -42,11 +45,9 @@ namespace PW.Editor
 				EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
 				{
 					Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
-					previewRect.height = currentRect.width;
 	
 					//TODO: way to specify camera type info the graph
-					// terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
-					EditorGUI.DrawRect(previewRect, Color.blue);
+					terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
 				}
 				EditorGUILayout.EndVertical();
 
@@ -80,6 +81,8 @@ namespace PW.Editor
 					EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
 					graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
 					EditorGUILayout.EndHorizontal();
+
+					EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
 	
 					EditorGUILayout.Separator();
 
@@ -101,6 +104,15 @@ namespace PW.Editor
 	
 				}
 				EditorGUILayout.EndVertical();
+
+				if (onDrawAdditionalSettings != null)
+				{
+					Rect r = EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+					{
+						onDrawAdditionalSettings(r);
+					}
+					EditorGUILayout.EndVertical();
+				}
 			}
 			EditorGUILayout.EndScrollView();
 			

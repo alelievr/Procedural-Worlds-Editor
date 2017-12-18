@@ -40,46 +40,37 @@ namespace PW.Editor
 			terrainReference = terrain;
 
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
-					
+
+			if (GUILayout.Button("Generate terrain"))
+				ReloadChunks();
+			
 			terrain.chunkSize = graph.chunkSize;
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them
 		public void ReloadChunks()
 		{
-			if (graph)
+			if (EditorApplication.isPlaying || EditorApplication.isPaused)
 			{
-
+				Debug.LogError("[Editor Terrain Manager] can't reload chunks from the editor in play mode");
+				return ;
 			}
-	/*		if (e.type == EventType.Layout)
+
+			PWMainGraph mainGraph = graph as PWMainGraph;
+
+			if (mainGraph != null)
 			{
-				if (graph.graphNeedReload)
-				{
-					graphNeedReload = false;
-					
-					terrainMaterializer.DestroyAllChunks();
+				terrain.DestroyAllChunks();
 
-					//load another instance of the current graph to separate calls:
-					if (terrainMaterializer.graph != null && terrainMaterializer.graph.GetHashCode() != graph.GetHashCode())
-						DestroyImmediate(terrainMaterializer.graph);
-					terrainMaterializer.InitGraph(CloneGraph(graph));
+				//if the graph we have is not the same / have been modified since last generation, we replace it
+				if (terrain.graph != null && terrain.graph.GetHashCode() != graph.GetHashCode())
+					GameObject.DestroyImmediate(terrain.graph);
 
-					Debug.Log("graph: " + graph.GetHashCode() + " , terrainMat: " + terrainMaterializer.graph.GetHashCode());
-					//process the instance of the graph in our editor so we can see datas on chunk 0, 0, 0
-					graph.realMode = false;
-					graph.ForeachAllNodes(n => n.Updategraph(graph));
-					graph.UpdateChunkPosition(Vector3.zero);
+				terrain.InitGraph(graph.Clone() as PWMainGraph);
 
-					if (graphNeedReloadOnce)
-						graph.ProcessGraphOnce();
-					graphNeedReloadOnce = false;
-
-					graph.ProcessGraph();
-				}
-				//updateChunks will update and generate new chunks if needed.
-				//TODOMAYBE: remove this when workers will be added to the Terrain.
-				terrainMaterializer.UpdateChunks();
-			}*/
+				//updateChunks will regenerate all deleted chunks
+				terrain.UpdateChunks();
+			}
 		}
 	}
 }

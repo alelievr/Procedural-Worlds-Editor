@@ -20,6 +20,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	[SerializeField]
 	PWGraphLayout		layout = new PWGraphLayout();
 	
+	//terrain manager to configure terrain generation / preview
+	PWGraphTerrainManager		terrainManager;
+	
 	//graph, node, anchors and links control and 
 	bool				previewMouseDrag = false;
 	[System.NonSerializedAttribute]
@@ -75,6 +78,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		LoadAssets();
 
 		OnWindowResize += WindowResizeCallback;
+		OnGraphChanged += GraphChangedCallback;
 		
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
@@ -86,6 +90,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		base.OnDisable();
 
 		OnWindowResize -= WindowResizeCallback;
+		OnGraphChanged -= GraphChangedCallback;
 	}
 
 #endregion
@@ -137,6 +142,18 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	void WindowResizeCallback(Vector2 newSize)
 	{
 		layout.ResizeWindow(newSize, position);
+	}
+
+	void GraphChangedCallback(PWGraph newGraph)
+	{
+		terrainManager = new PWGraphTerrainManager(graph);
+		
+		terrainManager.LoadStyles();
+
+		settingsBar.onDrawAdditionalSettings = (rect) =>
+		{
+			terrainManager.DrawTerrainSettings(rect);
+		};
 	}
 
 	void LoadStyles()

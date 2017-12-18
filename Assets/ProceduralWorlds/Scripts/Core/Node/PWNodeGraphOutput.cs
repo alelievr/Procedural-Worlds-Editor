@@ -4,7 +4,8 @@ using UnityEngine;
 namespace PW.Core
 {
 	[System.SerializableAttribute]
-	public class PWNodeGraphOutput : PWNode {
+	public class PWNodeGraphOutput : PWNode
+	{
 
 		//allow everything as output type
 		[PWInput]

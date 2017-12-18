@@ -75,20 +75,12 @@ namespace PW
 			graph.Process();
 
 			oldSeed = seed;
-			//TODO: add the possibility to retreive in Terrain materializers others output.
-			object firstOutput = graphOutput.inputValues.At(0);
-			// graph.GetOutputChunk();
-			if (firstOutput != null)
-			{
-				if (firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))
-					return (ChunkData)firstOutput; //return the first value of output
-				else
-				{
-					Debug.LogWarning("graph first output is not a ChunkData");
-					return null;
-				}
-			}
-			return null;
+			ChunkData chunkData = graph.GetOutput< ChunkData >();
+
+			if (chunkData == null)
+				Debug.LogWarning("[PWTerrainBase] Graph output does not contains ChunkData type");
+			
+			return chunkData;
 		}
 
 		public virtual object OnChunkCreate(ChunkData terrainData, Vector3 pos)
