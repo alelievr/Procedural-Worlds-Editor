@@ -6,7 +6,8 @@ using System.IO;
 
 namespace PW
 {
-	public static class PWUtils {
+	public static class PWUtils
+	{
 	
 		static Texture2D	debugTexture;
 		static int			localMaxLog = 0;
@@ -153,6 +154,18 @@ namespace PW
 				return ;
 			Debug.LogWarning(p);
 			localMaxLogWarning++;
+		}
+
+		public static Texture2D CreateTexture2DColor(Color c)
+		{
+			Texture2D	ret;
+
+			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			ret.wrapMode = TextureWrapMode.Repeat;
+			ret.SetPixel(0, 0, c);
+			ret.Apply();
+
+			return ret;
 		}
     }
 }

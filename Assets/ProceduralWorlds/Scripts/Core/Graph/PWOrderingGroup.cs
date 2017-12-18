@@ -120,7 +120,7 @@ namespace PW.Core
 				() => {orderGroupRect.yMax += e.delta.y; orderGroupRect.xMax += e.delta.x;}
 			);
 
-			if (e.type == EventType.MouseUp)
+			if (e.rawType == EventType.MouseUp)
 				resizing = false;
 
 			//draw renamable name field
@@ -137,7 +137,7 @@ namespace PW.Core
 					moving = true;
 					e.Use();
 				}
-			if ((e.type == EventType.MouseUp || e.type == EventType.MouseDown) && !movePadRect.Contains(e.mousePosition))
+			if ((e.rawType == EventType.MouseUp || e.rawType == EventType.MouseDown) && !movePadRect.Contains(e.mousePosition))
 				moving = false;
 
 			if (moving && e.type == EventType.MouseDrag)

@@ -336,7 +336,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		}
 
 		//on mouse button up
-		if (e.type == EventType.MouseUp)
+		if (e.rawType == EventType.MouseUp)
 		{
 			if (editorEvents.isDraggingNode)
 				Undo.RecordObject(graph, "drag node");

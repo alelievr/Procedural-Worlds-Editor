@@ -44,7 +44,7 @@ namespace PW
 
 			//link anchor event is we release the mouse with a draggingLink.
 			if (editorEvents.isMouseOverAnchor)
-				if (e.type == EventType.MouseUp && editorEvents.isDraggingLink)
+				if (e.rawType == EventType.MouseUp && editorEvents.isDraggingLink)
 					OnAnchorLinked(editorEvents.mouseOverAnchor);
 
 			if (editorEvents.isDraggingLink)

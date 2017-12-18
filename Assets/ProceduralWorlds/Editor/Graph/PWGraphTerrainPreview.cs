@@ -17,6 +17,7 @@ namespace PW.Editor
 		// TopDownCubicView,
 	}
 
+	[System.Serializable]
 	public class PWGraphTerrainPreview
 	{
 		//TODO: protection for multiple graph windows opened at same time
@@ -26,6 +27,7 @@ namespace PW.Editor
 		Camera					previewCamera;
 		RenderTexture			previewCameraRenderTexture;
 
+		[SerializeField]
 		PWGraphTerrainPreviewType	loadedPreviewType;
 
 		Event					e { get { return Event.current; } }
@@ -43,15 +45,16 @@ namespace PW.Editor
 		{
 			//TODO: do the preview for Density field 1D
 			string		previewObjectName = previewTypeToPrefabNames[newPreviewType];
-			GameObject	newPreviewObject;
 
 			//find and delete old preview object if existing
-			if ((newPreviewObject = GameObject.Find(previewTypeToPrefabNames[loadedPreviewType])) != null)
-				GameObject.DestroyImmediate(newPreviewObject);
+			if ((previewScene = GameObject.Find(previewTypeToPrefabNames[loadedPreviewType])) != null)
+				GameObject.DestroyImmediate(previewScene);
+			if ((previewScene = GameObject.Find(previewTypeToPrefabNames[newPreviewType])) != null)
+				GameObject.DestroyImmediate(previewScene);
 			
 			//instantiate the new object prefab
-			newPreviewObject = PrefabUtility.InstantiatePrefab(Resources.Load< Object >(previewObjectName)) as GameObject;
-			newPreviewObject.name = previewObjectName;
+			previewScene = PrefabUtility.InstantiatePrefab(Resources.Load< Object >(previewObjectName)) as GameObject;
+			previewScene.name = previewObjectName;
 
 			loadedPreviewType = newPreviewType;
 		}
@@ -108,6 +111,9 @@ namespace PW.Editor
 				previewMouseDrag = true;
 				e.Use();
 			}
+
+			if (previewMouseDrag && e.rawType == EventType.MouseUp)
+				previewMouseDrag = false;
 
 			//mouse controls:
 			if (e.type == EventType.MouseDrag && previewMouseDrag)

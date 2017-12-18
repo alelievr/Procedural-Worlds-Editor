@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using PW.Core;
 using PW.Node;
+using PW;
 using System;
 
 public partial class PWGraphEditor
@@ -34,20 +35,12 @@ public partial class PWGraphEditor
 
 	static void LoadAssets()
 	{
-		Func< Color, Texture2D > CreateTexture2DColor = (Color c) => {
-			Texture2D	ret;
-			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-			ret.wrapMode = TextureWrapMode.Repeat;
-			ret.SetPixel(0, 0, c);
-			ret.Apply();
-			return ret;
-		};
-
 		//generate background colors:
+		//TOOD: colorsphemeize
         Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
 		
 		//load backgrounds and colors as texture
-		defaultBackgroundTexture = CreateTexture2DColor(defaultBackgroundColor);
+		defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
 		nodeEditorBackgroundTexture = Resources.Load< Texture2D >("nodeEditorBackground");
 		
 		//style

@@ -41,7 +41,7 @@ namespace PW
 				isDragged = true;
 				editorEvents.isDraggingNode = true;
 			}
-			if (e.type == EventType.MouseUp)
+			if (e.rawType == EventType.MouseUp)
 			{
 				isDragged = false;
 				editorEvents.isDraggingNode = false;

@@ -83,9 +83,9 @@ namespace PW.Core
 					dragging = true;
 			}
 			if (closeIconRect.Contains(e.mousePosition))
-				if (e.type == EventType.MouseUp)
+				if (e.rawType == EventType.MouseUp)
 					data.guiSettings.InActive();
-			if (e.type == EventType.MouseUp)
+			if (e.rawType == EventType.MouseUp)
 				dragging = false;
 			
 			if (dragging && e.type == EventType.mouseDrag)
