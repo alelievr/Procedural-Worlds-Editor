@@ -90,16 +90,15 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
-
+		
+		//disable events if mouse is above an eventMask Rect.
+		//TODO: test this
+		MaskEvents();
+	
 		Rect pos = position;
 		pos.position = Vector2.zero;
 		graph.zoomPanCorrection = GUIScaleUtility.BeginScale(ref pos, pos.size / 2, 1f / graph.scale, false);
 		{
-			//disable events if mouse is above an eventMask Rect.
-			//TODO: test this
-			if (MaskEvents())
-				return ;
-	
 			//draw the background:
 			RenderBackground();
 	
@@ -120,15 +119,15 @@ public partial class PWGraphEditor : PWEditorWindow
 			//reset events for the next frame
 			editorEvents.Reset();
 	
-			//restore masked events:
-			UnMaskEvents();
-	
 			//TODO: fix ?
 			if (e.type == EventType.Repaint)
 				Repaint();
 		}
 		GUIScaleUtility.EndScale();
-
+	
+		//restore masked events:
+		UnMaskEvents();
+		
 		//save the size of the window
 		windowSize = position.size;
 	}
@@ -208,9 +207,10 @@ public partial class PWGraphEditor : PWEditorWindow
 		savedEventType = e.type;
 		
 		//check if we have an event outside of the graph event masks
-		if (e.isMouse || e.isKey || e.isScrollWheel)
+		if (e.type != EventType.Repaint && e.type != EventType.Layout)
 		{
 			foreach (var eventMask in eventMasks)
+			{
 				if (eventMask.Value.Contains(e.mousePosition))
 				{
 					//if there is, we say to ignore the event and restore it later
@@ -218,7 +218,9 @@ public partial class PWGraphEditor : PWEditorWindow
 					e.type = EventType.Ignore;
 					return true;
 				}
+			}
 		}
+
 		return false;
 	}
 

@@ -223,10 +223,6 @@ namespace PW
 
 			if (graphRef != null)
 				OnAfterNodeAndGraphDeserialized();
-			
-			OnNodeEnable();
-
-			OnAnchorEnable();
 		}
 
 		//here both our node and graph have been deserialized, we can now use it's datas
@@ -246,6 +242,10 @@ namespace PW
 				anchorField.OnAfterDeserialize(this);
 
 			UpdateWorkStatus();
+			
+			//send OnEnabled events
+			OnNodeEnable();
+			OnAnchorEnable();
 
 			//tell to the graph that this node is ready to work
 			this.ready = true;

@@ -2,10 +2,13 @@
 using UnityEditor;
 
 [System.SerializableAttribute]
-public class HorizontalSplitView {
+public class HorizontalSplitView
+{
 
 	[SerializeField]
-	public float	handlerPosition;
+	public float	handlePosition;
+	[SerializeField]
+	public int		handleWidth = 4;
 	[SerializeField]
 	int				internHandlerPosition;
 	[SerializeField]
@@ -22,12 +25,9 @@ public class HorizontalSplitView {
 	[SerializeField]
 	Rect			savedBeginRect;
 
-	[SerializeField]
-	int				handleWidth = 4;
-
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
 	{
-		handlerPosition = hP;
+		handlePosition = hP;
 		minWidth = min;
 		maxWidth = max;
 	}
@@ -36,7 +36,7 @@ public class HorizontalSplitView {
 	{
 		Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 		
-		internHandlerPosition = (int)handlerPosition;
+		internHandlerPosition = (int)handlePosition;
 		if (tmpRect.width > 0f)
 			availableRect = tmpRect;
 
@@ -60,12 +60,12 @@ public class HorizontalSplitView {
 		if (Event.current.type == EventType.mouseDown && handleCatchRect.Contains(Event.current.mousePosition))
 			resize = true;
 		if (lastMouseX != -1 && resize)
-			handlerPosition += Event.current.mousePosition.x - lastMouseX;
-		if (Event.current.type == EventType.MouseUp)
+			handlePosition += Event.current.mousePosition.x - lastMouseX;
+		if (Event.current.rawType == EventType.MouseUp)
 			resize = false;
 		lastMouseX = Event.current.mousePosition.x;
-		internHandlerPosition = (int)Mathf.Clamp(handlerPosition, minWidth, maxWidth);
-		handlerPosition = Mathf.Clamp(handlerPosition, minWidth, maxWidth);
+		internHandlerPosition = (int)Mathf.Clamp(handlePosition, minWidth, maxWidth);
+		handlePosition = Mathf.Clamp(handlePosition, minWidth, maxWidth);
 
 		if (resize && Event.current.isMouse)
 			Event.current.Use();

@@ -99,7 +99,7 @@ namespace PW.Editor
 				foreach (var nodeCase in nodeCategory.typeInfos.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
 				{
 					Rect clickableRect = DrawSelectorCase(nodeCase.name, nodeCategory.colorSchemeName);
-	
+
 					if (e.type == EventType.MouseDown && e.button == 0 && clickableRect.Contains(Event.current.mousePosition))
 						OnNodeClicked(nodeCase.type);
 				}
@@ -111,8 +111,8 @@ namespace PW.Editor
 			//draw selector bar background:
 			GUI.DrawTexture(currentRect, PWGraphEditor.defaultBackgroundTexture);
 	
-			//Pyramid of code:
-			GUI.BeginClip(currentRect);
+			//Pyramid of layouts:
+			// GUI.BeginClip(currentRect);
 			{
 				EditorGUILayout.BeginHorizontal(GUILayout.Width(currentRect.width), GUILayout.Height(currentRect.height));
 				{
@@ -128,7 +128,7 @@ namespace PW.Editor
 				}
 				EditorGUILayout.EndHorizontal();
 			}
-			GUI.EndClip();
+			// GUI.EndClip();
 		}
 	}
 }

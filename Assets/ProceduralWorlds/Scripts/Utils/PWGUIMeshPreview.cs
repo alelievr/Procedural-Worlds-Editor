@@ -17,6 +17,9 @@ namespace PW
 		bool						isRotating = false;
 		bool						isPanning = false;
 
+		float						zoom = 1;
+		float						defaultDistance;
+
 		Event						e { get { return Event.current; } }
 	
 		public PWGUIMeshPreview(float cameraFieldOfView = 30f, CameraClearFlags clearFlags = CameraClearFlags.Color, float distance = 2.3f)
@@ -35,6 +38,8 @@ namespace PW
 			cam.transform.position = (new Vector3(0, 0, -8)).normalized * distance;
 
 			cam.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+			defaultDistance = distance;
 		}
 	
 		void RotateCamera()
@@ -51,7 +56,9 @@ namespace PW
 				}
 				if (e.type == EventType.ScrollWheel)
 				{
-					cam.transform.position *= 1 + (e.delta.y / 40);
+					zoom *= 1 + (e.delta.y / 40);
+					zoom = Mathf.Clamp(zoom, .3f, 50f);
+					cam.transform.position = cam.transform.position.normalized * (defaultDistance * zoom);
 					e.Use();
 				}
 			}

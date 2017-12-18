@@ -128,15 +128,23 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		h2.UpdateMinMax(50, position.width / 2);
 
 		h1.Begin();
-		Rect p1 = h2.Begin();
-		settingsBar.DrawSettingsBar(p1);
+		Rect firstPanel = h2.Begin();
+		settingsBar.DrawSettingsBar(firstPanel);
 		Rect g = h2.Split(resizeHandleColor);
 		optionBar.DrawOptionBar(g);
+		Rect optionBarRect = GUILayoutUtility.GetLastRect();
 		h2.End();
-		Rect p2 = h1.Split(resizeHandleColor);
-		nodeSelectorBar.DrawNodeSelector(p2);
+		Rect secondPanel = h1.Split(resizeHandleColor);
+		nodeSelectorBar.DrawNodeSelector(secondPanel);
 		h1.End();
-
+		
+		//add the handleWidth to the panel for event mask + 2 pixel for UX
+		firstPanel.width += h1.handleWidth + 2;
+		secondPanel.xMin -= h2.handleWidth + 2;
+		//update event masks with our GUI parts
+		eventMasks[0] = firstPanel;
+		eventMasks[2] = secondPanel;
+		
 		//render all opened popups (at the end cause the have to be above other infos)
 		//TODO: the new popup system
 		// PWPopup.RenderAll(ref editorNeedRepaint);
@@ -183,8 +191,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		//calcul the ratio for the window move:
 		float r = position.size.x / windowSize.x;
 
-		h1.handlerPosition *= r;
-		h2.handlerPosition *= r;
+		h1.handlePosition *= r;
+		h2.handlePosition *= r;
 	}
 
 	void LoadStyles()
