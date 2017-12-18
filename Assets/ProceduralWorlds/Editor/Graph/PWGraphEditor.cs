@@ -92,7 +92,6 @@ public partial class PWGraphEditor : PWEditorWindow
 		GUI.skin = PWGUISkin;
 		
 		//disable events if mouse is above an eventMask Rect.
-		//TODO: test this
 		MaskEvents();
 	
 		Rect pos = position;
@@ -119,7 +118,7 @@ public partial class PWGraphEditor : PWEditorWindow
 			//reset events for the next frame
 			editorEvents.Reset();
 	
-			//TODO: fix ?
+			//TODO: repanit only if needed ?
 			if (e.type == EventType.Repaint)
 				Repaint();
 		}

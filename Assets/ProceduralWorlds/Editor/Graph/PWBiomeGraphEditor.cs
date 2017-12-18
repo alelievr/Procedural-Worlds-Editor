@@ -4,9 +4,13 @@ using UnityEngine;
 using UnityEditor;
 using PW;
 using PW.Core;
+using PW.Editor;
 
 public class PWBiomeGraphEditor : PWGraphEditor
 {
+	
+	[SerializeField]
+	PWGraphLayout		layout = new PWGraphLayout();
 
 	[MenuItem("Procedural Worlds/Biome graph")]
 	static void Init()
@@ -18,25 +22,34 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	public override void OnEnable()
 	{
 		base.OnEnable();
+		
+		OnWindowResize += WindowResizeCallback;
+
+		layout.LoadStyles(position);
+		
+		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
+		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
+		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
 	}
 
 	public override void OnGUI()
 	{
-		int selectorWidth = 250;
-		Rect nodeSelectorRect = new Rect(position.width - selectorWidth, 0, selectorWidth, position.height);
-
-		// eventMasks[0] = nodeSelectorRect;
-
 		//draw the node editor
 		base.OnGUI();
 
-		//draw the node selector
-		nodeSelectorBar.DrawNodeSelector(nodeSelectorRect);
+		layout.Render2ResizablePanel(this, position);
+	}
+	
+	void WindowResizeCallback(Vector2 newSize)
+	{
+		layout.ResizeWindow(newSize, position);
 	}
 
 	public override void OnDisable()
 	{
 		base.OnDisable();
+		
+		OnWindowResize -= WindowResizeCallback;
 	}
 
 }

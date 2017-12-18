@@ -7,6 +7,7 @@ using UnityEditor;
 using PW;
 using PW.Core;
 using PW.Node;
+using PW.Editor;
 using Object = UnityEngine.Object;
 
 [System.Serializable]
@@ -14,12 +15,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 {
 
 	[SerializeField]
-	PWMainGraph						mainGraph { get { return graph as PWMainGraph; } }
-	
+	PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
+
 	[SerializeField]
-	HorizontalSplitView				h1;
-	[SerializeField]
-	HorizontalSplitView				h2;
+	PWGraphLayout		layout = new PWGraphLayout();
 	
 	//graph, node, anchors and links control and 
 	bool				previewMouseDrag = false;
@@ -39,8 +38,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	Rect				selectionRect;
 
 #region Internal editor styles and textures
-
-	private static Texture2D	resizeHandleTexture;
 
 	private static Texture2D	preset2DSideViewTexture;
 	private static Texture2D	preset2DTopDownViewTexture;
@@ -69,7 +66,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		//setup splitted panels:
 	}*/
 
-	Color resizeHandleColor;
 	public override void OnEnable()
 	{
 		base.OnEnable();
@@ -79,6 +75,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		LoadAssets();
 
 		OnWindowResize += WindowResizeCallback;
+		
+		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
+		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
+		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
 	}
 
 	public override void OnDisable()
@@ -101,15 +101,16 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		var e = Event.current;
 
 		//prevent popup events to influence the rest of the GUI
-		PWPopup.eventType = e.type;
+		//TODO: remove this old popup code
+		/*PWPopup.eventType = e.type;
 		PWGUIManager.editorWindowRect = position;
 		if (PWPopup.mouseAbove && e.type != EventType.Repaint && e.type != EventType.Layout)
 			e.type = EventType.Ignore;
+		if (e.type == EventType.Layout)
+			PWPopup.ClearAll();*/
 
 		//update the current GUI settings storage and clear drawed popup list:
 		mainGraph.PWGUI.StartFrame();
-		if (e.type == EventType.Layout)
-			PWPopup.ClearAll();
 		
 		if (!mainGraph.presetChoosed)
 		{
@@ -124,27 +125,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				terrainMaterializer = gtm.GetComponent< PWTerrainBase >();
 		}
 
-		h1.UpdateMinMax(position.width / 2, position.width - 3);
-		h2.UpdateMinMax(50, position.width / 2);
+		layout.Render2ResizablePanel(this, position);
 
-		h1.Begin();
-		Rect firstPanel = h2.Begin();
-		settingsBar.DrawSettingsBar(firstPanel);
-		Rect g = h2.Split(resizeHandleColor);
-		optionBar.DrawOptionBar(g);
-		Rect optionBarRect = GUILayoutUtility.GetLastRect();
-		h2.End();
-		Rect secondPanel = h1.Split(resizeHandleColor);
-		nodeSelectorBar.DrawNodeSelector(secondPanel);
-		h1.End();
-		
-		//add the handleWidth to the panel for event mask + 2 pixel for UX
-		firstPanel.width += h1.handleWidth + 2;
-		secondPanel.xMin -= h2.handleWidth + 2;
-		//update event masks with our GUI parts
-		eventMasks[0] = firstPanel;
-		eventMasks[2] = secondPanel;
-		
 		//render all opened popups (at the end cause the have to be above other infos)
 		//TODO: the new popup system
 		// PWPopup.RenderAll(ref editorNeedRepaint);
@@ -188,11 +170,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	void WindowResizeCallback(Vector2 newSize)
 	{
-		//calcul the ratio for the window move:
-		float r = position.size.x / windowSize.x;
-
-		h1.handlePosition *= r;
-		h2.handlePosition *= r;
+		layout.ResizeWindow(newSize, position);
 	}
 
 	void LoadStyles()
@@ -201,13 +179,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	void LoadAssets()
 	{
-		h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
-		h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
-		
-		//load style: to move
-		resizeHandleColor = EditorGUIUtility.isProSkin
-			? new Color32(56, 56, 56, 255)
-            : new Color32(130, 130, 130, 255);
+		layout.LoadStyles(position);
 
 		//loading preset panel images
 		preset2DSideViewTexture = Resources.Load< Texture2D >("preview2DSideView");

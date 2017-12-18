@@ -120,7 +120,7 @@ namespace PW.Core
 	
 	#endregion
 
-		//this method must only be called when a new graph is created from PWgraphManager class
+		//this method is called onlyv when the graph is created by the PWGraphManager
 		public virtual void Initialize()
 		{
 			Debug.LogWarning("Initialized graph !");
