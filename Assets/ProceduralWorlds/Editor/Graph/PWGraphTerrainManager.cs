@@ -65,7 +65,7 @@ namespace PW.Editor
 				//if the graph we have is not the same / have been modified since last generation, we replace it
 				if (terrain.graph != null && terrain.graph.GetHashCode() != graph.GetHashCode())
 					GameObject.DestroyImmediate(terrain.graph);
-
+				
 				terrain.InitGraph(graph.Clone() as PWMainGraph);
 
 				//updateChunks will regenerate all deleted chunks

@@ -83,15 +83,23 @@ namespace PW.Editor
 					EditorGUILayout.EndHorizontal();
 
 					EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
+					EditorGUILayout.LabelField("Instance ID: " + graph.GetInstanceID());
+	
+					EditorGUILayout.Separator();
 	
 					EditorGUILayout.Separator();
 
-					//TODO: draw graph child specific GUI
-	
-					// mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
-					// mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
-	
-					EditorGUILayout.Separator();
+					if (GUILayout.Button("Cleaup graphs"))
+					{
+						PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
+
+						foreach (var graph in graphs)
+							if (graph.objectName.Contains("(Clone)"))
+							{
+								Debug.Log("destroyed graph: " + graph);
+								GameObject.DestroyImmediate(graph, false);
+							}
+					}
 	
 					EditorGUILayout.BeginHorizontal();
 					{

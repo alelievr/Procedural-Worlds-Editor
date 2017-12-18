@@ -27,6 +27,7 @@ namespace PW.Core
         public string							assetFilePath;
 		public string							PWFolderPath;
         public new string               	    name;
+		public string							objectName { get { return base.name; } }
 
 
         //public internal graph datas:
@@ -150,18 +151,6 @@ namespace PW.Core
 			if (!initialized)
 				return ;
 
-			Debug.Log("OnEnable graph, node count: " + nodes.Count);
-
-			graphProcessor.Initialize();
-			
-			//Send OnAfterSerialize here because when graph's OnEnable function is
-			// called, all it's nodes are already deserialized.
-			foreach (var node in nodes)
-			{
-				Debug.Log("Deserialized node from: " + GetInstanceID() + ": " + node);
-				node.OnAfterGraphDeserialize(this);
-			}
-			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnLinkCreated += LinkChangedCallback;
@@ -169,6 +158,13 @@ namespace PW.Core
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
 			OnAllNodeReady += NodeReadyCallback;
+
+			graphProcessor.Initialize();
+			
+			//Send OnAfterSerialize here because when graph's OnEnable function is
+			// called, all it's nodes are already deserialized.
+			foreach (var node in nodes)
+				node.OnAfterGraphDeserialize(this);
 		}
 
 		public virtual void OnDisable()
@@ -187,15 +183,14 @@ namespace PW.Core
 			//if one node isn't ready, return
 			if (nodes.Any(n => !n.ready))
 				return ;
-			
+
 			if (OnAllNodeReady != null)
 				OnAllNodeReady();
 		}
 
+		//when all nodes are ready, we can use their datas
 		void NodeReadyCallback()
 		{
-			//when all nodes are ready, we can use their datas
-
 			//add all existing nodes to the nodesDictionary
 			for (int i = 0; i < nodes.Count; i++)
 				nodesDictionary[nodes[i].id] = nodes[i];
@@ -210,17 +205,25 @@ namespace PW.Core
 		public T GetOutput< T >()
 		{
 			//get the PWArray from the graph output node
-			var outputArray = outputNode.inputAnchorFields.First().fieldValue as PWArray< object >;
-			Debug.Log("field value: " + outputArray);
+			PWArray< object > outputArray = outputNode.inputValues;
+
+			if (outputArray == null)
+			{
+				Debug.LogError("[PWGraph] Graph's output array is null");
+				return default(T);
+			}
 
 			//find if there are any object in the array of type T
 			foreach (var obj in outputArray)
-				if (obj.GetType().IsAssignableFrom(typeof(T)))
+			{
+				if (obj != null && obj.GetType().IsAssignableFrom(typeof(T)))
 				{
 					Debug.Log("found output value: " + obj);
 					return (T)obj;
 				}
+			}
 			
+			Debug.LogError("[PWGraph] Type '" + typeof(T) + "' was not found in the graph output values");
 			return default(T);
 		}
 
@@ -232,6 +235,7 @@ namespace PW.Core
 			// that we need to clone each nodes and assign them to this new graph.
 			PWGraph clonedGraph = Object.Instantiate(this);
 
+			//clean and add copies of nodes into the cloned graph
 			clonedGraph.nodes.Clear();
 			foreach (var node in nodes)
 				clonedGraph.nodes.Add(Object.Instantiate(node));
@@ -275,13 +279,11 @@ namespace PW.Core
 
 		public void Export(string filePath)
 		{
-
 			Debug.Log("TODO");
 		}
 
 		public void Import(string filePath, bool wipeDatas = false)
 		{
-
 			Debug.Log("TODO");
 		}
 

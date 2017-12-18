@@ -26,12 +26,22 @@ namespace PW.Core
 
 		public PWGraphBuilder NewNode(Type nodeType, string name)
 		{
+			if (!nodeType.IsAssignableFrom(typeof(PWNode)))
+			{
+				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
+				return this;
+			}
 			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name));
 			return this;
 		}
 
 		public PWGraphBuilder NewNode(Type nodeType, Vector2 position, string name)
 		{
+			if (!nodeType.IsAssignableFrom(typeof(PWNode)))
+			{
+				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
+				return this;
+			}
 			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name, position));
 			return this;
 		}

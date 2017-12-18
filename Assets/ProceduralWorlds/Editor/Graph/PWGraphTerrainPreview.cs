@@ -34,6 +34,9 @@ namespace PW.Editor
 
 		bool					previewMouseDrag = false;
 
+		[System.NonSerialized]
+		bool					first = true;
+
 		Dictionary< PWGraphTerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< PWGraphTerrainPreviewType, string >()
 		{
 			{ PWGraphTerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
@@ -101,6 +104,9 @@ namespace PW.Editor
 		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainPreviewType previewType)
 		{
 			UpdatePreviewScene(previewType);
+
+			if (previewCamera != null && first)
+				previewCamera.Render();
 
 			//draw preview texture:
 			GUI.DrawTexture(previewRect, previewCameraRenderTexture);

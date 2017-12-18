@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
 using UnityEditor;
+using System;
 
 namespace PW.Editor
 {
@@ -18,6 +19,8 @@ namespace PW.Editor
 		static Texture2D	rencenterIconTexture;
 		static Texture2D	fileIconTexture;
 		static Texture2D	eyeIconTexture;
+
+		public Action< Rect >	onDrawAdditionalOptions;
 
 		public PWGraphOptionBar(PWGraph graph)
 		{
@@ -39,15 +42,18 @@ namespace PW.Editor
 			EditorGUILayout.BeginVertical(navBarBackgroundStyle);
 			{
 				//Icon bar:
-				EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
+				Rect optionBarRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
 				{
 					//recenter the graph
 					if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-						graph.panPosition = Vector2.zero;
+						graph.panPosition = graphRect.center;
 					
 					//ping the current PW object in the project window
 					if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 						EditorGUIUtility.PingObject(graph);
+
+					if (onDrawAdditionalOptions != null)
+						onDrawAdditionalOptions(optionBarRect);
 				}
 				EditorGUILayout.EndHorizontal();
 		

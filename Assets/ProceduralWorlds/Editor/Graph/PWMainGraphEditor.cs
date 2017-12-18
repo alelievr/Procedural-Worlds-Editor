@@ -153,6 +153,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		settingsBar.onDrawAdditionalSettings = (rect) =>
 		{
 			terrainManager.DrawTerrainSettings(rect);
+
+			//Main graph sepcific datas:
+			mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+			mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
 		};
 	}
 
