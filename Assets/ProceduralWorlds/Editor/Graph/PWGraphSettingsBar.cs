@@ -19,7 +19,6 @@ namespace PW.Editor
 		
 		//Style datas:
 		GUIStyle				prefixLabelStyle;
-		Texture2D				defaultBackgroundTexture;
 
 		public PWGraphSettingsBar(PWGraph graph)
 		{
@@ -29,25 +28,27 @@ namespace PW.Editor
 		public void LoadStyles()
 		{
 			prefixLabelStyle = new GUIStyle("PrefixLabel");
-			
-			//TOOD: colorsphemeize
-			Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
-			defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
 		}
 
 		public void DrawSettingsBar(Rect currentRect)
 		{
 			Event	e = Event.current;
 			
-			GUI.DrawTexture(currentRect, defaultBackgroundTexture);
+			GUI.DrawTexture(currentRect, PWColorTheme.defaultBackgroundTexture);
 	
-			//add the texturepreviewRect size:
+			//add the texturePreviewRect size:
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
-				Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
-
-				//TODO: way to specify camera type info the graph
-				terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
+				EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
+				{
+					Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
+					previewRect.height = currentRect.width;
+	
+					//TODO: way to specify camera type info the graph
+					// terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
+					EditorGUI.DrawRect(previewRect, Color.blue);
+				}
+				EditorGUILayout.EndVertical();
 
 				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 				{

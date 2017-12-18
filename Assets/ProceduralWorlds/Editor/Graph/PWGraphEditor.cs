@@ -132,9 +132,9 @@ public partial class PWGraphEditor : PWEditorWindow
 	}
 
 	//TODO: move elsewhere
-	public void LoadGraph(string file)
+	public void LoadGraph(string assetPath)
 	{
-		LoadGraph(AssetDatabase.LoadAssetAtPath< PWGraph >(file));
+		LoadGraph(AssetDatabase.LoadAssetAtPath< PWGraph >(assetPath));
 	}
 
 	public void LoadGraph(PWGraph graph)
@@ -158,6 +158,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		optionBar.LoadStyles();
 		nodeSelectorBar.LoadStyles();
 		settingsBar.LoadStyles();
+		Debug.Log("Loaded styles !");
 
 		if (!graph.initialized)
 		{

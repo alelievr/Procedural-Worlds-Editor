@@ -44,20 +44,10 @@ namespace PW.Editor
 					//recenter the graph
 					if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 						graph.panPosition = Vector2.zero;
+					
 					//ping the current PW object in the project window
 					if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
 						EditorGUIUtility.PingObject(graph);
-					//Show every hidden object in your hierarchy
-					if (GUILayout.Button(eyeIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-					{
-						var objs = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
-	
-						foreach (var obj in objs)
-						{
-							if (obj.hideFlags == HideFlags.HideAndDontSave)
-								obj.hideFlags = HideFlags.DontSave;
-						}
-					}
 				}
 				EditorGUILayout.EndHorizontal();
 		

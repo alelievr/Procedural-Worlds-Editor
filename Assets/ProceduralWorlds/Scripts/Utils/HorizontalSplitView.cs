@@ -25,6 +25,9 @@ public class HorizontalSplitView
 	[SerializeField]
 	Rect			savedRect;
 
+	[System.NonSerialized]
+	bool			first = true;
+
 	Event			e { get { return Event.current; } }
 
 	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
@@ -40,12 +43,21 @@ public class HorizontalSplitView
 		
 		internHandlerPosition = (int)handlePosition;
 
+		//if we are in the first frame, provide the true width value for layout (the only information we have currently)
+		if (first)
+		{
+			availableRect = new Rect(0, 0, internHandlerPosition, 0);
+			savedRect = new Rect(0, 0, internHandlerPosition, 0);
+		}
+
 		if (e.type == EventType.Repaint)
 			availableRect = tmpRect;
 
 		Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition), GUILayout.ExpandHeight(true));
 		if (e.type == EventType.Repaint)
 			savedRect = beginRect;
+
+		first = false;
 
 		return savedRect;
 	}
@@ -55,7 +67,6 @@ public class HorizontalSplitView
 		EditorGUILayout.EndVertical();
 		
 		//left bar separation and resize:
-		
 		Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, handleWidth, availableRect.height);
 		Rect handleCatchRect = new Rect(internHandlerPosition - 1, availableRect.y, 6f, availableRect.height);
 		EditorGUI.DrawRect(handleRect, resizeColor);

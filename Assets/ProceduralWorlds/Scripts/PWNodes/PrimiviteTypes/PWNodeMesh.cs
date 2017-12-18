@@ -10,7 +10,7 @@ namespace PW.Node
 		[PWOutput("mesh")]
 		public Mesh			outputMesh;
 
-		PWGUIMeshPreview	meshPreview = new PWGUIMeshPreview();
+		PWGUIMeshPreview	meshPreview;
 		Material			previewMaterial;
 
 		[SerializeField]
@@ -24,6 +24,11 @@ namespace PW.Node
 			name = "mesh";
 
 			previewMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+		}
+
+		public override void OnNodeEnable()
+		{
+			meshPreview = new PWGUIMeshPreview();
 		}
 
 		public override void OnNodeGUI()

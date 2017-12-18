@@ -29,6 +29,8 @@ namespace PW.Editor
 
 		//current event
 		Event		e { get { return Event.current; } }
+		//current window rect:
+		Rect		windowRect;
 
 
 		//Graph reference
@@ -52,7 +54,7 @@ namespace PW.Editor
 				toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");
 				toolbarSearchCancelButtonStyle = new GUIStyle("ToolbarSeachCancelButton");
 			}
-	
+			
 			nodeSelectorTitleStyle = new GUIStyle("NodeSelectorTitle");
 			nodeSelectorCaseStyle = new GUIStyle("NodeSelectorCase");
 			panelBackgroundStyle = new GUIStyle("PanelBackground");
@@ -60,7 +62,7 @@ namespace PW.Editor
 
 		void DefaultNodeClickAction(Type t)
 		{
-			graph.CreateNewNode(t, -graph.panPosition + e.mousePosition);
+			graph.CreateNewNode(t, -graph.panPosition + windowRect.center);
 		}
 		
 		Rect DrawSelectorCase(string name, PWColorSchemeName colorSchemeName, bool title = false)
@@ -109,7 +111,9 @@ namespace PW.Editor
 		public void DrawNodeSelector(Rect currentRect)
 		{
 			//draw selector bar background:
-			GUI.DrawTexture(currentRect, PWGraphEditor.defaultBackgroundTexture);
+			GUI.DrawTexture(currentRect, PWColorTheme.defaultBackgroundTexture);
+
+			windowRect = new Rect(0, 0, currentRect.xMin + currentRect.width, currentRect.yMin + currentRect.height);
 	
 			//Pyramid of layouts:
 			// GUI.BeginClip(currentRect);

@@ -11,7 +11,7 @@ using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 namespace PW.Core
 {
 	[System.Serializable]
-    public class PWGraph : ScriptableObject
+    public abstract class PWGraph : ScriptableObject
 	{
     
 	#region Graph Datas

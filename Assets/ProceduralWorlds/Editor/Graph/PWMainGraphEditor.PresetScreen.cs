@@ -50,7 +50,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 
 	void DrawPresetPanel()
 	{
-		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), defaultBackgroundTexture);
+		GUI.DrawTexture(new Rect(0, 0, position.width, position.height), PWColorTheme.defaultBackgroundTexture);
 
 		presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
 

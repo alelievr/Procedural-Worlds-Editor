@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace PW.Core
 {
-	public static class PWColorTheme {
+	public static class PWColorTheme
+	{
 
 		public static Color		selectedColor = new Color(0.000f, 0.000f, 0.804f);
 		public static Color		deletedColor = new Color(1, 0, 0);
 		public static Color		disabledAnchorColor = new Color(.2f, .2f, .2f);
+		public static Color		defaultBackgroundColor = new Color32(57, 57, 57, 255);
 
 		public class PWColorSchemeDict : Dictionary< PWColorSchemeName, PWColorScheme > {}
 
@@ -30,7 +32,16 @@ namespace PW.Core
 			{PWColorSchemeName.Concrete, new PWColorScheme(149, 165, 166)},
 		};
 
-		//TODO assign these colorSchemes to types
+		static Texture2D _defaultBackgroundTexture;
+		public static Texture2D	defaultBackgroundTexture
+		{
+			get {
+				if (_defaultBackgroundTexture == null)
+					_defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
+
+				return _defaultBackgroundTexture;
+			}
+		}
 
 		static PWColorTheme()
 		{

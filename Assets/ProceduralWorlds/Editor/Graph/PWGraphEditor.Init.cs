@@ -16,7 +16,6 @@ public partial class PWGraphEditor
 	
 	//editor textures:
 	public static Texture2D			nodeEditorBackgroundTexture;
-	public static Texture2D			defaultBackgroundTexture;
 	
 	//editor skin:
 	protected GUISkin				PWGUISkin;
@@ -35,17 +34,12 @@ public partial class PWGraphEditor
 
 	static void LoadAssets()
 	{
-		//generate background colors:
-		//TOOD: colorsphemeize
-        Color defaultBackgroundColor = new Color32(57, 57, 57, 255);
-		
 		//load backgrounds and colors as texture
-		defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
 		nodeEditorBackgroundTexture = Resources.Load< Texture2D >("nodeEditorBackground");
 		
 		//style
 		nodeGraphWidowStyle = new GUIStyle();
-		nodeGraphWidowStyle.normal.background = defaultBackgroundTexture;
+		nodeGraphWidowStyle.normal.background = PWColorTheme.defaultBackgroundTexture;
 
 		//generating green-red gradient
         GradientColorKey[] gck;

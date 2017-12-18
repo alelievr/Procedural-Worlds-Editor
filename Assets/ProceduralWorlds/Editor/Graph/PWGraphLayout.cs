@@ -56,6 +56,7 @@ namespace PW.Editor
 			optionBarRect = GUILayoutUtility.GetLastRect();
 			h2.End();
 			Rect secondPanel = h1.Split(resizeHandleColor);
+			
 			if (onDrawNodeSelector != null)
 				onDrawNodeSelector(secondPanel);
 			h1.End();
@@ -65,9 +66,9 @@ namespace PW.Editor
 				//add the handleWidth to the panel for event mask + 2 pixel for UX
 				firstPanel.width += h1.handleWidth + 2;
 				secondPanel.xMin -= h2.handleWidth + 2;
+
 				//update event masks with our GUI parts
 				graphEditor.eventMasks[0] = firstPanel;
-				// Debug.Log("f: " + graphEditor.eventMasks[0]);
 				graphEditor.eventMasks[1] = optionBarRect;
 				graphEditor.eventMasks[2] = secondPanel;
 			}

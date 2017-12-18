@@ -77,6 +77,7 @@ namespace PW
 			oldSeed = seed;
 			//TODO: add the possibility to retreive in Terrain materializers others output.
 			object firstOutput = graphOutput.inputValues.At(0);
+			// graph.GetOutputChunk();
 			if (firstOutput != null)
 			{
 				if (firstOutput.GetType().IsSubclassOf(typeof(ChunkData)))

@@ -134,40 +134,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 #endregion
 
-//Manage to do something with this:
-
-/*			if (e.type == EventType.Layout)
-			{
-				graph.ForeachAllNodes(n => n.BeginFrameUpdate(), true, true);
-
-				if (graphNeedReload)
-				{
-					graphNeedReload = false;
-					
-					terrainMaterializer.DestroyAllChunks();
-
-					//load another instance of the current graph to separate calls:
-					if (terrainMaterializer.graph != null && terrainMaterializer.graph.GetHashCode() != graph.GetHashCode())
-						DestroyImmediate(terrainMaterializer.graph);
-					terrainMaterializer.InitGraph(CloneGraph(graph));
-
-					Debug.Log("graph: " + graph.GetHashCode() + " , terrainMat: " + terrainMaterializer.graph.GetHashCode());
-					//process the instance of the graph in our editor so we can see datas on chunk 0, 0, 0
-					graph.realMode = false;
-					graph.ForeachAllNodes(n => n.Updategraph(graph));
-					graph.UpdateChunkPosition(Vector3.zero);
-
-					if (graphNeedReloadOnce)
-						graph.ProcessGraphOnce();
-					graphNeedReloadOnce = false;
-
-					graph.ProcessGraph();
-				}
-				//updateChunks will update and generate new chunks if needed.
-				//TODOMAYBE: remove this when workers will be added to the Terrain.
-				terrainMaterializer.UpdateChunks();
-			}*/
-
 	void WindowResizeCallback(Vector2 newSize)
 	{
 		layout.ResizeWindow(newSize, position);
