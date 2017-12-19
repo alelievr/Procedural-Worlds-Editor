@@ -11,6 +11,26 @@ namespace PW
 	{
 		PWGraphEditorEventInfo	oldEventInfos;
 
+		public IEnumerable< PWAnchor > inputAnchors
+		{
+			get
+			{
+				foreach (var anchorField in inputAnchorFields)
+					foreach (var anchor in anchorField.anchors)
+						yield return anchor;
+			}
+		}
+		
+		public IEnumerable< PWAnchor > outputAnchors
+		{
+			get
+			{
+				foreach (var anchorField in outputAnchorFields)
+					foreach (var anchor in anchorField.anchors)
+						yield return anchor;
+			}
+		}
+
 		public void RenderAnchors()
 		{
 			var e = Event.current;

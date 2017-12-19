@@ -282,15 +282,15 @@ namespace PW.Core
 			Debug.Log("TODO");
 		}
 
+		//wipeDatas will remove all the graph content before importing the file
 		public void Import(string filePath, bool wipeDatas = false)
 		{
 			Debug.Log("TODO");
 		}
 
-		public bool Execute(string command)
+		public void Execute(string command)
 		{
-			Debug.Log("TODO");
-			return false;
+			PWGraphCLI.Execute(this, command);
 		}
 
 		public bool SetInput(string fieldName, object value)
@@ -397,6 +397,11 @@ namespace PW.Core
 		public PWNode	FindNodeById(int nodeId)
 		{
 			return nodesDictionary[nodeId];
+		}
+
+		public PWNode	FindNodeByName(string name)
+		{
+			return nodes.FirstOrDefault(n => n.name == name);
 		}
 
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()

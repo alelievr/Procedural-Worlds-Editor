@@ -91,6 +91,10 @@ namespace PW.Core
 				"Add", typeof(PWNodeAdd),
 				"Curve", typeof(PWNodeCurve)
 			),
+			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Noises and Masks", PWColorSchemeName.Emerald,
+				"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
+				"Circle Noise Mask", typeof(PWNodeCircleNoiseMask)
+			),
 			new PWNodeTypeInfoList(PWMainGraph, "Biomes", PWColorSchemeName.Carrot,
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
@@ -104,12 +108,8 @@ namespace PW.Core
 				"Biome surface", typeof(PWNodeBiomeSurface),
 				"Biome terrain", typeof(PWNodeBiomeTerrain)
 			),
-			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Landforms", PWColorSchemeName.Concrete,
+			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.Concrete,
 				"Terrain detail", typeof(PWNodeTerrainDetail)
-			),
-			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Noises and Masks", PWColorSchemeName.Emerald,
-				"Perlin noise 2D", typeof(PWNodePerlinNoise2D),
-				"Circle Noise Mask", typeof(PWNodeCircleNoiseMask)
 			),
 			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Debug", PWColorSchemeName.PeterRiver,
 				"DebugLog", typeof(PWNodeDebugLog)

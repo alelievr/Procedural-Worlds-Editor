@@ -10,11 +10,13 @@ namespace PW.Core
 		Link,
 	}
 	
-	public class PWGraphCommand {
+	public class PWGraphCommand
+	{
 	
 		public PWGraphCommandType	type;
 		public Vector2				position;
 		public string				name;
+		public string				nodeType;
 		public string				fromName;
 		public string				toName;
 	

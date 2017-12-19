@@ -62,14 +62,12 @@ namespace PW
 			List< PWNodeLink > linkToRemove = new List< PWNodeLink >();
 
 			//search in input anchors:
-			foreach (var anchorField in inputAnchorFields)
-				foreach (var anchor in anchorField.anchors)
-					linkToRemove.AddRange(anchor.links.Where(l => l.toNode == node));
-					
+			foreach (var anchor in inputAnchors)
+				linkToRemove.AddRange(anchor.links.Where(l => l.toNode == node));
+			
 			//search in output anchors:
-			foreach (var anchorField in outputAnchorFields)
-				foreach (var anchor in anchorField.anchors)
-					linkToRemove.AddRange(anchor.links.Where(l => l.fromNode == node));
+			foreach (var anchor in outputAnchors)
+				linkToRemove.AddRange(anchor.links.Where(l => l.fromNode == node));
 
 			foreach (var link in linkToRemove)
 				RemoveLink(link);
@@ -77,7 +75,6 @@ namespace PW
 		
 		public void		RemoveAllLinks()
 		{
-
 			foreach (var anchorField in anchorFields)
 				foreach (var anchor in anchorField.anchors)
 					anchor.RemoveAllLinks();

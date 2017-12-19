@@ -103,18 +103,16 @@ namespace PW
 
 		public IEnumerable< PWNode > 	GetOutputNodes()
 		{
-			foreach (var outputAnchorField in outputAnchorFields)
-				foreach (var outputAnchor in outputAnchorField.anchors)
-					foreach (var link in outputAnchor.links)
-						yield return link.toNode;
+			foreach (var outputAnchor in outputAnchors)
+				foreach (var link in outputAnchor.links)
+					yield return link.toNode;
 		}
 
 		public IEnumerable< PWNode >	GetInputNodes()
 		{
-			foreach (var inputAnchorField in inputAnchorFields)
-				foreach (var anchor in inputAnchorField.anchors)
-					foreach (var link in anchor.links)
-						yield return link.fromNode;
+			foreach (var anchor in inputAnchors)
+				foreach (var link in anchor.links)
+					yield return link.fromNode;
 		}
 
 		public PWAnchor					GetAnchor(string fieldName, int index = 0)

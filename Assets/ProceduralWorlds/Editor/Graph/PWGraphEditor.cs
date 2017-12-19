@@ -80,8 +80,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (graph == null)
 		{
-			//TODO: rework this
-			Debug.Log("NULL graph !");
+			RenderGraphNotFound();
 			return ;
 		}
 
@@ -244,6 +243,12 @@ public partial class PWGraphEditor : PWEditorWindow
 		GUI.DrawTextureWithTexCoords(position, nodeEditorBackgroundTexture, texCoord);
 	}
 
+	void RenderGraphNotFound()
+	{
+		EditorGUILayout.LabelField("Graph not found, please choose a graph using this input or double click to a graph to open it");
+		graph = EditorGUILayout.ObjectField(graph, typeof(PWGraph), false) as PWGraph;
+	}
+
 	void SelectAndDrag()
 	{
 		//rendering the selection rect
@@ -256,7 +261,7 @@ public partial class PWGraphEditor : PWEditorWindow
 			if (e.type == EventType.Repaint)
 				selectionStyle.Draw(posiviteSelectionRect, false, false, false, false);
 
-			//iterature throw all nodes of the graph and check if the selection overlaps
+			//iterate throw all nodes of the graph and check if the selection overlaps
 			graph.nodes.ForEach(n => n.isSelected = decaledSelectionRect.Overlaps(n.rect));
 			editorEvents.selectedNodeCount = graph.nodes.Count(n => n.isSelected);
 		}

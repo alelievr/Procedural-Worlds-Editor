@@ -103,6 +103,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		//render the whole graph
 		base.OnGUI();
 
+		//quit if the graph have been destroyed / does not exists
+		if (graph == null)
+			return ;
+
 		var e = Event.current;
 
 		//prevent popup events to influence the rest of the GUI
