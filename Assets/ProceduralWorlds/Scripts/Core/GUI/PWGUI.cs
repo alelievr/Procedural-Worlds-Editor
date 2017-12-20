@@ -9,7 +9,8 @@ using Object = UnityEngine.Object;
 
 namespace PW.Core
 {
-	public enum PWGUIStyleType {
+	public enum PWGUIStyleType
+	{
 		PrefixLabelWidth,
 		FieldWidth,
 	}
@@ -32,7 +33,8 @@ namespace PW.Core
 	}
 			
 	[System.Serializable]
-	public class PWGUIManager {
+	public class PWGUIManager
+	{
 
 		public static Rect	editorWindowRect;
 

@@ -24,6 +24,21 @@ namespace PW.Core
 			return builder;
 		}
 
+		public static PWGraphBuilder NewGraph< T >() where T : PWGraph
+		{
+			if (typeof(T).IsAbstract)
+			{
+				Debug.LogError("[PWGraphBuilder] Can't instatiate an abstract graph");
+				return null;
+			}
+
+			PWGraphBuilder	builder = new PWGraphBuilder();
+
+			builder.graph = ScriptableObject.CreateInstance< T >();
+
+			return builder;
+		}
+
 		public PWGraphBuilder NewNode(Type nodeType, string name)
 		{
 			if (!nodeType.IsAssignableFrom(typeof(PWNode)))

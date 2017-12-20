@@ -279,7 +279,7 @@ namespace PW.Core
 
 		public void Export(string filePath)
 		{
-			Debug.Log("TODO");
+			PWGraphCLI.Export(this, filePath);
 		}
 
 		//wipeDatas will remove all the graph content before importing the file

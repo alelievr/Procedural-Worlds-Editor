@@ -117,9 +117,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			e.type = EventType.Ignore;
 		if (e.type == EventType.Layout)
 			PWPopup.ClearAll();*/
-
-		//update the current GUI settings storage and clear drawed popup list:
-		mainGraph.PWGUI.StartFrame();
 		
 		if (!mainGraph.presetChoosed)
 		{

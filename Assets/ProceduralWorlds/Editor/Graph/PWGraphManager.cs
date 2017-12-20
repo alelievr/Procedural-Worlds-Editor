@@ -8,6 +8,7 @@ using PW.Core;
 
 namespace PW.Editor
 {
+    //TODO: rename this class
     public static class PWGraphManager
     {
     
@@ -19,7 +20,7 @@ namespace PW.Editor
         public static string        PWBiomeGraphPath = "Assets/ProceduralWorlds/Resources/Biomes";
         public static string        PWBiomeGraphDefaultFileName = "New ProceduralBiome.asset";
     
-        static void CreateGraph< T >(string directory, string fileName) where T : PWGraph
+        public static void CreateGraph< T >(string directory, string fileName) where T : PWGraph
         {
             //generate the file path
             string path = directory + "/" + fileName;

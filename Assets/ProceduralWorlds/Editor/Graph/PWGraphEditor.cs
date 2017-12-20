@@ -83,6 +83,9 @@ public partial class PWGraphEditor : PWEditorWindow
 			RenderGraphNotFound();
 			return ;
 		}
+		
+		//update the current GUI settings storage and clear drawed popup list:
+		graph.PWGUI.StartFrame();
 
 		e = Event.current;
 		
@@ -245,8 +248,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	void RenderGraphNotFound()
 	{
-		EditorGUILayout.LabelField("Graph not found, please choose a graph using this input or double click to a graph to open it");
-		graph = EditorGUILayout.ObjectField(graph, typeof(PWGraph), false) as PWGraph;
+		EditorGUILayout.LabelField("Graph not found, ouble click on a graph asset file to a graph to open it");
+		// graph = EditorGUILayout.ObjectField(graph, typeof(PWGraph), false) as PWGraph;
 	}
 
 	void SelectAndDrag()

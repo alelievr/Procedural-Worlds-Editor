@@ -89,7 +89,7 @@ namespace PW.Editor
 	
 					EditorGUILayout.Separator();
 
-					if (GUILayout.Button("Cleaup graphs"))
+					if (GUILayout.Button("Cleanup graphs"))
 					{
 						PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
 

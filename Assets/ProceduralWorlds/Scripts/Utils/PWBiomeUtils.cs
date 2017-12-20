@@ -10,7 +10,8 @@ using Debug = UnityEngine.Debug;
 
 namespace PW
 {
-	public static class BiomeUtils {
+	public static class BiomeUtils
+	{
 
 		static bool			terrainFoldout = false;
 		static bool			wetnessFoldout = false;

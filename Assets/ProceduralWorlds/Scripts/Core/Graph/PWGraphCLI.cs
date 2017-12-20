@@ -169,41 +169,67 @@ namespace PW.Core
 			return ret;
 		}
 
+		static PWGraphCommand CreateGraphCommand(PWGraphCommandTokenSequence seq, List< PWGraphTokenMatch > tokens)
+		{
+			switch (seq.type)
+			{
+				case PWGraphCommandType.Link:
+					return new PWGraphCommand(tokens[1].value, tokens[2].value);
+				case PWGraphCommandType.NewNode:
+					//try to parse the node type:
+					Type nodeType = Type.GetType(tokens[1].value);
+					if (nodeType == null)
+						nodeType = Type.GetType("PW.Node." + tokens[1].value);
+		
+					Debug.Log("nodeType: " + nodeType);
+		
+					//thorw exception if the type can't be parse / does not inherit from PWNode
+					if (nodeType == null || !nodeType.IsAssignableFrom(typeof(PWNode)))
+						throw new Exception("Type " + tokens[1].value + " not found as a node type");
+					
+					return new PWGraphCommand(nodeType, tokens[2].value);
+			}
+
+			return null;
+		}
+
 		static PWGraphCommand		BuildCommand(List< PWGraphTokenMatch > tokens, string startLine)
 		{
-			PWGraphCommand	ret = null;
-
 			foreach (var validTokenList in PWGraphValidCommandTokenSequence.validSequences)
 			{
 				if (validTokenList.requiredTokens.Count > tokens.Count)
 					continue ;
 				
+				//check if the tokens we received correspond to a valid squence of token
 				for (int i = 0; i < validTokenList.requiredTokens.Count; i++)
 					if (tokens[i].token != validTokenList.requiredTokens[i])
 						goto skipLoop;
 				
+				//the valid token list iterated until it's end so we have a valid command
+				// if there is no argument or the required options count is 0
+				if (validTokenList.optionTokens == null || validTokenList.requiredOptionCount == 0)
+					return CreateGraphCommand(validTokenList, tokens);
+				
+				//manage options tokens if 
+				int	validOptionCount = 0;
 				foreach (var optionTokenList in validTokenList.optionTokens)
 				{
 					for (int i = 0; i < optionTokenList.Count; i++)
 					{
 						if (tokens[i].token != optionTokenList[i])
 							goto skipLoop;
-						else if (i == optionTokenList.Count - 1)
-						{
-							ret = new PWGraphCommand();
-							//TOOD: fill up the command values
-						}
+						else
+							validOptionCount++;
 					}
+					if (validOptionCount == validTokenList.requiredOptionCount)
+						return CreateGraphCommand(validTokenList, tokens);
 				}
 
 				skipLoop:
 				continue ;
 			}
 
-			if (ret == null)
-				throw new Exception("Invalid token line");
-			
-			return ret;
+			throw new Exception("Invalid token at line: " + startLine);
 		}
 
 		public static PWGraphCommand	Parse(string inputCommand)
@@ -248,13 +274,9 @@ namespace PW.Core
 
 		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
-			Type	nodeType;
 			Vector2	position = command.position;
 
-			//try to parse the node type:
-			nodeType = Type.GetType(command.nodeType);
-
-			graph.CreateNewNode(nodeType, position);
+			graph.CreateNewNode(command.nodeType, position);
 		}
 
 		//yup i know, this function is very slow with big graphs, but fast enough for a pre-apha
@@ -266,6 +288,11 @@ namespace PW.Core
 				commandTypeFunctions[command.type](graph, command, inputCommand);
 			else
 				throw new Exception("Command type not handled: " + command.type);
+		}
+
+		public static void Export(PWGraph graph, string filePath)
+		{
+			Debug.Log("TODO");
 		}
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name)
