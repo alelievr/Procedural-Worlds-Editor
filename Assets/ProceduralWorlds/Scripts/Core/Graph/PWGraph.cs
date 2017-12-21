@@ -277,9 +277,10 @@ namespace PW.Core
 			graphProcessor.ProcessNodes(this, nodes);
 		}
 
-		public void Export(string filePath)
+		//export the graph as commands in a file and return the created file path
+		public string Export(string filePath)
 		{
-			PWGraphCLI.Export(this, filePath);
+			return PWGraphCLI.Export(this, filePath);
 		}
 
 		//wipeDatas will remove all the graph content before importing the file

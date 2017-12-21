@@ -90,7 +90,7 @@ namespace PW.Core
 			return commands;
 		}
 
-		public void Export(string fileName, bool assetPath = true)
+		public string Export(string fileName, bool assetPath = true)
 		{
 			string	outFolder;
 
@@ -109,6 +109,8 @@ namespace PW.Core
 				dstPath = fileName;
 
 			File.WriteAllLines(dstPath, commands.ToArray());
+
+			return dstPath;
 		}
 
 		public void Import(string fileName, bool assetPath = true)

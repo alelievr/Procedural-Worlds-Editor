@@ -275,7 +275,6 @@ namespace PW.Core
 				foreach (var inAnchor in toNode.inputAnchors)
 					if (PWAnchorUtils.AnchorAreAssignable(outAnchor, inAnchor))
 					{
-						Debug.Log("Created Link: " + outAnchor + " -> " + inAnchor);
 						graph.CreateLink(outAnchor, inAnchor);
 						break ;
 					}
@@ -304,9 +303,10 @@ namespace PW.Core
 
 		#region Export and command creation
 
-		public static void Export(PWGraph graph, string filePath)
+		public static string Export(PWGraph graph, string filePath)
 		{
 			Debug.Log("TODO");
+			return null;
 		}
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name)

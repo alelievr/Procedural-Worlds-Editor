@@ -207,7 +207,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		savedEventType = e.type;
 		
 		//check if we have an event outside of the graph event masks
-		if (e.type != EventType.Repaint && e.type != EventType.Layout)
+		if (e.type == EventType.MouseDown || e.type == EventType.ContextClick || e.isKey || e.isScrollWheel)
 		{
 			foreach (var eventMask in eventMasks)
 			{
@@ -320,14 +320,14 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		//graph panning
 		//if the event is a drag then it has't been used before
-		if (e.type == EventType.MouseDrag && !editorEvents.isDraggingSomething)
+		if (e.type == EventType.MouseDown && !editorEvents.isDraggingSomething)
+			editorEvents.isPanning = true;
+		
+		if (editorEvents.isPanning)
 		{
 			//mouse middle button or left click + cmd on mac and left click + control on other OS
 			if (e.button == 2 || (e.button == 0 && commandOSKey))
-			{
-				editorEvents.isPanning = true;
 				graph.panPosition += e.delta;
-			}
 		}
 		
 		//Graph selection start event 
