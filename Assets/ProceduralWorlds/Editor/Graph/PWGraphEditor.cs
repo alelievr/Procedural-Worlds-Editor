@@ -307,7 +307,7 @@ public partial class PWGraphEditor : PWEditorWindow
 			StartDragLink();
 		
 		//click up outside of an anchor, stop dragging
-		if (e.type == EventType.mouseUp && editorEvents.isDraggingLink)
+		if (e.type == EventType.MouseUp && editorEvents.isDraggingLink)
 			StopDragLink(false);
 		
 		//duplicate selected items if cmd+d
@@ -320,7 +320,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		//graph panning
 		//if the event is a drag then it has't been used before
-		if (e.type == EventType.mouseDrag && !editorEvents.isDraggingSomething)
+		if (e.type == EventType.MouseDrag && !editorEvents.isDraggingSomething)
 		{
 			//mouse middle button or left click + cmd on mac and left click + control on other OS
 			if (e.button == 2 || (e.button == 0 && commandOSKey))

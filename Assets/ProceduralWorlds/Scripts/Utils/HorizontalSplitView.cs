@@ -72,7 +72,7 @@ public class HorizontalSplitView
 		EditorGUI.DrawRect(handleRect, resizeColor);
 		EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
 
-		if (Event.current.type == EventType.mouseDown && handleCatchRect.Contains(Event.current.mousePosition))
+		if (Event.current.type == EventType.MouseDown && handleCatchRect.Contains(Event.current.mousePosition))
 			resize = true;
 		if (lastMouseX != -1 && resize)
 			handlePosition += Event.current.mousePosition.x - lastMouseX;

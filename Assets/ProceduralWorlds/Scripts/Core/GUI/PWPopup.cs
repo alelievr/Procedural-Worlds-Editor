@@ -88,7 +88,7 @@ namespace PW.Core
 			if (e.rawType == EventType.MouseUp)
 				dragging = false;
 			
-			if (dragging && e.type == EventType.mouseDrag)
+			if (dragging && e.type == EventType.MouseDrag)
 				data.guiSettings.windowPosition += e.delta;
 			
 			GUILayout.BeginArea(popupRect, popupStyle);

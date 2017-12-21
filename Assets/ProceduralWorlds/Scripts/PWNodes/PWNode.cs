@@ -369,7 +369,7 @@ namespace PW
 					foreach (var anchor in anchorField.anchors)
 						if (anchor.linkCount == 0)
 						{
-							Debug.Log("nope for " + GetType());
+							// Debug.Log("node " + GetType() + " can't work cauz it's anchor " + anchor.fieldName + " is not linked");
 							return ;
 						}
 				}

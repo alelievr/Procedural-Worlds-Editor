@@ -10,6 +10,41 @@ namespace PW.Core
 	public static class PWGraphCLI
 	{
 
+		/*
+		Valid command syntaxes:
+
+		> NewNode nodeType nodeName [position]
+		Create a new node of type nodeType in the graph, if the node
+		type does not exists, an excetion is raised and the node is
+		not created.
+		The position is in pixels so it's an integer, floating values
+		will not be accepted and will result with a lex error.
+
+		ex:
+			> NewNode PWNodeAdd simple_add
+			> NewNode PWNodeAdd simple_add (10, 100)
+
+		---------------------------------------------
+
+		> Link nodeName1 nodeName2
+		Create a link between two nodes, this command will try to find
+		any linkable anchor between the two nodes, if there is not an
+		exception is raised and the link is not created.
+
+		ex:
+			> NewNode PWNodeSlider slider
+			> NewNode PWNodeAdd add
+			> Link slider add
+
+		---------------------------------------------
+
+		*/
+
+
+		static bool		debug = false;
+		
+		#region Command Parsing
+
 		enum PWGraphToken
 		{
 			Undefined,
@@ -17,9 +52,9 @@ namespace PW.Core
 			LinkCommand,
 			OpenParenthesis,
 			ClosedParenthesis,
-			NodeTypeName,
-			NameValue,
+			Word,
 			IntValue,
+			Comma,
 		}
 
 		class PWGraphTokenMatch
@@ -50,59 +85,25 @@ namespace PW.Core
 					ret = new PWGraphTokenMatch();
 
 					ret.token = token;
-					ret.value = m.Value;
+					ret.value = m.Value.Trim();
 					ret.remainingText = input.Substring(m.Value.Length);
 				}
 				return ret;
 			}
 		}
 
-		/*
-		Valid command syntaxes:
-
-		> NewNode nodeType nodeName [position]
-		Create a new node of type nodeType in the graph, if the node
-		type does not exists, an excetion is raised and the node is
-		not created.
-		The position is in pixels so it's an integer, floating values
-		will not be accepted and will result with a lex error.
-
-		ex:
-			> NewNode PWNodeAdd simple_add
-			> NewNode PWNodeAdd simple_add (10, 100)
-
-		---------------------------------------------
-
-		> NewLink nodeName1 nodeName2
-		Create a link between two nodes, this command will try to find
-		any linkable anchor between the two nodes, if there is not an
-		exception is raised and the link is not created.
-
-		ex:
-			> NewNode PWNodeSlider slider
-			> NewNode PWNodeAdd add
-			> NewLink slider add
-
-		---------------------------------------------
-
-		*/
-
 		static class PWGraphTokenSequence
 		{
 			public static List< PWGraphToken > newNode = new List< PWGraphToken >() {
-				PWGraphToken.NewNodeCommand, PWGraphToken.NodeTypeName
+				PWGraphToken.NewNodeCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
 
-			public static List< PWGraphToken > newNodePositionOption = new List< PWGraphToken >() {
-				PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis
-			};
-
-			public static List< PWGraphToken > newNodeNameOption = new List< PWGraphToken >() {
-				PWGraphToken.NameValue
+			public static List< PWGraphToken > newNodePosition = new List< PWGraphToken >() {
+				PWGraphToken.NewNodeCommand, PWGraphToken.Word, PWGraphToken.Word, PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.Comma, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis
 			};
 
 			public static List< PWGraphToken > newLink = new List< PWGraphToken >() {
-				PWGraphToken.LinkCommand, PWGraphToken.NameValue, PWGraphToken.NameValue
+				PWGraphToken.LinkCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
 		}
 
@@ -110,23 +111,23 @@ namespace PW.Core
 		{
 			public PWGraphCommandType			type;
 			public List< PWGraphToken >			requiredTokens = null;
-			
-			public int							requiredOptionCount = 0;
-			public List< List< PWGraphToken > >	optionTokens = null;
 		}
 
 		static class PWGraphValidCommandTokenSequence
 		{
 			public static List< PWGraphCommandTokenSequence > validSequences = new List< PWGraphCommandTokenSequence >()
 			{
-				//Node command
+				//New Node command
 				new PWGraphCommandTokenSequence() {
 					type = PWGraphCommandType.NewNode,
 					requiredTokens = PWGraphTokenSequence.newNode,
-					requiredOptionCount = 1,
-					optionTokens = new List< List< PWGraphToken > > { PWGraphTokenSequence.newNodeNameOption, PWGraphTokenSequence.newNodePositionOption }
 				},
-				//Link command
+				//New Node position command
+				new PWGraphCommandTokenSequence() {
+					type = PWGraphCommandType.NewNodePosition,
+					requiredTokens = PWGraphTokenSequence.newNodePosition
+				},
+				//New Link command
 				new PWGraphCommandTokenSequence() {
 					type = PWGraphCommandType.Link,
 					requiredTokens = PWGraphTokenSequence.newLink,
@@ -136,14 +137,13 @@ namespace PW.Core
 
 		static List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >()
 		{
-			new PWGraphTokenDefinition(PWGraphToken.ClosedParenthesis, @"^\)"),
 			new PWGraphTokenDefinition(PWGraphToken.LinkCommand, @"^Link"),
 			new PWGraphTokenDefinition(PWGraphToken.NewNodeCommand, @"^NewNode"),
-			new PWGraphTokenDefinition(PWGraphToken.NodeTypeName, @"^\S+"),
-			new PWGraphTokenDefinition(PWGraphToken.NodeTypeName, @"^,"),
-			new PWGraphTokenDefinition(PWGraphToken.NameValue, "^(\\\"[^']*\\\"|\\S+)"),
 			new PWGraphTokenDefinition(PWGraphToken.OpenParenthesis, @"^\("),
-			new PWGraphTokenDefinition(PWGraphToken.IntValue, @"^\d+"),
+			new PWGraphTokenDefinition(PWGraphToken.ClosedParenthesis, @"^\)"),
+			new PWGraphTokenDefinition(PWGraphToken.IntValue, @"^[-+]?\d+"),
+			new PWGraphTokenDefinition(PWGraphToken.Comma, @"^,"),
+			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\".*\\\"|\\S+)"),
 		};
 
 		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
@@ -156,38 +156,58 @@ namespace PW.Core
 		{
 			PWGraphTokenMatch	ret = null;
 
-			//remove useless whitespaces:
-			line.Trim();
-
 			foreach (var tokenDef in tokenDefinitions)
-				if ((ret = tokenDef.Match(line)) != null)
+				if ((ret = tokenDef.Match(line.Trim())) != null)
 					break ;
 
 			if (ret != null)
+			{
+				if (debug)
+					Debug.Log("Token " + ret.token + " maches value: " + ret.value + ", remainingText: " + ret.remainingText);
 				line = ret.remainingText;
+			}
+			else if (debug)
+				Debug.Log("No token maches found with line: " + line);
 
 			return ret;
 		}
 
+		static Type	TryParseNodeType(string type)
+		{
+			Type	nodeType;
+
+			//try to parse the node type:
+			nodeType = Type.GetType(type);
+			if (nodeType == null)
+				nodeType = Type.GetType("PW.Node." + type);
+
+			//thorw exception if the type can't be parse / does not inherit from PWNode
+			if (nodeType == null || !nodeType.IsSubclassOf(typeof(PWNode)))
+				throw new Exception("Type " + type + " not found as a node type");
+			
+			return nodeType;
+		}
+
+		static Vector2 TryParsePosition(string x, string y)
+		{
+			return new Vector2(Int32.Parse(x), Int32.Parse(y));
+		}
+
 		static PWGraphCommand CreateGraphCommand(PWGraphCommandTokenSequence seq, List< PWGraphTokenMatch > tokens)
 		{
+			Type	nodeType;
+
 			switch (seq.type)
 			{
 				case PWGraphCommandType.Link:
 					return new PWGraphCommand(tokens[1].value, tokens[2].value);
 				case PWGraphCommandType.NewNode:
-					//try to parse the node type:
-					Type nodeType = Type.GetType(tokens[1].value);
-					if (nodeType == null)
-						nodeType = Type.GetType("PW.Node." + tokens[1].value);
-		
-					Debug.Log("nodeType: " + nodeType);
-		
-					//thorw exception if the type can't be parse / does not inherit from PWNode
-					if (nodeType == null || !nodeType.IsAssignableFrom(typeof(PWNode)))
-						throw new Exception("Type " + tokens[1].value + " not found as a node type");
-					
+					nodeType = TryParseNodeType(tokens[1].value);
 					return new PWGraphCommand(nodeType, tokens[2].value);
+				case PWGraphCommandType.NewNodePosition:
+					nodeType = TryParseNodeType(tokens[1].value);
+					Vector2 position = TryParsePosition(tokens[4].value, tokens[6].value);
+					return new PWGraphCommand(nodeType, tokens[2].value, position);
 			}
 
 			return null;
@@ -197,7 +217,8 @@ namespace PW.Core
 		{
 			foreach (var validTokenList in PWGraphValidCommandTokenSequence.validSequences)
 			{
-				if (validTokenList.requiredTokens.Count > tokens.Count)
+				//if our token count does not macth withthe valid token count, this sequence can't match
+				if (validTokenList.requiredTokens.Count != tokens.Count)
 					continue ;
 				
 				//check if the tokens we received correspond to a valid squence of token
@@ -206,30 +227,13 @@ namespace PW.Core
 						goto skipLoop;
 				
 				//the valid token list iterated until it's end so we have a valid command
-				// if there is no argument or the required options count is 0
-				if (validTokenList.optionTokens == null || validTokenList.requiredOptionCount == 0)
-					return CreateGraphCommand(validTokenList, tokens);
-				
-				//manage options tokens if 
-				int	validOptionCount = 0;
-				foreach (var optionTokenList in validTokenList.optionTokens)
-				{
-					for (int i = 0; i < optionTokenList.Count; i++)
-					{
-						if (tokens[i].token != optionTokenList[i])
-							goto skipLoop;
-						else
-							validOptionCount++;
-					}
-					if (validOptionCount == validTokenList.requiredOptionCount)
-						return CreateGraphCommand(validTokenList, tokens);
-				}
+				return CreateGraphCommand(validTokenList, tokens);
 
 				skipLoop:
 				continue ;
 			}
 
-			throw new Exception("Invalid token at line: " + startLine);
+			throw new Exception("Invalid token squence: " + startLine);
 		}
 
 		public static PWGraphCommand	Parse(string inputCommand)
@@ -251,22 +255,27 @@ namespace PW.Core
 			return BuildCommand(lineTokens, startLine);
 		}
 
-		static void CreateLink(PWGraph graph, PWGraphCommand command, string inputCommand)
+		#endregion //Command parsing
+
+		#region  Command Execution
+
+		static void	CreateLink(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
 			//get nodes from the graph:
 			PWNode fromNode = graph.FindNodeByName(command.fromName);
 			PWNode toNode = graph.FindNodeByName(command.toName);
 
 			if (fromNode == null)
-				throw new Exception("Node not found in graph: " + command.fromName + " while parsing: '" + inputCommand + "'");
+				throw new Exception("Node " + command.fromName + " found in graph while parsing: '" + inputCommand + "'");
 			if (toNode == null)
-				throw new Exception("Node not found in graph: " + command.toName + " while parsing: '" + inputCommand + "'");
+				throw new Exception("Node " + command.toName + " found in graph while parsing: '" + inputCommand + "'");
 			
 			//Create the first linkable anchors we found:
 			foreach (var outAnchor in fromNode.outputAnchors)
 				foreach (var inAnchor in toNode.inputAnchors)
 					if (PWAnchorUtils.AnchorAreAssignable(outAnchor, inAnchor))
 					{
+						Debug.Log("Created Link: " + outAnchor + " -> " + inAnchor);
 						graph.CreateLink(outAnchor, inAnchor);
 						break ;
 					}
@@ -276,10 +285,11 @@ namespace PW.Core
 		{
 			Vector2	position = command.position;
 
-			graph.CreateNewNode(command.nodeType, position);
+			PWNode node = graph.CreateNewNode(command.nodeType, position);
+
+			node.name = command.name;
 		}
 
-		//yup i know, this function is very slow with big graphs, but fast enough for a pre-apha
 		public static void Execute(PWGraph graph, string inputCommand)
 		{
 			PWGraphCommand command = Parse(inputCommand);
@@ -290,6 +300,10 @@ namespace PW.Core
 				throw new Exception("Command type not handled: " + command.type);
 		}
 
+		#endregion // Command Execution
+
+		#region Export and command creation
+
 		public static void Export(PWGraph graph, string filePath)
 		{
 			Debug.Log("TODO");
@@ -298,20 +312,22 @@ namespace PW.Core
 		public static string GenerateNewNodeCommand(Type nodeType, string name)
 		{
 			//TODO: use tokens here
-			return "NewNode " + nodeType.Name + " as \"" + name + "\"";
+			return "NewNode " + nodeType.Name + " " + name;
 		}
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position)
 		{
 			//TODO: use tokens here
-			return "NewNode " + nodeType.Name + " at (" + (int)position.x + ", " + (int)position.y+ ") as \"" + name + "\"";
+			return "NewNode " + nodeType.Name + " " + name + " (" + (int)position.x + ", " + (int)position.y+ ")";
 		}
 
 		public static string GenerateLinkCommand(string fromName, string toName)
 		{
 			//TODO: use tokens here
-			return "Link \"" + fromName + "\" to \"" + toName + "\"";
+			return "Link " + fromName + " " + toName;
 		}
+
+		#endregion //Export and command creation
 
 	}
 }

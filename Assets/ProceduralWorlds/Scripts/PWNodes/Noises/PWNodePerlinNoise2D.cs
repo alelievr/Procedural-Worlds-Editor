@@ -5,7 +5,8 @@ using PW.Noises;
 
 namespace PW.Node
 {
-	public class PWNodePerlinNoise2D : PWNode {
+	public class PWNodePerlinNoise2D : PWNode
+	{
 		
 		public float		persistance;
 		public int			octaves;

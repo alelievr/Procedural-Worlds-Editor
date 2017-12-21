@@ -77,7 +77,7 @@ public partial class PWGraphEditor
 		Vector3 startTan = startPos + startDir * tanPower;
 		Vector3 endTan = endPos + endDir * tanPower;
 
-		if (e.type == EventType.mouseDown && !editorEvents.isMouseOverAnchor)
+		if (e.type == EventType.MouseDown && !editorEvents.isMouseOverAnchor)
 		{
 			if (HandleUtility.nearestControl == link.controlId && e.button == 0)
 			{

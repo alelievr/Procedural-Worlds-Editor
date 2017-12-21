@@ -20,7 +20,7 @@ namespace PW.Editor
         public static string        PWBiomeGraphPath = "Assets/ProceduralWorlds/Resources/Biomes";
         public static string        PWBiomeGraphDefaultFileName = "New ProceduralBiome.asset";
     
-        public static void CreateGraph< T >(string directory, string fileName) where T : PWGraph
+        public static T CreateGraph< T >(string directory, string fileName) where T : PWGraph
         {
             //generate the file path
             string path = directory + "/" + fileName;
@@ -47,22 +47,24 @@ namespace PW.Editor
     
             //focus the asset file
             Selection.activeObject = mg;
+
+            return mg;
         }
     
-        public static void CreateMainGraph(string fileName = null)
+        public static PWMainGraph CreateMainGraph(string fileName = null)
         {
             if (fileName == null)
                 fileName = PWMainGraphDefaultFileName;
             
-            CreateGraph< PWMainGraph >(PWMainGraphPath, fileName);
+            return CreateGraph< PWMainGraph >(PWMainGraphPath, fileName);
         }
     
-        public static void CreateBiomeGraph(string fileName = null)
+        public static PWBiomeGraph CreateBiomeGraph(string fileName = null)
         {
             if (fileName == null)
                 fileName = PWBiomeGraphDefaultFileName;
             
-            CreateGraph< PWBiomeGraph >(PWBiomeGraphPath, fileName);
+            return CreateGraph< PWBiomeGraph >(PWBiomeGraphPath, fileName);
         }
     }
 }

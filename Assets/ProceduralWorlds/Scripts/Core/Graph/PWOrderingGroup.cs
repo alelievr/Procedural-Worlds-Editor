@@ -38,11 +38,11 @@ namespace PW.Core
 		{
 			EditorGUIUtility.AddCursorRect(r, cursor);
 
-			if (resizing && callbackId == resizingCallbackId && Event.current.type == EventType.mouseDrag)
+			if (resizing && callbackId == resizingCallbackId && Event.current.type == EventType.MouseDrag)
 				callback();
 			if (r.Contains(Event.current.mousePosition))
 			{
-				if (Event.current.type == EventType.mouseDown && Event.current.button == 0)
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				{
 					resizing = true;
 					resizingCallbackId = callbackId;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 using System;
 
 namespace PW.Core
@@ -41,7 +42,7 @@ namespace PW.Core
 
 		public PWGraphBuilder NewNode(Type nodeType, string name)
 		{
-			if (!nodeType.IsAssignableFrom(typeof(PWNode)))
+			if (!nodeType.IsSubclassOf(typeof(PWNode)))
 			{
 				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
@@ -50,9 +51,15 @@ namespace PW.Core
 			return this;
 		}
 
+		public PWGraphBuilder NewNode< T >(string name) where T : PWNode
+		{
+			commands.Add(PWGraphCLI.GenerateNewNodeCommand(typeof(T), name));
+			return this;
+		}
+
 		public PWGraphBuilder NewNode(Type nodeType, Vector2 position, string name)
 		{
-			if (!nodeType.IsAssignableFrom(typeof(PWNode)))
+			if (!nodeType.IsSubclassOf(typeof(PWNode)))
 			{
 				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
@@ -67,15 +74,64 @@ namespace PW.Core
 			return this;
 		}
 
-		public void Execute()
+		public PWGraphBuilder Execute(bool clearCommandsOnceExecuted = false)
 		{
 			foreach (var cmd in commands)
 				graph.Execute(cmd);
+			
+			if (clearCommandsOnceExecuted)
+				commands.Clear();
+			
+			return this;
 		}
 
 		public List< string > GetCommands()
 		{
 			return commands;
+		}
+
+		public void Export(string fileName, bool assetPath = true)
+		{
+			string	outFolder;
+
+			#if UNITY_EDITOR
+				outFolder = Application.dataPath;
+			#else
+				outFolder = Application.persistentDataPath;
+			#endif
+
+
+			string dstPath;
+			
+			if (assetPath)
+				dstPath = Path.Combine(outFolder, fileName);
+			else
+				dstPath = fileName;
+
+			File.WriteAllLines(dstPath, commands.ToArray());
+		}
+
+		public void Import(string fileName, bool assetPath = true)
+		{
+			string filePath = fileName;
+
+			if (assetPath)
+			{
+				#if UNITY_EDITOR
+					filePath = Path.Combine(Application.dataPath, fileName);
+				#else
+					filePath = Path.Combine(Application.persistentDataPath, fileName);
+				#endif
+			}
+			string[] lines = File.ReadAllLines(fileName);
+
+			foreach (var line in lines)
+				commands.Add(line);
+		}
+
+		public PWGraph GetGraph()
+		{
+			return graph;
 		}
 	
 	}

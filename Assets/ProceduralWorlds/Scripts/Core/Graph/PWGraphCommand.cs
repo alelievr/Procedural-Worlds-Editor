@@ -8,7 +8,9 @@ namespace PW.Core
 	public enum PWGraphCommandType
 	{
 		NewNode,
+		NewNodePosition,
 		Link,
+		LinkAnchor,
 	}
 	
 	public class PWGraphCommand
@@ -34,7 +36,7 @@ namespace PW.Core
 		//New node with position constructor
 		public PWGraphCommand(Type nodeType, string name, Vector2 position)
 		{
-			this.type = PWGraphCommandType.NewNode;
+			this.type = PWGraphCommandType.NewNodePosition;
 			this.nodeType = nodeType;
 			this.name = name;
 			this.position = position;

@@ -93,9 +93,9 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				DrawPresetLine(preset2DSideViewTexture, "2D sideview procedural terrain", () => {});
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
 					PWGraphBuilder.FromGraph(graph)
-						.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
-						.NewNode(typeof(PWNodeTopDown2DTerrain), "terrain")
-						.Link("perlin", "terrain")
+						.NewNode< PWNodePerlinNoise2D >("perlin")
+						.NewNode< PWNodeDebugLog >("debug")
+						.Link("perlin", "debug")
 						.Execute();
 					mainGraph.outputType = PWGraphTerrainType.TopDown2D;
 				}, false);

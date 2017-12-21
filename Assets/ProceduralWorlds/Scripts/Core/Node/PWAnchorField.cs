@@ -9,9 +9,9 @@ namespace PW.Core
 	[System.SerializableAttribute]
 	public enum PWAnchorType
 	{
+		None,
 		Input,
 		Output,
-		None,
 	}
 
 	[System.SerializableAttribute]
@@ -45,7 +45,7 @@ namespace PW.Core
 		//name given in the constructor of the attribute
 		public string						name;
 		//anchor type (input / output)
-		public PWAnchorType					anchorType;
+		public PWAnchorType					anchorType = PWAnchorType.None;
 		//anchor field type
 		public SerializableType				fieldType;
 		//value of the field
