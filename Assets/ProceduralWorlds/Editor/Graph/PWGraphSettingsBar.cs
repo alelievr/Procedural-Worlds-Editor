@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEditor;
 using System;
 using PW.Core;
@@ -33,15 +34,78 @@ namespace PW.Editor
 			prefixLabelStyle = new GUIStyle("PrefixLabel");
 		}
 
+		void DrawGraphSettings(Rect currentRect, Event e)
+		{
+			EditorGUILayout.Space();
+
+			GUI.SetNextControlName("PWName");
+			graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
+
+			if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
+				&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
+				&& GUI.GetNameOfFocusedControl() == "PWName")
+				GUI.FocusControl(null);
+
+			//seed
+			EditorGUI.BeginChangeCheck();
+			GUI.SetNextControlName("seed");
+			graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
+			
+			//chunk size:
+			EditorGUI.BeginChangeCheck();
+			GUI.SetNextControlName("chunk size");
+			graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
+			graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
+
+			//step:
+			EditorGUI.BeginChangeCheck();
+			float min = 0.1f;
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
+			graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
+			EditorGUILayout.EndHorizontal();
+
+			EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
+			EditorGUILayout.LabelField("Instance ID: " + graph.GetInstanceID());
+
+			EditorGUILayout.Separator();
+
+			EditorGUILayout.Separator();
+
+			if (GUILayout.Button("Cleanup graphs"))
+			{
+				PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
+
+				foreach (var graph in graphs)
+					if (graph.objectName.Contains("(Clone)"))
+					{
+						Debug.Log("destroyed graph: " + graph);
+						GameObject.DestroyImmediate(graph, false);
+					}
+			}
+
+			EditorGUILayout.BeginHorizontal();
+			{
+				if (GUILayout.Button("Force reload"))
+					graph.RaiseOnForceReload();
+				if (GUILayout.Button("Force reload Once"))
+					graph.RaiseOnForceReloadOnce();
+			}
+			EditorGUILayout.EndHorizontal();
+		}
+
 		public void DrawSettingsBar(Rect currentRect)
 		{
 			Event	e = Event.current;
+
+			Profiler.BeginSample("[PW] Rendering settings bar");
 			
 			GUI.DrawTexture(currentRect, PWColorTheme.defaultBackgroundTexture);
 	
 			//add the texturePreviewRect size:
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
+				//draw terrain preview
 				EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
 				{
 					Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
@@ -51,68 +115,14 @@ namespace PW.Editor
 				}
 				EditorGUILayout.EndVertical();
 
+				//draw main graph settings
 				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 				{
-					EditorGUILayout.Space();
-	
-					GUI.SetNextControlName("PWName");
-					graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
-	
-					if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
-						&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
-						&& GUI.GetNameOfFocusedControl() == "PWName")
-						GUI.FocusControl(null);
-	
-					//seed
-					EditorGUI.BeginChangeCheck();
-					GUI.SetNextControlName("seed");
-					graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
-					
-					//chunk size:
-					EditorGUI.BeginChangeCheck();
-					GUI.SetNextControlName("chunk size");
-					graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
-					graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
-	
-					//step:
-					EditorGUI.BeginChangeCheck();
-					float min = 0.1f;
-					EditorGUILayout.BeginHorizontal();
-					EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
-					graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
-					EditorGUILayout.EndHorizontal();
-
-					EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
-					EditorGUILayout.LabelField("Instance ID: " + graph.GetInstanceID());
-	
-					EditorGUILayout.Separator();
-	
-					EditorGUILayout.Separator();
-
-					if (GUILayout.Button("Cleanup graphs"))
-					{
-						PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
-
-						foreach (var graph in graphs)
-							if (graph.objectName.Contains("(Clone)"))
-							{
-								Debug.Log("destroyed graph: " + graph);
-								GameObject.DestroyImmediate(graph, false);
-							}
-					}
-	
-					EditorGUILayout.BeginHorizontal();
-					{
-						if (GUILayout.Button("Force reload"))
-							graph.RaiseOnForceReload();
-						if (GUILayout.Button("Force reload Once"))
-							graph.RaiseOnForceReloadOnce();
-					}
-					EditorGUILayout.EndHorizontal();
-	
+					DrawGraphSettings(currentRect, e);
 				}
 				EditorGUILayout.EndVertical();
 
+				//call the method to draw additional things determined by the graph.
 				if (onDrawAdditionalSettings != null)
 				{
 					Rect r = EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
@@ -127,6 +137,8 @@ namespace PW.Editor
 			//free focus of the selected fields
 			if (e.type == EventType.MouseDown)
 				GUI.FocusControl(null);
+
+			Profiler.EndSample();
 		}
 	}
 }

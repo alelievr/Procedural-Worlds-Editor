@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEditor;
 using System.Linq;
 using PW.Core;
@@ -110,13 +111,14 @@ namespace PW.Editor
 	
 		public void DrawNodeSelector(Rect currentRect)
 		{
+			Profiler.BeginSample("[PW] Rendering node selector");
+
 			//draw selector bar background:
 			GUI.DrawTexture(currentRect, PWColorTheme.defaultBackgroundTexture);
 
 			windowRect = new Rect(0, 0, currentRect.xMin + currentRect.width, currentRect.yMin + currentRect.height);
 	
 			//Pyramid of layouts:
-			// GUI.BeginClip(currentRect);
 			{
 				EditorGUILayout.BeginHorizontal(GUILayout.Width(currentRect.width), GUILayout.Height(currentRect.height));
 				{
@@ -132,7 +134,8 @@ namespace PW.Editor
 				}
 				EditorGUILayout.EndHorizontal();
 			}
-			// GUI.EndClip();
+
+			Profiler.EndSample();
 		}
 	}
 }

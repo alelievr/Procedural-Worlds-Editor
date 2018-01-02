@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using PW.Core;
 using UnityEditor;
 using System;
@@ -39,6 +40,9 @@ namespace PW.Editor
 		public void DrawOptionBar(Rect graphRect)
 		{
 			Event	e = Event.current;
+
+			Profiler.BeginSample("[PW] Rendering option bar");
+
 			EditorGUILayout.BeginVertical(navBarBackgroundStyle);
 			{
 				//Icon bar:
@@ -61,6 +65,8 @@ namespace PW.Editor
 				graphRect.size -= Vector2.right * 4;
 			}
 			EditorGUILayout.EndVertical();
+
+			Profiler.EndSample();
 		}
 
 	}

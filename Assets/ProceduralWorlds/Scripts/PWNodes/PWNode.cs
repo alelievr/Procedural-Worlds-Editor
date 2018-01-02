@@ -287,8 +287,13 @@ namespace PW
 				Debug.Log("Node " + GetType() + " Disable");
 			
 			UnBindEvents();
-			OnNodeDisable();
-			OnAnchorDisable();
+
+			//if the node was properly enabled, we call it's onDisable functions
+			if (graphRef != null)
+			{
+				OnNodeDisable();
+				OnAnchorDisable();
+			}
 		}
 
 	#endregion

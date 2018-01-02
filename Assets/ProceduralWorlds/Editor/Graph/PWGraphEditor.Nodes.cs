@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Profiling;
 using System.Linq;
 using PW.Core;
 using PW.Node;
@@ -69,6 +70,8 @@ public partial class PWGraphEditor
 	void RenderNodes()
 	{
 		int		nodeId = 0;
+
+		Profiler.BeginSample("[PW] rendering nodes");
 		
 		BeginWindows();
 		{
@@ -82,6 +85,8 @@ public partial class PWGraphEditor
 			RenderNode(nodeId++, graph.inputNode);
 		}
 		EndWindows();
+
+		Profiler.EndSample();
 
 		//if mouse was not over a node this frame, unset mouseOver
 		if (!editorEvents.isMouseOverNodeFrame)

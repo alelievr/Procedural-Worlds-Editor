@@ -8,6 +8,7 @@ using PW;
 using PW.Core;
 using PW.Node;
 using PW.Editor;
+using UnityEngine.Profiling;
 
 using Debug = UnityEngine.Debug;
 
@@ -54,6 +55,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	public override void OnEnable()
 	{
+		Profiler.BeginSample("[PW] GraphEditor Enabled");
 		base.OnEnable();
 
 		//provide the MacOS bool
@@ -63,6 +65,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		eventMasks.Clear();
 
 		LoadAssets();
+		Profiler.EndSample();
 	}
 
 	public override void OnGUIEnable()
@@ -94,7 +97,10 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//disable events if mouse is above an eventMask Rect.
 		MaskEvents();
-	
+
+		//profiling
+		Profiler.BeginSample("[PW] Graph redering");
+
 		Rect pos = position;
 		pos.position = Vector2.zero;
 		graph.zoomPanCorrection = GUIScaleUtility.BeginScale(ref pos, pos.size / 2, 1f / graph.scale, false);
@@ -124,6 +130,8 @@ public partial class PWGraphEditor : PWEditorWindow
 				Repaint();
 		}
 		GUIScaleUtility.EndScale();
+
+		Profiler.EndSample();
 	
 		//restore masked events:
 		UnMaskEvents();
@@ -254,6 +262,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	void SelectAndDrag()
 	{
+		Profiler.BeginSample("[PW] Select and drag");
+
 		//rendering the selection rect
 		if (editorEvents.isSelecting)
 		{
@@ -277,20 +287,28 @@ public partial class PWGraphEditor : PWEditorWindow
 					n.rect.position += e.delta;
 				});
 		}
+
+		Profiler.EndSample();
 	}
 
 	void RenderOrderingGroups()
 	{
+		Profiler.BeginSample("[PW] Render ordering groups");
+
 		foreach (var orderingGroup in graph.orderingGroups)
 			orderingGroup.Render(graph.panPosition, position.size, ref graph.editorEvents);
 
 		//if the mouse was not over an ordering group this frame
 		if (!editorEvents.isMouseOverOrderingGroupFrame)
 			editorEvents.mouseOverOrderingGroup = null;
+
+		Profiler.EndSample();
 	}
 
 	void ManageEvents()
 	{
+		Profiler.BeginSample("[PW] Managing events");
+
 		//do not process events if we are in layout / repaint
 		if (e.type == EventType.Repaint || e.type == EventType.Layout)
 			return ;
@@ -411,6 +429,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 			UnselectAllLinks();
 		}
+
+		Profiler.EndSample();
 	}
 
 	void UnMaskEvents()

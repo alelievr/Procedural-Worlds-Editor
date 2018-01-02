@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Profiling;
 using PW.Core;
 using PW;
 
@@ -13,6 +14,8 @@ public partial class PWGraphEditor
 	//process link creation, drag and select events + draw links
 	void RenderLinks()
 	{
+		Profiler.BeginSample("[PW] render links");
+
 		//render the dragged link
 		if (editorEvents.isDraggingLink || editorEvents.isDraggingNewLink)
 			DrawNodeCurve(editorEvents.startedLinkAnchor, e.mousePosition);
@@ -23,6 +26,8 @@ public partial class PWGraphEditor
 		
 		if (!editorEvents.isMouseOverLinkFrame)
 			editorEvents.mouseOverLink = null;
+
+		Profiler.EndSample();
 	}
 
 	void RenderNodeLinks(PWNode node)

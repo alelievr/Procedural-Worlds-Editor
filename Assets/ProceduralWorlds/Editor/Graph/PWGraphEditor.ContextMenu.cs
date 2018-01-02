@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Profiling;
 using PW.Core;
 using PW.Node;
 
@@ -32,6 +33,8 @@ public partial class PWGraphEditor
 
         if (e.type == EventType.ContextClick)
         {
+			Profiler.BeginSample("[PW] render context menu");
+
             Vector2 mousePos = e.mousePosition;
 
 			// Now create the menu, add items and show it
@@ -96,6 +99,8 @@ public partial class PWGraphEditor
 
 			menu.ShowAsContext();
 			e.Use();
+
+			Profiler.EndSample();
         }
 	}
 }

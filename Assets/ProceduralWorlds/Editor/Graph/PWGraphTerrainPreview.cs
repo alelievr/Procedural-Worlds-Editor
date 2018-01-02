@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEditor;
 using PW.Core;
 using System;
@@ -84,16 +85,15 @@ namespace PW.Editor
 		{
 			//if preview scene was destroyed or preview type was changed, reload preview game objects
 			if (previewScene == null || loadedPreviewType != previewType)
-			{
 				ReloadPreviewPrefab(previewType);
-			}
 	
 			if (previewCamera == null)
 				previewCamera = previewScene.GetComponentInChildren< Camera >();
 			if (previewCameraRenderTexture == null)
+			{
 				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
-			if (previewCamera != null && previewCameraRenderTexture != null)
 				previewCamera.targetTexture = previewCameraRenderTexture;
+			}
 		}
 
 		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainType terrainType)
@@ -103,6 +103,8 @@ namespace PW.Editor
 
 		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainPreviewType previewType)
 		{
+			Profiler.BeginSample("[PW] Rendering terrain preview");
+
 			UpdatePreviewScene(previewType);
 
 			if (previewCamera != null && first)
@@ -134,6 +136,10 @@ namespace PW.Editor
 					PWGraphTerrainManager.terrainReference.transform.position = previewCamera.transform.position;
 				e.Use();
 			}
+
+			first = false;
+
+			Profiler.EndSample();
 		}
 		
 	}

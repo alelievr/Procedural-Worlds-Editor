@@ -98,7 +98,7 @@ namespace PW.Core
 			var links = node.GetOutputLinks();
 
 			if (!realMode)
-				Profiler.BeginSample("Process node links " + node);
+				Profiler.BeginSample("[PW] Process node links " + node);
 
 			foreach (var link in links)
 			{
@@ -164,7 +164,7 @@ namespace PW.Core
 			//if you are in editor mode, update the process time of the node
 			if (!realMode)
 			{
-				Profiler.BeginSample("Process node " + node);
+				Profiler.BeginSample("[PW] Process node " + node);
 				Stopwatch	st = new Stopwatch();
 
 				st.Start();
