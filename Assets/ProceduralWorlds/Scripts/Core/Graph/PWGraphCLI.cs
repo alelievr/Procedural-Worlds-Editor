@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 
 namespace PW.Core
 {
+	public class PWGraphCLIAttributes : Pairs< string, object > {}
+
 	//Command line interpreter for PWGraph
 	public static class PWGraphCLI
 	{
@@ -13,7 +15,7 @@ namespace PW.Core
 		/*
 		Valid command syntaxes:
 
-		> NewNode nodeType nodeName [position]
+		> NewNode nodeType nodeName [position] [attr=...]
 		Create a new node of type nodeType in the graph, if the node
 		type does not exists, an excetion is raised and the node is
 		not created.
@@ -23,6 +25,7 @@ namespace PW.Core
 		ex:
 			> NewNode PWNodeAdd simple_add
 			> NewNode PWNodeAdd simple_add (10, 100)
+			> NewNode PWPerlinNoise2D perlin attr={ frequency: 1.2, octaves: 4, scale: 8.5 }
 
 		---------------------------------------------
 
@@ -55,6 +58,9 @@ namespace PW.Core
 			Word,
 			IntValue,
 			Comma,
+			Attr,
+			Equal,
+			JsonDatas,
 		}
 
 		class PWGraphTokenMatch
@@ -105,12 +111,17 @@ namespace PW.Core
 			public static List< PWGraphToken > newLink = new List< PWGraphToken >() {
 				PWGraphToken.LinkCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
+
+			public static List< PWGraphToken > newNodeAttrOption = new List< PWGraphToken >() {
+				PWGraphToken.Attr, PWGraphToken.Equal, PWGraphToken.JsonDatas
+			};
 		}
 
 		class PWGraphCommandTokenSequence
 		{
 			public PWGraphCommandType			type;
 			public List< PWGraphToken >			requiredTokens = null;
+			public List< PWGraphToken >			options = null;
 		}
 
 		static class PWGraphValidCommandTokenSequence
@@ -120,12 +131,14 @@ namespace PW.Core
 				//New Node command
 				new PWGraphCommandTokenSequence() {
 					type = PWGraphCommandType.NewNode,
+					options = PWGraphTokenSequence.newNodeAttrOption,
 					requiredTokens = PWGraphTokenSequence.newNode,
 				},
 				//New Node position command
 				new PWGraphCommandTokenSequence() {
 					type = PWGraphCommandType.NewNodePosition,
-					requiredTokens = PWGraphTokenSequence.newNodePosition
+					requiredTokens = PWGraphTokenSequence.newNodePosition,
+					options = PWGraphTokenSequence.newNodeAttrOption,
 				},
 				//New Link command
 				new PWGraphCommandTokenSequence() {
@@ -144,6 +157,9 @@ namespace PW.Core
 			new PWGraphTokenDefinition(PWGraphToken.IntValue, @"^[-+]?\d+"),
 			new PWGraphTokenDefinition(PWGraphToken.Comma, @"^,"),
 			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\".*\\\"|\\S+)"),
+			new PWGraphTokenDefinition(PWGraphToken.Attr, @"^attr"),
+			new PWGraphTokenDefinition(PWGraphToken.Equal, @"^="),
+			new PWGraphTokenDefinition(PWGraphToken.JsonDatas, @"^{.*}"),
 		};
 
 		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
@@ -217,8 +233,8 @@ namespace PW.Core
 		{
 			foreach (var validTokenList in PWGraphValidCommandTokenSequence.validSequences)
 			{
-				//if our token count does not macth withthe valid token count, this sequence can't match
-				if (validTokenList.requiredTokens.Count != tokens.Count)
+				//check if the token count can match the current valid token list
+				if (validTokenList.requiredTokens.Count > tokens.Count)
 					continue ;
 				
 				//check if the tokens we received correspond to a valid squence of token
@@ -309,13 +325,17 @@ namespace PW.Core
 			return null;
 		}
 
-		public static string GenerateNewNodeCommand(Type nodeType, string name)
+		public static string GenerateNewNodeCommand(Type nodeType, string name, PWGraphCLIAttributes datas = null)
 		{
 			//TODO: use tokens here
-			return "NewNode " + nodeType.Name + " " + name;
+			string cmd = "NewNode " + nodeType.Name + " " + name;
+			if (datas != null && datas.Count != 0)
+				cmd += " attr=" + PWJson.Generate(datas);
+			
+			return cmd;
 		}
 
-		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position)
+		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position, PWGraphCLIAttributes datas = null)
 		{
 			//TODO: use tokens here
 			return "NewNode " + nodeType.Name + " " + name + " (" + (int)position.x + ", " + (int)position.y+ ")";

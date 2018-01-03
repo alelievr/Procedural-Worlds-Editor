@@ -73,6 +73,25 @@ namespace PW.Core
 		{
 			return !(cmd1 == cmd2);
 		}
+
+		public override bool Equals(object cmd)
+		{
+			if (cmd as PWGraphCommand == null)
+				return false;
+			
+			return ((cmd as PWGraphCommand) == this);
+		}
+
+		public override int GetHashCode()
+		{
+			return position.GetHashCode()
+				+ type.GetHashCode()
+				+ forcePositon.GetHashCode()
+				+ name.GetHashCode()
+				+ nodeType.GetHashCode()
+				+ fromName.GetHashCode()
+				+ toName.GetHashCode();
+		}
 	
 	}
 }

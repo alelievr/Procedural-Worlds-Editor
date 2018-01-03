@@ -80,8 +80,14 @@ namespace PW.Core
 		void TrySetValue(FieldInfo prop, object val, PWNode target, PWNode from, bool realMode, bool clone = false)
 		{
 			//clone the input variable if requested by input anchor and if possible.
-			if (clone && val.GetType().IsAssignableFrom(typeof(Sampler)))
-				val = (val as Sampler).Clone(prop.GetValue(from) as Sampler);
+			if (clone)
+			{
+				Type t = val.GetType();
+				if (t.IsAssignableFrom(typeof(Sampler)))
+					val = (val as Sampler).Clone(prop.GetValue(from) as Sampler);
+				if (t.GetGenericTypeDefinition().IsAssignableFrom(typeof(IPWCloneable<>)))
+					(t as IPWCloneable< object >).Clone(val); //FIXME: is this working ???
+			}
 			
 			if (realMode)
 				prop.SetValue(target, val);

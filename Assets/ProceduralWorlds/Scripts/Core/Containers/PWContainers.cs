@@ -177,6 +177,16 @@ namespace PW.Core
 		}
 	}
 
+	[Serializable]
+	public class Pairs< T, U > : List< Pair< T, U> >
+	{
+		public void Add(T f, U s)
+		{
+			var p = new Pair< T, U >(f, s);
+			this.Add(p);
+		}
+	}
+
 	/*
 	**	PWNode render settings
 	*/

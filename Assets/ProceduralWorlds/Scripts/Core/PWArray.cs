@@ -9,8 +9,6 @@ namespace PW.Core
 	[System.SerializableAttribute]
 	public class PWArray< T > : IEnumerable< T >
 	{
-
-		public static MethodInfo assignAtReflection = typeof(PWArray<>).GetMethod("AssignAt");
 		
 		[SerializeField]
 		public int		valuesCount { get { return values.Count; } }

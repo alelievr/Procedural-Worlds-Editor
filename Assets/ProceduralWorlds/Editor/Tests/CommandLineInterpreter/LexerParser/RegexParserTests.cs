@@ -86,6 +86,13 @@ namespace PW
 				//the exception was thrown so the commmand works as excpected
 			}
 		}
+
+		[Test]
+		public void WellFormatedNewNodeWithDataCommand()
+		{
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new PWGraphCLIAttributes() {{"persistance", 2.4f}});
+
+		}
 	
 		#endregion //New Node commands
 	
@@ -122,6 +129,17 @@ namespace PW
 			try {
 				PWGraphCLI.Parse("BlaBlaBla arg1 arg2");
 				throw new Exception("no exception was thrown by unknow command");
+			} catch {
+				//the exception was thrown so the commmand works as excpected
+			}
+		}
+		
+		[Test]
+		public void EmptyCommand()
+		{
+			try {
+				PWGraphCLI.Parse("");
+				throw new Exception("no exception was thrown by an empty command");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
 			}
