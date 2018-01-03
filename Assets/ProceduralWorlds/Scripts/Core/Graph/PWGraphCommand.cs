@@ -23,24 +23,27 @@ namespace PW.Core
 		public Type					nodeType;
 		public string				fromName;
 		public string				toName;
+		public string				attributes;
 
 		//New node constructor
-		public PWGraphCommand(Type nodeType, string name)
+		public PWGraphCommand(Type nodeType, string name, string attributes = null)
 		{
 			this.type = PWGraphCommandType.NewNode;
 			this.nodeType = nodeType;
 			this.name = name;
 			this.forcePositon = false;
+			this.attributes = attributes;
 		}
 
 		//New node with position constructor
-		public PWGraphCommand(Type nodeType, string name, Vector2 position)
+		public PWGraphCommand(Type nodeType, string name, Vector2 position, string attributes = null)
 		{
 			this.type = PWGraphCommandType.NewNodePosition;
 			this.nodeType = nodeType;
 			this.name = name;
 			this.position = position;
 			this.forcePositon = true;
+			this.attributes = attributes;
 		}
 
 		//new link constructor

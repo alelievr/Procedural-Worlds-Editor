@@ -90,8 +90,17 @@ namespace PW
 		[Test]
 		public void WellFormatedNewNodeWithDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new PWGraphCLIAttributes() {{"persistance", 2.4f}});
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new PWGraphCLIAttributes() {{"persistance", 2.4f}, {"octaves", 3}});
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 
+			var parsedAttrs = PWJson.Parse(cmd.attributes);
+			var persistanceAttr = parsedAttrs[0];
+			var octavesAttr = parsedAttrs[1];
+
+			Assert.That(persistanceAttr.first == "persistance");
+			Assert.That(persistanceAttr.second.Equals(2.4f));
+			Assert.That(octavesAttr.first == "octaves");
+			Assert.That(octavesAttr.second.Equals(3));
 		}
 	
 		#endregion //New Node commands

@@ -148,6 +148,7 @@ namespace PW.Core
 			};
 		}
 
+		//token regex list by priority order
 		static List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >()
 		{
 			new PWGraphTokenDefinition(PWGraphToken.LinkCommand, @"^Link"),
@@ -156,10 +157,10 @@ namespace PW.Core
 			new PWGraphTokenDefinition(PWGraphToken.ClosedParenthesis, @"^\)"),
 			new PWGraphTokenDefinition(PWGraphToken.IntValue, @"^[-+]?\d+"),
 			new PWGraphTokenDefinition(PWGraphToken.Comma, @"^,"),
-			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\".*\\\"|\\S+)"),
 			new PWGraphTokenDefinition(PWGraphToken.Attr, @"^attr"),
 			new PWGraphTokenDefinition(PWGraphToken.Equal, @"^="),
 			new PWGraphTokenDefinition(PWGraphToken.JsonDatas, @"^{.*}"),
+			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\".*\\\"|\\S+)"),
 		};
 
 		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
@@ -212,6 +213,7 @@ namespace PW.Core
 		static PWGraphCommand CreateGraphCommand(PWGraphCommandTokenSequence seq, List< PWGraphTokenMatch > tokens)
 		{
 			Type	nodeType;
+			string	attributes = null;
 
 			switch (seq.type)
 			{
@@ -219,11 +221,16 @@ namespace PW.Core
 					return new PWGraphCommand(tokens[1].value, tokens[2].value);
 				case PWGraphCommandType.NewNode:
 					nodeType = TryParseNodeType(tokens[1].value);
-					return new PWGraphCommand(nodeType, tokens[2].value);
+					if (tokens.Count > 4)
+						attributes = tokens[5].value;
+					Debug.Log("attrs: " + attributes);
+					return new PWGraphCommand(nodeType, tokens[2].value, attributes);
 				case PWGraphCommandType.NewNodePosition:
 					nodeType = TryParseNodeType(tokens[1].value);
+					if (tokens.Count > 8)
+						attributes = tokens[9].value;
 					Vector2 position = TryParsePosition(tokens[4].value, tokens[6].value);
-					return new PWGraphCommand(nodeType, tokens[2].value, position);
+					return new PWGraphCommand(nodeType, tokens[2].value, position, attributes);
 			}
 
 			return null;
@@ -301,6 +308,14 @@ namespace PW.Core
 			Vector2	position = command.position;
 
 			PWNode node = graph.CreateNewNode(command.nodeType, position);
+
+			if (!String.IsNullOrEmpty(command.attributes))
+			{
+				foreach (var attr in PWJson.Parse(command.attributes))
+				{
+					Debug.Log(attr.first + " -> " + attr.second);
+				}
+			}
 
 			node.name = command.name;
 		}
