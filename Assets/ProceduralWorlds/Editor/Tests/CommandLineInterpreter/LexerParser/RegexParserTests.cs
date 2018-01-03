@@ -58,33 +58,43 @@ namespace PW
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "addName", new Vector2(42, -42));
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNodePosition);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
-			Assert.That(cmd.name == "addName");
-			Assert.That(cmd.forcePositon == true);
-			Assert.That(cmd.position == new Vector2(42, -42));
+			Assert.That(cmd.type == PWGraphCommandType.NewNodePosition, "Bad command type: " + cmd.type + " instead of " + PWGraphCommandType.NewNodePosition);
+			Assert.That(cmd.nodeType == typeof(PWNodeAdd), "Bad node type: " + cmd.nodeType + " instead of " + typeof(PWNodeAdd));
+			Assert.That(cmd.name == "addName", "Bad node name: " + cmd.name + " instead of addName");
+			Assert.That(cmd.forcePositon == true, "Forceposition is false but expected to be true");
+			Assert.That(cmd.position == new Vector2(42, -42), "Bad node position: " + cmd.position + " instead of " + new Vector2(42, -42));
 		}
 	
 		[Test]
 		public void BadTypeNewNodeCommand()
 		{
+			bool hasThrown = false;
+			
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeUnknown unknown");
-				throw new Exception("Unknow node type in newNode command didn't throw an exception");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
+				hasThrown = true;
 			}
+
+			if (!hasThrown)
+				throw new Exception("Unknow node type in newNode command didn't throw an exception");
 		}
 	
 		[Test]
 		public void TooManyArgumentsNewNodeCommand()
 		{
+			bool hasThrown = false;
+
 			try {
-				PWGraphCLI.Parse("NewNode PWNodeUnknown node node node node");
-				throw new Exception("too many arguments in newNode command didn't throw an exception");
+				PWGraphCLI.Parse("NewNode PWNodeAdd node node node node");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
+				hasThrown = true;
 			}
+			
+			if (!hasThrown)
+				throw new Exception("too many arguments in newNode command didn't throw an exception");
 		}
 
 		[Test]
@@ -97,10 +107,26 @@ namespace PW
 			var persistanceAttr = parsedAttrs[0];
 			var octavesAttr = parsedAttrs[1];
 
-			Assert.That(persistanceAttr.first == "persistance");
-			Assert.That(persistanceAttr.second.Equals(2.4f));
-			Assert.That(octavesAttr.first == "octaves");
-			Assert.That(octavesAttr.second.Equals(3));
+			Assert.That(persistanceAttr.first == "persistance", "The persistance name expected to be 'persistance' but was '" + persistanceAttr.first + "'");
+			Assert.That((float)persistanceAttr.second == 2.4f, "The persistance value expected to be 2.4 but was '" + persistanceAttr.second + "'");
+			Assert.That(octavesAttr.first == "octaves", "The octaves name expected to be 'octaves' but was '" + octavesAttr.first + "'");
+			Assert.That((int)octavesAttr.second == 3, "The octaves value expected to be 3 but was '" + octavesAttr.second + "'");
+		}
+		
+		[Test]
+		public void WellFormatedNewNodeWithPositionAndDataCommand()
+		{
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistance", 1.4f}, {"octaves", 2}});
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+
+			var parsedAttrs = PWJson.Parse(cmd.attributes);
+			var persistanceAttr = parsedAttrs[0];
+			var octavesAttr = parsedAttrs[1];
+
+			Assert.That(persistanceAttr.first == "persistance", "The persistance name expected to be 'persistance' but was '" + persistanceAttr.first + "'");
+			Assert.That((float)persistanceAttr.second == 1.4f, "The persistance value expected to be 1.4 but was '" + persistanceAttr.second + "'");
+			Assert.That(octavesAttr.first == "octaves", "The octaves name expected to be 'octaves' but was '" + octavesAttr.first + "'");
+			Assert.That((int)octavesAttr.second == 2, "The octaves value expected to be 2 but was '" + octavesAttr.second + "'");
 		}
 	
 		#endregion //New Node commands

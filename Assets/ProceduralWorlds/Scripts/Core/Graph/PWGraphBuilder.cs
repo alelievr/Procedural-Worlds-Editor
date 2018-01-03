@@ -40,31 +40,31 @@ namespace PW.Core
 			return builder;
 		}
 
-		public PWGraphBuilder NewNode(Type nodeType, string name)
+		public PWGraphBuilder NewNode(Type nodeType, string name, PWGraphCLIAttributes attributes = null)
 		{
 			if (!nodeType.IsSubclassOf(typeof(PWNode)))
 			{
 				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
 			}
-			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name));
+			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name, attributes));
 			return this;
 		}
 
-		public PWGraphBuilder NewNode< T >(string name) where T : PWNode
+		public PWGraphBuilder NewNode< T >(string name, PWGraphCLIAttributes attributes = null) where T : PWNode
 		{
-			commands.Add(PWGraphCLI.GenerateNewNodeCommand(typeof(T), name));
+			commands.Add(PWGraphCLI.GenerateNewNodeCommand(typeof(T), name, attributes));
 			return this;
 		}
 
-		public PWGraphBuilder NewNode(Type nodeType, Vector2 position, string name)
+		public PWGraphBuilder NewNode(Type nodeType, Vector2 position, string name, PWGraphCLIAttributes attributes = null)
 		{
 			if (!nodeType.IsSubclassOf(typeof(PWNode)))
 			{
 				Debug.Log("[PWGraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
 			}
-			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name, position));
+			commands.Add(PWGraphCLI.GenerateNewNodeCommand(nodeType, name, position, attributes));
 			return this;
 		}
 

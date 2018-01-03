@@ -13,7 +13,7 @@ public static class PWJson
         public Type     type;
         public string   prefix;
         public string   sufix;
-        public Regex    matchingRegex;
+        public Regex    regex;
         public Func< string, object >	parser;
     }
 
@@ -26,27 +26,51 @@ public static class PWJson
 			jsonType.type = t;
 			jsonType.prefix = prefix;
 			jsonType.sufix = sufix;
-			jsonType.matchingRegex = regex;
+			jsonType.regex = regex;
 			jsonType.parser = parser;
+		}
+		
+		public void Add(Type t, Regex regex, Func< string, object > parser)
+		{
+			JsonType jsonType = new JsonType();
+
+			jsonType.type = t;
+			jsonType.prefix = "";
+			jsonType.sufix = "";
+			jsonType.regex = regex;
+			jsonType.parser = parser;
+			
+			this.Add(jsonType);
 		}
 	}
 
-	static JsonTypes allowedJsonTypes = new JsonTypes() {
-		{typeof(string), "\"", "\"", new Regex("^\".*\"$"), (val) => { return val.Trim('"'); }},
-	};
+	static string intRegex = @"[-+]?\d+";
+	static string floatRegex = @"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+|f?)?";
+	static string vector2Regex = @"(\s*" + floatRegex + @"\s*,\s*" + floatRegex + ")";
+	static string texture2DRegex = @"{\s*Texture2D\s*:\s*(\w+)}";
 
-    // static List< Type > allowedJsonTypes = new List< Type >() {
-        // typeof(string), typeof(int), typeof(float), typeof(double),
-        // typeof(Vector2), typeof(Vector3), typeof(Vector4), typeof(Texture2D),
-        // typeof(Material)
-    // };
+	static JsonTypes allowedJsonTypes = new JsonTypes() {
+		{typeof(string), "\"", "\"", new Regex("^\".*\"$"), (val) => val.Trim('"') },
+		{typeof(int), new Regex(@"^" + intRegex + "$"), (val) => int.Parse(val)},
+		{typeof(float), new Regex("^" + floatRegex + "$"), (val) => float.Parse(val) },
+		{typeof(Vector2), new Regex("^" + vector2Regex + "$"),
+			(val) => {
+				//Arrrrrg i hate string manipulation in C#
+				MatchCollection mc = new Regex(@"\(\s*(.*)\s*,\s*(.*)\s*\)").Matches(val);
+				float f1 = float.Parse(mc[1].Value);
+				float f2 = float.Parse(mc[2].Value);
+				return new Vector2(f1, f2);
+			}
+		},
+		{typeof(Texture2D), "{Texture2D:", "}", new Regex(texture2DRegex), (val) => Resources.Load< Texture2D >(val) }
+	};
 
     static string Jsonify(object data)
     {
         Type t = data.GetType();
 
-        // if (!allowedJsonTypes.Contains(t))
-            // throw new Exception("[PWJson] Can't jsonify type '" + t + "'");
+        if (allowedJsonTypes.Count(a => a.type == t) == 0)
+            throw new Exception("[PWJson] Can't jsonify type '" + t + "'");
 
         if (t == typeof(string))
             return "\"" + (data as string) + "\"";
@@ -81,7 +105,7 @@ public static class PWJson
 		Match nameMatch = nameRegex.Match(part);
 
 		if (!nameMatch.Success)
-			throw new Exception("[PWJson] Parse error near " + part);
+			throw new Exception("[PWJson] Parse error near '" + part + "'");
 		
 		string name = nameMatch.Value.Replace("\"", String.Empty);
 
@@ -90,11 +114,24 @@ public static class PWJson
 		Match separatorMatch = separatorRegex.Match(part);
 
 		if (!separatorMatch.Success)
-			throw new Exception("[PWJson] Parse error near " + part);
+			throw new Exception("[PWJson] Parse error near '" + part + "'");
 			
-		part = part.Substring(separatorMatch.Value.Length);
+		part = part.Substring(separatorMatch.Value.Length).Trim();
 
+		object obj = null;
 
+		foreach (var allowedType in allowedJsonTypes)
+		{
+			// Debug.Log("part: [" + part + "], match '" + allowedType.regex + "': " + allowedType.regex.Match(part).Success);
+			if (allowedType.regex.Match(part).Success)
+			{
+				 obj = allowedType.parser(part);
+				 break ;
+			}
+		}
+
+		if (obj == null)
+			throw new Exception("[PWJson] Parse error near '" + part + "'");
 
 		return new Pair< string, object >(name, obj);
 	}
@@ -106,7 +143,7 @@ public static class PWJson
 		s = s.Trim();
 
 		//check for enclosing brackets
-		if (!Regex.Match(s, @"^{/.*}$").Success)
+		if (!Regex.Match(s, @"^{.*}$").Success)
 			throw new Exception("[PWJson] Bad json format while parsing '" + s + "'");
 		
 		//remove enclosing brackets
@@ -116,9 +153,7 @@ public static class PWJson
 		var datas = s.Split(',');
 
 		foreach (var data in datas)
-		{
-			var pair = ParsePart(data.Trim());
-		}
+			ret.Add(ParsePart(data.Trim()));
 
         return ret;
     }

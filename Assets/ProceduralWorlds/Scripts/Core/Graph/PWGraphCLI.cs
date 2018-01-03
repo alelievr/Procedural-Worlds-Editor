@@ -223,12 +223,11 @@ namespace PW.Core
 					nodeType = TryParseNodeType(tokens[1].value);
 					if (tokens.Count > 4)
 						attributes = tokens[5].value;
-					Debug.Log("attrs: " + attributes);
 					return new PWGraphCommand(nodeType, tokens[2].value, attributes);
 				case PWGraphCommandType.NewNodePosition:
 					nodeType = TryParseNodeType(tokens[1].value);
-					if (tokens.Count > 8)
-						attributes = tokens[9].value;
+					if (tokens.Count > 9)
+						attributes = tokens[10].value;
 					Vector2 position = TryParsePosition(tokens[4].value, tokens[6].value);
 					return new PWGraphCommand(nodeType, tokens[2].value, position, attributes);
 			}
@@ -243,11 +242,22 @@ namespace PW.Core
 				//check if the token count can match the current valid token list
 				if (validTokenList.requiredTokens.Count > tokens.Count)
 					continue ;
+
+				int i = 0;
 				
 				//check if the tokens we received correspond to a valid squence of token
-				for (int i = 0; i < validTokenList.requiredTokens.Count; i++)
+				for (i = 0; i < validTokenList.requiredTokens.Count; i++)
+				{
 					if (tokens[i].token != validTokenList.requiredTokens[i])
 						goto skipLoop;
+				}
+
+				//check for options:
+				for (int j = 0; i < tokens.Count; i++, j++)
+				{
+					if (tokens[i].token != validTokenList.options[j])
+						goto skipLoop;
+				}
 				
 				//the valid token list iterated until it's end so we have a valid command
 				return CreateGraphCommand(validTokenList, tokens);
@@ -353,7 +363,11 @@ namespace PW.Core
 		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position, PWGraphCLIAttributes datas = null)
 		{
 			//TODO: use tokens here
-			return "NewNode " + nodeType.Name + " " + name + " (" + (int)position.x + ", " + (int)position.y+ ")";
+			string cmd = "NewNode " + nodeType.Name + " " + name + " (" + (int)position.x + ", " + (int)position.y+ ")";
+			if (datas != null && datas.Count != 0)
+				cmd += " attr=" + PWJson.Generate(datas);
+			
+			return cmd;
 		}
 
 		public static string GenerateLinkCommand(string fromName, string toName)
