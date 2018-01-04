@@ -48,9 +48,6 @@ namespace PW.Core
 		static GUIStyle		colorPickerStyle;
 		static GUIStyle		centeredLabel;
 
-		[System.NonSerializedAttribute]
-		static MethodInfo	gradientField;
-
 		[SerializeField]
 		List< PWGUISettings >	settingsStorage;
 		int						currentSettingCount = 0;
@@ -165,80 +162,8 @@ namespace PW.Core
 
 			if (fieldSettings.active)
 			{
-				int colorPickerWidth = 170;
-				int colorPickerHeight = 270;
-				
+				fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
 				GUI.changed = true;
-				PWPopup.AddToRender(fieldSettings, "Color picker", () =>
-				{
-					if (e.type == EventType.KeyDown)
-					{
-						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
-						{
-							fieldSettings.InActive();
-							e.Use();
-						}
-						if (e.keyCode == KeyCode.Escape)
-						{
-							fieldSettings.c = (SerializableColor)(Color)fieldSettings.InActive();
-							e.Use();
-						}
-					}
-					
-					//draw the color picker window
-					colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
-					{
-						Rect localColorPickerRect = new Rect(Vector2.zero, new Vector2(colorPickerWidth, colorPickerHeight));
-						GUILayout.Label(colorPickerTexture, GUILayout.Width(150), GUILayout.Height(150));
-	
-						Vector2 colorPickerMousePosition = e.mousePosition - new Vector2(colorPickerStyle.padding.left + 1, colorPickerStyle.padding.top + 5);
-	
-						if (colorPickerMousePosition.x >= 0 && colorPickerMousePosition.y >= 0 && colorPickerMousePosition.x <= 150 && colorPickerMousePosition.y <= 150)
-						{
-							if (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
-							{
-								Vector2 textureCoord = colorPickerMousePosition * (colorPickerTexture.width / 150f);
-								textureCoord.y = colorPickerTexture.height - textureCoord.y;
-								fieldSettings.c = (SerializableColor)colorPickerTexture.GetPixel((int)textureCoord.x, (int)textureCoord.y);
-								fieldSettings.thumbPosition = colorPickerMousePosition + new Vector2(6, 9);
-							}
-						}
-	
-						Rect colorPickerThumbRect = new Rect(fieldSettings.thumbPosition, new Vector2(8, 8));
-						GUI.DrawTexture(colorPickerThumbRect, colorPickerThumb);
-	
-						byte r, g, b, a;
-						PWColor.ColorToByte(fieldSettings.c, out r, out g, out b, out a);
-						EditorGUIUtility.labelWidth = 20;
-						r = (byte)EditorGUILayout.IntSlider("R", r, 0, 255);
-						g = (byte)EditorGUILayout.IntSlider("G", g, 0, 255);
-						b = (byte)EditorGUILayout.IntSlider("B", b, 0, 255);
-						a = (byte)EditorGUILayout.IntSlider("A", a, 0, 255);
-						fieldSettings.c = (SerializableColor)PWColor.ByteToColor(r, g, b, a);
-						EditorGUIUtility.labelWidth = 0;
-	
-						EditorGUILayout.Space();
-	
-						//hex field
-						int hex = PWColor.ColorToHex(fieldSettings.c, false); //get color without alpha
-						EditorGUIUtility.labelWidth = 80;
-						EditorGUI.BeginChangeCheck();
-						string hexColor = EditorGUILayout.TextField("Hex color", hex.ToString("X6"));
-						if (EditorGUI.EndChangeCheck())
-							a = 255;
-						EditorGUIUtility.labelWidth = 0;
-						Regex reg = new Regex(@"[^A-F0-9 -]");
-						hexColor = reg.Replace(hexColor, "");
-						hexColor = hexColor.Substring(0, Mathf.Min(hexColor.Length, 6));
-						if (hexColor == "")
-							hexColor = "0";
-						hex = int.Parse(a.ToString("X2") + hexColor, System.Globalization.NumberStyles.HexNumber);
-						fieldSettings.c = (SerializableColor)PWColor.HexToColor(hex, false);
-	
-						if (e.isMouse && localColorPickerRect.Contains(e.mousePosition))
-							e.Use();
-					}
-				}, colorPickerWidth);
 			}
 			
 			color = fieldSettings.c;
@@ -274,6 +199,7 @@ namespace PW.Core
 			{
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
+					PWColorPicker.OpenPopup(color, fieldSettings.thumbPosition);
 					fieldSettings.Active(color);
 					e.Use();
 				}
@@ -573,26 +499,7 @@ namespace PW.Core
 			//render the texture settings window
 			if (fieldSettings.active)
 			{
-				PWPopup.AddToRender(fieldSettings, "Texture preview settings", () =>
-				{
-					if (e.type == EventType.KeyDown)
-						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
-						{
-							fieldSettings.InActive();
-							e.Use();
-						}
-					
-						EditorGUIUtility.labelWidth = 80;
-						EditorGUI.BeginChangeCheck();
-							fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup("filter mode", fieldSettings.filterMode);
-						if (EditorGUI.EndChangeCheck() || tex.filterMode != fieldSettings.filterMode)
-							tex.filterMode = fieldSettings.filterMode;
-						fieldSettings.scaleMode = (ScaleMode)EditorGUILayout.EnumPopup("scale mode", fieldSettings.scaleMode);
-						fieldSettings.scaleAspect = EditorGUILayout.FloatField("scale aspect", fieldSettings.scaleAspect);
-						fieldSettings.material = (Material)EditorGUILayout.ObjectField("material", fieldSettings.material, typeof(Material), false);
-						fieldSettings.debug = EditorGUILayout.Toggle("debug", fieldSettings.debug);
-						EditorGUIUtility.labelWidth = 0;
-				}, 200);
+				//TODO: update values
 			}
 
 			int		icSettingsSize = 16;
@@ -603,6 +510,7 @@ namespace PW.Core
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
 					fieldSettings.Invert(0);
+					PWTextureSettingsPopup.OpenPopup(fieldSettings.filterMode, fieldSettings.scaleMode, fieldSettings.scaleAspect, fieldSettings.material, fieldSettings.texture, fieldSettings.debug);
 					e.Use();
 				}
 				else if (fieldSettings.active)
@@ -700,35 +608,7 @@ namespace PW.Core
 			//draw the settings window
 			if (settings && fieldSettings.active)
 			{
-				PWPopup.AddToRender(fieldSettings, "Sampler 2D settings", () => {
-					EditorGUILayout.BeginVertical();
-					{
-						EditorGUI.BeginChangeCheck();
-						fieldSettings.filterMode = (FilterMode)EditorGUILayout.EnumPopup(fieldSettings.filterMode);
-						if (EditorGUI.EndChangeCheck())
-							tex.filterMode = fieldSettings.filterMode;
-						gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
-						if (!gradient.Compare(fieldSettings.serializableGradient))
-							fieldSettings.update = true;
-						fieldSettings.serializableGradient = (SerializableGradient)gradient;
-					}
-					EditorGUILayout.EndVertical();
-					
-					if (e.type == EventType.KeyDown && fieldSettings.active)
-					{
-						if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
-						{
-							fieldSettings.InActive();
-							e.Use();
-						}
-					}
-
-					EditorGUIUtility.labelWidth = 100;
-					fieldSettings.debug = EditorGUILayout.Toggle("debug", fieldSettings.debug);
-
-					if (GUILayout.Button("force update"))
-						fieldSettings.update = true;
-				});
+				//TODO: update values
 			}
 			
 			if (settings)
@@ -744,6 +624,7 @@ namespace PW.Core
 					if (icSettingsRect.Contains(e.mousePosition))
 					{
 						fieldSettings.Invert(null);
+						PWSamplerSettingsPopup.OpenPopup(fieldSettings.gradient, fieldSettings.filterMode, fieldSettings.texture, fieldSettings.debug);
 						e.Use();
 					}
 					else if (fieldSettings.active)
@@ -964,18 +845,9 @@ namespace PW.Core
 			ic_color = Resources.Load("ic_color") as Texture2D;
 			ic_edit = Resources.Load("ic_edit") as Texture2D;
 			ic_settings = Resources.Load("ic_settings") as Texture2D;
-			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
 			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
-			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
-			gradientField = typeof(EditorGUILayout).GetMethod(
-				"GradientField",
-				BindingFlags.NonPublic | BindingFlags.Static,
-				null,
-				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
-				null
-			);
 		}
 
 		//A negative value of fieldIndex will take the objectat the specified index starting from the end

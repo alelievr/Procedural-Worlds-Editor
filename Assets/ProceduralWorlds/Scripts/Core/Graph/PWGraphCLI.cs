@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace PW.Core
 {
@@ -318,12 +319,17 @@ namespace PW.Core
 			Vector2	position = command.position;
 
 			PWNode node = graph.CreateNewNode(command.nodeType, position);
+			Type nodeType = node.GetType();
 
 			if (!String.IsNullOrEmpty(command.attributes))
 			{
 				foreach (var attr in PWJson.Parse(command.attributes))
 				{
 					Debug.Log(attr.first + " -> " + attr.second);
+					FieldInfo attrField = nodeType.GetField(attr.first, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+
+					if (attrField == null)
+						Debug.LogError("Attribute " + attr.first + " can be found in node " + node);
 				}
 			}
 

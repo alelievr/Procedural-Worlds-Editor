@@ -36,6 +36,7 @@ namespace PW
 			Assert.That(link.toNode == debugNode);
 		}
 
+		[Test]
 		public void PerlinNoiseWithAttributesToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
@@ -54,15 +55,9 @@ namespace PW
 			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
 			PWNodeDebugLog debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugLog;
 
-			//TODO: finish this test
+			Assert.That(perlinNode.octaves == 6);
+			Assert.That(perlinNode.persistance == 2.4f);
 	
-			Assert.That(perlinNode != null, "Perlin node not found in the graph (using FindNodeByName)");
-			Assert.That(debugNode != null, "Debug node not found in the graph (using FindNodeByName)");
-	
-			PWNodeLink link = perlinNode.GetOutputLinks().First();
-	
-			Assert.That(link != null, "Link can't be found in the graph");
-			Assert.That(link.toNode == debugNode);
 		}
 	
 	}
