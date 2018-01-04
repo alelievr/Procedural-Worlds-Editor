@@ -160,10 +160,10 @@ namespace PW.Core
 				return colorSettings;
 			});
 
-			if (fieldSettings.active)
+			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
 			{
 				fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
-				GUI.changed = true;
+				fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
 			}
 			
 			color = fieldSettings.c;
@@ -200,12 +200,6 @@ namespace PW.Core
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
 					PWColorPicker.OpenPopup(color, fieldSettings.thumbPosition);
-					fieldSettings.Active(color);
-					e.Use();
-				}
-				else if (fieldSettings.active)
-				{
-					fieldSettings.InActive();
 					e.Use();
 				}
 			}
@@ -258,32 +252,27 @@ namespace PW.Core
 			bool editClickIn = (editable && e.type == EventType.MouseDown && e.button == 0 && iconRect.Contains(e.mousePosition));
 
 			if (editClickIn)
-				fieldSettings.Invert(text);
+				fieldSettings.editing = false;
 			
 			if (editable)
 			{
-				GUI.color = (fieldSettings.active) ? PWColorTheme.selectedColor : Color.white;
+				GUI.color = (fieldSettings.editing) ? PWColorTheme.selectedColor : Color.white;
 				GUI.DrawTexture(iconRect, ic_edit);
 				GUI.color = Color.white;
 			}
 
-			if (fieldSettings.active == true)
+			if (fieldSettings.editing)
 			{
 				Color oldCursorColor = GUI.skin.settings.cursorColor;
 				GUI.skin.settings.cursorColor = Color.white;
 				GUI.SetNextControlName(controlName);
 				text = GUI.TextField(textRect, text, textFieldStyle);
 				GUI.skin.settings.cursorColor = oldCursorColor;
-				if (e.isKey && fieldSettings.active)
+				if (e.isKey && fieldSettings.editing)
 				{
-					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+					if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
 					{
-						fieldSettings.InActive();
-						e.Use();
-					}
-					else if (e.keyCode == KeyCode.Escape)
-					{
-						text = (string)fieldSettings.InActive();
+						fieldSettings.editing = false;
 						e.Use();
 					}
 				}
@@ -293,9 +282,9 @@ namespace PW.Core
 			
 			bool editClickOut = (editable && e.type == EventType.MouseDown && e.button == 0 && !iconRect.Contains(e.mousePosition));
 
-			if (editClickOut && fieldSettings.active)
+			if (editClickOut && fieldSettings.editing)
 			{
-				fieldSettings.InActive();
+				fieldSettings.editing = false;
 				e.Use();
 			}
 
@@ -378,13 +367,13 @@ namespace PW.Core
 				GUILayout.Space(-4);
 				EditorGUILayout.BeginHorizontal();
 				{
-					if (!fieldSettings.active)
+					if (!fieldSettings.editing)
 					{
 						name.text += value.ToString();
 						GUILayout.Label(name, centeredLabel);
 						Rect valueRect = GUILayoutUtility.GetLastRect();
 						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.clickCount == 2)
-							fieldSettings.Active(value);
+							fieldSettings.editing = true;
 					}
 					else
 					{
@@ -394,9 +383,9 @@ namespace PW.Core
 						Rect valueRect = GUILayoutUtility.GetLastRect();
 						GUILayout.FlexibleSpace();
 						if (!valueRect.Contains(e.mousePosition) && e.isMouse || (e.isKey && e.keyCode == KeyCode.Return))
-							{ fieldSettings.InActive(); e.Use(); }
+							{ fieldSettings.editing = false; e.Use(); }
 						if (e.isKey && e.keyCode == KeyCode.Escape)
-							{ value = (float)fieldSettings.InActive(); e.Use(); }
+							{ fieldSettings.editing = false; e.Use(); }
 					}
 				}
 				EditorGUILayout.EndHorizontal();
@@ -492,15 +481,20 @@ namespace PW.Core
 			if (!settings)
 				return ;
 
-			//render debug:
-			if (fieldSettings.debug)
-				DisplayTextureDebug(fieldSettings.savedRect, tex as Texture2D);
-
 			//render the texture settings window
-			if (fieldSettings.active)
+			if (e.type == EventType.ExecuteCommand && e.commandName == "TextureSettingsUpdate")
 			{
-				//TODO: update values
+				fieldSettings.scaleAspect = PWTextureSettingsPopup.scaleAspect;
+				fieldSettings.scaleMode = PWTextureSettingsPopup.scaleMode;
+				fieldSettings.material = PWTextureSettingsPopup.material;
+				fieldSettings.filterMode = PWTextureSettingsPopup.filterMode;
+				fieldSettings.debug = PWTextureSettingsPopup.debug;
+				tex.filterMode = fieldSettings.filterMode;
 			}
+
+			//render debug:
+			if (fieldSettings.frameSafeDebug)
+				DisplayTextureDebug(fieldSettings.savedRect, tex as Texture2D);
 
 			int		icSettingsSize = 16;
 			Rect	icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize, previewRect.y, icSettingsSize, icSettingsSize);
@@ -509,13 +503,7 @@ namespace PW.Core
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					fieldSettings.Invert(0);
-					PWTextureSettingsPopup.OpenPopup(fieldSettings.filterMode, fieldSettings.scaleMode, fieldSettings.scaleAspect, fieldSettings.material, fieldSettings.texture, fieldSettings.debug);
-					e.Use();
-				}
-				else if (fieldSettings.active)
-				{
-					fieldSettings.InActive();
+					PWTextureSettingsPopup.OpenPopup(fieldSettings.filterMode, fieldSettings.scaleMode, fieldSettings.scaleAspect, fieldSettings.material, fieldSettings.debug);
 					e.Use();
 				}
 			}
@@ -527,17 +515,19 @@ namespace PW.Core
 
 			Vector2 pixelPos = e.mousePosition - textureRect.position;
 
-			Debug.Log("pixel: " + pixelPos + "texwidth: " + tex.width + ", " + textureRect.width+ ", r:" + tex.width / textureRect.width);
+			// Debug.Log("pixel: " + pixelPos + "texwidth: " + tex.width + ", " + textureRect.width+ ", r:" + tex.width / textureRect.width);
 			if (textureRect.width > 0)
 				pixelPos *= tex.width / textureRect.width;
 
 			if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < tex.width && pixelPos.y < tex.height)
 			{
-				if (e.isMouse)
-					e.Use();
-				Color pixel = tex.GetPixel((int)pixelPos.x, (int)pixelPos.y);
-				EditorGUILayout.LabelField("pixel(" + (int)pixelPos.x + ", " + (int)pixelPos.y + ")");
-				EditorGUILayout.LabelField(pixel.ToString("F2"));
+				try {
+					Color pixel = tex.GetPixel((int)pixelPos.x, (int)pixelPos.y);
+					EditorGUILayout.LabelField("pixel(" + (int)pixelPos.x + ", " + (int)pixelPos.y + ")");
+					EditorGUILayout.LabelField(pixel.ToString("F2"));
+				} catch {
+					EditorGUILayout.LabelField("Texture is not readble !");
+				}
 			}
 		}
 
@@ -606,9 +596,11 @@ namespace PW.Core
 			TexturePreview(tex, false, false, false);
 			
 			//draw the settings window
-			if (settings && fieldSettings.active)
+			if (settings && e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate")
 			{
-				//TODO: update values
+				fieldSettings.gradient = PWSamplerSettingsPopup.gradient;
+				fieldSettings.filterMode = PWSamplerSettingsPopup.filterMode;
+				fieldSettings.debug = PWSamplerSettingsPopup.debug;
 			}
 			
 			if (settings)
@@ -623,13 +615,7 @@ namespace PW.Core
 				{
 					if (icSettingsRect.Contains(e.mousePosition))
 					{
-						fieldSettings.Invert(null);
 						PWSamplerSettingsPopup.OpenPopup(fieldSettings.gradient, fieldSettings.filterMode, fieldSettings.texture, fieldSettings.debug);
-						e.Use();
-					}
-					else if (fieldSettings.active)
-					{
-						fieldSettings.InActive();
 						e.Use();
 					}
 				}
@@ -642,7 +628,7 @@ namespace PW.Core
 			if (fieldSettings.update)
 				UpdateSampler2D(fieldSettings);
 
-			if (fieldSettings.debug)
+			if (fieldSettings.frameSafeDebug)
 			{
 				Vector2 pixelPos = e.mousePosition - fieldSettings.savedRect.position;
 

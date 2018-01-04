@@ -328,7 +328,9 @@ namespace PW.Core
 					Debug.Log(attr.first + " -> " + attr.second);
 					FieldInfo attrField = nodeType.GetField(attr.first, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
 
-					if (attrField == null)
+					if (attrField != null)
+						attrField.SetValue(node, attr.second);
+					else
 						Debug.LogError("Attribute " + attr.first + " can be found in node " + node);
 				}
 			}

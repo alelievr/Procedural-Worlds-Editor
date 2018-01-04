@@ -9,23 +9,38 @@ namespace PW.Core
 	public abstract class PWPopup : EditorWindow
 	{
 
+		protected static Vector2		windowSize = new Vector2(240, 320);
+
 		[System.NonSerialized]
 		bool firstonGUI = true;
 
 		protected Event e { get { return Event.current; } }
 
-		protected static T OpenPopup< T >() where T : PWPopup
-		{
-			T window = EditorWindow.GetWindow< T >();
+		public EditorWindow	windowToUpdate;
 
+		protected static T OpenPopup< T >(Vector2 windowMinSize, bool allowResize = false) where T : PWPopup
+		{
+			EditorWindow currentWindow = EditorWindow.focusedWindow;
+
+			T window = EditorWindow.CreateInstance< T >();
+
+			window.windowToUpdate = currentWindow;
 			window.ShowAuxWindow();
+			window.minSize = windowMinSize;
+			if (!allowResize)
+				window.maxSize = windowMinSize;
 
 			return window;
 		}
 
+		protected static T OpenPopup< T >() where T : PWPopup
+		{
+			return OpenPopup< T >(windowSize);
+		}
+
 		void OnEnable()
 		{
-			Start();
+			GUIStart();
 		}
 
 		void OnGUI()
@@ -34,12 +49,23 @@ namespace PW.Core
 				OnGUIEnable();
 			firstonGUI = false;
 
-			Update();
+			GUIUpdate();
+
+			if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+				Close();
+		}
+
+		protected void SendUpdate(string key)
+		{
+			var evt = EditorGUIUtility.CommandEvent(key);
+
+			if (windowToUpdate != null)
+				windowToUpdate.SendEvent(evt);
 		}
 		
 		protected abstract void OnGUIEnable();
-		protected abstract void Start();
-		protected abstract void Update();
+		protected abstract void GUIStart();
+		protected abstract void GUIUpdate();
 		
 	}
 }

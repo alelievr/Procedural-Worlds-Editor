@@ -206,7 +206,6 @@ namespace PW.Core
 	[Serializable]
 	public class PWGUISettings
 	{
-		public bool				active {get;  private set;}
 		public Vector2			windowPosition;
 		public PWGUIFieldType	fieldType;
 
@@ -214,6 +213,9 @@ namespace PW.Core
 		public object	oldState = null;
 
 		//we put all possible datas for each inputs because unity serialization does not support inheritence :(
+
+		//text field:
+		public bool					editing;
 		
 		//colorPicker:
 		public SerializableColor	c;
@@ -225,6 +227,19 @@ namespace PW.Core
 		[System.NonSerialized]
 		public bool					update;
 		public bool					debug;
+
+		//verson of the debug bool only updated durin Layout passes (use this for conditional debug display)
+		[SerializeField]
+		bool						_frameSafeDebug;
+		public bool					frameSafeDebug
+		{
+			get
+			{
+				if (Event.current.type == EventType.Layout)
+					_frameSafeDebug = debug;
+				return _frameSafeDebug;
+			}
+		}
 		[System.NonSerialized]
 		public Rect					savedRect;
 
@@ -257,29 +272,7 @@ namespace PW.Core
 		
 		public PWGUISettings()
 		{
-			active = false;
 			update = false;
-		}
-
-		public object Active(object o)
-		{
-			active = true;
-			oldState = o;
-			return o;
-		}
-
-		public object InActive()
-		{
-			active = false;
-			return oldState;
-		}
-
-		public object Invert(object o)
-		{
-			if (active)
-				return InActive();
-			else
-				return Active(o);
 		}
 	}
 }

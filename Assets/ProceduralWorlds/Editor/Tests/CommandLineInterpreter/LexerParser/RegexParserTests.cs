@@ -68,33 +68,27 @@ namespace PW
 		[Test]
 		public void BadTypeNewNodeCommand()
 		{
-			bool hasThrown = false;
-			
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeUnknown unknown");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
-				hasThrown = true;
+				return ;
 			}
 
-			if (!hasThrown)
-				throw new Exception("Unknow node type in newNode command didn't throw an exception");
+			throw new Exception("Unknow node type in newNode command didn't throw an exception");
 		}
 	
 		[Test]
 		public void TooManyArgumentsNewNodeCommand()
 		{
-			bool hasThrown = false;
-
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeAdd node node node node");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
-				hasThrown = true;
+				return ;
 			}
 			
-			if (!hasThrown)
-				throw new Exception("too many arguments in newNode command didn't throw an exception");
+			throw new Exception("too many arguments in newNode command didn't throw an exception");
 		}
 
 		[Test]

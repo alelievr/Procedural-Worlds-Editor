@@ -55,8 +55,8 @@ namespace PW
 			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
 			PWNodeDebugLog debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugLog;
 
-			Assert.That(perlinNode.octaves == 6);
-			Assert.That(perlinNode.persistance == 2.4f);
+			Assert.That(perlinNode.octaves == 6, "Perlin node octaves expected to be 6 but was " + perlinNode.octaves);
+			Assert.That(perlinNode.persistance == 2.4f, "Perlin node persistance expected to be 2.4 but was " + perlinNode.persistance);
 	
 		}
 	

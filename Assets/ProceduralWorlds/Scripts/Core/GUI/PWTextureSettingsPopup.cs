@@ -13,9 +13,8 @@ namespace PW.Core
 		public static Material		material;
 		public static FilterMode	filterMode;
 		public static bool			debug;
-		public static Texture2D		texture;
 
-		public static void OpenPopup(FilterMode filterMode, ScaleMode scaleMode, float scaleAspect, Material material, Texture2D texture, bool debug = false)
+		public static void OpenPopup(FilterMode filterMode, ScaleMode scaleMode, float scaleAspect, Material material, bool debug = false)
 		{
 			PWPopup.OpenPopup< PWTextureSettingsPopup >();
 
@@ -24,10 +23,9 @@ namespace PW.Core
 			PWTextureSettingsPopup.material = material;
 			PWTextureSettingsPopup.scaleAspect = scaleAspect;
 			PWTextureSettingsPopup.debug = debug;
-			PWTextureSettingsPopup.texture = texture;
 		}
 
-		protected override void Start()
+		protected override void GUIStart()
 		{
 		}
 	
@@ -35,18 +33,20 @@ namespace PW.Core
 		{
 		}
 
-		protected override void Update()
+		protected override void GUIUpdate()
 		{
-			EditorGUIUtility.labelWidth = 80;
 			EditorGUI.BeginChangeCheck();
+			{
+				EditorGUIUtility.labelWidth = 80;
 				filterMode = (FilterMode)EditorGUILayout.EnumPopup("filter mode", filterMode);
-			if (EditorGUI.EndChangeCheck() || texture.filterMode != filterMode)
-				texture.filterMode = filterMode;
-			scaleMode = (ScaleMode)EditorGUILayout.EnumPopup("scale mode", scaleMode);
-			scaleAspect = EditorGUILayout.FloatField("scale aspect", scaleAspect);
-			material = (Material)EditorGUILayout.ObjectField("material", material, typeof(Material), false);
-			debug = EditorGUILayout.Toggle("debug", debug);
-			EditorGUIUtility.labelWidth = 0;
+				scaleMode = (ScaleMode)EditorGUILayout.EnumPopup("scale mode", scaleMode);
+				scaleAspect = EditorGUILayout.FloatField("scale aspect", scaleAspect);
+				material = (Material)EditorGUILayout.ObjectField("material", material, typeof(Material), false);
+				debug = EditorGUILayout.Toggle("debug", debug);
+				EditorGUIUtility.labelWidth = 0;
+			}
+			if (EditorGUI.EndChangeCheck())
+				SendUpdate("TextureSettingsUpdate");
 		}
 	}
 }

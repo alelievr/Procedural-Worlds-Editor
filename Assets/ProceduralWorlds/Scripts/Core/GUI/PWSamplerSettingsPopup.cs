@@ -31,7 +31,7 @@ namespace PW.Core
 		{
 		}
 
-		protected override void Start()
+		protected override void GUIStart()
 		{
 			gradientField = typeof(EditorGUILayout).GetMethod(
 				"GradientField",
@@ -42,31 +42,34 @@ namespace PW.Core
 			);
 		}
 
-		protected override void Update()
+		protected override void GUIUpdate()
 		{
-			EditorGUILayout.BeginVertical();
+			EditorGUI.BeginChangeCheck();
 			{
-				EditorGUI.BeginChangeCheck();
-				filterMode = (FilterMode)EditorGUILayout.EnumPopup(filterMode);
-				if (EditorGUI.EndChangeCheck())
-					texture.filterMode = filterMode;
-				gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
-				// if (!gradient.Compare(serializableGradient))
-					// update = true;
+				EditorGUILayout.BeginVertical();
+				{
+					EditorGUI.BeginChangeCheck();
+					filterMode = (FilterMode)EditorGUILayout.EnumPopup(filterMode);
+					if (EditorGUI.EndChangeCheck())
+						texture.filterMode = filterMode;
+					SerializableGradient serializableGradient = (SerializableGradient)gradient;
+					gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
+					if (!gradient.Compare(serializableGradient))
+						GUI.changed = true;
+				}
+				EditorGUILayout.EndVertical();
+				
+				if (e.type == EventType.KeyDown)
+				{
+					if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
+						e.Use();
+				}
+	
+				EditorGUIUtility.labelWidth = 100;
+				debug = EditorGUILayout.Toggle("debug", debug);
 			}
-			EditorGUILayout.EndVertical();
-			
-			if (e.type == EventType.KeyDown)
-			{
-				if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape)
-					e.Use();
-			}
-
-			EditorGUIUtility.labelWidth = 100;
-			debug = EditorGUILayout.Toggle("debug", debug);
-
-			if (GUILayout.Button("force update"))
-				;//TODO: update ???
+			if (EditorGUI.EndChangeCheck())
+				SendUpdate("SamplerSettingsUpdate");
 		}
 
 	}
