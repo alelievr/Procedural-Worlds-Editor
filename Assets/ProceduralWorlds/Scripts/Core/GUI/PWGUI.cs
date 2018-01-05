@@ -61,6 +61,7 @@ namespace PW.Core
 				attachedNode = node;
 				node.OnPostReload += ReloadTextures;
 				node.OnPostProcess += ReloadTextures;
+				EditorApplication.playModeStateChanged += PlayModeChangedCallback;
 			}
 		}
 
@@ -72,7 +73,14 @@ namespace PW.Core
 			{
 				attachedNode.OnPostReload -= ReloadTextures;
 				attachedNode.OnPostProcess -= ReloadTextures;
+				EditorApplication.playModeStateChanged -= PlayModeChangedCallback;
 			}
+		}
+
+		void PlayModeChangedCallback(PlayModeStateChange mode)
+		{
+			if (mode == PlayModeStateChange.EnteredEditMode)
+				ReloadTextures();
 		}
 
 		void ReloadTextures(PWNode node) { ReloadTextures(); }
@@ -152,7 +160,7 @@ namespace PW.Core
 			int		icColorSize = 18;
 			Color	localColor = color;
 
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.Color, () => {
 				PWGUISettings colorSettings = new PWGUISettings();
 
 				colorSettings.fieldType = PWGUIFieldType.Color;
@@ -231,7 +239,7 @@ namespace PW.Core
 
 			string	controlName = "textfield-" + text.GetHashCode().ToString();
 
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.Text, () => {
 				return new PWGUISettings();
 			});
 			
@@ -338,7 +346,7 @@ namespace PW.Core
 			if (name == null)
 				name = new GUIContent();
 
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.Slider, () => {
 				return new PWGUISettings();
 			});
 			
@@ -462,7 +470,7 @@ namespace PW.Core
 			}
 
 			//create or load texture settings
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.TexturePreview, () => {
 				var state = new PWGUISettings();
 				state.fieldType = PWGUIFieldType.TexturePreview;
 				state.filterMode = FilterMode.Bilinear;
@@ -556,7 +564,7 @@ namespace PW.Core
 			if (prefix != null && !String.IsNullOrEmpty(prefix.text))
 				EditorGUILayout.LabelField(prefix);
 
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.Sampler2DPreview, () => {
 				var state = new PWGUISettings();
 				state.fieldType = PWGUIFieldType.Sampler2DPreview;
 				state.filterMode = fm;
@@ -596,11 +604,16 @@ namespace PW.Core
 			TexturePreview(tex, false, false, false);
 			
 			//draw the settings window
-			if (settings && e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate")
+			if (settings) 
 			{
-				fieldSettings.gradient = PWSamplerSettingsPopup.gradient;
-				fieldSettings.filterMode = PWSamplerSettingsPopup.filterMode;
-				fieldSettings.debug = PWSamplerSettingsPopup.debug;
+				if (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate"))
+				{
+					fieldSettings.gradient = PWSamplerSettingsPopup.gradient;
+					fieldSettings.serializableGradient = (SerializableGradient)fieldSettings.gradient;
+					fieldSettings.filterMode = PWSamplerSettingsPopup.filterMode;
+					fieldSettings.debug = PWSamplerSettingsPopup.debug;
+					UpdateSampler2D(fieldSettings);
+				}
 			}
 			
 			if (settings)
@@ -623,10 +636,6 @@ namespace PW.Core
 
 			if (!settings && fieldSettings.texture.filterMode != fm)
 				fieldSettings.texture.filterMode = fm;
-
-			//update the texture with the gradient
-			if (fieldSettings.update)
-				UpdateSampler2D(fieldSettings);
 
 			if (fieldSettings.frameSafeDebug)
 			{
@@ -694,7 +703,7 @@ namespace PW.Core
 				return ;
 			}
 			int texSize = biomeData.biomeIds.size;
-			var fieldSettings = GetGUISettingData(() => {
+			var fieldSettings = GetGUISettingData(PWGUIFieldType.BiomeMapPreview, () => {
 				var state = new PWGUISettings();
 				state.fieldType = PWGUIFieldType.BiomeMapPreview;
 				state.filterMode = FilterMode.Point;
@@ -774,7 +783,7 @@ namespace PW.Core
 		{
 			if (textureArray == null)
 				return ;
-			var	fieldSettings = GetGUISettingData(() => new PWGUISettings());
+			var	fieldSettings = GetGUISettingData(PWGUIFieldType.Texture2DArrayPreview, () => new PWGUISettings());
 			if (update)
 			{
 				if (fieldSettings.textures == null || fieldSettings.textures.Length < textureArray.depth)
@@ -797,7 +806,7 @@ namespace PW.Core
 
 	#region Utils
 
-		private T		GetGUISettingData< T >(Func< T > newGUISettings) where T : PWGUISettings
+		private T		GetGUISettingData< T >(PWGUIFieldType fieldType, Func< T > newGUISettings) where T : PWGUISettings
 		{
 			if (settingsStorage == null)
 				settingsStorage = new List< PWGUISettings >();
@@ -809,13 +818,9 @@ namespace PW.Core
 				s.windowPosition = PWUtils.Round(editorWindowRect.size / 2);
 				settingsStorage.Add(s);
 			}
-			if (settingsStorage[currentSettingCount].GetType() != typeof(T))
+			if (settingsStorage[currentSettingCount].fieldType != fieldType)
 			{
-				//try cast, if fails create a new object
-				T ret = settingsStorage[currentSettingCount] as T;
-				if (ret != null)
-					return ret;
-				Debug.Log("type mismatch and cast fail, creating a new insatnce !");
+				//if the fileType does not match, we reset all GUI datas
 				settingsStorage[currentSettingCount] = newGUISettings();
 			}
 			return settingsStorage[currentSettingCount++] as T;

@@ -22,11 +22,16 @@ namespace PW.Editor
 		//Style datas:
 		GUIStyle				prefixLabelStyle;
 
+		DelayedChanges			delayedChanges = new DelayedChanges();
+
 		public Action< Rect >	onDrawAdditionalSettings;
+
+		readonly string			graphProcessKey = "UpdateGraphProperties";
 
 		public PWGraphSettingsBar(PWGraph graph)
 		{
 			this.graph = graph;
+			delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); Debug.Log("graph chunk size: " + graph.chunkSize); });
 		}
 
 		public void LoadStyles()
@@ -41,34 +46,31 @@ namespace PW.Editor
 			GUI.SetNextControlName("PWName");
 			graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
 
-			if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
-				&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
-				&& GUI.GetNameOfFocusedControl() == "PWName")
-				GUI.FocusControl(null);
+			EditorGUI.BeginChangeCheck();
+			{
+				//seed
+				GUI.SetNextControlName("seed");
+				graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
+				
+				//chunk size:
+				GUI.SetNextControlName("chunk size");
+				graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
+				graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
+	
+				//step:
+				float min = 0.1f;
+				EditorGUILayout.BeginHorizontal();
+				EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
+				graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
+				EditorGUILayout.EndHorizontal();
+			}
+			if (EditorGUI.EndChangeCheck())
+				delayedChanges.UpdateValue(graphProcessKey);
 
-			//seed
-			EditorGUI.BeginChangeCheck();
-			GUI.SetNextControlName("seed");
-			graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
-			
-			//chunk size:
-			EditorGUI.BeginChangeCheck();
-			GUI.SetNextControlName("chunk size");
-			graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
-			graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
-
-			//step:
-			EditorGUI.BeginChangeCheck();
-			float min = 0.1f;
-			EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
-			graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
-			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.Separator();
 
 			EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
 			EditorGUILayout.LabelField("Instance ID: " + graph.GetInstanceID());
-
-			EditorGUILayout.Separator();
 
 			EditorGUILayout.Separator();
 
@@ -84,6 +86,7 @@ namespace PW.Editor
 					}
 			}
 
+			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();
 			{
 				if (GUILayout.Button("Force reload"))
@@ -92,6 +95,15 @@ namespace PW.Editor
 					graph.RaiseOnForceReloadOnce();
 			}
 			EditorGUILayout.EndHorizontal();
+			
+			//unfocus all fields if we click outsize of the settings bar
+			if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
+				&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
+				&& GUI.GetNameOfFocusedControl() == "PWName")
+				GUI.FocusControl(null);
+
+			//update the delayed changes
+			delayedChanges.Update();
 		}
 
 		public void DrawSettingsBar(Rect currentRect)

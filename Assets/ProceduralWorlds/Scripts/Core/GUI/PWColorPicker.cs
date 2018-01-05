@@ -11,13 +11,16 @@ namespace PW.Core
 		Texture2D		colorPickerTexture;
 		Texture2D		colorPickerThumb;
 
+		Vector2			colorPickerPadding = new Vector2(10, 10);
+
+		bool			colorPicking = false;
 
 		public static Color		currentColor;
 		public static Vector2	thumbPosition;
 
 		public static void OpenPopup(Color color, Vector2 thumbPosition)
 		{
-			PWPopup.OpenPopup< PWColorPicker >();
+			PWPopup.OpenPopup< PWColorPicker >(new Vector2(windowSize.x, 340));
 
 			PWColorPicker.currentColor = color;
 			PWColorPicker.thumbPosition = thumbPosition;
@@ -37,23 +40,33 @@ namespace PW.Core
 		void DrawRainbowPicker()
 		{
 			GUIStyle colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
-			GUILayout.Label(colorPickerTexture, GUILayout.Width(windowSize.x - 10), GUILayout.Height(windowSize.x - 10));
-
-			Rect colorPickerRect = EditorGUILayout.GetControlRect(false, windowSize.x - 10);
-
-			Vector2 colorPickerMousePosition = e.mousePosition;
+			GUILayout.Label(colorPickerTexture, GUILayout.Width(windowSize.x - colorPickerPadding.x), GUILayout.Height(windowSize.x - colorPickerPadding.y));
+			Rect colorPickerRect = GUILayoutUtility.GetLastRect();
 
 			//TODO: better bounds
-			if (colorPickerMousePosition.x >= 0 && colorPickerMousePosition.y >= 0 && colorPickerMousePosition.x <= windowSize.x && colorPickerMousePosition.y <= windowSize.x)
+			float mouseX = Mathf.Clamp(e.mousePosition.x, colorPickerPadding.x, windowSize.x - colorPickerPadding.x);
+			float mouseY = Mathf.Clamp(e.mousePosition.y, colorPickerPadding.y, windowSize.x - colorPickerPadding.y);
+
+			Vector2 colorPickerMousePosition = new Vector2(mouseX, mouseY);
+
+			if (e.type == EventType.MouseDown && colorPickerRect.Contains(e.mousePosition))
+				colorPicking = true;
+			
+			if (e.type == EventType.MouseUp)
+				colorPicking = false;
+
+			if (colorPicking)
 			{
-				if (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
-				{
-					Vector2 textureCoord = colorPickerMousePosition * (colorPickerTexture.width / windowSize.x);
-					textureCoord.y = colorPickerTexture.height - textureCoord.y;
-					currentColor = colorPickerTexture.GetPixel((int)textureCoord.x, (int)textureCoord.y);
-					thumbPosition = colorPickerMousePosition;
+				Vector2 relativeMousePos = colorPickerMousePosition - colorPickerPadding;
+				Vector2 mouseRatio = relativeMousePos / (windowSize.x - colorPickerPadding.x * 2);
+				Vector2 textureCoord = new Vector2(mouseRatio.x * colorPickerTexture.width, mouseRatio.y * colorPickerTexture.height);
+				textureCoord.y = Mathf.Clamp(colorPickerTexture.height - textureCoord.y, 0, colorPickerTexture.height - 1);
+
+				currentColor = colorPickerTexture.GetPixel((int)textureCoord.x, (int)textureCoord.y);
+				thumbPosition = colorPickerMousePosition + new Vector2(-5, -6);
+
+				if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
 					GUI.changed = true;
-				}
 			}
 
 			Rect colorPickerThumbRect = new Rect(thumbPosition, new Vector2(8, 8));

@@ -27,9 +27,6 @@ public partial class PWGraphEditor : PWEditorWindow
 	
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
 	
-	//current Event:
-	Event						e;
-	
 	//size of the current window, updated each frame
 	protected Vector2			windowSize;
 
@@ -89,8 +86,6 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//update the current GUI settings storage and clear drawed popup list:
 		graph.PWGUI.StartFrame();
-
-		e = Event.current;
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;

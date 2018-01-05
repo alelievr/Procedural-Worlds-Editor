@@ -107,8 +107,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		if (graph == null)
 			return ;
 
-		var e = Event.current;
-
 		//prevent popup events to influence the rest of the GUI
 		//TODO: remove this old popup code
 		/*PWPopup.eventType = e.type;

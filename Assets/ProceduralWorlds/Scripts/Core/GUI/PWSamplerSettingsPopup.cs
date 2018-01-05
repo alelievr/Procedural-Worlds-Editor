@@ -13,9 +13,13 @@ namespace PW.Core
 		public static FilterMode	filterMode;
 		public static Texture		texture;
 		public static bool			debug;
+		public static bool			update;
 		
 		[System.NonSerializedAttribute]
 		static MethodInfo	gradientField;
+		
+		SerializableGradient		oldGradient;
+		bool						needUpdate = false;
 	
 		public static void OpenPopup(Gradient gradient, FilterMode filterMode, Texture texture, bool debug = false)
 		{
@@ -52,10 +56,24 @@ namespace PW.Core
 					filterMode = (FilterMode)EditorGUILayout.EnumPopup(filterMode);
 					if (EditorGUI.EndChangeCheck())
 						texture.filterMode = filterMode;
-					SerializableGradient serializableGradient = (SerializableGradient)gradient;
 					gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
-					if (!gradient.Compare(serializableGradient))
+					if (oldGradient != null && !gradient.Compare(oldGradient))
+						needUpdate = true;
+					if (e.type == EventType.Repaint)
+						update = false;
+					if (needUpdate && e.type != EventType.Layout)
+					{
 						GUI.changed = true;
+						needUpdate = false;
+
+						//for an unknown reason, EditorWindow.SendEvent dooes not works with gradient field
+						//so here is a workaround to update the main window:
+						if (windowToUpdate != null)
+						{
+							update = true;
+							windowToUpdate.Repaint();
+						}
+					}
 				}
 				EditorGUILayout.EndVertical();
 				
@@ -70,7 +88,8 @@ namespace PW.Core
 			}
 			if (EditorGUI.EndChangeCheck())
 				SendUpdate("SamplerSettingsUpdate");
-		}
 
+			oldGradient = (SerializableGradient)gradient;
+		}
 	}
 }

@@ -26,6 +26,7 @@ public partial class PWGraphEditor
 
 	GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
 
+	protected Event e { get { return Event.current; } }
 
 	void ContextMenu()
 	{

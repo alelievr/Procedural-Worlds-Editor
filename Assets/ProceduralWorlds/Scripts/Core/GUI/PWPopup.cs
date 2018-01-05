@@ -9,7 +9,7 @@ namespace PW.Core
 	public abstract class PWPopup : EditorWindow
 	{
 
-		protected static Vector2		windowSize = new Vector2(240, 320);
+		protected static Vector2		windowSize = new Vector2(220, 300);
 
 		[System.NonSerialized]
 		bool firstonGUI = true;
