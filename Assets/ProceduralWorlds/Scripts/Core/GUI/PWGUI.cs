@@ -31,14 +31,14 @@ namespace PW.Core
 			return new PWGUIStyle(pixels, PWGUIStyleType.PrefixLabelWidth);
 		}
 	}
-			
+	
 	[System.Serializable]
 	public class PWGUIManager
 	{
 
 		public static Rect	editorWindowRect;
 
-		public Rect			currentWindowRect;
+		Rect				currentWindowRect;
 
 		static Texture2D	ic_color;
 		static Texture2D	ic_edit;
@@ -163,7 +163,6 @@ namespace PW.Core
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.Color, () => {
 				PWGUISettings colorSettings = new PWGUISettings();
 
-				colorSettings.fieldType = PWGUIFieldType.Color;
 				colorSettings.c = (SerializableColor)localColor;
 				return colorSettings;
 			});
@@ -288,7 +287,7 @@ namespace PW.Core
 			else
 				GUI.Label(textRect, text, textFieldStyle);			
 			
-			bool editClickOut = (editable && e.type == EventType.MouseDown && e.button == 0 && !iconRect.Contains(e.mousePosition));
+			bool editClickOut = (editable && e.rawType == EventType.MouseDown && e.button == 0 && !iconRect.Contains(e.mousePosition));
 
 			if (editClickOut && fieldSettings.editing)
 			{
@@ -336,6 +335,11 @@ namespace PW.Core
 	
 		public float Slider(GUIContent name, float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, params PWGUIStyle[] styles)
 		{
+			return Slider(name, value, ref min, ref max, step, editableMin, editableMax, false, styles);
+		}
+		
+		float Slider(GUIContent name, float value, ref float min, ref float max, float step = 0.01f, bool editableMin = true, bool editableMax = true, bool intMode = false, params PWGUIStyle[] styles)
+		{
 			int		sliderLabelWidth = 30;
 			var		e = Event.current;
 
@@ -346,7 +350,7 @@ namespace PW.Core
 			if (name == null)
 				name = new GUIContent();
 
-			var fieldSettings = GetGUISettingData(PWGUIFieldType.Slider, () => {
+			var fieldSettings = GetGUISettingData((intMode) ? PWGUIFieldType.IntSlider : PWGUIFieldType.Slider, () => {
 				return new PWGUISettings();
 			});
 			
@@ -380,8 +384,12 @@ namespace PW.Core
 						name.text += value.ToString();
 						GUILayout.Label(name, centeredLabel);
 						Rect valueRect = GUILayoutUtility.GetLastRect();
-						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.clickCount == 2)
-							fieldSettings.editing = true;
+						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+						{
+							e.Use();
+							if (e.clickCount == 2)
+								fieldSettings.editing = true;
+						}
 					}
 					else
 					{
@@ -390,7 +398,7 @@ namespace PW.Core
 						value = EditorGUILayout.FloatField(value, GUILayout.Width(50));
 						Rect valueRect = GUILayoutUtility.GetLastRect();
 						GUILayout.FlexibleSpace();
-						if (!valueRect.Contains(e.mousePosition) && e.isMouse || (e.isKey && e.keyCode == KeyCode.Return))
+						if ((!valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown) || (e.isKey && e.keyCode == KeyCode.Return))
 							{ fieldSettings.editing = false; e.Use(); }
 						if (e.isKey && e.keyCode == KeyCode.Escape)
 							{ fieldSettings.editing = false; e.Use(); }
@@ -400,7 +408,7 @@ namespace PW.Core
 			}
 			EditorGUILayout.EndVertical();
 
-			return step;
+			return value;
 		}
 		
 		public int IntSlider(int value, int min, int max, int step = 1, params PWGUIStyle[] styles)
@@ -428,7 +436,7 @@ namespace PW.Core
 			float		v = value;
 			float		m_min = min;
 			float		m_max = max;
-			value = (int)Slider(name, v, ref m_min, ref m_max, step, editableMin, editableMax, styles);
+			value = (int)Slider(name, v, ref m_min, ref m_max, step, editableMin, editableMax, true, styles);
 			min = (int)m_min;
 			max = (int)m_max;
 			return value;
@@ -472,7 +480,6 @@ namespace PW.Core
 			//create or load texture settings
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.TexturePreview, () => {
 				var state = new PWGUISettings();
-				state.fieldType = PWGUIFieldType.TexturePreview;
 				state.filterMode = FilterMode.Bilinear;
 				state.scaleMode = ScaleMode.ScaleToFit;
 				state.scaleAspect = 1;
@@ -566,7 +573,6 @@ namespace PW.Core
 
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.Sampler2DPreview, () => {
 				var state = new PWGUISettings();
-				state.fieldType = PWGUIFieldType.Sampler2DPreview;
 				state.filterMode = fm;
 				state.debug = false;
 				state.gradient = new SerializableGradient(
@@ -705,7 +711,6 @@ namespace PW.Core
 			int texSize = biomeData.biomeIds.size;
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.BiomeMapPreview, () => {
 				var state = new PWGUISettings();
-				state.fieldType = PWGUIFieldType.BiomeMapPreview;
 				state.filterMode = FilterMode.Point;
 				state.debug = debug;
 				return state;
@@ -814,6 +819,7 @@ namespace PW.Core
 			if (currentSettingCount == settingsStorage.Count)
 			{
 				var s = newGUISettings();
+				s.fieldType = fieldType;
 
 				s.windowPosition = PWUtils.Round(editorWindowRect.size / 2);
 				settingsStorage.Add(s);
@@ -822,13 +828,16 @@ namespace PW.Core
 			{
 				//if the fileType does not match, we reset all GUI datas
 				settingsStorage[currentSettingCount] = newGUISettings();
+				settingsStorage[currentSettingCount].fieldType = fieldType;
 			}
 			return settingsStorage[currentSettingCount++] as T;
 		}
 
-		public void	StartFrame()
+		public void	StartFrame(Rect currentWindowRect)
 		{
 			currentSettingCount = 0;
+
+			this.currentWindowRect = currentWindowRect;
 
 			if (ic_color != null)
 				return ;

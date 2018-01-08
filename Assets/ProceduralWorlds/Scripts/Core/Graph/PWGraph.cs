@@ -33,14 +33,66 @@ namespace PW.Core
         //public internal graph datas:
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
+		
 		[SerializeField] private int			_seed;
-		public int								seed { get { return _seed; } set { if (OnSeedChanged != null && _seed != value) { _seed = value; OnSeedChanged(); } } }
+		public int								seed
+		{
+			get{ return _seed; }
+			set
+			{
+				if (_seed != value)
+				{
+					_seed = value;
+					if (OnSeedChanged != null)
+						OnSeedChanged();
+				}
+			}
+		}
+
 		[SerializeField] private int			_chunkSize;
-		public int								chunkSize { get { return _chunkSize; } set { if (OnChunkSizeChanged != null && _chunkSize != value) {_chunkSize = value; OnChunkSizeChanged(); } } }
+		public int								chunkSize
+		{
+			get { return _chunkSize; }
+			set
+			{
+				if (_chunkSize != value)
+				{
+					_chunkSize = value;
+					if (OnChunkSizeChanged != null)
+						OnChunkSizeChanged();
+				}
+			}
+		}
+
 		[SerializeField] private Vector3		_chunkPosition;
-		public Vector3							chunkPosition { get { return _chunkPosition; } set { if (OnChunkPositionChanged != null && _chunkPosition != value) { _chunkPosition = value; OnChunkPositionChanged(); } } }
+		public Vector3							chunkPosition
+		{
+			get { return _chunkPosition; }
+			set
+			{
+				if (_chunkPosition != value)
+				{
+					_chunkPosition = value;
+					if (OnChunkPositionChanged != null)
+						OnChunkPositionChanged();
+				}
+			}
+		}
+
 		[SerializeField] private float			_step;
-		public float							step { get { return _step; } set { if (OnStepChanged != null && _step != value) { _step = value; OnStepChanged(); } } }
+		public float							step
+		{
+			get { return _step; }
+			set
+			{
+				if (_step != value)
+				{
+					_step = value;
+					if (OnStepChanged != null)
+						OnStepChanged();
+				}
+			}
+		}
 		public PWGraphType						graphType;
 
 

@@ -46,8 +46,6 @@ namespace PW.Node
 		{
 			EditorGUI.BeginChangeCheck();
 			{
-				// EditorGUIUtility.labelWidth = 20;
-				// persistance = EditorGUILayout.Slider("Persistance", persistance, 0, 2);
 				persistance = PWGUI.Slider("Persistance: ", persistance, ref persistanceMin, ref persistanceMax);
 				octaves = PWGUI.IntSlider("Octaves: ", octaves, 0, 16);
 			}
@@ -60,7 +58,7 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			//recalcul perlin noise values with new seed / position.
-			float scale = 0.2f;
+			float scale = 40f;
 			output.Foreach((x, y) => {
 				float nx = (float)x * step + chunkPosition.x;
 				float ny = (float)y * step + chunkPosition.z;

@@ -85,7 +85,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		}
 		
 		//update the current GUI settings storage and clear drawed popup list:
-		graph.PWGUI.StartFrame();
+		graph.PWGUI.StartFrame(position);
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
@@ -393,7 +393,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		//zoom
 		if (e.type == EventType.ScrollWheel)
 		{
-			graph.scale *= 1 - (e.delta.y / 100f);
+			graph.scale *= 1 - (e.delta.y / 40f);
 			graph.scale = Mathf.Clamp(graph.scale, .2f, 2);
 		}
 

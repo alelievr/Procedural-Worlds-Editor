@@ -64,6 +64,7 @@ namespace PW
 		//Utils
 		[System.NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
+		protected Event				e { get { return Event.current; } }
 
 
 		[System.NonSerialized]

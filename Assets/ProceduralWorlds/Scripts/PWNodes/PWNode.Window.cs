@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
+using PW.Node;
 
 namespace PW
 {
@@ -24,8 +25,7 @@ namespace PW
 			}
 			
 			//update the PWGUI window rect with this window rect:
-			PWGUI.currentWindowRect = rect;
-			PWGUI.StartFrame();
+			PWGUI.StartFrame(rect);
 
 			// set the header of the window as draggable:
 			int width = (int) rect.width;
@@ -49,7 +49,7 @@ namespace PW
 			
 			if (id != -1 && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
-
+			
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
 				OnNodeGUI();

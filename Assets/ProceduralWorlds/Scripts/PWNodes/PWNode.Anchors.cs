@@ -33,8 +33,6 @@ namespace PW
 
 		public void RenderAnchors()
 		{
-			var e = Event.current;
-
 			int			windowHeaderSize = nodeStyle.border.top + nodeStyle.margin.top;
 			int			windowHorizontalPadding = 15;
 			Rect		inputAcnhorRect = new Rect(windowHorizontalPadding - 13, windowHeaderSize, 120, -1);
@@ -51,7 +49,6 @@ namespace PW
 
 		public void ProcessAnchorEvents()
 		{
-			Event					e = Event.current;
 			PWGraphEditorEventInfo	editorEvents = graphRef.editorEvents;
 			
 			oldEventInfos = editorEvents.Clone(oldEventInfos);

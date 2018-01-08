@@ -23,8 +23,8 @@ namespace PW
 	
 		public static void DrawBiomeInfos(BiomeData b)
 		{
-			PWGUI.currentWindowRect = new Rect(0, 0, 200, 150);
-			PWGUI.StartFrame();
+			//TODO: non hard-coded window size ?
+			PWGUI.StartFrame(new Rect(0, 0, 200, 150));
 			EditorGUILayout.LabelField("Biome datas:");
 
 			update = GUILayout.Button("Update maps");

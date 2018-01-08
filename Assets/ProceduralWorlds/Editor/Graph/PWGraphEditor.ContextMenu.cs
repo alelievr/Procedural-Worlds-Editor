@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEngine.Profiling;
 using PW.Core;
 using PW.Node;
+using System.IO;
+using System;
 
 using Debug = UnityEngine.Debug;
 
@@ -20,6 +22,7 @@ public partial class PWGraphEditor
 	GUIContent	deleteLinkContent = new GUIContent("Delete link");
 	
 	GUIContent	deleteNodeContent = new GUIContent("Delete node");
+	GUIContent	openNodeScriptContent = new GUIContent("Open C# Script");
 
 	GUIContent	debugNodeContent = new GUIContent("Debug/Node");
 	GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
@@ -47,10 +50,7 @@ public partial class PWGraphEditor
 					menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => { graph.CreateNewNode(nodeClass.type, -graph.panPosition + e.mousePosition); Debug.Log("pos: " + -graph.panPosition + e.mousePosition); });
 			}
 			menu.AddItem(newOrderingGroupContent, false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
-			if (editorEvents.mouseOverOrderingGroup != null)
-				menu.AddItem(deleteOrderingGroupContent, false, DeleteOrderingGroup);
-			else
-				menu.AddDisabledItem(deleteOrderingGroupContent);
+			menu.AddItemState(deleteOrderingGroupContent, editorEvents.isMouseOverOrderingGroup, DeleteOrderingGroup);
 
 			menu.AddSeparator("");
 
@@ -61,16 +61,10 @@ public partial class PWGraphEditor
 			}
 
 			var hoveredLink = editorEvents.mouseOverLink;
-			if (hoveredLink != null)
-				menu.AddItem(deleteLinkContent, false, () => { graph.RemoveLink(hoveredLink); });
-			else
-				menu.AddDisabledItem(deleteLinkContent);
+			menu.AddItemState(deleteLinkContent, hoveredLink != null, () => { graph.RemoveLink(hoveredLink); });
 
 			menu.AddSeparator("");
-			if (editorEvents.mouseOverNode != null)
-				menu.AddItem(deleteNodeContent, false, () => { graph.RemoveNode(editorEvents.mouseOverNode); });
-			else
-				menu.AddDisabledItem(deleteNodeContent);
+			menu.AddItemState(deleteNodeContent, editorEvents.isMouseOverNode, () => { graph.RemoveNode(editorEvents.mouseOverNode); });
 				
 			if (editorEvents.selectedNodeCount != 0)
 			{
@@ -84,16 +78,11 @@ public partial class PWGraphEditor
 			menu.AddSeparator("");
 
 			var hoveredNode = editorEvents.mouseOverNode;
-			if (hoveredNode != null)
-				menu.AddItem(debugNodeContent, hoveredNode.debug, () => { hoveredNode.debug = !hoveredNode.debug; });
-			else
-				menu.AddDisabledItem(debugNodeContent);
+			menu.AddItemState(openNodeScriptContent, hoveredNode != null, () => { OpenNodeScript(hoveredNode.GetType()); })
+			menu.AddItemState(debugNodeContent, hoveredNode != null, () => { hoveredNode.debug = !hoveredNode.debug; }, hoveredNode.debug);
 			
 			var hoveredAnchor = editorEvents.mouseOverAnchor;
-			if (hoveredAnchor != null)
-				menu.AddItem(debugAnchorContent, hoveredAnchor.debug, () => { hoveredAnchor.debug = !hoveredAnchor.debug; });
-			else
-				menu.AddDisabledItem(debugAnchorContent);
+			menu.AddItemState(debugAnchorContent, hoveredAnchor != null, () => { hoveredAnchor.debug = !hoveredAnchor.debug; }, hoveredAnchor.debug);
 
 			menu.AddSeparator("");
 			menu.AddItem(recenterGraphContent, false, () => { graph.scale = 1; graph.panPosition = Vector2.zero; });
@@ -102,6 +91,16 @@ public partial class PWGraphEditor
 			e.Use();
 
 			Profiler.EndSample();
-        }
+        } 
+	}
+
+	public void OpenNodeScript(Type nodeType)
+	{
+		string filePath = "";
+
+		//TODO: find the file path from the class type.
+
+		if (File.Exists(filePath))
+			UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(filePath, 21);
 	}
 }

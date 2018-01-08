@@ -28,7 +28,20 @@ namespace PW.Core
 		public bool						presetChoosed;
 
 		//chunk relative datas
-		public float					geologicTerrainStep;
+		public float					_geologicTerrainStep;
+		public float					geologicTerrainStep
+		{
+			get { return _geologicTerrainStep; }
+			set
+			{
+				if (_geologicTerrainStep != value)
+				{
+					_geologicTerrainStep = value;
+					if (OnGeologicStepChanged != null)
+						OnGeologicStepChanged(_geologicTerrainStep);
+				}
+			}
+		}
 
 		public PWGraphTerrainType		outputType;
 		public PWGraphProcessMode		processMode;
@@ -44,7 +57,7 @@ namespace PW.Core
 		public GeologicBakedDatas		geologicBakedDatas = new GeologicBakedDatas();
 		
 		//parameter events:
-		public event Action< int >		OnGeologicStepChanged;
+		public event Action< float >		OnGeologicStepChanged;
 		//button triggered events:
 		
 		void		BakeNeededGeologicDatas()
