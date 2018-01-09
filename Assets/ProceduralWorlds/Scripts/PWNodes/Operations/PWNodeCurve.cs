@@ -18,7 +18,7 @@ namespace PW.Node
 		[PWOutput("Terrain output")]
 		public Sampler		outputTerrain;
 
-		AnimationCurve		curve;
+		public AnimationCurve		curve;
 		[SerializeField]
 		SerializableAnimationCurve	sCurve = new SerializableAnimationCurve();
 

@@ -93,6 +93,8 @@ namespace PW.Core
 
 					ret.token = token;
 					ret.value = m.Value.Trim();
+					if (ret.value[0] == '"')
+						ret.value = ret.value.Trim('"');
 					ret.remainingText = input.Substring(m.Value.Length);
 				}
 				return ret;
@@ -361,7 +363,7 @@ namespace PW.Core
 		public static string GenerateNewNodeCommand(Type nodeType, string name, PWGraphCLIAttributes datas = null)
 		{
 			//TODO: use tokens here
-			string cmd = "NewNode " + nodeType.Name + " " + name;
+			string cmd = "NewNode " + nodeType.Name + " \"" + name + "\"";
 			if (datas != null && datas.Count != 0)
 				cmd += " attr=" + PWJson.Generate(datas);
 			

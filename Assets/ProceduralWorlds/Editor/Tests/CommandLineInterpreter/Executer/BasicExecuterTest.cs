@@ -57,7 +57,17 @@ namespace PW
 
 			Assert.That(perlinNode.octaves == 6, "Perlin node octaves expected to be 6 but was " + perlinNode.octaves);
 			Assert.That(perlinNode.persistance == 2.4f, "Perlin node persistance expected to be 2.4 but was " + perlinNode.persistance);
-	
+		}
+
+		[Test]
+		public void EmptyGraph()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().Execute().GetGraph();
+
+			Debug.Log("graph: " + graph);
+			Assert.That(graph != null, "Null graph !");
+			Assert.That(graph.inputNode != null, "Null graph input node while creating empty graph");
+			Assert.That(graph.outputNode != null, "Null graph output node while creating empty graph");
 		}
 	
 	}

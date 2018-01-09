@@ -58,8 +58,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("Process !");
-
 			//recalcul perlin noise values with new seed / position.
 			float scale = 40f;
 			output.Foreach((x, y) => {

@@ -177,8 +177,6 @@ namespace PW.Core
 		//this method is called onlyv when the graph is created by the PWGraphManager
 		public virtual void Initialize()
 		{
-			Debug.LogWarning("Initialized graph !");
-
 			//initialize the graph pan position
 			panPosition = Vector2.zero;
 	
@@ -452,9 +450,19 @@ namespace PW.Core
 			return nodesDictionary[nodeId];
 		}
 
+		public T		FindNodeById< T >(int nodeId) where T : PWNode
+		{
+			return FindNodeById(nodeId) as T;
+		}
+
 		public PWNode	FindNodeByName(string name)
 		{
 			return nodes.FirstOrDefault(n => n.name == name);
+		}
+
+		public T		FindNodeByName< T >(string name) where T : PWNode
+		{
+			return FindNodeByName(name) as T;
 		}
 
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()

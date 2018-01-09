@@ -39,6 +39,20 @@ namespace PW
 			Assert.That(cmd.name == "addName");
 			Assert.That(cmd.forcePositon == false);
 		}
+		
+		[Test]
+		public void WellFormatedWhitespaceNewNodeCommand()
+		{
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "add node name");
+			Debug.Log("s = " + s);
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+	
+			Debug.Log(cmd.name);
+			Assert.That(cmd.type == PWGraphCommandType.NewNode);
+			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
+			Assert.That(cmd.name == "add node name");
+			Assert.That(cmd.forcePositon == false);
+		}
 	
 		[Test]
 		public void WhiteSpaceNewNodeWithPositionCommand()
@@ -76,6 +90,17 @@ namespace PW
 			}
 
 			throw new Exception("Unknow node type in newNode command didn't throw an exception");
+		}
+
+		[Test]
+		public void missingNameNewNodeCommand()
+		{
+			try {
+				PWGraphCLI.Parse("NewNode PWNodeAdd");
+			} catch {
+				return ;
+			}
+			throw new Exception("Missing name in newNode command did't throw an exception");
 		}
 	
 		[Test]

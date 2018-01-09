@@ -91,7 +91,6 @@ namespace PW.Core
 		{
 			PWAnchor	newAnchor = new PWAnchor();
 
-			Debug.LogWarning("anchor create called !");
 			newAnchor.Initialize(this);
 			anchors.Add(newAnchor);
 			return newAnchor;

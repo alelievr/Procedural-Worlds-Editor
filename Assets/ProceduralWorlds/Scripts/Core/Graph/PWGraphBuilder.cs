@@ -36,6 +36,7 @@ namespace PW.Core
 			PWGraphBuilder	builder = new PWGraphBuilder();
 
 			builder.graph = ScriptableObject.CreateInstance< T >();
+			builder.graph.Initialize();
 
 			return builder;
 		}
