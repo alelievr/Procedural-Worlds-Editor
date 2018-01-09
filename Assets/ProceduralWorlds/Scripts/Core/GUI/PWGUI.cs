@@ -664,6 +664,9 @@ namespace PW.Core
 
 		void UpdateSampler2D(PWGUISettings fieldSettings)
 		{
+			if (fieldSettings.sampler2D == null)
+				return ;
+			
 			fieldSettings.sampler2D.Foreach((x, y, val) => {
 				fieldSettings.texture.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
 			}, true);

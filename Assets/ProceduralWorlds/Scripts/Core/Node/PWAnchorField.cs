@@ -345,6 +345,8 @@ namespace PW.Core
 			var e = Event.current;
 			bool contains = false;
 
+			if (e.type == EventType.ContextClick)
+				Debug.Log(e.mousePosition);
 			foreach (var anchor in anchors)
 				if (anchor.rect.Contains(e.mousePosition))
 				{

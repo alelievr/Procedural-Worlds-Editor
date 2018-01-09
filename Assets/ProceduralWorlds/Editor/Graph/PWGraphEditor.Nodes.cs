@@ -14,8 +14,6 @@ public partial class PWGraphEditor
 
 	void RenderDecaledNode(int id, PWNode node)
 	{
-		var		e = Event.current;
-
 		//node grid snapping when pressing cmd/crtl 
 		if (node.isDragged && e.command)
 		{
@@ -45,8 +43,6 @@ public partial class PWGraphEditor
 
 	void RenderNode(int id, PWNode node)
 	{
-		Event	e = Event.current;
-
 		RenderDecaledNode(id, node);
 
 		//check if the mouse is over this node
@@ -76,9 +72,7 @@ public partial class PWGraphEditor
 		BeginWindows();
 		{
 			foreach (var node in graph.nodes)
-			{
 				RenderNode(nodeId++, node);
-			}
 	
 			//display the graph input and output:
 			RenderNode(nodeId++, graph.outputNode);
@@ -88,13 +82,17 @@ public partial class PWGraphEditor
 
 		Profiler.EndSample();
 
+		//if we have a context click, editorEvents was not properly executed (cauz ContextClick is not sent to nested windows -___-)
+		if (e.type == EventType.ContextClick)
+			return ;
+
 		//if mouse was not over a node this frame, unset mouseOver
 		if (!editorEvents.isMouseOverNodeFrame)
 			editorEvents.mouseOverNode = null;
 		
 		//if mouse was not over an anchor this frame, unset mouseOver
 		if (!editorEvents.isMouseOverAnchorFrame)
-				editorEvents.mouseOverAnchor = null;
+			editorEvents.mouseOverAnchor = null;
 	}
 	
 	void DeleteSelectedNodes()

@@ -423,7 +423,7 @@ namespace PW.Core
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
-		void		GraphStructureChangedCallback() { UpdateComputeOrder(); }
+		void		GraphStructureChangedCallback() { UpdateComputeOrder(); Process(); }
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }

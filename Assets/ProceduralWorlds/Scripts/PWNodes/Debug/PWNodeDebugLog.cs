@@ -10,6 +10,10 @@ namespace PW.Node
 		[PWInput]
 		public object		obj;
 
+		//for pass-safe rendering
+		[System.NonSerialized]
+		bool				firstRender = false;
+
 		public override void OnNodeCreation()
 		{
 			name = "Debug log node";
@@ -21,6 +25,11 @@ namespace PW.Node
 		{
 			if (obj != null)
 			{
+				if (!firstRender && e.type != EventType.Layout)
+					return ;
+				
+				firstRender = true;
+
 				Type	objType = obj.GetType();
 				EditorGUILayout.LabelField(obj.ToString());
 				if (objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(PWArray<>))
@@ -41,9 +50,7 @@ namespace PW.Node
 				else if (objType == typeof(Vector4))
 					EditorGUILayout.Vector2Field("vec4", (Vector4)obj);
 				else if (objType == typeof(Sampler2D))
-				{
-					//TODO
-				}
+					PWGUI.Sampler2DPreview(obj as Sampler2D);
 				else if (objType == typeof(Sampler3D))
 				{
 					//TODO
