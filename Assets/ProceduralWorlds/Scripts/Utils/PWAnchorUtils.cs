@@ -22,7 +22,8 @@ namespace PW.Core
 			if (from == to)
 				return true;
 			
-			if (from.IsAssignableFrom(to))
+			//Allow parrent -> child assignation but also child -> parrent
+			if (from.IsAssignableFrom(to) || to.IsAssignableFrom(from))
 				return true;
 
 			return false;

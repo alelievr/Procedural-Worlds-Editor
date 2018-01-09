@@ -77,18 +77,8 @@ namespace PW.Core
 			return false;
 		}
 		
-		void TrySetValue(FieldInfo prop, object val, PWNode target, PWNode from, bool realMode, bool clone = false)
+		void TrySetValue(FieldInfo prop, object val, PWNode target, PWNode from, bool realMode)
 		{
-			//clone the input variable if requested by input anchor and if possible.
-			if (clone)
-			{
-				Type t = val.GetType();
-				if (t.IsAssignableFrom(typeof(Sampler)))
-					val = (val as Sampler).Clone(prop.GetValue(from) as Sampler);
-				if (t.GetGenericTypeDefinition().IsAssignableFrom(typeof(IPWCloneable<>)))
-					(t as IPWCloneable< object >).Clone(val); //FIXME: is this working ???
-			}
-			
 			if (realMode)
 				prop.SetValue(target, val);
 			else
@@ -121,7 +111,7 @@ namespace PW.Core
 
 				//Without multi-anchor, simple assignation
 				if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex == -1)
-					TrySetValue(prop, val, link.toNode, link.fromNode, realMode, (link.toAnchor.transferType == PWTransferType.Copy));
+					TrySetValue(prop, val, link.toNode, link.fromNode, realMode);
 				
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)

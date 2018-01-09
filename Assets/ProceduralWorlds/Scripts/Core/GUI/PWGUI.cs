@@ -40,12 +40,9 @@ namespace PW.Core
 
 		Rect				currentWindowRect;
 
-		static Texture2D	ic_color;
-		static Texture2D	ic_edit;
-		static Texture2D	ic_settings;
-		static Texture2D	colorPickerTexture;
-		static Texture2D	colorPickerThumb;
-		static GUIStyle		colorPickerStyle;
+		static Texture2D	icColor;
+		static Texture2D	icEdit;
+		static Texture2D	icSettingsOutline;
 		static GUIStyle		centeredLabel;
 
 		[SerializeField]
@@ -200,7 +197,7 @@ namespace PW.Core
 			//actions if clicked on/outside of the icon
 			if (previewOnIcon)
 				GUI.color = color;
-			GUI.DrawTexture(iconRect, ic_color);
+			GUI.DrawTexture(iconRect, icColor);
 			GUI.color = Color.white;
 			if (e.type == EventType.MouseDown && e.button == 0)
 			{
@@ -264,7 +261,7 @@ namespace PW.Core
 			if (editable)
 			{
 				GUI.color = (fieldSettings.editing) ? PWColorTheme.selectedColor : Color.white;
-				GUI.DrawTexture(iconRect, ic_edit);
+				GUI.DrawTexture(iconRect, icEdit);
 				GUI.color = Color.white;
 			}
 
@@ -513,7 +510,7 @@ namespace PW.Core
 
 			int		icSettingsSize = 16;
 			Rect	icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize, previewRect.y, icSettingsSize, icSettingsSize);
-			GUI.DrawTexture(icSettingsRect, ic_settings);
+			GUI.DrawTexture(icSettingsRect, icSettingsOutline);
 			if (e.type == EventType.MouseDown && e.button == 0)
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
@@ -581,15 +578,23 @@ namespace PW.Core
 						new KeyValuePair< float, Color >(1, Color.white)
 					)
 				);
+				state.serializableGradient = (SerializableGradient)state.gradient;
 				return state;
 			});
-
+		
 			fieldSettings.sampler2D = samp;
+
+			//avoid unity's ArgumentException for control position is the sampler value is set outside of the layout event:
+			if (fieldSettings.firstRender && e.type != EventType.Layout)
+				return ;
+			fieldSettings.firstRender = false;
+			// Debug.Log("event: " + attachedNode + ":" + e.type);
 
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				fieldSettings.samplerTextureUpdated = false;
 				fieldSettings.texture.filterMode = fieldSettings.filterMode;
 			}
 
@@ -602,6 +607,10 @@ namespace PW.Core
 
 			if (samp.size != tex.width)
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
+			
+			//if the preview texture of the sampler have not been updated, we try to update it
+			if (!fieldSettings.samplerTextureUpdated)
+				UpdateSampler2D(fieldSettings);
 			
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			if (previewRect.width > 2)
@@ -629,7 +638,7 @@ namespace PW.Core
 				int	icSettingsPadding = 4;
 				Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
 	
-				GUI.DrawTexture(icSettingsRect, ic_settings);
+				GUI.DrawTexture(icSettingsRect, icSettingsOutline);
 				if (e.type == EventType.MouseDown && e.button == 0)
 				{
 					if (icSettingsRect.Contains(e.mousePosition))
@@ -672,6 +681,7 @@ namespace PW.Core
 			}, true);
 			fieldSettings.texture.Apply();
 			fieldSettings.update = false;
+			fieldSettings.samplerTextureUpdated = true;
 		}
 
 	#endregion
@@ -685,6 +695,8 @@ namespace PW.Core
 
 	public void SamplerPreview(string name, Sampler sampler, bool settings = true)
 	{
+		if (sampler == null)
+			return ;
 		switch (sampler.type)
 		{
 			case SamplerType.Sampler2D:
@@ -842,13 +854,12 @@ namespace PW.Core
 
 			this.currentWindowRect = currentWindowRect;
 
-			if (ic_color != null)
+			if (icColor != null)
 				return ;
 
-			ic_color = Resources.Load("ic_color") as Texture2D;
-			ic_edit = Resources.Load("ic_edit") as Texture2D;
-			ic_settings = Resources.Load("ic_settings") as Texture2D;
-			colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
+			icColor = Resources.Load("ic_color") as Texture2D;
+			icEdit = Resources.Load("ic_edit") as Texture2D;
+			icSettingsOutline = Resources.Load("ic_settings_outline") as Texture2D;
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}

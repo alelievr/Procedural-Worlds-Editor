@@ -427,8 +427,8 @@ namespace PW.Core
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
-		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); }
-		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); }
+		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); Process(); }
+		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); ProcessOnce(); Process(); }
 		public void RaiseOnLinkStartDragged(PWAnchor anchor) { if (OnLinkStartDragged != null) OnLinkStartDragged(anchor); }
 		public void RaiseOnLinkCancenled() { if (OnLinkCanceled != null) OnLinkCanceled(); }
 		public void RaiseOnLinkStopDragged() { if (OnLinkStopDragged != null) OnLinkStopDragged(); }

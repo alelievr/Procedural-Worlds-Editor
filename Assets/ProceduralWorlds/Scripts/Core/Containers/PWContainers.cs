@@ -209,8 +209,10 @@ namespace PW.Core
 		public Vector2			windowPosition;
 		public PWGUIFieldType	fieldType;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public object	oldState = null;
+		[System.NonSerialized]
+		public bool		firstRender = true;
 
 		//we put all possible datas for each inputs because unity serialization does not support inheritence :(
 
@@ -226,6 +228,8 @@ namespace PW.Core
 		public SerializableGradient	serializableGradient;
 		[System.NonSerialized]
 		public bool					update;
+		[System.NonSerialized]
+		public bool					samplerTextureUpdated = false;
 		public bool					debug;
 
 		//verson of the debug bool only updated durin Layout passes (use this for conditional debug display)

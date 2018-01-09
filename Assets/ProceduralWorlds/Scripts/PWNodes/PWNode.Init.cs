@@ -85,7 +85,6 @@ namespace PW
 					PWColorAttribute		colorAttr = attr as PWColorAttribute;
 					PWOffsetAttribute		offsetAttr = attr as PWOffsetAttribute;
 					PWNotRequiredAttribute	notRequiredAttr = attr as PWNotRequiredAttribute;
-					PWCopyAttribute			copyAttr = attr as PWCopyAttribute;
 
 					if (inputAttr != null)
 					{
@@ -99,8 +98,6 @@ namespace PW
 						if (outputAttr.name != null)
 							anchorField.name = outputAttr.name;
 					}
-					if (copyAttr != null)
-						anchorField.transferType = PWTransferType.Copy;
 					if (colorAttr != null)
 						anchorField.color = new SerializableColor(colorAttr.color);
 					if (offsetAttr != null)
@@ -154,7 +151,6 @@ namespace PW
 						anchor.name = af.name;
 						anchor.fieldType = af.fieldType;
 						anchor.debug = af.debug;
-						anchor.transferType = af.transferType;
 						anchor.offset = af.offset;
 						anchor.padding = af.padding;
 						anchor.colorSchemeName = af.colorSchemeName;

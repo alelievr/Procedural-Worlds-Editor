@@ -36,6 +36,8 @@ public partial class PWGraphEditor : PWEditorWindow
 	bool 						MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
+	//Process the graph at the next event pass if true
+	bool						processGraphOnNextPass;
 
 	//Layout additional windows
 	protected PWGraphOptionBar			optionBar;
@@ -58,10 +60,13 @@ public partial class PWGraphEditor : PWEditorWindow
 		//provide the MacOS bool
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
+		EditorApplication.playModeStateChanged += PlayModeChangeCallback;
+
 		//clear event masks
 		eventMasks.Clear();
 
 		LoadAssets();
+
 		Profiler.EndSample();
 	}
 
@@ -131,8 +136,24 @@ public partial class PWGraphEditor : PWEditorWindow
 		//restore masked events:
 		UnMaskEvents();
 		
+		//we process the graph if we have to
+		if (processGraphOnNextPass)
+		{
+			graph.Process();
+			processGraphOnNextPass = false;
+		}
+		
 		//save the size of the window
 		windowSize = position.size;
+	}
+
+	void PlayModeChangeCallback(PlayModeStateChange mode)
+	{
+		if (mode == PlayModeStateChange.EnteredEditMode)
+		{
+			// Debug.Log("here !");
+			// graph.Process();
+		}
 	}
 
 	//TODO: move elsewhere
@@ -172,6 +193,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (OnGraphChanged != null)
 			OnGraphChanged(graph);
+		
+		processGraphOnNextPass = true;
 	}
 
 	public void UnloadGraph()

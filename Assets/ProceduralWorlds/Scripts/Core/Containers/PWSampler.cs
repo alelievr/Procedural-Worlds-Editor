@@ -106,7 +106,7 @@ namespace PW.Core
 			else
 				newSampler = new Sampler2D(size, step);
 			
-			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
+			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length * sizeof(float));
 
 			return newSampler;
 		}

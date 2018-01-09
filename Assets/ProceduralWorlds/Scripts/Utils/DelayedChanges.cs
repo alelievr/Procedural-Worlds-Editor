@@ -4,7 +4,8 @@ using UnityEngine;
 using System;
 using UnityEditor;
 
-public class DelayedChanges {
+public class DelayedChanges
+{
 
 	//time before a stable value will trigger a callback
 	public float	delayedTime = 300; //ms
@@ -13,10 +14,11 @@ public class DelayedChanges {
 	{
 		public object			value = null;
 		public double			lastUpdate = 0;
-		public bool				called = false;
+		public bool				called = true;
 		public Action< object >	callback = null;
 	}
 
+	[System.NonSerialized]
 	private  Dictionary< string, ChangeData > values = new Dictionary< string, ChangeData >();
 
 	public void	UpdateValue(string key, object value = null)
