@@ -8,7 +8,7 @@ using PW.Node;
 
 namespace PW
 {
-	public class PWGraphParameterToNodes
+	public class PWGraphParameterToNodesTests
 	{
 
 		PWMainGraph CreateTestGraph(out PWNodePerlinNoise2D perlinNode, out PWNodeDebugLog debugNode)

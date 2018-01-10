@@ -30,8 +30,6 @@ public partial class PWGraphEditor : PWEditorWindow
 	//size of the current window, updated each frame
 	protected Vector2			windowSize;
 
-	//Is the asset saved ?
-	bool						saved;
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
@@ -61,6 +59,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		MacOS = SystemInfo.operatingSystem.Contains("Mac");
 
 		EditorApplication.playModeStateChanged += PlayModeChangeCallback;
+		Undo.undoRedoPerformed += UndoRedoCallback;
 
 		//clear event masks
 		eventMasks.Clear();
@@ -149,11 +148,13 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	void PlayModeChangeCallback(PlayModeStateChange mode)
 	{
-		if (mode == PlayModeStateChange.EnteredEditMode)
-		{
-			// Debug.Log("here !");
+		// if (mode == PlayModeStateChange.EnteredEditMode)
 			// graph.Process();
-		}
+	}
+
+	void UndoRedoCallback()
+	{
+		graph.Process();
 	}
 
 	//TODO: move elsewhere
@@ -222,7 +223,6 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	void SaveGraph()
 	{
-		saved = true;
 		EditorUtility.SetDirty(graph);
 		AssetDatabase.SaveAssets();
 	}
@@ -382,7 +382,10 @@ public partial class PWGraphEditor : PWEditorWindow
 		if (e.rawType == EventType.MouseUp)
 		{
 			if (editorEvents.isDraggingNode)
+			{
+				Debug.Log("undo.record");
 				Undo.RecordObject(graph, "drag node");
+			}
 			if (editorEvents.isPanning)
 				Undo.RecordObject(graph, "graph pan");
 			if (editorEvents.isDraggingOrderingGroup)

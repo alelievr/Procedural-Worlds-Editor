@@ -8,7 +8,7 @@ using PW.Core;
 
 namespace PW
 {
-	public class PWGraphNoiseRemapAndDebug
+	public class PWGraphNoiseRemapAndDebugTests
 	{
 	
 		[Test]

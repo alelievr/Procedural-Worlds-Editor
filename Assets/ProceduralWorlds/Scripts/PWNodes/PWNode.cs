@@ -209,6 +209,8 @@ namespace PW
 			
 			LoadFieldAttributes();
 
+			LoadUndoableFields();
+
 			UpdateAnchorProperties();
 
 			if (debug)

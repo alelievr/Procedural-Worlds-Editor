@@ -603,7 +603,6 @@ namespace PW.Core
 				fieldSettings.gradient = fieldSettings.serializableGradient;
 
 			Texture2D	tex = fieldSettings.texture;
-			Gradient	gradient = fieldSettings.gradient;
 
 			if (samp.size != tex.width)
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);

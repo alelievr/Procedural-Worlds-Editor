@@ -99,7 +99,10 @@ public partial class PWGraphEditor
 
 		//mouse over bezier curve:
 		if (HandleUtility.nearestControl == link.controlId)
+		{
+			editorEvents.mouseOverLink = link;
 			editorEvents.isMouseOverLinkFrame = true;
+		}
 
 		if (e.type == EventType.Repaint)
 		{

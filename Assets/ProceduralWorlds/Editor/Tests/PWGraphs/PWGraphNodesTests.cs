@@ -8,7 +8,7 @@ using PW.Node;
 
 namespace PW
 {
-	public class PWGraphNodes
+	public class PWGraphNodesTests
 	{
 	
 		[Test]

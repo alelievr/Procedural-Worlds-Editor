@@ -28,6 +28,9 @@ namespace PW
 		[SerializeField]
 		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
+		[System.NonSerialized]
+		List< FieldInfo >		undoableFields = new List< FieldInfo >();
+
 		void LoadAssets()
 		{
 			editIcon = Resources.Load< Texture2D >("ic_edit");
@@ -182,6 +185,40 @@ namespace PW
 					else
 						outputAnchorFields.Add(af);
 				}
+			}
+		}
+
+		void LoadUndoableFields()
+		{
+			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+			undoableFields.Clear();
+			
+			foreach (var fInfo in fInfos)
+			{
+				var attrs = fInfo.GetCustomAttributes(false);
+
+				bool hasSerializeField = false;
+
+				foreach (var attr in attrs)
+				{
+					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
+						goto skipThisField;
+					
+					if (attr as SerializeField != null)
+						hasSerializeField = true;
+				}
+
+				if (fInfo.IsPrivate && !hasSerializeField)
+					goto skipThisField;
+				
+				if (fInfo.IsNotSerialized)
+					goto skipThisField;
+				
+				undoableFields.Add(fInfo);
+
+				skipThisField:
+				continue ;
 			}
 		}
 

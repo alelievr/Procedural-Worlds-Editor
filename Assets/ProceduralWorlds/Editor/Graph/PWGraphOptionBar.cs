@@ -19,7 +19,7 @@ namespace PW.Editor
 		
 		static Texture2D	rencenterIconTexture;
 		static Texture2D	fileIconTexture;
-		static Texture2D	eyeIconTexture;
+		// static Texture2D	eyeIconTexture;
 
 		public Action< Rect >	onDrawAdditionalOptions;
 
@@ -32,7 +32,7 @@ namespace PW.Editor
 		{
 			rencenterIconTexture = Resources.Load< Texture2D >("ic_recenter");
 			fileIconTexture = Resources.Load< Texture2D >("ic_file");
-			eyeIconTexture = Resources.Load< Texture2D >("ic_eye");
+			// eyeIconTexture = Resources.Load< Texture2D >("ic_eye");
 			
 			navBarBackgroundStyle = new GUIStyle("NavBarBackground");
 		}

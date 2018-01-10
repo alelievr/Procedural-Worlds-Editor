@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using PW.Core;
 using PW.Node;
 
@@ -11,6 +12,9 @@ namespace PW
 	public partial class PWNode
 	{
 		public int		viewHeight = 0; //to keep ???
+
+		List< object >	propertiesBeforeGUI = null;
+		List< object >	propertiesAfterGUI = null;
 
 		#if UNITY_EDITOR
 		public void OnWindowGUI(int id)
@@ -47,9 +51,13 @@ namespace PW
 				editorEvents.isDraggingNode = false;
 			}
 			
+			//Drag window
 			if (id != -1 && e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 			
+			//Undo/Redo handling:
+			propertiesBeforeGUI = TakeUndoablePropertiesSnapshot(propertiesBeforeGUI);
+
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
 				OnNodeGUI();
@@ -57,6 +65,22 @@ namespace PW
 				EditorGUIUtility.labelWidth = 0;
 			}
 			GUILayout.EndVertical();
+			
+			propertiesAfterGUI = TakeUndoablePropertiesSnapshot(propertiesAfterGUI);
+
+			if (PropertiesSnapshotDiffers(propertiesBeforeGUI, propertiesAfterGUI))
+			{
+				//Set back the node values to what they was before the modification
+				RestorePropertiesSnapshot(propertiesBeforeGUI);
+
+				//Then record the object
+				Undo.RecordObject(this, "Property updated in " + name);
+
+				//And set back the modified values
+				RestorePropertiesSnapshot(propertiesAfterGUI);
+				
+				// Debug.Log("Undo recorded: in " + GetType());
+			}
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)
@@ -77,6 +101,35 @@ namespace PW
 				isSelected = !isSelected;
 		}
 		#endif
+
+		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)
+		{
+			if (buffer == null)
+				buffer = new List< object >(new object[undoableFields.Count]);
+			
+			for (int i = 0; i < undoableFields.Count; i++)
+				buffer[i] = undoableFields[i].GetValue(this);
+			
+			return buffer;
+		}
+
+		bool PropertiesSnapshotDiffers(List< object > propertiesList1, List< object > propertiesList2)
+		{
+			if (propertiesList1.Count != propertiesList2.Count)
+				return true;
+			
+			for (int i = 0; i < propertiesList1.Count; i++)
+				if (!propertiesList1[i].Equals(propertiesList2[i]))
+					return true;
+
+			return false;
+		}
+
+		void RestorePropertiesSnapshot(List< object > properties)
+		{
+			for (int i = 0; i < undoableFields.Count; i++)
+				undoableFields[i].SetValue(this, properties[i]);
+		}
 
 		public virtual void	OnNodeGUI()
 		{

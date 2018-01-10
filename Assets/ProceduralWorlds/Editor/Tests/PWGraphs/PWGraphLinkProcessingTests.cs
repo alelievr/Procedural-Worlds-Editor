@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace PW
 {
-	public class PWGraphLinkProcessing
+	public class PWGraphLinkProcessingTests
 	{
 	
 		[Test]

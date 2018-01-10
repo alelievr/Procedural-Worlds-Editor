@@ -40,20 +40,16 @@ namespace PW
 		public void PerlinNoiseWithAttributesToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
-			string	debugNodeName = "debug";
 			var perlinAttributes = new PWGraphCLIAttributes() {
 				{"persistance", 2.4f}, {"octaves", 6}
 			};
 
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodePerlinNoise2D >(perlinNodeName, perlinAttributes)
-				.NewNode< PWNodeDebugLog >(debugNodeName)
-				.Link(perlinNodeName, debugNodeName)
 				.Execute()
 				.GetGraph();
 			
 			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
-			PWNodeDebugLog debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugLog;
 
 			Assert.That(perlinNode.octaves == 6, "Perlin node octaves expected to be 6 but was " + perlinNode.octaves);
 			Assert.That(perlinNode.persistance == 2.4f, "Perlin node persistance expected to be 2.4 but was " + perlinNode.persistance);

@@ -21,12 +21,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	PWGraphLayout		layout = new PWGraphLayout();
 	
 	//terrain manager to configure terrain generation / preview
-	PWGraphTerrainManager		terrainManager;
-	
-	//graph, node, anchors and links control and 
-	bool				previewMouseDrag = false;
-	[System.NonSerializedAttribute]
-	PWNode				mouseAboveNode;
+	PWGraphTerrainManager	terrainManager;
 	
 	//events fields
 	Vector2				lastMousePosition;

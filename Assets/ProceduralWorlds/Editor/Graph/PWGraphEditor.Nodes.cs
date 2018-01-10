@@ -121,7 +121,7 @@ public partial class PWGraphEditor
 
 	void OnNodeRemovedCallback(PWNode node)
 	{
-		DestroyImmediate(node, true);
+		Undo.DestroyObjectImmediate(node);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	}

@@ -36,7 +36,6 @@ public partial class PWGraphEditor
 	{
 		Event	e = Event.current;
 		
-		// Debug.Log("mouseOverAnchor: " + editorEvents.mouseOverAnchor);
         if (e.type == EventType.ContextClick)
         {
 			Profiler.BeginSample("[PW] render context menu");
@@ -56,7 +55,6 @@ public partial class PWGraphEditor
 
 			menu.AddSeparator("");
 
-			Debug.Log("mouseOverAnchro: " + editorEvents.mouseOverAnchor);
 			if (editorEvents.mouseOverAnchor != null)
 			{
 				Debug.Log("Anchor !");

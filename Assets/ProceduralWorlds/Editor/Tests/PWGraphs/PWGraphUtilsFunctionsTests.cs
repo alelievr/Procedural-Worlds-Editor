@@ -8,7 +8,7 @@ using PW.Core;
 
 namespace PW
 {
-	public class PWGraphUtilsFunctions
+	public class PWGraphUtilsFunctionsTests
 	{
 		[Test]
 		public void FindNodeByName()
