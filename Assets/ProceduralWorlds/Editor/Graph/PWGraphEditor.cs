@@ -173,6 +173,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.OnNodeAdded += OnNodeAddedCallback;
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
 		graph.OnLinkCreated += OnLinkCreated;
+		graph.OnLinkRemoved += OnlinkRemoved;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
@@ -203,6 +204,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
 		graph.OnLinkCreated -= OnLinkCreated;
+		graph.OnLinkRemoved -= OnlinkRemoved;
 
 		SaveGraph();
 
@@ -378,22 +380,16 @@ public partial class PWGraphEditor : PWEditorWindow
 			}
 		}
 
+		if (editorEvents.isPanning)
+			Undo.RecordObject(graph, "graph pan");
+		if (editorEvents.isDraggingOrderingGroup)
+			Undo.RecordObject(graph, "ordering graph drag");
+		if (GUI.changed)
+			Undo.RecordObject(graph, "something changed");
+			
 		//on mouse button up
 		if (e.rawType == EventType.MouseUp)
 		{
-			if (editorEvents.isDraggingNode)
-			{
-				Debug.Log("undo.record");
-				Undo.RecordObject(graph, "drag node");
-			}
-			if (editorEvents.isPanning)
-				Undo.RecordObject(graph, "graph pan");
-			if (editorEvents.isDraggingOrderingGroup)
-				Undo.RecordObject(graph, "ordering graph drag");
-			if (GUI.changed)
-				Undo.RecordObject(graph, "something changed");
-			
-			editorEvents.isDraggingNode = false;
 			editorEvents.isDraggingOrderingGroup = false;
 			editorEvents.isSelecting = false;
 			editorEvents.isPanning = false;

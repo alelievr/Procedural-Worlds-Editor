@@ -141,6 +141,32 @@ public partial class PWGraphEditor
 	{
 		if (editorEvents.isDraggingLink || editorEvents.isDraggingNewLink)
 			StopDragLink(true);
+			
+		//Currently causes weird bugs
+		
+		// if (link.toNode == null || link.fromNode == null)
+		// 	return ;
+
+		// Debug.Log("register !");
+		// string undoName = "Link created";
+		
+		// Undo.RecordObject(link.toNode, undoName);
+		// Undo.RecordObject(link.fromNode, undoName);
+		// Undo.RecordObject(graph, undoName);
+	}
+
+	void	OnlinkRemoved(PWNodeLink link)
+	{
+		if (link.toNode == null || link.fromNode)
+			return ;
+
+		//Currently causes weird bugs
+
+		// string undoName = "Link removed";
+		
+		// Undo.RecordObject(link.toNode, undoName);
+		// Undo.RecordObject(link.fromNode, undoName);
+		// Undo.RecordObject(graph, undoName);
 	}
 
 	void UnselectAllLinks()

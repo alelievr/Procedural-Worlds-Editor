@@ -50,6 +50,9 @@ namespace PW
 				isDragged = false;
 				editorEvents.isDraggingNode = false;
 			}
+
+			if (isDragged)
+				Undo.RecordObject(this, "Node " + name + " dragged");
 			
 			//Drag window
 			if (id != -1 && e.button == 0 && !windowNameEdit)
