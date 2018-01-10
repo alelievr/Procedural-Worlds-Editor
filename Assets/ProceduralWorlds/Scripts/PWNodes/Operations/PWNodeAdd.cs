@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using PW.Core;
+using NUnit.Framework;
 
 namespace PW.Node
 {
@@ -38,6 +39,15 @@ namespace PW.Node
 			
 			if (intify)
 				fOutput = Mathf.RoundToInt(fOutput);
+		}
+
+		public override void OnNodeUnitTest()
+		{
+			values = new PWArray< float >() {10, 30, 40, -20};
+
+			OnNodeProcess();
+
+			Assert.That(fOutput == 60);
 		}
 	}
 }

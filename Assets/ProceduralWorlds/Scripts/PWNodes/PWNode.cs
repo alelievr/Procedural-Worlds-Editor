@@ -313,6 +313,8 @@ namespace PW
 
 		public virtual void OnNodeProcessOnce() {}
 
+		public virtual void OnNodeUnitTest() {}
+
 		public virtual bool	OnNodeAnchorLink(string propName, int index) { return true; }
 
 		public virtual void OnNodeAnchorUnlink(string propName, int index) {}

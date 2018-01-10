@@ -145,6 +145,14 @@ namespace PW.Core
 			}
         }
 
+		public static IEnumerable< Type > GetExlusiveNodeTypesForGraph(PWGraphType graphType)
+		{
+			foreach (var nodeInfo in nodeInfoList)
+				if (nodeInfo.allowedGraphMask == (int)graphType)
+					foreach (var ni in nodeInfo.typeInfos)
+						yield return ni.type;
+		}
+
 		static T GetNodeInfo< T >(Type t, Func< PWNodeTypeInfo, PWNodeTypeInfoList, T > fun)
 		{
 			foreach (var nil in nodeInfoList)
