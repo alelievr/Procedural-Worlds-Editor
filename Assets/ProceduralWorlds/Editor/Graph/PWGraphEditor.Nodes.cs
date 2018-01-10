@@ -117,7 +117,6 @@ public partial class PWGraphEditor
 		AssetDatabase.AddObjectToAsset(node, graph);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
-		Debug.Log("Added node " + node + " to the graph " + graph);
 	}
 
 	void OnNodeRemovedCallback(PWNode node)

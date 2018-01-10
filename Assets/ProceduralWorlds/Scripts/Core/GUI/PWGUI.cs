@@ -618,21 +618,22 @@ namespace PW.Core
 
 			TexturePreview(tex, false, false, false);
 			
-			//draw the settings window
-			if (settings) 
+			if (settings)
 			{
-				if (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate"))
+				//if the gradient value have been modified, we update the texture
+				if (PWSamplerSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate")))
 				{
 					fieldSettings.gradient = PWSamplerSettingsPopup.gradient;
 					fieldSettings.serializableGradient = (SerializableGradient)fieldSettings.gradient;
 					fieldSettings.filterMode = PWSamplerSettingsPopup.filterMode;
 					fieldSettings.debug = PWSamplerSettingsPopup.debug;
+
 					UpdateSampler2D(fieldSettings);
+					
+					if (e.type == EventType.ExecuteCommand)
+						e.Use();
 				}
-			}
-			
-			if (settings)
-			{
+
 				//draw the setting icon and manage his events
 				int icSettingsSize = 16;
 				int	icSettingsPadding = 4;
@@ -643,7 +644,7 @@ namespace PW.Core
 				{
 					if (icSettingsRect.Contains(e.mousePosition))
 					{
-						PWSamplerSettingsPopup.OpenPopup(fieldSettings.gradient, fieldSettings.filterMode, fieldSettings.texture, fieldSettings.debug);
+						PWSamplerSettingsPopup.OpenPopup(fieldSettings);
 						e.Use();
 					}
 				}

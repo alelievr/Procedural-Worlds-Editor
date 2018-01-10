@@ -157,6 +157,7 @@ namespace PW.Core
 		public event Action						OnLinkStopDragged;
 		public event Action						OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
+		public event LinkAction					OnPostLinkCreated;
 		public event LinkAction					OnLinkRemoved;
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
@@ -203,7 +204,7 @@ namespace PW.Core
 
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
-			OnLinkCreated += LinkChangedCallback;
+			OnPostLinkCreated += LinkChangedCallback;
 			OnLinkRemoved += LinkChangedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
@@ -221,7 +222,7 @@ namespace PW.Core
 		{
 			//Events detach
 			OnGraphStructureChanged -= GraphStructureChangedCallback;
-			OnLinkCreated -= LinkChangedCallback;
+			OnPostLinkCreated -= LinkChangedCallback;
 			OnLinkRemoved -= LinkChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
@@ -421,7 +422,15 @@ namespace PW.Core
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
-		void		GraphStructureChangedCallback() { UpdateComputeOrder(); Process(); }
+		void		GraphStructureChangedCallback()
+		{
+			UpdateComputeOrder();
+
+			foreach (var node in nodes)
+				Debug.Log(node + " computeOrder: " + node.computeOrder);
+
+			Process();
+		}
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
@@ -581,7 +590,11 @@ namespace PW.Core
 			nodeLinkTable.AddLink(link);
 
 			//raise link creation event
-			OnLinkCreated(link);
+			if (OnLinkCreated != null)
+				OnLinkCreated(link);
+			
+			if (OnPostLinkCreated != null)
+				OnPostLinkCreated(link);
 
 			if (Event.current != null)
 				Event.current.Use();

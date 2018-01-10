@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 using System;
+using PW;
 
 namespace PW.Core
 {
@@ -21,14 +22,15 @@ namespace PW.Core
 		SerializableGradient		oldGradient;
 		bool						needUpdate = false;
 	
-		public static void OpenPopup(Gradient gradient, FilterMode filterMode, Texture texture, bool debug = false)
+		public static void OpenPopup(PWGUISettings guiSettings)
 		{
 			PWPopup.OpenPopup< PWSamplerSettingsPopup >();
 
-			PWSamplerSettingsPopup.gradient = gradient;
-			PWSamplerSettingsPopup.filterMode = filterMode;
-			PWSamplerSettingsPopup.texture = texture;
-			PWSamplerSettingsPopup.debug = debug;
+			gradient = guiSettings.gradient;
+			filterMode = guiSettings.filterMode;
+			texture = guiSettings.texture;
+			debug = guiSettings.debug;
+			controlId = guiSettings.GetHashCode();
 		}
 
 		protected override void OnGUIEnable()
