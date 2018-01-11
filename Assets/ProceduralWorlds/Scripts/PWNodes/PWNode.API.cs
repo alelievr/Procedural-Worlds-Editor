@@ -51,7 +51,12 @@ namespace PW
 		public void				SetMultiAnchor(string fieldName, int newCount, params string[] newNames)
 		{
 			if (!anchorFieldDictionary.ContainsKey(fieldName))
+			{
+				Debug.LogError("Unknown anchor \"" + fieldName + "\" in node " + this);
 				return ;
+			}
+
+			Debug.Log("set multi-anchor count: " + newCount);
 			
 			var anchorField = anchorFieldDictionary[fieldName];
 

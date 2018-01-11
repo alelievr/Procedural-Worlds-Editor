@@ -126,7 +126,7 @@ namespace PW.Core
 					filePath = Path.Combine(Application.persistentDataPath, fileName);
 				#endif
 			}
-			string[] lines = File.ReadAllLines(fileName);
+			string[] lines = File.ReadAllLines(filePath);
 
 			foreach (var line in lines)
 				commands.Add(line);

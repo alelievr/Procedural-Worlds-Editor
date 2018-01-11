@@ -118,7 +118,6 @@ namespace PW.Core
 				{
 					var pwArray = prop.GetValue(link.toNode);
 
-					//TODO: value not cloned here
 					//TODO: bake this abomination
 					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
 
@@ -132,13 +131,14 @@ namespace PW.Core
 					//TODO: bake this abomination
 					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 
+					Debug.Log("processing array link from " + link.fromNode + " to " + link.toNode + ", value: " + localVal + " : " + link.fromAnchor.fieldIndex);
+
 					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
 				}
 
 				//Both are multi-anchors
 				else if (val != null)
 				{
-					//TODO: value not cloned here
 					//TODO: brun these abomination
 					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 	

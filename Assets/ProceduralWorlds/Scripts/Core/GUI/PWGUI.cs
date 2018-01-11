@@ -170,6 +170,7 @@ namespace PW.Core
 				{
 					fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
 					fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
+					GUI.changed = true;
 				}
 			
 			color = fieldSettings.c;

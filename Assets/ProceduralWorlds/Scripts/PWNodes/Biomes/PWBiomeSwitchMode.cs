@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW.Node
+namespace PW.Biomator
 {
 	public enum PWBiomeSwitchMode
 	{

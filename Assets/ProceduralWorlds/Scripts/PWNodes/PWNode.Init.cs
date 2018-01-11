@@ -199,17 +199,24 @@ namespace PW
 				var attrs = fInfo.GetCustomAttributes(false);
 
 				bool hasSerializeField = false;
+				bool hasNonSerialized = false;
 
 				foreach (var attr in attrs)
 				{
 					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
 						goto skipThisField;
 					
+					if (attr as System.NonSerializedAttribute != null)
+						hasNonSerialized = true;
+					
 					if (attr as SerializeField != null)
 						hasSerializeField = true;
 				}
 
 				if (fInfo.IsPrivate && !hasSerializeField)
+					goto skipThisField;
+				
+				if (hasNonSerialized)
 					goto skipThisField;
 				
 				if (fInfo.IsNotSerialized)
