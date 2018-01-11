@@ -18,12 +18,13 @@ namespace PW.Core
 		public static Color		currentColor;
 		public static Vector2	thumbPosition;
 
-		public static void OpenPopup(Color color, Vector2 thumbPosition)
+		public static void OpenPopup(Color color, PWGUISettings guiSettings)
 		{
 			PWPopup.OpenPopup< PWColorPicker >(new Vector2(windowSize.x, 340));
 
 			PWColorPicker.currentColor = color;
-			PWColorPicker.thumbPosition = thumbPosition;
+			PWColorPicker.controlId = guiSettings.GetHashCode();
+			PWColorPicker.thumbPosition = guiSettings.thumbPosition;
 		}
 
 		protected override void GUIStart()

@@ -319,6 +319,11 @@ namespace PW.Core
 		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
 			Vector2	position = command.position;
+			
+			Debug.Log("Create new Node: " + inputCommand);
+
+			foreach (var n in graph.nodes)
+				Debug.Log("node: " + n);
 
 			PWNode node = graph.CreateNewNode(command.nodeType, position);
 			Type nodeType = node.GetType();

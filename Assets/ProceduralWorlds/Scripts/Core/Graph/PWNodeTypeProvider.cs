@@ -70,6 +70,7 @@ namespace PW.Core
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
             typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
+			typeof(PWNodeBiome),
 		};
 
 		static List< PWNodeTypeInfoList > nodeInfoList = new List< PWNodeTypeInfoList >
@@ -96,6 +97,7 @@ namespace PW.Core
 				"Circle Noise Mask", typeof(PWNodeCircleNoiseMask)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "Biomes", PWColorSchemeName.Carrot,
+				"Biome", typeof(PWNodeBiome),
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
 				"Biome switch", typeof(PWNodeBiomeSwitch),

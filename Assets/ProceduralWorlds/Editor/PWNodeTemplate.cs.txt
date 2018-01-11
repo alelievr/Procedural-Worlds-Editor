@@ -6,11 +6,19 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeTemplate : PWNode {
+	public class #SCRIPTNAME# : PWNode
+	{
 	
+		string propUpdateKey = "#NAME#";
+
+		//Called only when the node is created (not when it is enabled/loaded)
 		public override void OnNodeCreation()
 		{
-			name = "your node name";
+			name = "#NOTRIM#";
+		}
+
+		public override void OnNodeEnable()
+		{
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
 		}
 

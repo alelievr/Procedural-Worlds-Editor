@@ -136,6 +136,8 @@ public partial class PWGraphEditor
 		Color c = PWColorTheme.GetLinkColor(colorSchemeName);
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);
 	}
+	
+	// string undoName = "Link created";
 
 	void	OnLinkCreated(PWNodeLink link)
 	{
@@ -148,7 +150,16 @@ public partial class PWGraphEditor
 		// 	return ;
 
 		// Debug.Log("register !");
-		// string undoName = "Link created";
+		
+		// Undo.RecordObject(graph, undoName);
+	}
+
+	void	OnPostLinkCreated(PWNodeLink link)
+	{
+		// if (link.toNode == null || link.fromNode == null)
+		// 	return ;
+
+		// Debug.Log("register !");
 		
 		// Undo.RecordObject(link.toNode, undoName);
 		// Undo.RecordObject(link.fromNode, undoName);
@@ -157,7 +168,7 @@ public partial class PWGraphEditor
 
 	void	OnlinkRemoved(PWNodeLink link)
 	{
-		if (link.toNode == null || link.fromNode)
+		if (link.toNode == null || link.fromNode == null)
 			return ;
 
 		//Currently causes weird bugs

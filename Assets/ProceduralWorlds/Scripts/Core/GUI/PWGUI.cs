@@ -161,14 +161,16 @@ namespace PW.Core
 				PWGUISettings colorSettings = new PWGUISettings();
 
 				colorSettings.c = (SerializableColor)localColor;
+
 				return colorSettings;
 			});
 
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
-			{
-				fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
-				fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
-			}
+				if (fieldSettings.GetHashCode() == PWColorPicker.controlId)
+				{
+					fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
+					fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
+				}
 			
 			color = fieldSettings.c;
 			
@@ -203,7 +205,7 @@ namespace PW.Core
 			{
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
-					PWColorPicker.OpenPopup(color, fieldSettings.thumbPosition);
+					PWColorPicker.OpenPopup(color, fieldSettings);
 					e.Use();
 				}
 			}
@@ -608,7 +610,7 @@ namespace PW.Core
 				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
 			
 			//if the preview texture of the sampler have not been updated, we try to update it
-			if (!fieldSettings.samplerTextureUpdated)
+			if (!fieldSettings.samplerTextureUpdated || fieldSettings.update)
 				UpdateSampler2D(fieldSettings);
 			
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));

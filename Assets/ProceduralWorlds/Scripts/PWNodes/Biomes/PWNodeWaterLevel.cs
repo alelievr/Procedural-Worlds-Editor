@@ -106,10 +106,6 @@ namespace PW.Node
 			}
 		}
 
-		void				CreateNewBiome()
-		{
-		}
-
 		public override void OnNodeProcess()
 		{
 			if (terrainNoise == null)
@@ -138,6 +134,11 @@ namespace PW.Node
 			}
 			else
 				; //TODO
+		}
+
+		void CreateNewBiome()
+		{
+
 		}
 
 		public override void OnNodeProcessOnce()

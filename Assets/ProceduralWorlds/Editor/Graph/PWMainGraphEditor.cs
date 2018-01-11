@@ -140,6 +140,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	void GraphChangedCallback(PWGraph newGraph)
 	{
+		if (newGraph == null)
+			return ;
+		
 		terrainManager = new PWGraphTerrainManager(graph);
 		
 		terrainManager.LoadStyles();

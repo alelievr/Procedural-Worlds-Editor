@@ -165,6 +165,9 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	public void LoadGraph(PWGraph graph)
 	{
+		if (this.graph != null)
+			UnloadGraph(false);
+
 		this.graph = graph;
 
 		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
@@ -174,6 +177,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.OnNodeRemoved += OnNodeRemovedCallback;
 		graph.OnLinkCreated += OnLinkCreated;
 		graph.OnLinkRemoved += OnlinkRemoved;
+		graph.OnPostLinkCreated += OnPostLinkCreated;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
@@ -199,16 +203,18 @@ public partial class PWGraphEditor : PWEditorWindow
 		processGraphOnNextPass = true;
 	}
 
-	public void UnloadGraph()
+	public void UnloadGraph(bool unloadAsset = true)
 	{
 		graph.OnNodeAdded -= OnNodeAddedCallback;
 		graph.OnNodeRemoved -= OnNodeRemovedCallback;
 		graph.OnLinkCreated -= OnLinkCreated;
 		graph.OnLinkRemoved -= OnlinkRemoved;
+		graph.OnPostLinkCreated -= OnPostLinkCreated;
 
 		SaveGraph();
 
-		Resources.UnloadAsset(graph);
+		if (unloadAsset)
+			Resources.UnloadAsset(graph);
 
 		if (OnGraphChanged != null)
 			OnGraphChanged(null);

@@ -41,7 +41,8 @@ namespace PW.Node
 		public BiomeFieldSwitchData() : this(null) {}
 	}
 
-	public class PWNodeBiomeSwitch : PWNode {
+	public class PWNodeBiomeSwitch : PWNode
+	{
 
 		[PWInput]
 		public BiomeData		inputBiome;
@@ -72,8 +73,11 @@ namespace PW.Node
 
 		public override void OnNodeCreation()
 		{
-
 			name = "Biome switch";
+		}
+
+		public override void OnNodeEnable()
+		{
 			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
 

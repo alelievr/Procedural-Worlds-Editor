@@ -327,29 +327,6 @@ namespace PW.Core
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			graphProcessor.ProcessNodes(this, nodes);
 		}
-
-		//export the graph as commands in a file and return the created file path
-		public string Export(string filePath)
-		{
-			return PWGraphCLI.Export(this, filePath);
-		}
-
-		//wipeDatas will remove all the graph content before importing the file
-		public void Import(string filePath, bool wipeDatas = false)
-		{
-			Debug.Log("TODO");
-		}
-
-		public void Execute(string command)
-		{
-			PWGraphCLI.Execute(this, command);
-		}
-
-		public bool SetInput(string fieldName, object value)
-		{
-			Debug.Log("TODO");
-			return false;
-		}
 	
 		//Dictionary< nodeId, dependencyWeight >
 		[System.NonSerialized]
@@ -433,8 +410,8 @@ namespace PW.Core
 		public void RaiseOnLinkStopDragged() { if (OnLinkStopDragged != null) OnLinkStopDragged(); }
 
 	#endregion
-
-	#region Nodes API
+	
+	#region Graph API
 
 		public bool		IsRealMode()
 		{
@@ -445,6 +422,61 @@ namespace PW.Core
 		{
 			realMode = value;
 		}
+
+		//export the graph as commands in a file and return the created file path
+		public string Export(string filePath)
+		{
+			return PWGraphCLI.Export(this, filePath);
+		}
+
+		//wipeDatas will remove all the graph content before importing the file
+		public void Import(string filePath, bool wipeDatas = false)
+		{
+			Debug.Log("TODO");
+		}
+
+		public void Execute(string command)
+		{
+			PWGraphCLI.Execute(this, command);
+		}
+
+		public bool SetInput(string fieldName, object value)
+		{
+			var array = inputNode.outputValues;
+
+			int index = array.FindName(fieldName);
+
+			if (index == -1)
+				return array.AssignAt(index, value, fieldName, false);
+
+			array.Add(value, fieldName);
+
+			return true;
+		}
+
+		public bool SetInput(int index, object value, string name)
+		{
+			return inputNode.outputValues.AssignAt(index, value, name, true);
+		}
+
+		public bool RemoveInput(string name)
+		{
+			return RemoveInput(inputNode.outputValues.FindName(name));
+		}
+
+		public bool RemoveInput(int index)
+		{
+			return inputNode.outputValues.RemoveAt(index);
+		}
+
+		public void ClearInput()
+		{
+			inputNode.outputValues.Clear();
+		}
+
+	#endregion
+
+	#region Nodes API
 
 		public PWNode	FindNodeById(int nodeId)
 		{
@@ -488,7 +520,7 @@ namespace PW.Core
 
 			nodes.Add(newNode);
 			nodesDictionary[newNode.id] = newNode;
-
+			
 			if (OnNodeAdded != null)
 				OnNodeAdded(newNode);
 			

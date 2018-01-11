@@ -8,7 +8,7 @@ namespace PW.Core
 	{
 
 		[PWOutput]
-		public PWArray< object >				outputValues = new PWArray< object >();
+		public PWArray< object >	outputValues = new PWArray< object >();
 		
 		public override void OnNodeCreation()
 		{

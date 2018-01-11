@@ -122,8 +122,16 @@ namespace PW
 				return true;
 			
 			for (int i = 0; i < propertiesList1.Count; i++)
-				if (!propertiesList1[i].Equals(propertiesList2[i]))
+			{
+				var p1 = propertiesList1[i];
+				var p2 = propertiesList2[i];
+
+				if (p1 == null)
+					continue ;
+
+				if (!p1.Equals(p2))
 					return true;
+			}
 
 			return false;
 		}

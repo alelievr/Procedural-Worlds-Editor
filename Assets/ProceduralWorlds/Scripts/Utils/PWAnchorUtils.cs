@@ -13,11 +13,11 @@ namespace PW.Core
 			if (to == typeof(object))
 				return true;
 
+			//if to or from are PWArray, we replace the to/from type by their generic type
 			if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(PWArray<>))
-			{
-				//TODO: check for allowed types from PWArray
-				return true;
-			}
+				to = to.GetGenericArguments()[0];
+			if (from.IsGenericType && from.GetGenericTypeDefinition() == typeof(PWArray<>))
+				from = from.GetGenericArguments()[0];
 
 			if (from == to)
 				return true;

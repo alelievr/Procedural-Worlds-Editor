@@ -55,11 +55,22 @@ namespace PW.Core
 				return null;
 			return names[index];
 		}
+
+		public int	FindName(string name)
+		{
+			return names.FindIndex((n => n == name));
+		}
 	
 		public void Add(T val)
 		{
 			values.Add(val);
 			names.Add(null);
+		}
+
+		public void Add(T val, string name)
+		{
+			values.Add(val);
+			names.Add(name);
 		}
 
 		public bool AssignAt(int index, T val, string name, bool force = false)
@@ -84,7 +95,7 @@ namespace PW.Core
 
 		public bool RemoveAt(int index)
 		{
-			if (index >= values.Count)
+			if (index < 0 || index >= values.Count)
 				return false;
 
 			values.RemoveAt(index);
