@@ -16,7 +16,7 @@ namespace PW.Node
 		public BiomeData			inputBiome;
 
 		[PWOutput]
-		[PWOffset(53, 16)]
+		[PWOffset(72, 18)] //hardcoded padding and margin for anchors
 		public PWArray< BiomeData >	outputBiomes = new PWArray< BiomeData >();
 
 		[SerializeField]
@@ -47,14 +47,12 @@ namespace PW.Node
 
 			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
 
-			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { UpdateSwitchMode(); NotifyReload(typeof(PWNodeBiomeBlender)); });
+			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
 
-			Action UpdateBiomeBlender = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-
-			switchList.OnBiomeDataAdded = (unused) => { UpdateBiomeBlender(); };
-			switchList.OnBiomeDataModified = (unused) => { UpdateBiomeBlender(); };
-			switchList.OnBiomeDataRemoved = UpdateBiomeBlender;
-			switchList.OnBiomeDataReordered = UpdateBiomeBlender;
+			switchList.OnBiomeDataAdded = (unused) => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			switchList.OnBiomeDataModified = (unused) => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			switchList.OnBiomeDataRemoved = () => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			switchList.OnBiomeDataReordered = () => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			
 			UpdateSwitchMode();
 		}
@@ -134,15 +132,11 @@ namespace PW.Node
 			if (firstPass)
 				CheckForBiomeSwitchErrors();
 
-			//FIXME do i still need this ?
-			for (int i = 0; i < outputBiomes.Count; i++)
-				SetAnchorVisibility("outputBiomes", error ? PWVisibility.Invisible : PWVisibility.Visible, i);
-			
 			//display popup field to choose the switch source
 			EditorGUI.BeginChangeCheck();
 			{
 				EditorGUIUtility.labelWidth = 80;
-				selectedPWBiomeSwitchMode = EditorGUILayout.Popup("switch field", selectedPWBiomeSwitchMode, biomeSwitchModes);
+				selectedPWBiomeSwitchMode = EditorGUILayout.Popup("switch parameter", selectedPWBiomeSwitchMode, biomeSwitchModes);
 				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedPWBiomeSwitchMode]);
 			}
 			if (EditorGUI.EndChangeCheck())
@@ -169,11 +163,22 @@ namespace PW.Node
 		//no process needed else than assignation, this node only exists for user visual organization.
 		//switch values are collected form BiomeSwitchTree to create a biome tree.
 
+		void AdjustOutputBiomeArraySize()
+		{
+			//we adjust the size of the outputBiomes array to the size of the switchList
+			while (outputBiomes.Count < switchList.Count)
+				outputBiomes.Add(inputBiome, "outputBiome");
+			while (outputBiomes.Count > switchList.Count)
+				outputBiomes.RemoveAt(outputBiomes.Count - 1);
+		}
+
 		public override void OnNodeProcess()
 		{
 			#if UNITY_EDITOR
 				switchList.UpdateBiomeRepartitionPreview();
 			#endif
+
+			AdjustOutputBiomeArraySize();
 
 			Debug.Log("Processing biome switch, count: " + outputBiomes.Count);
 			for (int i = 0; i < outputBiomes.Count; i++)
@@ -182,6 +187,8 @@ namespace PW.Node
 
 		public override void OnNodeProcessOnce()
 		{
+			AdjustOutputBiomeArraySize();
+
 			for (int i = 0; i < outputBiomes.Count; i++)
 				outputBiomes.AssignAt(i, inputBiome, "inputBiome");
 		}

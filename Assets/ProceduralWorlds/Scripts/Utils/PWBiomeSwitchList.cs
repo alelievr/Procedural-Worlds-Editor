@@ -66,8 +66,6 @@ namespace PW.Biomator
 
 		public int			Count { get { return switchDatas.Count; } }
 
-		Rect				previewRect;
-
 		public void OnEnable()
 		{
 			PWGUI = new PWGUIManager();
@@ -162,14 +160,11 @@ namespace PW.Biomator
 				UpdateBiomeRepartitionPreview();
 
 			EditorGUILayout.LabelField("repartition map: (" + localCoveragePercent.ToString("F1") + "%)");
-			Rect tmpRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
-
-			if (Event.current.type == EventType.Repaint)
-				previewRect = tmpRect;
-				
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			
 			previewRect.height = previewTextureHeight;
 			GUILayout.Space(previewTextureHeight);
+
 			PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
 			PWGUI.SetScaleModeForField(-1, ScaleMode.StretchToFill);
 		}

@@ -58,7 +58,7 @@ namespace PW
 				anchorField.ProcessEvent(ref editorEvents);
 			foreach (var anchorField in outputAnchorFields)
 				anchorField.ProcessEvent(ref editorEvents);
-
+			
 			//link anchor event is we release the mouse with a draggingLink.
 			if (editorEvents.isMouseOverAnchor)
 				if (e.rawType == EventType.MouseUp && editorEvents.isDraggingLink)

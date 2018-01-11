@@ -91,9 +91,6 @@ namespace PW.Node
 			if (EditorGUI.EndChangeCheck())
 				fieldUpdate = true;
 			
-			if (fieldUpdate)
-				UpdateTemperatureMap();
-			
 			if (localTemperatureMap != null)
 				PWGUI.Sampler2DPreview(localTemperatureMap as Sampler2D, false, FilterMode.Point);
 
@@ -102,6 +99,9 @@ namespace PW.Node
 				PWGUI.SetGradientForField(2, temperatureGradient);
 				PWGUI.SetDebugForField(2, true);
 			}
+			
+			if (fieldUpdate)
+				UpdateTemperatureMap();
 
 			//TODO: temperature map creation options
 		}
@@ -143,7 +143,7 @@ namespace PW.Node
 					if (waterMultiplier != 0)
 						waterMod = inputBiome.waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
 				}
-				return mapValue + terrainMod + waterMod;
+				return Mathf.Clamp(mapValue + terrainMod + waterMod, minTemperature, maxTemperature);
 			});
 
 			localTemperatureMap.min = minTemperature;

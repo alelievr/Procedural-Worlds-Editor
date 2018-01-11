@@ -33,7 +33,8 @@ namespace PW
 
 			// set the header of the window as draggable:
 			int width = (int) rect.width;
-			Rect dragRect = new Rect(30, 0, width, 20);
+			int padding = 8;
+			Rect dragRect = new Rect(padding, 0, width - padding * 2, 20);
 			
 			Rect debugIconRect = dragRect;
 			int	debugIconSize = 16;

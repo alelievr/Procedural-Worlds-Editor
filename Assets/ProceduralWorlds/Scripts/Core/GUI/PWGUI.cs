@@ -666,7 +666,7 @@ namespace PW.Core
 
 				if (pixelPos.x >= 0 && pixelPos.y >= 0 && pixelPos.x < samp.size && pixelPos.y < samp.size)
 				{
-					if (e.isMouse)
+					if (e.type == EventType.MouseMove)
 						e.Use();
 					EditorGUILayout.LabelField("(" + (int)pixelPos.x + ", " + (int)pixelPos.y + "): " + samp[(int)pixelPos.x, (int)pixelPos.y]);
 				}
@@ -871,8 +871,18 @@ namespace PW.Core
 		//A negative value of fieldIndex will take the objectat the specified index starting from the end
 		public void SetGradientForField(int fieldIndex, Gradient g)
 		{
+			//if the specified index is negative, we set it to all the GUISettings
 			if (fieldIndex < 0)
-				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			{
+				foreach (var setting in settingsStorage)
+				{
+					setting.gradient = g;
+					setting.serializableGradient = (SerializableGradient)g;
+					setting.update = true;
+				}
+				return ;
+			}
+
 			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
@@ -886,8 +896,14 @@ namespace PW.Core
 
 		public void SetDebugForField(int fieldIndex, bool value)
 		{
+			//if the specified index is negative, we set it to all the GUISettings
 			if (fieldIndex < 0)
-				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			{
+				foreach (var setting in settingsStorage)
+					setting.debug = value;
+				return ;
+			}
+
 			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
@@ -899,8 +915,14 @@ namespace PW.Core
 
 		public void SetScaleModeForField(int fieldIndex, ScaleMode mode)
 		{
+			//if the specified index is negative, we set it to all the GUISettings
 			if (fieldIndex < 0)
-				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			{
+				foreach (var setting in settingsStorage)
+					setting.scaleMode = mode;
+				return ;
+			}
+
 			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
@@ -912,8 +934,14 @@ namespace PW.Core
 		
 		public void SetScaleAspectForField(int fieldIndex, float aspect)
 		{
+			//if the specified index is negative, we set it to all the GUISettings
 			if (fieldIndex < 0)
-				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			{
+				foreach (var setting in settingsStorage)
+					setting.scaleAspect = aspect;
+				return ;
+			}
+
 			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
@@ -925,8 +953,14 @@ namespace PW.Core
 		
 		public void SetMaterialForField(int fieldIndex, Material mat)
 		{
+			//if the specified index is negative, we set it to all the GUISettings
 			if (fieldIndex < 0)
-				fieldIndex = fieldIndex % settingsStorage.Count + settingsStorage.Count;
+			{
+				foreach (var setting in settingsStorage)
+					setting.material = mat;
+				return ;
+			}
+
 			if (fieldIndex >= settingsStorage.Count)
 			{
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);

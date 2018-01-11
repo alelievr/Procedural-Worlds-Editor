@@ -96,7 +96,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		MaskEvents();
 
 		//profiling
-		Profiler.BeginSample("[PW] Graph redering");
+		Profiler.BeginSample("[PW] Graph redering (" + e.type + ")");
 
 		Rect pos = position;
 		pos.position = Vector2.zero;
@@ -413,7 +413,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		if (e.type == EventType.ScrollWheel)
 		{
 			graph.scale *= 1 - (e.delta.y / 40f);
-			graph.scale = Mathf.Clamp(graph.scale, .2f, 2);
+			graph.scale = Mathf.Clamp(graph.scale, .15f, 3);
 		}
 
 		//undo and redo

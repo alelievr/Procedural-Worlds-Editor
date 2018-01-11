@@ -56,8 +56,6 @@ namespace PW
 				return ;
 			}
 
-			Debug.Log("set multi-anchor count: " + newCount);
-			
 			var anchorField = anchorFieldDictionary[fieldName];
 
 			if (anchorField.anchors.Count > newCount)
@@ -71,10 +69,12 @@ namespace PW
 					anchorField.CreateNewAnchor();
 			}
 
-			if (newNames != null && newNames.Length != 0)
+			for (int i = 0; i < anchorField.anchors.Count; i++)
 			{
-				for (int i = 0; i < newNames.Length; i++)
+				if (newNames != null && newNames.Length > i)
 					anchorField.anchors[i].name = newNames[i];
+				else
+					anchorField.anchors[i].name = "";
 			}
 		}
 

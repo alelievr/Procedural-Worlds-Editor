@@ -29,7 +29,7 @@ namespace PW
 		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
 		[System.NonSerialized]
-		List< FieldInfo >		undoableFields = new List< FieldInfo >();
+		private List< FieldInfo >			undoableFields = new List< FieldInfo >();
 
 		void LoadAssets()
 		{

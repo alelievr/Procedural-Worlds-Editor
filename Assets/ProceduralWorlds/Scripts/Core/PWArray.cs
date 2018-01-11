@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace PW.Core
 {
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public class PWArray< T > : IEnumerable< T >
 	{
 		

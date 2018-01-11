@@ -3,10 +3,11 @@ using System.Linq;
 using UnityEngine;
 using PW.Node;
 using UnityEditor;
+using System;
 
 namespace PW.Core
 {
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public enum PWAnchorType
 	{
 		None,
@@ -14,7 +15,7 @@ namespace PW.Core
 		Output,
 	}
 
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public enum PWAnchorHighlight
 	{
 		None,
@@ -23,7 +24,7 @@ namespace PW.Core
 		AttachAdd,				//link will be added to anchor links
 	}
 
-	[System.SerializableAttribute]
+	[System.Serializable]
 	public class PWAnchorField
 	{
 		//node instance where the anchor is.
@@ -117,6 +118,11 @@ namespace PW.Core
 			}
 		}
 
+		public override string ToString()
+		{
+			return "{d:" + anchorType + ", node: " + nodeRef + ", field: " + fieldName + "}";
+		}
+
 	#region Anchor style
 		
 		[System.NonSerialized]
@@ -189,15 +195,14 @@ namespace PW.Core
 			//anchor name:
 			string anchorName = name;
 
-			if (!string.IsNullOrEmpty(name) && anchors.Count > 1)
-				anchorName += " #" + index;
+			if (!String.IsNullOrEmpty(anchor.name))
+				anchorName = anchor.name;
 
 			//anchor color:
 			if (anchor.color != new Color(0, 0, 0, 0))
 				GUI.color = anchor.color;
 			else
 				GUI.color = PWColorTheme.GetAnchorColor(anchor.colorSchemeName);
-
 
 			//highlight mode to GUI color:
 			if (graphRef.editorEvents.isDraggingLink || graphRef.editorEvents.isDraggingNewLink)
@@ -216,7 +221,7 @@ namespace PW.Core
 			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);
 			
 			//Draw the anchor name if not null
-			if (!string.IsNullOrEmpty(name))
+			if (!string.IsNullOrEmpty(anchorName))
 			{
 				Rect	anchorNameRect = anchor.rect;
 				Vector2 textSize = GUI.skin.label.CalcSize(new GUIContent(anchorName));
@@ -265,6 +270,10 @@ namespace PW.Core
 
 			renderRect.y += offset;
 
+			// if (nodeRef.GetType() == typeof(PWNodeBiomeSwitch))
+				// if (anchorType == PWAnchorType.Output)
+					// Debug.Log("rendering output anchors: " + anchors.Count + ", hashCode: " + GetHashCode());
+
 			foreach (var anchor in anchors)
 			{
 				//render anchor if visible and linkable
@@ -307,7 +316,7 @@ namespace PW.Core
 		}
 
 		//disable anchors which are unlinkable with the anchor in parameter
-		public void DisableIfUnlinkable(PWAnchor anchorToLink	)
+		public void DisableIfUnlinkable(PWAnchor anchorToLink)
 		{
 			foreach (var anchor in anchors)
 			{
