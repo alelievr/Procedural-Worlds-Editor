@@ -659,6 +659,7 @@ namespace PW.Core
 				Vector2 pixelPos = e.mousePosition - fieldSettings.savedRect.position;
 
 				pixelPos *= samp.size / fieldSettings.savedRect.width;
+				pixelPos.y = samp.size - pixelPos.y;
 
 				EditorGUILayout.LabelField("Sampler2D min: " + samp.min + ", max: " + samp.max);
 

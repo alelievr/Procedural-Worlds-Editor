@@ -7,40 +7,10 @@ using System;
 using System.Linq;
 using UnityEditor;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Node
 {
-	[System.SerializableAttribute]
-	public class BiomeFieldSwitchData
-	{
-		public float				min;
-		public float				max;
-		public string				name;
-		public float				absoluteMax; //max value in the map
-		public float				absoluteMin; //min value in the map
-		public SerializableColor	color;
-
-		public BiomeFieldSwitchData(Sampler samp)
-		{
-			UpdateSampler(samp);
-			name = "swampland";
-			min = 70;
-			max = 90;
-			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f, 1);
-		}
-
-		public void UpdateSampler(Sampler samp)
-		{
-			if (samp != null)
-			{
-				absoluteMax = samp.max;
-				absoluteMin = samp.min;
-			}
-		}
-
-		public BiomeFieldSwitchData() : this(null) {}
-	}
-
 	public class PWNodeBiomeSwitch : PWNode
 	{
 
@@ -51,8 +21,8 @@ namespace PW.Node
 		[PWOffset(53, 16)]
 		public PWArray< BiomeData >	outputBiomes = new PWArray< BiomeData >();
 
-		public PWBiomeSwitchMode			switchMode;
-		public List< BiomeFieldSwitchData >	switchDatas = new List< BiomeFieldSwitchData >();
+		public PWBiomeSwitchMode		switchMode;
+		public List< BiomeSwitchData >	switchDatas = new List< BiomeSwitchData >();
 
 		ReorderableList			switchList;
 		string[]				biomeSwitchModes;
@@ -79,14 +49,14 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
-			switchList = new ReorderableList(switchDatas, typeof(BiomeFieldSwitchData), true, true, true, true);
+			switchList = new ReorderableList(switchDatas, typeof(BiomeSwitchData), true, true, true, true);
 
 			switchList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
 
 			delayedChanges.BindCallback(delayedUpdateKey, (elem) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
 
             switchList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-				BiomeFieldSwitchData elem = switchDatas[index];
+				BiomeSwitchData elem = switchDatas[index];
 				
                 rect.y += 2;
 				int		floatFieldSize = 70;
@@ -135,7 +105,7 @@ namespace PW.Node
 			};
 
 			switchList.onAddCallback += (ReorderableList l) => {
-				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
+				switchDatas.Add(new BiomeSwitchData(currentSampler));
 				delayedChanges.UpdateValue(delayedUpdateKey, null);
 				UpdateSwitchMode();
 			};
@@ -150,7 +120,7 @@ namespace PW.Node
 			};
 
 			if (switchDatas.Count == 0)
-				switchDatas.Add(new BiomeFieldSwitchData(currentSampler));
+				switchDatas.Add(new BiomeSwitchData(currentSampler));
 			
 			UpdateSwitchMode();
 		}

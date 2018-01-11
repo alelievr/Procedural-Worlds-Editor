@@ -6,13 +6,15 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeTemperature : PWNode {
+	public class PWNodeBiomeTemperature : PWNode
+	{
 
 		[PWInput("biome datas")]
 		public BiomeData		inputBiome;
-		[PWInput("temperature map")]
-		[PWNotRequired]
+		[PWInput("temperature map"), PWNotRequired]
 		public Sampler			temperatureMap;
+
+		Sampler					localTemperatureMap;
 		
 		[PWOutput]
 		public BiomeData		outputBiome;
@@ -28,14 +30,25 @@ namespace PW.Node
 		[SerializeField]
 		float					averageTemperature = 17;
 
+		[SerializeField]
 		Gradient				temperatureGradient;
 		bool					fieldUpdate = false;
 		[SerializeField]
 		bool					internalTemperatureMap = true;
 
+		[SerializeField]
+		float					minTemperatureMapInput;
+		[SerializeField]
+		float					maxTemperatureMapInput;
+
 		public override void OnNodeCreation()
 		{
 			name = "Temperature node";
+		}
+
+		public override void OnNodeEnable()
+		{
+			UpdateTemperatureMap();
 
 			temperatureGradient = PWUtils.CreateGradient(
 				new KeyValuePair< float, Color >(0f, Color.blue),
@@ -46,11 +59,6 @@ namespace PW.Node
 			);
 		}
 
-		public override void OnNodeEnable()
-		{
-			UpdateTemperatureMap();
-		}
-
 		public override void OnNodeGUI()
 		{
 			fieldUpdate = false;
@@ -58,24 +66,36 @@ namespace PW.Node
 			GUILayout.Space(GUI.skin.label.lineHeight * 3);
 
 			EditorGUI.BeginChangeCheck();
-			terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
-			waterMultiplier = PWGUI.Slider(new GUIContent("water multiplier: "), waterMultiplier, -1, 1);
-
-			EditorGUILayout.LabelField("temperature limits:");
-			EditorGUILayout.BeginHorizontal();
-			EditorGUIUtility.labelWidth = 30;
-			minTemperature = EditorGUILayout.FloatField("from", minTemperature);
-			maxTemperature = EditorGUILayout.FloatField("to", maxTemperature);
-			EditorGUILayout.EndHorizontal();
-			EditorGUIUtility.labelWidth = 120;
-			averageTemperature = EditorGUILayout.FloatField("average temperature", averageTemperature);
+			{
+				terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
+				waterMultiplier = PWGUI.Slider(new GUIContent("water multiplier: "), waterMultiplier, -1, 1);
+	
+				EditorGUILayout.LabelField("temperature limits:");
+				EditorGUILayout.BeginHorizontal();
+				{
+					EditorGUIUtility.labelWidth = 30;
+					minTemperature = EditorGUILayout.FloatField("from", minTemperature);
+					maxTemperature = EditorGUILayout.FloatField("to", maxTemperature);
+				}
+				EditorGUILayout.EndHorizontal();
+				EditorGUIUtility.labelWidth = 120;
+				if (internalTemperatureMap)
+					averageTemperature = EditorGUILayout.FloatField("average temperature", averageTemperature);
+				else
+				{
+					EditorGUILayout.LabelField("Input temperature map range");
+					using (new DefaultGUISkin())
+						EditorGUILayout.MinMaxSlider(ref minTemperatureMapInput, ref maxTemperatureMapInput, minTemperature, maxTemperature);
+				}
+			}
 			if (EditorGUI.EndChangeCheck())
 				fieldUpdate = true;
-				
+			
 			if (fieldUpdate)
 				UpdateTemperatureMap();
 			
-			PWGUI.Sampler2DPreview(temperatureMap as Sampler2D, false, FilterMode.Point);
+			if (localTemperatureMap != null)
+				PWGUI.Sampler2DPreview(localTemperatureMap as Sampler2D, false, FilterMode.Point);
 
 			if (fieldUpdate)
 			{
@@ -102,15 +122,19 @@ namespace PW.Node
 
 		void UpdateTemperatureMap()
 		{
-			//create a new flat temperature map if not exists
-			if (temperatureMap == null || temperatureMap.size != chunkSize || temperatureMap.step != step)
-				temperatureMap = new Sampler2D(chunkSize, step);
+			if (localTemperatureMap == null)
+				return ;
 			
-			(temperatureMap as Sampler2D).Foreach((x, y, val) => {
+			var inputTemperatureMap = temperatureMap as Sampler2D;
+
+			(localTemperatureMap as Sampler2D).Foreach((x, y, val) => {
 				float	terrainMod = 0;
 				float	waterMod = 0;
 				float	temperatureRange = (maxTemperature - minTemperature);
-				float	mapValue = (internalTemperatureMap) ? averageTemperature : val;
+				float	mapValue = averageTemperature;
+
+				if (!internalTemperatureMap)
+					mapValue = Mathf.Lerp(Mathf.Max(minTemperature, minTemperatureMapInput), Mathf.Min(maxTemperature, maxTemperatureMapInput), inputTemperatureMap[x, y]);
 
 				if (inputBiome != null)
 				{
@@ -122,16 +146,35 @@ namespace PW.Node
 				return mapValue + terrainMod + waterMod;
 			});
 
-			temperatureMap.min = minTemperature;
-			temperatureMap.max = maxTemperature;
+			localTemperatureMap.min = minTemperature;
+			localTemperatureMap.max = maxTemperature;
+		}
+
+		void CreateTemperatureMapIfNotExists()
+		{
+			if (temperatureMap == null)
+			{
+				localTemperatureMap = new Sampler2D(chunkSize, step);
+				return ;
+			}
+
+			if (localTemperatureMap == null || localTemperatureMap.NeedResize(chunkSize, step))
+			{
+				localTemperatureMap = temperatureMap.Clone(localTemperatureMap);
+				return ;
+			}
 		}
 
 		public override void OnNodeProcess()
 		{
+			CreateTemperatureMapIfNotExists();
+
+			UpdateTemperatureMap();
+
 			if (inputBiome != null)
 			{
-				inputBiome.temperature = temperatureMap as Sampler2D;
-				inputBiome.temperature3D = temperatureMap as Sampler3D;
+				inputBiome.temperature = localTemperatureMap as Sampler2D;
+				inputBiome.temperature3D = localTemperatureMap as Sampler3D;
 			}
 
 			outputBiome = inputBiome;

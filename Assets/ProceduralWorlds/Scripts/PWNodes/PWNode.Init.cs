@@ -332,9 +332,15 @@ namespace PW
 		void LinkCreatedCallback(PWNodeLink link)
 		{
 			if (link.fromNode == this)
+			{
 				link.fromAnchor.AddLink(link);
+				OnNodeAnchorLink(link.fromAnchor.fieldName, link.fromAnchor.fieldIndex);
+			}
 			else if (link.toNode == this)
+			{
 				link.toAnchor.AddLink(link);
+				OnNodeAnchorLink(link.toAnchor.fieldName, link.toAnchor.fieldIndex);
+			}
 			
 			ResetUnlinkableAnchors();
 		}

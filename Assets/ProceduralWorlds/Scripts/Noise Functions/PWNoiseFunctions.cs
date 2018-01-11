@@ -14,7 +14,7 @@ namespace PW
 			if (alloc)
 				ret = new Sampler2D(ret.size, ret.step);
 			ret.Foreach((x, y, val) => {
-				return Mathf.Lerp(min, max, samp[x, y]);
+				return Mathf.Lerp(min, max, Mathf.InverseLerp(samp.min, samp.max, samp[x, y]));
 			});
 			ret.min = min;
 			ret.max = max;

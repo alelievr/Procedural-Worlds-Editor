@@ -73,10 +73,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			blendMap = new BiomeBlendPoint[size * size];
+			this.step = (step == -1) ? this.step : step;
 		}
 		
 		public void SetFirstBiomeId(int x, int y, short id)
@@ -121,10 +122,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			blendMap = new BiomeBlendPoint[size * size * size];
+			this.step = (step == -1) ? this.step : step;
 		}
 
 		public BiomeBlendPoint this[int x, int y, int z]

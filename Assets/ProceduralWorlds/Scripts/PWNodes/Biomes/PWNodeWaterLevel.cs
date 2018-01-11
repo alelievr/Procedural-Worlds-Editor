@@ -41,6 +41,10 @@ namespace PW.Node
 
 			outputBiome.isWaterless = false;
 			outputBiome.biomeTreeStartPoint = this;
+
+			delayedChanges.BindCallback(delayedUpdateKey, (unused) => {
+				NotifyReload();
+			});
 		}
 
 		public override void OnNodeDisable()

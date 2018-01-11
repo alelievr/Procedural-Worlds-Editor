@@ -25,7 +25,12 @@ namespace PW.Core
 		public float		max = 1;
 
 		public abstract Sampler Clone(Sampler reuseObject);
-		public abstract void Resize(int size);
+		public abstract void Resize(int size, float step = -1);
+
+		public bool NeedResize(int size, float step)
+		{
+			return (this.size != size || this.step != step);
+		}
 	}
 
 	/*
@@ -44,7 +49,7 @@ namespace PW.Core
 		public float At(int x, int y, bool normalized)
 		{
 			if (normalized)
-				return (map[x, y] - min) / (max - min);
+				return Mathf.InverseLerp(min, max, map[x, y]);
 			else
 				return map[x, y];
 		}
@@ -56,10 +61,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			this.map = new float[size, size];
+			this.step = (step == -1) ? this.step : step;
 		}
 
 		public void Foreach(Func< int, int, float > callback)
@@ -131,10 +137,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			this.map = new float[size, size, size];
+			this.step = (step == -1) ? this.step : step;
 		}
 
 		public float this[int x, int y, int z]

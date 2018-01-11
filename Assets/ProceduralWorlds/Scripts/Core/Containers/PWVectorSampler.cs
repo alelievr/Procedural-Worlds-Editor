@@ -17,10 +17,11 @@ namespace PW.Core
 			Resize(size);
 		}
 		
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.map = new Vector2[size, size];
 			this.size = size;
+			this.step = (step == -1) ? this.step : step;
 		}
 		
 		public override Sampler Clone(Sampler reuseObject)
@@ -52,10 +53,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			this.map = new Vector3[size, size];
+			this.step = (step == -1) ? this.step : step;
 		}
 		
 		public override Sampler Clone(Sampler reuseObject)
@@ -88,10 +90,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			this.map = new Vector2[size, size, size];
+			this.step = (step == -1) ? this.step : step;
 		}
 		
 		public override Sampler Clone(Sampler reuseObject)
@@ -124,10 +127,11 @@ namespace PW.Core
 			Resize(size);
 		}
 
-		public override void Resize(int size)
+		public override void Resize(int size, float step = -1)
 		{
 			this.size = size;
 			map = new Vector3[size, size, size];
+			this.step = (step == -1) ? this.step : step;
 		}
 		
 		public override Sampler Clone(Sampler reuseObject)
