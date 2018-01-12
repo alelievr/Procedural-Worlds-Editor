@@ -205,7 +205,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		SaveGraph();
 
 		if (unloadAsset)
-			Resources.UnloadAsset(graph);
+			Resources.UnloadUnusedAssets();
 
 		if (OnGraphChanged != null)
 			OnGraphChanged(null);

@@ -36,6 +36,9 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		//draw the node editor
 		base.OnGUI();
+		
+		if (graph == null)
+			return ;
 
 		layout.Render2ResizablePanel(this, position);
 	}

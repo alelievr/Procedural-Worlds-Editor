@@ -8,12 +8,13 @@ using Random = UnityEngine.Random;
 
 namespace PW.Editor
 {
+	[System.Serializable]
 	public class PWGraphLayout
 	{
 		[SerializeField]
-		HorizontalSplitView				h1;
+		HorizontalSplitView				h1 = new HorizontalSplitView();
 		[SerializeField]
-		HorizontalSplitView				h2;
+		HorizontalSplitView				h2 = new HorizontalSplitView();
 
 		//Styles:
 		Texture2D	resizeHandleTexture = null;
@@ -29,9 +30,6 @@ namespace PW.Editor
 
 		public void LoadStyles(Rect position)
 		{
-			h1 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.85f, position.width / 2, position.width - 4);
-			h2 = new HorizontalSplitView(resizeHandleTexture, position.width * 0.25f, 4, position.width / 2);
-			
 			//load style: to move
 			resizeHandleColor = EditorGUIUtility.isProSkin
 				? new Color32(56, 56, 56, 255)

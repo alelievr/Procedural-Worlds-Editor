@@ -101,14 +101,14 @@ namespace PW.Core
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
 				"Biome switch", typeof(PWNodeBiomeSwitch),
-				"Biome Binder", typeof(PWNodeBiomeBinder),
 				"Biome blender", typeof(PWNodeBiomeBlender),
 				"Biome temperature map", typeof(PWNodeBiomeTemperature),
 				"Biome wetness map", typeof(PWNodeBiomeWetness)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Clouds,
 				"Biome surface", typeof(PWNodeBiomeSurface),
-				"Biome terrain", typeof(PWNodeBiomeTerrain)
+				"Biome terrain", typeof(PWNodeBiomeTerrain),
+				"Biome Binder", typeof(PWNodeBiomeBinder)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.Concrete,
 				"Terrain detail", typeof(PWNodeTerrainDetail)

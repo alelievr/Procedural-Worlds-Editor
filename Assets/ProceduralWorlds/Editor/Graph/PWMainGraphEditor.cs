@@ -102,15 +102,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		if (graph == null)
 			return ;
 
-		//prevent popup events to influence the rest of the GUI
-		//TODO: remove this old popup code
-		/*PWPopup.eventType = e.type;
-		PWGUIManager.editorWindowRect = position;
-		if (PWPopup.mouseAbove && e.type != EventType.Repaint && e.type != EventType.Layout)
-			e.type = EventType.Ignore;
-		if (e.type == EventType.Layout)
-			PWPopup.ClearAll();*/
-		
 		if (!mainGraph.presetChoosed)
 		{
 			DrawPresetPanel();
@@ -125,10 +116,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		}
 
 		layout.Render2ResizablePanel(this, position);
-
-		//render all opened popups (at the end cause the have to be above other infos)
-		//TODO: the new popup system
-		// PWPopup.RenderAll(ref editorNeedRepaint);
     }
 
 #endregion

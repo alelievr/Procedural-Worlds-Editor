@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[System.SerializableAttribute]
+[System.Serializable]
 public class HorizontalSplitView
 {
 
-	[SerializeField]
 	public float	handlePosition;
-	[SerializeField]
 	public int		handleWidth = 4;
 	[SerializeField]
 	int				internHandlerPosition;
@@ -29,13 +27,6 @@ public class HorizontalSplitView
 	bool			first = true;
 
 	Event			e { get { return Event.current; } }
-
-	public HorizontalSplitView(Texture2D handleTex, float hP, float min, float max)
-	{
-		handlePosition = hP;
-		minWidth = min;
-		maxWidth = max;
-	}
 
 	public Rect Begin()
 	{

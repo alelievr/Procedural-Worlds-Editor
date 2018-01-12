@@ -287,7 +287,7 @@ namespace PW
 		{
 			foreach (var anchor in anchorFields)
 				anchor.OnDisable();
-
+			
 			if (debug)
 				Debug.Log("Node " + GetType() + " Disable");
 			

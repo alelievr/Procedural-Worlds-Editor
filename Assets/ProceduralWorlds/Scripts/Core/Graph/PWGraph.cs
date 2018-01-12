@@ -31,8 +31,11 @@ namespace PW.Core
 
 
         //public internal graph datas:
+		//returns all nodes in the graph (excluding input and output nodes)
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
+		//returns all nodes
+		public IEnumerable< PWNode >			allNodes { get { yield return inputNode; yield return outputNode; foreach (var node in nodes) yield return node; } }
 		
 		[SerializeField] private int			_seed;
 		public int								seed
@@ -139,6 +142,8 @@ namespace PW.Core
 		
 		//useful variables:
 		public bool								initialized = false;
+		[System.NonSerialized]
+		public bool								readyToProcess = false;
 
 
 		//public delegates:
@@ -180,7 +185,7 @@ namespace PW.Core
 		{
 			//initialize the graph pan position
 			panPosition = Vector2.zero;
-	
+
 			realMode = false;
 			// presetChoosed = false;
 			
@@ -188,7 +193,7 @@ namespace PW.Core
 			chunkSize = 16;
 			step = 1;
 			maxStep = 4;
-			name = "New ProceduralWorld";
+			name = "New Procedural Graph";
 			
 			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(50, 0));
 			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(-100, 0));
@@ -201,7 +206,7 @@ namespace PW.Core
 			//check if the object have been initialized, if not, quit.
 			if (!initialized)
 				return ;
-
+			
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnPostLinkCreated += LinkChangedCallback;
@@ -211,7 +216,7 @@ namespace PW.Core
 			OnAllNodeReady += NodeReadyCallback;
 
 			graphProcessor.Initialize();
-			
+
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
@@ -250,6 +255,8 @@ namespace PW.Core
 			
 			//Build compute order list
 			UpdateComputeOrder();
+
+			readyToProcess = true;
 		}
 
 		//must be called after a Process() to get back datas
@@ -311,6 +318,11 @@ namespace PW.Core
 
 		public float Process()
 		{
+			if (!readyToProcess)
+			{
+				Debug.LogError("Graph not ready to process !");
+			}
+			
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			return graphProcessor.Process(this);
 		}

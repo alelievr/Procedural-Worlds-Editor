@@ -21,8 +21,6 @@ namespace PW.Node
 	
 		string propUpdateKey = "PWNodeBiome";
 
-		readonly string defaultNewGraphPath = "Assets/ProceduralWorlds/Resources/Biomes/biome.asset";
-
 		public override void OnNodeCreation()
 		{
 			name = "your node name";
@@ -41,16 +39,6 @@ namespace PW.Node
 			{
 				if (GUILayout.Button("Open " + biomeGraph.name))
 					AssetDatabase.OpenAsset(biomeGraph);
-			}
-			else
-			{
-				if (GUILayout.Button("Create new Biome Graph"))
-				{
-					biomeGraph = PWGraphBuilder.NewGraph< PWBiomeGraph >().GetGraph() as PWBiomeGraph;
-					string path = AssetDatabase.GenerateUniqueAssetPath(defaultNewGraphPath);
-					AssetDatabase.CreateAsset(biomeGraph, path);
-					AssetDatabase.Refresh();
-				}
 			}
 		}
 
@@ -73,7 +61,12 @@ namespace PW.Node
 				return ;
 			}
 
+			//TODO: set inputs to biome graph
+			biomeGraph.SetInput("inputBiomeData", inputBiomeData);
+
 			biomeGraph.Process();
+
+			//TODO: get output from biome graph
 		}
 		
 	}
