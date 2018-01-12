@@ -19,13 +19,13 @@ namespace PW
 			string	debugNodeName = "debug";
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodePerlinNoise2D >(perlinNodeName)
-				.NewNode< PWNodeDebugLog >(debugNodeName)
+				.NewNode< PWNodeDebugInfo >(debugNodeName)
 				.Link(perlinNodeName, debugNodeName)
 				.Execute()
 				.GetGraph();
 			
 			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
-			PWNodeDebugLog debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugLog;
+			PWNodeDebugInfo debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugInfo;
 	
 			Assert.That(perlinNode != null, "Perlin node not found in the graph (using FindNodeByName)");
 			Assert.That(debugNode != null, "Debug node not found in the graph (using FindNodeByName)");

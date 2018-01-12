@@ -55,7 +55,7 @@ namespace PW.Core
             typeof(PWNodeAdd), typeof(PWNodeCurve),
 
 			//Debug:
-            typeof(PWNodeDebugLog),
+            typeof(PWNodeDebugInfo),
 
 			//Noises and masks:
             typeof(PWNodeCircleNoiseMask), typeof(PWNodePerlinNoise2D),
@@ -114,7 +114,7 @@ namespace PW.Core
 				"Terrain detail", typeof(PWNodeTerrainDetail)
 			),
 			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Debug", PWColorSchemeName.PeterRiver,
-				"DebugLog", typeof(PWNodeDebugLog)
+				"DebugLog", typeof(PWNodeDebugInfo)
 			)
 		};
 

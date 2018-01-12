@@ -17,14 +17,14 @@ namespace PW
 		{
 			var builder = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
-				.NewNode(typeof(PWNodeDebugLog), "debug")
+				.NewNode(typeof(PWNodeDebugInfo), "debug")
 				.Link("perlin", "debug");
 	
 			//list of the expected created commands
 			List< PWGraphCommand > expectedCommands = new List< PWGraphCommand >()
 			{
 				new PWGraphCommand(typeof(PWNodePerlinNoise2D), "perlin"),
-				new PWGraphCommand(typeof(PWNodeDebugLog), "debug"),
+				new PWGraphCommand(typeof(PWNodeDebugInfo), "debug"),
 				new PWGraphCommand("perlin", "debug"),
 			};
 	

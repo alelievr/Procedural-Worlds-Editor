@@ -82,9 +82,14 @@ namespace PW.Node
 
 			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
 			{
-				foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
-					if (biomeCoverageKP.Value > 0)
-						EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+				if (biomeData != null && biomeData.biomeTree != null)
+				{
+					foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
+						if (biomeCoverageKP.Value > 0)
+							EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+				}
+				else
+					EditorGUILayout.LabelField("Null biome data/biome tree");
 				//TODO: exloit the biome switch tree datas
 			}
 		}

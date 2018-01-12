@@ -876,6 +876,9 @@ namespace PW.Core
 			{
 				foreach (var setting in settingsStorage)
 				{
+					if (setting.gradient == g)
+						continue ;
+					
 					setting.gradient = g;
 					setting.serializableGradient = (SerializableGradient)g;
 					setting.update = true;
@@ -888,6 +891,9 @@ namespace PW.Core
 				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
 				return ;
 			}
+
+			if (settingsStorage[fieldIndex].gradient == g)
+				return ;
 
 			settingsStorage[fieldIndex].gradient = g;
 			settingsStorage[fieldIndex].serializableGradient = (SerializableGradient)g;
@@ -968,6 +974,25 @@ namespace PW.Core
 			}
 
 			settingsStorage[fieldIndex].material = mat;
+		}
+		
+		public void SetUpdateForField(int fieldIndex, bool update)
+		{
+			//if the specified index is negative, we set it to all the GUISettings
+			if (fieldIndex < 0)
+			{
+				foreach (var setting in settingsStorage)
+					setting.update = update;
+				return ;
+			}
+
+			if (fieldIndex >= settingsStorage.Count)
+			{
+				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
+				return ;
+			}
+
+			settingsStorage[fieldIndex].update = update;
 		}
 
 	#endregion

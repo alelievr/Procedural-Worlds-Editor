@@ -23,7 +23,7 @@ namespace PW.Node
 
 		public override void OnNodeCreation()
 		{
-			name = "your node name";
+			name = "Biome";
 		}
 
 		public override void OnNodeEnable()
@@ -50,7 +50,7 @@ namespace PW.Node
 				return ;
 			}
 			
-			biomeGraph.ProcessOnce();
+			// biomeGraph.ProcessOnce();
 		}
 
 		public override void OnNodeProcess()
@@ -62,9 +62,10 @@ namespace PW.Node
 			}
 
 			//TODO: set inputs to biome graph
-			biomeGraph.SetInput("inputBiomeData", inputBiomeData);
+			// biomeGraph.SetInput("inputBiomeData", inputBiomeData);
 
-			biomeGraph.Process();
+			//NOPE: don't process the biome graph here, just store it until we need it !
+			// biomeGraph.Process();
 
 			//TODO: get output from biome graph
 		}

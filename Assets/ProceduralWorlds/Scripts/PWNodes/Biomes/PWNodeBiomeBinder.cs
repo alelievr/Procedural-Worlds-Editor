@@ -66,11 +66,10 @@ namespace PW.Node
 			//TODO: preview the modified terrain
 		}
 
-		public override bool OnNodeAnchorLink(string prop, int index)
+		public override void OnNodeAnchorLink(string prop, int index)
 		{
 			if (prop == "inputBiome" && outputBiome != null)
 				outputBiome.biomeDataReference = inputBiome;
-			return true;
 		}
 
 		public override void OnNodeProcess()

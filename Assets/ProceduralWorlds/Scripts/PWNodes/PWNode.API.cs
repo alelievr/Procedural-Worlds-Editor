@@ -6,13 +6,17 @@ using PW.Core;
 
 namespace PW
 {
-	public partial class PWNode {
+	public partial class PWNode
+	{
 
 		PWAnchor				GetAnchorFromField(string fieldName, int index = 0)
 		{
 			if (anchorFieldDictionary.ContainsKey(fieldName))
-				if (anchorFieldDictionary[fieldName].anchors.Count < index)
-					return anchorFieldDictionary[fieldName].anchors[index];
+			{
+				var anchorField = anchorFieldDictionary[fieldName];
+				if (index < anchorField.anchors.Count)
+					return anchorField.anchors[index];
+			}
 			return null;
 		}
 

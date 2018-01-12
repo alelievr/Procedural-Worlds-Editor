@@ -114,7 +114,6 @@ public partial class PWGraphEditor
 
 	void OnNodeAddedCallback(PWNode node)
 	{
-		Debug.Log("adding node " + node + " to graph " + graph);
 		AssetDatabase.AddObjectToAsset(node, graph);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();

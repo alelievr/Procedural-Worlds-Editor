@@ -5,7 +5,8 @@ using UnityEngine;
 namespace PW.Core
 {
 	[System.Serializable]
-	public class PWNodeLinkTable : ISerializationCallbackReceiver {
+	public class PWNodeLinkTable : ISerializationCallbackReceiver
+	{
 	
 		[System.Serializable]
 		public class LinkTable : SerializableDictionary< string, PWNodeLink > {}
@@ -14,6 +15,8 @@ namespace PW.Core
 	
 		[SerializeField]
 		LinkTable		linkTable = new LinkTable();
+
+		bool			debug = false;
 	
 		//to be called, fmorAnchor and toAnchor fields in PWNodeLink must be valid
 		public void				AddLink(PWNodeLink link)
@@ -49,12 +52,14 @@ namespace PW.Core
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
-			Debug.Log("after serialization: dict keys: " + linkTable.Count);
+			if (debug)
+				Debug.Log("after serialization: dict keys: " + linkTable.Count);
 		}
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
-			Debug.Log("Before serialization: dict keys: " + linkTable.Count);
+			if (debug)
+				Debug.Log("Before serialization: dict keys: " + linkTable.Count);
 		}
 
 		public IEnumerable< PWNodeLink > GetLinks()

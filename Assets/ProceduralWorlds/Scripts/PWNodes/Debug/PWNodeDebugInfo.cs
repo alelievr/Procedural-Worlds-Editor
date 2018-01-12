@@ -5,7 +5,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeDebugLog : PWNode {
+	public class PWNodeDebugInfo : PWNode
+	{
 	
 		[PWInput]
 		public object		obj;
@@ -16,7 +17,7 @@ namespace PW.Node
 
 		public override void OnNodeCreation()
 		{
-			name = "Debug log node";
+			name = "Debug Info";
 			renamable = true;
 			obj = "null";
 		}

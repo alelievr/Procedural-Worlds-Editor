@@ -131,8 +131,6 @@ namespace PW.Core
 					//TODO: bake this abomination
 					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 
-					Debug.Log("processing array link from " + link.fromNode + " to " + link.toNode + ", value: " + localVal + " : " + link.fromAnchor.fieldIndex);
-
 					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
 				}
 

@@ -11,7 +11,7 @@ namespace PW.Node
 	{
 
 		[PWInput]
-		public PWArray< object >			inputs = new PWArray< object >();
+		public PWArray< object >	inputs = new PWArray< object >();
 
 		[PWOutput("Terrain modifiers")]
 		public BiomeTerrain		outputBiomeTerrain = new BiomeTerrain();
@@ -20,11 +20,14 @@ namespace PW.Node
 		int						listRequiredInputCout = 0;
 		[SerializeField]
 		int						lastRequiredInputCount;
-	
+
 		public override void OnNodeCreation()
 		{
 			name = "Biome Terrain";
-
+		}
+	
+		public override void OnNodeEnable()
+		{
 			modifierList = new ReorderableList(outputBiomeTerrain.terrainModifiers, typeof(BiomeTerrainModifer), true, true, true, true);
 
 			float	lh = EditorGUIUtility.singleLineHeight;

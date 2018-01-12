@@ -8,10 +8,10 @@ namespace PW.Node
 {
 	public class PWNodeTexture2D : PWNode {
 
-		[PWOutput("tex2D")]
+		[PWOutput("Texture 2D")]
 		public Texture2D		outputTexture;
 
-		[PWOutput("mat")]
+		[PWOutput("Material")]
 		public Material			outputMaterial;
 
 		[SerializeField]
@@ -37,7 +37,7 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(EditorGUIUtility.singleLineHeight);
+			GUILayout.Space(EditorGUIUtility.singleLineHeight * 2 + 4);
 			outputTexture = EditorGUILayout.ObjectField(outputTexture, typeof(Texture2D), false) as Texture2D;
 			EditorGUI.BeginChangeCheck();
 			{

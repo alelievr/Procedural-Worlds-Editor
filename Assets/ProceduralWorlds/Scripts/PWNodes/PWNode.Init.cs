@@ -307,9 +307,6 @@ namespace PW
 		{
 			//CreateLink will raise the OnLinkCreated event in the graph and create the link
 			graphRef.SafeCreateLink(anchor);
-
-			//update canWork bool
-			UpdateWorkStatus();
 		}
 
 		void AnchorUnlinkedCallback(PWAnchor anchor)
@@ -350,6 +347,9 @@ namespace PW
 			}
 			
 			ResetUnlinkableAnchors();
+
+			//update canWork bool
+			UpdateWorkStatus();
 		}
 
 		void NodeRemovedCallback(PWNode node)

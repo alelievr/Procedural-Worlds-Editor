@@ -180,7 +180,6 @@ namespace PW.Node
 
 			AdjustOutputBiomeArraySize();
 
-			Debug.Log("Processing biome switch, count: " + outputBiomes.Count);
 			for (int i = 0; i < outputBiomes.Count; i++)
 				outputBiomes.AssignAt(i, inputBiome, "inputBiome");
 		}

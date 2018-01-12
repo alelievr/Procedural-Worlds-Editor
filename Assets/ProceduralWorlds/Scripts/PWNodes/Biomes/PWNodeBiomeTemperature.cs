@@ -92,32 +92,39 @@ namespace PW.Node
 				fieldUpdate = true;
 			
 			if (localTemperatureMap != null)
-				PWGUI.Sampler2DPreview(localTemperatureMap as Sampler2D, false, FilterMode.Point);
-
-			if (fieldUpdate)
 			{
+				PWGUI.Sampler2DPreview(localTemperatureMap as Sampler2D, false, FilterMode.Point);
 				PWGUI.SetGradientForField(2, temperatureGradient);
 				PWGUI.SetDebugForField(2, true);
 			}
 			
 			if (fieldUpdate)
+			{
+				PWGUI.SetUpdateForField(2, true);
 				UpdateTemperatureMap();
+				Debug.Log("update temperature");
+			}
 
 			//TODO: temperature map creation options
 		}
 
-		public override bool OnNodeAnchorLink(string prop, int index)
+		public override void OnNodeAnchorLink(string prop, int index)
 		{
 			if (prop == "temperatureMap")
+			{
 				internalTemperatureMap = false;
-			
-			return true;
+				UpdateTemperatureMap();
+			}
 		}
 		
 		public override void OnNodeAnchorUnlink(string prop, int index)
 		{
 			if (prop == "temperatureMap")
+			{
 				internalTemperatureMap = true;
+				temperatureMap = null;
+				UpdateTemperatureMap();
+			}
 		}
 
 		void UpdateTemperatureMap()
@@ -167,6 +174,7 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
+			Debug.Log("Process !");
 			CreateTemperatureMapIfNotExists();
 
 			UpdateTemperatureMap();

@@ -319,9 +319,7 @@ namespace PW.Core
 		public float Process()
 		{
 			if (!readyToProcess)
-			{
-				Debug.LogError("Graph not ready to process !");
-			}
+				return -1;
 			
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			return graphProcessor.Process(this);
@@ -411,7 +409,7 @@ namespace PW.Core
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
-		void		GraphStructureChangedCallback() { UpdateComputeOrder(); Process(); }
+		void		GraphStructureChangedCallback() { Debug.Log("Process requetsed"); UpdateComputeOrder(); Process(); }
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }

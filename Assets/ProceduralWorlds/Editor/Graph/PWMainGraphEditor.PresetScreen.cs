@@ -94,7 +94,7 @@ public partial class PWMainGraphEditor : PWGraphEditor {
 				DrawPresetLine(preset2DTopDownViewTexture, "2D top down procedural terrain", () => {
 					PWGraphBuilder.FromGraph(graph)
 						.NewNode< PWNodePerlinNoise2D >("perlin")
-						.NewNode< PWNodeDebugLog >("debug")
+						.NewNode< PWNodeDebugInfo >("debug")
 						.Link("perlin", "debug")
 						.Execute();
 					mainGraph.outputType = PWGraphTerrainType.TopDown2D;

@@ -17,7 +17,7 @@ namespace PW
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
 				.NewNode(typeof(PWNodeCurve), "curve")
-				.NewNode(typeof(PWNodeDebugLog), "debug")
+				.NewNode(typeof(PWNodeDebugInfo), "debug")
 				.Link("perlin", "curve")
 				.Link("curve", "debug")
 				.Execute()
@@ -25,7 +25,7 @@ namespace PW
 			
 			var perlinNode = graph.FindNodeByName< PWNodePerlinNoise2D >("perlin");
 			var curveNode = graph.FindNodeByName< PWNodeCurve >("curve");
-			var debugNode = graph.FindNodeByName< PWNodeDebugLog >("debug");
+			var debugNode = graph.FindNodeByName< PWNodeDebugInfo >("debug");
 
 			//Assign a curve like this -> /\
 			var curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(.5f, 1), new Keyframe(1, 0));

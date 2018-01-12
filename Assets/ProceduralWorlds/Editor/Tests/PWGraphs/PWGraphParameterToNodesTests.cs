@@ -11,17 +11,17 @@ namespace PW
 	public class PWGraphParameterToNodesTests
 	{
 
-		PWMainGraph CreateTestGraph(out PWNodePerlinNoise2D perlinNode, out PWNodeDebugLog debugNode)
+		PWMainGraph CreateTestGraph(out PWNodePerlinNoise2D perlinNode, out PWNodeDebugInfo debugNode)
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
-				.NewNode(typeof(PWNodeDebugLog), "debug")
+				.NewNode(typeof(PWNodeDebugInfo), "debug")
 				.Link("perlin", "debug")
 				.Execute()
 				.GetGraph();
 			
 			perlinNode = graph.FindNodeByName< PWNodePerlinNoise2D >("perlin");
-			debugNode = graph.FindNodeByName< PWNodeDebugLog >("debug");
+			debugNode = graph.FindNodeByName< PWNodeDebugInfo >("debug");
 
 			graph.chunkSize = 64;
 			graph.step = .5f;
@@ -35,7 +35,7 @@ namespace PW
 		public void PWMainGraphParameterToProcessedNodes()
 		{
 			PWNodePerlinNoise2D perlinNode;
-			PWNodeDebugLog		debugNode;
+			PWNodeDebugInfo		debugNode;
 			var graph = CreateTestGraph(out perlinNode, out debugNode);
 
 			graph.Process();
