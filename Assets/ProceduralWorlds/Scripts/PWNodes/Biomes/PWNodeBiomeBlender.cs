@@ -16,6 +16,7 @@ namespace PW.Node
 		[PWOutput]
 		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 
+		[System.NonSerialized]
 		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
 

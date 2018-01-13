@@ -10,6 +10,8 @@ namespace PW.Core
 		public override void Initialize()
 		{
 			base.Initialize();
+
+			//TODO: replace input and output nodes by custom Biome input and output nodes
 		}
 
 		public override void OnEnable()

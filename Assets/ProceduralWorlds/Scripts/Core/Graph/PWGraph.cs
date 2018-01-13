@@ -456,7 +456,7 @@ namespace PW.Core
 
 			int index = array.FindName(fieldName);
 
-			if (index == -1)
+			if (index != -1)
 				return array.AssignAt(index, value, fieldName, false);
 
 			array.Add(value, fieldName);

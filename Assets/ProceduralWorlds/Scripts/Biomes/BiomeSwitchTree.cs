@@ -36,7 +36,7 @@ namespace PW.Biomator
 			public float				max;
 			public bool					value;
 			public SwitchMode			mode;
-			public PWBiomeSwitchMode		biomeSwitchMode;
+			public PWBiomeSwitchMode	biomeSwitchMode;
 			public Biome				biome;
 			public Color				previewColor;
 			public string				biomeName;
@@ -199,35 +199,37 @@ namespace PW.Biomator
 						Debug.Log("water switch mode output type: " + currentNode.GetChildAt(childIndex) + " [" + childIndex + "] -> " + outNode);
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
 					Type outNodeType = outNode.GetType();
-					if (outNodeType == typeof(PWNodeBiomeSwitch) || outNodeType == typeof(PWNodeBiomeBinder))
+					// if (outNodeType == typeof(PWNodeBiomeSwitch) || outNodeType == typeof(PWNodeBiome))
 						childIndex++;
 				}
 			}
-			else if (node.GetType() == typeof(PWNodeBiomeBinder))
+			else if (node.GetType() == typeof(PWNodeBiome))
 			{
-				PWNodeBiomeBinder binder = node as PWNodeBiomeBinder;
+				PWNodeBiome biomeNode = node as PWNodeBiome;
 
 				string biomeName = currentNode.biomeName;
 
 				if (String.IsNullOrEmpty(biomeName))
 				{
-					Debug.LogWarning("Biome name null or empty for biomeBinder: " + binder);
+					Debug.LogWarning("Biome name null or empty for biomeNode: " + node);
 					return ;
 				}
 
-				//Biome binder detected, assign the biome to the current Node:
-				currentNode.biome = binder.outputBiome;
+				//Biome biomeNode detected, assign the biome to the current Node:
+				currentNode.biome = biomeNode.outputBiome;
 
 				// Debug.Log("current node: " + currentNode + ", preview color: " + currentNode.previewColor);
-
-				//set the color of the biome in the binder
-				binder.outputBiome.previewColor = currentNode.previewColor;
 
 				Debug.Log("set biome " + currentNode.biome + " in node " + currentNode);
 
 				//set the biome ID and name:
 				currentNode.biome.name = biomeName;
 				currentNode.biome.id = biomeIdCount++;
+
+				//set the color and the id of the biome in the biomeNode
+				biomeNode.outputBiome.previewColor = currentNode.previewColor;
+				biomeNode.outputBiome.id = currentNode.biome.id;
+				biomeNode.outputBiome.name = currentNode.biome.name;
 
 				//store the biome in dictionaries for fast access
 				biomePerId[currentNode.biome.id] = currentNode.biome;

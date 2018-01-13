@@ -751,6 +751,9 @@ namespace PW.Core
 
 		void UpdateBiomeMap2D(PWGUISettings fieldSettings)
 		{
+			if (fieldSettings.biomeData == null)
+				return ;
+			
 			var map = fieldSettings.biomeData.biomeIds;
 			int texSize = map.size;
 			

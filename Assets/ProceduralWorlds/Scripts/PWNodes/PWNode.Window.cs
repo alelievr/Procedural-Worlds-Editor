@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Profiling;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
@@ -27,6 +28,8 @@ namespace PW
 				foreach (var anchor in anchorFields)
 					anchor.LoadStylesAndAssets();
 			}
+
+			Profiler.BeginSample("[PW] " + GetType() + " rendering");
 			
 			//update the PWGUI window rect with this window rect:
 			PWGUI.StartFrame(rect);
@@ -97,6 +100,8 @@ namespace PW
 			
 			RenderAnchors();
 			ProcessAnchorEvents();
+
+			Profiler.EndSample();
 
 			delayedChanges.Update();
 

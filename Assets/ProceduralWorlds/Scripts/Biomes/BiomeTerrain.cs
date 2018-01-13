@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 
+//TODO: remove this file
 namespace PW.Core
 {
 	public enum BiomeTerrainModifierType

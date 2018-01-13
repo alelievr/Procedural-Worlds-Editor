@@ -105,6 +105,10 @@ namespace PW.Core
 				"Biome temperature map", typeof(PWNodeBiomeTemperature),
 				"Biome wetness map", typeof(PWNodeBiomeWetness)
 			),
+			new PWNodeTypeInfoList(PWMainGraph, "Terrain Builders", PWColorSchemeName.SunFlower,
+				"TopDown2D Terrain", typeof(PWNodeTopDown2DTerrain)
+				// "SideView2D Terrain", typeof(PWNodeSideView2DTerrain)
+			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Clouds,
 				"Biome surface", typeof(PWNodeBiomeSurface),
 				"Biome terrain", typeof(PWNodeBiomeTerrain),

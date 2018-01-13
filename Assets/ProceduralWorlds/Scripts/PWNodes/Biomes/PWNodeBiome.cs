@@ -18,6 +18,8 @@ namespace PW.Node
 
 		[SerializeField]
 		PWBiomeGraph		biomeGraph;
+
+		Rect				biomeColorPreviewRect;
 	
 		string propUpdateKey = "PWNodeBiome";
 
@@ -28,10 +30,25 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
+			outputBiome = new Biome();
 		}
 
 		public override void OnNodeGUI()
 		{
+			EditorGUILayout.LabelField("Biome: " + outputBiome.name);
+			EditorGUILayout.BeginHorizontal();
+			{
+				EditorGUIUtility.labelWidth = 40;
+				EditorGUILayout.LabelField("id: " + outputBiome.id);
+				EditorGUIUtility.labelWidth = 0;
+				Rect colorRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight, GUILayout.ExpandWidth(true));
+				if (e.type == EventType.Repaint)
+					biomeColorPreviewRect = colorRect;
+				EditorGUI.BeginDisabledGroup(false);
+				EditorGUIUtility.DrawColorSwatch(biomeColorPreviewRect, outputBiome.previewColor);
+				EditorGUI.EndDisabledGroup();
+			}
+			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.LabelField("Biome Graph reference");
 			biomeGraph = EditorGUILayout.ObjectField(biomeGraph, typeof(PWBiomeGraph), false) as PWBiomeGraph;
 
@@ -49,8 +66,9 @@ namespace PW.Node
 				Debug.LogError("NUll biome graph when processing once a biome node");
 				return ;
 			}
-			
-			// biomeGraph.ProcessOnce();
+
+			outputBiome.biomeDataReference = inputBiomeData;
+			outputBiome.biomeGraph = biomeGraph;
 		}
 
 		public override void OnNodeProcess()
@@ -61,13 +79,11 @@ namespace PW.Node
 				return ;
 			}
 
-			//TODO: set inputs to biome graph
-			// biomeGraph.SetInput("inputBiomeData", inputBiomeData);
-
-			//NOPE: don't process the biome graph here, just store it until we need it !
-			// biomeGraph.Process();
-
-			//TODO: get output from biome graph
+			//we set the biomeData to the biomeGraph so it can process
+			biomeGraph.SetInput("inputBiomeData", inputBiomeData);
+			
+			outputBiome.biomeDataReference = inputBiomeData;
+			outputBiome.biomeGraph = biomeGraph;
 		}
 		
 	}

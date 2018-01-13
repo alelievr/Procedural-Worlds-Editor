@@ -271,11 +271,10 @@ namespace PW.Core
 	public class Biome
 	{
 		public BiomeData				biomeDataReference;
-		public PWGraphTerrainType		mode;
 		public string					name;
 		public Color					previewColor;
 		public short					id;
-		public BiomeTerrain				biomeTerrain;
+		public PWBiomeGraph				biomeGraph;
 
 		public BiomeSurfaces			biomeSurfaces;
 	}

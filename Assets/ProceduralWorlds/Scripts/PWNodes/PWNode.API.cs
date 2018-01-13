@@ -133,8 +133,8 @@ namespace PW
 		{
 			//TODO bake these data to prevent GC
 			return (anchor.anchorType == PWAnchorType.Input) ?
-				from l in anchor.links select l.toNode : 
-				from l in anchor.links select l.fromNode;
+				from l in anchor.links select l.fromNode : 
+				from l in anchor.links select l.toNode;
 		}
 	}
 }

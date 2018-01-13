@@ -276,7 +276,7 @@ namespace PW
 			//set the graph reference:
 			graphRef = graph;
 
-			//initialize anchors
+			//Initialize the rest of the node
 			OnAfterNodeAndGraphDeserialized();
 
 			//call virtual NodeCreation method

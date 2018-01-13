@@ -24,10 +24,6 @@ namespace PW.Node
 		[PWNotRequired]
 		public TerrainDetail		biomeDetail;
 
-		[PWInput("Terrain modifier")]
-		[PWNotRequired]
-		public BiomeTerrain			biomeTerrainModifier;
-
 		//TODO: dispositon algos
 
 		//inputs for 3D planar terrain
@@ -77,8 +73,6 @@ namespace PW.Node
 			if (outputBiome == null)
 				outputBiome = new Biome();
 			outputBiome.biomeDataReference = inputBiome;
-			outputBiome.biomeTerrain = biomeTerrainModifier;
-			outputBiome.mode = outputMode;
 			outputBiome.biomeSurfaces = biomeSurfaces;
 		}
 
