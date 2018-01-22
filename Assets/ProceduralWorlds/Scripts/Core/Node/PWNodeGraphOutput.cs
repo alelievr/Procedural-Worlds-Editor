@@ -13,31 +13,12 @@ namespace PW.Core
 
 		public override void OnNodeCreation()
 		{
-
+			name = "Graph output";
 		}
 
 		public override void OnNodeGUI()
 		{
-			var names = inputValues.GetNames();
-			var values = inputValues.GetValues();
-
-			EditorGUILayout.LabelField("names: [" + names.Count + "]");
-			for (int i = 0; i < values.Count; i++)
-			{
-				if (i < names.Count && names[i] != null)
-				{
-					if (values[i] != null)
-						EditorGUILayout.LabelField(names[i] + " <" + values[i].GetType() + ": " + values[i] + ">");
-					else
-						EditorGUILayout.LabelField(names[i]);
-				}
-				else
-					EditorGUILayout.LabelField("null");
-			}
-		}
-
-		public override void OnNodeProcess()
-		{
+			PWGUI.PWArrayField(inputValues);
 		}
 	}
 }

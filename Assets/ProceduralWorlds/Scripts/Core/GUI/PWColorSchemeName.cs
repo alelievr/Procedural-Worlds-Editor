@@ -21,17 +21,17 @@ namespace PW.Core
 		Clouds,
 		Concrete,
 
-	/*	//dark:
-		GreenSea,
-		Nephrits,
-		BelizeHole,
-		Wisteria,
-		MidnightBlue,
-		Orange,
+		//dark:
+		// GreenSea,
+		// Nephrits,
+		// BelizeHole,
+		// Wisteria,
+		// MidnightBlue,
+		// Orange,
 		Pumpkin,
-		Pomegrenate,
-		Silver,
-		Asbestos,*/
+		// Pomegrenate,
+		// Silver,
+		// Asbestos,
 	
 	}
 }

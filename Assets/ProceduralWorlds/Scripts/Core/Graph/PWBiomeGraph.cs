@@ -6,12 +6,11 @@ namespace PW.Core
 {
 	public class PWBiomeGraph : PWGraph
 	{
-		
-		public override void Initialize()
-		{
-			base.Initialize();
 
-			//TODO: replace input and output nodes by custom Biome input and output nodes
+		public override void InitializeInputAndOutputNodes()
+		{
+			inputNode = CreateNewNode< PWNodeBiomeGraphInput >(new Vector2(-100, 0));
+			outputNode = CreateNewNode< PWNodeBiomeGraphOutput >(new Vector2(100, 0));
 		}
 
 		public override void OnEnable()

@@ -12,7 +12,7 @@ namespace PW.Core
 		
 		public override void OnNodeCreation()
 		{
-
+			name = "Graph input";
 		}
 
 		public override void OnNodeGUI()

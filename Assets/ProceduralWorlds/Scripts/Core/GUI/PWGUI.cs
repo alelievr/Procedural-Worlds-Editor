@@ -15,7 +15,8 @@ namespace PW.Core
 		FieldWidth,
 	}
 
-	public class PWGUIStyle {
+	public class PWGUIStyle
+	{
 		
 		public int				data;
 		public PWGUIStyleType	type;
@@ -829,6 +830,30 @@ namespace PW.Core
 					TexturePreview(tex, false, false, false);
 		}
 	
+	#endregion
+
+	#region PWArray< T > field
+
+	public void PWArrayField< T >(PWArray< T > array)
+	{
+		var names = array.GetNames();
+		var values = array.GetValues();
+
+		EditorGUILayout.LabelField("names: [" + names.Count + "]");
+		for (int i = 0; i < values.Count; i++)
+		{
+			if (i < names.Count && names[i] != null)
+			{
+				if (values[i] != null)
+					EditorGUILayout.LabelField(names[i] + " <" + values[i].GetType() + ": " + values[i] + ">");
+				else
+					EditorGUILayout.LabelField(names[i]);
+			}
+			else
+				EditorGUILayout.LabelField("null");
+		}
+	}
+
 	#endregion
 
 	#region Utils

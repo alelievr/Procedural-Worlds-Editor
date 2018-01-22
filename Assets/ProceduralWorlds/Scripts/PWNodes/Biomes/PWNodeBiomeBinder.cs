@@ -43,22 +43,6 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			EditorGUILayout.BeginHorizontal();
-			if (outputBiome != null)
-			{
-				EditorGUIUtility.labelWidth = 72;
-				EditorGUILayout.LabelField("id: " + outputBiome.id +  " (" +  outputBiome.name + ")");
-				if (Event.current.type == EventType.Repaint)
-				{
-					colorPreviewRect = EditorGUILayout.GetControlRect();
-					colorPreviewRect.width -= 88;
-				}
-				else
-					EditorGUILayout.GetControlRect();
-				EditorGUIUtility.DrawColorSwatch(colorPreviewRect, outputBiome.previewColor);
-			}
-			EditorGUILayout.EndHorizontal();
-
 			//TODO: preview the modified terrain
 		}
 

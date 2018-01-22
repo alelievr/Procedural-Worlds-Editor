@@ -14,7 +14,7 @@ namespace PW.Node
 		//Called only when the node is created (not when it is enabled/loaded)
 		public override void OnNodeCreation()
 		{
-			name = "#NOTRIM#";
+			name = "#NAME#";
 		}
 
 		public override void OnNodeEnable()
@@ -29,7 +29,7 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			//write here the process which take input, transform them and set output variables.
+			//write here the process which take inputs, transform them and set outputs.
 		}
 		
 	}

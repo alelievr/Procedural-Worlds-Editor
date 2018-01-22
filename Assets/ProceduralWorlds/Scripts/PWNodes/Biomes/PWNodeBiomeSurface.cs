@@ -8,7 +8,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeSurface : PWNode {
+	public class PWNodeBiomeSurface : PWNode
+	{
 	
 		[PWInput, PWNotRequired]
 		public PWArray< BiomeSurfaceMaps >	inputSurfaces = new PWArray< BiomeSurfaceMaps >();

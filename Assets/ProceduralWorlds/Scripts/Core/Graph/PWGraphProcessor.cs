@@ -29,7 +29,7 @@ namespace PW.Core
 				dico[field.Name] = field;
 		}
 	
-		public void Initialize()
+		public void OnEnable()
 		{
 			//bake node fields to accelerate data transfer from node to node.
 			bakedNodeFields.Clear();
@@ -44,6 +44,12 @@ namespace PW.Core
 		{
 			if (!realMode)
 			{
+				if (link.fromAnchor == null || link.toAnchor == null)
+				{
+					Debug.LogError("[PW Process] null anchors in link: " + link);
+					return true;
+				}
+
 				if (!nodesDictionary.ContainsKey(link.toNode.id))
 				{
 					Debug.LogError("[PW Process] " + "node id (" + link.toNode.id + ") not found in nodes dictionary");
@@ -57,6 +63,7 @@ namespace PW.Core
 				}
 
 				if (!bakedNodeFields.ContainsKey(link.fromNode.classAQName)
+					|| !bakedNodeFields.ContainsKey(link.toNode.classAQName)
 					|| !bakedNodeFields[link.fromNode.classAQName].ContainsKey(link.fromAnchor.fieldName)
 					|| !bakedNodeFields[link.toNode.classAQName].ContainsKey(link.toAnchor.fieldName))
 				{

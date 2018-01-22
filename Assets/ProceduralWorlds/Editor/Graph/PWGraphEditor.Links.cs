@@ -65,6 +65,12 @@ public partial class PWGraphEditor
 			Debug.LogError("[PWGraphEditor] attempt to draw null link !");
 			return ;
 		}
+		if (link.fromAnchor == null || link.toAnchor == null)
+		{
+			Debug.LogError("[PWGraphEditor] null anchors in a link, trying to remove it !");
+			graph.RemoveLink(link);
+			return ;
+		}
 
 		Event e = Event.current;
 

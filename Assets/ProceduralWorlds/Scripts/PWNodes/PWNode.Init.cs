@@ -73,11 +73,7 @@ namespace PW
 				if (field.FieldType.IsGenericType)
 				{
 					if (field.FieldType.GetGenericTypeDefinition() == typeof(PWArray<>))
-					{
-						//provide the template type here:
-						anchorField.allowedType = (SerializableType)field.FieldType.GetGenericArguments()[0];
 						anchorField.multiple = true;
-					}
 				}
 				
 				System.Object[] attrs = field.GetCustomAttributes(true);
@@ -119,7 +115,7 @@ namespace PW
 					if (anchorField.anchors.Count == 0)
 						anchorField.CreateNewAnchor();
 
-					anchorField.colorSchemeName = colorSchemeName;
+					anchorField.colorSchemeName = PWColorTheme.GetAnchorColorSchemeName(field.FieldType);
 					anchorField.fieldName = field.Name;
 					anchorField.fieldType = (SerializableType)field.FieldType;
 					anchorField.fieldValue = field.GetValue(this);
@@ -158,7 +154,6 @@ namespace PW
 						anchor.padding = af.padding;
 						anchor.colorSchemeName = af.colorSchemeName;
 						anchor.color = af.color;
-						anchor.allowedType = af.allowedType;
 						anchor.required = af.required;
 						anchor.multiple = af.multiple;
 

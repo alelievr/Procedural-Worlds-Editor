@@ -18,18 +18,20 @@ namespace PW.Core
 		//nodes, link and anchor colors:
 		static PWColorSchemeDict colorSchemes = new PWColorSchemeDict
 		{
-			{PWColorSchemeName.Default, new PWColorScheme(0, 0, 0)},
+			{PWColorSchemeName.Default, new PWColorScheme(220, 220, 220)},
 
 			{PWColorSchemeName.Turquoise, new PWColorScheme(26, 188, 156)},
 			{PWColorSchemeName.Emerald, new PWColorScheme(46, 204, 113)},
 			{PWColorSchemeName.PeterRiver, new PWColorScheme(52, 152, 219)},
 			{PWColorSchemeName.Amethyst, new PWColorScheme(155, 89, 182)},
 			{PWColorSchemeName.WetAsphalt, new PWColorScheme(52, 73, 94)},
-			{PWColorSchemeName.SunFlower,new PWColorScheme(241, 196, 15) },
+			{PWColorSchemeName.SunFlower,new PWColorScheme(241, 196, 15)},
 			{PWColorSchemeName.Carrot, new PWColorScheme(230, 126, 34)},
 			{PWColorSchemeName.Alizarin, new PWColorScheme(231, 76, 60)},
 			{PWColorSchemeName.Clouds, new PWColorScheme(236, 240, 241)},
 			{PWColorSchemeName.Concrete, new PWColorScheme(149, 165, 166)},
+
+			{PWColorSchemeName.Pumpkin, new PWColorScheme(211, 84, 0)}
 		};
 
 		static Texture2D _defaultBackgroundTexture;
@@ -71,6 +73,47 @@ namespace PW.Core
 		public static Color GetSelectorCellColor(PWColorSchemeName csn)
 		{
 			return colorSchemes[csn].selectorCellColor;
+		}
+
+		static Dictionary< PWColorSchemeName, List< Type > > anchorColorSchemeNames = new Dictionary< PWColorSchemeName, List< Type > >()
+		{
+			{
+				PWColorSchemeName.Alizarin, new List< Type >() {
+				typeof(float), typeof(Color), typeof(Vector2),
+				typeof(Vector3), typeof(Vector4), typeof(int),
+				typeof(GameObject), typeof(Mesh), typeof(Material),
+				typeof(Texture2D), typeof(BiomeSurfaceMaps) }
+			}, {
+				PWColorSchemeName.Amethyst, new List< Type >() {}
+			}, {
+				PWColorSchemeName.Emerald, new List< Type >() { typeof(Sampler) }
+			}, {
+				PWColorSchemeName.Carrot, new List< Type >() {
+					typeof(Biome), typeof(BiomeData) }
+			}, {
+				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
+			}, {
+				PWColorSchemeName.SunFlower, new List< Type >() { typeof(ChunkData) }
+			}, {
+				PWColorSchemeName.Concrete, new List< Type >() { typeof(TerrainDetail) }
+			}, {
+				PWColorSchemeName.PeterRiver, new List< Type >() {}
+			}, {
+				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeTerrain), typeof(BiomeSurfaces) }
+			},
+		};
+
+		public static PWColorSchemeName GetAnchorColorSchemeName(Type fieldType)
+		{
+			if (fieldType.IsGenericType)
+				fieldType = fieldType.GetGenericArguments()[0];
+			
+			foreach (var kp in anchorColorSchemeNames)
+				foreach (var type in kp.Value)
+					if (type == fieldType || fieldType.IsSubclassOf(type))
+						return kp.Key;
+			
+			return PWColorSchemeName.Default;
 		}
 	}
 }

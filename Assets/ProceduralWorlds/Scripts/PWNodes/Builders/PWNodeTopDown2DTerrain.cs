@@ -4,7 +4,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeTopDown2DTerrain : PWNode {
+	public class PWNodeTopDown2DTerrain : PWNode
+	{
 	
 		[PWInput]
 		public BlendedBiomeTerrain	inputBlendedBiomes;

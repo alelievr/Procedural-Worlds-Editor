@@ -49,7 +49,9 @@ namespace PW.Core
         static List< Type > allNodeTypes = new List< Type >
 		{
 			//Primitives:
-            typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial), typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject), typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
+            typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial),
+			typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject),
+			typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
 
 			//Operations:
             typeof(PWNodeAdd), typeof(PWNodeCurve),
@@ -64,20 +66,23 @@ namespace PW.Core
             typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
 
 			//Graph specific:
-			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput),
+			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeBiomeGraphInput),
+			typeof(PWNodeBiomeGraphOutput),
 
 			//Biomes:
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
             typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
-			typeof(PWNodeBiome),
+			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer)
 		};
 
 		static List< PWNodeTypeInfoList > nodeInfoList = new List< PWNodeTypeInfoList >
 		{
 			new PWNodeTypeInfoList(0, "Graph", PWColorSchemeName.Default,
-				"Input", typeof(PWNodeGraphInput),
-				"Output", typeof(PWNodeGraphOutput)),
+				null, typeof(PWNodeGraphInput),
+				null, typeof(PWNodeGraphOutput),
+				null, typeof(PWNodeBiomeGraphInput),
+				null, typeof(PWNodeBiomeGraphOutput)),
 			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Primitive types", PWColorSchemeName.Alizarin,
 				"Slider", typeof(PWNodeSlider),
 				"Constant", typeof(PWNodeConstant),
@@ -109,7 +114,8 @@ namespace PW.Core
 				"TopDown2D Terrain", typeof(PWNodeTopDown2DTerrain)
 				// "SideView2D Terrain", typeof(PWNodeSideView2DTerrain)
 			),
-			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Clouds,
+			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Turquoise,
+				"BiomeData decomposer", typeof(PWNodeBiomeDataDecomposer),
 				"Biome surface", typeof(PWNodeBiomeSurface),
 				"Biome terrain", typeof(PWNodeBiomeTerrain),
 				"Biome Binder", typeof(PWNodeBiomeBinder)

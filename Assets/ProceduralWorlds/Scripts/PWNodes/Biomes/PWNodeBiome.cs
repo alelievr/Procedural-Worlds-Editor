@@ -10,11 +10,11 @@ namespace PW.Node
 	public class PWNodeBiome : PWNode
 	{
 
-		[PWOutput]
-		public Biome		outputBiome;
-
 		[PWInput]
 		public BiomeData	inputBiomeData;
+
+		[PWOutput]
+		public Biome		outputBiome;
 
 		[SerializeField]
 		PWBiomeGraph		biomeGraph;

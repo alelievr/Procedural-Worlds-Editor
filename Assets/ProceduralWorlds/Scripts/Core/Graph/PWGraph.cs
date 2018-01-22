@@ -6,12 +6,11 @@ using UnityEngine;
 using System;
 
 using Debug = UnityEngine.Debug;
-using OrderedNodeList = System.Linq.IOrderedEnumerable< PW.PWNode >;
 using Object = UnityEngine.Object;
 
 namespace PW.Core
 {
-	[System.Serializable]
+	[Serializable]
     public abstract class PWGraph : ScriptableObject
 	{
     
@@ -118,10 +117,14 @@ namespace PW.Core
 		[SerializeField]
 		private PWGraphProcessor				graphProcessor = new PWGraphProcessor();
 		protected bool					    	realMode;
-		[System.NonSerialized]
+		[NonSerialized]
 		protected IOrderedEnumerable< PWNode >	computeOrderSortedNodes;
-		[System.NonSerialized]
+		[NonSerialized]
 		protected Dictionary< int, PWNode >		nodesDictionary = new Dictionary< int, PWNode >();
+		[NonSerialized]
+		private FieldInfo						inputNodeOutputValues;
+		[NonSerialized]
+		private FieldInfo						outputNodeInputValues;
 
 
         //editor datas:
@@ -130,19 +133,19 @@ namespace PW.Core
 		public float							scale = 2;
 		public Vector2							zoomPanCorrection;
         public PWGUIManager						PWGUI = new PWGUIManager();
-		[System.NonSerialized]
+		[NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
 		public float							maxStep;
 
 
         //input and output nodes:
-        public PWNodeGraphInput					inputNode;
-        public PWNodeGraphOutput				outputNode;
+        public PWNode							inputNode;
+        public PWNode							outputNode;
 
 		
 		//useful variables:
 		public bool								initialized = false;
-		[System.NonSerialized]
+		[NonSerialized]
 		public bool								readyToProcess = false;
 
 
@@ -166,17 +169,17 @@ namespace PW.Core
 		public event LinkAction					OnLinkRemoved;
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
-		public event System.Action				OnSeedChanged;
-		public event System.Action				OnChunkSizeChanged;
-		public event System.Action				OnStepChanged;
-		public event System.Action				OnChunkPositionChanged;
+		public event Action						OnSeedChanged;
+		public event Action						OnChunkSizeChanged;
+		public event Action						OnStepChanged;
+		public event Action						OnChunkPositionChanged;
 		//graph events:
-		public event System.Action				OnGraphStructureChanged;
-		public event System.Action				OnClickNowhere; //when click inside the graph, not on a node nor a link.
-		public event System.Action				OnAllNodeReady;
+		public event Action						OnGraphStructureChanged;
+		public event Action						OnClickNowhere; //when click inside the graph, not on a node nor a link.
+		public event Action						OnAllNodeReady;
 		//editor button events:
-		public event System.Action				OnForceReload;
-		public event System.Action				OnForceReloadOnce;
+		public event Action						OnForceReload;
+		public event Action						OnForceReloadOnce;
 	
 	#endregion
 
@@ -195,10 +198,15 @@ namespace PW.Core
 			maxStep = 4;
 			name = "New Procedural Graph";
 			
-			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(50, 0));
-			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(-100, 0));
+			InitializeInputAndOutputNodes();
 			
 			initialized = true;
+		}
+
+		public virtual void InitializeInputAndOutputNodes()
+		{
+			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(-100, 0));
+			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(100, 0));
 		}
 
 		public virtual void OnEnable()
@@ -215,7 +223,11 @@ namespace PW.Core
 			OnNodeAdded += NodeCountChangedCallback;
 			OnAllNodeReady += NodeReadyCallback;
 
-			graphProcessor.Initialize();
+			graphProcessor.OnEnable();
+
+			//get the in and out node arrays refelection getters:
+			inputNodeOutputValues = inputNode.GetType().GetField("outputValues", BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+			outputNodeInputValues = outputNode.GetType().GetField("inputValues",  BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance);
 
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
@@ -263,7 +275,7 @@ namespace PW.Core
 		public T GetOutput< T >()
 		{
 			//get the PWArray from the graph output node
-			PWArray< object > outputArray = outputNode.inputValues;
+			PWArray< object > outputArray = outputNodeInputValues.GetValue(outputNode) as PWArray< object >;
 
 			if (outputArray == null)
 			{
@@ -450,9 +462,14 @@ namespace PW.Core
 			PWGraphCLI.Execute(this, command);
 		}
 
+		PWArray< object > GetInputArray()
+		{
+			return inputNodeOutputValues.GetValue(inputNode) as PWArray< object >;
+		}
+
 		public bool SetInput(string fieldName, object value)
 		{
-			var array = inputNode.outputValues;
+			var array = GetInputArray();
 
 			int index = array.FindName(fieldName);
 
@@ -466,22 +483,22 @@ namespace PW.Core
 
 		public bool SetInput(int index, object value, string name)
 		{
-			return inputNode.outputValues.AssignAt(index, value, name, true);
+			return GetInputArray().AssignAt(index, value, name, true);
 		}
 
 		public bool RemoveInput(string name)
 		{
-			return RemoveInput(inputNode.outputValues.FindName(name));
+			return RemoveInput(GetInputArray().FindName(name));
 		}
 
 		public bool RemoveInput(int index)
 		{
-			return inputNode.outputValues.RemoveAt(index);
+			return GetInputArray().RemoveAt(index);
 		}
 
 		public void ClearInput()
 		{
-			inputNode.outputValues.Clear();
+			GetInputArray().Clear();
 		}
 
 	#endregion
@@ -562,8 +579,10 @@ namespace PW.Core
 			if (OnLinkRemoved != null)
 				OnLinkRemoved(link);
 			
-			link.fromAnchor.RemoveLinkReference(link);
-			link.toAnchor.RemoveLinkReference(link);
+			if (link.fromAnchor != null)
+				link.fromAnchor.RemoveLinkReference(link);
+			if (link.toAnchor != null)
+				link.toAnchor.RemoveLinkReference(link);
 			nodeLinkTable.RemoveLink(link);
 		}
 		

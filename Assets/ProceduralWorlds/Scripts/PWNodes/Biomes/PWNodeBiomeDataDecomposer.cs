@@ -19,10 +19,15 @@ namespace PW.Node
 		[PWOutput("Terrain")]
 		public Sampler			outputTerrain;
 
-		//Called only when the node is created (not when it is enabled/loaded)
+		[PWOutput("Temperature map")]
+		public Sampler			outputTemperatureMap;
+
+		[PWOutput("Wetness map")]
+		public Sampler			outputWetnessMap;
+
 		public override void OnNodeCreation()
 		{
-			name = "";
+			name = "BiomeData decomposer";
 		}
 
 		public override void OnNodeEnable()
@@ -42,6 +47,8 @@ namespace PW.Node
 			}
 
 			outputTerrain = inputBiomeData.terrainRef;
+			outputTemperatureMap = inputBiomeData.temperatureRef;
+			outputWetnessMap = inputBiomeData.wetnessRef;
 		}
 		
 	}

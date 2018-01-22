@@ -12,25 +12,7 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		PWLinkType		GetLinkType(Type from, Type to)
-		{
-			if (from == typeof(Sampler2D) || to == typeof(Sampler2D))
-				return PWLinkType.Sampler2D;
-			if (from == typeof(Sampler3D) || to == typeof(Sampler3D))
-				return PWLinkType.Sampler3D;
-			if (from == typeof(float) || to == typeof(float))
-				return PWLinkType.BasicData;
-			if (from.IsSubclassOf(typeof(ChunkData)) || to.IsSubclassOf(typeof(ChunkData)))
-				return PWLinkType.ChunkData;
-			if (from == typeof(Vector2) || to == typeof(Vector2))
-				return PWLinkType.TwoChannel;
-			if (from == typeof(Vector3) || to == typeof(Vector3))
-				return PWLinkType.ThreeChannel;
-			if (from == typeof(Vector4) || to == typeof(Vector4))
-				return PWLinkType.FourChannel;
-			return PWLinkType.BasicData;
-		}
-		
+	
 		public void RemoveLink(PWNodeLink link)
 		{
 			//call this function will fire an event which trigger the graph and causes anchors to remove link datas.

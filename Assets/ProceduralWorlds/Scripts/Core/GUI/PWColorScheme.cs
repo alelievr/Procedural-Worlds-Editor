@@ -7,7 +7,8 @@ using PW.Core;
 namespace PW.Core
 {
 	[System.Serializable]
-	public class PWColorScheme {
+	public class PWColorScheme
+	{
 
 		public PWColorScheme(byte r, byte g, byte b)
 		{

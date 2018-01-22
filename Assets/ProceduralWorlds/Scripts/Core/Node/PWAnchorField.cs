@@ -59,8 +59,6 @@ namespace PW.Core
 		//properties for multiple anchors:
 		//is this anchor a multiple anchor
 		public bool							multiple = false;
-		//allowed type input for multiple anchor
-		public SerializableType				allowedType;
 
 		//if the anchor value is required to compute result
 		public bool							required = true;

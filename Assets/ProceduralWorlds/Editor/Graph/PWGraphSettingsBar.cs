@@ -106,6 +106,19 @@ namespace PW.Editor
 			delayedChanges.Update();
 		}
 
+		public void DrawTerrainPreview(Rect currentRect)
+		{
+			//draw terrain preview
+			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
+			{
+				Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
+
+				//TODO: way to specify camera type info the graph
+				terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
+			}
+			EditorGUILayout.EndVertical();
+		}
+
 		public void DrawSettingsBar(Rect currentRect)
 		{
 			Event	e = Event.current;
@@ -117,16 +130,8 @@ namespace PW.Editor
 			//add the texturePreviewRect size:
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
-				//draw terrain preview
-				EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
-				{
-					Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
-	
-					//TODO: way to specify camera type info the graph
-					terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
-				}
-				EditorGUILayout.EndVertical();
-
+				DrawTerrainPreview(currentRect);
+				
 				//draw main graph settings
 				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 				{
