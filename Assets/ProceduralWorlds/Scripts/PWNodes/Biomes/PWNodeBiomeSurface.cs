@@ -35,6 +35,10 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			name = "Biome surface";
+		}
+
+		public override void OnNodeEnable()
+		{
 			layerList = new ReorderableList(surfaces.biomeLayers, typeof(BiomeSurfaceLayer));
 
 			layerList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4;

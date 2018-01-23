@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using UnityEngine;
+using UnityEditor;
 using PW.Core;
 using PW.Node;
 
@@ -16,6 +17,7 @@ public partial class PWGraphEditor
 	
 	void StartDragLink()
 	{
+		Undo.RecordObject(graph, "Link started");
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
 		graph.RaiseOnLinkStartDragged(graph.editorEvents.startedLinkAnchor);

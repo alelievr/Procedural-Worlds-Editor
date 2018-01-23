@@ -59,5 +59,19 @@ namespace PW.Editor
 		{
 			PWGraphManager.CreateBiomeGraph();
 		}
+
+		[MenuItem("Assets/Create/Biome Surface Maps", false, 1)]
+		public static void CreateBiomeSurfaceMaps()
+		{
+			string path = GetCurrentHierarchyPath();
+
+			path += "/New BiomeSurfaceMaps.asset";
+
+			path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+			var biomeSurfaceMaps = ScriptableObject.CreateInstance< BiomeSurfaceMapsObject >();
+
+			ProjectWindowUtil.CreateAsset(biomeSurfaceMaps, path);
+		}
 	}
 }

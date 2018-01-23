@@ -57,7 +57,6 @@ public partial class PWGraphEditor
 
 			if (editorEvents.mouseOverAnchor != null)
 			{
-				Debug.Log("Anchor !");
 				menu.AddItem(newLinkContent, false, StartDragLink);
 				menu.AddItem(deleteAllLinksContent, false, DeleteAllAnchorLinks);
 			}

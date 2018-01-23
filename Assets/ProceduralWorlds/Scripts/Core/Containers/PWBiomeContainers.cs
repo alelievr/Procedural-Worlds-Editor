@@ -203,7 +203,7 @@ namespace PW.Core
 		}
 	}
 	
-	public enum SurfaceMapType
+	public enum SurfaceMapsType
 	{
 		Basic,
 		Normal,
@@ -214,29 +214,28 @@ namespace PW.Core
 	public class BiomeSurfaceMaps
 	{
 		[SerializeField]
-		SurfaceMapType		type;
+		public SurfaceMapsType	type;
 
-		public string		name;
+		public string			name;
 
-		public Texture2D	albedo;
-		public Texture2D	secondAlbedo;
-		public Texture2D	diffuse;
-		public Texture2D	normal;
-		public Texture2D	secondNormal;
-		public Texture2D	height;
-		public Texture2D	emissive;
-		public Texture2D	specular;
-		public Texture2D	opacity;
-		public Texture2D	smoothness;
-		public Texture2D	ambiantOcculison;
-		public Texture2D	detailMask;
-		public Texture2D	metallic;
-		public Texture2D	roughness;
-		public Texture2D	displacement;
-		public Texture2D	tesselation;
+		public Texture2D		albedo;
+		public Texture2D		secondAlbedo;
+		public Texture2D		normal;
+		public Texture2D		secondNormal;
+		public Texture2D		height;
+		public Texture2D		emissive;
+		public Texture2D		specular;
+		public Texture2D		opacity;
+		public Texture2D		smoothness;
+		public Texture2D		ambiantOcculison;
+		public Texture2D		detailMask;
+		public Texture2D		metallic;
+		public Texture2D		roughness;
+		public Texture2D		displacement;
+		public Texture2D		tesselation;
 		
-		public Color		temperatureColorModifier;
-		public Color		wetnessColorModifier;
+		public Color			temperatureColorModifier;
+		public Color			wetnessColorModifier;
 	}
 
 	[Serializable]

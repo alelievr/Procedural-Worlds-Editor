@@ -9,10 +9,8 @@ namespace PW.Node
 {
 	public class PWNodeSurfaceMaps : PWNode {
 		
-		[PWInput("Albedo"), PWOffset(40), PWNotRequired]
+		[PWInput("Albedo"), PWOffset(58), PWNotRequired]
 		public Texture2D		albedo;
-		[PWInput("Diffuse"), PWNotRequired]
-		public Texture2D		diffuse;
 		[PWInput("Normal"), PWNotRequired]
 		public Texture2D		normal;
 		[PWInput("Height"), PWNotRequired]
@@ -40,15 +38,14 @@ namespace PW.Node
 		[PWInput("Displacement"), PWNotRequired]
 		public Texture2D		displacement;
 		
+		[SerializeField]
+		BiomeSurfaceMapsObject	surfaceMapsObject;
 	
 		[PWOutput]
 		public BiomeSurfaceMaps	maps = new BiomeSurfaceMaps();
 
-		[SerializeField]
-		SurfaceMapType			type;
-
 		static string[]			inputNames = {
-			"albedo", "diffuse", "normal", "height", "emissive",
+			"albedo", "normal", "height", "emissive",
 			"specular", "opacity", "smoothness", "ambiantOcculison",
 			"detailMask", "secondAlbedo", "secondNormal", "metallic",
 			"roughness", "displacement"
@@ -73,20 +70,24 @@ namespace PW.Node
 		{
 			foreach (var inputName in inputNames)
 				SetAnchorVisibility(inputName, PWVisibility.Gone);
+			
+			//if we have a surface map object, then dont show any input
+			if (surfaceMapsObject != null)
+				return ;
 
-			switch (type)
+			switch (maps.type)
 			{
-				case SurfaceMapType.Basic:
+				case SurfaceMapsType.Basic:
 					foreach (var inputName in inputNames)
 						if (basicInputFields.Contains(inputName))
 							SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
-				case SurfaceMapType.Normal:
+				case SurfaceMapsType.Normal:
 					foreach (var inputName in inputNames)
 						if (normalInputFields.Contains(inputName))
 							SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
-				case SurfaceMapType.Complex:
+				case SurfaceMapsType.Complex:
 					foreach (var inputName in inputNames)
 						SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
@@ -97,29 +98,39 @@ namespace PW.Node
 		{
 			EditorGUIUtility.labelWidth = 110;
 			EditorGUI.BeginChangeCheck();
-			type = (SurfaceMapType)EditorGUILayout.EnumPopup("Surface complexity", type);
-
-			maps.name = EditorGUILayout.TextField("Name", maps.name);
-
-			albedo = EditorGUILayout.ObjectField(albedo, typeof(Texture2D), false) as Texture2D;
-			normal = EditorGUILayout.ObjectField(normal, typeof(Texture2D), false) as Texture2D;
-			if (type == SurfaceMapType.Normal || type == SurfaceMapType.Complex)
+			surfaceMapsObject = EditorGUILayout.ObjectField("Surface maps", surfaceMapsObject, typeof(BiomeSurfaceMapsObject), false) as BiomeSurfaceMapsObject;
+			
+			if (surfaceMapsObject != null)
 			{
-				diffuse = EditorGUILayout.ObjectField(diffuse, typeof(Texture2D), false) as Texture2D;
-				opacity = EditorGUILayout.ObjectField(opacity, typeof(Texture2D), false) as Texture2D;
-				smoothness = EditorGUILayout.ObjectField(smoothness, typeof(Texture2D), false) as Texture2D;
-				metallic = EditorGUILayout.ObjectField(metallic, typeof(Texture2D), false) as Texture2D;
-				roughness = EditorGUILayout.ObjectField(roughness, typeof(Texture2D), false) as Texture2D;
+				maps = surfaceMapsObject.maps;	
+				EditorGUILayout.LabelField("maps: " + maps.name);
+				EditorGUILayout.LabelField("Type: " + maps.type);
 			}
-			if (type == SurfaceMapType.Complex)
+			else
 			{
-				height = EditorGUILayout.ObjectField(height, typeof(Texture2D), false) as Texture2D;
-				emissive = EditorGUILayout.ObjectField(emissive, typeof(Texture2D), false) as Texture2D;
-				ambiantOcculison = EditorGUILayout.ObjectField(ambiantOcculison, typeof(Texture2D), false) as Texture2D;
-				secondAlbedo = EditorGUILayout.ObjectField(secondAlbedo, typeof(Texture2D), false) as Texture2D;
-				secondNormal = EditorGUILayout.ObjectField(secondNormal, typeof(Texture2D), false) as Texture2D;
-				detailMask = EditorGUILayout.ObjectField(detailMask, typeof(Texture2D), false) as Texture2D;
-				displacement = EditorGUILayout.ObjectField(displacement, typeof(Texture2D), false) as Texture2D;
+				maps.type = (SurfaceMapsType)EditorGUILayout.EnumPopup("Surface complexity", maps.type);
+			
+				maps.name = EditorGUILayout.TextField("Name", maps.name);
+	
+				albedo = EditorGUILayout.ObjectField(albedo, typeof(Texture2D), false) as Texture2D;
+				normal = EditorGUILayout.ObjectField(normal, typeof(Texture2D), false) as Texture2D;
+				if (maps.type == SurfaceMapsType.Normal || maps.type == SurfaceMapsType.Complex)
+				{
+					opacity = EditorGUILayout.ObjectField(opacity, typeof(Texture2D), false) as Texture2D;
+					smoothness = EditorGUILayout.ObjectField(smoothness, typeof(Texture2D), false) as Texture2D;
+					metallic = EditorGUILayout.ObjectField(metallic, typeof(Texture2D), false) as Texture2D;
+					roughness = EditorGUILayout.ObjectField(roughness, typeof(Texture2D), false) as Texture2D;
+				}
+				if (maps.type == SurfaceMapsType.Complex)
+				{
+					height = EditorGUILayout.ObjectField(height, typeof(Texture2D), false) as Texture2D;
+					emissive = EditorGUILayout.ObjectField(emissive, typeof(Texture2D), false) as Texture2D;
+					ambiantOcculison = EditorGUILayout.ObjectField(ambiantOcculison, typeof(Texture2D), false) as Texture2D;
+					secondAlbedo = EditorGUILayout.ObjectField(secondAlbedo, typeof(Texture2D), false) as Texture2D;
+					secondNormal = EditorGUILayout.ObjectField(secondNormal, typeof(Texture2D), false) as Texture2D;
+					detailMask = EditorGUILayout.ObjectField(detailMask, typeof(Texture2D), false) as Texture2D;
+					displacement = EditorGUILayout.ObjectField(displacement, typeof(Texture2D), false) as Texture2D;
+				}
 			}
 			
 			if (EditorGUI.EndChangeCheck())
@@ -130,9 +141,11 @@ namespace PW.Node
 
 		public override void OnNodeProcessOnce()
 		{
+			if (surfaceMapsObject != null)
+				maps = surfaceMapsObject.maps;
+			
 			maps.albedo = albedo;
 			maps.normal = normal;
-			maps.diffuse = diffuse;
 			maps.height = height;
 			maps.emissive = emissive;
 			maps.specular = specular;
