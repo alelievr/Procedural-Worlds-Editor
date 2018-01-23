@@ -68,6 +68,9 @@ namespace PW.Core
 			if (!orderGroupRect.Overlaps(screen))
 				return ;
 			
+			//Start GUI frame
+			PWGUI.StartFrame(screen);
+			
 			if (orderingGroupStyle == null)
 				LoadStyles();
 

@@ -13,7 +13,6 @@ public partial class PWGraphEditor {
 
 	void DeleteOrderingGroup()
 	{
-		Debug.Log("mouseoverorderingGroup: " + editorEvents.mouseOverOrderingGroup);
 		if (editorEvents.mouseOverOrderingGroup != null)
 			graph.orderingGroups.Remove(editorEvents.mouseOverOrderingGroup);
 	}
