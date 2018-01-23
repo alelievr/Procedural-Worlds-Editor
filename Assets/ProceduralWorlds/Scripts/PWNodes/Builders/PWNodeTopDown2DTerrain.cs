@@ -46,7 +46,8 @@ namespace PW.Node
 
 		public override void OnNodeCreation()
 		{
-			name = "2D TopDown terrain";
+			name = "Data To Chunk";
+			//TODO: change the output type based on a popup
 			terrainOutput = new TopDown2DData();
 		}
 
@@ -74,16 +75,9 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			//TODO: 3D biome map management
-			//TODO: replace this by the PWBiomeGraph
-			// BiomeUtils.ApplyBiomeTerrainModifiers(inputBlendedBiomes);
-
 			terrainOutput.biomeMap = inputBlendedBiomes.biomeMap;
 			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
-
-			//TODO: apply geologic layer (rivers / oth)
-
-			//TODO: place vegetation / small details
+			terrainOutput.materializerType = materializer;
 
 			//assign everything needed to the output chunk:
 			terrainOutput.size = chunkSize;

@@ -16,14 +16,13 @@ namespace PW.Node
 		[PWOutput]
 		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 
-		[System.NonSerialized]
-		Texture2D			biomeRepartitionPreview;
 		int					maxBiomeBlendCount = 2;
 
 		[SerializeField]
-		bool				biomePreviewFoldout = true;
-		[SerializeField]
 		bool				biomeCoverageRecap = false;
+
+		[System.NonSerialized]
+		bool				firstGUI = true;
 
 		public override void OnNodeCreation()
 		{
@@ -33,18 +32,9 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			OnReload += OnReloadCallback;
-			graphRef.OnChunkSizeChanged += ChunkSizeChanged;
 			
 			if (inputBiomes.GetValues().Count == 0)
 				return ;
-
-			biomeRepartitionPreview = new Texture2D(chunkSize, chunkSize, TextureFormat.RGBA32, false);
-			biomeRepartitionPreview.filterMode = FilterMode.Point;
-		}
-
-		public void ChunkSizeChanged()
-		{
-			biomeRepartitionPreview.Resize(chunkSize, chunkSize);
 		}
 
 		public BiomeData	GetBiomeData()
@@ -71,15 +61,15 @@ namespace PW.Node
 
 			if (biomeData != null)
 			{
-				if ((biomePreviewFoldout = EditorGUILayout.Foldout(biomePreviewFoldout, "Biome id map")))
-				{
-					if (biomeData.biomeIds != null)
-						PWGUI.BiomeMap2DPreview(biomeData);
-					//TODO: biome 3D preview
-				}
+				if (biomeData.biomeIds != null)
+					PWGUI.BiomeMap2DPreview(biomeData);
+				//TODO: biome 3D preview
 			}
 			else
 				EditorGUILayout.LabelField("no biome data");
+			
+			if (firstGUI)
+				PWGUI.SetUpdateForField(0, true);
 
 			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
 			{
@@ -91,8 +81,9 @@ namespace PW.Node
 				}
 				else
 					EditorGUILayout.LabelField("Null biome data/biome tree");
-				//TODO: exloit the biome switch tree datas
 			}
+
+			firstGUI = false;
 		}
 
 		public override void OnNodeProcess()
@@ -111,6 +102,18 @@ namespace PW.Node
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+
+			//once the biome data is filled, we call the biome graphs corresponding to the biome id
+			foreach (var id in biomeData.ids)
+			{
+				foreach (var biome in biomes)
+					if (id == biome.id)
+					{
+						biome.biomeGraph.id = id;
+						biome.biomeGraph.SetInput(biomeData);
+						biome.biomeGraph.Process();
+					}
+			}
 
 			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;
 			outputBlendedBiomeTerrain.biomeMap3D = biomeData.biomeIds3D;
@@ -154,7 +157,6 @@ namespace PW.Node
 		public override void OnNodeDisable()
 		{
 			OnReload -= OnReloadCallback;
-			graphRef.OnChunkSizeChanged -= ChunkSizeChanged;
 		}
 	}
 }

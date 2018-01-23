@@ -286,7 +286,7 @@ namespace PW.Core
 			//find if there are any object in the array of type T
 			foreach (var obj in outputArray)
 			{
-				if (obj != null && obj.GetType().IsAssignableFrom(typeof(T)))
+				if (obj != null && typeof(T).IsAssignableFrom(obj.GetType()))
 				{
 					Debug.Log("found output value: " + obj);
 					return (T)obj;

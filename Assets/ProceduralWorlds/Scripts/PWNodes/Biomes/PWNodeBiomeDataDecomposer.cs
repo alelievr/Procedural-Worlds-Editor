@@ -46,6 +46,7 @@ namespace PW.Node
 				return ;
 			}
 
+			outputBiomeData = inputBiomeData;
 			outputTerrain = inputBiomeData.terrainRef;
 			outputTemperatureMap = inputBiomeData.temperatureRef;
 			outputWetnessMap = inputBiomeData.wetnessRef;

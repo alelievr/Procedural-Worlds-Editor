@@ -53,6 +53,9 @@ namespace PW.Node
 
 		void					CurveTerrain()
 		{
+			if (inputTerrain == null)
+				return ;
+			
 			Sampler samp = inputTerrain.Clone(outputTerrain);
 
 			if (samp.type == SamplerType.Sampler2D)
@@ -61,9 +64,11 @@ namespace PW.Node
 					return curve.Evaluate(val);
 				});
 			}
-			else
+			else if (samp.type == SamplerType.Sampler3D)
 			{
-				//TODO
+				(samp as Sampler3D).Foreach((x, y, z, val) => {
+					return curve.Evaluate(val);
+				});
 			}
 
 			outputTerrain = samp;

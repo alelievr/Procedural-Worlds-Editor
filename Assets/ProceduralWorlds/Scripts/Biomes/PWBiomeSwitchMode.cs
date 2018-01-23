@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PW.Biomator
 {
-	public enum PWBiomeSwitchMode
+	public enum BiomeSwitchMode
 	{
 		Water,
 		Height,

@@ -309,6 +309,8 @@ namespace PW
 
 		public virtual void OnNodeEnable() {}
 
+		public virtual void OnNodeLoadStyle() {}
+
 		public virtual void OnNodeProcess() {}
 
 		public virtual void OnNodeDisable() {}

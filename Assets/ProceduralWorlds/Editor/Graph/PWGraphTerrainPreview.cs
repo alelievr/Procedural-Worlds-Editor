@@ -133,7 +133,7 @@ namespace PW.Editor
 
 				//move the terrain materializer so it generate terrain around the camera
 				if (PWGraphTerrainManager.terrainReference != null)
-					PWGraphTerrainManager.terrainReference.transform.position = previewCamera.transform.position;
+					PWGraphTerrainManager.terrainReference.position = previewCamera.transform.position;
 				e.Use();
 			}
 

@@ -194,6 +194,8 @@ namespace PW.Core
 		public Sampler3D[]			datas3D;
 		public string[]				dataNames;
 
+		public List< short >		ids = new List< short >();
+
 		public BiomeData()
 		{
 			biomeTree = new BiomeSwitchTree();
@@ -236,6 +238,23 @@ namespace PW.Core
 		
 		public Color			temperatureColorModifier;
 		public Color			wetnessColorModifier;
+	}
+
+	[Serializable]
+	public class BiomeSurfaceSwitch
+	{
+		public bool					slopeEnabled;
+		public float				minSlope;
+		public float				maxSlope;
+
+		public bool					heightEnabled;
+		public float				minHeight;
+		public float				maxHeight;
+
+		public BiomeSwitchMode		paramType;
+		public bool					paramEnabled;
+		public float				minParam;
+		public float				maxParam;
 	}
 
 	[Serializable]
@@ -292,8 +311,6 @@ namespace PW.Core
 		public Sampler				windMap;
 		public Sampler				lightingMap;
 		public Sampler				airMap;
-
-		public List< PWBiomeGraph >	biomes; //indices correspond to biome ids.
 	}
 	
 }

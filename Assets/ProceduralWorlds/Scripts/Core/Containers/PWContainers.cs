@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor.AnimatedValues;
 using System;
 using System.Linq;
 using PW.Biomator;
@@ -28,8 +29,6 @@ namespace PW.Core
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
 		public Texture2DArray		albedoMaps;
-
-		public List< PWBiomeGraph >	biomes;
 
 		public override string ToString()
 		{
@@ -65,7 +64,7 @@ namespace PW.Core
 		Min,
 	}
 
-	public enum	TerrainDetailType : Int16
+	public enum	TerrainDetailType
 	{
 		River,
 		Lake,
@@ -201,6 +200,7 @@ namespace PW.Core
 		Sampler2DPreview,
 		BiomeMapPreview,
 		Texture2DArrayPreview,
+		FadeBlock,
 	}
 
 	[Serializable]
@@ -273,6 +273,11 @@ namespace PW.Core
 		public Sampler2D			sampler2D;
 		[System.NonSerialized]
 		public BiomeData			biomeData;
+
+		//Fade block:
+		[System.NonSerialized]
+		public AnimBool				fadeStatus;
+		public bool					faded;
 		
 		public PWGUISettings()
 		{

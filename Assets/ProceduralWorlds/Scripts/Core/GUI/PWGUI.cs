@@ -4,6 +4,7 @@ using System.Reflection;
 using System;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
@@ -45,6 +46,7 @@ namespace PW.Core
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
 		static GUIStyle		centeredLabel;
+		static Material		lineMaterial;
 
 		[SerializeField]
 		List< PWGUISettings >	settingsStorage;
@@ -778,6 +780,7 @@ namespace PW.Core
 					fieldSettings.texture.SetPixel(x, y, firstBiomeColor);
 				}
 			fieldSettings.texture.Apply();
+			fieldSettings.update = false;
 		}
 	#endregion
 
@@ -861,26 +864,120 @@ namespace PW.Core
 	#endregion
 
 	#region FadeGroup block
-
-		public void BeginHorizontalFade(bool faded, GUIStyle style)
+	
+		public bool BeginFade(string header, GUIStyle style = null)
 		{
-
-		}
-
-		public void EndHorizontalFade()
-		{
-
-		}
-
-		public void BeginVerticalFade(bool faded, GUIStyle style)
-		{
-
-		}
-
-		public void EndVerticalFade()
-		{
+			bool checkbox = false;
 			
+			return BeginFade(new GUIContent(header), style, ref checkbox, false);
 		}
+	
+		public bool BeginFade(string header, GUIStyle style, ref bool checkbox)
+		{
+			return BeginFade(new GUIContent(header), style, ref checkbox, true);
+		}
+
+		public bool BeginFade(GUIContent header, GUIStyle style, ref bool checkbox, bool checkboxEnabled = true)
+		{
+			var e = Event.current;
+			var settings = GetGUISettingData(PWGUIFieldType.FadeBlock, () => {
+				return new PWGUISettings();
+			});
+
+			if (settings.fadeStatus == null)
+				settings.fadeStatus = new AnimBool(settings.faded);
+
+			EditorGUILayout.BeginVertical(style);
+
+			//header
+			EditorGUILayout.BeginHorizontal();
+			{
+				if (checkboxEnabled)
+					checkbox = EditorGUILayout.Toggle(checkbox);
+				EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
+			}
+			EditorGUILayout.EndHorizontal();
+
+			//click in the header to expand block
+			Rect headerRect = GUILayoutUtility.GetLastRect();
+			if (headerRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+			{
+				settings.faded = !settings.faded;
+				e.Use();
+			}
+			
+			bool display = EditorGUILayout.BeginFadeGroup(settings.fadeStatus.faded);
+			
+			settings.fadeStatus.target = settings.faded;
+
+			return display;
+		}
+
+		public void EndFade()
+		{
+			EditorGUILayout.EndFadeGroup();
+			EditorGUILayout.EndVertical();
+		}
+
+	#endregion
+
+	#region MinMaxSlope field
+
+	public void MinMaxSlope(float min, float max, ref float inputMin, ref float inputMax)
+	{
+		EditorGUILayout.BeginVertical();
+		{
+			EditorGUIUtility.labelWidth = 60;
+			inputMin = EditorGUILayout.FloatField("Min", inputMin);
+			inputMax = EditorGUILayout.FloatField("Min", inputMax);
+			EditorGUIUtility.labelWidth = 0;
+		}
+		EditorGUILayout.EndVertical();
+		Rect r = EditorGUILayout.GetControlRect(false, 60);
+		MinMaxSlope(r, ref inputMin, ref inputMax);
+
+		inputMax = Mathf.Clamp(inputMax, min, max);
+		inputMin = Mathf.Clamp(inputMin, min, max);
+	}
+
+	void MinMaxSlope(Rect drawRect, ref float inputMin, ref float inputMax)
+	{
+		float gapWidth = drawRect.width / 2;
+		float minSlopeWidth = Mathf.Cos(inputMin * Mathf.Deg2Rad) * gapWidth;
+		float maxSlopwWidth = Mathf.Cos(inputMax * Mathf.Deg2Rad) * gapWidth;
+		float minSlopeHeight = Mathf.Sin(inputMin * Mathf.Deg2Rad) * drawRect.height;
+		float maxSlopeHeight = Mathf.Sin(inputMax * Mathf.Deg2Rad) * drawRect.height;
+
+		Color minSlopeColor = Color.blue;
+		Color maxSlopeColor = Color.red;
+		Color baseColor = Color.black;
+
+		Vector2 b1 = new Vector2(drawRect.xMin, drawRect.yMax);
+		Vector2 b2 = new Vector2(b1.x + drawRect.width / 4, drawRect.yMax);
+
+		Vector2 m1 = new Vector2((drawRect.width / 4) + minSlopeWidth + drawRect.xMin, drawRect.yMax - minSlopeHeight);
+		Vector2 m2 = new Vector2(drawRect.xMax, drawRect.yMax - minSlopeHeight);
+
+		Vector2 n1 = new Vector2((drawRect.width / 4) + maxSlopwWidth + drawRect.xMin, drawRect.yMax - maxSlopeHeight);
+		Vector2 n2 = new Vector2(drawRect.xMax, drawRect.yMax - maxSlopeHeight);
+
+		Handles.color = baseColor;
+		Handles.DrawAAPolyLine(b1, b2);
+		Handles.DrawAAPolyLine(m1, m2);
+		Handles.DrawAAPolyLine(n1, n2);
+
+		Vector2 min1 = b2;
+		Vector2 min2 = m1;
+		
+		Handles.color = minSlopeColor;
+		Handles.DrawAAPolyLine(min1, min2);
+
+		Vector2 max1 = b2;
+		Vector2 max2 = n1;
+
+		Handles.color = maxSlopeColor;
+		Handles.DrawAAPolyLine(max1, max2);
+	}
 
 	#endregion
 
@@ -917,8 +1014,11 @@ namespace PW.Core
 			if (icColor != null)
 				return ;
 
+			Shader lineShader = EditorGUIUtility.LoadRequired("Editors/AnimationWindow/Curve.shader") as Shader;
+
 			icColor = Resources.Load("ic_color") as Texture2D;
 			icEdit = Resources.Load("ic_edit") as Texture2D;
+			lineMaterial = new Material(lineShader);
 			icSettingsOutline = Resources.Load("ic_settings_outline") as Texture2D;
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;

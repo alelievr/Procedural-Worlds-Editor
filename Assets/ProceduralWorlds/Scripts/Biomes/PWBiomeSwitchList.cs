@@ -50,7 +50,7 @@ namespace PW.Biomator
 		public Action< BiomeSwitchData >	OnBiomeDataModified;
 
 		public Sampler						currentSampler;
-		public PWBiomeSwitchMode			currentSwitchMode;
+		public BiomeSwitchMode			currentSwitchMode;
 		public BiomeData					currentBiomeData;
 		
 		Texture2D			biomeRepartitionPreview;
@@ -199,7 +199,7 @@ namespace PW.Biomator
 			}
 			
 			//add water if there is and if switch mode is height:
-			if (!currentBiomeData.isWaterless && currentSwitchMode == PWBiomeSwitchMode.Height)
+			if (!currentBiomeData.isWaterless && currentSwitchMode == BiomeSwitchMode.Height)
 			{
 				float rMax = (currentBiomeData.waterLevel / range) * previewTextureWidth;
 				for (int x = 0; x < rMax; x++)

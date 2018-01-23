@@ -17,7 +17,9 @@ namespace PW
 		static GUIStyle				debugStyle = null;
 		static GUIStyle				innerNodePaddingStyle = null;
 		static GUIStyle				nodeStyle = null;
-		static bool					styleLoaded = false;
+		static bool					styleLoadedStatic = false;
+		[System.NonSerialized]
+		bool						styleLoaded = false;
 		
 		static Texture2D			editIcon = null;
 		static Texture2D			debugIcon = null;

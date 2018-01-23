@@ -136,6 +136,9 @@ namespace PW
 							yield return chunkPos;
 						}
 					yield break ;
+				default:
+					Debug.Log("TODO: " + loadPatternMode + " load mode");
+					break ;
 			}
 			yield return position;
 		}
@@ -143,6 +146,7 @@ namespace PW
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks()
 		{
+			Debug.Log("Updating chunks");
 			if (terrainStorage == null)
 				return ;
 
@@ -173,6 +177,7 @@ namespace PW
 
 		public void	DestroyAllChunks()
 		{
+			Debug.Log("Destroying all chunks");
 			PWWorker.StopAllWorkers(WorkerGenerationId);
 			if (terrainStorage == null)
 				return ;

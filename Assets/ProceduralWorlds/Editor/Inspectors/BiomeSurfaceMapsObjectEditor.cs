@@ -46,7 +46,7 @@ public class BiomeSurfaceMapsObjectEditor : Editor
 				TryCompleteOtherMaps();
 			maps.normal = EditorGUILayout.ObjectField("Normal", maps.normal, typeof(Texture2D), false) as Texture2D;
 	
-			EditorGUILayout.BeginFadeGroup(Mathf.Clamp(showNormalMaps.faded, Mathf.Epsilon, 1));
+			if (EditorGUILayout.BeginFadeGroup(showNormalMaps.faded))
 			{
 				maps.opacity = EditorGUILayout.ObjectField("Opacity", maps.opacity, typeof(Texture2D), false) as Texture2D;
 				maps.smoothness = EditorGUILayout.ObjectField("Smoothness", maps.smoothness, typeof(Texture2D), false) as Texture2D;
@@ -54,7 +54,7 @@ public class BiomeSurfaceMapsObjectEditor : Editor
 				maps.roughness = EditorGUILayout.ObjectField("Roughness", maps.roughness, typeof(Texture2D), false) as Texture2D;
 			}
 			EditorGUILayout.EndFadeGroup();
-			EditorGUILayout.BeginFadeGroup(Mathf.Clamp(showComplexMaps.faded, Mathf.Epsilon, 1));
+			if (EditorGUILayout.BeginFadeGroup(showComplexMaps.faded))
 			{
 				maps.height = EditorGUILayout.ObjectField("Height", maps.height, typeof(Texture2D), false) as Texture2D;
 				maps.emissive = EditorGUILayout.ObjectField("Emissive", maps.emissive, typeof(Texture2D), false) as Texture2D;

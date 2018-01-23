@@ -22,11 +22,11 @@ namespace PW.Node
 		[SerializeField]
 		public PWBiomeSwitchList	switchList = new PWBiomeSwitchList();
 
-		public PWBiomeSwitchMode	switchMode;
+		public BiomeSwitchMode	switchMode;
 		string[]					biomeSwitchModes;
 
 		[SerializeField]
-		int						selectedPWBiomeSwitchMode;
+		int						selectedBiomeSwitchMode;
 		[SerializeField]
 		bool					error;
 		string					errorString;
@@ -45,7 +45,7 @@ namespace PW.Node
 		{
 			switchList.OnEnable();
 
-			biomeSwitchModes = Enum.GetNames(typeof(PWBiomeSwitchMode));
+			biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
 
@@ -59,21 +59,21 @@ namespace PW.Node
 
 		void UpdateSwitchMode()
 		{
-			if (switchMode == PWBiomeSwitchMode.Water)
+			if (switchMode == BiomeSwitchMode.Water)
 				SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
 			else
 				SetMultiAnchor("outputBiomes", switchList.Count, null);
 		}
 
-		Dictionary< PWBiomeSwitchMode, string > switchModeToName = new Dictionary< PWBiomeSwitchMode, string >()
+		Dictionary< BiomeSwitchMode, string > switchModeToName = new Dictionary< BiomeSwitchMode, string >()
 		{
-			{PWBiomeSwitchMode.Water, "waterHeight"},
-			{PWBiomeSwitchMode.Wetness, "wetness"},
-			{PWBiomeSwitchMode.Temperature, "temperature"},
-			// {PWBiomeSwitchMode.Wind, "wind"},
-			// {PWBiomeSwitchMode.Lighting, "lighting"},
-			// {PWBiomeSwitchMode.Air, "air"},
-			{PWBiomeSwitchMode.Height, "terrain"}
+			{BiomeSwitchMode.Water, "waterHeight"},
+			{BiomeSwitchMode.Wetness, "wetness"},
+			{BiomeSwitchMode.Temperature, "temperature"},
+			// {BiomeSwitchMode.Wind, "wind"},
+			// {BiomeSwitchMode.Lighting, "lighting"},
+			// {BiomeSwitchMode.Air, "air"},
+			{BiomeSwitchMode.Height, "terrain"}
 			//soil settings apart.
 		};
 
@@ -136,8 +136,8 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			{
 				EditorGUIUtility.labelWidth = 80;
-				selectedPWBiomeSwitchMode = EditorGUILayout.Popup("switch parameter", selectedPWBiomeSwitchMode, biomeSwitchModes);
-				switchMode = (PWBiomeSwitchMode)Enum.Parse(typeof(PWBiomeSwitchMode), biomeSwitchModes[selectedPWBiomeSwitchMode]);
+				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch parameter", selectedBiomeSwitchMode, biomeSwitchModes);
+				switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
 			}
 			if (EditorGUI.EndChangeCheck())
 			{
@@ -154,7 +154,7 @@ namespace PW.Node
 				return ;
 			}
 
-			if (switchMode != PWBiomeSwitchMode.Water)
+			if (switchMode != BiomeSwitchMode.Water)
 				switchList.OnGUI();
 
 			firstPass = false;

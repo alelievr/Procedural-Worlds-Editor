@@ -22,11 +22,16 @@ namespace PW
 		{
 			var e = Event.current;
 			
-			if (!styleLoaded)
+			if (!styleLoadedStatic)
 			{
 				LoadStyles();
+				OnNodeLoadStyle();
+			}
+			if (!styleLoaded)
+			{
 				foreach (var anchor in anchorFields)
 					anchor.LoadStylesAndAssets();
+				styleLoaded = true;
 			}
 
 			Profiler.BeginSample("[PW] " + GetType() + " rendering");

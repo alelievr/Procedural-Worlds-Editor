@@ -4,7 +4,8 @@ using System.Linq;
 using PW;
 using PW.Core;
 
-public class PWTopDown2DTerrain : PWTerrainBase {
+public class PWTopDown2DTerrain : PWTerrainBase
+{
 
 	static Gradient			rainbow = null;
 
@@ -83,6 +84,8 @@ public class PWTopDown2DTerrain : PWTerrainBase {
 	{
 		if (cd == null)
 			return null;
+
+		Debug.Log("Generating chunk at " + pos);
 		
 		if (rainbow == null)
 			rainbow = PWUtils.CreateRainbowGradient();
