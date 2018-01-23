@@ -162,13 +162,17 @@ namespace PW.Core
 				PWGUISettings colorSettings = new PWGUISettings();
 
 				colorSettings.c = (SerializableColor)localColor;
+				Debug.Log("New FieldSettings");
 
 				return colorSettings;
 			});
 
+			// if (e.type == EventType.ExecuteCommand)
+				// Debug.Log("cmd: " + e.commandName + ", hash: " + fieldSettings.GetHashCode() + ", controlId: " + PWColorPicker.controlId);
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
 				if (fieldSettings.GetHashCode() == PWColorPicker.controlId)
 				{
+					Debug.Log("Color: " + fieldSettings.c);
 					fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
 					fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
 					GUI.changed = true;
@@ -853,6 +857,30 @@ namespace PW.Core
 				EditorGUILayout.LabelField("null");
 		}
 	}
+
+	#endregion
+
+	#region FadeGroup block
+
+		public void BeginHorizontalFade(bool faded, GUIStyle style)
+		{
+
+		}
+
+		public void EndHorizontalFade()
+		{
+
+		}
+
+		public void BeginVerticalFade(bool faded, GUIStyle style)
+		{
+
+		}
+
+		public void EndVerticalFade()
+		{
+			
+		}
 
 	#endregion
 

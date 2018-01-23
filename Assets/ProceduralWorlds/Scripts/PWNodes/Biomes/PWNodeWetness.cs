@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeWetness : PWNode {
+	public class PWNodeWetness : PWNode {
 
 		public override void OnNodeCreation()
 		{

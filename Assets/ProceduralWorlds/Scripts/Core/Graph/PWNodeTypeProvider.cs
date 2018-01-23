@@ -72,8 +72,9 @@ namespace PW.Core
 			//Biomes:
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
-            typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
-			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer)
+            typeof(PWNodeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
+			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeSurfaceSwitch),
+			typeof(PWNodeBiomeSurfaceModifiers)
 		};
 
 		static List< PWNodeTypeInfoList > nodeInfoList = new List< PWNodeTypeInfoList >
@@ -108,7 +109,7 @@ namespace PW.Core
 				"Biome switch", typeof(PWNodeBiomeSwitch),
 				"Biome blender", typeof(PWNodeBiomeBlender),
 				"Biome temperature map", typeof(PWNodeBiomeTemperature),
-				"Biome wetness map", typeof(PWNodeBiomeWetness)
+				"Biome wetness map", typeof(PWNodeWetness)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "Terrain Builders", PWColorSchemeName.SunFlower,
 				"TopDown2D Terrain", typeof(PWNodeTopDown2DTerrain)
@@ -121,7 +122,9 @@ namespace PW.Core
 				"Biome Binder", typeof(PWNodeBiomeBinder)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.Concrete,
-				"Terrain detail", typeof(PWNodeTerrainDetail)
+				"Terrain detail", typeof(PWNodeTerrainDetail),
+				"Surface switch", typeof(PWNodeBiomeSurfaceSwitch),
+				"Surface modifiers", typeof(PWNodeBiomeSurfaceModifiers)
 			),
 			new PWNodeTypeInfoList(PWMainGraph | PWBiomeGraph, "Debug", PWColorSchemeName.PeterRiver,
 				"DebugLog", typeof(PWNodeDebugInfo)

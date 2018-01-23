@@ -6,15 +6,15 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeSlope : PWNode
+	public class PWNodeBiomeSurfaceModifiers : PWNode
 	{
 	
-		string propUpdateKey = "PWNodeBiomeSlope";
+		string propUpdateKey = "PWNodeBiomeSurfaceModifiers";
 
 		//Called only when the node is created (not when it is enabled/loaded)
 		public override void OnNodeCreation()
 		{
-			name = "PWNodeBiomeSlope";
+			name = "PWNodeBiomeSurfaceModifiers";
 		}
 
 		public override void OnNodeEnable()
