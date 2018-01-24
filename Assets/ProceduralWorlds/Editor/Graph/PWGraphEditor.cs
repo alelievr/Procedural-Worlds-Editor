@@ -91,6 +91,14 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
+
+		//protection against node class rename
+		for (int i = 0; i < graph.nodes.Count; i++)
+		{
+			var node = graph.nodes[i];
+			if (node.GetType() == typeof(PWNode))
+				graph.RemoveNode(node);
+		}
 		
 		//disable events if mouse is above an eventMask Rect.
 		MaskEvents();

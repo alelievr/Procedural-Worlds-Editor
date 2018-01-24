@@ -62,8 +62,8 @@ namespace PW.Core
 			//Noises and masks:
             typeof(PWNodeCircleNoiseMask), typeof(PWNodePerlinNoise2D),
 
-			//Materializers:
-            typeof(PWNodeSideView2DTerrain), typeof(PWNodeTopDown2DTerrain),
+			//ChunkData:
+            typeof(PWNodeChunkData),
 
 			//Graph specific:
 			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeBiomeGraphInput),
@@ -111,9 +111,8 @@ namespace PW.Core
 				"Biome temperature map", typeof(PWNodeBiomeTemperature),
 				"Biome wetness map", typeof(PWNodeWetness)
 			),
-			new PWNodeTypeInfoList(PWMainGraph, "Terrain Builders", PWColorSchemeName.SunFlower,
-				"TopDown2D Terrain", typeof(PWNodeTopDown2DTerrain)
-				// "SideView2D Terrain", typeof(PWNodeSideView2DTerrain)
+			new PWNodeTypeInfoList(PWMainGraph, "ChunkData", PWColorSchemeName.SunFlower,
+				"Data to Chunk", typeof(PWNodeChunkData)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Turquoise,
 				"BiomeData decomposer", typeof(PWNodeBiomeDataDecomposer),

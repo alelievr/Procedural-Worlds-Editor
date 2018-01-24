@@ -1,0 +1,406 @@
+﻿
+      #include "UnityCG.cginc"
+      #include "AutoLight.cginc"
+      #include "Lighting.cginc"
+      #include "UnityPBSLighting.cginc"
+      #include "UnityStandardBRDF.cginc"
+
+      // splat
+      UNITY_DECLARE_TEX2DARRAY(_Diffuse);
+      float4 _Diffuse_TexelSize;
+      UNITY_DECLARE_TEX2DARRAY(_NormalSAO);
+      float4 _NormalSAO_TexelSize;
+
+      #if _USEEMISSIVEMETAL
+         UNITY_DECLARE_TEX2DARRAY(_EmissiveMetal);
+         float4 _EmissiveMetal_TexelSize;
+      #endif
+
+      half _Contrast;
+      UNITY_DECLARE_TEX2D(_Control0);
+      #if !_MAX4TEXTURES
+      UNITY_DECLARE_TEX2D_NOSAMPLER(_Control1);
+      #endif
+      #if !_MAX4TEXTURES && !_MAX8TEXTURES
+      UNITY_DECLARE_TEX2D_NOSAMPLER(_Control2);
+      #endif
+      #if !_MAX4TEXTURES && !_MAX8TEXTURES && !_MAX12TEXTURES
+      UNITY_DECLARE_TEX2D_NOSAMPLER(_Control3);
+      #endif
+
+      sampler2D_float _PerTexProps;
+      float2 uv_Control0;
+
+      float4 _UVScale; // scale and offset
+
+      struct TriplanarConfig
+      {
+         float3x3 uv0;
+         float3x3 uv1;
+         float3x3 uv2;
+         float3x3 uv3;
+         half3 pN;
+         half3 pN0;
+         half3 pN1;
+         half3 pN2;
+         half3 pN3;
+      };
+
+
+      struct Config
+      {
+         float2 uv;
+         float3 uv0;
+         float3 uv1;
+         float3 uv2;
+         float3 uv3;
+
+         half4 cluster0;
+         half4 cluster1;
+         half4 cluster2;
+         half4 cluster3;
+
+      };
+
+
+      struct MicroSplatLayer
+      {
+         half3 Albedo;
+         half3 Normal;
+         half Smoothness;
+         half Occlusion;
+         half Metallic;
+         half Height;
+         half3 Emission;
+      };
+
+
+      struct appdata 
+      {
+         float4 vertex : POSITION;
+         float4 tangent : TANGENT;
+         float3 normal : NORMAL;
+         float2 texcoord : TEXCOORD0;
+         float2 texcoord1 : TEXCOORD1;
+         float2 texcoord2 : TEXCOORD2;
+         #if _TERRAINBLENDING || _VSSHADOWMAP || _WINDSHADOWS || _SNOWSHADOWS
+         half4 color : COLOR;
+         #endif
+      };
+
+      struct Input 
+      {
+         float2 uv_Control0;
+         #if _MICROMESH
+         float2 uv2_Diffuse;
+         #endif
+         float3 viewDir;
+         float3 worldPos;
+         float3 worldNormal;
+         #if _TERRAINBLENDING || _VSSHADOWMAP || _WINDSHADOWS || _SNOWSHADOWS
+         fixed4 color : COLOR;
+         #endif
+         INTERNAL_DATA
+      };
+
+      // raw, unblended samples from arrays
+      struct RawSamples
+      {
+         half4 albedo0;
+         half4 albedo1;
+         half4 albedo2;
+         half4 albedo3;
+         half4 normSAO0;
+         half4 normSAO1;
+         half4 normSAO2;
+         half4 normSAO3;
+         #if _USEEMISSIVEMETAL
+            half4 emisMetal0;
+            half4 emisMetal1;
+            half4 emisMetal2;
+            half4 emisMetal3;
+         #endif
+      };
+
+      void InitRawSamples(inout RawSamples s)
+      {
+         s.normSAO0 = half4(0,0,0,1);
+         s.normSAO1 = half4(0,0,0,1);
+         s.normSAO2 = half4(0,0,0,1);
+         s.normSAO3 = half4(0,0,0,1);
+      }
+
+
+
+
+      #if _MAX2LAYER
+         inline half BlendWeights(half s1, half s2, half s3, half s4, half4 w)      { return s1 * w.x + s2 * w.y; }
+         inline half2 BlendWeights(half2 s1, half2 s2, half2 s3, half2 s4, half4 w) { return s1 * w.x + s2 * w.y; }
+         inline half3 BlendWeights(half3 s1, half3 s2, half3 s3, half3 s4, half4 w) { return s1 * w.x + s2 * w.y; }
+         inline half4 BlendWeights(half4 s1, half4 s2, half4 s3, half4 s4, half4 w) { return s1 * w.x + s2 * w.y; }
+      #elif _MAX3LAYER
+         inline half BlendWeights(half s1, half s2, half s3, half s4, half4 w)      { return s1 * w.x + s2 * w.y + s3 * w.z; }
+         inline half2 BlendWeights(half2 s1, half2 s2, half2 s3, half2 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z; }
+         inline half3 BlendWeights(half3 s1, half3 s2, half3 s3, half3 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z; }
+         inline half4 BlendWeights(half4 s1, half4 s2, half4 s3, half4 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z; }
+      #else
+         inline half BlendWeights(half s1, half s2, half s3, half s4, half4 w)      { return s1 * w.x + s2 * w.y + s3 * w.z + s4 * w.w; }
+         inline half2 BlendWeights(half2 s1, half2 s2, half2 s3, half2 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z + s4 * w.w; }
+         inline half3 BlendWeights(half3 s1, half3 s2, half3 s3, half3 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z + s4 * w.w; }
+         inline half4 BlendWeights(half4 s1, half4 s2, half4 s3, half4 s4, half4 w) { return s1 * w.x + s2 * w.y + s3 * w.z + s4 * w.w; }
+      #endif
+
+      #if _MAX3LAYER
+         #define SAMPLE_PER_TEX(varName, pixel, config, defVal) \
+            half4 varName##0 = defVal; \
+            half4 varName##1 = defVal; \
+            half4 varName##2 = defVal; \
+            half4 varName##3 = defVal; \
+            varName##0 = tex2Dlod(_PerTexProps, float4(config.uv0.z/16, pixel/16, 0, 0)); \
+            varName##1 = tex2Dlod(_PerTexProps, float4(config.uv1.z/16, pixel/16, 0, 0)); \
+            varName##2 = tex2Dlod(_PerTexProps, float4(config.uv2.z/16, pixel/16, 0, 0)); \
+
+      #elif _MAX2LAYER
+         #define SAMPLE_PER_TEX(varName, pixel, config, defVal) \
+            half4 varName##0 = defVal; \
+            half4 varName##1 = defVal; \
+            half4 varName##2 = defVal; \
+            half4 varName##3 = defVal; \
+            varName##0 = tex2Dlod(_PerTexProps, float4(config.uv0.z/16, pixel/16, 0, 0)); \
+            varName##1 = tex2Dlod(_PerTexProps, float4(config.uv1.z/16, pixel/16, 0, 0)); \
+
+      #else
+         #define SAMPLE_PER_TEX(varName, pixel, config, defVal) \
+            half4 varName##0 = tex2Dlod(_PerTexProps, float4(config.uv0.z/16, pixel/16, 0, 0)); \
+            half4 varName##1 = tex2Dlod(_PerTexProps, float4(config.uv1.z/16, pixel/16, 0, 0)); \
+            half4 varName##2 = tex2Dlod(_PerTexProps, float4(config.uv2.z/16, pixel/16, 0, 0)); \
+            half4 varName##3 = tex2Dlod(_PerTexProps, float4(config.uv3.z/16, pixel/16, 0, 0)); \
+
+      #endif
+
+      // 2 component normal blend?
+      half2 BlendNormal2(half2 base, half2 blend) { return normalize(float3(base.xy + blend.xy, 1)).xy; }
+      half3 BlendOverlay(half3 base, half3 blend) { return (base < 0.5 ? (2.0 * base * blend) : (1.0 - 2.0 * (1.0 - base) * (1.0 - blend))); }
+      half3 BlendMult2X(half3  base, half3 blend) { return (base * (blend * 2)); }
+
+
+      half4 ComputeWeights(half4 iWeights, half h0, half h1, half h2, half h3, half contrast)
+      {
+          #if _DISABLEHEIGHTBLENDING
+             return iWeights;
+          #else
+             // compute weight with height map
+             //half4 weights = half4(iWeights.x * h0, iWeights.y * h1, iWeights.z * h2, iWeights.w * h3);
+             half4 weights = half4(iWeights.x * max(h0,0.001), iWeights.y * max(h1,0.001), iWeights.z * max(h2,0.001), iWeights.w * max(h3,0.001));
+             
+             // Contrast weights
+             half maxWeight = max(max(weights.x, max(weights.y, weights.z)), weights.w);
+             half transition = max(contrast * maxWeight, 0.0001);
+             half threshold = maxWeight - transition;
+             half scale = 1.0 / transition;
+             weights = saturate((weights - threshold) * scale);
+             // Normalize weights.
+             half weightScale = 1.0f / (weights.x + weights.y + weights.z + weights.w);
+             weights *= weightScale;
+             return weights;
+          #endif
+      }
+
+      half HeightBlend(half h1, half h2, half slope, half contrast)
+      {
+         #if _DISABLEHEIGHTBLENDING
+            return slope;
+         #else
+            h2 = 1 - h2;
+            half tween = saturate((slope - min(h1, h2)) / max(abs(h1 - h2), 0.001)); 
+            half blend = saturate( ( tween - (1-contrast) ) / max(contrast, 0.001));
+            return blend;
+         #endif
+      }
+
+      #if _MAX4TEXTURES
+         #define TEXCOUNT 4
+      #elif _MAX8TEXTURES
+         #define TEXCOUNT 8
+      #elif _MAX12TEXTURES
+         #define TEXCOUNT 12
+      #else
+         #define TEXCOUNT 16
+      #endif
+
+      void Setup(out half4 weights, float2 uv, out Config config, fixed4 w0, fixed4 w1, fixed4 w2, fixed4 w3, float3 worldPos)
+      {
+         UNITY_INITIALIZE_OUTPUT(Config,config);
+         half4 indexes = 0;
+
+         fixed splats[TEXCOUNT];
+
+         splats[0] = w0.x;
+         splats[1] = w0.y;
+         splats[2] = w0.z;
+         splats[3] = w0.w;
+         #if !_MAX4TEXTURES
+            splats[4] = w1.x;
+            splats[5] = w1.y;
+            splats[6] = w1.z;
+            splats[7] = w1.w;
+         #endif
+         #if !_MAX4TEXTURES && !_MAX8TEXTURES
+            splats[8] = w2.x;
+            splats[9] = w2.y;
+            splats[10] = w2.z;
+            splats[11] = w2.w;
+         #endif
+         #if !_MAX4TEXTURES && !_MAX8TEXTURES && !_MAX12TEXTURES
+            splats[12] = w3.x;
+            splats[13] = w3.y;
+            splats[14] = w3.z;
+            splats[15] = w3.w;
+         #endif
+
+
+         weights[0] = 0;
+         weights[1] = 0;
+         weights[2] = 0;
+         weights[3] = 0;
+         indexes[0] = 0;
+         indexes[1] = 0;
+         indexes[2] = 0;
+         indexes[3] = 0;
+
+         int i = 0;
+         for (i = 0; i < TEXCOUNT; ++i)
+         {
+            fixed w = splats[i];
+            if (w >= weights[0])
+            {
+               weights[3] = weights[2];
+               indexes[3] = indexes[2];
+               weights[2] = weights[1];
+               indexes[2] = indexes[1];
+               weights[1] = weights[0];
+               indexes[1] = indexes[0];
+               weights[0] = w;
+               indexes[0] = i;
+            }
+            else if (w >= weights[1])
+            {
+               weights[3] = weights[2];
+               indexes[3] = indexes[2];
+               weights[2] = weights[1];
+               indexes[2] = indexes[1];
+               weights[1] = w;
+               indexes[1] = i;
+            }
+            else if (w >= weights[2])
+            {
+               weights[3] = weights[2];
+               indexes[3] = indexes[2];
+               weights[2] = w;
+               indexes[2] = i;
+            }
+            else if (w >= weights[3])
+            {
+               weights[3] = w;
+               indexes[3] = i;
+            }
+         }
+
+         // clamp and renormalize
+         #if _MAX2LAYER
+         weights.zw = 0;
+         weights.xy *= (1.0 / (weights.x + weights.y));
+         #endif
+         #if _MAX3LAYER
+         weights.w = 0;
+         weights.xyz *= (1.0 / (weights.x + weights.y + weights.z));
+         #endif
+
+
+         config.uv = uv;
+
+         #if _WORLDUV
+         uv = worldPos.xz;
+         #endif
+
+         float2 scaledUV = uv * _UVScale.xy + _UVScale.zw;
+         config.uv0 = float3(scaledUV, indexes.x);
+         config.uv1 = float3(scaledUV, indexes.y);
+         config.uv2 = float3(scaledUV, indexes.z);
+         config.uv3 = float3(scaledUV, indexes.w);
+
+
+
+      }
+
+      float ComputeMipLevel(float2 uv, float2 textureSize)
+      {
+         uv *= textureSize;
+         float2  dx_vtc        = ddx(uv);
+         float2  dy_vtc        = ddy(uv);
+         float delta_max_sqr   = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+         return 0.5 * log2(delta_max_sqr);
+      }
+
+      inline fixed2 UnpackNormal2(fixed4 packednormal)
+      {
+         #if defined(UNITY_NO_DXT5nm)
+          return packednormal.xy * 2 - 1;
+         #else
+          return packednormal.wy * 2 - 1;
+         #endif
+      }
+
+      half3 TriplanarHBlend(half h0, half h1, half h2, half3 pN, half contrast)
+      {
+         half3 blend = pN / dot(pN, half3(1,1,1));
+         float3 heights = float3(h0, h1, h2) + (blend * 3.0);
+         half height_start = max(max(heights.x, heights.y), heights.z) - contrast;
+         half3 h = max(heights - height_start.xxx, half3(0,0,0));
+         blend = h / dot(h, half3(1,1,1));
+         return blend;
+      }
+
+      // man I wish unity would wrap everything instead of only what they use. Just seems like a landmine for
+      // people like myself..
+      #if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(UNITY_COMPILER_HLSLCC) || defined(SHADER_API_PSSL)
+         #define MICROSPLAT_SAMPLE_TEX2D_LOD(tex,coord, lod) tex.SampleLevel (sampler##tex,coord, lod)
+         #define MICROSPLAT_SAMPLE_TEX2D_SAMPLER_LOD(tex,samplertex,coord, lod) tex.SampleLevel (sampler##samplertex,coord, lod)
+      #else
+         #define MICROSPLAT_SAMPLE_TEX2D_LOD(tex,coord,lod) tex2D (tex,coord,lod)
+         #define MICROSPLAT_SAMPLE_TEX2D_SAMPLER_LOD(tex,samplertex,coord,lod) tex2D (tex,coord,lod)
+      #endif
+
+
+
+      #if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE) || defined(SHADER_API_PSSL) || defined(UNITY_COMPILER_HLSLCC)
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) tex.SampleGrad (sampler##tex,coord,dx,dy)
+      #elif defined(SHADER_API_D3D9)
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) half4(0,1,0,0) 
+      #elif defined(UNITY_COMPILER_HLSL2GLSL) || defined(SHADER_TARGET_SURFACE_ANALYSIS)
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) tex2DArray(tex,coord,dx,dy)
+      #elif defined(SHADER_API_GLES)
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) half4(1,1,0,0)
+      #elif defined(SHADER_API_D3D11_9X)
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) half4(0,1,1,0) 
+      #else
+         #define MICROSPLAT_SAMPLE_TEX2D_GRAD(tex,coord,dx,dy) half4(0,0,1,0) 
+      #endif
+
+
+      #if _USELODMIP
+         #define MICROSPLAT_SAMPLE(tex, u, l) UNITY_SAMPLE_TEX2DARRAY_LOD(tex, u, l.x)
+      #elif _USEGRADMIP
+         #define MICROSPLAT_SAMPLE(tex, u, l) MICROSPLAT_SAMPLE_TEX2D_GRAD(tex, u, ddx(u), ddy(u))
+      #else
+         #define MICROSPLAT_SAMPLE(tex, u, l) UNITY_SAMPLE_TEX2DARRAY(tex, u)
+      #endif
+
+
+      #define MICROSPLAT_SAMPLE_DIFFUSE(u, cl, l) MICROSPLAT_SAMPLE(_Diffuse, u, l)
+      #define MICROSPLAT_SAMPLE_NORMAL(u, cl, l) MICROSPLAT_SAMPLE(_NormalSAO, u, l)
+      #define MICROSPLAT_SAMPLE_EMIS(u, cl, l) MICROSPLAT_SAMPLE(_EmissiveMetal, u, l)
+      #define MICROSPLAT_SAMPLE_DIFFUSE_LOD(u, cl, l) UNITY_SAMPLE_TEX2DARRAY_LOD(_Diffuse, u, l)
+
+
+

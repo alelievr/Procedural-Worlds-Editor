@@ -24,12 +24,27 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		base.OnEnable();
 		
 		OnWindowResize += WindowResizeCallback;
+		// OnGraphChanged += GraphLoadedCallback;
 
 		layout.LoadStyles(position);
 		
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
 		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
+	}
+
+	void GraphLoadedCallback(PWGraph graph)
+	{
+		if (graph == null)
+
+			return ;
+		
+		settingsBar.onDrawAdditionalSettings = DrawBiomeSettingsBar;
+	}
+
+	void DrawBiomeSettingsBar(Rect rect)
+	{
+
 	}
 
 	public override void OnGUI()
@@ -53,6 +68,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		base.OnDisable();
 		
 		OnWindowResize -= WindowResizeCallback;
+		// OnGraphChanged -= GraphLoadedCallback;
 	}
 
 }

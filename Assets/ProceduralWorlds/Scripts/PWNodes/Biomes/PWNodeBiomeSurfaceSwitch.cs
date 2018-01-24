@@ -14,8 +14,14 @@ namespace PW.Node
 		[PWInput, PWNotRequired]
 		public BiomeSurfaceSwitch	inputSwitch;
 
-		[PWInput]
-		public BiomeSurfaceMaps		inputMaps;
+		// [PWInput]
+		// public BiomeSurfaceMaps		inputMaps;
+
+		// [PWInput]
+		// public BiomeSurfaceColor	inputColor;
+
+		// [PWInput]
+		// public biomeSurfaceMaterial	inputMaterial;
 
 		[PWOutput]
 		public BiomeSurfaceSwitch	outputSwitch;
@@ -42,8 +48,32 @@ namespace PW.Node
 			}
 		}
 
+		public void UpdateSurfaceType(BiomeSurfaceType surfaceType)
+		{
+			switch (surfaceType)
+			{
+				case BiomeSurfaceType.SurfaceMaps:
+					SetAnchorVisibility("inputMaps", PWVisibility.Visible);
+					SetAnchorVisibility("inputColor", PWVisibility.Gone);
+					SetAnchorVisibility("inputMaterial", PWVisibility.Gone);
+					break ;
+				case BiomeSurfaceType.Color:
+					SetAnchorVisibility("inputMaps", PWVisibility.Gone);
+					SetAnchorVisibility("inputColor", PWVisibility.Visible);
+					SetAnchorVisibility("inputMaterial", PWVisibility.Gone);
+					break ;
+				case BiomeSurfaceType.Material:
+					SetAnchorVisibility("inputMaps", PWVisibility.Gone);
+					SetAnchorVisibility("inputColor", PWVisibility.Gone);
+					SetAnchorVisibility("inputMaterial", PWVisibility.Visible);
+					break ;
+			}
+		}
+
 		public override void OnNodeGUI()
 		{
+			UpdateSurfaceType(biomeGraphRef.surfaceType);
+
 			if (PWGUI.BeginFade("Height limit", boxStyle, ref surfaceSwitch.heightEnabled))
 			{
 				EditorGUIUtility.labelWidth = 60;

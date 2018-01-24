@@ -1,0 +1,4 @@
+
+      _VSGrassMap("VS Grass Map", 2D) = "white" {}
+      _VSTint("VS Tint", Color) = (0.5,0.5,0.5,1)
+      //global//_VSGrassFade("VS Fade", Vector) = (50, 150, 1, 1)

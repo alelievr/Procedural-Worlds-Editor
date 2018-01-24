@@ -114,14 +114,16 @@ namespace PW
 		{
 			foreach (var outputAnchor in outputAnchors)
 				foreach (var link in outputAnchor.links)
-					yield return link.toNode;
+					if (link.toNode != null)
+						yield return link.toNode;
 		}
 
 		public IEnumerable< PWNode >	GetInputNodes()
 		{
 			foreach (var anchor in inputAnchors)
 				foreach (var link in anchor.links)
-					yield return link.fromNode;
+					if (link.fromNode != null)
+						yield return link.fromNode;
 		}
 
 		public PWAnchor					GetAnchor(string fieldName, int index = 0)

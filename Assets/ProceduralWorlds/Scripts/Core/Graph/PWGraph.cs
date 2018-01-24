@@ -507,7 +507,10 @@ namespace PW.Core
 
 		public PWNode	FindNodeById(int nodeId)
 		{
-			return nodesDictionary[nodeId];
+			PWNode ret;
+			nodesDictionary.TryGetValue(nodeId, out ret);
+
+			return ret;
 		}
 
 		public T		FindNodeById< T >(int nodeId) where T : PWNode
@@ -565,13 +568,13 @@ namespace PW.Core
 			if (removeNode == inputNode || removeNode == outputNode)
 				return false;
 			
-			var item = nodesDictionary.First(kvp => kvp.Value == removeNode);
+			int id = removeNode.id;
 			nodes.Remove(removeNode);
 			
 			if (OnNodeRemoved != null)
 				OnNodeRemoved(removeNode);
 			
-			return nodesDictionary.Remove(item.Key);
+			return nodesDictionary.Remove(id);
 		}
 
 		public void		RemoveLink(PWNodeLink link)

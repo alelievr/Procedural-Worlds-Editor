@@ -205,6 +205,13 @@ namespace PW.Core
 		}
 	}
 	
+	public enum BiomeSurfaceType
+	{
+		SurfaceMaps,
+		Color,
+		Material,
+	}
+	
 	public enum SurfaceMapsType
 	{
 		Basic,
@@ -241,49 +248,53 @@ namespace PW.Core
 	}
 
 	[Serializable]
+	public class BiomeSurfaceColor
+	{
+		public Color		baseColor;
+
+		public Color		colorOverParam;
+	}
+
+	[Serializable]
+	public class biomeSurfaceMaterial
+	{
+		public Material		material;
+
+		public List< string >	propertiesOverParams = new List< string >();
+	}
+
+	[Serializable]
 	public class BiomeSurfaceSwitch
 	{
+		//slope limit
 		public bool					slopeEnabled;
 		public float				minSlope;
 		public float				maxSlope;
 
+		//height limit
 		public bool					heightEnabled;
 		public float				minHeight;
 		public float				maxHeight;
 
+		//param limit
 		public BiomeSwitchMode		paramType;
 		public bool					paramEnabled;
 		public float				minParam;
 		public float				maxParam;
-	}
 
-	[Serializable]
-	public class BiomeSurfaceSlopeMaps
-	{
-		public float					minSlope;
-		public float					maxSlope;
+		//surface
+		public BiomeSurfaceType		surfaceType; //same as PWBiomeGraph.surfaceType
+		public BiomeSurfaceMaps		surfaceMaps;
+		public BiomeSurfaceColor	surfaceColor;
+		public biomeSurfaceMaterial	surfaceMaterial;
 
-		public float					y;
-
-		public BiomeSurfaceMaps 		surfaceMaps;
-	}
-
-	[Serializable]
-	public class BiomeSurfaceLayer
-	{
-		public float							minHeight;
-		public float							maxHeight;
-
-		public string							name = "Layer name";
-		public bool								foldout = false;
-
-		public List< BiomeSurfaceSlopeMaps	>	slopeMaps = new List< BiomeSurfaceSlopeMaps >();
+		//TODO: details
 	}
 
 	[Serializable]
 	public class BiomeSurfaces
 	{
-		public List< BiomeSurfaceLayer >	biomeLayers = new List< BiomeSurfaceLayer >();
+		public List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
 	}
 
 	public class Biome

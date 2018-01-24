@@ -8,6 +8,7 @@ namespace PW.Core
 	{
 
 		public short			id;
+		public BiomeSurfaceType	surfaceType;
 
 		public override void InitializeInputAndOutputNodes()
 		{

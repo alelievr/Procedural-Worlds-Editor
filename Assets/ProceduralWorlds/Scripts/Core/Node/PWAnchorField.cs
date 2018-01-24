@@ -155,7 +155,7 @@ namespace PW.Core
 
 		public void LoadStylesAndAssets()
 		{
-			if (styleLoaded)
+			if (styleLoaded && inputAnchorLabelStyle != null)
 				return ;
 			
 			//styles:
@@ -168,6 +168,8 @@ namespace PW.Core
 			
 			//assets:
 			errorIcon = Resources.Load< Texture2D >("ic_error");
+			
+			styleLoaded = true;
 		}
 
 		public void OnDisable() {}

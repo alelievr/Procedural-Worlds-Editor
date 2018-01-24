@@ -1,0 +1,46 @@
+
+      void surf (Input i, inout SurfaceOutputStandard o) 
+      {
+         o.Normal = float3(0,0,1);
+         float3 worldNormalVertex = float3(0,1,0);
+         #if _SNOW || _TRIPLANAR || _STREAMS || _LAVA || _GLITTER || _SNOWGLITTER
+         worldNormalVertex = WorldNormalVector(i, float3(0,0,1));
+         #endif
+
+         MicroSplatLayer l = SurfImpl(i, worldNormalVertex);
+
+         // always write to o.Normal to keep i.viewDir consistent
+         o.Normal = half3(0, 0, 1);
+
+         #if _DEBUG_OUTPUT_ALBEDO
+            o.Albedo = l.Albedo;
+         #elif _DEBUG_OUTPUT_NORMAL
+            o.Albedo = l.Normal * 0.5 + 0.5;
+         #elif _DEBUG_OUTPUT_SMOOTHNESS
+            o.Albedo = l.Smoothness.xxx;
+         #elif _DEBUG_OUTPUT_METAL
+            o.Albedo = l.Metallic.xxx;
+         #elif _DEBUG_OUTPUT_AO
+            o.Albedo = l.Occlusion.xxx;
+         #elif _DEBUG_OUTPUT_EMISSION
+            o.Albedo = l.Emission;
+         #elif _DEBUG_OUTPUT_HEIGHT
+            o.Albedo = l.Height.xxx;
+         #else
+            o.Albedo = l.Albedo;
+            o.Normal = l.Normal;
+            o.Smoothness = l.Smoothness;
+            o.Metallic = l.Metallic;
+            o.Occlusion = l.Occlusion;
+            o.Emission = l.Emission;
+         #endif
+      }
+
+      // for debug shaders
+      half4 LightingUnlit(SurfaceOutputStandard s, half3 lightDir, half atten)
+      {
+         return half4(s.Albedo, 1);
+      }
+
+
+   

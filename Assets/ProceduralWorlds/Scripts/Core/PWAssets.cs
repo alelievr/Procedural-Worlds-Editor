@@ -11,7 +11,8 @@ using UnityEditor;
 
 namespace PW.Core
 {
-	public class PWAssets {
+	public class PWAssets
+	{
 
 		public static Texture2DArray	GenerateTexture2DArray(IEnumerable< Texture2D > texs)
 		{
@@ -89,13 +90,15 @@ namespace PW.Core
 		{
 			List< Texture2D > biomeTextures = new List< Texture2D >();
 			var biomeSurfaces = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces);
+			
 			foreach (var biomeSurface in biomeSurfaces)
-				if (biomeSurface.biomeLayers != null)
-					foreach (var layerSurface in biomeSurface.biomeLayers)
-						foreach (var slopeSurface in layerSurface.slopeMaps)
-							if (slopeSurface.surfaceMaps != null)
-								if (slopeSurface.surfaceMaps.albedo != null && !biomeTextures.Contains(slopeSurface.surfaceMaps.albedo))
-									biomeTextures.Add(slopeSurface.surfaceMaps.albedo);
+				if (biomeSurface.surfaceSwitches != null)
+					foreach (var surfaceSwitch in biomeSurface.surfaceSwitches)
+						if (surfaceSwitch.surfaceType == BiomeSurfaceType.SurfaceMaps)
+							if (surfaceSwitch.surfaceMaps != null)
+								if (surfaceSwitch.surfaceMaps.albedo != null && !biomeTextures.Contains(surfaceSwitch.surfaceMaps.albedo))
+									biomeTextures.Add(surfaceSwitch.surfaceMaps.albedo);
+									
 			return GenerateOrLoadTexture2DArray(fName, biomeTextures, forceReload);
 		}
 	}
