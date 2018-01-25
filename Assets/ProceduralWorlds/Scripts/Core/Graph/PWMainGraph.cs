@@ -28,7 +28,8 @@ namespace PW.Core
 		public bool						presetChoosed;
 
 		//chunk relative datas
-		public float					_geologicTerrainStep;
+		[SerializeField]
+		float							_geologicTerrainStep;
 		public float					geologicTerrainStep
 		{
 			get { return _geologicTerrainStep; }
@@ -45,6 +46,7 @@ namespace PW.Core
 
 		public PWGraphTerrainType		outputType;
 		public PWGraphProcessMode		processMode;
+		public MaterializerType			materializerType;
 
 		[System.NonSerialized]
 		Vector3							currentChunkPosition;

@@ -7,7 +7,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeSurfaceMaps : PWNode {
+	public class PWNodeBiomeSurfaceMaps : PWNode
+	{
 		
 		[PWInput("Albedo"), PWOffset(58), PWNotRequired]
 		public Texture2D		albedo;

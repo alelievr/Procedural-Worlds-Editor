@@ -12,7 +12,7 @@ namespace PW.Core
 	**	Parent class to store everything needed to render a chunk
 	*/
 	[Serializable]
-	public abstract class ChunkData
+	public class ChunkData
 	{
 		public int					size;
 		public MaterializerType		materializerType;
@@ -34,19 +34,6 @@ namespace PW.Core
 		{
 			return GetType().Name + "(" + size + ")";
 		}
-	}
-
-	[Serializable]
-	public class SideView2DData : ChunkData
-	{
-	}
-	
-	[Serializable]
-	public class TopDown2DData : ChunkData
-	{
-		//TODO for chunk saving to file: encode image to png and store path.
-		[System.NonSerializedAttribute]
-		public Texture2D	texture;
 	}
 
 	//TODO: other storage classes

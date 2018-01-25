@@ -131,12 +131,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			return ;
 		
 		terrainManager = new PWGraphTerrainManager(graph);
-		
-		terrainManager.LoadStyles();
 
 		settingsBar.onDrawAdditionalSettings = (rect) =>
 		{
-			terrainManager.DrawTerrainSettings(rect);
+			terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
 
 			//Main graph sepcific datas:
 			mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);

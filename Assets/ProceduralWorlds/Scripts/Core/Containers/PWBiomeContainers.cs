@@ -256,7 +256,7 @@ namespace PW.Core
 	}
 
 	[Serializable]
-	public class biomeSurfaceMaterial
+	public class BiomeSurfaceMaterial
 	{
 		public Material		material;
 
@@ -286,7 +286,7 @@ namespace PW.Core
 		public BiomeSurfaceType		surfaceType; //same as PWBiomeGraph.surfaceType
 		public BiomeSurfaceMaps		surfaceMaps;
 		public BiomeSurfaceColor	surfaceColor;
-		public biomeSurfaceMaterial	surfaceMaterial;
+		public BiomeSurfaceMaterial	surfaceMaterial;
 
 		//TODO: details
 	}

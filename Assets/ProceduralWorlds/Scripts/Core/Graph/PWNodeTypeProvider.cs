@@ -51,7 +51,7 @@ namespace PW.Core
 			//Primitives:
             typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial),
 			typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject),
-			typeof(PWNodeColor), typeof(PWNodeSurfaceMaps),
+			typeof(PWNodeColor), typeof(PWNodeBiomeSurfaceMaps),
 
 			//Operations:
             typeof(PWNodeAdd), typeof(PWNodeCurve),
@@ -88,7 +88,6 @@ namespace PW.Core
 				"Slider", typeof(PWNodeSlider),
 				"Constant", typeof(PWNodeConstant),
 				"Color", typeof(PWNodeColor),
-				"Surface maps", typeof(PWNodeSurfaceMaps),
 				"GameObject", typeof(PWNodeGameObject),
 				"Material", typeof(PWNodeMaterial),
 				"Texture2D", typeof(PWNodeTexture2D),
@@ -121,6 +120,9 @@ namespace PW.Core
 				"Biome Binder", typeof(PWNodeBiomeBinder)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.Concrete,
+				"Surface maps", typeof(PWNodeBiomeSurfaceMaps),
+				"Surface color", typeof(PWNodeBiomeSurfaceColor),
+				"Surface material", typeof(PWNodeBiomeSurfaceMaterial),
 				"Terrain detail", typeof(PWNodeTerrainDetail),
 				"Surface switch", typeof(PWNodeBiomeSurfaceSwitch),
 				"Surface modifiers", typeof(PWNodeBiomeSurfaceModifiers)

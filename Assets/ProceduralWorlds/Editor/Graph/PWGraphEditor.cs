@@ -18,6 +18,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	//the reference to the graph in public for the AssetHandlers class
 	public PWGraph				graph;
+	public PWBiomeGraph			biomeGraph { get { return graph as PWBiomeGraph; } }
+	public PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
 
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.

@@ -25,7 +25,8 @@ namespace PW
 
 	[System.SerializableAttribute]
 	[CreateAssetMenuAttribute]
-	public class PWTerrainStorage : ScriptableObject {
+	public class PWTerrainStorage : ScriptableObject
+	{
 		
 		[System.SerializableAttribute]
 		public class Chunk

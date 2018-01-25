@@ -20,12 +20,16 @@ namespace PW
 			return null;
 		}
 
-		public void				SetAnchorEnabled(string fieldName, bool enabled, int index = 0)
+		public void				SetAnchorEnabled(string fieldName, bool enabled, int index = 0, bool removeLink = true)
 		{
 			PWAnchor	anchor = GetAnchorFromField(fieldName, index);
 
 			if (anchor != null)
+			{
+				if (enabled == false && removeLink)
+					anchor.RemoveAllLinks();
 				anchor.enabled = enabled;
+			}
 		}
 	
 		public void				SetAnchorName(string fieldName, string newName, int index = 0)
@@ -44,12 +48,16 @@ namespace PW
 				anchor.color = newColor;
 		}
 
-		public void				SetAnchorVisibility(string fieldName, PWVisibility visibility, int index = 0)
+		public void				SetAnchorVisibility(string fieldName, PWVisibility visibility, int index = 0, bool removeLink = true)
 		{
 			PWAnchor	anchor = GetAnchorFromField(fieldName, index);
 
 			if (anchor != null)
+			{
+				if (visibility != PWVisibility.Visible && removeLink)
+					anchor.RemoveAllLinks();
 				anchor.visibility = visibility;
+			}
 		}
 
 		public void				SetMultiAnchor(string fieldName, int newCount, params string[] newNames)

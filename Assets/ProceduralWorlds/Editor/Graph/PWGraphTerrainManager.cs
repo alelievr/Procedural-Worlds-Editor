@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
+using System;
 
 namespace PW.Editor
 {
@@ -18,26 +19,35 @@ namespace PW.Editor
 
 		Event				e { get { return Event.current; } }
 
+		Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
+		{
+			{MaterializerType.SquareTileMap, typeof(PWTopDown2DTerrainSquare)},
+		};
+
 
 		public PWGraphTerrainManager(PWGraph graph)
 		{
 			this.graph = graph;
 		}
 
-		public void LoadStyles()
-		{
-
-		}
-	
-		public void DrawTerrainSettings(Rect settingsRect)
+		public void DrawTerrainSettings(Rect settingsRect, MaterializerType type)
 		{
 			if (terrain == null)
 				terrain = GameObject.FindObjectOfType< PWTerrainBase >();
 
 			if (terrain == null)
 				return ;
-
+			
 			terrainReference = terrain;
+			
+			Type expectedType = materializerTypes[type];
+
+			if (terrainReference.GetType() != expectedType)
+			{
+				GameObject go = terrainReference.gameObject;
+				GameObject.DestroyImmediate(terrainReference);
+				terrainReference = go.AddComponent(expectedType) as PWTerrainBase;
+			}
 
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
 

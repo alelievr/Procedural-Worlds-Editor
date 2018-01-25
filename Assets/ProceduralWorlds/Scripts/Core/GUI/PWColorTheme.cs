@@ -82,7 +82,8 @@ namespace PW.Core
 				typeof(float), typeof(Color), typeof(Vector2),
 				typeof(Vector3), typeof(Vector4), typeof(int),
 				typeof(GameObject), typeof(Mesh), typeof(Material),
-				typeof(Texture2D), typeof(BiomeSurfaceMaps) }
+				typeof(Texture2D), typeof(BiomeSurfaceMaps),
+				typeof(BiomeSurfaceColor), typeof(BiomeSurfaceMaterial) }
 			}, {
 				PWColorSchemeName.Amethyst, new List< Type >() {}
 			}, {

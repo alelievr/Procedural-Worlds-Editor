@@ -95,6 +95,7 @@ namespace PW.Core
 				}
 			}
 		}
+
 		public PWGraphType						graphType;
 
 

@@ -24,7 +24,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		base.OnEnable();
 		
 		OnWindowResize += WindowResizeCallback;
-		// OnGraphChanged += GraphLoadedCallback;
+		OnGraphChanged += GraphLoadedCallback;
 
 		layout.LoadStyles(position);
 		
@@ -36,7 +36,6 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	void GraphLoadedCallback(PWGraph graph)
 	{
 		if (graph == null)
-
 			return ;
 		
 		settingsBar.onDrawAdditionalSettings = DrawBiomeSettingsBar;
@@ -44,7 +43,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 	void DrawBiomeSettingsBar(Rect rect)
 	{
-
+		biomeGraph.surfaceType = (BiomeSurfaceType)EditorGUILayout.EnumPopup("Biome surface type", biomeGraph.surfaceType);
 	}
 
 	public override void OnGUI()
@@ -68,7 +67,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		base.OnDisable();
 		
 		OnWindowResize -= WindowResizeCallback;
-		// OnGraphChanged -= GraphLoadedCallback;
+		OnGraphChanged -= GraphLoadedCallback;
 	}
 
 }

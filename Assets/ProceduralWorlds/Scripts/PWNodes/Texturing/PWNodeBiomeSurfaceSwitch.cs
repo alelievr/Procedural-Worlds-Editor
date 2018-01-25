@@ -11,17 +11,14 @@ namespace PW.Node
 	public class PWNodeBiomeSurfaceSwitch : PWNode
 	{
 
-		[PWInput, PWNotRequired]
-		public BiomeSurfaceSwitch	inputSwitch;
+		[PWInput]
+		public BiomeSurfaceMaps		inputMaps;
 
-		// [PWInput]
-		// public BiomeSurfaceMaps		inputMaps;
+		[PWInput]
+		public BiomeSurfaceColor	inputColor;
 
-		// [PWInput]
-		// public BiomeSurfaceColor	inputColor;
-
-		// [PWInput]
-		// public biomeSurfaceMaterial	inputMaterial;
+		[PWInput]
+		public BiomeSurfaceMaterial	inputMaterial;
 
 		[PWOutput]
 		public BiomeSurfaceSwitch	outputSwitch;
@@ -79,6 +76,7 @@ namespace PW.Node
 				EditorGUIUtility.labelWidth = 60;
 				surfaceSwitch.minHeight = EditorGUILayout.FloatField("From", surfaceSwitch.minHeight);
 				surfaceSwitch.maxHeight = EditorGUILayout.FloatField("To", surfaceSwitch.maxHeight);
+				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
 			if (PWGUI.BeginFade("Slope limit", boxStyle, ref surfaceSwitch.slopeEnabled))
@@ -92,6 +90,7 @@ namespace PW.Node
 				EditorGUIUtility.labelWidth = 60;
 				surfaceSwitch.minParam = EditorGUILayout.FloatField("Min", surfaceSwitch.minParam);
 				surfaceSwitch.maxParam = EditorGUILayout.FloatField("Max", surfaceSwitch.maxParam);
+				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
 		}

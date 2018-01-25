@@ -11,10 +11,7 @@ namespace PW.Node
 		public BlendedBiomeTerrain	inputBlendedBiomes;
 
 		[PWOutput]
-		public TopDown2DData		terrainOutput;
-
-		[SerializeField]
-		MaterializerType			materializer;
+		public ChunkData			terrainOutput;
 
 		[SerializeField]
 		bool						blendMapsFoldout;
@@ -48,14 +45,14 @@ namespace PW.Node
 		{
 			name = "Data To Chunk";
 			//TODO: change the output type based on a popup
-			terrainOutput = new TopDown2DData();
+			terrainOutput = new ChunkData();
 		}
 
 		public override void OnNodeGUI()
 		{
 			int i = 0;
 			EditorGUIUtility.labelWidth = 80;
-			materializer = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", materializer);
+			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
 			
 			EditorGUILayout.LabelField("Output maps in chunk");
 			EditorGUIUtility.labelWidth = 66;
@@ -77,7 +74,7 @@ namespace PW.Node
 		{
 			terrainOutput.biomeMap = inputBlendedBiomes.biomeMap;
 			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
-			terrainOutput.materializerType = materializer;
+			terrainOutput.materializerType = mainGraphRef.materializerType;
 
 			//assign everything needed to the output chunk:
 			terrainOutput.size = chunkSize;
