@@ -36,6 +36,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new Sampler2D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
 
@@ -72,6 +75,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new Sampler2D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
 
@@ -109,6 +115,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new Sampler2D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
 
@@ -146,6 +155,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new Vector3Sampler3D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
 

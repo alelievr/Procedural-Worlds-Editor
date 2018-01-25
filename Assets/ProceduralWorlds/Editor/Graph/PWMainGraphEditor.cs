@@ -15,9 +15,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 {
 
 	[SerializeField]
-	PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
-
-	[SerializeField]
 	PWGraphLayout		layout = new PWGraphLayout();
 	
 	//terrain manager to configure terrain generation / preview

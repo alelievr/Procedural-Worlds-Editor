@@ -5,7 +5,8 @@ using PW.Core;
 
 namespace PW
 {
-	public class PWNoiseFunctions {
+	public class PWNoiseFunctions
+	{
 
 		public static Sampler2D Map(Sampler2D samp, float min, float max, bool alloc = false)
 		{

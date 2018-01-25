@@ -6,13 +6,15 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeSurfaceModifiers : PWNode
+	public class PWNodeBiomeMerger : PWNode
 	{
 
-		//Called only when the node is created (not when it is enabled/loaded)
+		[PWInput]
+		public BlendedBiomeTerrain	inputBlendedTerrain;
+
 		public override void OnNodeCreation()
 		{
-			name = "PWNodeBiomeSurfaceModifiers";
+			name = "Biome Merger";
 		}
 
 		public override void OnNodeEnable()

@@ -111,6 +111,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new Sampler2D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length * sizeof(float));
 
@@ -119,7 +122,7 @@ namespace PW.Core
 		
 		public override string ToString()
 		{
-			return "Samp2D(" + size + ")";
+			return "Samp2D(size: " + size + ", step: " + step + ", min: " + min + ", max: " + max + ")";
 		}
 	}
 
@@ -207,6 +210,9 @@ namespace PW.Core
 			else
 				newSampler = new Sampler3D(size, step);
 			
+			newSampler.min = min;
+			newSampler.max = max;
+			
 			System.Buffer.BlockCopy(map, 0, newSampler.map, 0, map.Length);
 
 			return newSampler;
@@ -214,7 +220,7 @@ namespace PW.Core
 
 		public override string ToString()
 		{
-			return "Samp3D(" + size + ")";
+			return "Samp3D(size: " + size + ", step: " + step + ", min: " + min + ", max: " + max + ")";
 		}
 	}
 

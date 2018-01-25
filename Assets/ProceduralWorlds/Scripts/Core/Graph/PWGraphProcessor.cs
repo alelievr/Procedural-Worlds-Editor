@@ -44,6 +44,9 @@ namespace PW.Core
 		{
 			if (!realMode)
 			{
+				var fromType = Type.GetType(link.fromNode.classAQName);
+				var toType = Type.GetType(link.toNode.classAQName);
+
 				if (link.fromAnchor == null || link.toAnchor == null)
 				{
 					Debug.LogError("[PW Process] null anchors in link: " + link);
@@ -63,20 +66,25 @@ namespace PW.Core
 				}
 
 				if (!bakedNodeFields.ContainsKey(link.fromNode.classAQName)
-					|| !bakedNodeFields.ContainsKey(link.toNode.classAQName)
-					|| !bakedNodeFields[link.fromNode.classAQName].ContainsKey(link.fromAnchor.fieldName)
+					|| !bakedNodeFields[link.fromNode.classAQName].ContainsKey(link.fromAnchor.fieldName))
+				{
+					Debug.LogError("[PW Process] Can't find field: "
+						+ link.fromAnchor.fieldName + " in " + fromType);
+					return true;
+				}
+
+				if (!bakedNodeFields.ContainsKey(link.toNode.classAQName)
 					|| !bakedNodeFields[link.toNode.classAQName].ContainsKey(link.toAnchor.fieldName))
 				{
 					Debug.LogError("[PW Process] Can't find field: "
-						+ link.fromAnchor.fieldName + " in " + link.fromNode.classAQName
-						+ " OR " + link.toAnchor.fieldName + " in " + link.toNode.classAQName);
+						+ link.toAnchor.fieldName + " in " + toType);
 					return true;
 				}
 					
 				if (bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node) == null)
 				{
 					Debug.Log("[PW Process] tring to assign null value from "
-						+ link.fromNode.classAQName + "." + link.fromAnchor.fieldName);
+						+ fromType + "." + link.fromAnchor.fieldName);
 					return true;
 				}
 			}

@@ -53,7 +53,6 @@ public class PWNodeAPITests
 
 		var add2Node = graph.FindNodeByName("add2");
 		var sliderNode = graph.FindNodeByName("slider");
-		var floatNode = graph.FindNodeByName("constant");
 		var debug2Node = graph.FindNodeByName("debug2");
 
 		var add2NodeInputAnchor = add2Node.inputAnchors.First();

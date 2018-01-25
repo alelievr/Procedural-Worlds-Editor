@@ -46,13 +46,15 @@ namespace PW.Core
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
 		static GUIStyle		centeredLabel;
-		static Material		lineMaterial;
 
 		[SerializeField]
 		List< PWGUISettings >	settingsStorage;
 		int						currentSettingCount = 0;
 
 		PWNode				attachedNode;
+		
+		[System.NonSerializedAttribute]
+		static MethodInfo	gradientField;
 
 		public void SetNode(PWNode node)
 		{
@@ -174,7 +176,6 @@ namespace PW.Core
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
 				if (fieldSettings.GetHashCode() == PWColorPicker.controlId)
 				{
-					Debug.Log("Color: " + fieldSettings.c);
 					fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
 					fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
 					GUI.changed = true;
@@ -219,6 +220,41 @@ namespace PW.Core
 			}
 		}
 	
+	#endregion
+
+	#region Gradient field
+
+	public Gradient GradientField(Gradient gradient)
+	{
+		return GradientField((GUIContent)null, gradient);
+	}
+
+	public Gradient GradientField(string label, Gradient gradient)
+	{
+		return GradientField(new GUIContent(label), gradient);
+	}
+
+	public Gradient GradientField(GUIContent content, Gradient gradient)
+	{
+		if (content != null && content.text != null)
+			EditorGUILayout.PrefixLabel(content);
+
+		if (gradientField == null)
+		{
+			gradientField = typeof(EditorGUILayout).GetMethod(
+				"GradientField",
+				BindingFlags.NonPublic | BindingFlags.Static,
+				null,
+				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
+				null
+			);
+		}
+
+		gradient = (Gradient)gradientField.Invoke(null, new object[] {"", gradient, null});
+
+		return gradient;
+	}
+
 	#endregion
 
 	#region Text field
@@ -900,7 +936,7 @@ namespace PW.Core
 
 			//click in the header to expand block
 			Rect headerRect = GUILayoutUtility.GetLastRect();
-			if (headerRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+			if (headerRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
 			{
 				settings.faded = !settings.faded;
 				e.Use();
@@ -1014,11 +1050,8 @@ namespace PW.Core
 			if (icColor != null)
 				return ;
 
-			Shader lineShader = EditorGUIUtility.LoadRequired("Editors/AnimationWindow/Curve.shader") as Shader;
-
 			icColor = Resources.Load("ic_color") as Texture2D;
 			icEdit = Resources.Load("ic_edit") as Texture2D;
-			lineMaterial = new Material(lineShader);
 			icSettingsOutline = Resources.Load("ic_settings_outline") as Texture2D;
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;

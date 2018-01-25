@@ -60,14 +60,16 @@ namespace PW.Node
 
 			if (samp.type == SamplerType.Sampler2D)
 			{
+				float d = samp.max - samp.min;
 				(samp as Sampler2D).Foreach((x, y, val) => {
-					return curve.Evaluate(val);
+					return curve.Evaluate(val / d) * d;
 				});
 			}
 			else if (samp.type == SamplerType.Sampler3D)
 			{
+				float d = samp.max - samp.min;
 				(samp as Sampler3D).Foreach((x, y, z, val) => {
-					return curve.Evaluate(val);
+					return curve.Evaluate(val / d) * d;
 				});
 			}
 

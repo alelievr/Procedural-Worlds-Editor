@@ -127,7 +127,7 @@ namespace PW.Core
 		static bool				styleLoaded = false;
 		static Texture2D		errorIcon = null;
 		static Texture2D		anchorTexture = null;
-		static Texture2D		anchorDisabledTexture = null;
+		// static Texture2D		anchorDisabledTexture = null;
 		
 		static GUIStyle			inputAnchorLabelStyle = null;
 		static GUIStyle			outputAnchorLabelStyle = null;
@@ -162,7 +162,7 @@ namespace PW.Core
 			boxAnchorStyle = new GUIStyle(GUI.skin.box);
 			boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			anchorTexture = GUI.skin.box.normal.background;
-			anchorDisabledTexture = GUI.skin.box.active.background;
+			// anchorDisabledTexture = GUI.skin.box.active.background;
 			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 			
@@ -347,7 +347,7 @@ namespace PW.Core
 			if (e.type == EventType.ContextClick)
 				Debug.Log(e.mousePosition);
 			foreach (var anchor in anchors)
-				if (anchor.rect.Contains(e.mousePosition))
+				if (anchor.visibility == PWVisibility.Visible && anchor.rect.Contains(e.mousePosition))
 				{
 					editorEvents.mouseOverAnchor = anchor;
 					editorEvents.isMouseOverAnchorFrame = true;

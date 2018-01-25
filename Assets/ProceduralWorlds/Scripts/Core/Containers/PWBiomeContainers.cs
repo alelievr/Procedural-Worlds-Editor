@@ -105,6 +105,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new BiomeMap2D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(blendMap, 0, newSampler.blendMap, 0, blendMap.Length);
 
@@ -146,6 +149,9 @@ namespace PW.Core
 			}
 			else
 				newSampler = new BiomeMap3D(size, step);
+				
+			newSampler.min = min;
+			newSampler.max = max;
 			
 			System.Buffer.BlockCopy(blendMap, 0, newSampler.blendMap, 0, blendMap.Length);
 
@@ -252,6 +258,9 @@ namespace PW.Core
 	{
 		public Color		baseColor;
 
+		public bool			colorOverParamEnabled;
+		public float		minRange;
+		public float		maxRange;
 		public Color		colorOverParam;
 	}
 

@@ -14,7 +14,6 @@ namespace PW
 	public partial class PWNode
 	{
 		static GUIStyle 			renameNodeTextFieldStyle = null;
-		static GUIStyle				debugStyle = null;
 		static GUIStyle				innerNodePaddingStyle = null;
 		static GUIStyle				nodeStyle = null;
 		static bool					styleLoadedStatic = false;
@@ -50,7 +49,6 @@ namespace PW
 
 			renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
 			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
-			debugStyle = GUI.skin.FindStyle("Debug");
 			nodeStyle = GUI.skin.FindStyle("Node");
 
 			styleLoaded = true;

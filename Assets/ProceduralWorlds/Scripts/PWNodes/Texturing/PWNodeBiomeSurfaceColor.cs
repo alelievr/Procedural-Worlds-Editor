@@ -25,7 +25,9 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			//your node GUI
+			PWGUI.ColorPicker("Base color", ref surfaceColor.baseColor);
+
+			// PWGUI.ColorPicker("Color over param", ref surfaceColor.colorOverParam);
 		}
 
 		public override void OnNodeProcess()

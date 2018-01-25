@@ -8,9 +8,6 @@ using PW;
 
 public partial class PWGraphEditor
 {
-
-	const float	tanPower = 50;
-
 	//process link creation, drag and select events + draw links
 	void RenderLinks()
 	{
@@ -55,6 +52,9 @@ public partial class PWGraphEditor
 				endPoint = toAnchor.rectInGraph.center;
 		}
 
+		float tanPower = (startPos - (Vector3)endPoint).magnitude / 2;
+		tanPower = Mathf.Clamp(tanPower, 0, 100);
+
 		DrawSelectedBezier(startPos, endPoint, startPos + startDir * tanPower, endPoint, anchor.colorSchemeName, 4, PWLinkHighlight.None);
 	}
 	
@@ -84,6 +84,9 @@ public partial class PWGraphEditor
 
 		Vector3 startDir = Vector3.right;
 		Vector3 endDir = Vector3.left;
+		
+		float tanPower = (startPos - endPos).magnitude / 2;
+		tanPower = Mathf.Clamp(tanPower, 0, 100);
 
 		Vector3 startTan = startPos + startDir * tanPower;
 		Vector3 endTan = endPos + endDir * tanPower;

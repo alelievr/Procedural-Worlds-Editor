@@ -195,7 +195,7 @@ namespace PW.Biomator
 				foreach (var outNode in outputNodeList)
 				{
 					BuildTreeInternal(outNode, currentNode.GetChildAt(childIndex, true), depth + 1, currentNode);
-					Type outNodeType = outNode.GetType();
+					// Type outNodeType = outNode.GetType();
 					// if (outNodeType == typeof(PWNodeBiomeSwitch) || outNodeType == typeof(PWNodeBiome))
 						childIndex++;
 				}
@@ -287,7 +287,7 @@ namespace PW.Biomator
 		{
 			bool			is3DBiomes = false;
 			bool			is3DTerrain = biomeData.terrain3D != null;
-			Biome[]			nearestBiomes = new Biome[biomeBlendCount];
+			// Biome[]			nearestBiomes = new Biome[biomeBlendCount];
 
 			//TODO: biome blend count > 1 management
 			

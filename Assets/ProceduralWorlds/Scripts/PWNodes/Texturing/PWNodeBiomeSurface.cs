@@ -29,6 +29,8 @@ namespace PW.Node
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 80;
+			
+			EditorGUILayout.LabelField("Texturing switches: " + GetInputNodes().Count());
 		}
 
 		//nothing to process, output already set

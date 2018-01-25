@@ -20,8 +20,6 @@ namespace PW.Node
 		PWBiomeGraph		biomeGraph;
 
 		Rect				biomeColorPreviewRect;
-	
-		string propUpdateKey = "PWNodeBiome";
 
 		public override void OnNodeCreation()
 		{

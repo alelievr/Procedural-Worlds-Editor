@@ -17,7 +17,6 @@ namespace PW.Editor
 		HorizontalSplitView				h2 = new HorizontalSplitView();
 
 		//Styles:
-		Texture2D	resizeHandleTexture = null;
 		Color		resizeHandleColor;
 
 		Event		e { get { return Event.current; } }

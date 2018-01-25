@@ -61,7 +61,6 @@ namespace PW.Core
 		{
 			var evt = EditorGUIUtility.CommandEvent(key);
 
-			Debug.Log("Sending update to " + windowToUpdate);
 			if (windowToUpdate != null)
 				windowToUpdate.SendEvent(evt);
 		}

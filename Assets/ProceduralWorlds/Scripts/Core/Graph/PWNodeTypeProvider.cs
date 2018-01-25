@@ -51,7 +51,7 @@ namespace PW.Core
 			//Primitives:
             typeof(PWNodeSlider), typeof(PWNodeTexture2D), typeof(PWNodeMaterial),
 			typeof(PWNodeConstant), typeof(PWNodeMesh), typeof(PWNodeGameObject),
-			typeof(PWNodeColor), typeof(PWNodeBiomeSurfaceMaps),
+			typeof(PWNodeColor),
 
 			//Operations:
             typeof(PWNodeAdd), typeof(PWNodeCurve),
@@ -73,8 +73,12 @@ namespace PW.Core
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
             typeof(PWNodeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
-			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeSurfaceSwitch),
-			typeof(PWNodeBiomeSurfaceModifiers)
+			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeMerger),
+			
+			//Texturing:
+			typeof(PWNodeBiomeSurfaceMaps), typeof(PWNodeBiomeSurfaceSwitch),
+			typeof(PWNodeBiomeSurfaceModifiers), typeof(PWNodeBiomeSurfaceColor),
+			typeof(PWNodeBiomeSurfaceMaterial), typeof(PWNodeTerrainDetail),
 		};
 
 		static List< PWNodeTypeInfoList > nodeInfoList = new List< PWNodeTypeInfoList >
@@ -102,13 +106,14 @@ namespace PW.Core
 				"Circle Noise Mask", typeof(PWNodeCircleNoiseMask)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "Biomes", PWColorSchemeName.Carrot,
-				"Biome", typeof(PWNodeBiome),
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
-				"Biome switch", typeof(PWNodeBiomeSwitch),
-				"Biome blender", typeof(PWNodeBiomeBlender),
 				"Biome temperature map", typeof(PWNodeBiomeTemperature),
-				"Biome wetness map", typeof(PWNodeWetness)
+				"Biome wetness map", typeof(PWNodeWetness),
+				"Biome switch", typeof(PWNodeBiomeSwitch),
+				"Biome", typeof(PWNodeBiome),
+				"Biome blender", typeof(PWNodeBiomeBlender),
+				"Biome merger", typeof(PWNodeBiomeMerger)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "ChunkData", PWColorSchemeName.SunFlower,
 				"Data to Chunk", typeof(PWNodeChunkData)
@@ -139,6 +144,12 @@ namespace PW.Core
 		{
 			mainGraphInfoList = nodeInfoList.Where(til => (til.allowedGraphMask & PWMainGraph) != 0).ToList();
 			biomeGraphInfoList = nodeInfoList.Where(til => (til.allowedGraphMask & PWBiomeGraph) != 0).ToList();
+
+			//check if all nodes in the NodeInfoList are also inside the allnodeTypes list:
+			foreach (var info in nodeInfoList)
+				foreach (var nodeInfo in info.typeInfos)
+					if (!allNodeTypes.Contains(nodeInfo.type))
+						Debug.LogError("[NodeTypeProvider]: The node type " + nodeInfo.type + " is not present in the allNodeTypes list !");
         }
 
         public static  IEnumerable< Type >  GetAllNodeTypes()

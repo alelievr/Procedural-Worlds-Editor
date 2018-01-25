@@ -21,11 +21,18 @@ namespace PW.Core
 		{
 			name = "Biome input";
 
+		}
+
+		public override void OnNodeEnable()
+		{
 			#if UNITY_EDITOR
 			
-			var graphs = Resources.FindObjectsOfTypeAll< PWMainGraph >();;
-			if (graphs.Length > 0)
-				previewGraph = graphs[0];
+			if (previewGraph == null)
+			{
+				var graphs = Resources.FindObjectsOfTypeAll< PWMainGraph >();;
+				if (graphs.Length > 0)
+					previewGraph = graphs[0];
+			}
 
 			#endif
 		}
@@ -54,6 +61,9 @@ namespace PW.Core
 			if (previewGraph == null)
 				return ;
 			
+			//we process the graph to provide the outputBiomeData
+			//it require that biomeGraph to be contained in the previewGraph.
+			previewGraph.Process();
 		}
 
 	}

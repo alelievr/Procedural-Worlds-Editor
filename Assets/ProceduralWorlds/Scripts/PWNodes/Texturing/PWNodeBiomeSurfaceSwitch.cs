@@ -23,8 +23,6 @@ namespace PW.Node
 		[PWOutput]
 		public BiomeSurfaceSwitch	outputSwitch;
 
-		string propUpdateKey = "PWNodeBiomeSurfaceSwitch";
-
 		[SerializeField]
 		BiomeSurfaceSwitch	surfaceSwitch = new BiomeSurfaceSwitch();
 
