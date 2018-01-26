@@ -22,7 +22,7 @@ namespace PW.Node
 		[SerializeField]
 		public PWBiomeSwitchList	switchList = new PWBiomeSwitchList();
 
-		public BiomeSwitchMode	switchMode;
+		public BiomeSwitchMode		switchMode;
 		string[]					biomeSwitchModes;
 
 		[SerializeField]
@@ -165,10 +165,15 @@ namespace PW.Node
 
 		void AdjustOutputBiomeArraySize()
 		{
+			int		outputArraySize = switchList.Count;
+
+			if (switchMode == BiomeSwitchMode.Water)
+				outputArraySize = 2;
+
 			//we adjust the size of the outputBiomes array to the size of the switchList
-			while (outputBiomes.Count < switchList.Count)
+			while (outputBiomes.Count < outputArraySize)
 				outputBiomes.Add(inputBiome, "outputBiome");
-			while (outputBiomes.Count > switchList.Count)
+			while (outputBiomes.Count > outputArraySize)
 				outputBiomes.RemoveAt(outputBiomes.Count - 1);
 		}
 

@@ -24,11 +24,14 @@ namespace PW.Core
 		{
 			GUILayout.Space(14);
 			
-			if (inputBiome != null)
-				EditorGUILayout.LabelField("Biome: " + inputBiome);
+			EditorGUILayout.LabelField("Biome: " + inputBiome);
 			
 			PWGUI.PWArrayField(inputValues);
 		}
 		
+		public override void OnNodeProcess()
+		{
+			Debug.Log("input biome: " + inputBiome);
+		}
 	}
 }

@@ -19,7 +19,7 @@ namespace PW.Core
 		{
 			var input = inputNode as PWNodeBiomeGraphInput;
 
-			input.outputBiomeData = biomeData;
+			input.outputPartialBiome = biomeData;
 		}
 
 		public Biome GetOutput()

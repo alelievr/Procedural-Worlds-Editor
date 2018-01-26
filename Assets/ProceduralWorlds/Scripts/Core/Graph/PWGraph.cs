@@ -168,6 +168,7 @@ namespace PW.Core
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnPostLinkCreated;
 		public event LinkAction					OnLinkRemoved;
+		public event Action						OnPostLinkRemoved;
 		public event LinkAction					OnLinkUnselected;
 		//parameter events:
 		public event Action						OnSeedChanged;
@@ -219,7 +220,7 @@ namespace PW.Core
 			//Events attach
 			OnGraphStructureChanged += GraphStructureChangedCallback;
 			OnPostLinkCreated += LinkChangedCallback;
-			OnLinkRemoved += LinkChangedCallback;
+			OnPostLinkRemoved += GraphStructureChangedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
 			OnAllNodeReady += NodeReadyCallback;
@@ -241,7 +242,7 @@ namespace PW.Core
 			//Events detach
 			OnGraphStructureChanged -= GraphStructureChangedCallback;
 			OnPostLinkCreated -= LinkChangedCallback;
-			OnLinkRemoved -= LinkChangedCallback;
+			OnPostLinkRemoved -= GraphStructureChangedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
 			OnAllNodeReady -= NodeReadyCallback;
@@ -539,7 +540,7 @@ namespace PW.Core
 			return CreateNewNode(typeof(T), position) as T;
 		}
 
-		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position)
+		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position, bool raiseEvents = true)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			
@@ -552,7 +553,7 @@ namespace PW.Core
 			nodes.Add(newNode);
 			nodesDictionary[newNode.id] = newNode;
 			
-			if (OnNodeAdded != null)
+			if (OnNodeAdded != null && raiseEvents)
 				OnNodeAdded(newNode);
 			
 			return newNode;
@@ -563,7 +564,7 @@ namespace PW.Core
 			return RemoveNode(nodesDictionary[nodeId]);
 		}
 
-		public bool		RemoveNode(PWNode removeNode)
+		public bool		RemoveNode(PWNode removeNode, bool raiseEvents = true)
 		{
 			//can't delete an input/output node
 			if (removeNode == inputNode || removeNode == outputNode)
@@ -572,15 +573,15 @@ namespace PW.Core
 			int id = removeNode.id;
 			nodes.Remove(removeNode);
 			
-			if (OnNodeRemoved != null)
+			if (OnNodeRemoved != null && raiseEvents)
 				OnNodeRemoved(removeNode);
 			
 			return nodesDictionary.Remove(id);
 		}
 
-		public void		RemoveLink(PWNodeLink link)
+		public void		RemoveLink(PWNodeLink link, bool raiseEvents = true)
 		{
-			if (OnLinkRemoved != null)
+			if (OnLinkRemoved != null && raiseEvents)
 				OnLinkRemoved(link);
 			
 			if (link.fromAnchor != null)
@@ -588,6 +589,9 @@ namespace PW.Core
 			if (link.toAnchor != null)
 				link.toAnchor.RemoveLinkReference(link);
 			nodeLinkTable.RemoveLink(link);
+
+			if (OnPostLinkRemoved != null && raiseEvents)
+				OnPostLinkRemoved();
 		}
 		
 		//Create a link from the anchor where the link was dragged and the parameter
@@ -624,7 +628,7 @@ namespace PW.Core
 		}
 
 		//create a link without checking for duplication
-		public PWNodeLink	CreateLink(PWAnchor fromAnchor, PWAnchor toAnchor)
+		public PWNodeLink	CreateLink(PWAnchor fromAnchor, PWAnchor toAnchor, bool raiseEvents = true)
 		{
 			PWNodeLink	link = new PWNodeLink();
 			PWAnchor	fAnchor = fromAnchor;
@@ -647,10 +651,10 @@ namespace PW.Core
 			nodeLinkTable.AddLink(link);
 
 			//raise link creation event
-			if (OnLinkCreated != null)
+			if (OnLinkCreated != null && raiseEvents)
 				OnLinkCreated(link);
 			
-			if (OnPostLinkCreated != null)
+			if (OnPostLinkCreated != null && raiseEvents)
 				OnPostLinkCreated(link);
 
 			if (Event.current != null)

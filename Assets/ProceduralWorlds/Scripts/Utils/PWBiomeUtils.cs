@@ -21,10 +21,15 @@ namespace PW
 		static Color[]		blackTexture;
 		static PWGUIManager	PWGUI = new PWGUIManager();
 	
-		public static void DrawBiomeInfos(BiomeData b)
+		public static void DrawBiomeInfos(Rect view, BiomeData b)
 		{
-			//TODO: non hard-coded window size ?
-			PWGUI.StartFrame(new Rect(0, 0, 200, 150));
+			if (b == null)
+			{
+				EditorGUILayout.LabelField("Null biome data");
+				return ;
+			}
+
+			PWGUI.StartFrame(view);
 			EditorGUILayout.LabelField("Biome datas:");
 
 			update = GUILayout.Button("Update maps");

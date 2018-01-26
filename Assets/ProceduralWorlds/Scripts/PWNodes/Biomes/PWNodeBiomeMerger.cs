@@ -34,7 +34,7 @@ namespace PW.Node
 		{
 			foreach (Biome biome in inputBlendedTerrain.biomes)
 			{
-				var terrain = biome.modifiedTerrain;
+				// var terrain = biome.modifiedTerrain;
 			}
 		}
 		

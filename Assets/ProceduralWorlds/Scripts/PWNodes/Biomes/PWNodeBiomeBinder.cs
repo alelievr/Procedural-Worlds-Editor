@@ -44,7 +44,6 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			//TODO: preview the modified terrain
 		}
 
 		public override void OnNodeAnchorLink(string prop, int index)
@@ -53,20 +52,8 @@ namespace PW.Node
 				outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
 		}
 
-		public override void OnNodeProcess()
+		void FillBiomeOutput()
 		{
-			if (outputBiome == null)
-				outputBiome = new Biome();
-			outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
-			outputBiome.biomeSurfaces = biomeSurfaces;
-		}
-
-		public override void OnNodeProcessOnce()
-		{
-			//just pass the biomeSurfaces to the blender for processOnce:
-			if (outputBiome == null)
-				outputBiome = new Biome();
-			
 			outputBiome.biomeSurfaces = biomeSurfaces;
 			outputBiome.id = inputPartialBiome.id;
 			outputBiome.name = inputPartialBiome.name;
@@ -75,6 +62,26 @@ namespace PW.Node
 
 			//we set our version of the terrain for future merge
 			outputBiome.modifiedTerrain = terrain;
+		}
+
+		public override void OnNodeProcess()
+		{
+			Debug.Log("Process binder");
+			if (outputBiome == null)
+				outputBiome = new Biome();
+			
+			FillBiomeOutput();
+		}
+
+		public override void OnNodeProcessOnce()
+		{
+			//just pass the biomeSurfaces to the blender for processOnce:
+			if (outputBiome == null)
+				outputBiome = new Biome();
+			
+			Debug.Log("Process !");
+			
+			FillBiomeOutput();
 		}
 	}
 }

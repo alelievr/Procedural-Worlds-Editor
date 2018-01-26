@@ -32,8 +32,8 @@ public partial class PWGraphEditor
 		Handles.BeginGUI();
 		foreach (var anchorField in node.outputAnchorFields)
 			foreach (var anchor in anchorField.anchors)
-				for (int i = 0; i < anchor.links.Count; i++)
-					DrawNodeCurve(anchor.links[i]);
+				foreach (var link in anchor.links)
+					DrawNodeCurve(link);
 		Handles.EndGUI();
 	}
 	
@@ -55,7 +55,7 @@ public partial class PWGraphEditor
 		float tanPower = (startPos - (Vector3)endPoint).magnitude / 2;
 		tanPower = Mathf.Clamp(tanPower, 0, 100);
 
-		DrawSelectedBezier(startPos, endPoint, startPos + startDir * tanPower, endPoint, anchor.colorSchemeName, 4, PWLinkHighlight.None);
+		DrawSelectedBezier(startPos, endPoint, startPos + startDir * tanPower, (Vector3)endPoint + -startDir * tanPower, anchor.colorSchemeName, 4, PWLinkHighlight.None);
 	}
 	
 	void DrawNodeCurve(PWNodeLink link)
@@ -67,8 +67,7 @@ public partial class PWGraphEditor
 		}
 		if (link.fromAnchor == null || link.toAnchor == null)
 		{
-			Debug.LogError("[PWGraphEditor] null anchors in a link, trying to remove it !");
-			graph.RemoveLink(link);
+			Debug.LogError("[PWGraphEditor] null anchors in a the link: " + link);
 			return ;
 		}
 

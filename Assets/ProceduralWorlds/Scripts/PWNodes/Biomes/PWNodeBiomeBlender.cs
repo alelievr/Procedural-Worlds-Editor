@@ -113,8 +113,11 @@ namespace PW.Node
 					if (id == biome.id)
 					{
 						biome.biomeGraph.SetInput(biomes[id]);
+						Debug.Log("Process biome graph " + biome.biomeGraph);
 						biome.biomeGraph.Process();
-						outputBlendedBiomeTerrain.biomes.Add(biome.biomeGraph.GetOutput());
+						Biome b = biome.biomeGraph.GetOutput();
+						Debug.Log("output biome: " + b);
+						outputBlendedBiomeTerrain.biomes.Add(b);
 					}
 			}
 
@@ -138,8 +141,11 @@ namespace PW.Node
 		
 		public override void OnNodeProcessOnce()
 		{
-			var biomes = inputBiomes.GetValues();
-			var biomeData = biomes[0].biomeDataReference;
+			var partialBiomes = inputBiomes.GetValues();
+			var biomeData = partialBiomes[0].biomeDataReference;
+
+			foreach (var partialBiome in partialBiomes)
+				partialBiome.biomeGraph.ProcessOnce();
 
 			if (biomeData == null)
 			{

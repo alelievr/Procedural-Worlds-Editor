@@ -40,7 +40,6 @@ namespace PW.Core
 
 		void DrawRainbowPicker()
 		{
-			GUIStyle colorPickerStyle = GUI.skin.FindStyle("ColorPicker");
 			GUILayout.Label(colorPickerTexture, GUILayout.Width(windowSize.x - colorPickerPadding.x), GUILayout.Height(windowSize.x - colorPickerPadding.y));
 			Rect colorPickerRect = GUILayoutUtility.GetLastRect();
 

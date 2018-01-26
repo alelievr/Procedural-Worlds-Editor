@@ -18,6 +18,8 @@ namespace PW.Core
 		NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
 		Dictionary< int, PWNode >	nodesDictionary;
 
+		PWGraph						currentGraph;
+
 	#region Initialization
 		
 		void BakeNode(System.Type t)
@@ -46,7 +48,8 @@ namespace PW.Core
 			{
 				if (link.fromAnchor == null || link.toAnchor == null)
 				{
-					Debug.LogError("[PW Process] null anchors in link: " + link + ", from node: " + node);
+					Debug.LogError("[PW Process] null anchors in link: " + link + ", from node: " + node + ", trying to removing this link");
+					currentGraph.RemoveLink(link, false);
 					return true;
 				}
 				
@@ -198,6 +201,8 @@ namespace PW.Core
 		{
 			float	calculTime = 0f;
 			bool	realMode = graph.IsRealMode();
+			
+			currentGraph = graph;
 
 			if (graph.GetComputeSortedNodes() == null)
 				graph.UpdateComputeOrder();
@@ -217,6 +222,8 @@ namespace PW.Core
 		{
 			float	calculTime = 0f;
 			bool	realMode = graph.IsRealMode();
+			
+			currentGraph = graph;
 
 			//sort nodes by compute order:
 			nodes.Sort((n1, n2) => n1.computeOrder.CompareTo(n2.computeOrder));
@@ -236,6 +243,8 @@ namespace PW.Core
 		{
 			if (graph.GetComputeSortedNodes() == null)
 				graph.UpdateComputeOrder();
+
+			currentGraph = graph;
 
 			foreach (var node in graph.GetComputeSortedNodes())
 			{

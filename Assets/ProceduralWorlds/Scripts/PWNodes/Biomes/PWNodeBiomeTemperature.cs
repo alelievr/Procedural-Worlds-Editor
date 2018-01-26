@@ -174,7 +174,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("Process !");
 			CreateTemperatureMapIfNotExists();
 
 			UpdateTemperatureMap();

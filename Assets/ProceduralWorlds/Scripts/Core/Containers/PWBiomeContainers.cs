@@ -313,6 +313,11 @@ namespace PW.Core
 		public Color					previewColor;
 		public short					id;
 		public PWBiomeGraph				biomeGraph;
+
+		public override string ToString()
+		{
+			return "Partial biome '" + name +"', id: " + id + ", data: " + biomeDataReference;
+		}
 	}
 
 	public class Biome

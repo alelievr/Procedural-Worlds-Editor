@@ -58,7 +58,7 @@ namespace PW.Node
 				}
 				else if (objType == typeof(BiomeData))
 				{
-					BiomeUtils.DrawBiomeInfos(obj as BiomeData);
+					BiomeUtils.DrawBiomeInfos(rect, obj as BiomeData);
 				}
 			}
 			else
