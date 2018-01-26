@@ -9,8 +9,8 @@ namespace PW.Node
 {
 	public class PWNodeBiomeBinder : PWNode {
 
-		[PWInput("Biome datas")]
-		public BiomeData			inputBiome;
+		[PWInput("Partial Biome")]
+		public PartialBiome			inputPartialBiome;
 		
 		[PWInput("Terrain"), PWNotRequired]
 		public Sampler				terrain;
@@ -49,15 +49,15 @@ namespace PW.Node
 
 		public override void OnNodeAnchorLink(string prop, int index)
 		{
-			if (prop == "inputBiome" && outputBiome != null)
-				outputBiome.biomeDataReference = inputBiome;
+			if (prop == "inputPartialBiome" && outputBiome != null)
+				outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
 		}
 
 		public override void OnNodeProcess()
 		{
 			if (outputBiome == null)
 				outputBiome = new Biome();
-			outputBiome.biomeDataReference = inputBiome;
+			outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
 			outputBiome.biomeSurfaces = biomeSurfaces;
 		}
 
@@ -68,35 +68,13 @@ namespace PW.Node
 				outputBiome = new Biome();
 			
 			outputBiome.biomeSurfaces = biomeSurfaces;
-			outputBiome.biomeDataReference = inputBiome;
+			outputBiome.id = inputPartialBiome.id;
+			outputBiome.name = inputPartialBiome.name;
+			outputBiome.previewColor = inputPartialBiome.previewColor;
+			outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
 
-			//merge the modified terrain if there is
-			if (terrain != null)
-			{
-				//if there is more than one biome in the chunk
-				if (inputBiome.ids.Count > 1)
-				{
-					Sampler2D terrain2D = terrain as Sampler2D;
-
-					if (terrain.type == SamplerType.Sampler2D)
-						inputBiome.terrain.Foreach((x, y, val) => {
-							float t = terrain2D[x, y];
-							var info = inputBiome.biomeIds.GetBiomeBlendInfo(x, y);
-							var p = (info.firstBiomeId == biomeGraphRef.id) ? info.firstBiomeBlendPercent : info.secondBiomeBlendPercent;
-
-							return t * p;
-						});
-					else
-						inputBiome.terrain3D.Foreach((x, y, z, val) => {
-							return val;
-						});
-				}
-				else
-				{
-					inputBiome.terrain = terrain as Sampler2D;
-					inputBiome.terrain3D = terrain as Sampler3D;
-				}
-			}
+			//we set our version of the terrain for future merge
+			outputBiome.modifiedTerrain = terrain;
 		}
 	}
 }

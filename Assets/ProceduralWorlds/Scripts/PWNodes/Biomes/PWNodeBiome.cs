@@ -14,7 +14,7 @@ namespace PW.Node
 		public BiomeData	inputBiomeData;
 
 		[PWOutput]
-		public Biome		outputBiome;
+		public PartialBiome	outputBiome;
 
 		[SerializeField]
 		PWBiomeGraph		biomeGraph;
@@ -28,7 +28,7 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
-			outputBiome = new Biome();
+			outputBiome = new PartialBiome();
 		}
 
 		public override void OnNodeGUI()

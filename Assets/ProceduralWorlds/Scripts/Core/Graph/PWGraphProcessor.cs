@@ -44,14 +44,14 @@ namespace PW.Core
 		{
 			if (!realMode)
 			{
-				var fromType = Type.GetType(link.fromNode.classAQName);
-				var toType = Type.GetType(link.toNode.classAQName);
-
 				if (link.fromAnchor == null || link.toAnchor == null)
 				{
-					Debug.LogError("[PW Process] null anchors in link: " + link);
+					Debug.LogError("[PW Process] null anchors in link: " + link + ", from node: " + node);
 					return true;
 				}
+				
+				var fromType = Type.GetType(link.fromNode.classAQName);
+				var toType = Type.GetType(link.toNode.classAQName);
 
 				if (!nodesDictionary.ContainsKey(link.toNode.id))
 				{

@@ -32,8 +32,8 @@ public partial class PWGraphEditor
 		Handles.BeginGUI();
 		foreach (var anchorField in node.outputAnchorFields)
 			foreach (var anchor in anchorField.anchors)
-				foreach (var link in anchor.links)
-					DrawNodeCurve(link);
+				for (int i = 0; i < anchor.links.Count; i++)
+					DrawNodeCurve(anchor.links[i]);
 		Handles.EndGUI();
 	}
 	

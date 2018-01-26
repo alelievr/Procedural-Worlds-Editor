@@ -8,8 +8,8 @@ namespace PW.Core
 {
 	public class PWNodeBiomeGraphInput : PWNode
 	{
-		[PWOutput("Biome data")]
-		public BiomeData			outputBiomeData;
+		[PWOutput("Partial Biome data")]
+		public PartialBiome			outputBiomeData;
 		
 		[PWOutput]
 		public PWArray< object >	outputValues = new PWArray< object >();
@@ -50,7 +50,7 @@ namespace PW.Core
 				EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
 			
 			if (outputBiomeData != null)
-				BiomeUtils.DrawBiomeInfos(outputBiomeData);
+				BiomeUtils.DrawBiomeInfos(outputBiomeData.biomeDataReference);
 		}
 
 		public override void OnNodeProcess()

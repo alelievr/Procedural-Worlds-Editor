@@ -10,11 +10,11 @@ namespace PW.Node
 	public class PWNodeBiomeDataDecomposer : PWNode
 	{
 
-		[PWInput("Biome Data")]
-		public BiomeData		inputBiomeData;
+		[PWInput("Partial Biome")]
+		public PartialBiome		inputPartialBiome;
 
-		[PWOutput("Biome Data")]
-		public BiomeData		outputBiomeData;
+		[PWOutput("Partial Biome")]
+		public PartialBiome		outputBiomeData;
 
 		[PWOutput("Terrain")]
 		public Sampler			outputTerrain;
@@ -40,16 +40,18 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (inputBiomeData == null)
+			if (inputPartialBiome == null)
 			{
-				Debug.LogError("[PWNodeBiomeDataDecomposer]: Null input biome data");
+				Debug.LogError("[PWNodeBiomeDataDecomposer]: Null input partial biome data");
 				return ;
 			}
 
-			outputBiomeData = inputBiomeData;
-			outputTerrain = inputBiomeData.terrainRef;
-			outputTemperatureMap = inputBiomeData.temperatureRef;
-			outputWetnessMap = inputBiomeData.wetnessRef;
+			var biomeData = inputPartialBiome.biomeDataReference;
+
+			outputBiomeData = inputPartialBiome;
+			outputTerrain = biomeData.terrainRef;
+			outputTemperatureMap = biomeData.temperatureRef;
+			outputWetnessMap = biomeData.wetnessRef;
 		}
 		
 	}

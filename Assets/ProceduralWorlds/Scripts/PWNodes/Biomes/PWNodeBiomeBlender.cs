@@ -8,10 +8,11 @@ using PW.Biomator;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeBlender : PWNode {
+	public class PWNodeBiomeBlender : PWNode
+	{
 
 		[PWInput]
-		public PWArray< Biome >		inputBiomes = new PWArray< Biome >();
+		public PWArray< PartialBiome >		inputBiomes = new PWArray< PartialBiome >();
 
 		[PWOutput]
 		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
@@ -103,28 +104,24 @@ namespace PW.Node
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 
+			outputBlendedBiomeTerrain.biomes.Clear();
+
 			//once the biome data is filled, we call the biome graphs corresponding to the biome id
 			foreach (var id in biomeData.ids)
 			{
 				foreach (var biome in biomes)
 					if (id == biome.id)
 					{
-						biome.biomeGraph.id = id;
-						biome.biomeGraph.SetInput(biomeData);
+						biome.biomeGraph.SetInput(biomes[id]);
 						biome.biomeGraph.Process();
+						outputBlendedBiomeTerrain.biomes.Add(biome.biomeGraph.GetOutput());
 					}
 			}
 
 			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;
 			outputBlendedBiomeTerrain.biomeMap3D = biomeData.biomeIds3D;
 			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
-			outputBlendedBiomeTerrain.terrain = biomeData.terrainRef;
-			outputBlendedBiomeTerrain.waterHeight = biomeData.waterHeight;
-			outputBlendedBiomeTerrain.wetnessMap = biomeData.wetnessRef;
-			outputBlendedBiomeTerrain.temperatureMap = biomeData.temperatureRef;
-			outputBlendedBiomeTerrain.windMap = biomeData.windRef;
-			outputBlendedBiomeTerrain.lightingMap = biomeData.lighting;
-			outputBlendedBiomeTerrain.airMap = biomeData.airRef;
+			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
 
 		void OnReloadCallback(PWNode from)

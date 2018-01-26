@@ -90,7 +90,7 @@ namespace PW.Core
 				PWColorSchemeName.Emerald, new List< Type >() { typeof(Sampler) }
 			}, {
 				PWColorSchemeName.Carrot, new List< Type >() {
-					typeof(Biome), typeof(BiomeData) }
+					typeof(Biome), typeof(BiomeData), typeof(PartialBiome) }
 			}, {
 				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
 			}, {

@@ -86,7 +86,7 @@ namespace PW.Core
 			return ret;
 		}
 	
-		public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName, bool forceReload = false)
+		/*public static Texture2DArray	GenerateOrLoadBiomeTexture2DArray(BiomeSwitchTree bst, string fName, bool forceReload = false)
 		{
 			List< Texture2D > biomeTextures = new List< Texture2D >();
 			var biomeSurfaces = bst.GetBiomes().OrderBy(kp => kp.Key).Select(kp => kp.Value.biomeSurfaces);
@@ -100,6 +100,6 @@ namespace PW.Core
 									biomeTextures.Add(surfaceSwitch.surfaceMaps.albedo);
 									
 			return GenerateOrLoadTexture2DArray(fName, biomeTextures, forceReload);
-		}
+		}*/
 	}
 }

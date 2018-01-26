@@ -76,18 +76,20 @@ namespace PW.Node
 			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
 			terrainOutput.materializerType = mainGraphRef.materializerType;
 
+			var biomeData = inputBlendedBiomes.biomeData;
+
 			//assign everything needed to the output chunk:
 			terrainOutput.size = chunkSize;
 			if (outputMaps[0].active)
-				terrainOutput.terrain = inputBlendedBiomes.terrain;
+				terrainOutput.terrain = biomeData.terrain;
 			if (outputMaps[1].active)
-				terrainOutput.wetnessMap = inputBlendedBiomes.wetnessMap;
+				terrainOutput.wetnessMap = biomeData.wetnessRef;
 			if (outputMaps[2].active)
-				terrainOutput.temperatureMap = inputBlendedBiomes.temperatureMap;
+				terrainOutput.temperatureMap = biomeData.temperatureRef;
 			if (outputMaps[3].active)
-				terrainOutput.airMap = inputBlendedBiomes.airMap;
+				terrainOutput.airMap = biomeData.airRef;
 			if (outputMaps[4].active)
-				terrainOutput.lightingMap = inputBlendedBiomes.lightingMap;
+				terrainOutput.lightingMap = biomeData.lighting;
 		}
 	}
 }

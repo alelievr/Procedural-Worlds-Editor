@@ -19,8 +19,8 @@ namespace PW.Biomator
 		private BiomeSwitchNode				root = null;
 		private short						biomeIdCount = 0;
 
-		private Dictionary< int, Biome >	biomePerId = new Dictionary< int, Biome >();
-		private Dictionary< string, Biome >	biomePerName = new Dictionary< string, Biome >();
+		private Dictionary< int, PartialBiome >	biomePerId = new Dictionary< int, PartialBiome >();
+		private Dictionary< string, PartialBiome >	biomePerName = new Dictionary< string, PartialBiome >();
 		private Dictionary< BiomeSwitchMode, float > biomeCoverage = new Dictionary< BiomeSwitchMode, float >();
 
 		private enum SwitchMode
@@ -37,7 +37,7 @@ namespace PW.Biomator
 			public bool					value;
 			public SwitchMode			mode;
 			public BiomeSwitchMode	biomeSwitchMode;
-			public Biome				biome;
+			public PartialBiome			partialBiome;
 			public Color				previewColor;
 			public string				biomeName;
 
@@ -56,7 +56,7 @@ namespace PW.Biomator
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
 				this.previewColor = previewColor;
-				this.biome = null;
+				this.partialBiome = null;
 			}
 			
 			public void SetSwitchValue(bool value, BiomeSwitchMode biomeSwitchMode, string biomeName, Color previewColor)
@@ -66,12 +66,12 @@ namespace PW.Biomator
 				this.biomeSwitchMode = biomeSwitchMode;
 				this.biomeName = biomeName;
 				this.previewColor = previewColor;
-				this.biome = null;
+				this.partialBiome = null;
 			}
 
-			public void SetBiome(Biome b)
+			public void SetPartialBiome(PartialBiome b)
 			{
-				biome = b;
+				partialBiome = b;
 			}
 
 			public BiomeSwitchNode GetNext(float value)
@@ -213,22 +213,22 @@ namespace PW.Biomator
 				}
 
 				//Biome biomeNode detected, assign the biome to the current Node:
-				currentNode.biome = biomeNode.outputBiome;
+				currentNode.partialBiome = biomeNode.outputBiome;
 
 				// Debug.Log("current node: " + currentNode + ", preview color: " + currentNode.previewColor);
 
-				//set the biome ID and name:
-				currentNode.biome.name = biomeName;
-				currentNode.biome.id = biomeIdCount++;
+				//set the partialBiome ID and name:
+				currentNode.partialBiome.name = biomeName;
+				currentNode.partialBiome.id = biomeIdCount++;
 
-				//set the color and the id of the biome in the biomeNode
+				//set the color and the id of the partialBiome in the biomeNode
 				biomeNode.outputBiome.previewColor = currentNode.previewColor;
-				biomeNode.outputBiome.id = currentNode.biome.id;
-				biomeNode.outputBiome.name = currentNode.biome.name;
+				biomeNode.outputBiome.id = currentNode.partialBiome.id;
+				biomeNode.outputBiome.name = currentNode.partialBiome.name;
 
-				//store the biome in dictionaries for fast access
-				biomePerId[currentNode.biome.id] = currentNode.biome;
-				biomePerName[biomeName] = currentNode.biome;
+				//store the partialBiome in dictionaries for fast access
+				biomePerId[currentNode.partialBiome.id] = currentNode.partialBiome;
+				biomePerName[biomeName] = currentNode.partialBiome;
 			}
 			else
 			{
@@ -273,13 +273,13 @@ namespace PW.Biomator
 			DumpBiomeTree(root);
 			string	childs = "";
 			foreach (var child in current.GetChilds())
-				childs += child + "(" + child.biome + ") | ";
+				childs += child + "(" + child.partialBiome + ") | ";
 			Debug.Log("swicth line1: " + childs);
 
 			childs = "";
 			foreach (var child in current.GetChilds())
 				foreach (var childOfChild in child.GetChilds())
-					childs += childOfChild + "(" + childOfChild.biome + ") | ";
+					childs += childOfChild + "(" + childOfChild.partialBiome + ") | ";
 			Debug.Log("swicth line2: " + childs);
 		}
 
@@ -289,7 +289,7 @@ namespace PW.Biomator
 			bool			is3DTerrain = biomeData.terrain3D != null;
 			// Biome[]			nearestBiomes = new Biome[biomeBlendCount];
 
-			//TODO: biome blend count > 1 management
+			//TODO: partialBiome blend count > 1 management
 			
 			//TODO: biomeData.datas3D null check
 			if (biomeData.air3D != null || biomeData.wind3D != null || biomeData.wetness3D != null || biomeData.temperature3D != null)
@@ -327,7 +327,7 @@ namespace PW.Biomator
 					while (true)
 					{
 						nextChild:
-						if (current.biome != null)
+						if (current.partialBiome != null)
 							break ;
 						int childCount = current.GetChildCount();
 						for (int i = 0; i < childCount; i++)
@@ -353,22 +353,25 @@ namespace PW.Biomator
 									break ;
 							}
 						}
-						//if flow reach this part, values are missing in the biome graph so biome can't be chosen.
+						//if flow reach this part, values are missing in the partialBiome graph so partialBiome can't be chosen.
 						break ;
 					}
 
-					//add our id to the list of ids if it's not already added
-					if (!biomeData.ids.Contains(current.biome.id))
-						biomeData.ids.Add(current.biome.id);
+					if (current.partialBiome == null)
+						continue ;
 
-					//TODO: blending with second biome
-					if (current.biome != null)
-						biomeData.biomeIds.SetFirstBiomeId(x, y, current.biome.id);
+					//add our id to the list of ids if it's not already added
+					if (!biomeData.ids.Contains(current.partialBiome.id))
+						biomeData.ids.Add(current.partialBiome.id);
+
+					//TODO: blending with second partialBiome
+					if (current.partialBiome != null)
+						biomeData.biomeIds.SetFirstBiomeId(x, y, current.partialBiome.id);
 					else
 					{
 						//FIXME!!!!
 						biomeData.biomeIds.SetFirstBiomeId(x, y, -1);
-						// PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 200);
+						// PWUtils.LogWarningMax("Can't choose partialBiome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 200);
 						PWUtils.LogWarningMax("Can't choose biome with water:" + water + ", temp: " + temp + ", wet: " + wet + ", height: " + height, 300);
 						continue ;
 					}
@@ -381,21 +384,21 @@ namespace PW.Biomator
 			return biomePerId.Count;
 		}
 
-		public Biome GetBiome(string name)
+		public PartialBiome GetBiome(string name)
 		{
 			if (biomePerName.ContainsKey(name))
 				return biomePerName[name];
 			return null;
 		}
 
-		public Biome GetBiome(int id)
+		public PartialBiome GetBiome(int id)
 		{
 			if (biomePerId.ContainsKey(id))
 				return biomePerId[id];
 			return null;
 		}
 
-		public Dictionary< int, Biome > GetBiomes()
+		public Dictionary< int, PartialBiome > GetBiomes()
 		{
 			return biomePerId;
 		}

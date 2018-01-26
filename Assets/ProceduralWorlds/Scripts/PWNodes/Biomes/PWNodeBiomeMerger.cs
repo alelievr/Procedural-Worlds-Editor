@@ -12,6 +12,9 @@ namespace PW.Node
 		[PWInput]
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
+		// [PWOutput]
+		// public FinalBiome
+
 		public override void OnNodeCreation()
 		{
 			name = "Biome Merger";
@@ -29,7 +32,10 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			//write here the process which take inputs, transform them and set outputs.
+			foreach (Biome biome in inputBlendedTerrain.biomes)
+			{
+				var terrain = biome.modifiedTerrain;
+			}
 		}
 		
 	}

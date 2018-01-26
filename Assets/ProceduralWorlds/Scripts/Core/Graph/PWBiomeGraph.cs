@@ -7,7 +7,6 @@ namespace PW.Core
 	public class PWBiomeGraph : PWGraph
 	{
 
-		public short			id;
 		public BiomeSurfaceType	surfaceType;
 
 		public override void InitializeInputAndOutputNodes()
@@ -16,7 +15,7 @@ namespace PW.Core
 			outputNode = CreateNewNode< PWNodeBiomeGraphOutput >(new Vector2(100, 0));
 		}
 
-		public void SetInput(BiomeData biomeData)
+		public void SetInput(PartialBiome biomeData)
 		{
 			var input = inputNode as PWNodeBiomeGraphInput;
 

@@ -306,31 +306,35 @@ namespace PW.Core
 		public List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
 	}
 
-	public class Biome
+	public class PartialBiome
 	{
 		public BiomeData				biomeDataReference;
 		public string					name;
 		public Color					previewColor;
 		public short					id;
 		public PWBiomeGraph				biomeGraph;
+	}
 
+	public class Biome
+	{
+		public BiomeData				biomeDataReference;
+		public string					name;
+		public Color					previewColor;
+		public short					id;
+
+		//datas added by the biome graph
+		public Sampler					modifiedTerrain;
 		public BiomeSurfaces			biomeSurfaces;
 	}
 
 	public class BlendedBiomeTerrain
 	{
 		public BiomeSwitchTree		biomeTree;
+		public BiomeData			biomeData;
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
 
-		public Sampler				terrain;
-		public Sampler				biomeTerrain;
-		public Sampler				waterHeight;
-		public Sampler				wetnessMap;
-		public Sampler				temperatureMap;
-		public Sampler				windMap;
-		public Sampler				lightingMap;
-		public Sampler				airMap;
+		public List< Biome >		biomes = new List< Biome >();
 	}
 	
 }
