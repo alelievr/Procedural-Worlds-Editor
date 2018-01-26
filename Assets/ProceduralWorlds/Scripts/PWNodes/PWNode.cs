@@ -364,6 +364,7 @@ namespace PW
 				anchorField.DisableIfUnlinkable(anchor);
 		}
 
+		//reset anchor colors and visibility after a link was dragged.
 		void		ResetUnlinkableAnchors()
 		{
 			foreach (var anchorField in inputAnchorFields)
@@ -372,6 +373,7 @@ namespace PW
 				anchorField.ResetLinkable();
 		}
 	
+		//Look for required input anchors and check if there are linked, if not we set the canWork bool to false.
 		void		UpdateWorkStatus()
 		{
 			canWork = false;
@@ -381,11 +383,14 @@ namespace PW
 				if (anchorField.required && !anchorField.multiple)
 				{
 					foreach (var anchor in anchorField.anchors)
+					{
+						if (anchor.visibility != PWVisibility.Visible)
+							continue ;
+						
+						//check if the input anchor is linked and exit if not
 						if (anchor.linkCount == 0)
-						{
-							// Debug.Log("node " + GetType() + " can't work cauz it's anchor " + anchor.fieldName + " is not linked");
 							return ;
-						}
+					}
 				}
 			}
 			

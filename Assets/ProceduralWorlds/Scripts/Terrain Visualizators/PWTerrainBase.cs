@@ -55,10 +55,10 @@ namespace PW
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
 			if (terrainRoot == null)
 			{
-				terrainRoot = GameObject.Find(PWConstants.RealModeRootObjectName);
+				terrainRoot = GameObject.Find(PWConstants.realModeRootObjectName);
 				if (terrainRoot == null)
 				{
-					terrainRoot = new GameObject(PWConstants.RealModeRootObjectName);
+					terrainRoot = new GameObject(PWConstants.realModeRootObjectName);
 					terrainRoot.transform.position = Vector3.zero;
 				}
 			}
@@ -146,7 +146,7 @@ namespace PW
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks()
 		{
-			Debug.Log("Updating chunks");
+			Debug.Log("Updating chunks, storage: " + terrainStorage);
 			if (terrainStorage == null)
 				return ;
 

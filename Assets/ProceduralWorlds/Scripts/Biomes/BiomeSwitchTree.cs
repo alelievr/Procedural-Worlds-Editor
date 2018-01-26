@@ -10,9 +10,11 @@ using Debug = UnityEngine.Debug;
 
 namespace PW.Biomator
 {
-	using Node;
 
-	public class BiomeSwitchTree {
+	using Node;
+	
+	public class BiomeSwitchTree
+	{
 
 		public bool							isBuilt { private set; get; }
 

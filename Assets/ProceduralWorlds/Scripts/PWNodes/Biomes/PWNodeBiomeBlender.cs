@@ -113,20 +113,16 @@ namespace PW.Node
 					if (id == biome.id)
 					{
 						biome.biomeGraph.SetInput(biomes[id]);
-						Debug.Log("Process biome graph " + biome.biomeGraph);
 						biome.biomeGraph.Process();
 						Biome b = biome.biomeGraph.GetOutput();
-						Debug.Log("output biome: " + b);
 						outputBlendedBiomeTerrain.biomes.Add(b);
 					}
 			}
 
-			outputBlendedBiomeTerrain.biomeMap = biomeData.biomeIds;
-			outputBlendedBiomeTerrain.biomeMap3D = biomeData.biomeIds3D;
 			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
 			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
-
+		
 		void OnReloadCallback(PWNode from)
 		{
 			//Reload from the editor:

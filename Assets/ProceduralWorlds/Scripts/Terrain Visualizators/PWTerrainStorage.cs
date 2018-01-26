@@ -23,8 +23,8 @@ namespace PW
 		NotLoaded,
 	}
 
-	[System.SerializableAttribute]
-	[CreateAssetMenuAttribute]
+	[System.Serializable]
+	[CreateAssetMenu]
 	public class PWTerrainStorage : ScriptableObject
 	{
 		

@@ -336,10 +336,15 @@ namespace PW.Core
 	{
 		public BiomeSwitchTree		biomeTree;
 		public BiomeData			biomeData;
-		public BiomeMap2D			biomeMap;
-		public BiomeMap3D			biomeMap3D;
 
 		public List< Biome >		biomes = new List< Biome >();
+	}
+
+	public class FinalBiomeTerrain
+	{
+		public BiomeData				biomeData;
+
+		public Dictionary< short, BiomeSurfaces >	biomeSurfacesList = new Dictionary< short, BiomeSurfaces >();
 	}
 	
 }

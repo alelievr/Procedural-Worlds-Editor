@@ -33,6 +33,20 @@ namespace PW.Node
 			EditorGUILayout.LabelField("Texturing switches: " + GetInputNodes().Count());
 		}
 
-		//nothing to process, output already set
+		public override void OnNodeProcessOnce()
+		{
+			foreach (var biomeSwitch in inputSurfaces.GetValues())
+			{
+				Debug.Log("Biome switch !");
+				surfaces.surfaceSwitches.Add(biomeSwitch);
+			}
+		}
+
+		public override void OnNodeProcess()
+		{
+			Debug.Log("output biome surface: " + surfaces);
+		}
+
+		//nothing to process, output already computed by processOnce
 	}
 }

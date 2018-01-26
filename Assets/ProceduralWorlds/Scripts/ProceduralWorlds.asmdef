@@ -1,6 +1,8 @@
 {
     "name": "ProceduralWorlds",
-    "references": [],
+    "references": [
+        "Utils"
+    ],
     "includePlatforms": [],
     "excludePlatforms": []
 }

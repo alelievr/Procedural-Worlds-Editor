@@ -8,7 +8,7 @@ using UnityEditor;
 using PW.Core;
 using Debug = UnityEngine.Debug;
 
-namespace PW
+namespace PW.Biomator
 {
 	public static class BiomeUtils
 	{

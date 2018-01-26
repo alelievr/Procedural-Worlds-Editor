@@ -8,10 +8,10 @@ namespace PW.Node
 	{
 	
 		[PWInput]
-		public BlendedBiomeTerrain	inputBlendedBiomes;
+		public FinalBiomeTerrain	inputFinalTerrain;
 
 		[PWOutput]
-		public ChunkData			terrainOutput;
+		public ChunkData			outputChunk;
 
 		[SerializeField]
 		bool						blendMapsFoldout;
@@ -44,8 +44,6 @@ namespace PW.Node
 		public override void OnNodeCreation()
 		{
 			name = "Data To Chunk";
-			//TODO: change the output type based on a popup
-			terrainOutput = new ChunkData();
 		}
 
 		public override void OnNodeGUI()
@@ -72,24 +70,28 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			terrainOutput.biomeMap = inputBlendedBiomes.biomeMap;
-			terrainOutput.biomeMap3D = inputBlendedBiomes.biomeMap3D;
-			terrainOutput.materializerType = mainGraphRef.materializerType;
+			if (outputChunk == null)
+				outputChunk = new ChunkData();
+			
+			outputChunk.biomeMap = inputFinalTerrain.biomeData.biomeIds;
+			outputChunk.biomeMap3D = inputFinalTerrain.biomeData.biomeIds3D;
+			outputChunk.materializerType = mainGraphRef.materializerType;
+			outputChunk.biomeTexturing = inputFinalTerrain.biomeSurfacesList;
 
-			var biomeData = inputBlendedBiomes.biomeData;
+			var biomeData = inputFinalTerrain.biomeData;
 
 			//assign everything needed to the output chunk:
-			terrainOutput.size = chunkSize;
+			outputChunk.size = chunkSize;
 			if (outputMaps[0].active)
-				terrainOutput.terrain = biomeData.terrain;
+				outputChunk.terrain = biomeData.terrain;
 			if (outputMaps[1].active)
-				terrainOutput.wetnessMap = biomeData.wetnessRef;
+				outputChunk.wetnessMap = biomeData.wetnessRef;
 			if (outputMaps[2].active)
-				terrainOutput.temperatureMap = biomeData.temperatureRef;
+				outputChunk.temperatureMap = biomeData.temperatureRef;
 			if (outputMaps[3].active)
-				terrainOutput.airMap = biomeData.airRef;
+				outputChunk.airMap = biomeData.airRef;
 			if (outputMaps[4].active)
-				terrainOutput.lightingMap = biomeData.lighting;
+				outputChunk.lightingMap = biomeData.lighting;
 		}
 	}
 }

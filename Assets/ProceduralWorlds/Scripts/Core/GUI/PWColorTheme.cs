@@ -92,7 +92,7 @@ namespace PW.Core
 				PWColorSchemeName.Carrot, new List< Type >() {
 					typeof(Biome), typeof(BiomeData), typeof(PartialBiome) }
 			}, {
-				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
+				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain), typeof(FinalBiomeTerrain) }
 			}, {
 				PWColorSchemeName.SunFlower, new List< Type >() { typeof(ChunkData) }
 			}, {

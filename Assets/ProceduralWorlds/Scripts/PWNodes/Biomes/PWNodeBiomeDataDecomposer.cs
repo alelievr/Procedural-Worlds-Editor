@@ -40,7 +40,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("Procee decmp");
 			if (inputPartialBiome == null)
 			{
 				Debug.LogError("[PWNodeBiomeDataDecomposer]: Null input partial biome data");

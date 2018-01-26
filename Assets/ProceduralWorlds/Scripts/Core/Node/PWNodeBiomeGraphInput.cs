@@ -54,7 +54,6 @@ namespace PW.Core
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("Process !");
 			if (outputPartialBiome != null)
 				return ;
 			
@@ -64,6 +63,10 @@ namespace PW.Core
 			//we process the graph to provide the outputPartialBiome
 			//it require that biomeGraph to be contained in the previewGraph.
 			previewGraph.Process();
+
+			//if the graph we process does not contains an instance of our biome graph
+			if (outputPartialBiome == null)
+				Debug.LogError("[PWBiomeGraph] the specified preview graph does not contains a reference of this biome graph");
 		}
 
 	}

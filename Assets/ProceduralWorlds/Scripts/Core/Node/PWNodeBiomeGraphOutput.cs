@@ -28,10 +28,5 @@ namespace PW.Core
 			
 			PWGUI.PWArrayField(inputValues);
 		}
-		
-		public override void OnNodeProcess()
-		{
-			Debug.Log("input biome: " + inputBiome);
-		}
 	}
 }

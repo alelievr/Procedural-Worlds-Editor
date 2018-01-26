@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
+using System.Linq;
 
 namespace PW.Node
 {
@@ -12,8 +13,11 @@ namespace PW.Node
 		[PWInput]
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
-		// [PWOutput]
-		// public FinalBiome
+		[PWOutput]
+		public FinalBiomeTerrain	mergedBiomeTerrain;
+
+		[System.NonSerialized]
+		bool						update;
 
 		public override void OnNodeCreation()
 		{
@@ -27,15 +31,68 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			//your node GUI
+			Sampler finalTerrain = null;
+			
+			if (inputBlendedTerrain != null)
+				finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
+
+			if (finalTerrain != null)
+				PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
+			else
+				EditorGUILayout.LabelField("Null terrain");
+
+			if (update)
+			{
+				update = false;
+				PWGUI.SetUpdateForField(0, true);
+			}
 		}
 
 		public override void OnNodeProcess()
 		{
-			foreach (Biome biome in inputBlendedTerrain.biomes)
+			if (mergedBiomeTerrain == null)
+				mergedBiomeTerrain = new FinalBiomeTerrain();
+			
+			Sampler finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
+
+			if (finalTerrain.type == SamplerType.Sampler2D)
 			{
-				// var terrain = biome.modifiedTerrain;
+				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeIds;
+
+				(finalTerrain as Sampler2D).Foreach((x, y, val) => {
+					float ret = 0;
+
+					var biomeInfo = biomeMap.GetBiomeBlendInfo(x, y);
+					foreach (var biome in inputBlendedTerrain.biomes)
+					{
+						var terrain = biome.modifiedTerrain as Sampler2D;
+						if (terrain == null)
+						{
+							Debug.LogError("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
+							continue ;
+						}
+
+						if (biome.id == biomeInfo.firstBiomeId)
+							ret += terrain[x, y] * biomeInfo.firstBiomeBlendPercent;
+						else if (biome.id == biomeInfo.secondBiomeId)
+							ret += terrain[x, y] * biomeInfo.secondBiomeBlendPercent;
+					}
+
+					return ret;
+				});
 			}
+			else if (finalTerrain.type == SamplerType.Sampler3D)
+			{
+				Debug.Log("TODO");
+			}
+
+			mergedBiomeTerrain.biomeData = inputBlendedTerrain.biomeData;
+
+			mergedBiomeTerrain.biomeSurfacesList.Clear();
+			foreach (var biome in inputBlendedTerrain.biomes)
+				mergedBiomeTerrain.biomeSurfacesList.Add(biome.id, biome.biomeSurfaces);
+			
+			update = true;
 		}
 		
 	}

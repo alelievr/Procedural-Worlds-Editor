@@ -52,14 +52,14 @@ public partial class PWGraphEditor
 			graph.editorEvents.isMouseOverNodeFrame = true;
 		}
 
-		//display the process time of the window (if not 0)
-		if (node.processTime > Mathf.Epsilon)
+		//display the process time of the window (if > .1ms)
+		if (node.processTime > .1f)
 		{
 			GUIStyle gs = new GUIStyle();
 			Rect msRect = PWUtils.DecalRect(node.rect, graph.panPosition);
 			msRect.position += new Vector2(msRect.size.x / 2 - 10, msRect.size.y + 5);
 			gs.normal.textColor = greenRedGradient.Evaluate(node.processTime / 20); //20ms ok, after is red
-			GUI.Label(msRect, node.processTime + " ms", gs);
+			GUI.Label(msRect, node.processTime.ToString("F1") + " ms", gs);
 		}
 	}
 	

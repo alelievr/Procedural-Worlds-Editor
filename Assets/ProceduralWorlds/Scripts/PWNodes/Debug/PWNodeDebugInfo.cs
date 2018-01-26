@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Node
 {

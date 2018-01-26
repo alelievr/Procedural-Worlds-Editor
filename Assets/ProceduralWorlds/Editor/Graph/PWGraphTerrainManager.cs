@@ -48,6 +48,9 @@ namespace PW.Editor
 				GameObject.DestroyImmediate(terrainReference);
 				terrainReference = go.AddComponent(expectedType) as PWTerrainBase;
 			}
+				
+			if (terrainReference.terrainStorage == null)
+				terrainReference.terrainStorage = Resources.Load< PWTerrainStorage >(PWConstants.memoryTerrainStorageAsset);
 
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
 

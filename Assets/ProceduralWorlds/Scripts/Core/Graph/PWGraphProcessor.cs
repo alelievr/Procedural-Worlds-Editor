@@ -118,7 +118,7 @@ namespace PW.Core
 			{
 				//if we are in real mode, we check all errors and discard if there is any.
 				if (CheckProcessErrors(link, node, realMode))
-					continue ;
+					return ;
 
 				var val = bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node);
 				var prop = bakedNodeFields[link.toNode.classAQName][link.toAnchor.fieldName];
@@ -183,7 +183,7 @@ namespace PW.Core
 				node.Process();
 				st.Stop();
 
-				node.processTime = st.ElapsedMilliseconds;
+				node.processTime = (float)st.Elapsed.TotalMilliseconds;
 				calculTime = node.processTime;
 			}
 			else

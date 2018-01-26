@@ -16,12 +16,10 @@ namespace PW.Node
 		public Sampler				terrain;
 		
 		//inputs for 2D topdown map
-		[PWInput("Surfaces")]
-		[PWNotRequired]
+		[PWInput("Surfaces"), PWNotRequired]
 		public BiomeSurfaces		biomeSurfaces;
 
-		[PWInput("Details")]
-		[PWNotRequired]
+		[PWInput("Details"), PWNotRequired]
 		public TerrainDetail		biomeDetail;
 
 		//TODO: dispositon algos
@@ -66,7 +64,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("Process binder");
 			if (outputBiome == null)
 				outputBiome = new Biome();
 			

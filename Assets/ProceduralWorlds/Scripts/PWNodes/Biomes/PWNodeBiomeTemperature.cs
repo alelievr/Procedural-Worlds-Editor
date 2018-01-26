@@ -32,6 +32,7 @@ namespace PW.Node
 
 		[SerializeField]
 		Gradient				temperatureGradient;
+		[System.NonSerialized]
 		bool					fieldUpdate = false;
 		[SerializeField]
 		bool					internalTemperatureMap = true;
@@ -61,8 +62,6 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			fieldUpdate = false;
-
 			GUILayout.Space(GUI.skin.label.lineHeight * 3);
 
 			EditorGUI.BeginChangeCheck();
@@ -102,7 +101,7 @@ namespace PW.Node
 			{
 				PWGUI.SetUpdateForField(2, true);
 				UpdateTemperatureMap();
-				Debug.Log("update temperature");
+				fieldUpdate = false;
 			}
 
 			//TODO: temperature map creation options
@@ -177,6 +176,8 @@ namespace PW.Node
 			CreateTemperatureMapIfNotExists();
 
 			UpdateTemperatureMap();
+
+			fieldUpdate = true;
 
 			if (inputBiome != null)
 			{

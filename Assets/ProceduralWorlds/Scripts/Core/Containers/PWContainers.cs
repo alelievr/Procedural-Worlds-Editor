@@ -30,6 +30,9 @@ namespace PW.Core
 		public BiomeMap3D			biomeMap3D;
 		public Texture2DArray		albedoMaps;
 
+		[System.NonSerialized]
+		public Dictionary< short, BiomeSurfaces > biomeTexturing;
+
 		public override string ToString()
 		{
 			return GetType().Name + "(" + size + ")";
@@ -145,31 +148,6 @@ namespace PW.Core
 		public static implicit operator Vector3i(Vector3 v)
 		{
 			return new Vector3i(v.x, v.y, v.z);
-		}
-	}
-
-	[Serializable]
-	public class Pair< T, U >
-	{
-		[SerializeField]
-		public T	first;
-		[SerializeField]
-		public U	second;
-
-		public Pair(T f, U s)
-		{
-			first = f;
-			second = s;
-		}
-	}
-
-	[Serializable]
-	public class Pairs< T, U > : List< Pair< T, U> >
-	{
-		public void Add(T f, U s)
-		{
-			var p = new Pair< T, U >(f, s);
-			this.Add(p);
 		}
 	}
 
