@@ -112,6 +112,9 @@ namespace PW.Node
 				foreach (var biome in biomes)
 					if (id == biome.id)
 					{
+						if (biome.biomeGraph == null)
+							continue ;
+						
 						biome.biomeGraph.SetInput(biomes[id]);
 						biome.biomeGraph.Process();
 						Biome b = biome.biomeGraph.GetOutput();
@@ -122,7 +125,7 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
 			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
-		
+
 		void OnReloadCallback(PWNode from)
 		{
 			//Reload from the editor:
@@ -132,7 +135,15 @@ namespace PW.Node
 		
 		void BuildBiomeTree()
 		{
-			inputBiomes.GetValues()[0].biomeDataReference.biomeTree.BuildTree(inputBiomes.GetValues()[0].biomeDataReference.biomeTreeStartPoint);
+			var biomeData = inputBiomes.GetValues()[0].biomeDataReference;
+
+			if (biomeData == null)
+			{
+				Debug.LogError("[PWBiomeBlender] Can't access to partial biome data, did you forgot the BiomeGraph in a biome node ?");
+				return ;
+			}
+
+			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 		}
 		
 		public override void OnNodeProcessOnce()

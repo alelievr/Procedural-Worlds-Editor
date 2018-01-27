@@ -91,11 +91,9 @@ namespace PW.Node
 				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
+
+			surfaceSwitch.surfaceType = biomeGraphRef.surfaceType;
 		}
 
-		public override void OnNodeProcess()
-		{
-		}
-		
 	}
 }

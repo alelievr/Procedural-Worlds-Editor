@@ -73,6 +73,12 @@ namespace PW.Node
 			if (outputChunk == null)
 				outputChunk = new ChunkData();
 			
+			if (inputFinalTerrain.biomeData == null)
+			{
+				Debug.LogError("[PWDataToChunk] can't find BiomeData");
+				return ;
+			}
+			
 			outputChunk.biomeMap = inputFinalTerrain.biomeData.biomeIds;
 			outputChunk.biomeMap3D = inputFinalTerrain.biomeData.biomeIds3D;
 			outputChunk.materializerType = mainGraphRef.materializerType;

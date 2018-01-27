@@ -33,7 +33,7 @@ namespace PW.Node
 		{
 			Sampler finalTerrain = null;
 			
-			if (inputBlendedTerrain != null)
+			if (inputBlendedTerrain != null && inputBlendedTerrain.biomeData != null)
 				finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
 
 			if (finalTerrain != null)
@@ -53,6 +53,12 @@ namespace PW.Node
 			if (mergedBiomeTerrain == null)
 				mergedBiomeTerrain = new FinalBiomeTerrain();
 			
+			if (inputBlendedTerrain.biomeData == null)
+			{
+				Debug.LogError("[PWBiomeMerger] Can't find BiomeData, did you forgot to specify the BiomGraph in a Biome node");
+				return ;
+			}
+			
 			Sampler finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
 
 			if (finalTerrain.type == SamplerType.Sampler2D)
@@ -66,6 +72,7 @@ namespace PW.Node
 					foreach (var biome in inputBlendedTerrain.biomes)
 					{
 						var terrain = biome.modifiedTerrain as Sampler2D;
+
 						if (terrain == null)
 						{
 							Debug.LogError("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
@@ -90,7 +97,11 @@ namespace PW.Node
 
 			mergedBiomeTerrain.biomeSurfacesList.Clear();
 			foreach (var biome in inputBlendedTerrain.biomes)
-				mergedBiomeTerrain.biomeSurfacesList.Add(biome.id, biome.biomeSurfaces);
+			{
+				if (mergedBiomeTerrain.biomeSurfacesList.ContainsKey(biome.id))
+					Debug.LogError("[PWBiomeMerger] Duplicate biome in the biome graph: " + biome.name + ", id: " + biome.id);
+				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaces;
+			}
 			
 			update = true;
 		}

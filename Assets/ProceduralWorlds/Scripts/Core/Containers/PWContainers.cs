@@ -28,7 +28,6 @@ namespace PW.Core
 		//TODO: save vertex datas to the disk
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
-		public Texture2DArray		albedoMaps;
 
 		[System.NonSerialized]
 		public Dictionary< short, BiomeSurfaces > biomeTexturing;

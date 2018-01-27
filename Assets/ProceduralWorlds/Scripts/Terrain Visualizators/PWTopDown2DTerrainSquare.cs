@@ -12,6 +12,11 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase
 	static Mesh				topDownTerrainMesh = null;
 	static int				topDownTerrainMeshSize = 0;
 
+	//TODO: generate texture based on texturing dict in the chunkData
+	//TODO: generate Uvs based on this texture
+
+	public
+
 	void	GenerateTopDownTerrainMesh()
 	{
 		int					size = chunkSize * chunkSize;
@@ -24,7 +29,6 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase
 		float				terrainWidth = 1;
 
 		topDownTerrainMesh = new Mesh();
-		topDownTerrainMesh.Clear();
 
 		for (int x = 0; x < chunkSize; x++)
 		{
@@ -112,7 +116,7 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase
 		if (topDown2DBasicTerrainShader == null)
 			topDown2DBasicTerrainShader = Shader.Find("Standard");
 		Material mat = new Material(topDown2DBasicTerrainShader);
-		mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
+		// mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
 		mr.sharedMaterial = mat;
 		//TODO: vertex painting
 		return g;

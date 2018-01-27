@@ -113,7 +113,7 @@ public class PWTopDown2DTerrainHex : PWTerrainBase
 		if (topDown2DBasicTerrainShader == null)
 			topDown2DBasicTerrainShader = Shader.Find("Standard");
 		Material mat = new Material(topDown2DBasicTerrainShader);
-		mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
+		// mat.SetTexture("_AlbedoMaps", chunk.albedoMaps);
 		mr.sharedMaterial = mat;
 		//TODO: vertex painting
 		return g;

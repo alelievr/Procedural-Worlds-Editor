@@ -44,14 +44,11 @@ namespace PW.Node
 		{
 		}
 
-		public override void OnNodeAnchorLink(string prop, int index)
-		{
-			if (prop == "inputPartialBiome" && outputBiome != null)
-				outputBiome.biomeDataReference = inputPartialBiome.biomeDataReference;
-		}
-
 		void FillBiomeOutput()
 		{
+			if (inputPartialBiome == null)
+				return ;
+			
 			outputBiome.biomeSurfaces = biomeSurfaces;
 			outputBiome.id = inputPartialBiome.id;
 			outputBiome.name = inputPartialBiome.name;

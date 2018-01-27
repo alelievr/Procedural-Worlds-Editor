@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using System.Linq;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Node
 {
@@ -16,6 +17,9 @@ namespace PW.Node
 
 		[PWOutput]
 		public BiomeSurfaces	surfaces = new BiomeSurfaces();
+
+		[SerializeField]
+		BiomeSurfaceGraph		surfaceGraph = new BiomeSurfaceGraph();
 
 		public override void OnNodeCreation()
 		{
@@ -44,7 +48,6 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			Debug.Log("output biome surface: " + surfaces);
 		}
 
 		//nothing to process, output already computed by processOnce

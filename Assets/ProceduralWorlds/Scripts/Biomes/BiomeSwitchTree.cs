@@ -173,8 +173,14 @@ namespace PW.Biomator
 
 						for (int anchorIndex = 0; anchorIndex < bSwitch.switchList.Count; anchorIndex++)
 						{
-							PWAnchor anchor = node.GetAnchor("outpuBiomes", anchorIndex);
+							PWAnchor anchor = node.GetAnchor("outputBiomes", anchorIndex);
 							var sData = bSwitch.switchList[anchorIndex];
+
+							if (anchor == null)
+							{
+								Debug.Log("NULL: " + anchorIndex);
+								continue ;
+							}
 
 							var attachedNodesToAnchor = node.GetNodesAttachedToAnchor(anchor);
 							outputNodeList.AddRange(attachedNodesToAnchor);

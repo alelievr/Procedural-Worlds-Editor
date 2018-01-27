@@ -48,7 +48,10 @@ namespace PW.Node
 			}
 			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.LabelField("Biome Graph reference");
+			EditorGUI.BeginChangeCheck();
 			biomeGraph = EditorGUILayout.ObjectField(biomeGraph, typeof(PWBiomeGraph), false) as PWBiomeGraph;
+			if (EditorGUI.EndChangeCheck())
+				NotifyReload();
 
 			if (biomeGraph != null)
 			{
@@ -61,7 +64,7 @@ namespace PW.Node
 		{
 			if (biomeGraph == null)
 			{
-				Debug.LogError("NUll biome graph when processing once a biome node");
+				Debug.LogError("[PWWBiomeNode] Null biome graph when processing once a biome node");
 				return ;
 			}
 
@@ -73,7 +76,7 @@ namespace PW.Node
 		{
 			if (biomeGraph == null)
 			{
-				Debug.LogError("NUll biome graph when processing a biome node");
+				Debug.LogError("[PWBiomeNode] Null biome graph when processing a biome node");
 				return ;
 			}
 
