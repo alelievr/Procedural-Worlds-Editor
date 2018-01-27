@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using PW;
 using PW.Core;
+using PW.Biomator;
 
-public class PWTopDown2DTerrainHex : PWTerrainBase
+public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 {
 
 	static Gradient			rainbow = null;
@@ -80,8 +81,14 @@ public class PWTopDown2DTerrainHex : PWTerrainBase
 			}
 		topDownTerrainMesh.SetUVs(1, blendInfos);
 	}
+
+	public override TopDownChunkData CreateChunkData(FinalTerrain terrain)
+	{
+		Debug.Log("TODO !");
+		return null;
+	}
 	
-	public override object	OnChunkCreate(ChunkData chunk, Vector3 pos)
+	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
 		if (chunk == null)
 			return null;
@@ -119,7 +126,7 @@ public class PWTopDown2DTerrainHex : PWTerrainBase
 		return g;
 	}
 
-	public override void 	OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
+	public override void 	OnChunkDestroy(TopDownChunkData terrainData, object userStoredObject, Vector3 pos)
 	{
 		GameObject g = userStoredObject as GameObject;
 
@@ -127,7 +134,7 @@ public class PWTopDown2DTerrainHex : PWTerrainBase
 			DestroyImmediate(g);
 	}
 
-	public override void	OnChunkRender(ChunkData chunk, object chunkGameObject, Vector3 pos)
+	public override void	OnChunkRender(TopDownChunkData chunk, object chunkGameObject, Vector3 pos)
 	{
 		if (chunk == null)
 			return ;

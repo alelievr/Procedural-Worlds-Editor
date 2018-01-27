@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Node
 {

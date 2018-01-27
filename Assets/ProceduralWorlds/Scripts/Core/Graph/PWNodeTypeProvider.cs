@@ -62,9 +62,6 @@ namespace PW.Core
 			//Noises and masks:
             typeof(PWNodeCircleNoiseMask), typeof(PWNodePerlinNoise2D),
 
-			//ChunkData:
-            typeof(PWNodeChunkData),
-
 			//Graph specific:
 			typeof(PWNodeGraphInput), typeof(PWNodeGraphOutput), typeof(PWNodeBiomeGraphInput),
 			typeof(PWNodeBiomeGraphOutput),
@@ -114,9 +111,6 @@ namespace PW.Core
 				"Biome", typeof(PWNodeBiome),
 				"Biome blender", typeof(PWNodeBiomeBlender),
 				"Biome merger", typeof(PWNodeBiomeMerger)
-			),
-			new PWNodeTypeInfoList(PWMainGraph, "ChunkData", PWColorSchemeName.SunFlower,
-				"Data to Chunk", typeof(PWNodeChunkData)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Turquoise,
 				"BiomeData decomposer", typeof(PWNodeBiomeDataDecomposer),

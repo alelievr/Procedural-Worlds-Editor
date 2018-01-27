@@ -10,12 +10,12 @@ namespace PW.Editor
 	public class PWGraphTerrainManager
 	{
 		//terrain base game object reference
-		public static PWTerrainBase	terrainReference;
+		public static PWTerrainBase< ChunkData >	terrainReference;
 
 		//Graph reference
 		PWGraph				graph;
 
-		PWTerrainBase		terrain;
+		PWTerrainBase< ChunkData >		terrain;
 
 		Event				e { get { return Event.current; } }
 
@@ -33,7 +33,7 @@ namespace PW.Editor
 		public void DrawTerrainSettings(Rect settingsRect, MaterializerType type)
 		{
 			if (terrain == null)
-				terrain = GameObject.FindObjectOfType< PWTerrainBase >();
+				terrain = GameObject.FindObjectOfType(typeof(PWTerrainBase<>)) as PWTerrainBase< ChunkData >;
 
 			if (terrain == null)
 				return ;
@@ -46,16 +46,22 @@ namespace PW.Editor
 			{
 				GameObject go = terrainReference.gameObject;
 				GameObject.DestroyImmediate(terrainReference);
-				terrainReference = go.AddComponent(expectedType) as PWTerrainBase;
+				terrainReference = go.AddComponent(expectedType) as PWTerrainBase< ChunkData >;
 			}
-				
+			
 			if (terrainReference.terrainStorage == null)
 				terrainReference.terrainStorage = Resources.Load< PWTerrainStorage >(PWConstants.memoryTerrainStorageAsset);
 
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
 
-			if (GUILayout.Button("Generate terrain"))
-				ReloadChunks();
+			EditorGUILayout.BeginHorizontal();
+			{
+				if (GUILayout.Button("Generate terrain"))
+					ReloadChunks();
+				if (GUILayout.Button("Clean terrain"))
+					terrain.DestroyAllChunks();
+			}
+			EditorGUILayout.EndHorizontal();
 			
 			terrain.chunkSize = graph.chunkSize;
 		}
@@ -73,13 +79,14 @@ namespace PW.Editor
 
 			if (mainGraph != null)
 			{
-				terrain.DestroyAllChunks();
-
 				//if the graph we have is not the same / have been modified since last generation, we replace it
 				if (terrain.graph != null && terrain.graph.GetHashCode() != graph.GetHashCode())
 					GameObject.DestroyImmediate(terrain.graph);
 				
 				terrain.InitGraph(graph.Clone() as PWMainGraph);
+				
+				terrain.DestroyAllChunks();
+
 
 				//updateChunks will regenerate all deleted chunks
 				terrain.UpdateChunks();

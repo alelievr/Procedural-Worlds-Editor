@@ -135,7 +135,12 @@ namespace PW.Node
 		
 		void BuildBiomeTree()
 		{
-			var biomeData = inputBiomes.GetValues()[0].biomeDataReference;
+			var partialbiomes = inputBiomes.GetValues();
+
+			if (partialbiomes.Count == 0)
+				return ;
+
+			var biomeData = partialbiomes[0].biomeDataReference;
 
 			if (biomeData == null)
 			{

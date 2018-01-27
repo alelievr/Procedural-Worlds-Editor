@@ -14,7 +14,7 @@ namespace PW
 	}
 
 	[System.Serializable]
-	public abstract class PWTerrainBase : MonoBehaviour
+	public abstract class PWTerrainBase< T > : MonoBehaviour where T : ChunkData
 	{
 		public Vector3					position;
 		public int						renderDistance;
@@ -65,7 +65,7 @@ namespace PW
 			graph.ProcessOnce();
 		}
 
-		public ChunkData RequestChunk(Vector3 pos, int seed)
+		public T RequestChunk(Vector3 pos, int seed)
 		{
 			if (seed != oldSeed)
 				graph.seed = seed;
@@ -75,36 +75,41 @@ namespace PW
 			graph.Process();
 
 			oldSeed = seed;
-			ChunkData chunkData = graph.GetOutput< ChunkData >();
+			FinalTerrain finalTerrain = graph.GetOutput< FinalTerrain >();
 
-			if (chunkData == null)
-				Debug.LogWarning("[PWTerrainBase] Graph output does not contains ChunkData type");
+			if (finalTerrain == null)
+			{
+				Debug.LogWarning("[PWTerrainBase] Graph output does not contains T type");
+				return null;
+			}
 			
-			return chunkData;
+			return CreateChunkData(finalTerrain);
 		}
 
-		public virtual object OnChunkCreate(ChunkData terrainData, Vector3 pos)
+		public abstract T CreateChunkData(FinalTerrain terrain);
+
+		public virtual object OnChunkCreate(T terrainData, Vector3 pos)
 		{
 			//do nothing here, the inherited function will render it.
 			return null;
 		}
 
-		public virtual void OnChunkRender(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		public virtual void OnChunkRender(T terrainData, object userStoredObject, Vector3 pos)
 		{
 			//do nothing here, the inherited function will update render.
 		}
 
-		public virtual void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		public virtual void OnChunkDestroy(T terrainData, object userStoredObject, Vector3 pos)
 		{
 
 		}
 
-		public virtual void OnChunkHide(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		public virtual void OnChunkHide(T terrainData, object userStoredObject, Vector3 pos)
 		{
 
 		}
 
-		public object RequestCreate(ChunkData terrainData, Vector3 pos)
+		public object RequestCreate(T terrainData, Vector3 pos)
 		{
 			var userData = OnChunkCreate(terrainData, pos);
 			if (terrainStorage == null)
@@ -154,13 +159,13 @@ namespace PW
 			{
 				if (!terrainStorage.isLoaded(pos))
 				{
-					ChunkData data = RequestChunk(pos, graph.seed);
+					T data = RequestChunk(pos, graph.seed);
 					var userChunkData = OnChunkCreate(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
 					/*PWWorker.EnqueueTask(
 						() => RequestChunk(pos, graph.seed),
 						(chunkData) => {
-							ChunkData data = chunkData as ChunkData;
+							T data = chunkData as T;
 							var userChunkData = OnChunkCreate(data, pos);
 							terrainStorage.AddChunk(pos, data, userChunkData);
 						},
@@ -170,7 +175,7 @@ namespace PW
 				else
 				{
 					var chunk = terrainStorage[pos];
-					OnChunkRender(chunk.terrainData, chunk.userData, pos);
+					OnChunkRender(chunk.terrainData as T, chunk.userData, pos);
 				}
 			}
 		}
@@ -182,9 +187,13 @@ namespace PW
 			if (terrainStorage == null)
 				return ;
 			terrainStorage.Foreach((pos, terrainData, userData) => {
-				OnChunkDestroy(terrainData, userData, (Vector3)pos);
+				OnChunkDestroy(terrainData as T, userData, (Vector3)pos);
 			});
 			terrainStorage.Clear();
+
+			//manually cleanup remaining GOs:
+			while (terrainRoot.transform.childCount > 0)
+				DestroyImmediate(terrainRoot.transform.GetChild(0).gameObject);
 		}
 
 		/* Utils function to simplify the downstream scripting: */

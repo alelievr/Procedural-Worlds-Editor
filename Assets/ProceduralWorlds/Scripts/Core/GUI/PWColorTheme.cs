@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using PW.Biomator;
 
 namespace PW.Core
 {
@@ -92,9 +93,9 @@ namespace PW.Core
 				PWColorSchemeName.Carrot, new List< Type >() {
 					typeof(Biome), typeof(BiomeData), typeof(PartialBiome) }
 			}, {
-				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain), typeof(FinalBiomeTerrain) }
+				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
 			}, {
-				PWColorSchemeName.SunFlower, new List< Type >() { typeof(ChunkData) }
+				PWColorSchemeName.SunFlower, new List< Type >() { typeof(FinalTerrain) }
 			}, {
 				PWColorSchemeName.Concrete, new List< Type >() { typeof(TerrainDetail) }
 			}, {

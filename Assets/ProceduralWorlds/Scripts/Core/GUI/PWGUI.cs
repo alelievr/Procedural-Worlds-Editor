@@ -4,6 +4,7 @@ using System.Reflection;
 using System;
 using UnityEngine;
 using UnityEditor;
+using PW.Biomator;
 using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;

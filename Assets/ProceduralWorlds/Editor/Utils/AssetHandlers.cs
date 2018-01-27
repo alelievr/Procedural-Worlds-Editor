@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Editor
 {

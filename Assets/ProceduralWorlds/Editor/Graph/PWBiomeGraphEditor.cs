@@ -5,6 +5,7 @@ using UnityEditor;
 using PW;
 using PW.Core;
 using PW.Editor;
+using PW.Biomator;
 
 public class PWBiomeGraphEditor : PWGraphEditor
 {

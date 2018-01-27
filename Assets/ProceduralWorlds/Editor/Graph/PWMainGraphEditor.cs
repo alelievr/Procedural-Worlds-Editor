@@ -15,22 +15,19 @@ public partial class PWMainGraphEditor : PWGraphEditor
 {
 
 	[SerializeField]
-	PWGraphLayout		layout = new PWGraphLayout();
+	PWGraphLayout			layout = new PWGraphLayout();
 	
 	//terrain manager to configure terrain generation / preview
 	PWGraphTerrainManager	terrainManager;
 	
 	//events fields
-	Vector2				lastMousePosition;
+	Vector2					lastMousePosition;
 	[System.NonSerializedAttribute]
-	Vector2				currentMousePosition;
-
-	//terrain materializer
-	PWTerrainBase		terrainMaterializer;
+	Vector2					currentMousePosition;
 
 	//multi-node selection
 	[System.NonSerializedAttribute]
-	Rect				selectionRect;
+	Rect					selectionRect;
 
 #region Internal editor styles and textures
 
@@ -103,13 +100,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		{
 			DrawPresetPanel();
 			return ;
-		}
-		
-		if (terrainMaterializer == null)
-		{
-			GameObject gtm = GameObject.Find("PWPreviewTerrain");
-			if (gtm != null)
-				terrainMaterializer = gtm.GetComponent< PWTerrainBase >();
 		}
 
 		layout.Render2ResizablePanel(this, position);

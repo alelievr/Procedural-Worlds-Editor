@@ -92,7 +92,7 @@ namespace PW.Node
 			}
 			PWGUI.EndFade();
 
-			surfaceSwitch.surfaceType = biomeGraphRef.surfaceType;
+			surfaceSwitch.surface.type = biomeGraphRef.surfaceType;
 		}
 
 	}

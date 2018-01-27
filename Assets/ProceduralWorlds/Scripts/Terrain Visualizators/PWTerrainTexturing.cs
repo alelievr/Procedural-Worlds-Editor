@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
+using PW.Biomator;
 
 public class PWTerrainTexturing
 {
@@ -18,9 +19,9 @@ public class PWTerrainTexturing
 		{
 			foreach (var surfaceSwitch in kp.Value.surfaceSwitches)
 			{
-				if (surfaceSwitch.surfaceType == BiomeSurfaceType.Color)
+				if (surfaceSwitch.surface.type == BiomeSurfaceType.Color)
 				{
-					colors.Add(surfaceSwitch.surfaceColor.baseColor);
+					colors.Add(surfaceSwitch.surface.color.baseColor);
 					biomeColorTextureUvs.Add(kp.Key, new Vector4(.5f, i + .5f, .5f, i + .5f));
 					i++;
 				}

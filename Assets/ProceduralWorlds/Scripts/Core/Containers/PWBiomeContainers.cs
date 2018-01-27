@@ -2,8 +2,9 @@
 using UnityEngine;
 using System;
 using PW.Biomator;
+using PW.Core;
 
-namespace PW.Core
+namespace PW.Biomator
 {
 	/*
 	**	Biomes
@@ -292,12 +293,18 @@ namespace PW.Core
 		public float				maxParam;
 
 		//surface
-		public BiomeSurfaceType		surfaceType; //same as PWBiomeGraph.surfaceType
-		public BiomeSurfaceMaps		surfaceMaps;
-		public BiomeSurfaceColor	surfaceColor;
-		public BiomeSurfaceMaterial	surfaceMaterial;
+		public BiomeSurface			surface = new BiomeSurface();
 
 		//TODO: details
+	}
+
+	[Serializable]
+	public class BiomeSurface
+	{
+		public BiomeSurfaceType		type; //same as PWBiomeGraph.surfaceType
+		public BiomeSurfaceMaps		maps;
+		public BiomeSurfaceColor	color;
+		public BiomeSurfaceMaterial	material;
 	}
 
 	[Serializable]
@@ -338,13 +345,6 @@ namespace PW.Core
 		public BiomeData			biomeData;
 
 		public List< Biome >		biomes = new List< Biome >();
-	}
-
-	public class FinalBiomeTerrain
-	{
-		public BiomeData				biomeData;
-
-		public Dictionary< short, BiomeSurfaces >	biomeSurfacesList = new Dictionary< short, BiomeSurfaces >();
 	}
 	
 }

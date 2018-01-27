@@ -11,31 +11,38 @@ namespace PW.Core
 	/*
 	**	Parent class to store everything needed to render a chunk
 	*/
+	//TODO: change this to abstract and only a class to be serialized on the disk (no more used in the graph)
 	[Serializable]
-	public class ChunkData
+	public abstract class ChunkData
 	{
 		public int					size;
 		public MaterializerType		materializerType;
 
 		public Sampler				terrain;
-		public Sampler				waterHeight;
-		public Sampler				wetnessMap;
-		public Sampler				temperatureMap;
-		public Sampler				windMap;
-		public Sampler				lightingMap;
-		public Sampler				airMap;
+		// public Sampler				waterHeight;
+		// public Sampler				wetnessMap;
+		// public Sampler				temperatureMap;
+		// public Sampler				windMap;
+		// public Sampler				lightingMap;
+		// public Sampler				airMap;
 
 		//TODO: save vertex datas to the disk
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
 
-		[System.NonSerialized]
-		public Dictionary< short, BiomeSurfaces > biomeTexturing;
+		// [System.NonSerialized]
+		// public Dictionary< short, BiomeSurfaces > biomeTexturing;
 
 		public override string ToString()
 		{
 			return GetType().Name + "(" + size + ")";
 		}
+	}
+
+	[Serializable]
+	public class TopDownChunkData : ChunkData
+	{
+		
 	}
 
 	//TODO: other storage classes
@@ -112,6 +119,15 @@ namespace PW.Core
 		// SurfaceNets,
 		// GreedyMeshing,
 		// MonotoneMeshing,
+	}
+	
+	public class FinalTerrain
+	{
+		public BiomeData				biomeData;
+		public MaterializerType			materializerType;
+
+		//TODO: change biomeSurfaces to BiomeSurfaceGraph
+		public Dictionary< short, BiomeSurfaces >	biomeSurfacesList = new Dictionary< short, BiomeSurfaces >();
 	}
 
 	/*

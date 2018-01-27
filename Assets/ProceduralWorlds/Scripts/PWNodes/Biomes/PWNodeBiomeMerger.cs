@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using PW.Core;
 using System.Linq;
+using PW.Biomator;
 
 namespace PW.Node
 {
@@ -14,7 +15,7 @@ namespace PW.Node
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
 		[PWOutput]
-		public FinalBiomeTerrain	mergedBiomeTerrain;
+		public FinalTerrain	mergedBiomeTerrain;
 
 		[System.NonSerialized]
 		bool						update;
@@ -35,6 +36,9 @@ namespace PW.Node
 			
 			if (inputBlendedTerrain != null && inputBlendedTerrain.biomeData != null)
 				finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
+				
+			EditorGUIUtility.labelWidth = 80;
+			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
 
 			if (finalTerrain != null)
 				PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
@@ -51,7 +55,7 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			if (mergedBiomeTerrain == null)
-				mergedBiomeTerrain = new FinalBiomeTerrain();
+				mergedBiomeTerrain = new FinalTerrain();
 			
 			if (inputBlendedTerrain.biomeData == null)
 			{
@@ -94,6 +98,7 @@ namespace PW.Node
 			}
 
 			mergedBiomeTerrain.biomeData = inputBlendedTerrain.biomeData;
+			mergedBiomeTerrain.materializerType = mainGraphRef.materializerType;
 
 			mergedBiomeTerrain.biomeSurfacesList.Clear();
 			foreach (var biome in inputBlendedTerrain.biomes)
