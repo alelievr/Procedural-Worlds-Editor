@@ -13,7 +13,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	[SerializeField]
 	PWGraphLayout		layout = new PWGraphLayout();
 
-	[MenuItem("Procedural Worlds/Biome graph")]
+	[MenuItem("Window/Procedural Worlds/Biome Graph", priority = 2)]
 	static void Init()
 	{
 		PWBiomeGraphEditor window = (PWBiomeGraphEditor)GetWindow(typeof(PWBiomeGraphEditor));

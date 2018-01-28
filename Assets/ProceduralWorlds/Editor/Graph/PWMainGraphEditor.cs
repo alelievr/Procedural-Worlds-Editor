@@ -45,7 +45,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 #region Initialization and data baking
 
-	[MenuItem("Procedural Worlds/Main graph")]
+	[MenuItem("Window/Procedural Worlds/Main Graph", priority = 1)]
 	static void Init()
 	{
 		PWMainGraphEditor window = (PWMainGraphEditor)EditorWindow.GetWindow (typeof (PWMainGraphEditor));

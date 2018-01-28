@@ -274,33 +274,11 @@ namespace PW.Biomator
 	}
 
 	[Serializable]
-	public class BiomeSurfaceSwitch
-	{
-		//slope limit
-		public bool					slopeEnabled;
-		public float				minSlope;
-		public float				maxSlope;
-
-		//height limit
-		public bool					heightEnabled;
-		public float				minHeight;
-		public float				maxHeight;
-
-		//param limit
-		public BiomeSwitchMode		paramType;
-		public bool					paramEnabled;
-		public float				minParam;
-		public float				maxParam;
-
-		//surface
-		public BiomeSurface			surface = new BiomeSurface();
-
-		//TODO: details
-	}
-
-	[Serializable]
 	public class BiomeSurface
 	{
+		//test variable:
+		public string				name;
+
 		public BiomeSurfaceType		type; //same as PWBiomeGraph.surfaceType
 		public BiomeSurfaceMaps		maps;
 		public BiomeSurfaceColor	color;

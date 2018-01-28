@@ -66,7 +66,7 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 		topDownTerrainMesh.RecalculateBounds();
 	}
 
-	void					UpdateMeshDatas(BiomeMap2D biomes)
+	void	UpdateMeshDatas(BiomeMap2D biomes)
 	{
 		List< Vector4 >		blendInfos = new List< Vector4 >();
 
