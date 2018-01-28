@@ -154,7 +154,10 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 		{
 			var surf = biomeSurfaceGraph.GetSurface(searchHeight, searchSlope);
 
-			Debug.Log("Surface: " + surf.name + ", color: " + surf.color.baseColor);
+			if (surf == null)
+				Debug.Log("Surface not found !");
+			else
+				Debug.Log("Surface: " + surf.name + ", color: " + surf.color.baseColor);
 		}
 
 		EditorGUILayout.EndVertical();

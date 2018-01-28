@@ -11,7 +11,7 @@ using PW;
 
 public class PWNodeAPITests
 {
-	//TestGraph: 
+	//TestGraph 1: 
 	// 	              +-----+
 	//            +---> Add1+---+
 	// +------+   |   +-----+   |   +-----+   +------+

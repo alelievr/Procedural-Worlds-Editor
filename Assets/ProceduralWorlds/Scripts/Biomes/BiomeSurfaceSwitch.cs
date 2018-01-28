@@ -58,6 +58,20 @@ namespace PW.Biomator
 			
 			return true;
 		}
+
+		public float				GapWidth(BiomeSurfaceSwitch b2)
+		{
+			float	gap = 0;
+
+			if (heightEnabled)
+				gap += PWUtils.GapWidth(minHeight, maxHeight, b2.minHeight, b2.maxHeight);
+			if (slopeEnabled)
+				gap += PWUtils.GapWidth(minSlope, maxSlope, b2.minSlope, b2.maxSlope);
+			if (paramEnabled)
+				gap += PWUtils.GapWidth(minParam, maxParam, b2.minParam, b2.maxParam);
+			
+			return gap;
+		}
 	}
 
 }

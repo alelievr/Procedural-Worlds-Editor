@@ -172,5 +172,18 @@ namespace PW
 		{
 			return (x1 <= y2 && y1 <= x2);
 		}
+
+		public static float GapWidth(float x1, float x2, float y1, float y2)
+		{
+			float	ret = 0;
+
+			if (y1 < x1)
+				ret = (x1 - y2);
+			else
+				ret = (y1 - x2);
+			
+			Debug.Log(x1 + " to " + x2 + " | " + y1 + " to " + y2 + ", gap: " + ret);
+			return ret;
+		}
     }
 }

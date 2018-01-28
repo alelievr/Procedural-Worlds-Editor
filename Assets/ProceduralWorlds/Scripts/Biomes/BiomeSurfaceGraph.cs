@@ -28,12 +28,8 @@ namespace PW.Biomator
 
 		public List< BiomeSurfaceCell >	cells = new List< BiomeSurfaceCell >();
 
-		List< BiomeSurfaceSwitch >	currentSwitches;
-
 		public void BuildGraph(IEnumerable< BiomeSurfaceSwitch > surfacesSwitches)
 		{
-			currentSwitches = surfacesSwitches.ToList();
-
 			var bSwitchCellMap = new Dictionary< BiomeSurfaceSwitch, BiomeSurfaceCell >();
 
 			Action< BiomeSurfaceCell, BiomeSurfaceSwitch > AddLink = (cell, s) => {
@@ -81,35 +77,89 @@ namespace PW.Biomator
 			rootCell = cells.First();
 		}
 
-		bool IsFinalCell(BiomeSurfaceCell cell, float height, float slope)
+		BiomeSurfaceCell	CheckForBetterCell(BiomeSurfaceCell cell, float height, float slope, float param)
 		{
-			if (cell.surfaceSwitch.Matches(height, slope, 0))
+			foreach (var link in cell.links)
 			{
-				//TODO: weight calcul and check if there is a better node in links
-				return true;
+				if (link.toCell.surfaceSwitch.Matches(height, slope, param))
+				{
+					if (link.toCell.weight < cell.weight)
+						return link.toCell;
+				}
 			}
-			return false;
+
+			return null;
 		}
 
-		public BiomeSurface GetSurface(float height, float slope)
+		BiomeSurfaceCell	FindBestCell(BiomeSurfaceCell currentCell, float height, float slope, float param)
+		{
+			BiomeSurfaceCell	bestCell = null;
+			float				minGap = 1e20f;
+
+			foreach (var link in currentCell.links)
+			{
+				if (link.toCell.surfaceSwitch.Matches(height, slope, param))
+					return link.toCell;
+				
+				float gap = link.toCell.surfaceSwitch.GapWidth(currentCell.surfaceSwitch);
+				if (gap > 0 && gap < minGap)
+				{
+					minGap = gap;
+					bestCell = link.toCell;
+				}
+			}
+
+			return bestCell;
+		}
+
+		public BiomeSurface GetSurface(float height = 0, float slope = 0, float param = 0)
 		{
 			BiomeSurfaceCell	currentCell = (lastCell == null) ? rootCell : lastCell;
 
-			if (IsFinalCell(currentCell, height, slope))
-				return currentCell.surface;
+			if (currentCell == null)
+				return null;
 			
+			int maxSearchDepth = 100;
+			int	i = 0;
+
 			while (true)
 			{
-				foreach (var link in currentCell.links)
+				if (i > maxSearchDepth)
 				{
-					if (link.toCell.surfaceSwitch.Matches(height, slope, 0))
+					Debug.Log("Infinite loop detected, exiting ...");
+					return null;
+				}
+				
+				i++;
+				if (currentCell.surfaceSwitch.Matches(height, slope, param))
+				{
+					//try to find a better link
+					var betterCell = CheckForBetterCell(currentCell, height, slope, param);
+					
+					//if there is nothing better, we've the solution
+					if (betterCell == null)
 					{
-						if (link.toCell.weight < currentCell.weight)
-						{
-							currentCell = link.toCell;
-							lastCell = currentCell;
-							return currentCell.surface;
-						}
+						lastCell = currentCell;
+						return currentCell.surface;
+					}
+					else
+						currentCell = betterCell;
+					
+					continue ;
+				}
+				else
+				{
+					//find the best link to take to get near from the node we look for
+					BiomeSurfaceCell	oldCell = currentCell;
+					currentCell = FindBestCell(currentCell, height, slope, param);
+
+					//if the cell returned by best cell finder is the same than the current, quit
+					if (oldCell == currentCell)
+						return null;
+					if (currentCell == null)
+					{
+						Debug.Log("BestCell: null");
+						return null;
 					}
 				}
 			}
