@@ -101,7 +101,7 @@ namespace PW.Core
 			}, {
 				PWColorSchemeName.PeterRiver, new List< Type >() {}
 			}, {
-				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeTerrain), typeof(BiomeSurfaces) }
+				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeTerrain), typeof(BiomeSurfaceGraph) }
 			},
 		};
 

@@ -36,8 +36,6 @@ namespace PW.Core
 		//Contains the type in the PWArray at fieldIndex or anchorField.fieldType if field is not a PWArray
 		[SerializeField] SerializableType	_fieldType;
 		public SerializableType		fieldType { get { return (_fieldType == null) ? anchorFieldRef.fieldType : _fieldType; } set { _fieldType = value; } }
-		//link type for visual bezier curve style
-		public PWLinkType			linkType = PWLinkType.BasicData;
 
 
 		//hightlight mode (for replace / new / delete link visualization)
@@ -58,6 +56,7 @@ namespace PW.Core
 		public PWAnchorType			anchorType { get { return anchorFieldRef.anchorType; } }
 		public string				fieldName { get { return anchorFieldRef.fieldName; } }
 		public PWColorSchemeName	colorSchemeName { get { return anchorFieldRef.colorSchemeName; } }
+		public bool					required { get { return anchorFieldRef.required; } }
 
 		
 		//Editor variable:

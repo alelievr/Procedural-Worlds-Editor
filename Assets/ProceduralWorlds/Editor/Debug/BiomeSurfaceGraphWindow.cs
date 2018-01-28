@@ -112,7 +112,12 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 			switchList.DoLayoutList();
 	
 			if (GUILayout.Button("Build graph"))
-				biomeSurfaceGraph.BuildGraph(surfaceSwitches);
+			{
+				bool built = biomeSurfaceGraph.BuildGraph(surfaceSwitches);
+				Debug.Log("Graph valid: " + built);
+			}
+			
+			EditorGUILayout.LabelField("Graph is built: " + biomeSurfaceGraph.isBuilt);
 
 			DrawSearchInput();
 		}

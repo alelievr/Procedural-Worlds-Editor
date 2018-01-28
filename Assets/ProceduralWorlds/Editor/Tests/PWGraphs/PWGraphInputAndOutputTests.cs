@@ -4,12 +4,15 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-public class PWGraphInputAndOutputTests
+namespace PW.Tests.Graphs
 {
-
-	[Test]
-	public void PWGraphInputAndOutputTestsSimplePasses()
+	public class PWGraphInputAndOutputTests
 	{
+	
+		[Test]
+		public void PWGraphInputAndOutputTestsSimplePasses()
+		{
+		}
+	
 	}
-
 }

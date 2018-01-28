@@ -6,7 +6,7 @@ using System.Collections;
 using PW.Node;
 using PW.Core;
 
-namespace PW
+namespace PW.Tests.Graphs
 {
 	public class PWGraphNoiseRemapAndDebugTests
 	{

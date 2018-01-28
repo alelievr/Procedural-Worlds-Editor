@@ -285,12 +285,6 @@ namespace PW.Biomator
 		public BiomeSurfaceMaterial	material;
 	}
 
-	[Serializable]
-	public class BiomeSurfaces
-	{
-		public List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
-	}
-
 	public class PartialBiome
 	{
 		public BiomeData				biomeDataReference;
@@ -314,7 +308,7 @@ namespace PW.Biomator
 
 		//datas added by the biome graph
 		public Sampler					modifiedTerrain;
-		public BiomeSurfaces			biomeSurfaces;
+		public BiomeSurfaceGraph		biomeSurfaceGraph;
 	}
 
 	public class BlendedBiomeTerrain

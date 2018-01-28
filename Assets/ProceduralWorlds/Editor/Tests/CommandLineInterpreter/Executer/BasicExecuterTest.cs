@@ -7,7 +7,7 @@ using PW.Core;
 using PW.Node;
 using System.Linq;
 
-namespace PW
+namespace PW.Tests.CLI
 {
 	public class BasicExecuterTest
 	{

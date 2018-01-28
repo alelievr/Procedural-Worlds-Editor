@@ -966,7 +966,7 @@ namespace PW.Core
 		{
 			EditorGUIUtility.labelWidth = 60;
 			inputMin = EditorGUILayout.FloatField("Min", inputMin);
-			inputMax = EditorGUILayout.FloatField("Min", inputMax);
+			inputMax = EditorGUILayout.FloatField("Max", inputMax);
 			EditorGUIUtility.labelWidth = 0;
 		}
 		EditorGUILayout.EndVertical();

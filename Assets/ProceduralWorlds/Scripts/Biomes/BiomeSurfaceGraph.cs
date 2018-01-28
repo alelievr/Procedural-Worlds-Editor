@@ -28,9 +28,21 @@ namespace PW.Biomator
 
 		public List< BiomeSurfaceCell >	cells = new List< BiomeSurfaceCell >();
 
-		public void BuildGraph(IEnumerable< BiomeSurfaceSwitch > surfacesSwitches)
+		public BiomeSurfaceType		surfaceType;
+
+		[System.NonSerialized]
+		public bool					isBuilt = false;
+
+		public bool BuildGraph(List< BiomeSurfaceSwitch > surfacesSwitches)
 		{
 			var bSwitchCellMap = new Dictionary< BiomeSurfaceSwitch, BiomeSurfaceCell >();
+
+			isBuilt = false;
+
+			if (surfacesSwitches.Count == 0)
+				return false;
+
+			surfaceType = surfacesSwitches.First().surface.type;
 
 			Action< BiomeSurfaceCell, BiomeSurfaceSwitch > AddLink = (cell, s) => {
 				var link = new BiomeSurfaceLink();
@@ -75,6 +87,40 @@ namespace PW.Biomator
 			}
 
 			rootCell = cells.First();
+
+			if (!CheckValid())
+				return false;
+
+			isBuilt = true;
+
+			return true;
+		}
+
+		bool CheckValid()
+		{
+			List< BiomeSurfaceCell >	checkedCells = new List< BiomeSurfaceCell >();
+
+			Stack< BiomeSurfaceCell >	currentCells = new Stack< BiomeSurfaceCell >();
+
+			currentCells.Push(rootCell);
+
+			while (currentCells.Count > 0)
+			{
+				var currentCell = currentCells.Pop();
+				
+				if (!checkedCells.Contains(currentCell))
+					checkedCells.Add(currentCell);
+
+				foreach (var link in currentCell.links)
+					if (!checkedCells.Contains(link.toCell))
+						currentCells.Push(link.toCell);
+			}
+
+			//if all graphb cells are contained in the checkedCell list then it's good
+			if (cells.All(cell => checkedCells.Contains(cell)))
+				return true;
+			
+			return false;
 		}
 
 		BiomeSurfaceCell	CheckForBetterCell(BiomeSurfaceCell cell, float height, float slope, float param)
@@ -116,7 +162,7 @@ namespace PW.Biomator
 		{
 			BiomeSurfaceCell	currentCell = (lastCell == null) ? rootCell : lastCell;
 
-			if (currentCell == null)
+			if (!isBuilt || currentCell == null)
 				return null;
 			
 			int maxSearchDepth = 100;
@@ -126,7 +172,7 @@ namespace PW.Biomator
 			{
 				if (i > maxSearchDepth)
 				{
-					Debug.Log("Infinite loop detected, exiting ...");
+					Debug.LogError("[BiomeSurfaceGraph] Infinite loop detected, exiting ...");
 					return null;
 				}
 				
@@ -150,19 +196,18 @@ namespace PW.Biomator
 				else
 				{
 					//find the best link to take to get near from the node we look for
-					BiomeSurfaceCell	oldCell = currentCell;
 					currentCell = FindBestCell(currentCell, height, slope, param);
 
-					//if the cell returned by best cell finder is the same than the current, quit
-					if (oldCell == currentCell)
-						return null;
 					if (currentCell == null)
-					{
-						Debug.Log("BestCell: null");
 						return null;
-					}
 				}
 			}
+		}
+
+		public IEnumerable< BiomeSurface > GetSurfaces()
+		{
+			foreach (var cell in cells)
+				yield return cell.surface;
 		}
 	}
 }

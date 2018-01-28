@@ -7,36 +7,39 @@ using PW.Editor;
 using PW;
 using PW.Core;
 
-public class PWGraphAssetTests
+namespace PW.Tests.Graphs
 {
-/*
-	[Test]
-	public void CreateBiomeGraphFile()
+	public class PWGraphAssetTests
 	{
-		string fileName = "TestBiomeGraph";
-		PWBiomeGraph g = PWGraphManager.CreateBiomeGraph(fileName);
-
-		Assert.That(g != null, "Created graph was null");
-
-		string path = AssetDatabase.GetAssetPath(g);
-		Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
-
-		//cleanup the created file:
-		ScriptableObject.DestroyImmediate(g, true);
-	}
+	/*
+		[Test]
+		public void CreateBiomeGraphFile()
+		{
+			string fileName = "TestBiomeGraph";
+			PWBiomeGraph g = PWGraphManager.CreateBiomeGraph(fileName);
 	
-	[Test]
-	public void CreateMainGraphFile()
-	{
-		string fileName = "TestMainGraph";
-		PWMainGraph g = PWGraphManager.CreateMainGraph(fileName);
-
-		Assert.That(g != null, "Created graph was null");
-
-		string path = AssetDatabase.GetAssetPath(g);
-		Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
-
-		//cleanup the created file:
-		ScriptableObject.DestroyImmediate(g, true);
-	}*/
+			Assert.That(g != null, "Created graph was null");
+	
+			string path = AssetDatabase.GetAssetPath(g);
+			Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
+	
+			//cleanup the created file:
+			ScriptableObject.DestroyImmediate(g, true);
+		}
+		
+		[Test]
+		public void CreateMainGraphFile()
+		{
+			string fileName = "TestMainGraph";
+			PWMainGraph g = PWGraphManager.CreateMainGraph(fileName);
+	
+			Assert.That(g != null, "Created graph was null");
+	
+			string path = AssetDatabase.GetAssetPath(g);
+			Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
+	
+			//cleanup the created file:
+			ScriptableObject.DestroyImmediate(g, true);
+		}*/
+	}
 }

@@ -40,9 +40,9 @@ namespace PW.Biomator
 
 		public float				GetWeight(float heightRange, float slopeRange, float paramRange)
 		{
-			float slope = (slopeEnabled) ? (maxSlope - minSlope) / slopeRange : 0;
-			float height = (heightEnabled) ? (maxHeight - minHeight) / heightRange : 0;
-			float param = (paramEnabled) ? (maxParam - minParam) / paramRange : 0;
+			float slope = (slopeEnabled) ? (maxSlope - minSlope) / slopeRange : 1;
+			float height = (heightEnabled) ? (maxHeight - minHeight) / heightRange : 1;
+			float param = (paramEnabled) ? (maxParam - minParam) / paramRange : 1;
 
 			return slope + height + param;
 		}

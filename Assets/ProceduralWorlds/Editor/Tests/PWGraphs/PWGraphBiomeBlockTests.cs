@@ -4,13 +4,16 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-public class PWGraphBiomeBlockTests
+namespace PW.Tests.Graphs
 {
-
-	[Test]
-	public void PWGraphBiomeBlockTestsSimplePasses()
+	public class PWGraphBiomeBlockTests
 	{
-		// Use the Assert class to test conditions.
+	
+		[Test]
+		public void PWGraphBiomeBlockTestsSimplePasses()
+		{
+			// Use the Assert class to test conditions.
+		}
+	
 	}
-
 }

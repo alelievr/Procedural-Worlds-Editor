@@ -21,18 +21,25 @@ namespace PW.Node
 		public BiomeSurfaceMaterial	inputMaterial;
 
 		[PWOutput]
-		public BiomeSurfaceSwitch	outputSwitch;
+		public BiomeSurfaceSwitch	outputSwitch = new BiomeSurfaceSwitch();
 
-		[SerializeField]
-		BiomeSurfaceSwitch	surfaceSwitch = new BiomeSurfaceSwitch();
+		GUIStyle			boxStyle;
 
-		GUIStyle		boxStyle;
+		readonly string		biomeSurfaceSwitchKey = "BiomeSurfaceSwitch";
 
 		public override void OnNodeCreation()
 		{
 			name = "Surface switch";
-			surfaceSwitch.minSlope = 0;
-			surfaceSwitch.maxSlope = 90;
+			outputSwitch.minSlope = 0;
+			outputSwitch.maxSlope = 90;
+		}
+
+		public override void OnNodeEnable()
+		{
+			//send reload to surface biome to rebuild the graph if switch values are updated
+			delayedChanges.BindCallback(biomeSurfaceSwitchKey, (unused) => {
+				NotifyReload(typeof(PWNodeBiomeSurface));
+			});
 		}
 
 		public override void OnNodeLoadStyle()
@@ -69,30 +76,35 @@ namespace PW.Node
 		{
 			UpdateSurfaceType(biomeGraphRef.surfaceType);
 
-			if (PWGUI.BeginFade("Height limit", boxStyle, ref surfaceSwitch.heightEnabled))
+			EditorGUI.BeginChangeCheck();
+
+			if (PWGUI.BeginFade("Height limit", boxStyle, ref outputSwitch.heightEnabled))
 			{
 				EditorGUIUtility.labelWidth = 60;
-				surfaceSwitch.minHeight = EditorGUILayout.FloatField("From", surfaceSwitch.minHeight);
-				surfaceSwitch.maxHeight = EditorGUILayout.FloatField("To", surfaceSwitch.maxHeight);
+				outputSwitch.minHeight = EditorGUILayout.FloatField("From", outputSwitch.minHeight);
+				outputSwitch.maxHeight = EditorGUILayout.FloatField("To", outputSwitch.maxHeight);
 				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
-			if (PWGUI.BeginFade("Slope limit", boxStyle, ref surfaceSwitch.slopeEnabled))
+			if (PWGUI.BeginFade("Slope limit", boxStyle, ref outputSwitch.slopeEnabled))
 			{
-				PWGUI.MinMaxSlope(0, 90, ref surfaceSwitch.minSlope, ref surfaceSwitch.maxSlope);
+				PWGUI.MinMaxSlope(0, 90, ref outputSwitch.minSlope, ref outputSwitch.maxSlope);
 			}
 			PWGUI.EndFade();
-			if (PWGUI.BeginFade("Param limit", boxStyle, ref surfaceSwitch.paramEnabled))
+			if (PWGUI.BeginFade("Param limit", boxStyle, ref outputSwitch.paramEnabled))
 			{
-				surfaceSwitch.paramType = (BiomeSwitchMode)EditorGUILayout.EnumPopup(surfaceSwitch.paramType);
+				outputSwitch.paramType = (BiomeSwitchMode)EditorGUILayout.EnumPopup(outputSwitch.paramType);
 				EditorGUIUtility.labelWidth = 60;
-				surfaceSwitch.minParam = EditorGUILayout.FloatField("Min", surfaceSwitch.minParam);
-				surfaceSwitch.maxParam = EditorGUILayout.FloatField("Max", surfaceSwitch.maxParam);
+				outputSwitch.minParam = EditorGUILayout.FloatField("Min", outputSwitch.minParam);
+				outputSwitch.maxParam = EditorGUILayout.FloatField("Max", outputSwitch.maxParam);
 				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
 
-			surfaceSwitch.surface.type = biomeGraphRef.surfaceType;
+			if (EditorGUI.EndChangeCheck())
+				delayedChanges.UpdateValue(biomeSurfaceSwitchKey);
+
+			outputSwitch.surface.type = biomeGraphRef.surfaceType;
 		}
 
 	}

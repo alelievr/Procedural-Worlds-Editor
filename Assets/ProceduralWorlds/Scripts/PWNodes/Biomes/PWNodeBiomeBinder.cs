@@ -18,7 +18,7 @@ namespace PW.Node
 		
 		//inputs for 2D topdown map
 		[PWInput("Surfaces"), PWNotRequired]
-		public BiomeSurfaces		biomeSurfaces;
+		public BiomeSurfaceGraph	biomeSurfaceGraph;
 
 		[PWInput("Details"), PWNotRequired]
 		public TerrainDetail		biomeDetail;
@@ -50,7 +50,7 @@ namespace PW.Node
 			if (inputPartialBiome == null)
 				return ;
 			
-			outputBiome.biomeSurfaces = biomeSurfaces;
+			outputBiome.biomeSurfaceGraph = biomeSurfaceGraph;
 			outputBiome.id = inputPartialBiome.id;
 			outputBiome.name = inputPartialBiome.name;
 			outputBiome.previewColor = inputPartialBiome.previewColor;

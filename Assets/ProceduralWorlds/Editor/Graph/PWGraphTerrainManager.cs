@@ -33,7 +33,11 @@ namespace PW.Editor
 		public void DrawTerrainSettings(Rect settingsRect, MaterializerType type)
 		{
 			if (terrain == null)
-				terrain = GameObject.FindObjectOfType(typeof(PWTerrainBase<>)) as PWTerrainBase< ChunkData >;
+			{
+				var go = GameObject.FindObjectOfType(typeof(PWTopDown2DTerrainSquare));
+				// terrain = go as ITerrainBas;
+				Debug.Log("terrain: " + terrain + " | " + go);
+			}
 
 			if (terrain == null)
 				return ;

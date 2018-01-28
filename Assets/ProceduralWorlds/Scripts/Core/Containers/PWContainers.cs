@@ -126,8 +126,7 @@ namespace PW.Core
 		public BiomeData				biomeData;
 		public MaterializerType			materializerType;
 
-		//TODO: change biomeSurfaces to BiomeSurfaceGraph
-		public Dictionary< short, BiomeSurfaces >	biomeSurfacesList = new Dictionary< short, BiomeSurfaces >();
+		public Dictionary< short, BiomeSurfaceGraph >	biomeSurfacesList = new Dictionary< short, BiomeSurfaceGraph >();
 	}
 
 	/*

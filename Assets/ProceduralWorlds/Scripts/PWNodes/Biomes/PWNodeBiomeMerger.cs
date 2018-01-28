@@ -105,7 +105,7 @@ namespace PW.Node
 			{
 				if (mergedBiomeTerrain.biomeSurfacesList.ContainsKey(biome.id))
 					Debug.LogError("[PWBiomeMerger] Duplicate biome in the biome graph: " + biome.name + ", id: " + biome.id);
-				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaces;
+				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaceGraph;
 			}
 			
 			update = true;

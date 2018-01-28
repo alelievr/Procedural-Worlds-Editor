@@ -6,7 +6,7 @@ using NUnit.Framework;
 using PW.Node;
 using PW.Core;
 
-namespace PW
+namespace PW.Tests.Graphs
 {
 	public class PWGraphUtilsFunctionsTests
 	{

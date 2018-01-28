@@ -92,8 +92,8 @@ namespace PW.Node
 			if (inputBiomes.Count == 0 || inputBiomes.GetValues().First() == null)
 				return ;
 
-			var biomes = inputBiomes.GetValues();
-			var biomeData = biomes[0].biomeDataReference;
+			var partialBiomes = inputBiomes.GetValues();
+			var biomeData = partialBiomes[0].biomeDataReference;
 
 			if (biomeData == null)
 				return ;
@@ -109,15 +109,23 @@ namespace PW.Node
 			//once the biome data is filled, we call the biome graphs corresponding to the biome id
 			foreach (var id in biomeData.ids)
 			{
-				foreach (var biome in biomes)
-					if (id == biome.id)
+				foreach (var partialBiome in partialBiomes)
+					if (id == partialBiome.id)
 					{
-						if (biome.biomeGraph == null)
+						if (partialBiome.biomeGraph == null)
 							continue ;
 						
-						biome.biomeGraph.SetInput(biomes[id]);
-						biome.biomeGraph.Process();
-						Biome b = biome.biomeGraph.GetOutput();
+						partialBiome.biomeGraph.SetInput(partialBiomes[id]);
+						partialBiome.biomeGraph.Process();
+
+						Biome b = partialBiome.biomeGraph.GetOutput();
+
+						if (b == null)
+						{
+							Debug.LogError("[PWBiomeBlender] Can't process properly the biome graph '" + partialBiome.biomeGraph + "'");
+							continue ;
+						}
+
 						outputBlendedBiomeTerrain.biomes.Add(b);
 					}
 			}

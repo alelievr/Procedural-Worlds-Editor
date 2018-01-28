@@ -14,8 +14,6 @@ namespace PW.Core
 	
 		//ColorPalette of the link
 		public PWColorSchemeName colorSchemeName;
-		//link type
-		public PWLinkType		type;
 		//link hightlight mode 
 		public PWLinkHighlight	highlight;
 		//is selected ?
@@ -61,6 +59,12 @@ namespace PW.Core
 				fromNode = fromAnchor.nodeRef;
 			if (toAnchor != null)
 				toNode = toAnchor.nodeRef;
+			
+			//update link color:
+			if (fromAnchor != null)
+			{
+				colorSchemeName = fromAnchor.colorSchemeName;
+			}
 		}
 
 		public void ResetHighlight()

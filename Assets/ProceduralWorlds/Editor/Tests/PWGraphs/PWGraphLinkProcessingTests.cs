@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace PW
+namespace PW.Tests.Graphs
 {
 	public class PWGraphLinkProcessingTests
 	{

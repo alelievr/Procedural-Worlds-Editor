@@ -182,7 +182,6 @@ namespace PW
 			else
 				ret = (y1 - x2);
 			
-			Debug.Log(x1 + " to " + x2 + " | " + y1 + " to " + y2 + ", gap: " + ret);
 			return ret;
 		}
     }

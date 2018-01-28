@@ -389,17 +389,25 @@ namespace PW.Core
 	
 			//compute dependency weight:
 			int	ret = 1;
-			foreach (var dep in node.GetInputNodes())
+			foreach (var inputAnchor in node.inputAnchors)
 			{
-				int d = EvaluateComputeOrder(false, depth + 1, dep.id);
-	
-				//if dependency does not have enought datas to compute result, abort calculus.
-				if (d == -1)
+				foreach (var link in inputAnchor.links)
 				{
-					ret = -1;
-					break ;
+					if (link.fromNode == null)
+						continue ;
+					
+					PWNode dep = link.fromNode;
+
+					int d = EvaluateComputeOrder(false, depth + 1, dep.id);
+		
+					//if dependency does not have enought datas to compute result, abort calculus.
+					if (d == -1 && inputAnchor.required)
+					{
+						ret = -1;
+						break ;
+					}
+					ret += d;
 				}
-				ret += d;
 			}
 	
 			nodeComputeOrderCount[nodeId] = ret;

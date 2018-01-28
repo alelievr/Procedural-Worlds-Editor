@@ -27,11 +27,12 @@ namespace PW
 				foreach (var anchor in anchorFields)
 					anchor.LoadStylesAndAssets();
 				styleLoaded = true;
+				
+				OnNodeLoadStyle();
 			}
 			if (!styleLoadedStatic)
 			{
 				LoadStyles();
-				OnNodeLoadStyle();
 			}
 
 			Profiler.BeginSample("[PW] " + GetType() + " rendering");

@@ -7,7 +7,7 @@ using System.Collections;
 using PW.Core;
 using PW.Node;
 
-namespace PW
+namespace PW.Tests.CLI
 {
 	public class BasicLexerParserTest
 	{

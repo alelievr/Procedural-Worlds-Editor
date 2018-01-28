@@ -5,7 +5,9 @@ using PW;
 using PW.Core;
 using PW.Biomator;
 
-public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
+public interface ITerrainBase {}
+
+public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >, ITerrainBase
 {
 
 	static Gradient			rainbow = null;

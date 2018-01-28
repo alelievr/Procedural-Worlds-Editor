@@ -16,10 +16,9 @@ namespace PW.Node
 		public PWArray< BiomeSurfaceSwitch >	inputSurfaces = new PWArray< BiomeSurfaceSwitch >();
 
 		[PWOutput]
-		public BiomeSurfaces	surfaces = new BiomeSurfaces();
+		public BiomeSurfaceGraph	surfaceGraph = new BiomeSurfaceGraph();
 
-		[SerializeField]
-		BiomeSurfaceGraph		surfaceGraph = new BiomeSurfaceGraph();
+		GUIContent		surfaceGraphError = new GUIContent("Surface graph not built !", "You have a gap in some parameter so the graph can't be correctly built");
 
 		public override void OnNodeCreation()
 		{
@@ -28,26 +27,48 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
+			OnPostProcess += UpdateGraph;
+			OnReload += ReloadCallback;
+		}
+
+		public override void OnNodeDisable()
+		{
+			OnPostProcess -= UpdateGraph;
+			OnReload -= ReloadCallback;
+		}
+
+		public override void OnNodeLoadStyle()
+		{
+			//build the graph the first times:
+			UpdateGraph();
 		}
 
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 80;
+
+			int switchCount = GetInputNodes().Count();
 			
-			EditorGUILayout.LabelField("Texturing switches: " + GetInputNodes().Count());
+			EditorGUILayout.LabelField("Texturing switches: " + switchCount);
+
+			if (surfaceGraph.isBuilt)
+				EditorGUILayout.LabelField("Graph built without error");
+			else
+				EditorGUILayout.LabelField(surfaceGraphError, PWStyles.errorLabel);
+			
+			//TODO: print more infos about why the graph can't be built
+		}
+
+		void ReloadCallback(PWNode from) { UpdateGraph(); }
+
+		void UpdateGraph()
+		{
+			surfaceGraph.BuildGraph(inputSurfaces.GetValues());
 		}
 
 		public override void OnNodeProcessOnce()
 		{
-			foreach (var biomeSwitch in inputSurfaces.GetValues())
-			{
-				Debug.Log("Biome switch !");
-				surfaces.surfaceSwitches.Add(biomeSwitch);
-			}
-		}
-
-		public override void OnNodeProcess()
-		{
+			UpdateGraph();
 		}
 
 		//nothing to process, output already computed by processOnce

@@ -51,7 +51,7 @@ namespace PW
 			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
 			nodeStyle = GUI.skin.FindStyle("Node");
 
-			styleLoaded = true;
+			styleLoadedStatic = true;
 		}
 		
 		void LoadFieldAttributes()
