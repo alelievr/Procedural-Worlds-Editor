@@ -641,8 +641,8 @@ namespace PW.Core
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
-				fieldSettings.samplerTextureUpdated = false;
 				fieldSettings.texture.filterMode = fieldSettings.filterMode;
+				fieldSettings.samplerTextureUpdated = false;
 			}
 
 			//same for the gradient:
@@ -652,7 +652,7 @@ namespace PW.Core
 			Texture2D	tex = fieldSettings.texture;
 
 			if (samp.size != tex.width)
-				tex.Resize(samp.size, samp.size, TextureFormat.RGBA32, false);
+				UpdateSampler2D(fieldSettings);
 			
 			//if the preview texture of the sampler have not been updated, we try to update it
 			if (!fieldSettings.samplerTextureUpdated || fieldSettings.update)
@@ -721,13 +721,17 @@ namespace PW.Core
 
 		void UpdateSampler2D(PWGUISettings fieldSettings)
 		{
-			if (fieldSettings.sampler2D == null)
+			if (fieldSettings.sampler2D == null || fieldSettings.texture == null)
 				return ;
 			
+			var tex = fieldSettings.texture;
+			if (fieldSettings.sampler2D.size != tex.width)	
+				tex.Resize(fieldSettings.sampler2D.size, fieldSettings.sampler2D.size, TextureFormat.RGBA32, false);
+			
 			fieldSettings.sampler2D.Foreach((x, y, val) => {
-				fieldSettings.texture.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
+				tex.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
 			}, true);
-			fieldSettings.texture.Apply();
+			tex.Apply();
 			fieldSettings.update = false;
 			fieldSettings.samplerTextureUpdated = true;
 		}
@@ -784,6 +788,7 @@ namespace PW.Core
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
+				fieldSettings.update = true;
 				fieldSettings.texture.filterMode = FilterMode.Point;
 			}
 
@@ -795,7 +800,7 @@ namespace PW.Core
 
 		void UpdateBiomeMap2D(PWGUISettings fieldSettings)
 		{
-			if (fieldSettings.biomeData == null)
+			if (fieldSettings.biomeData == null || fieldSettings.texture == null)
 				return ;
 			
 			var map = fieldSettings.biomeData.biomeIds;

@@ -13,7 +13,7 @@ namespace PW.Tests.Nodes
 {
 	public class PWNodeAPITests
 	{
-		//TestGraph 1: 
+		//TestUtils.GenerateTestMainGraph():
 		// 	              +-----+
 		//            +---> Add1+---+
 		// +------+   |   +-----+   |   +-----+   +------+
@@ -26,32 +26,10 @@ namespace PW.Tests.Nodes
 		//            +---> Add3+    
 		//                +-----+
 	
-		PWMainGraph	GenerateTestGraph()
-		{
-			return PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode(typeof(PWNodeSlider), "slider")
-				.NewNode(typeof(PWNodeConstant), "constant")
-				.NewNode(typeof(PWNodeAdd), "add1")
-				.NewNode(typeof(PWNodeAdd), "add2")
-				.NewNode(typeof(PWNodeAdd), "add3")
-				.NewNode(typeof(PWNodeCurve), "curve")
-				.NewNode(typeof(PWNodeDebugInfo), "debug1")
-				.NewNode(typeof(PWNodeDebugInfo), "debug2")
-				.Link("slider", "add1")
-				.Link("slider", "add2")
-				.Link("constant", "add2")
-				.Link("constant", "add3")
-				.Link("add1", "curve")
-				.Link("curve", "debug1")
-				.Link("add2", "debug2")
-				.Execute()
-				.GetGraph() as PWMainGraph;
-		}
-	
 		[Test]
 		public void PWNodeAPIGetNodesAttachedToAnchorArray()
 		{
-			PWMainGraph graph = GenerateTestGraph();
+			PWMainGraph graph = TestUtils.GenerateTestMainGraph();
 	
 			var add2Node = graph.FindNodeByName("add2");
 			var sliderNode = graph.FindNodeByName("slider");
@@ -73,7 +51,7 @@ namespace PW.Tests.Nodes
 		[Test]
 		public void PWNodeAPIGetNodesAttachedToAnchor()
 		{
-			PWMainGraph graph = GenerateTestGraph();
+			PWMainGraph graph = TestUtils.GenerateTestMainGraph();
 	
 			var curveNode = graph.FindNodeByName("curve");
 			var add1Node = graph.FindNodeByName("add1");

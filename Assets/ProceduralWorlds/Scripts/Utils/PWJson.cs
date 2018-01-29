@@ -8,7 +8,7 @@ using PW.Core;
 
 public static class PWJson
 {
-    class JsonType
+    public class JsonType
     {
         public Type     type;
         public string   prefix;
@@ -17,7 +17,7 @@ public static class PWJson
         public Func< string, object >	parser;
     }
 
-	class JsonTypes : List< JsonType >
+	public class JsonTypes : List< JsonType >
 	{
 		public void Add(Type t, string prefix, string sufix, Regex regex, Func< string, object > parser)
 		{
@@ -28,6 +28,8 @@ public static class PWJson
 			jsonType.sufix = sufix;
 			jsonType.regex = regex;
 			jsonType.parser = parser;
+
+			this.Add(jsonType);
 		}
 		
 		public void Add(Type t, Regex regex, Func< string, object > parser)
@@ -49,7 +51,7 @@ public static class PWJson
 	static string vector2Regex = @"(\s*" + floatRegex + @"\s*,\s*" + floatRegex + ")";
 	static string texture2DRegex = @"{\s*Texture2D\s*:\s*(\w+)}";
 
-	static JsonTypes allowedJsonTypes = new JsonTypes() {
+	public static readonly JsonTypes allowedJsonTypes = new JsonTypes() {
 		{typeof(string), "\"", "\"", new Regex("^\".*\"$"), (val) => val.Trim('"') },
 		{typeof(int), new Regex(@"^" + intRegex + "$"), (val) => int.Parse(val)},
 		{typeof(float), new Regex("^" + floatRegex + "$"), (val) => float.Parse(val) },
@@ -69,7 +71,7 @@ public static class PWJson
     {
         Type t = data.GetType();
 
-        if (allowedJsonTypes.Count(a => a.type == t) == 0)
+        if (allowedJsonTypes.FindIndex(a => a.type == t) == -1)
             throw new Exception("[PWJson] Can't jsonify type '" + t + "'");
 
         if (t == typeof(string))

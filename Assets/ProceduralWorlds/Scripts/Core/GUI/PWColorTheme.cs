@@ -83,8 +83,7 @@ namespace PW.Core
 				typeof(float), typeof(Color), typeof(Vector2),
 				typeof(Vector3), typeof(Vector4), typeof(int),
 				typeof(GameObject), typeof(Mesh), typeof(Material),
-				typeof(Texture2D), typeof(BiomeSurfaceMaps),
-				typeof(BiomeSurfaceColor), typeof(BiomeSurfaceMaterial) }
+				typeof(Texture2D) }
 			}, {
 				PWColorSchemeName.Amethyst, new List< Type >() {}
 			}, {
@@ -95,7 +94,9 @@ namespace PW.Core
 			}, {
 				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
 			}, {
-				PWColorSchemeName.SunFlower, new List< Type >() { typeof(FinalTerrain) }
+				PWColorSchemeName.SunFlower, new List< Type >() { typeof(FinalTerrain),
+				typeof(BiomeSurfaceMaps), typeof(BiomeSurfaceColor),
+				typeof(BiomeSurfaceMaterial), typeof(BiomeSurfaceSwitch) }
 			}, {
 				PWColorSchemeName.Concrete, new List< Type >() { typeof(TerrainDetail) }
 			}, {

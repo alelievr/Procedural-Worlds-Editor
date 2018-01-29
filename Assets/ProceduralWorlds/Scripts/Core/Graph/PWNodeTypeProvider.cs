@@ -105,11 +105,13 @@ namespace PW.Core
 			new PWNodeTypeInfoList(PWMainGraph, "Biomes", PWColorSchemeName.Carrot,
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
-				"Biome temperature map", typeof(PWNodeBiomeTemperature),
-				"Biome wetness map", typeof(PWNodeWetness),
-				"Biome switch", typeof(PWNodeBiomeSwitch),
-				"Biome", typeof(PWNodeBiome),
-				"Biome blender", typeof(PWNodeBiomeBlender),
+				"Remperature map", typeof(PWNodeBiomeTemperature),
+				"Wetness map", typeof(PWNodeWetness),
+				"Biome Switch", typeof(PWNodeBiomeSwitch),
+				"Biome Graph", typeof(PWNodeBiome),
+				"Biome blender", typeof(PWNodeBiomeBlender)
+			),
+			new PWNodeTypeInfoList(PWMainGraph, "Terrain", PWColorSchemeName.Pumpkin,
 				"Biome merger", typeof(PWNodeBiomeMerger)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Turquoise,

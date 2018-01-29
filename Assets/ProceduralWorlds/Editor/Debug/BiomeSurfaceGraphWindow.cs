@@ -122,8 +122,6 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 			DrawSearchInput();
 		}
 
-		Rect zone = EditorGUILayout.GetControlRect(false, 300, GUILayout.ExpandWidth(true));
-
 		int i = 0;
 
 		if (biomeSurfaceGraph.rootCell != null)

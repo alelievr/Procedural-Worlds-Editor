@@ -456,15 +456,15 @@ namespace PW.Core
 		}
 
 		//export the graph as commands in a file and return the created file path
-		public string Export(string filePath)
+		public void Export(string filePath)
 		{
-			return PWGraphCLI.Export(this, filePath);
+			PWGraphCLI.Export(this, filePath);
 		}
 
 		//wipeDatas will remove all the graph content before importing the file
 		public void Import(string filePath, bool wipeDatas = false)
 		{
-			Debug.Log("TODO");
+			PWGraphCLI.Import(this, filePath, wipeDatas);
 		}
 
 		public void Execute(string command)

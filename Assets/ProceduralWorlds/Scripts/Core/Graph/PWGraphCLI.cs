@@ -4,6 +4,8 @@ using UnityEngine;
 using System;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Linq;
+using System.IO;
 
 namespace PW.Core
 {
@@ -319,11 +321,6 @@ namespace PW.Core
 		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
 			Vector2	position = command.position;
-			
-			Debug.Log("Create new Node: " + inputCommand);
-
-			foreach (var n in graph.nodes)
-				Debug.Log("node: " + n);
 
 			PWNode node = graph.CreateNewNode(command.nodeType, position);
 			Type nodeType = node.GetType();
@@ -332,8 +329,7 @@ namespace PW.Core
 			{
 				foreach (var attr in PWJson.Parse(command.attributes))
 				{
-					Debug.Log(attr.first + " -> " + attr.second);
-					FieldInfo attrField = nodeType.GetField(attr.first, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+					FieldInfo attrField = nodeType.GetField(attr.first, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 
 					if (attrField != null)
 						attrField.SetValue(node, attr.second);
@@ -359,10 +355,73 @@ namespace PW.Core
 
 		#region Export and command creation
 
-		public static string Export(PWGraph graph, string filePath)
+		public static void Export(PWGraph graph, string filePath)
 		{
-			Debug.Log("TODO");
-			return null;
+			List< string > commands = new List< string >();
+			List< string > nodeNames = new List< string >();
+			var nodeToNameMap = new Dictionary< PWNode, string >();
+
+			foreach (var node in graph.nodes)
+			{
+				var attrs = new PWGraphCLIAttributes();
+
+				//load node attributes
+				FieldInfo[] attrFields = node.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+				foreach (var field in attrFields)
+				{
+					var attributes = field.GetCustomAttributes(false);
+
+					bool isInputOrOutput = attributes.Any(a => {
+						return a.GetType() == typeof(PWInputAttribute) || a.GetType() == typeof(PWOutputAttribute);
+					});
+
+					//if the field can't be jsonified, we skip it
+					if (PWJson.allowedJsonTypes.FindIndex(j => j.type == field.FieldType) == -1)
+						continue ;
+
+					if (isInputOrOutput)
+						continue ;
+
+					attrs.Add(field.Name, field.GetValue(node));
+				}
+
+				string	nodeName = node.name;
+				int		i = 0;
+
+				//unique name generation
+				while (nodeNames.Contains(nodeName))
+					nodeName = node.name + i++;
+				
+				nodeToNameMap[node] = nodeName;
+				
+				commands.Add(GenerateNewNodeCommand(node.GetType(), nodeName, attrs));
+			}
+		
+			foreach (var link in graph.nodeLinkTable.GetLinks())
+			{
+				var fromName = nodeToNameMap[link.fromNode];
+				var toName = nodeToNameMap[link.toNode];
+
+				commands.Add(GenerateLinkCommand(fromName, toName));
+			}
+
+			File.WriteAllLines(filePath, commands.ToArray());
+		}
+		
+		public static void Import(PWGraph graph, string filePath, bool wipeDatas = false)
+		{
+			if (wipeDatas)
+			{
+				while (graph.nodes.Count != 0)
+				{
+					Debug.Log("removing node: " + graph.nodes.First());
+					graph.RemoveNode(graph.nodes.First());
+				}
+			}
+
+			string[] commands = File.ReadAllLines(filePath);
+			foreach (var command in commands)
+				Execute(graph, command);
 		}
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name, PWGraphCLIAttributes datas = null)

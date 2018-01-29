@@ -25,7 +25,7 @@ namespace PW
 
 		//anchor 
 		[System.Serializable]
-		public class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
+		protected class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
 		[SerializeField]
 		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
