@@ -165,7 +165,7 @@ namespace PW.Core
 			new PWGraphTokenDefinition(PWGraphToken.Attr, @"^attr"),
 			new PWGraphTokenDefinition(PWGraphToken.Equal, @"^="),
 			new PWGraphTokenDefinition(PWGraphToken.JsonDatas, @"^{.*}"),
-			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\".*\\\"|\\S+)"),
+			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\"(.*?)\\\"|\\S+)"),
 		};
 
 		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
@@ -185,7 +185,7 @@ namespace PW.Core
 			if (ret != null)
 			{
 				if (debug)
-					Debug.Log("Token " + ret.token + " maches value: " + ret.value + ", remainingText: " + ret.remainingText);
+					Debug.Log("Token " + ret.token + " maches value: |" + ret.value + "|, remainingText: |" + ret.remainingText + "|");
 				line = ret.remainingText;
 			}
 			else if (debug)
@@ -202,10 +202,12 @@ namespace PW.Core
 			nodeType = Type.GetType(type);
 			if (nodeType == null)
 				nodeType = Type.GetType("PW.Node." + type);
+			if (nodeType == null)
+				nodeType = Type.GetType("PW.Core." + type);
 
 			//thorw exception if the type can't be parse / does not inherit from PWNode
 			if (nodeType == null || !nodeType.IsSubclassOf(typeof(PWNode)))
-				throw new Exception("Type " + type + " not found as a node type");
+				throw new Exception("Type " + type + " not found as a node type (" + nodeType + ")");
 			
 			return nodeType;
 		}
@@ -321,8 +323,16 @@ namespace PW.Core
 		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
 			Vector2	position = command.position;
-
-			PWNode node = graph.CreateNewNode(command.nodeType, position);
+			PWNode node = null;
+			
+			//if we receive a CreateNode with input/output graph nodes, we assign them so we don't have multiple inout/output nodes
+			if (command.nodeType.IsAssignableFrom(typeof(PWNodeGraphInput)))
+				node = graph.inputNode;
+			else if (command.nodeType.IsAssignableFrom(typeof(PWNodeGraphOutput)))
+				node = graph.outputNode;
+			else
+				node = graph.CreateNewNode(command.nodeType, position);
+			
 			Type nodeType = node.GetType();
 
 			if (!String.IsNullOrEmpty(command.attributes))
@@ -371,15 +381,15 @@ namespace PW.Core
 				{
 					var attributes = field.GetCustomAttributes(false);
 
-					bool isInputOrOutput = attributes.Any(a => {
-						return a.GetType() == typeof(PWInputAttribute) || a.GetType() == typeof(PWOutputAttribute);
+					bool isInput = attributes.Any(a => {
+						return a.GetType() == typeof(PWInputAttribute);
 					});
+
+					if (isInput)
+						continue ;
 
 					//if the field can't be jsonified, we skip it
 					if (PWJson.allowedJsonTypes.FindIndex(j => j.type == field.FieldType) == -1)
-						continue ;
-
-					if (isInputOrOutput)
 						continue ;
 
 					attrs.Add(field.Name, field.GetValue(node));

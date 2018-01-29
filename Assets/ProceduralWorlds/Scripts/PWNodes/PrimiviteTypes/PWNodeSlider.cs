@@ -7,10 +7,9 @@ namespace PW.Node
 	{
 	
 		[PWOutput]
-		[PWColor(1, 0, 0)]
-		public float	value1 = .5f;
-		float	min = 0;
-		float	max = 1;
+		public float	outValue = .5f;
+		public float	min = 0;
+		public float	max = 1;
 
 		string changeKey = "Slider";
 
@@ -22,9 +21,9 @@ namespace PW.Node
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
-			value1 = EditorGUILayout.Slider(value1, min, max);
+			outValue = EditorGUILayout.Slider(outValue, min, max);
 			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(changeKey, value1);
+				delayedChanges.UpdateValue(changeKey, outValue);
 		}
 
 		//no process needed, value already set by the slider.

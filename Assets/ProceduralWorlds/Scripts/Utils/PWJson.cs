@@ -48,7 +48,7 @@ public static class PWJson
 
 	static string intRegex = @"[-+]?\d+";
 	static string floatRegex = @"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+|f?)?";
-	static string vector2Regex = @"(\s*" + floatRegex + @"\s*,\s*" + floatRegex + ")";
+	static string vector2Regex = @"\(\s*" + floatRegex + @"\s*,\s*" + floatRegex + @"\)";
 	static string texture2DRegex = @"{\s*Texture2D\s*:\s*(\w+)}";
 
 	public static readonly JsonTypes allowedJsonTypes = new JsonTypes() {
@@ -58,9 +58,11 @@ public static class PWJson
 		{typeof(Vector2), new Regex("^" + vector2Regex + "$"),
 			(val) => {
 				//Arrrrrg i hate string manipulation in C#
-				MatchCollection mc = new Regex(@"\(\s*(.*)\s*,\s*(.*)\s*\)").Matches(val);
-				float f1 = float.Parse(mc[1].Value);
-				float f2 = float.Parse(mc[2].Value);
+				Debug.Log("input: " + val);
+				MatchCollection mc = Regex.Matches(val, @"\(\s*(.*)\s*,\s*(.*)\s*\)");
+				var groups = mc[0].Groups;
+				float f1 = float.Parse(groups[1].Value);
+				float f2 = float.Parse(groups[2].Value);
 				return new Vector2(f1, f2);
 			}
 		},
@@ -152,7 +154,10 @@ public static class PWJson
 		s = s.Substring(1);
 		s = s.Substring(0, s.Length - 1);
 
-		var datas = s.Split(',');
+		//magic regex to parse exluding commas
+		var datas = Regex.Matches(s, @"([\""].+?[\""]|\S+)\s*:\s*([\(].+?[\)]|[^,]+)")
+            .Cast< Match >()
+            .Select(m => m.Value);
 
 		foreach (var data in datas)
 			ret.Add(ParsePart(data.Trim()));
