@@ -10,14 +10,14 @@ namespace PW.Editor
 	public class PWGraphTerrainManager
 	{
 		//terrain base game object reference
-		public static PWTerrainBase< ChunkData >	terrainReference;
+		public static PWTerrainGenericBase	terrainReference;
 
 		//Graph reference
-		PWGraph				graph;
+		PWGraph							graph;
 
-		PWTerrainBase< ChunkData >		terrain;
+		PWTerrainGenericBase		terrain;
 
-		Event				e { get { return Event.current; } }
+		Event							e { get { return Event.current; } }
 
 		Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
 		{
@@ -34,11 +34,10 @@ namespace PW.Editor
 		{
 			if (terrain == null)
 			{
-				var go = GameObject.FindObjectOfType(typeof(PWTopDown2DTerrainSquare));
-				// terrain = go as ITerrainBas;
-				Debug.Log("terrain: " + terrain + " | " + go);
+				var go = GameObject.FindObjectOfType< PWTerrainGenericBase >();
+				terrain = (go);
 			}
-
+			
 			if (terrain == null)
 				return ;
 			
@@ -50,7 +49,7 @@ namespace PW.Editor
 			{
 				GameObject go = terrainReference.gameObject;
 				GameObject.DestroyImmediate(terrainReference);
-				terrainReference = go.AddComponent(expectedType) as PWTerrainBase< ChunkData >;
+				terrainReference = go.AddComponent(expectedType) as PWTerrainGenericBase;
 			}
 			
 			if (terrainReference.terrainStorage == null)
@@ -62,12 +61,8 @@ namespace PW.Editor
 			{
 				if (GUILayout.Button("Generate terrain"))
 					ReloadChunks();
-				if (GUILayout.Button("Clean terrain"))
-					terrain.DestroyAllChunks();
 			}
 			EditorGUILayout.EndHorizontal();
-			
-			terrain.chunkSize = graph.chunkSize;
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them

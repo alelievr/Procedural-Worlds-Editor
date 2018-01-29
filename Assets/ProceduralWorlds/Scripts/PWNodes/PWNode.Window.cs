@@ -31,9 +31,7 @@ namespace PW
 				OnNodeLoadStyle();
 			}
 			if (!styleLoadedStatic)
-			{
 				LoadStyles();
-			}
 
 			Profiler.BeginSample("[PW] " + GetType() + " rendering");
 			

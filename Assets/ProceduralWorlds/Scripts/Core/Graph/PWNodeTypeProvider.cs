@@ -118,7 +118,7 @@ namespace PW.Core
 				"Biome terrain", typeof(PWNodeBiomeTerrain),
 				"Biome Binder", typeof(PWNodeBiomeBinder)
 			),
-			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.Concrete,
+			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.SunFlower,
 				"Surface maps", typeof(PWNodeBiomeSurfaceMaps),
 				"Surface color", typeof(PWNodeBiomeSurfaceColor),
 				"Surface material", typeof(PWNodeBiomeSurfaceMaterial),

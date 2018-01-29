@@ -31,6 +31,18 @@ public partial class PWGraphEditor
 		Rect decaledRect = GUILayout.Window(id, node.rect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 
+		//draw node header:
+		//Draw the node header using the color scheme:
+		if (e.type == EventType.Repaint)
+		{
+			float h = nodeStyle.border.top;
+			float w = decaledRect.width - nodeStyle.border.right - nodeStyle.border.left;
+			GUI.color = PWColorTheme.GetNodeColor(node.colorSchemeName);
+			// GUI.DrawTexture(new Rect(0, 0, w, h), nodeHeaderStyle.normal.background);
+			nodeHeaderStyle.Draw(new Rect(decaledRect.x, decaledRect.y, w, h), false, false, false, false);
+			GUI.color = Color.white;
+		}
+
 		if (node.debug)
 		{
 			Rect debugRect = decaledRect;
