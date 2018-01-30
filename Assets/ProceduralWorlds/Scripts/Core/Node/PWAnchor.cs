@@ -66,7 +66,6 @@ namespace PW.Core
 		//debug variables:
 		public bool					debug;
 
-
 		public void OnAfterDeserialized(PWAnchorField anchorField)
 		{
 			Init(anchorField);
@@ -111,6 +110,13 @@ namespace PW.Core
 		{
 			linkGUIDs.Remove(link.GUID);
 			links.Remove(link);
+
+			//set to null the object value if we're not anymore linked
+			if (linkCount == 0)
+				nodeRef.SetAnchorValue(this, null);
+			
+			//update anchor group
+			anchorFieldRef.UpdateAnchors();
 		}
 		
 		//remove all links attached to this anchor
@@ -120,12 +126,18 @@ namespace PW.Core
 
 			for (int i = 0; i < count; i++)
 				nodeRef.graphRef.RemoveLink(links[0]);
+				
+			//update anchorFieldRef (for multiple anchors)
+			anchorFieldRef.UpdateAnchors();
 		}
 
 		public void AddLink(PWNodeLink link)
 		{
 			linkGUIDs.Add(link.GUID);
 			links.Add(link);
+
+			//update anchorFieldRef (for multiple anchors)
+			anchorFieldRef.UpdateAnchors();
 		}
 
 		//called only once (when the anchor is created)

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using PW.Core;
 using PW.Node;
+using PW.Biomator;
 
 namespace PW.Tests.Graphs
 {
@@ -39,10 +40,19 @@ namespace PW.Tests.Graphs
 				.NewNode< PWNodeBiomeSurfaceColor >("c1")
 				.NewNode< PWNodeBiomeSurfaceColor >("c2")
 				.NewNode< PWNodeBiomeSurfaceColor >("c3")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s1")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s2")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s3")
 				.NewNode< PWNodeBiomeSurface >("surf")
-				.Link("c1", "surf")
-				.Link("c2" ,"surf")
-				.Link("c3" ,"surf")
+				.Link("s1", "surf")
+				.Link("s2" ,"surf")
+				.Link("s3" ,"surf")
+				.Link("c1", "s1")
+				.Link("c2" ,"s2")
+				.Link("c3" ,"s3")
+				.Custom(g => {
+					(g as PWBiomeGraph).surfaceType = BiomeSurfaceType.Color;
+				})
 				.Execute()
 				.GetGraph();
 			
@@ -55,10 +65,8 @@ namespace PW.Tests.Graphs
 			c2.surfaceColor.baseColor = Color.green;
 			c3.surfaceColor.baseColor = Color.yellow;
 
-			graph.Process();
+			graph.ProcessOnce();
 
-			Debug.Log("surfaceGraph: " + surf.surfaceGraph.isBuilt);
-			Debug.Log("surfaceGraph: " + surf.surfaceGraph.cells.Count);
 			Assert.That(surf.surfaceGraph.cells.Count == 3);
 		}
 	

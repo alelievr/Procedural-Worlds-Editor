@@ -63,7 +63,6 @@ namespace PW.Node
 
 		void UpdateGraph()
 		{
-			Debug.Log("inputSurfaces: " + inputSurfaces.Count);
 			surfaceGraph.BuildGraph(inputSurfaces.GetValues());
 		}
 

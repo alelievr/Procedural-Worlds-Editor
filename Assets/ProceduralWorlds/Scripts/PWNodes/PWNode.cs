@@ -343,12 +343,14 @@ namespace PW
 				anchorField.OnDisable();
 		}
 
-		void		CreateAnchorField(PWAnchorType type)
+		PWAnchorField	CreateAnchorField()
 		{
 			PWAnchorField newAnchorField = new PWAnchorField();
 
 			newAnchorField.Initialize(this);
 			newAnchorField.OnEnable();
+
+			return newAnchorField;
 		}
 
 		void		DisableUnlinkableAnchors(PWAnchor anchor)

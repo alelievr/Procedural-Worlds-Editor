@@ -98,6 +98,30 @@ namespace PW
 				anchor.forcedY = y;
 		}
 
+		public void				SetAnchorValue(string fieldName, object value, int index = 0)
+		{
+			SetAnchorValue(GetAnchorFromField(fieldName, index), value);
+		}
+
+		public void				SetAnchorValue(PWAnchor anchor, object value)
+		{
+			if (anchor != null && anchorFieldInfoMap.ContainsKey(anchor.fieldName))
+			{
+				var fieldInfo = anchorFieldInfoMap[anchor.fieldName];
+
+				if (anchor.anchorFieldRef.multiple)
+				{
+					//TODO: make this code fly
+					var SetValue = fieldInfo.FieldType.GetMethod("AssignAt");
+					SetValue.Invoke(fieldInfo.GetValue(this), new object[]{anchor.fieldIndex, value, anchor.name, true});
+				}
+				else
+					fieldInfo.SetValue(this, value);
+			}
+			else
+				Debug.LogError("Can't set value " + value + " to anchor " + anchor);
+		}
+
 		public int				GetAnchorLinkCount(string fieldName, int index = 0)
 		{
 			PWAnchor	anchor = GetAnchorFromField(fieldName, index);

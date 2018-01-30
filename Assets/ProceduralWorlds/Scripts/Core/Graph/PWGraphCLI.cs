@@ -315,9 +315,15 @@ namespace PW.Core
 				foreach (var inAnchor in toNode.inputAnchors)
 					if (PWAnchorUtils.AnchorAreAssignable(outAnchor, inAnchor))
 					{
+						//if the input anchor is already linked, find another
+						if (inAnchor.linkCount == 1)
+							continue ;
+						
 						graph.CreateLink(outAnchor, inAnchor);
-						break ;
+						return ;
 					}
+			
+			Debug.LogError("Can't link " + fromNode + " with " + toNode);
 		}
 
 		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)

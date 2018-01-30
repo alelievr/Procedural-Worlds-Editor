@@ -114,6 +114,8 @@ namespace PW.Core
 				deserializedAnchors.Add(anchor.GUID);
 				anchor.OnAfterDeserialized(this);
 			}
+
+			UpdateAnchors();
 		}
 
 		public override string ToString()
@@ -132,6 +134,67 @@ namespace PW.Core
 		static GUIStyle			inputAnchorLabelStyle = null;
 		static GUIStyle			outputAnchorLabelStyle = null;
 		static GUIStyle			boxAnchorStyle = null;
+
+	#endregion
+
+	#region AnchorField API
+
+		//Update multiple anchor count, must be called when a link is created/removed on this anchorField
+		public void UpdateAnchors()
+		{
+			//if this anchor field is a multiple input, check if all our anchors are linked
+			// and if so, add a new one
+			if (multiple && anchorType == PWAnchorType.Input)
+			{
+				if (anchors.All(a => a.linkCount > 0))
+					CreateNewAnchor();
+
+				//if there are more than 1 unlinked anchor, delete the others:
+				if (anchors.Count(a => a.linkCount == 0) > 1)
+					RemoveDuplicatedUnlinkedAnchors();
+			}
+		}
+
+		void RemoveDuplicatedUnlinkedAnchors()
+		{
+			bool first = true;
+			List< string > anchorsToRemove = new List< string >();
+
+			foreach (var anchor in anchors)
+				if (anchor.linkCount == 0)
+				{
+					if (first)
+						first = false;
+					else
+						anchorsToRemove.Add(anchor.GUID);
+				}
+			foreach (var guid in anchorsToRemove)
+				RemoveAnchor(guid);
+		}
+
+		//disable anchors which are unlinkable with the anchor in parameter
+		public void DisableIfUnlinkable(PWAnchor anchorToLink)
+		{
+			foreach (var anchor in anchors)
+			{
+				if (!PWAnchorUtils.AnchorAreAssignable(anchorToLink, anchor))
+					anchor.isLinkable = false;
+			}
+		}
+
+		//disable all anchor to mark them as unlinkable.
+		public void DisableLinkable()
+		{
+			foreach (var anchor in anchors)
+				anchor.isLinkable = false;
+		}
+
+		//reset the anchor state, re-enable it if it was disable by DisableIfUnlinkable()
+		public void ResetLinkable()
+		{
+			foreach (var anchor in anchors)
+				anchor.isLinkable = true;
+		}
 
 	#endregion
 
@@ -284,59 +347,6 @@ namespace PW.Core
 				if (anchor.visibility != PWVisibility.Gone)
 					renderRect.y += padding + anchorDefaultPadding;
 			}
-
-			//if this anchor field is a multiple input, check if all our anchors are linked
-			// and if so, add a new one
-			if (multiple && anchorType == PWAnchorType.Input)
-			{
-				if (anchors.All(a => a.linkCount > 0))
-					CreateNewAnchor();
-
-				//if there are more than 1 unlinked anchor, delete the others:
-				if (anchors.Count(a => a.linkCount == 0) > 1)
-					RemoveDuplicatedUnlinkedAnchors();
-			}
-		}
-
-		void RemoveDuplicatedUnlinkedAnchors()
-		{
-			bool first = true;
-			List< string > anchorsToRemove = new List< string >();
-
-			foreach (var anchor in anchors)
-				if (anchor.linkCount == 0)
-				{
-					if (first)
-						first = false;
-					else
-						anchorsToRemove.Add(anchor.GUID);
-				}
-			foreach (var guid in anchorsToRemove)
-				RemoveAnchor(guid);
-		}
-
-		//disable anchors which are unlinkable with the anchor in parameter
-		public void DisableIfUnlinkable(PWAnchor anchorToLink)
-		{
-			foreach (var anchor in anchors)
-			{
-				if (!PWAnchorUtils.AnchorAreAssignable(anchorToLink, anchor))
-					anchor.isLinkable = false;
-			}
-		}
-
-		//disable all anchor to mark them as unlinkable.
-		public void DisableLinkable()
-		{
-			foreach (var anchor in anchors)
-				anchor.isLinkable = false;
-		}
-
-		//reset the anchor state, re-enable it if it was disable by DisableIfUnlinkable()
-		public void ResetLinkable()
-		{
-			foreach (var anchor in anchors)
-				anchor.isLinkable = true;
 		}
 
 		public void ProcessEvent(ref PWGraphEditorEventInfo editorEvents)

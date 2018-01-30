@@ -111,8 +111,6 @@ namespace PW.Core
 		{
 			var links = node.GetOutputLinks();
 
-			Debug.Log("Process node: " + node + ", links: " + links.Count());
-
 			if (!realMode)
 				Profiler.BeginSample("[PW] Process node links " + node);
 
@@ -128,8 +126,6 @@ namespace PW.Core
 				// Debug.Log("local: " + link.fromNode.classAQName + " / " + node.GetType() + " / " + node.nodeId);
 				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
 				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
-			
-				Debug.Log("node: " + node + " -> " + link.toNode);
 
 				//Without multi-anchor, simple assignation
 				if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex == -1)
@@ -142,7 +138,6 @@ namespace PW.Core
 
 					//TODO: bake this abomination
 					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
-					Debug.Log("Set multi-value: " + pwArray);
 
 					if (!b)
 						Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);

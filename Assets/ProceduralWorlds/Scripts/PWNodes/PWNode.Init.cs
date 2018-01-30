@@ -30,7 +30,10 @@ namespace PW
 		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
 		[System.NonSerialized]
-		private List< FieldInfo >			undoableFields = new List< FieldInfo >();
+		Dictionary< string, FieldInfo >		anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
+
+		[System.NonSerialized]
+		List< FieldInfo >					undoableFields = new List< FieldInfo >();
 
 		void LoadAssets()
 		{
@@ -63,9 +66,12 @@ namespace PW
 			foreach (var field in fInfos)
 			{
 				// reading field informations.
+
 				actualFields.Add(field.Name);
+				anchorFieldInfoMap[field.Name] = field;
+				
 				if (!anchorFieldDictionary.ContainsKey(field.Name))
-					anchorFieldDictionary[field.Name] = new PWAnchorField();
+					anchorFieldDictionary[field.Name] = CreateAnchorField();
 				
 				PWAnchorField	anchorField = anchorFieldDictionary[field.Name];
 				

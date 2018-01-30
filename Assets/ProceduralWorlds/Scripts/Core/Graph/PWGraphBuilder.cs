@@ -76,6 +76,12 @@ namespace PW.Core
 			return this;
 		}
 
+		public PWGraphBuilder Custom(Action< PWGraph > callback)
+		{
+			callback(graph);
+			return this;
+		}
+
 		public PWGraphBuilder Execute(bool clearCommandsOnceExecuted = false)
 		{
 			foreach (var cmd in commands)

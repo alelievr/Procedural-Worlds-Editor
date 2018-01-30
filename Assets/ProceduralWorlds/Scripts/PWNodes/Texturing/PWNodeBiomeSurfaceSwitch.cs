@@ -40,6 +40,8 @@ namespace PW.Node
 			delayedChanges.BindCallback(biomeSurfaceSwitchKey, (unused) => {
 				NotifyReload(typeof(PWNodeBiomeSurface));
 			});
+			
+			UpdateSurfaceType(biomeGraphRef.surfaceType);
 		}
 
 		public override void OnNodeLoadStyle()

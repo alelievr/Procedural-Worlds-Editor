@@ -89,11 +89,16 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
-			if (inputBiomes.Count == 0 || inputBiomes.GetValues().First() == null)
+			if (inputBiomes.Count == 0 || inputBiomes.GetValues().All(b => b == null))
 				return ;
 
 			var partialBiomes = inputBiomes.GetValues();
-			var biomeData = partialBiomes[0].biomeDataReference;
+			var tmpPartialBiome = partialBiomes.FirstOrDefault(b => b.biomeDataReference != null);
+
+			if (tmpPartialBiome == null)
+				return ;
+			
+			var biomeData = tmpPartialBiome.biomeDataReference;
 
 			if (biomeData == null)
 				return ;
@@ -110,6 +115,10 @@ namespace PW.Node
 			foreach (var id in biomeData.ids)
 			{
 				foreach (var partialBiome in partialBiomes)
+				{
+					if (partialBiome == null)
+						continue ;
+					
 					if (id == partialBiome.id)
 					{
 						if (partialBiome.biomeGraph == null)
@@ -126,8 +135,15 @@ namespace PW.Node
 							continue ;
 						}
 
+						if (outputBlendedBiomeTerrain.biomes.Contains(b))
+						{
+							Debug.LogError("[PWBiomeBlender] Duplicate biome in the biome graph: " + b.name + " (" + b.id + ")");
+							continue ;
+						}
+
 						outputBlendedBiomeTerrain.biomes.Add(b);
 					}
+				}
 			}
 
 			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;

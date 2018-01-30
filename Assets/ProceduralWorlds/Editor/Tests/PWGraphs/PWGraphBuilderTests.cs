@@ -70,6 +70,16 @@ namespace PW.Tests.Graphs
 			Assert.That(s2.GetOutputNodes().First() == add);
 			Assert.That(s3.GetOutputNodes().First() == add);
 			Assert.That(s4.GetOutputNodes().First() == add);
+
+			var s1a = s1.outputAnchors.First().links.First().toAnchor;
+			var s2a = s2.outputAnchors.First().links.First().toAnchor;
+			var s3a = s3.outputAnchors.First().links.First().toAnchor;
+			var s4a = s4.outputAnchors.First().links.First().toAnchor;
+
+			//check that links are not on the same input anchor:
+			Assert.That(s1a != s2a);
+			Assert.That(s2a != s3a);
+			Assert.That(s3a != s4a);
 		}
 		
 		//TestUtils.GenerateTestMainGraph():

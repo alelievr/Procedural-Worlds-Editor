@@ -88,12 +88,8 @@ namespace PW.Biomator
 
 			rootCell = cells.First();
 
-			Debug.Log("checkValid: ");
-
 			if (!CheckValid())
 				return false;
-
-			Debug.Log("OK !");
 
 			isBuilt = true;
 
