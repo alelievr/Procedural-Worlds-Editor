@@ -17,7 +17,7 @@ namespace PW.Tests.Nodes
 		// 	              +-----+
 		//            +---> Add1+---+
 		// +------+   |   +-----+   |   +-----+   +------+
-		// |Slider+---+             +--->Curve+--->Debug1|
+		// |Slider+---+             +---> Add4+--->Debug1|
 		// +------+   |   +-----+       +-----+   +------+
 		//            +---> Add2+---+
 		// +------+   |   +-----+   |   +------+
@@ -53,29 +53,18 @@ namespace PW.Tests.Nodes
 		{
 			PWMainGraph graph = TestUtils.GenerateTestMainGraph();
 	
-			var curveNode = graph.FindNodeByName("curve");
+			var add4Node = graph.FindNodeByName("add4");
 			var add1Node = graph.FindNodeByName("add1");
 			var debug1Node = graph.FindNodeByName("debug1");
 		
-			var curveNodeInAnchor = curveNode.inputAnchors.First();
-			var curveNodeOutAnchor = curveNode.outputAnchors.First();
-		
-			Debug.Log("curve input: " + curveNodeInAnchor);
-			Debug.Log("curve output: " + curveNodeOutAnchor);
+			var add4NodeInAnchor = add4Node.inputAnchors.First();
+			var add4NodeOutAnchor = add4Node.outputAnchors.First();
 	
-			List< PWNode > curveInputNodes = curveNode.GetNodesAttachedToAnchor(curveNodeInAnchor).ToList();
-			List< PWNode > curveOutputNodes = curveNode.GetNodesAttachedToAnchor(curveNodeOutAnchor).ToList();
-
-			Debug.Log("linkCount: " + curveNodeInAnchor.linkCount);
+			List< PWNode > add4InputNodes = add4Node.GetNodesAttachedToAnchor(add4NodeInAnchor).ToList();
+			List< PWNode > add4OutputNodes = add4Node.GetNodesAttachedToAnchor(add4NodeOutAnchor).ToList();
 			
-			foreach (var inputNode in curveInputNodes)
-				Debug.Log("Input node: " + inputNode);
-
-			foreach (var outputNode in curveOutputNodes)
-				Debug.Log("Output node: " + outputNode);
-	
-			Assert.That(curveInputNodes[0] == add1Node, "Curve input node was " + curveInputNodes[0] + ", " + add1Node + " expected");
-			Assert.That(curveOutputNodes[0] == debug1Node, "Curve output node was " + curveOutputNodes[0] + ", " + debug1Node + " expected");
+			Assert.That(add4InputNodes[0] == add1Node, "add4 input node was " + add4InputNodes[0] + ", " + add1Node + " expected");
+			Assert.That(add4OutputNodes[0] == debug1Node, "add4 output node was " + add4OutputNodes[0] + ", " + debug1Node + " expected");
 		}
 		
 	}

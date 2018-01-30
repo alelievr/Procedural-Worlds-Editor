@@ -15,7 +15,7 @@ namespace PW.Core
 		public PWArray< object >	outputValues = new PWArray< object >();
 
 		[SerializeField]
-		PWMainGraph					previewGraph;
+		public PWMainGraph			previewGraph = null;
 
 		public override void OnNodeCreation()
 		{
@@ -64,9 +64,11 @@ namespace PW.Core
 			//it require that biomeGraph to be contained in the previewGraph.
 			previewGraph.Process();
 
+			Debug.Log("graph: " + biomeGraphRef);
+
 			//if the graph we process does not contains an instance of our biome graph
 			if (outputPartialBiome == null)
-				Debug.LogError("[PWBiomeGraph] the specified preview graph does not contains a reference of this biome graph");
+				Debug.LogError("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
 		}
 
 	}

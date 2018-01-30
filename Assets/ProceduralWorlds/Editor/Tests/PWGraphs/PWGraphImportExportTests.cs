@@ -33,11 +33,11 @@ namespace PW.Tests.Graphs
 		{
 			var graph = TestUtils.GenerateTestMainGraph();
 
-			Debug.Log("path: " + tmpFilePath);
-
 			graph.Export(tmpFilePath);
 
 			string[] lines = File.ReadAllLines(tmpFilePath);
+			
+			ScriptableObject.DestroyImmediate(graph);
 		}
 	
 		[Test]

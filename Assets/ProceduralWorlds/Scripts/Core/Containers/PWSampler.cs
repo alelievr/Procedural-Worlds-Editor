@@ -31,6 +31,12 @@ namespace PW.Core
 		{
 			return (this.size != size || this.step != step);
 		}
+
+		public void ResizeIfNeeded(int size, float step)
+		{
+			if (NeedResize(size, step))
+				Resize(size, step);
+		}
 	}
 
 	/*

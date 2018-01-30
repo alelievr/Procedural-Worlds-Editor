@@ -30,18 +30,7 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			output = new Sampler2D(chunkSize, step);
-			graphRef.OnChunkSizeChanged += ChunkSizeChanged;
 			delayedChanges.BindCallback(noiseSettingsChangedKey, (unused) => NotifyReload());
-		}
-
-		public override void OnNodeDisable()
-		{
-			graphRef.OnChunkPositionChanged -= ChunkSizeChanged;
-		}
-
-		void ChunkSizeChanged()
-		{
-			output.Resize(chunkSize);
 		}
 
 		public override void OnNodeGUI()
@@ -62,6 +51,8 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			//recalcul perlin noise values with new seed / position.
+			output.ResizeIfNeeded(graphRef.chunkSize, graphRef.step);
+
 			float scale = 40f;
 			output.Foreach((x, y) => {
 				float nx = (float)x * step + chunkPosition.x;

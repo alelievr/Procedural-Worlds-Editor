@@ -60,7 +60,6 @@ namespace PW.Tests.CLI
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().Execute().GetGraph();
 
-			Debug.Log("graph: " + graph);
 			Assert.That(graph != null, "Null graph !");
 			Assert.That(graph.inputNode != null, "Null graph input node while creating empty graph");
 			Assert.That(graph.outputNode != null, "Null graph output node while creating empty graph");

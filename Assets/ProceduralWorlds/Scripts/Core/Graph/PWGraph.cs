@@ -424,6 +424,11 @@ namespace PW.Core
 					//sort the resulting list by computeOrder:
 					.OrderBy(n => n.computeOrder);
 		}
+
+		public override string ToString()
+		{
+			return name + " [" + GetType() + "]";
+		}
 	
 	#region Events handlers
 

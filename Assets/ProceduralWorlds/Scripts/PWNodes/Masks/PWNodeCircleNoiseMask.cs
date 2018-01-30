@@ -4,7 +4,8 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeCircleNoiseMask : PWNode {
+	public class PWNodeCircleNoiseMask : PWNode
+	{
 	
 		[PWInput]
 		public Sampler2D	samp;
@@ -32,6 +33,9 @@ namespace PW.Node
 
 		void	CreateNoiseMask()
 		{
+			if (samp == null)
+				return ;
+			
 			Vector2		center = new Vector2(samp.size / 2, samp.size / 2);
 			float		maxDist = samp.size * radius; //simplified max dist to get better noiseMask.
 

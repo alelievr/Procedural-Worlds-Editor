@@ -44,10 +44,8 @@ namespace PW.Tests.CLI
 		public void WellFormatedWhitespaceNewNodeCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "add node name");
-			Debug.Log("s = " + s);
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 	
-			Debug.Log(cmd.name);
 			Assert.That(cmd.type == PWGraphCommandType.NewNode);
 			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
 			Assert.That(cmd.name == "add node name");

@@ -143,6 +143,6 @@ namespace PW.Core
 		{
 			return graph;
 		}
-	
-	}
+
+    }
 }

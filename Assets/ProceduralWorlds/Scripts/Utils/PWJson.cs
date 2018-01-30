@@ -58,7 +58,6 @@ public static class PWJson
 		{typeof(Vector2), new Regex("^" + vector2Regex + "$"),
 			(val) => {
 				//Arrrrrg i hate string manipulation in C#
-				Debug.Log("input: " + val);
 				MatchCollection mc = Regex.Matches(val, @"\(\s*(.*)\s*,\s*(.*)\s*\)");
 				var groups = mc[0].Groups;
 				float f1 = float.Parse(groups[1].Value);

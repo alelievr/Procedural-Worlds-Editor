@@ -16,7 +16,7 @@ namespace PW.Tests.Graphs
 		[Test]
 		public void PWGraphLinkProcessSimple()
 		{
-			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >()
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("slider")
 				.NewNode< PWNodeDebugInfo >("debug")
 				.Link("slider", "debug")
@@ -27,6 +27,8 @@ namespace PW.Tests.Graphs
 			var debug = graph.FindNodeByName< PWNodeDebugInfo >("debug");
 
 			slider.outValue = 0.42f;
+
+			graph.name = "MyGraph !";
 
 			graph.Process();
 

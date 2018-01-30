@@ -33,7 +33,7 @@ namespace PW.Tests.Graphs
 				.Link("perlin", "mask")
 				.Execute()
 				.GetGraph();
-			
+
 			var perlin = graph.FindNodeByName< PWNodePerlinNoise2D >("perlin");
 			var mask = graph.FindNodeByName< PWNodeCircleNoiseMask >("mask");
 
@@ -42,6 +42,36 @@ namespace PW.Tests.Graphs
 
 			Assert.That(perlinAnchor.linkCount == 1);
 			Assert.That(maskAnchor.linkCount == 1);
+		}
+
+		[Test]
+		public void PWGraphBuilderBiomeSimple()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >()
+				.NewNode< PWNodeBiomeSurfaceColor >("c")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s")
+				.NewNode< PWNodeBiomeSurface >("surf")
+				.Link("s" ,"surf")
+				.Link("c", "s")
+				.Execute()
+				.GetGraph();
+
+			var color = graph.FindNodeByName("c");
+			var surfSwitch = graph.FindNodeByName("s");
+			var surf = graph.FindNodeByName("surf");
+
+			Assert.That(color.GetOutputLinks().Count() == 1);
+			Assert.That(surfSwitch.GetInputLinks().Count() == 1);
+			Assert.That(surfSwitch.GetOutputLinks().Count() == 1);
+			Assert.That(surf.GetInputLinks().Count() == 1);
+
+			var colorLink = color.GetOutputLinks().First();
+			var surfSwitchLink = surfSwitch.GetOutputLinks().First();
+
+			Assert.That(colorLink.fromNode == color);
+			Assert.That(colorLink.toNode == surfSwitch);
+			Assert.That(surfSwitchLink.fromNode == surfSwitch);
+			Assert.That(surfSwitchLink.toNode == surf);
 		}
 		
 		[Test]
@@ -86,7 +116,7 @@ namespace PW.Tests.Graphs
 		// 	              +-----+
 		//            +---> Add1+---+
 		// +------+   |   +-----+   |   +-----+   +------+
-		// |Slider+---+             +--->Curve+--->Debug1|
+		// |Slider+---+             +---> Add4+--->Debug1|
 		// +------+   |   +-----+       +-----+   +------+
 		//            +---> Add2+---+
 		// +------+   |   +-----+   |   +------+
@@ -106,7 +136,7 @@ namespace PW.Tests.Graphs
 			var add1 = graph.FindNodeByName< PWNodeAdd >("add1");
 			var add2 = graph.FindNodeByName< PWNodeAdd >("add2");
 			var add3 = graph.FindNodeByName< PWNodeAdd >("add3");
-			var curve = graph.FindNodeByName< PWNodeCurve >("curve");
+			var add4 = graph.FindNodeByName< PWNodeAdd >("add4");
 			var debug1 = graph.FindNodeByName< PWNodeDebugInfo >("debug1");
 			var debug2 = graph.FindNodeByName< PWNodeDebugInfo >("debug2");
 
@@ -119,8 +149,8 @@ namespace PW.Tests.Graphs
 			var add2OutputAnchor = add2.outputAnchors.First();
 			var add3InputAnchor = add3.inputAnchors.First();
 			var add3OutputAnchor = add3.outputAnchors.First();
-			var curveInputAnchor = curve.inputAnchors.First();
-			var curveOutputAnchor = curve.outputAnchors.First();
+			var add4InputAnchor = add4.inputAnchors.First();
+			var add4OutputAnchor = add4.outputAnchors.First();
 			var debug1InputAnchor = debug1.inputAnchors.First();
 			var debug2InputAnchor = debug2.inputAnchors.First();
 
@@ -142,8 +172,7 @@ namespace PW.Tests.Graphs
 
 		bool ScrambledEqual(IEnumerable< PWAnchor > anchorList1, IEnumerable< PWAnchor > anchorList2)
 		{
-			//TODO
-			return true;
+			return anchorList1.All(a1 => anchorList2.Contains(a1));
 		}
 	
 	}
