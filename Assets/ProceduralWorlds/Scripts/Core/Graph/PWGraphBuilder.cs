@@ -37,6 +37,7 @@ namespace PW.Core
 
 			builder.graph = ScriptableObject.CreateInstance< T >();
 			builder.graph.Initialize();
+			builder.graph.OnEnable();
 
 			return builder;
 		}

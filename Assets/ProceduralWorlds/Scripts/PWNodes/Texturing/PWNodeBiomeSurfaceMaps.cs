@@ -144,7 +144,10 @@ namespace PW.Node
 		public override void OnNodeProcessOnce()
 		{
 			if (surfaceMapsObject != null)
+			{
 				maps = surfaceMapsObject.maps;
+				return ;
+			}
 			
 			maps.albedo = albedo;
 			maps.normal = normal;

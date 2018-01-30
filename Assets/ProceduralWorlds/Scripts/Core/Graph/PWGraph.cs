@@ -199,7 +199,7 @@ namespace PW.Core
 			step = 1;
 			maxStep = 4;
 			name = "New Procedural Graph";
-			
+
 			InitializeInputAndOutputNodes();
 			
 			initialized = true;
@@ -253,7 +253,7 @@ namespace PW.Core
 			//if one node isn't ready, return
 			if (nodes.Any(n => !n.ready))
 				return ;
-
+			
 			if (OnAllNodeReady != null)
 				OnAllNodeReady();
 		}
@@ -431,7 +431,7 @@ namespace PW.Core
 		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
 
-		void		GraphStructureChangedCallback() { Debug.Log("Process requetsed"); UpdateComputeOrder(); Process(); }
+		void		GraphStructureChangedCallback() { UpdateComputeOrder(); Process(); }
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }

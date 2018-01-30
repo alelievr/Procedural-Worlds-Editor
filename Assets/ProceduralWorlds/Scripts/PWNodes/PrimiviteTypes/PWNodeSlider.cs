@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 using PW.Core;
 
 namespace PW.Node
@@ -8,6 +9,7 @@ namespace PW.Node
 	
 		[PWOutput]
 		public float	outValue = .5f;
+		
 		public float	min = 0;
 		public float	max = 1;
 
@@ -25,7 +27,7 @@ namespace PW.Node
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(changeKey, outValue);
 		}
-
+		
 		//no process needed, value already set by the slider.
 	}
 }

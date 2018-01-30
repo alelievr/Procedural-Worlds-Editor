@@ -8,7 +8,8 @@ using PW.Biomator;
 
 namespace PW.Node
 {
-	public class PWNodeBiomeBinder : PWNode {
+	public class PWNodeBiomeBinder : PWNode
+	{
 
 		[PWInput("Partial Biome")]
 		public PartialBiome			inputPartialBiome;
@@ -73,8 +74,6 @@ namespace PW.Node
 			//just pass the biomeSurfaces to the blender for processOnce:
 			if (outputBiome == null)
 				outputBiome = new Biome();
-			
-			Debug.Log("Process !");
 			
 			FillBiomeOutput();
 		}

@@ -45,7 +45,7 @@ namespace PW.Tests.Graphs
 			//TODO: add seed
 		}
 
-		//TODO: add a test which test the final chunk datas
+		//TODO: add a test which test the final terrain datas
 	
 	}
 }
