@@ -24,9 +24,6 @@ namespace PW.Core
 		//Editor datas:
 		public Vector2					leftBarScrollPosition;
 
-		//tell if the user choose a preset (first screen)
-		public bool						presetChoosed;
-
 		//chunk relative datas
 		[SerializeField]
 		float							_geologicTerrainStep;

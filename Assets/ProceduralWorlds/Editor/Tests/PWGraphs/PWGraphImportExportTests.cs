@@ -36,6 +36,8 @@ namespace PW.Tests.Graphs
 			graph.Export(tmpFilePath);
 
 			string[] lines = File.ReadAllLines(tmpFilePath);
+
+			//TODO: compare lines
 			
 			ScriptableObject.DestroyImmediate(graph);
 		}
@@ -73,12 +75,12 @@ namespace PW.Tests.Graphs
 					for (int k = 0; k < exAnchors.Count; k++)
 					{
 						var exLinks = exAnchors[k].links.ToList();
-						var newLinks = exAnchors[k].links.ToList();
+						var newLinks = newAnchors[k].links.ToList();
 
 						for (int l = 0; l < exLinks.Count; l++)
 						{
 							Assert.That(exLinks[l].fromNode.GetType() == newLinks[l].fromNode.GetType());
-							Assert.That(exLinks[l].toNode.GetType() == newLinks[l].toNode.GetType());
+							Assert.That(newLinks[l].toNode.GetType() == newLinks[l].toNode.GetType());
 						}
 					}
 				}	

@@ -33,18 +33,19 @@ namespace PW.Core
 			{PWColorSchemeName.Concrete, new PWColorScheme(149, 165, 166)},
 
 			{PWColorSchemeName.Pumpkin, new PWColorScheme(211, 84, 0)}
-		};
+        };
+		
+        static Texture2D _defaultBackgroundTexture;
+        public static Texture2D defaultBackgroundTexture
+        {
+            get
+            {
+                if (_defaultBackgroundTexture == null)
+                    _defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
 
-		static Texture2D _defaultBackgroundTexture;
-		public static Texture2D	defaultBackgroundTexture
-		{
-			get {
-				if (_defaultBackgroundTexture == null)
-					_defaultBackgroundTexture = PWUtils.CreateTexture2DColor(defaultBackgroundColor);
-
-				return _defaultBackgroundTexture;
-			}
-		}
+                return _defaultBackgroundTexture;
+            }
+        }
 
 		static PWColorTheme()
 		{

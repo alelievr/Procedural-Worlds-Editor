@@ -22,26 +22,16 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	
 	//events fields
 	Vector2					lastMousePosition;
-	[System.NonSerializedAttribute]
+	[System.NonSerialized]
 	Vector2					currentMousePosition;
 
 	//multi-node selection
-	[System.NonSerializedAttribute]
+	[System.NonSerialized]
 	Rect					selectionRect;
 
-#region Internal editor styles and textures
+	[System.NonSerialized]
+	PWMainPresetScreen		presetScreen;
 
-	private static Texture2D	preset2DSideViewTexture;
-	private static Texture2D	preset2DTopDownViewTexture;
-	private static Texture2D	preset3DPlaneTexture;
-	private static Texture2D	preset3DSphericalTexture;
-	private static Texture2D	preset3DCubicTexture;
-	private static Texture2D	preset1DDensityFieldTexture;
-	private static Texture2D	preset2DDensityFieldTexture;
-	private static Texture2D	preset3DDensityFieldTexture;
-	private static Texture2D	presetMeshTetxure;
-
-#endregion
 
 #region Initialization and data baking
 
@@ -61,10 +51,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	public override void OnEnable()
 	{
 		base.OnEnable();
-		
-		LoadStyles();
-		
-		LoadAssets();
 
 		OnWindowResize += WindowResizeCallback;
 		OnGraphChanged += GraphChangedCallback;
@@ -72,6 +58,13 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
 		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
+	}
+
+	public override void OnGUIEnable()
+	{
+		base.OnGUIEnable();
+		
+		LoadStyles();
 	}
 
 	public override void OnDisable()
@@ -98,7 +91,14 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 		if (!mainGraph.presetChoosed)
 		{
-			DrawPresetPanel();
+			if (presetScreen == null)
+				presetScreen = new PWMainPresetScreen(mainGraph);
+			
+			var newGraph = presetScreen.Draw(position, graph);
+
+			if (newGraph != graph)
+				LoadGraph(newGraph);
+			
 			return ;
 		}
 
@@ -131,22 +131,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	void LoadStyles()
 	{
-	}
-
-	void LoadAssets()
-	{
 		layout.LoadStyles(position);
-
-		//loading preset panel images
-		preset2DSideViewTexture = Resources.Load< Texture2D >("preview2DSideView");
-		preset2DTopDownViewTexture = Resources.Load< Texture2D >("preview2DTopDownView");
-		preset3DPlaneTexture = Resources.Load< Texture2D >("preview3DPlane");
-		preset3DSphericalTexture = Resources.Load< Texture2D >("preview3DSpherical");
-		preset3DCubicTexture = Resources.Load< Texture2D >("preview3DCubic");
-		presetMeshTetxure = Resources.Load< Texture2D >("previewMesh");
-		preset1DDensityFieldTexture= Resources.Load< Texture2D >("preview1DDensityField");
-		preset2DDensityFieldTexture = Resources.Load< Texture2D >("preview2DDensityField");
-		preset3DDensityFieldTexture = Resources.Load< Texture2D >("preview3DDensityField");
 	}
 
 }

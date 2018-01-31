@@ -28,7 +28,7 @@ namespace PW.Core
 			
 			if (previewGraph == null)
 			{
-				var graphs = Resources.FindObjectsOfTypeAll< PWMainGraph >();;
+				var graphs = Resources.FindObjectsOfTypeAll< PWMainGraph >();
 				if (graphs.Length > 0)
 					previewGraph = graphs[0];
 			}

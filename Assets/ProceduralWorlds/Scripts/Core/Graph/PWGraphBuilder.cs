@@ -38,6 +38,12 @@ namespace PW.Core
 			builder.graph = ScriptableObject.CreateInstance< T >();
 			builder.graph.Initialize();
 			builder.graph.OnEnable();
+			builder.graph.name = Guid.NewGuid().ToString();
+
+			//if the created graph is a biome graph, we manually reset previewGraph
+			//to avoid unwished graph asset processing
+			if (typeof(T) == typeof(PWBiomeGraph))
+				(builder.graph.inputNode as PWNodeBiomeGraphInput).previewGraph = null;
 
 			return builder;
 		}

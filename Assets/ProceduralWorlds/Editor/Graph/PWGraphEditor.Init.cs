@@ -23,8 +23,6 @@ public partial class PWGraphEditor
 	//color gradient used for compute time displayed under nodes
 	private static Gradient			greenRedGradient;
 	
-	protected static GUIStyle		whiteText; //TODO: replace by EditorStyles.whiteLabel ?
-	protected static GUIStyle		whiteBoldText; //TODO: same ?
 	protected static GUIStyle		nodeGraphWidowStyle;
 	
 	protected GUIStyle				selectionStyle;
@@ -32,6 +30,9 @@ public partial class PWGraphEditor
 	protected GUIStyle				nodeStyle;
 	protected GUIStyle				nodeHeaderStyle;
 	protected GUIStyle				nodeSelectedStyle;
+
+	[System.NonSerialized]
+	protected bool					styleLoaded = false;
 
 	static void LoadAssets()
 	{
@@ -65,17 +66,13 @@ public partial class PWGraphEditor
 
 		selectionStyle = PWGUISkin.FindStyle("Selection");
 
-
 		nodeStyle = PWGUISkin.FindStyle("Node");
 		nodeSelectedStyle = PWGUISkin.FindStyle("NodeSelected");
 		nodeHeaderStyle = PWGUISkin.FindStyle("NodeHeader");
 		
-		//TODO: still used ?
-		whiteText = new GUIStyle();
-		whiteText.normal.textColor = Color.white;
-		whiteBoldText = new GUIStyle();
-		whiteBoldText.fontStyle = FontStyle.Bold;
-		whiteBoldText.normal.textColor = Color.white;
+		GUI.skin = PWGUISkin;
+
+		styleLoaded = true;
 	}
 
 }

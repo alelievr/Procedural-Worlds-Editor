@@ -46,7 +46,10 @@ namespace PW.Node
 		{
 			renamable = true;
 			name = "Constant";
+		}
 
+		public override void OnNodeEnable()
+		{
 			UpdateConstantType();
 		}
 

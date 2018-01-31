@@ -45,7 +45,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphBuilderBiomeSimple()
+		public void PWGraphBuilderBiomeGraph()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >()
 				.NewNode< PWNodeBiomeSurfaceColor >("c")
@@ -142,32 +142,57 @@ namespace PW.Tests.Graphs
 
 			//get anchors
 			var sliderAnchor = slider.outputAnchors.First();
-			var constantAnchor = constant.outputAnchors.First();
+			var constantAnchor = constant.outputAnchors.FirstOrDefault(a => a.visibility == PWVisibility.Visible);
 			var add1InputAnchor = add1.inputAnchors.First();
 			var add1OutputAnchor = add1.outputAnchors.First();
 			var add2InputAnchor = add2.inputAnchors.First();
 			var add2OutputAnchor = add2.outputAnchors.First();
 			var add3InputAnchor = add3.inputAnchors.First();
-			var add3OutputAnchor = add3.outputAnchors.First();
 			var add4InputAnchor = add4.inputAnchors.First();
 			var add4OutputAnchor = add4.outputAnchors.First();
 			var debug1InputAnchor = debug1.inputAnchors.First();
 			var debug2InputAnchor = debug2.inputAnchors.First();
 
 			//slider links:
-			var sliderOutList = sliderAnchor.links.Select(l => l.toAnchor);
-			var expectedSliderOutList = new PWAnchor[] {add1InputAnchor, add2InputAnchor };
+			var sliderOutList = sliderAnchor.links.Select(l => l.toAnchor).ToList();
+			var expectedSliderOutList = new PWAnchor[] { add1InputAnchor, add2InputAnchor }.ToList();
 
 			Assert.That(ScrambledEqual(sliderOutList, expectedSliderOutList));
 
 			//constant links:
-			var constantOutList = constantAnchor.links.Select(l => l.toAnchor).OrderBy(a => a);
-			var expectedConstantOutList = new PWAnchor[] {add2InputAnchor, add3InputAnchor }.OrderBy(a => a);
-			
+			var constantOutList = constantAnchor.links.Select(l => l.toAnchor).ToList();
+			var expectedConstantOutList = add2.inputAnchors.Concat(add3.inputAnchors).ToList();
+
 			Assert.That(ScrambledEqual(constantOutList, expectedConstantOutList));
 
-			//add1 links
+			//add1 links:
+			Assert.That(add1InputAnchor.linkCount == 1);
+			Assert.That(add1OutputAnchor.linkCount == 1);
 			Assert.That(add1InputAnchor.links[0].fromAnchor == sliderAnchor);
+			Assert.That(add1OutputAnchor.links[0].toAnchor == add4InputAnchor);
+			
+			//add2 links:
+			Assert.That(add2OutputAnchor.linkCount == 1);
+			Assert.That(add2OutputAnchor.links[0].toAnchor == debug2InputAnchor);
+			Assert.That(add2InputAnchor.links.All(l => l.toNode == add2));
+
+			//add3 links:
+			Assert.That(add3InputAnchor.linkCount == 1);
+			Assert.That(add3InputAnchor.links[0].fromAnchor == constantAnchor);
+
+			//add4 links:
+			Assert.That(add4InputAnchor.linkCount == 1);
+			Assert.That(add4OutputAnchor.linkCount == 1);
+			Assert.That(add4OutputAnchor.links[0].toAnchor == debug1InputAnchor);
+			Assert.That(add4InputAnchor.links[0].fromAnchor == add1OutputAnchor);
+
+			//debug1 links:
+			Assert.That(debug1InputAnchor.linkCount == 1);
+			Assert.That(debug1InputAnchor.links[0].fromAnchor == add4OutputAnchor);
+
+			//debug2 links:
+			Assert.That(debug2InputAnchor.linkCount == 1);
+			Assert.That(debug2InputAnchor.links[0].fromAnchor == add2OutputAnchor);
 		}
 
 		bool ScrambledEqual(IEnumerable< PWAnchor > anchorList1, IEnumerable< PWAnchor > anchorList2)

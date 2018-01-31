@@ -137,6 +137,7 @@ namespace PW.Core
 		[NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
 		public float							maxStep;
+		public bool								presetChoosed = false;
 
 
         //input and output nodes:
@@ -192,7 +193,7 @@ namespace PW.Core
 			panPosition = Vector2.zero;
 
 			realMode = false;
-			// presetChoosed = false;
+			presetChoosed = false;
 			
 			//default values:
 			chunkSize = 16;
@@ -427,7 +428,7 @@ namespace PW.Core
 
 		public override string ToString()
 		{
-			return name + " [" + GetType() + "]";
+			return name + " " + " [" + GetType() + "]";
 		}
 	
 	#region Events handlers

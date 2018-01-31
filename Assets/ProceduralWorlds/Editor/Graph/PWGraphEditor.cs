@@ -183,6 +183,9 @@ public partial class PWGraphEditor : PWEditorWindow
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
 
+		if (!styleLoaded)
+			LoadStyles();
+
 		//update graph in views:
 		optionBar = new PWGraphOptionBar(graph);
 		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);

@@ -13,6 +13,9 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	[SerializeField]
 	PWGraphLayout		layout = new PWGraphLayout();
 
+	[System.NonSerialized]
+	PWBiomePresetScreen	presetScreen;
+
 	[MenuItem("Window/Procedural Worlds/Biome Graph", priority = 2)]
 	static void Init()
 	{
@@ -54,6 +57,19 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		
 		if (graph == null)
 			return ;
+		
+		if (!biomeGraph.presetChoosed)
+		{
+			if (presetScreen == null)
+				presetScreen = new PWBiomePresetScreen(biomeGraph);
+			
+			var newGraph = presetScreen.Draw(position, graph);
+
+			if (newGraph != graph)
+				LoadGraph(newGraph);
+
+			return ;
+		}
 
 		layout.Render2ResizablePanel(this, position);
 	}

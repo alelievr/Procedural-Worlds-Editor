@@ -162,7 +162,7 @@ namespace PW.Core
 
 		override public string ToString()
 		{
-			return "Anchor [" + GUID + "]";
+			return anchorType + " Anchor [" + GUID + "], node: " + nodeRef;
 		}
 	}
 }
