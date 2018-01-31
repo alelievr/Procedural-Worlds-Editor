@@ -1,0 +1,19 @@
+NewNode PWNodeGraphInput "Input" (-89, -10)
+NewNode PWNodeGraphOutput "Output" (1884, 404)
+NewNode PWNodePerlinNoise2D "perlin" (-123, 130) attr={ persistance: 0, octaves: 0, additionalSeed: 0, persistanceMin: 0, persistanceMax: 0 }
+NewNode PWNodeWaterLevel "Water level" (164, 169) attr={ waterLevel: 65.33, mapMin: 0, mapMax: 100 }
+NewNode PWNodeBiomeTemperature "Temperature node" (473, 280) attr={ minTemperature: 0, maxTemperature: 30, terrainHeightMultiplier: 0, waterMultiplier: -0.17, averageTemperature: 15, minTemperatureMapInput: 0, maxTemperatureMapInput: 0 }
+NewNode PWNodeBiomeBlender "Biome blender" (1299, 307) attr={ maxBiomeBlendCount: 2 }
+NewNode PWNodeBiomeSwitch "Biome switch" (743, 249) attr={ selectedBiomeSwitchMode: 0, errorString: "" }
+NewNode PWNodeBiome "Biome" (1022, 440)
+NewNode PWNodeBiomeMerger "PWNodeBiomeMerger" (1580, 361)
+NewNode PWNodeBiome "Biome" (1029, 257)
+Link "perlin" "Water level"
+Link "Temperature node" "Biome switch"
+Link "Water level" "Temperature node"
+Link "Biome switch" "Biome"
+Link "Biome switch" "Biome"
+Link "Biome" "Biome blender"
+Link "Biome blender" "PWNodeBiomeMerger"
+Link "PWNodeBiomeMerger" "Output"
+Link "Biome" "Biome blender"

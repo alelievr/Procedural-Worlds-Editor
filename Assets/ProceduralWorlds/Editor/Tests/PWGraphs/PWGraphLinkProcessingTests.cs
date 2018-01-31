@@ -35,28 +35,25 @@ namespace PW.Tests.Graphs
 			Assert.That(debug.obj.Equals(0.42f));
 		}
 
+		//Test biome graph
+		// +----+      +----+
+		// | c1 +------> s1 +----+
+		// +----+      +----+    |
+		//                       |
+		// +----+      +----+    |  +------+
+		// | c2 +------> s2 +-------> surf |
+		// +----+      +----+    |  +------+
+		//                       |
+		// +----+      +----+    |
+		// | c3 +------> s3 +----+
+		// +----+      +----+
+		//c*: PWNodeBiomeSurfaceColor, s*: PWNodeBiomeSurfaceSwitch, surf: PWNodeBiomeSurface
+
+
 		[Test]
 		public void PWGraphLinkProcessOnceArray()
 		{
-			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >()
-				.NewNode< PWNodeBiomeSurfaceColor >("c1")
-				.NewNode< PWNodeBiomeSurfaceColor >("c2")
-				.NewNode< PWNodeBiomeSurfaceColor >("c3")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s1")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s2")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s3")
-				.NewNode< PWNodeBiomeSurface >("surf")
-				.Link("s1", "surf")
-				.Link("s2" ,"surf")
-				.Link("s3" ,"surf")
-				.Link("c1", "s1")
-				.Link("c2" ,"s2")
-				.Link("c3" ,"s3")
-				.Custom(g => {
-					(g as PWBiomeGraph).surfaceType = BiomeSurfaceType.Color;
-				})
-				.Execute()
-				.GetGraph();
+			var graph = TestUtils.GenerateTestBiomeGraph();
 			
 			var c1 = graph.FindNodeByName< PWNodeBiomeSurfaceColor >("c1");
 			var c2 = graph.FindNodeByName< PWNodeBiomeSurfaceColor >("c2");

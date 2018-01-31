@@ -37,8 +37,8 @@ namespace PW
 
 		void LoadAssets()
 		{
-			editIcon = Resources.Load< Texture2D >("ic_edit");
-			debugIcon = Resources.Load< Texture2D >("ic_settings");
+			editIcon = Resources.Load< Texture2D >("Icons/ic_edit");
+			debugIcon = Resources.Load< Texture2D >("Icons/ic_settings");
 			
 			//set the color scheme name for this node type
 			colorSchemeName = PWNodeTypeProvider.GetNodeColor(GetType());

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using PW.Core;
 using PW.Node;
 
@@ -48,14 +49,22 @@ public class PWMainPresetScreen : PWPresetScreen
 		LoadPresetList(presets);
 	}
 
+	void ImportGraphTextAsset(string path)
+	{
+		var file = Resources.Load< TextAsset >(path);
+
+		PWGraphBuilder.FromGraph(mainGraph)
+			.ImportCommands(file.text.Split('\n'))
+			.Execute();
+	}
+
 	void Build2DSideView()
 	{
 	}
 
 	void Build2DTopDown()
 	{
-		PWGraphBuilder.FromGraph(mainGraph)
-			.Execute();
+		ImportGraphTextAsset("GraphPresets/Main/TopDown2D");
 	}
 
 	void Build3DPlanar()

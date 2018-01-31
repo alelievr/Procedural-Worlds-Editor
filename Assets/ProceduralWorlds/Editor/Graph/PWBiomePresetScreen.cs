@@ -32,9 +32,18 @@ public class PWBiomePresetScreen : PWPresetScreen
 		LoadPresetList(presets);
 	}
 
+	void ImportGraphTextAsset(string path)
+	{
+		var file = Resources.Load< TextAsset >(path);
+
+		PWGraphBuilder.FromGraph(biomeGraph)
+			.ImportCommands(file.text.Split('\n'))
+			.Execute();
+	}
+
 	void BuildPlain()
 	{
-
+		ImportGraphTextAsset("GraphPresets/Biome/PlainTest1");
 	}
 
 	void BuildMountains()

@@ -9,10 +9,8 @@ using System.IO;
 
 namespace PW.Core
 {
-	public class PWGraphCLIAttributes : Pairs< string, object > {}
-
 	//Command line interpreter for PWGraph
-	public static class PWGraphCLI
+	public static partial class PWGraphCLI
 	{
 
 		/*
@@ -172,6 +170,7 @@ namespace PW.Core
 		{
 			{PWGraphCommandType.Link, CreateLink},
 			{PWGraphCommandType.NewNode, CreateNode},
+			{PWGraphCommandType.NewNodePosition, CreateNode},
 		};
 
 		static PWGraphTokenMatch	Match(ref string line)
@@ -237,9 +236,9 @@ namespace PW.Core
 						attributes = tokens[10].value;
 					Vector2 position = TryParsePosition(tokens[4].value, tokens[6].value);
 					return new PWGraphCommand(nodeType, tokens[2].value, position, attributes);
+				default:
+					return null;
 			}
-
-			return null;
 		}
 
 		static PWGraphCommand		BuildCommand(List< PWGraphTokenMatch > tokens, string startLine)
@@ -258,6 +257,10 @@ namespace PW.Core
 					if (tokens[i].token != validTokenList.requiredTokens[i])
 						goto skipLoop;
 				}
+
+				//if the validTokenList does not take options but there are remaining tokens, skip this command:
+				if (validTokenList.options == null && i < tokens.Count)
+					goto skipLoop;
 
 				//check for options:
 				for (int j = 0; i < tokens.Count; i++, j++)
@@ -296,177 +299,6 @@ namespace PW.Core
 		}
 
 		#endregion //Command parsing
-
-		#region  Command Execution
-
-		static void	CreateLink(PWGraph graph, PWGraphCommand command, string inputCommand)
-		{
-			//get nodes from the graph:
-			PWNode fromNode = graph.FindNodeByName(command.fromName);
-			PWNode toNode = graph.FindNodeByName(command.toName);
-
-			if (fromNode == null)
-				throw new Exception("Node " + command.fromName + " found in graph while parsing: '" + inputCommand + "'");
-			if (toNode == null)
-				throw new Exception("Node " + command.toName + " found in graph while parsing: '" + inputCommand + "'");
-			
-			//Create the first linkable anchors we found:
-			foreach (var outAnchor in fromNode.outputAnchors)
-				foreach (var inAnchor in toNode.inputAnchors)
-					if (PWAnchorUtils.AnchorAreAssignable(outAnchor, inAnchor))
-					{
-						//if the input anchor is already linked, find another
-						if (inAnchor.linkCount == 1)
-							continue ;
-						
-						graph.CreateLink(outAnchor, inAnchor);
-						return ;
-					}
-			
-			Debug.LogError("Can't link " + fromNode + " with " + toNode);
-		}
-
-		static void	CreateNode(PWGraph graph, PWGraphCommand command, string inputCommand)
-		{
-			Vector2	position = command.position;
-			PWNode node = null;
-			
-			//if we receive a CreateNode with input/output graph nodes, we assign them so we don't have multiple inout/output nodes
-			if (command.nodeType.IsAssignableFrom(typeof(PWNodeGraphInput)))
-				node = graph.inputNode;
-			else if (command.nodeType.IsAssignableFrom(typeof(PWNodeGraphOutput)))
-				node = graph.outputNode;
-			else
-				node = graph.CreateNewNode(command.nodeType, position);
-			
-			Type nodeType = node.GetType();
-
-			if (!String.IsNullOrEmpty(command.attributes))
-			{
-				foreach (var attr in PWJson.Parse(command.attributes))
-				{
-					FieldInfo attrField = nodeType.GetField(attr.first, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-
-					if (attrField != null)
-						attrField.SetValue(node, attr.second);
-					else
-						Debug.LogError("Attribute " + attr.first + " can be found in node " + node);
-				}
-			}
-
-			node.name = command.name;
-		}
-
-		public static void Execute(PWGraph graph, string inputCommand)
-		{
-			PWGraphCommand command = Parse(inputCommand);
-
-			if (commandTypeFunctions.ContainsKey(command.type))
-				commandTypeFunctions[command.type](graph, command, inputCommand);
-			else
-				throw new Exception("Command type not handled: " + command.type);
-		}
-
-		#endregion // Command Execution
-
-		#region Export and command creation
-
-		public static void Export(PWGraph graph, string filePath)
-		{
-			List< string > commands = new List< string >();
-			List< string > nodeNames = new List< string >();
-			var nodeToNameMap = new Dictionary< PWNode, string >();
-
-			foreach (var node in graph.nodes)
-			{
-				var attrs = new PWGraphCLIAttributes();
-
-				//load node attributes
-				FieldInfo[] attrFields = node.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-				foreach (var field in attrFields)
-				{
-					var attributes = field.GetCustomAttributes(false);
-
-					bool isInput = attributes.Any(a => {
-						return a.GetType() == typeof(PWInputAttribute);
-					});
-
-					if (isInput)
-						continue ;
-
-					//if the field can't be jsonified, we skip it
-					if (PWJson.allowedJsonTypes.FindIndex(j => j.type == field.FieldType) == -1)
-						continue ;
-
-					attrs.Add(field.Name, field.GetValue(node));
-				}
-
-				string	nodeName = node.name;
-				int		i = 0;
-
-				//unique name generation
-				while (nodeNames.Contains(nodeName))
-					nodeName = node.name + i++;
-				
-				nodeToNameMap[node] = nodeName;
-				
-				commands.Add(GenerateNewNodeCommand(node.GetType(), nodeName, attrs));
-			}
-		
-			foreach (var link in graph.nodeLinkTable.GetLinks())
-			{
-				var fromName = nodeToNameMap[link.fromNode];
-				var toName = nodeToNameMap[link.toNode];
-
-				commands.Add(GenerateLinkCommand(fromName, toName));
-			}
-
-			File.WriteAllLines(filePath, commands.ToArray());
-		}
-		
-		public static void Import(PWGraph graph, string filePath, bool wipeDatas = false)
-		{
-			if (wipeDatas)
-			{
-				while (graph.nodes.Count != 0)
-				{
-					Debug.Log("removing node: " + graph.nodes.First());
-					graph.RemoveNode(graph.nodes.First());
-				}
-			}
-
-			string[] commands = File.ReadAllLines(filePath);
-			foreach (var command in commands)
-				Execute(graph, command);
-		}
-
-		public static string GenerateNewNodeCommand(Type nodeType, string name, PWGraphCLIAttributes datas = null)
-		{
-			//TODO: use tokens here
-			string cmd = "NewNode " + nodeType.Name + " \"" + name + "\"";
-			if (datas != null && datas.Count != 0)
-				cmd += " attr=" + PWJson.Generate(datas);
-			
-			return cmd;
-		}
-
-		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position, PWGraphCLIAttributes datas = null)
-		{
-			//TODO: use tokens here
-			string cmd = "NewNode " + nodeType.Name + " " + name + " (" + (int)position.x + ", " + (int)position.y+ ")";
-			if (datas != null && datas.Count != 0)
-				cmd += " attr=" + PWJson.Generate(datas);
-			
-			return cmd;
-		}
-
-		public static string GenerateLinkCommand(string fromName, string toName)
-		{
-			//TODO: use tokens here
-			return "Link " + fromName + " " + toName;
-		}
-
-		#endregion //Export and command creation
 
 	}
 }

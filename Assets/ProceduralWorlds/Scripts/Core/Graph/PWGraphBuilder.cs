@@ -127,7 +127,7 @@ namespace PW.Core
 			return dstPath;
 		}
 
-		public void Import(string fileName, bool assetPath = true)
+		public PWGraphBuilder Import(string fileName, bool assetPath = true)
 		{
 			string filePath = fileName;
 
@@ -143,6 +143,15 @@ namespace PW.Core
 
 			foreach (var line in lines)
 				commands.Add(line);
+
+			return this;
+		}
+
+		public PWGraphBuilder ImportCommands(params string[] cmds)
+		{
+			commands.AddRange(cmds);
+
+			return this;
 		}
 
 		public PWGraph GetGraph()

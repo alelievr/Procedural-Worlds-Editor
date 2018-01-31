@@ -5,13 +5,14 @@ using NUnit.Framework;
 using System.Collections;
 using PW.Node;
 using PW.Core;
+using PW.Biomator;
 
 namespace PW.Tests
 {
 	public static class TestUtils
 	{
 	
-		//TestGraph 1: 
+		//test main graph
 		// 	              +-----+
 		//            +---> Add1+---+
 		// +------+   |   +-----+   |   +-----+   +------+
@@ -45,6 +46,56 @@ namespace PW.Tests
 				.Execute()
 				.GetGraph() as PWMainGraph;
 		}
+
+		//Test biome graph
+		// +----+      +----+
+		// | c1 +------> s1 +----+
+		// +----+      +----+    |
+		//                       |
+		// +----+      +----+    |  +------+
+		// | c2 +------> s2 +-------> surf |
+		// +----+      +----+    |  +------+
+		//                       |
+		// +----+      +----+    |
+		// | c3 +------> s3 +----+
+		// +----+      +----+
+		// c*: PWNodeBiomeSurfaceColor, s*: PWNodeBiomeSurfaceSwitch, surf: PWNodeBiomeSurface
 	
+		public static PWBiomeGraph	GenerateTestBiomeGraph()
+		{
+			return PWGraphBuilder.NewGraph< PWBiomeGraph >()
+				.NewNode< PWNodeBiomeSurfaceColor >("c1")
+				.NewNode< PWNodeBiomeSurfaceColor >("c2")
+				.NewNode< PWNodeBiomeSurfaceColor >("c3")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s1")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s2")
+				.NewNode< PWNodeBiomeSurfaceSwitch >("s3")
+				.NewNode< PWNodeBiomeSurface >("surf")
+				.Link("s1", "surf")
+				.Link("s2" ,"surf")
+				.Link("s3" ,"surf")
+				.Link("c1", "s1")
+				.Link("c2" ,"s2")
+				.Link("c3" ,"s3")
+				.Custom(g => {
+					(g as PWBiomeGraph).surfaceType = BiomeSurfaceType.Color;
+				})
+				.Execute()
+				.GetGraph() as PWBiomeGraph;
+		}
+
+		// +--------------+     +-------------+   +-----------+
+		// | perlin noise +-----> noise remap +---> view noise|
+		// +--------------+     +-------------+   +-----------+
+
+		public static PWMainGraph	GenerateTestMainGraphWhitespaces()
+		{
+			return PWGraphBuilder.NewGraph< PWMainGraph >()
+				.NewNode< PWNodePerlinNoise2D >("perlin noise")
+				.NewNode< PWNodeCurve >("noise remap")
+				.NewNode< PWNodeDebugInfo >("view noise")
+				.Execute()
+				.GetGraph() as PWMainGraph;
+		}
 	}
 }

@@ -1056,9 +1056,9 @@ namespace PW.Core
 			if (icColor != null)
 				return ;
 
-			icColor = Resources.Load("ic_color") as Texture2D;
-			icEdit = Resources.Load("ic_edit") as Texture2D;
-			icSettingsOutline = Resources.Load("ic_settings_outline") as Texture2D;
+			icColor = Resources.Load("Icons/ic_color") as Texture2D;
+			icEdit = Resources.Load("Icons/ic_edit") as Texture2D;
+			icSettingsOutline = Resources.Load("Icons/ic_settings_outline") as Texture2D;
 			centeredLabel = new GUIStyle();
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}

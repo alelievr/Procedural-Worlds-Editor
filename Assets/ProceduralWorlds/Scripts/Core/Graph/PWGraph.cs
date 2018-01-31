@@ -549,12 +549,12 @@ namespace PW.Core
 			return computeOrderSortedNodes;
 		}
 
-		public T		CreateNewNode< T >(Vector2 position) where T : PWNode
+		public T		CreateNewNode< T >(Vector2 position, string name = null) where T : PWNode
 		{
-			return CreateNewNode(typeof(T), position) as T;
+			return CreateNewNode(typeof(T), position, name) as T;
 		}
 
-		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position, bool raiseEvents = true)
+		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position, string name = null, bool raiseEvents = true)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			
@@ -569,6 +569,9 @@ namespace PW.Core
 			
 			if (OnNodeAdded != null && raiseEvents)
 				OnNodeAdded(newNode);
+			
+			if (name != null)
+				newNode.name = name;
 			
 			return newNode;
 		}

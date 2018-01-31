@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace PW.Tests.CLI
 {
-	public class BasicExecuterTest
+	public class ExecuterTests
 	{
 	
 		[Test]

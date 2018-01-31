@@ -117,7 +117,7 @@ namespace PW.Tests.CLI
 		[Test]
 		public void WellFormatedNewNodeWithDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new PWGraphCLIAttributes() {{"persistance", 2.4f}, {"octaves", 3}});
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new PWGraphCLIAttributes() {{"persistance", 2.4f}, {"octaves", 3}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 
 			var parsedAttrs = PWJson.Parse(cmd.attributes);
@@ -133,7 +133,7 @@ namespace PW.Tests.CLI
 		[Test]
 		public void WellFormatedNewNodeWithPositionAndDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistance", 1.4f}, {"octaves", 2}});
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistance", 1.4f}, {"octaves", 2}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 
 			var parsedAttrs = PWJson.Parse(cmd.attributes);
@@ -159,6 +159,17 @@ namespace PW.Tests.CLI
 			Assert.That(cmd.type == PWGraphCommandType.Link);
 			Assert.That(cmd.fromName == "node1");
 			Assert.That(cmd.toName == "node2");
+		}
+		
+		[Test]
+		public void WellFormatedLinkCommandNameWhitespaces()
+		{
+			string s = PWGraphCLI.GenerateLinkCommand("node 1", "node 2");
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+	
+			Assert.That(cmd.type == PWGraphCommandType.Link);
+			Assert.That(cmd.fromName == "node 1");
+			Assert.That(cmd.toName == "node 2");
 		}
 		
 		[Test]

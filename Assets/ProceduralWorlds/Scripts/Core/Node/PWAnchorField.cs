@@ -230,7 +230,7 @@ namespace PW.Core
 			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 			
 			//assets:
-			errorIcon = Resources.Load< Texture2D >("ic_error");
+			errorIcon = Resources.Load< Texture2D >("Icons/ic_error");
 			
 			styleLoaded = true;
 		}
