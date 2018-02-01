@@ -219,9 +219,8 @@ namespace PW.Core
 				return ;
 			
 			//Events attach
-			OnGraphStructureChanged += GraphStructureChangedCallback;
-			OnPostLinkCreated += LinkChangedCallback;
-			OnPostLinkRemoved += GraphStructureChangedCallback;
+			OnPostLinkCreated += LinkPostAddedCallback;
+			OnPostLinkRemoved += LinkPostRemovedCallback;
 			OnNodeRemoved += NodeCountChangedCallback;
 			OnNodeAdded += NodeCountChangedCallback;
 			OnAllNodeReady += NodeReadyCallback;
@@ -241,9 +240,8 @@ namespace PW.Core
 		public virtual void OnDisable()
 		{
 			//Events detach
-			OnGraphStructureChanged -= GraphStructureChangedCallback;
-			OnPostLinkCreated -= LinkChangedCallback;
-			OnPostLinkRemoved -= GraphStructureChangedCallback;
+			OnPostLinkCreated -= LinkPostAddedCallback;
+			OnPostLinkRemoved -= LinkPostRemovedCallback;
 			OnNodeRemoved -= NodeCountChangedCallback;
 			OnNodeAdded -= NodeCountChangedCallback;
 			OnAllNodeReady -= NodeReadyCallback;
@@ -342,6 +340,9 @@ namespace PW.Core
 
 		public void	ProcessOnce()
 		{
+			if (!readyToProcess)
+				return ;
+			
 			Debug.LogWarning("Process once called !");
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			graphProcessor.ProcessOnce(this);
@@ -434,10 +435,9 @@ namespace PW.Core
 	#region Events handlers
 
 		//retarget link and node events to GraphStructure event
-		void		LinkChangedCallback(PWNodeLink link) { OnGraphStructureChanged(); }
-		void		NodeCountChangedCallback(PWNode n) { OnGraphStructureChanged(); }
-
-		void		GraphStructureChangedCallback() { UpdateComputeOrder(); Process(); }
+		void		LinkPostAddedCallback(PWNodeLink link) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
+		void		LinkPostRemovedCallback() { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
+		void		NodeCountChangedCallback(PWNode n) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
 
 		//event accessors for PWGraphEditor
 		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
@@ -576,9 +576,9 @@ namespace PW.Core
 			return newNode;
 		}
 		
-		public bool		RemoveNode(int nodeId)
+		public bool		RemoveNode(int nodeId, bool raiseEvents = true)
 		{
-			return RemoveNode(nodesDictionary[nodeId]);
+			return RemoveNode(nodesDictionary[nodeId], raiseEvents);
 		}
 
 		public bool		RemoveNode(PWNode removeNode, bool raiseEvents = true)
@@ -593,7 +593,11 @@ namespace PW.Core
 			if (OnNodeRemoved != null && raiseEvents)
 				OnNodeRemoved(removeNode);
 			
-			return nodesDictionary.Remove(id);
+			bool success = nodesDictionary.Remove(id);
+
+			removeNode.RemoveSelf();
+
+			return success;
 		}
 
 		public void		RemoveLink(PWNodeLink link, bool raiseEvents = true)
@@ -660,7 +664,7 @@ namespace PW.Core
 
 			if (!PWAnchorUtils.AnchorAreAssignable(fAnchor, tAnchor))
 			{
-				Debug.LogWarning("[PWGraph] attemp to create a link between unlinkable anchors: " + fAnchor.fieldType + " into " + tAnchor.fieldType);
+				Debug.LogWarning("[PWGraph] attempted to create a link between unlinkable anchors: " + fAnchor.fieldType + " into " + tAnchor.fieldType);
 				return null;
 			}
 
@@ -671,11 +675,11 @@ namespace PW.Core
 			if (OnLinkCreated != null && raiseEvents)
 				OnLinkCreated(link);
 			
+			link.fromNode.AddLink(link);
+			link.toNode.AddLink(link);
+
 			if (OnPostLinkCreated != null && raiseEvents)
 				OnPostLinkCreated(link);
-
-			if (Event.current != null)
-				Event.current.Use();
 
 			return link;
 		}

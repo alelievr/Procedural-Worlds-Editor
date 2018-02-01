@@ -108,9 +108,11 @@ namespace PW.Core
 		//remove the link reference stored inside this anchor
 		public void RemoveLinkReference(PWNodeLink link)
 		{
-			linkGUIDs.Remove(link.GUID);
-			links.Remove(link);
-
+			if (!linkGUIDs.Remove(link.GUID))
+				Debug.LogError("[PWAnchor] Tried to remove inexistant link GUID: " + link.GUID);
+			if (!links.Remove(link))
+				Debug.LogError("[PWAnchor] Tried to remove link: " + link);
+			
 			//set to null the object value if we're not anymore linked
 			if (linkCount == 0)
 				nodeRef.SetAnchorValue(this, null);

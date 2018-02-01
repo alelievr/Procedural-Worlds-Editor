@@ -404,6 +404,8 @@ namespace PW
 			RemoveAllLinks();
 
 			//the node instance will be removed by the editor at the same time that it's asset
+		
+			ScriptableObject.DestroyImmediate(this, true);
 		}
 
 		void		OnClickedOutside()

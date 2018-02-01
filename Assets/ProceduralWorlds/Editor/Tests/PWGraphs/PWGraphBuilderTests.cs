@@ -152,6 +152,8 @@ namespace PW.Tests.Graphs
 			var add4OutputAnchor = add4.outputAnchors.First();
 			var debug1InputAnchor = debug1.inputAnchors.First();
 			var debug2InputAnchor = debug2.inputAnchors.First();
+			
+			var add2InputAnchors = add2.inputAnchorFields[0].anchors;
 
 			//slider links:
 			var sliderOutList = sliderAnchor.links.Select(l => l.toAnchor).ToList();
@@ -175,6 +177,10 @@ namespace PW.Tests.Graphs
 			Assert.That(add2OutputAnchor.linkCount == 1);
 			Assert.That(add2OutputAnchor.links[0].toAnchor == debug2InputAnchor);
 			Assert.That(add2InputAnchor.links.All(l => l.toNode == add2));
+			Assert.That(add2InputAnchors.Count == 3);
+			Assert.That(add2InputAnchors[0].linkCount == 1);
+			Assert.That(add2InputAnchors[1].linkCount == 1);
+			Assert.That(add2InputAnchors[2].linkCount == 0);
 
 			//add3 links:
 			Assert.That(add3InputAnchor.linkCount == 1);
@@ -198,6 +204,48 @@ namespace PW.Tests.Graphs
 		bool ScrambledEqual(IEnumerable< PWAnchor > anchorList1, IEnumerable< PWAnchor > anchorList2)
 		{
 			return anchorList1.All(a1 => anchorList2.Contains(a1));
+		}
+		
+		//Test biome graph
+		// +----+      +----+
+		// | c1 +------> s1 +----+
+		// +----+      +----+    |
+		//                       |
+		// +----+      +----+    |  +------+
+		// | c2 +------> s2 +-------> surf |
+		// +----+      +----+    |  +------+
+		//                       |
+		// +----+      +----+    |
+		// | c3 +------> s3 +----+
+		// +----+      +----+
+		//c*: PWNodeBiomeSurfaceColor, s*: PWNodeBiomeSurfaceSwitch, surf: PWNodeBiomeSurface
+
+
+		[Test]
+		public void PWGraphBuilderBiomeLinkArray()
+		{
+			var graph = TestUtils.GenerateTestBiomeGraph();
+			
+			var s1 = graph.FindNodeByName("s1");
+			var s2 = graph.FindNodeByName("s2");
+			var s3 = graph.FindNodeByName("s3");
+			var surf = graph.FindNodeByName("surf");
+
+			var surfinputAnchorField = surf.inputAnchorFields.First();
+
+			var expectedConnectedAnchors = new List< PWAnchor >()
+			{
+				s1.outputAnchors.First(),
+				s2.outputAnchors.First(),
+				s3.outputAnchors.First(),
+			};
+
+			var surfConnectedAnchors =	from anchor in surfinputAnchorField.anchors
+										from links in anchor.links
+										select links.fromAnchor;
+
+			Assert.That(surfinputAnchorField.anchors.Count == 4);
+			Assert.That(ScrambledEqual(surfConnectedAnchors, expectedConnectedAnchors));
 		}
 	
 	}

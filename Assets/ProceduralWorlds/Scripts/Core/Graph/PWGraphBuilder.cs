@@ -107,6 +107,8 @@ namespace PW.Core
 			
 			if (clearCommandsOnceExecuted)
 				commands.Clear();
+
+			graph.UpdateComputeOrder();
 			
 			return this;
 		}

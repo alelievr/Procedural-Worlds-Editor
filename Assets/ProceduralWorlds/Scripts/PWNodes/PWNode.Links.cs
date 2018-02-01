@@ -7,7 +7,7 @@ using System.Linq;
 using PW;
 using PW.Core;
 
-//rendering and processing of links and dependencies
+//Link API
 namespace PW
 {
 	public partial class PWNode
@@ -58,8 +58,34 @@ namespace PW
 		public void		RemoveAllLinks()
 		{
 			foreach (var anchorField in anchorFields)
-				foreach (var anchor in anchorField.anchors)
-					anchor.RemoveAllLinks();
+			{
+				int i = 0;
+
+				while (i < anchorField.anchors.Count)
+				{
+					if (anchorField.anchors[i].linkCount != 0)
+						anchorField.anchors[i].RemoveAllLinks();
+					i++;
+				}
+			}
+		}
+
+		public void		AddLink(PWNodeLink link)
+		{
+			if (link.fromNode == this)
+			{
+				link.fromAnchor.AddLink(link);
+				OnNodeAnchorLink(link.fromAnchor.fieldName, link.fromAnchor.fieldIndex);
+			}
+			else if (link.toNode == this)
+			{
+				link.toAnchor.AddLink(link);
+				OnNodeAnchorLink(link.toAnchor.fieldName, link.toAnchor.fieldIndex);
+			}
+			else
+				Debug.LogError("[PWNode] tried to link a node with a link that didn't reference this node");
+			
+			UpdateWorkStatus();
 		}
 
 		public IEnumerable< PWNodeLink >	GetOutputLinks()

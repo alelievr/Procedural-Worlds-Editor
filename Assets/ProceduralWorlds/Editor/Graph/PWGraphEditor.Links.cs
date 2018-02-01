@@ -147,7 +147,7 @@ public partial class PWGraphEditor
 	
 	// string undoName = "Link created";
 
-	void	OnLinkCreated(PWNodeLink link)
+	void	LinkCreatedCallback(PWNodeLink link)
 	{
 		if (editorEvents.isDraggingLink || editorEvents.isDraggingNewLink)
 			StopDragLink(true);
@@ -162,7 +162,7 @@ public partial class PWGraphEditor
 		// Undo.RecordObject(graph, undoName);
 	}
 
-	void	OnPostLinkCreated(PWNodeLink link)
+	void	PostLinkCreatedCallback(PWNodeLink link)
 	{
 		// if (link.toNode == null || link.fromNode == null)
 		// 	return ;
@@ -174,7 +174,7 @@ public partial class PWGraphEditor
 		// Undo.RecordObject(graph, undoName);
 	}
 
-	void	OnlinkRemoved(PWNodeLink link)
+	void	LinkRemovedCallback(PWNodeLink link)
 	{
 		if (link.toNode == null || link.fromNode == null)
 			return ;
@@ -188,7 +188,7 @@ public partial class PWGraphEditor
 		// Undo.RecordObject(graph, undoName);
 	}
 
-	void UnselectAllLinks()
+	void	UnselectAllLinks()
 	{
 		foreach (var l in graph.nodeLinkTable.GetLinks())
 		{

@@ -174,11 +174,12 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
 		
 		//attach to graph events
-		graph.OnNodeAdded += OnNodeAddedCallback;
-		graph.OnNodeRemoved += OnNodeRemovedCallback;
-		graph.OnLinkCreated += OnLinkCreated;
-		graph.OnLinkRemoved += OnlinkRemoved;
-		graph.OnPostLinkCreated += OnPostLinkCreated;
+		graph.OnNodeAdded += NodeAddedCallback;
+		graph.OnNodeRemoved += NodeRemovedCallback;
+		graph.OnLinkCreated += LinkCreatedCallback;
+		graph.OnLinkRemoved += LinkRemovedCallback;
+		graph.OnPostLinkCreated += PostLinkCreatedCallback;
+		graph.OnGraphStructureChanged += GraphStructureChangedCallback;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
@@ -209,11 +210,12 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	public void UnloadGraph(bool unloadAsset = true)
 	{
-		graph.OnNodeAdded -= OnNodeAddedCallback;
-		graph.OnNodeRemoved -= OnNodeRemovedCallback;
-		graph.OnLinkCreated -= OnLinkCreated;
-		graph.OnLinkRemoved -= OnlinkRemoved;
-		graph.OnPostLinkCreated -= OnPostLinkCreated;
+		graph.OnNodeAdded -= NodeAddedCallback;
+		graph.OnNodeRemoved -= NodeRemovedCallback;
+		graph.OnLinkCreated -= LinkCreatedCallback;
+		graph.OnLinkRemoved -= LinkRemovedCallback;
+		graph.OnPostLinkCreated -= PostLinkCreatedCallback;
+		graph.OnGraphStructureChanged -= GraphStructureChangedCallback;
 
 		SaveGraph();
 
@@ -263,6 +265,12 @@ public partial class PWGraphEditor : PWEditorWindow
 		}
 
 		return false;
+	}
+
+	void GraphStructureChangedCallback()
+	{
+		graph.UpdateComputeOrder();
+		graph.Process();
 	}
 
 	void RenderBackground()

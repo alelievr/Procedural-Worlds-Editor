@@ -124,16 +124,15 @@ public partial class PWGraphEditor
 		Debug.Log("moving from context menu");
 	}
 
-	void OnNodeAddedCallback(PWNode node)
+	void NodeAddedCallback(PWNode node)
 	{
 		AssetDatabase.AddObjectToAsset(node, graph);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	}
 
-	void OnNodeRemovedCallback(PWNode node)
+	void NodeRemovedCallback(PWNode node)
 	{
-		ScriptableObject.DestroyImmediate(node, true);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	}

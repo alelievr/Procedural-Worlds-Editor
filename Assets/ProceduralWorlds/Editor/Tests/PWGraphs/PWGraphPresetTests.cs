@@ -12,9 +12,7 @@ namespace PW.Tests.Graphs
 	public class PWGraphPresetTests
 	{
 
-		//Temporarily commented, waiting for node creation raiseEvent tests
-	
-	/*	string mainGraphPresetPath = "GraphPresets/Main";
+		string mainGraphPresetPath = "GraphPresets/Main";
 		string biomeGraphPresetPath = "GraphPresets/Biome";
 	
 		[Test]
@@ -39,6 +37,7 @@ namespace PW.Tests.Graphs
 			}
 		}
 		
+		/* 
 		[Test]
 		public void PWBiomeGraphPresets()
 		{

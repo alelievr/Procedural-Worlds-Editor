@@ -77,7 +77,7 @@ namespace PW.Core
 	
 		override public string ToString()
 		{
-			return "link [" + GUID + "]";
+			return "link from [" + fromAnchor + "] to [" + toAnchor + "], GUID: " + GUID;
 		}
 	}
 }

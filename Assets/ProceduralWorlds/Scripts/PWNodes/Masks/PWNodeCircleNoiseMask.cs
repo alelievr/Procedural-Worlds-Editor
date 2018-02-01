@@ -49,23 +49,11 @@ namespace PW.Node
 			maskTexture.Apply();
 		}
 
-		public override	void OnNodeAnchorLink(string propName, int index)
-		{
-			if (propName == "samp")
-				CreateNoiseMask();
-		}
-
-		/*public override void OnNodeAnchorUnLink(string propName, int index)
-		{
-
-		}*/
-
 		public override void OnNodeGUI()
 		{
-			//TODO: delete this protection !
 			if (samp == null)
 			{
-				EditorGUILayout.LabelField("please connect the input noise (Sampler2D)");
+				EditorGUILayout.LabelField("Null input noise (Sampler2D)");
 				return ;
 			}
 
