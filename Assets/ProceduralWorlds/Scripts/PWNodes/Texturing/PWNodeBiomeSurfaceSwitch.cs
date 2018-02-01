@@ -20,6 +20,9 @@ namespace PW.Node
 		[PWInput]
 		public BiomeSurfaceMaterial	inputMaterial;
 
+		[PWInput, PWNotRequired]
+		public BiomeDetails			inputDetails;
+
 		[PWOutput]
 		public BiomeSurfaceSwitch	outputSwitch = new BiomeSurfaceSwitch();
 
@@ -107,6 +110,7 @@ namespace PW.Node
 				delayedChanges.UpdateValue(biomeSurfaceSwitchKey);
 
 			outputSwitch.surface.type = biomeGraphRef.surfaceType;
+			outputSwitch.details = inputDetails;
 		}
 
 	}

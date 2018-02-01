@@ -97,13 +97,14 @@ namespace PW.Core
 			}, {
 				PWColorSchemeName.SunFlower, new List< Type >() { typeof(FinalTerrain),
 				typeof(BiomeSurfaceMaps), typeof(BiomeSurfaceColor),
-				typeof(BiomeSurfaceMaterial), typeof(BiomeSurfaceSwitch) }
+				typeof(BiomeSurfaceMaterial), typeof(BiomeSurfaceSwitch),
+				typeof(BiomeDetails), typeof(BiomeDetail) }
 			}, {
 				PWColorSchemeName.Concrete, new List< Type >() { typeof(TerrainDetail) }
 			}, {
 				PWColorSchemeName.PeterRiver, new List< Type >() {}
 			}, {
-				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeTerrain), typeof(BiomeSurfaceGraph) }
+				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeSurfaceGraph) }
 			},
 		};
 

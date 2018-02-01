@@ -132,7 +132,7 @@ public partial class PWGraphEditor : PWEditorWindow
 			//reset events for the next frame
 			editorEvents.Reset();
 	
-			if (e.type == EventType.Layout)
+			if (e.type == EventType.Repaint)
 				Repaint();
 		}
 		GUIScaleUtility.EndScale();

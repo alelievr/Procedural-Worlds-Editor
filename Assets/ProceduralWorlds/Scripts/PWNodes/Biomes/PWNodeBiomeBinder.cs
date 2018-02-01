@@ -24,11 +24,6 @@ namespace PW.Node
 		[PWInput("Details"), PWNotRequired]
 		public TerrainDetail		biomeDetail;
 
-		//TODO: dispositon algos
-
-		//inputs for 3D planar terrain
-		//TODO
-
 		[PWOutput("biome")]
 		public Biome				outputBiome;
 		

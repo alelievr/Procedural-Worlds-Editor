@@ -69,8 +69,8 @@ namespace PW.Core
 			//Biomes:
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
-            typeof(PWNodeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiomeTerrain),
-			typeof(PWNodeBiome), typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeMerger),
+            typeof(PWNodeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiome),
+			typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeMerger),
 			
 			//Texturing:
 			typeof(PWNodeBiomeSurfaceMaps), typeof(PWNodeBiomeSurfaceSwitch),
@@ -105,11 +105,11 @@ namespace PW.Core
 			new PWNodeTypeInfoList(PWMainGraph, "Biomes", PWColorSchemeName.Carrot,
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
-				"Remperature map", typeof(PWNodeBiomeTemperature),
+				"Temperature map", typeof(PWNodeBiomeTemperature),
 				"Wetness map", typeof(PWNodeWetness),
-				"Biome Switch", typeof(PWNodeBiomeSwitch),
-				"Biome Graph", typeof(PWNodeBiome),
-				"Biome blender", typeof(PWNodeBiomeBlender)
+				"Switch", typeof(PWNodeBiomeSwitch),
+				"Graph", typeof(PWNodeBiome),
+				"Blender", typeof(PWNodeBiomeBlender)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "Terrain", PWColorSchemeName.Pumpkin,
 				"Biome merger", typeof(PWNodeBiomeMerger)
@@ -117,8 +117,7 @@ namespace PW.Core
 			new PWNodeTypeInfoList(PWBiomeGraph, "Biomes", PWColorSchemeName.Turquoise,
 				"BiomeData decomposer", typeof(PWNodeBiomeDataDecomposer),
 				"Biome surface", typeof(PWNodeBiomeSurface),
-				"Biome terrain", typeof(PWNodeBiomeTerrain),
-				"Biome Binder", typeof(PWNodeBiomeBinder)
+				"Biome binder", typeof(PWNodeBiomeBinder)
 			),
 			new PWNodeTypeInfoList(PWBiomeGraph, "Landforms & Texturing", PWColorSchemeName.SunFlower,
 				"Surface maps", typeof(PWNodeBiomeSurfaceMaps),
@@ -161,7 +160,6 @@ namespace PW.Core
 					return mainGraphInfoList;
 				case PWGraphType.Biome:
 					return biomeGraphInfoList;
-				//TODO: other type of graph
 				default:
 					Debug.LogError("Could not find allowed nodes for the graph " + graphType);
 					return null;

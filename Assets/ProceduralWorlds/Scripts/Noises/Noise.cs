@@ -25,9 +25,6 @@ namespace PW.Noises
 			return 0;
 		}
 
-		public virtual void ComputeSampler(Sampler samp, int seed)
-		{
-
-		}
+		public abstract void ComputeSampler(Sampler samp, int seed);
 	}
 }

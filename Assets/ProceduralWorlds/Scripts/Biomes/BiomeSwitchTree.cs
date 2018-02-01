@@ -132,7 +132,6 @@ namespace PW.Biomator
 			if (node == null)
 				return ;
 			
-			//TODO: anchor to multiple PWNodeBiomeSwitch management
 			if (node.GetType() == typeof(PWNodeBiomeSwitch))
 			{
 				PWNodeBiomeSwitch	bSwitch = node as PWNodeBiomeSwitch;
@@ -305,7 +304,7 @@ namespace PW.Biomator
 			
 			if (biomeData.terrainRef == null)
 				return ;
-				
+			
 			int		terrainSize = (is3DTerrain) ? biomeData.terrain3D.size : biomeData.terrain.size;
 			float	terrainStep = (is3DTerrain) ? biomeData.terrain3D.step : biomeData.terrain.step;
 			if (is3DBiomes)

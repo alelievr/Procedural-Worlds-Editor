@@ -11,7 +11,6 @@ namespace PW.Core
 	/*
 	**	Parent class to store everything needed to render a chunk
 	*/
-	//TODO: change this to abstract and only a class to be serialized on the disk (no more used in the graph)
 	[Serializable]
 	public abstract class ChunkData
 	{
@@ -26,7 +25,6 @@ namespace PW.Core
 		// public Sampler				lightingMap;
 		// public Sampler				airMap;
 
-		//TODO: save vertex datas to the disk
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
 
@@ -45,7 +43,6 @@ namespace PW.Core
 		
 	}
 
-	//TODO: other storage classes
 	public enum CaveType
 	{
 		PerlinWorms,
@@ -94,7 +91,8 @@ namespace PW.Core
 		public float		lakeSize = 0.5f;
 
 		//Datas for Ravines:
-		//TODO
+
+		//...
 	}
 
 	//Datas stored for river / lakes / oth precomputing
@@ -228,15 +226,12 @@ namespace PW.Core
 
 		[System.NonSerialized]
 		public Gradient				gradient;
-		[System.NonSerialized]
 		public Texture2D			texture;
 
 		//Texture:
 		// public FilterMode		filterMode; //duplicated
 		public ScaleMode			scaleMode;
 		public float				scaleAspect;
-		//TODO: light-weight serializableMaterial
-		[System.NonSerialized]
 		public Material				material;
 
 		//Texture2DArray:

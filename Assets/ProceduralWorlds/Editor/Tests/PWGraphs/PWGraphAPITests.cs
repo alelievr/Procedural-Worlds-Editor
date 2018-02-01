@@ -82,7 +82,25 @@ namespace PW.Tests.Graphs
 			Assert.That(link.toNode == add);
 		}
 
-		//TODO: test for SafeCreateLink
+		[Test]
+		public void PWGraphSafeCreateLinkDuplicate()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
+				.NewNode< PWNodeSlider >("slider")
+				.NewNode< PWNodeDebugInfo >("debug")
+				.Execute()
+				.GetGraph();
+			
+			var sliderAnchor = graph.FindNodeByName("slider").outputAnchors.First();
+			var debugAnchor = graph.FindNodeByName("debug").inputAnchors.First();
+
+			graph.SafeCreateLink(sliderAnchor, debugAnchor);
+			graph.SafeCreateLink(sliderAnchor, debugAnchor);
+
+			Assert.That(sliderAnchor.linkCount == 1);
+			Assert.That(debugAnchor.linkCount == 1);
+			Assert.That(graph.nodeLinkTable.GetLinks().Count() == 1);
+		}
 		
 		[Test]
 		public void FindNodeByName()

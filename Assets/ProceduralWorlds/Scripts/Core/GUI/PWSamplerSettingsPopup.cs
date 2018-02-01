@@ -63,19 +63,6 @@ namespace PW.Core
 						needUpdate = true;
 					if (e.type == EventType.Repaint)
 						update = false;
-					if (needUpdate && e.type != EventType.Layout)
-					{
-						GUI.changed = true;
-						needUpdate = false;
-
-						//for an unknown reason, EditorWindow.SendEvent dooes not works with gradient field
-						//so here is a workaround to update the main window:
-						if (windowToUpdate != null)
-						{
-							update = true;
-							windowToUpdate.Repaint();
-						}
-					}
 				}
 				EditorGUILayout.EndVertical();
 				
@@ -90,6 +77,20 @@ namespace PW.Core
 			}
 			if (EditorGUI.EndChangeCheck())
 				SendUpdate("SamplerSettingsUpdate");
+				
+			if (needUpdate && e.type != EventType.Layout)
+			{
+				GUI.changed = true;
+				needUpdate = false;
+
+				//for an unknown reason, EditorWindow.SendEvent dooes not works with gradient field
+				//so here is a workaround to update the main window:
+				if (windowToUpdate != null)
+				{
+					update = true;
+					windowToUpdate.Repaint();
+				}
+			}
 
 			oldGradient = (SerializableGradient)gradient;
 		}

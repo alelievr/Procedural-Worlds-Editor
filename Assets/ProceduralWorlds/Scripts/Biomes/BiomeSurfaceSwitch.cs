@@ -27,7 +27,7 @@ namespace PW.Biomator
 		//surface
 		public BiomeSurface			surface = new BiomeSurface();
 
-		//TODO: details
+		public BiomeDetails			details = new BiomeDetails();
 
 		public bool					Overlaps(BiomeSurfaceSwitch b2)
 		{

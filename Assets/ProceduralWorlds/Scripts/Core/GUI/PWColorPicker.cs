@@ -43,7 +43,6 @@ namespace PW.Core
 			GUILayout.Label(colorPickerTexture, GUILayout.Width(windowSize.x - colorPickerPadding.x), GUILayout.Height(windowSize.x - colorPickerPadding.y));
 			Rect colorPickerRect = GUILayoutUtility.GetLastRect();
 
-			//TODO: better bounds
 			float mouseX = Mathf.Clamp(e.mousePosition.x, colorPickerPadding.x, windowSize.x - colorPickerPadding.x);
 			float mouseY = Mathf.Clamp(e.mousePosition.y, colorPickerPadding.y, windowSize.x - colorPickerPadding.y);
 

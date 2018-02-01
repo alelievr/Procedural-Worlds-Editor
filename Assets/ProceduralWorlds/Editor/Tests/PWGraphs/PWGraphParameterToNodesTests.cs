@@ -42,10 +42,7 @@ namespace PW.Tests.Graphs
 
 			Assert.That(perlinNode.output.size == graph.chunkSize, "Bad chunk size in perlin node after process");
 			Assert.That(perlinNode.output.step == graph.step, "Bad step value in perlin node after process: expected " + graph.step + ", got: " + perlinNode.output.step);
-			//TODO: add seed
 		}
-
-		//TODO: add a test which test the final terrain datas
 	
 	}
 }

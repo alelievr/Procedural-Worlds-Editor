@@ -3,8 +3,9 @@ using PW.Core;
 
 namespace PW.Noises
 {
-	public class PerlinNoise2D : Noise {
-		        static int[] p = {151,160,137,91,90,15,
+	public class PerlinNoise2D : Noise
+    {
+		static int[] p = {151,160,137,91,90,15,
            131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
            190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
            88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -87,17 +88,17 @@ namespace PW.Noises
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
-			if (hasGraphicAcceleration)
+            
+			if (false)//(hasGraphicAcceleration)
 			{
 				//compute shader here
 			}
 			else
 			{
-				//TODO: thread with workers
 				if (samp.type == SamplerType.Sampler2D)
 				{
 					(samp as Sampler2D).Foreach((x, y) => {
-						return PerlinValue(x, y, seed);
+						return GenerateNoise(x, y, 2, samp.step / 20, 1, 1, seed);
 					});
 				}
 				else

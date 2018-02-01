@@ -37,9 +37,8 @@ namespace PW.Tests.Graphs
 
 			string[] lines = File.ReadAllLines(tmpFilePath);
 
-			//TODO: compare lines
-			
-			ScriptableObject.DestroyImmediate(graph);
+			foreach (var line in lines)
+				PWGraphCLI.Parse(line);
 		}
 	
 		[Test]

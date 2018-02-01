@@ -21,12 +21,11 @@ namespace PW.Editor
 	[System.Serializable]
 	public class PWGraphTerrainPreview
 	{
-		//TODO: protection for multiple graph windows opened at same time
-
 		//preview fields
 		GameObject				previewScene;
 		Camera					previewCamera;
-		RenderTexture			previewCameraRenderTexture;
+		
+		static RenderTexture	previewCameraRenderTexture;
 
 		[SerializeField]
 		PWGraphTerrainPreviewType	loadedPreviewType;

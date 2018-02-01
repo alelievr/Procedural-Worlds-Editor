@@ -285,6 +285,21 @@ namespace PW.Biomator
 		public BiomeSurfaceMaterial	material;
 	}
 
+	public class BiomeDetail
+	{
+		//list of model, placing algo ...
+	}
+
+	public class BiomeDetails : List< BiomeDetail >
+	{
+		public void Add()
+		{
+			BiomeDetail	bd = new BiomeDetail();
+
+			this.Add(bd);
+		}
+	}
+
 	public class PartialBiome
 	{
 		public BiomeData				biomeDataReference;

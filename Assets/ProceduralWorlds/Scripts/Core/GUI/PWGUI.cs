@@ -167,7 +167,6 @@ namespace PW.Core
 				PWGUISettings colorSettings = new PWGUISettings();
 
 				colorSettings.c = (SerializableColor)localColor;
-				Debug.Log("New FieldSettings");
 
 				return colorSettings;
 			});

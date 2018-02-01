@@ -13,7 +13,6 @@ namespace PW.Biomator
 /*		Wind,
 		Lighting,
 		Air,
-		//TODO: one Soil swicth
 		SoilPH,
 		SoilDrainage,
 		SoilNutriment,

@@ -20,6 +20,8 @@ namespace PW.Node
 		[SerializeField]
 		float				persistanceMax;
 
+		PerlinNoise2D		perlin2D;
+
 		const string noiseSettingsChangedKey = "PerlinNoiseSettings";
 
 		public override void OnNodeCreation()
@@ -30,6 +32,7 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			output = new Sampler2D(chunkSize, step);
+			perlin2D = new PerlinNoise2D();
 			delayedChanges.BindCallback(noiseSettingsChangedKey, (unused) => NotifyReload());
 		}
 
@@ -54,14 +57,15 @@ namespace PW.Node
 			output.ResizeIfNeeded(graphRef.chunkSize, graphRef.step);
 
 			float scale = 40f;
-			output.Foreach((x, y) => {
-				float nx = (float)x * step + chunkPosition.x;
-				float ny = (float)y * step + chunkPosition.z;
-				float val = PerlinNoise2D.GenerateNoise(nx / scale, ny / scale, 2, 2, 1, 1, seed + additionalSeed);
-				for (int i = 0; i < octaves; i++)
-					val *= 1.2f;
-				return val;
-			});
+			perlin2D.ComputeSampler(output, seed + additionalSeed);
+			// output.Foreach((x, y) => {
+			// 	float nx = (float)x * step + chunkPosition.x;
+			// 	float ny = (float)y * step + chunkPosition.z;
+			// 	float val = PerlinNoise2D.GenerateNoise(nx / scale, ny / scale, 2, 2, 1, 1, seed + additionalSeed);
+			// 	for (int i = 0; i < octaves; i++)
+			// 		val *= 1.2f;
+			// 	return val;
+			// });
 		}
 	}
 }
