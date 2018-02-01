@@ -8,8 +8,7 @@ using PW.Core;
 
 namespace PW.Editor
 {
-    //TODO: rename this class
-    public static class PWGraphManager
+    public static class PWGraphFactory
     {
     
         //Main graph settings:

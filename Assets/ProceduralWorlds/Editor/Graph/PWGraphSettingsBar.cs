@@ -9,6 +9,7 @@ using PW;
 
 namespace PW.Editor
 {
+	[System.Serializable]
 	public class PWGraphSettingsBar
 	{
 		//Graph reference:
@@ -27,6 +28,9 @@ namespace PW.Editor
 		public Action< Rect >	onDrawAdditionalSettings;
 
 		readonly string			graphProcessKey = "UpdateGraphProperties";
+
+		[SerializeField]
+		PWGraphTerrainPreviewType	previewType = PWGraphTerrainPreviewType.TopDownPlanarView;
 
 		public PWGraphSettingsBar(PWGraph graph)
 		{
@@ -105,7 +109,25 @@ namespace PW.Editor
 			//update the delayed changes
 			delayedChanges.Update();
 		}
-
+		
+		PWGraphTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
+		{
+			switch (terrainType)
+			{
+				case PWGraphTerrainType.SideView2D:
+					return PWGraphTerrainPreviewType.SideView;
+				case PWGraphTerrainType.TopDown2D:
+				case PWGraphTerrainType.Planar3D:
+					return PWGraphTerrainPreviewType.TopDownPlanarView;
+				// case PWGraphTerrainType.Spherical3D:
+					// return PWGraphTerrainPreviewType.TopDownSphericalView;
+				// case PWGraphTerrainType.Cubic3D:
+					// return PWGraphTerrainPreviewType.TopDownCubicView;
+				default:
+					return PWGraphTerrainPreviewType.TopDownPlanarView;
+			}
+		}
+	
 		public void DrawTerrainPreview(Rect currentRect)
 		{
 			//draw terrain preview
@@ -113,8 +135,7 @@ namespace PW.Editor
 			{
 				Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
 
-				//TODO: way to specify camera type info the graph
-				terrainPreview.DrawTerrainPreview(previewRect, PWGraphTerrainPreviewType.TopDownPlanarView);
+				terrainPreview.DrawTerrainPreview(previewRect, previewType);
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -131,6 +152,12 @@ namespace PW.Editor
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
 				DrawTerrainPreview(currentRect);
+
+				EditorGUILayout.BeginHorizontal();
+				{
+					previewType = (PWGraphTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
+				}
+				EditorGUILayout.EndHorizontal();
 				
 				//draw main graph settings
 				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));

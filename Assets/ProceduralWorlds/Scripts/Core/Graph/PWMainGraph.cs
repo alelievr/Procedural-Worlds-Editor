@@ -41,7 +41,7 @@ namespace PW.Core
 			}
 		}
 
-		public PWGraphTerrainType		outputType;
+		public PWGraphTerrainType		terrainType;
 		public PWGraphProcessMode		processMode;
 		public MaterializerType			materializerType;
 

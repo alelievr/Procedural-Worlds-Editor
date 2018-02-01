@@ -186,7 +186,7 @@ namespace PW.Core
 	
 	#endregion
 
-		//this method is called onlyv when the graph is created by the PWGraphManager
+		//this method is called onlyv when the graph is created by the PWGraphFactory
 		public virtual void Initialize()
 		{
 			//initialize the graph pan position

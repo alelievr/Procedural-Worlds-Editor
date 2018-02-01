@@ -155,7 +155,7 @@ namespace PW.Core
 				//Both are multi-anchors
 				else if (val != null)
 				{
-					//TODO: brun these abomination
+					//TODO: brun these abominations
 					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
 	
 					var pwArray = prop.GetValue(link.toNode);

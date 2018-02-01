@@ -15,6 +15,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 	public bool				isDraggingSelectedNodes;
 	public int				selectedNodeCount;
 	public bool				isPanning;
+	public bool				isZooming;
 	public bool				isDraggingNewLink;
 	public PWAnchor			startedLinkAnchor;
 
@@ -62,6 +63,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 		selectionStartPoint = Vector2.zero;
 		isDraggingSelectedNodes = false;
 		isPanning = false;
+		isZooming = false;
 		isDraggingNewLink = false;
 		startedLinkAnchor = null;
 		selectedNodeCount = 0;
@@ -91,6 +93,7 @@ public class PWGraphEditorEventInfo : IPWCloneable< PWGraphEditorEventInfo > {
 	public void Reset()
 	{
 		isMouseClickOutside = false;
+		isZooming = false;
 		
 		isMouseClickOnNode = false;
 		isMouseOverNodeFrame = false;

@@ -16,7 +16,7 @@ namespace PW.Tests.Graphs
 		public void CreateBiomeGraphFile()
 		{
 			string fileName = "TestBiomeGraph";
-			PWBiomeGraph g = PWGraphManager.CreateBiomeGraph(fileName);
+			PWBiomeGraph g = PWGraphFactory.CreateBiomeGraph(fileName);
 	
 			Assert.That(g != null, "Created graph was null");
 	
@@ -28,7 +28,7 @@ namespace PW.Tests.Graphs
 		public void CreateMainGraphFile()
 		{
 			string fileName = "TestMainGraph";
-			PWMainGraph g = PWGraphManager.CreateMainGraph(fileName);
+			PWMainGraph g = PWGraphFactory.CreateMainGraph(fileName);
 	
 			Assert.That(g != null, "Created graph was null");
 	

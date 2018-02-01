@@ -52,13 +52,13 @@ namespace PW.Editor
 		[MenuItem("Assets/Create/Procedural World", false, 1)]
 		public static void CreateNewProceduralWorld()
 		{
-			PWGraphManager.CreateMainGraph();
+			PWGraphFactory.CreateMainGraph();
 		}
 	
 		[MenuItem("Assets/Create/Procedural Biome", false, 1)]
 		public static void CreateNewProceduralBiome()
 		{
-			PWGraphManager.CreateBiomeGraph();
+			PWGraphFactory.CreateBiomeGraph();
 		}
 
 		[MenuItem("Assets/Create/Biome Surface Maps", false, 1)]

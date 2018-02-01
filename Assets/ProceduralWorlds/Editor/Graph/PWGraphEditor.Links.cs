@@ -196,4 +196,28 @@ public partial class PWGraphEditor
 			l.highlight = PWLinkHighlight.None;
 		}
 	}
+	
+	void StartDragLink()
+	{
+		Undo.RecordObject(graph, "Link started");
+		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
+		graph.editorEvents.isDraggingLink = true;
+		graph.RaiseOnLinkStartDragged(graph.editorEvents.startedLinkAnchor);
+	}
+
+	void StopDragLink(bool linked)
+	{
+		Debug.Log("linked: " + linked);
+		graph.editorEvents.isDraggingLink = false;
+
+		if (!linked)
+			graph.RaiseOnLinkCancenled();
+		
+		graph.RaiseOnLinkStopDragged();
+	}
+
+	void DeleteAllAnchorLinks()
+	{
+		editorEvents.mouseOverAnchor.RemoveAllLinks();
+	}
 }

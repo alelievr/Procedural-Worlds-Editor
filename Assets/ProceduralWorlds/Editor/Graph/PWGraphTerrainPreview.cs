@@ -47,7 +47,6 @@ namespace PW.Editor
 
 		void ReloadPreviewPrefab(PWGraphTerrainPreviewType newPreviewType)
 		{
-			//TODO: do the preview for Density field 1D
 			string		previewObjectName = previewTypeToPrefabNames[newPreviewType];
 
 			//find and delete old preview object if existing
@@ -63,24 +62,6 @@ namespace PW.Editor
 			loadedPreviewType = newPreviewType;
 		}
 
-		PWGraphTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
-		{
-			switch (terrainType)
-			{
-				case PWGraphTerrainType.SideView2D:
-					return PWGraphTerrainPreviewType.SideView;
-				case PWGraphTerrainType.TopDown2D:
-				case PWGraphTerrainType.Planar3D:
-					return PWGraphTerrainPreviewType.TopDownPlanarView;
-				// case PWGraphTerrainType.Spherical3D:
-					// return PWGraphTerrainPreviewType.TopDownSphericalView;
-				// case PWGraphTerrainType.Cubic3D:
-					// return PWGraphTerrainPreviewType.TopDownCubicView;
-				default:
-					return PWGraphTerrainPreviewType.TopDownPlanarView;
-			}
-		}
-	
 		void UpdatePreviewScene(PWGraphTerrainPreviewType previewType)
 		{
 			//if preview scene was destroyed or preview type was changed, reload preview game objects
@@ -94,11 +75,6 @@ namespace PW.Editor
 				previewCameraRenderTexture = new RenderTexture(800, 800, 10000, RenderTextureFormat.ARGB32);
 				previewCamera.targetTexture = previewCameraRenderTexture;
 			}
-		}
-
-		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainType terrainType)
-		{
-			DrawTerrainPreview(previewRect, GetPreviewTypeFromTerrainType(terrainType));
 		}
 
 		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainPreviewType previewType)
