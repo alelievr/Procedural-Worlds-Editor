@@ -93,7 +93,7 @@ namespace PW.Node
 				return ;
 
 			var partialBiomes = inputBiomes.GetValues();
-			var tmpPartialBiome = partialBiomes.FirstOrDefault(b => b.biomeDataReference != null);
+			var tmpPartialBiome = partialBiomes.FirstOrDefault(b => b != null && b.biomeDataReference != null);
 
 			if (tmpPartialBiome == null)
 				return ;

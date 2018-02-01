@@ -157,8 +157,8 @@ namespace PW.Tests.CLI
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 	
 			Assert.That(cmd.type == PWGraphCommandType.Link);
-			Assert.That(cmd.fromName == "node1");
-			Assert.That(cmd.toName == "node2");
+			Assert.That(cmd.fromNodeName == "node1");
+			Assert.That(cmd.toNodeName == "node2");
 		}
 		
 		[Test]
@@ -168,8 +168,8 @@ namespace PW.Tests.CLI
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 	
 			Assert.That(cmd.type == PWGraphCommandType.Link);
-			Assert.That(cmd.fromName == "node 1");
-			Assert.That(cmd.toName == "node 2");
+			Assert.That(cmd.fromNodeName == "node 1");
+			Assert.That(cmd.toNodeName == "node 2");
 		}
 		
 		[Test]
@@ -178,13 +178,70 @@ namespace PW.Tests.CLI
 			PWGraphCommand cmd = PWGraphCLI.Parse("    	 	 	Link 		 	 node1   	node2	 	      ");
 	
 			Assert.That(cmd.type == PWGraphCommandType.Link);
-			Assert.That(cmd.fromName == "node1");
-			Assert.That(cmd.toName == "node2");
+			Assert.That(cmd.fromNodeName == "node1");
+			Assert.That(cmd.toNodeName == "node2");
 		}
 	
 		#endregion
 		
-		#region Command parser test
+		#region LinkAnchor command tests
+
+		[Test]
+		public void WellFormatedLinkAnchorCommand()
+		{
+			string s = PWGraphCLI.GenerateLinkAnchorCommand("node1", 1, "node2", 4);
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+
+			Assert.That(cmd.type == PWGraphCommandType.LinkAnchor);
+			Assert.That(cmd.fromNodeName == "node1");
+			Assert.That(cmd.toNodeName == "node2");
+			Assert.That(cmd.fromAnchorIndex == 1);
+			Assert.That(cmd.toAnchorIndex == 4);
+		}
+		
+		[Test]
+		public void WellFormatedLinkAnchorCommandNameWhitespaces()
+		{
+			string s = PWGraphCLI.GenerateLinkAnchorCommand("node 1", 1, "node 2", 4);
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+
+			Assert.That(cmd.type == PWGraphCommandType.LinkAnchor);
+			Assert.That(cmd.fromNodeName == "node 1");
+			Assert.That(cmd.toNodeName == "node 2");
+			Assert.That(cmd.fromAnchorIndex == 1);
+			Assert.That(cmd.toAnchorIndex == 4);
+		}
+		
+
+		[Test]
+		public void WellFormatedLinkAnchorNameCommand()
+		{
+			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node1", "a1", "node2", "a2");
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+
+			Assert.That(cmd.type == PWGraphCommandType.LinkAnchorName);
+			Assert.That(cmd.fromNodeName == "node1");
+			Assert.That(cmd.toNodeName == "node2");
+			Assert.That(cmd.fromAnchorFieldName == "a1");
+			Assert.That(cmd.toAnchorFieldName == "a2");
+		}
+		
+		[Test]
+		public void WellFormatedLinkAnchorNameCommandNameWhitespaces()
+		{
+			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node 1", "a1", "node 2", "a2");
+			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+
+			Assert.That(cmd.type == PWGraphCommandType.LinkAnchorName);
+			Assert.That(cmd.fromNodeName == "node 1");
+			Assert.That(cmd.toNodeName == "node 2");
+			Assert.That(cmd.fromAnchorFieldName == "a1");
+			Assert.That(cmd.toAnchorFieldName == "a2");
+		}
+
+		#endregion
+
+		#region Command parser tests
 	
 		[Test]
 		public void UnknowCommand()

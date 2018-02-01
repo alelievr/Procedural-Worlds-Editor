@@ -59,7 +59,7 @@ namespace PW.Node
 			
 			if (inputBlendedTerrain.biomeData == null)
 			{
-				Debug.LogError("[PWBiomeMerger] Can't find BiomeData, did you forgot to specify the BiomGraph in a Biome node");
+				Debug.LogError("[PWBiomeMerger] Can't find BiomeData, did you forgot to specify the BiomeGraph in a Biome node");
 				return ;
 			}
 			

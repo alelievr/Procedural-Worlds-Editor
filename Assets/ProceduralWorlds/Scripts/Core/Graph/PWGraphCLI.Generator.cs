@@ -13,8 +13,6 @@ namespace PW.Core
 	public static partial class PWGraphCLI
 	{
 
-		#region Export and command creation
-
 		public static void Export(PWGraph graph, string filePath)
 		{
 			List< string > commands = new List< string >();
@@ -51,7 +49,8 @@ namespace PW.Core
 				//unique name generation
 				while (nodeNames.Contains(nodeName))
 					nodeName = node.name + i++;
-				
+			
+				nodeNames.Add(nodeName);
 				nodeToNameMap[node] = nodeName;
 				
 				commands.Add(GenerateNewNodeCommand(node.GetType(), nodeName, node.rect.position, attrs));
@@ -64,8 +63,10 @@ namespace PW.Core
 				
 				var fromName = nodeToNameMap[link.fromNode];
 				var toName = nodeToNameMap[link.toNode];
+				var fromAnchorName = link.fromAnchor.fieldName;
+				var toAnchorName = link.toAnchor.fieldName;
 
-				commands.Add(GenerateLinkCommand(fromName, toName));
+				commands.Add(GenerateLinkAnchorNameCommand(fromName, fromAnchorName, toName, toAnchorName));
 			}
 
 			File.WriteAllLines(filePath, commands.ToArray());
@@ -84,12 +85,17 @@ namespace PW.Core
 
 			string[] commands = File.ReadAllLines(filePath);
 			foreach (var command in commands)
+			{
+				//ignore empty lines:
+				if (String.IsNullOrEmpty(command.Trim()))
+					continue ;
+				
 				Execute(graph, command);
+			}
 		}
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name, PWGraphCLIAttributes datas = null)
 		{
-			//TODO: use tokens here
 			string cmd = "NewNode " + nodeType.Name + " \"" + name + "\"";
 			if (datas != null && datas.Count != 0)
 				cmd += " attr=" + PWJson.Generate(datas);
@@ -99,7 +105,6 @@ namespace PW.Core
 
 		public static string GenerateNewNodeCommand(Type nodeType, string name, Vector2 position, PWGraphCLIAttributes datas = null)
 		{
-			//TODO: use tokens here
 			string cmd = "NewNode " + nodeType.Name + " \"" + name + "\" (" + (int)position.x + ", " + (int)position.y+ ")";
 			if (datas != null && datas.Count != 0)
 				cmd += " attr=" + PWJson.Generate(datas);
@@ -107,13 +112,20 @@ namespace PW.Core
 			return cmd;
 		}
 
-		public static string GenerateLinkCommand(string fromName, string toName)
+		public static string GenerateLinkCommand(string fromNodeName, string toNodeName)
 		{
-			//TODO: use tokens here
-			return "Link \"" + fromName + "\" \"" + toName + "\"";
+			return "Link \"" + fromNodeName + "\" \"" + toNodeName + "\"";
 		}
 
-		#endregion //Export and command creation
+		public static string GenerateLinkAnchorCommand(string fromNodeName, int fromAnchorIndex, string toNodeName, int toAnchorIndex)
+		{
+			return "LinkAnchor \"" + fromNodeName + "\":" + fromAnchorIndex + " " + "\"" + toNodeName + "\":" + toAnchorIndex;
+		}
+
+		public static string GenerateLinkAnchorNameCommand(string fromNodeName, string fromAnchorName, string toNodeName, string toAnchorName)
+		{
+			return "LinkAnchor \"" + fromNodeName + "\":\"" + fromAnchorName + "\" " + "\"" + toNodeName + "\":\"" + toAnchorName + "\"";
+		}
 
 	}
 }

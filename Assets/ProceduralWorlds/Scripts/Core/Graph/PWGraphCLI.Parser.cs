@@ -42,24 +42,42 @@ namespace PW.Core
 
 		---------------------------------------------
 
+		> LinkAnchor nodeName1:anchorFieldIndex nodeName2:anchorFieldIndex
+		> LinkAnchor nodeName1:anchorFieldName nodeName2:anchorFieldName
+		Create a link between two nodes using the anchor index / name
+		to find the anchor to link.
+		when using the anchorFieldName, it'll try to find the field inside
+		the nodes using their names and then link them. If the specified anchor
+		is multiple (PWArray<>) the link will be created on the first unlinked
+		available anchor.
+		Remarks: anchorFieldIndex start from 0.
+
+		ex:
+			> NewNode PWNodeSlider slider
+			> NewNode PWNodeAdd add
+			> LinkAnchor slider:outpuValue add:values
+			> LinkAnchor slider:0 add:0
+
+		---------------------------------------------
+
 		*/
 
 
 		static bool		debug = false;
-		
-		#region Command Parsing
 
 		enum PWGraphToken
 		{
 			Undefined,
 			NewNodeCommand,
 			LinkCommand,
+			LinkAnchorCommand,
 			OpenParenthesis,
 			ClosedParenthesis,
 			Word,
 			IntValue,
 			Comma,
 			Attr,
+			Colon,
 			Equal,
 			JsonDatas,
 		}
@@ -115,6 +133,14 @@ namespace PW.Core
 				PWGraphToken.LinkCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
 
+			public static List< PWGraphToken > newLinkAnchor = new List< PWGraphToken >() {
+				PWGraphToken.LinkAnchorCommand, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.IntValue, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.IntValue
+			};
+			
+			public static List< PWGraphToken > newLinkAnchorName = new List< PWGraphToken >() {
+				PWGraphToken.LinkAnchorCommand, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.Word, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.Word
+			};
+
 			public static List< PWGraphToken > newNodeAttrOption = new List< PWGraphToken >() {
 				PWGraphToken.Attr, PWGraphToken.Equal, PWGraphToken.JsonDatas
 			};
@@ -147,13 +173,24 @@ namespace PW.Core
 				new PWGraphCommandTokenSequence() {
 					type = PWGraphCommandType.Link,
 					requiredTokens = PWGraphTokenSequence.newLink,
-				}
+				},
+				//New Link Anchor command
+				new PWGraphCommandTokenSequence() {
+					type = PWGraphCommandType.LinkAnchor,
+					requiredTokens = PWGraphTokenSequence.newLinkAnchor
+				},
+				//New Link Anchor using names command
+				new PWGraphCommandTokenSequence() {
+					type = PWGraphCommandType.LinkAnchorName,
+					requiredTokens = PWGraphTokenSequence.newLinkAnchorName
+				},
 			};
 		}
 
 		//token regex list by priority order
 		static List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >()
 		{
+			new PWGraphTokenDefinition(PWGraphToken.LinkAnchorCommand, @"^LinkAnchor"),
 			new PWGraphTokenDefinition(PWGraphToken.LinkCommand, @"^Link"),
 			new PWGraphTokenDefinition(PWGraphToken.NewNodeCommand, @"^NewNode"),
 			new PWGraphTokenDefinition(PWGraphToken.OpenParenthesis, @"^\("),
@@ -162,15 +199,9 @@ namespace PW.Core
 			new PWGraphTokenDefinition(PWGraphToken.Comma, @"^,"),
 			new PWGraphTokenDefinition(PWGraphToken.Attr, @"^attr"),
 			new PWGraphTokenDefinition(PWGraphToken.Equal, @"^="),
+			new PWGraphTokenDefinition(PWGraphToken.Colon, @"^:"),
 			new PWGraphTokenDefinition(PWGraphToken.JsonDatas, @"^{.*}"),
 			new PWGraphTokenDefinition(PWGraphToken.Word, "^(\\\"(.*?)\\\"|\\S+)"),
-		};
-
-		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
-		{
-			{PWGraphCommandType.Link, CreateLink},
-			{PWGraphCommandType.NewNode, CreateNode},
-			{PWGraphCommandType.NewNodePosition, CreateNode},
 		};
 
 		static PWGraphTokenMatch	Match(ref string line)
@@ -225,6 +256,12 @@ namespace PW.Core
 			{
 				case PWGraphCommandType.Link:
 					return new PWGraphCommand(tokens[1].value, tokens[2].value);
+				case PWGraphCommandType.LinkAnchor:
+					int fromAnchorField = int.Parse(tokens[3].value);
+					int toAnchorField = int.Parse(tokens[6].value);
+					return new PWGraphCommand(tokens[1].value, fromAnchorField, tokens[4].value, toAnchorField);
+				case PWGraphCommandType.LinkAnchorName:
+					return new PWGraphCommand(tokens[1].value, tokens[3].value, tokens[4].value, tokens[6].value);
 				case PWGraphCommandType.NewNode:
 					nodeType = TryParseNodeType(tokens[1].value);
 					if (tokens.Count > 4)
@@ -295,10 +332,11 @@ namespace PW.Core
 				lineTokens.Add(match);
 			}
 
+			if (lineTokens.Count == 0)
+				throw new Exception("Invalid empty command: " + inputCommand);
+
 			return BuildCommand(lineTokens, startLine);
 		}
-
-		#endregion //Command parsing
 
 	}
 }

@@ -133,6 +133,7 @@ public partial class PWGraphEditor
 
 	void OnNodeRemovedCallback(PWNode node)
 	{
+		ScriptableObject.DestroyImmediate(node, true);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	}

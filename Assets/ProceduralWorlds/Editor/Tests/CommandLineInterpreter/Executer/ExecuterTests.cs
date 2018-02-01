@@ -64,6 +64,39 @@ namespace PW.Tests.CLI
 			Assert.That(graph.inputNode != null, "Null graph input node while creating empty graph");
 			Assert.That(graph.outputNode != null, "Null graph output node while creating empty graph");
 		}
+
+		[Test]
+		public void SliderNodeAnchorLinkedToAddNodeExecution()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
+				.NewNode< PWNodeSlider >("s1")
+				.NewNode< PWNodeSlider >("s2")
+				.NewNode< PWNodeSlider >("s3")
+				.NewNode< PWNodeSlider >("s4")
+				.NewNode< PWNodeAdd >("add")
+				.Link("s1", "outValue", "add", "values")
+				.Link("s2", "outValue", "add", "values")
+				.Link("s3", 0, "add", 0)
+				.Link("s4", 0, "add", 0)
+				.Execute()
+				.GetGraph();
+			
+			var s1 = graph.FindNodeByName("s1");
+			var s2 = graph.FindNodeByName("s2");
+			var s3 = graph.FindNodeByName("s3");
+			var s4 = graph.FindNodeByName("s4");
+
+			var s1Link = s1.GetOutputLinks().First();
+			var s2Link = s2.GetOutputLinks().First();
+			var s3Link = s3.GetOutputLinks().First();
+			var s4Link = s4.GetOutputLinks().First();
+
+			//check if the links haven't been linked to the same anchor
+			Assert.That(s1Link.toAnchor != s2Link.toAnchor);
+			Assert.That(s2Link.toAnchor != s3Link.toAnchor);
+			Assert.That(s3Link.toAnchor != s4Link.toAnchor);
+			Assert.That(s4Link.toAnchor != s1Link.toAnchor);
+		}
 	
 	}
 }

@@ -49,7 +49,7 @@ namespace PW.Core
 		static GUIStyle		centeredLabel;
 
 		[SerializeField]
-		List< PWGUISettings >	settingsStorage;
+		List< PWGUISettings >	settingsStorage = new List< PWGUISettings >();
 		int						currentSettingCount = 0;
 
 		PWNode				attachedNode;
@@ -1027,8 +1027,6 @@ namespace PW.Core
 
 		private T		GetGUISettingData< T >(PWGUIFieldType fieldType, Func< T > newGUISettings) where T : PWGUISettings
 		{
-			if (settingsStorage == null)
-				settingsStorage = new List< PWGUISettings >();
 			
 			if (currentSettingCount == settingsStorage.Count)
 			{

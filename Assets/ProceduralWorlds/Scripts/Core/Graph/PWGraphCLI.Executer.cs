@@ -15,18 +15,66 @@ namespace PW.Core
 	public static partial class PWGraphCLI
 	{
 
-		#region  Command Execution
+		static Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > > commandTypeFunctions = new Dictionary< PWGraphCommandType, Action< PWGraph, PWGraphCommand, string > >()
+		{
+			{PWGraphCommandType.Link, CreateLink},
+			{PWGraphCommandType.NewNode, CreateNode},
+			{PWGraphCommandType.NewNodePosition, CreateNode},
+			{PWGraphCommandType.LinkAnchor, CreateLinkAnchor},
+			{PWGraphCommandType.LinkAnchorName, CreateLinkAnchorName},
+		};
+		
+		static void CreateLinkAnchorName(PWGraph graph, PWGraphCommand command, string inputCommand)
+		{
+			PWNode fromNode, toNode;
+
+			GetNodes(graph, command, out fromNode, out toNode, inputCommand);
+
+			var fromAnchorField = fromNode.outputAnchorFields.Find(af => af.fieldName == command.fromAnchorFieldName);
+			var toAnchorField = toNode.inputAnchorFields.Find(af => af.fieldName == command.toAnchorFieldName);
+
+			if (fromAnchorField == null)
+				throw new Exception("Anchor " + command.fromAnchorFieldName + " not found in node: " + fromNode);
+			if (toAnchorField == null)
+				throw new Exception("Anchor " + command.toAnchorFieldName + " not found in node: " + toNode);
+			
+			PWAnchor fromAnchor, toAnchor;
+			
+			FindAnchors(fromAnchorField, toAnchorField, out fromAnchor, out toAnchor);
+
+			graph.SafeCreateLink(fromAnchor, toAnchor);
+		}
+
+		static void CreateLinkAnchor(PWGraph graph, PWGraphCommand command, string inputCommand)
+		{
+			PWNode fromNode, toNode;
+
+			GetNodes(graph, command, out fromNode, out toNode, inputCommand);
+
+			var fromAnchorFields = fromNode.outputAnchorFields;
+			var toAnchorFields = toNode.inputAnchorFields;
+
+			if (command.fromAnchorIndex < 0 || command.fromAnchorIndex >= fromAnchorFields.Count)
+				throw new Exception("Anchor " + command.fromAnchorIndex + " out of range in node: " + fromNode);
+			if (command.toAnchorIndex < 0 || command.toAnchorIndex >= toAnchorFields.Count)
+				throw new Exception("Anchor " + command.fromAnchorIndex + " out of range in node: " + toNode);
+			
+			var fromAnchorField = fromAnchorFields[command.fromAnchorIndex];
+			var toAnchorField = toAnchorFields[command.toAnchorIndex];
+
+			PWAnchor fromAnchor, toAnchor;
+			
+			FindAnchors(fromAnchorField, toAnchorField, out fromAnchor, out toAnchor);
+
+			graph.SafeCreateLink(fromAnchor, toAnchor);
+		}
 
 		static void	CreateLink(PWGraph graph, PWGraphCommand command, string inputCommand)
 		{
 			//get nodes from the graph:
-			PWNode fromNode = graph.FindNodeByName(command.fromName);
-			PWNode toNode = graph.FindNodeByName(command.toName);
+			PWNode fromNode, toNode;
 
-			if (fromNode == null)
-				throw new Exception("Node " + command.fromName + " found in graph while parsing: '" + inputCommand + "'");
-			if (toNode == null)
-				throw new Exception("Node " + command.toName + " found in graph while parsing: '" + inputCommand + "'");
+			GetNodes(graph, command, out fromNode, out toNode, inputCommand);
 			
 			//Create the first linkable anchors we found:
 			foreach (var outAnchor in fromNode.outputAnchors)
@@ -57,6 +105,9 @@ namespace PW.Core
 			else
 				node = graph.CreateNewNode(command.nodeType, position);
 			
+			//set the position again for input/output nodes
+			node.rect.position = position;
+			
 			Type nodeType = node.GetType();
 
 			if (!String.IsNullOrEmpty(command.attributes))
@@ -85,7 +136,33 @@ namespace PW.Core
 				throw new Exception("Command type not handled: " + command.type);
 		}
 
-		#endregion // Command Execution
+		#region Utils
+
+		static void GetNodes(PWGraph graph, PWGraphCommand command, out PWNode fromNode, out PWNode toNode, string inputCommand)
+		{
+			fromNode = graph.FindNodeByName(command.fromNodeName);
+			toNode = graph.FindNodeByName(command.toNodeName);
+
+			if (fromNode == null)
+				throw new Exception("Node " + command.fromNodeName + " not found in graph while parsing: '" + inputCommand + "'");
+			if (toNode == null)
+				throw new Exception("Node " + command.toNodeName + " not found in graph while parsing: '" + inputCommand + "'");
+		}
+
+		static void FindAnchors(PWAnchorField fromAnchorField, PWAnchorField toAnchorField, out PWAnchor fromAnchor, out PWAnchor toAnchor)
+		{
+			if (fromAnchorField.multiple)
+				fromAnchor = fromAnchorField.anchors.Find(a => a.linkCount == 0);
+			else
+				fromAnchor = fromAnchorField.anchors.First();
+			
+			if (toAnchorField.multiple)
+				toAnchor = toAnchorField.anchors.Find(a => a.linkCount == 0);
+			else
+				toAnchor = toAnchorField.anchors.First();
+		}
+
+		#endregion
 
 	}
 }

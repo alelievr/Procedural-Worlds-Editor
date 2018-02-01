@@ -82,6 +82,18 @@ namespace PW.Core
 			return this;
 		}
 
+		public PWGraphBuilder Link(string fromNode, string fromAnchor, string toNode, string toAnchor)
+		{
+			commands.Add(PWGraphCLI.GenerateLinkAnchorNameCommand(fromNode, fromAnchor, toNode, toAnchor));
+			return this;
+		}
+
+		public PWGraphBuilder Link(string fromNode, int fromAnchorIndex, string toNode, int toAnchorIndex)
+		{
+			commands.Add(PWGraphCLI.GenerateLinkAnchorCommand(fromNode, fromAnchorIndex, toNode, toAnchorIndex));
+			return this;
+		}
+
 		public PWGraphBuilder Custom(Action< PWGraph > callback)
 		{
 			callback(graph);
@@ -149,7 +161,14 @@ namespace PW.Core
 
 		public PWGraphBuilder ImportCommands(params string[] cmds)
 		{
-			commands.AddRange(cmds);
+			foreach (var cmd in cmds)
+			{
+				//ignore empty commands
+				if (String.IsNullOrEmpty(cmd.Trim()))
+					continue ;
+				
+				commands.Add(cmd);
+			}
 
 			return this;
 		}

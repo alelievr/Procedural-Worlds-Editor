@@ -22,9 +22,6 @@ namespace PW.Tests.Graphs
 	
 			string path = AssetDatabase.GetAssetPath(g);
 			Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
-	
-			//cleanup the created file:
-			ScriptableObject.DestroyImmediate(g, true);
 		}
 		
 		[Test]
@@ -37,9 +34,6 @@ namespace PW.Tests.Graphs
 	
 			string path = AssetDatabase.GetAssetPath(g);
 			Assert.That(path.Contains(fileName), "Created graph file path does not contains it's name: " + path);
-	
-			//cleanup the created file:
-			ScriptableObject.DestroyImmediate(g, true);
 		}*/
 	}
 }

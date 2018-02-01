@@ -11,6 +11,7 @@ namespace PW.Core
 		NewNodePosition,
 		Link,
 		LinkAnchor,
+		LinkAnchorName,
 	}
 	
 	public class PWGraphCommand
@@ -21,9 +22,15 @@ namespace PW.Core
 		public bool					forcePositon;
 		public string				name;
 		public Type					nodeType;
-		public string				fromName;
-		public string				toName;
+		public string				fromNodeName;
+		public string				toNodeName;
+		
 		public string				attributes;
+
+		public int					fromAnchorIndex;
+		public int					toAnchorIndex;
+		public string				fromAnchorFieldName;
+		public string				toAnchorFieldName;
 
 		//New node constructor
 		public PWGraphCommand(Type nodeType, string name, string attributes = null)
@@ -50,24 +57,37 @@ namespace PW.Core
 		public PWGraphCommand(string fromNodeName, string toNodeName)
 		{
 			this.type = PWGraphCommandType.Link;
-			this.fromName = fromNodeName;
-			this.toName = toNodeName;
+			this.fromNodeName = fromNodeName;
+			this.toNodeName = toNodeName;
 		}
 
 		//new link with anchor index constructor
-		public PWGraphCommand(string fromNodeName, int fromAnchorFieldIndex, string toNodeName, int toAnchorFieldIndex)
+		public PWGraphCommand(string fromNodeName, int fromAnchorIndex, string toNodeName, int toAnchorIndex)
 		{
-			this.type = PWGraphCommandType.Link;
-			this.toName = toNodeName;
-			this.fromName = fromNodeName;
+			this.type = PWGraphCommandType.LinkAnchor;
+			this.fromNodeName = fromNodeName;
+			this.fromAnchorIndex = fromAnchorIndex;
+			this.toNodeName = toNodeName;
+			this.toAnchorIndex = toAnchorIndex;
 		}
+
+		public PWGraphCommand(string fromNodeName, string fromAnchorFieldName, string toNodeName, string toAnchorFieldName)
+		{
+			this.type = PWGraphCommandType.LinkAnchorName;
+			this.fromNodeName = fromNodeName;
+			this.fromAnchorFieldName = fromAnchorFieldName;
+			this.toNodeName = toNodeName;
+			this.toAnchorFieldName = toAnchorFieldName;
+		}
+
+		//new link 
 
 		public static bool operator ==(PWGraphCommand cmd1, PWGraphCommand cmd2)
 		{
 			return	cmd1.type == cmd2.type
 					&& cmd1.forcePositon == cmd2.forcePositon
-					&& cmd1.fromName == cmd2.fromName
-					&& cmd1.toName == cmd2.toName
+					&& cmd1.fromNodeName == cmd2.fromNodeName
+					&& cmd1.toNodeName == cmd2.toNodeName
 					&& cmd1.name == cmd2.name
 					&& cmd1.position == cmd2.position;
 		}
@@ -92,8 +112,8 @@ namespace PW.Core
 				+ forcePositon.GetHashCode()
 				+ name.GetHashCode()
 				+ nodeType.GetHashCode()
-				+ fromName.GetHashCode()
-				+ toName.GetHashCode();
+				+ fromNodeName.GetHashCode()
+				+ toNodeName.GetHashCode();
 		}
 	
 	}

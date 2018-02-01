@@ -7,7 +7,8 @@ using PW.Biomator;
 
 namespace PW.Node
 {
-	public class PWNodeWaterLevel : PWNode {
+	public class PWNodeWaterLevel : PWNode
+	{
 
 		[PWInput("Terrain input")]
 		[PWOffset(5)]
