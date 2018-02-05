@@ -285,7 +285,7 @@ namespace PW.Core
 				return new PWGUISettings();
 			});
 			
-			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text));
+			Vector2 nameSize = textFieldStyle.CalcSize(new GUIContent(text + " ")); //add a space for the edit icon beside the text
 			textRect.size = nameSize;
 
 			if (!String.IsNullOrEmpty(prefix))
@@ -298,11 +298,14 @@ namespace PW.Core
 				GUI.Label(prefixRect, prefix);
 			}
 			
-			Rect iconRect = new Rect(textRect.position + new Vector2(nameSize.x + 10, 0), new Vector2(17, 17));
+			Rect iconRect = new Rect(textRect.position + new Vector2(nameSize.x, 0), new Vector2(17, 17));
 			bool editClickIn = (editable && e.type == EventType.MouseDown && e.button == 0 && iconRect.Contains(e.mousePosition));
+			bool doubleClickText = (textRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.clickCount == 2);
 
 			if (editClickIn)
-				fieldSettings.editing = false;
+				fieldSettings.editing = !fieldSettings.editing;
+			if (doubleClickText)
+				fieldSettings.editing = true;
 			
 			if (editable)
 			{
@@ -338,7 +341,7 @@ namespace PW.Core
 				e.Use();
 			}
 
-			if (editClickIn)
+			if ((editClickIn || doubleClickText) && fieldSettings.editing)
 			{
 				GUI.FocusControl(controlName);
 				var te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);

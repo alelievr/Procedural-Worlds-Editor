@@ -55,7 +55,6 @@ namespace PW.Node
 					PWGUI.Sampler2DPreview(obj as Sampler2D);
 				else if (objType == typeof(Sampler3D))
 				{
-					//TODO
 				}
 				else if (objType == typeof(BiomeData))
 				{

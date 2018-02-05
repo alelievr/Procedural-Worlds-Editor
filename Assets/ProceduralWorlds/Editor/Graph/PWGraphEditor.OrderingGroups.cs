@@ -11,7 +11,11 @@ public partial class PWGraphEditor
     
 	void CreateNewOrderingGroup(object pos)
 	{
-	    graph.orderingGroups.Add(new PWOrderingGroup((Vector2)pos));
+		PWOrderingGroup	newOrderingGroup = new PWOrderingGroup();
+
+		newOrderingGroup.Initialize((Vector2)pos);
+		
+	    graph.orderingGroups.Add(newOrderingGroup);
 	}
 
 	void DeleteOrderingGroup()

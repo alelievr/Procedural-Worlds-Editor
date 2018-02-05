@@ -4,34 +4,34 @@ using System;
 
 namespace PW.Core
 {
-	[System.SerializableAttribute]
-	public class PWOrderingGroup {
+	[System.Serializable]
+	public class PWOrderingGroup
+	{
 	
 		public Rect					orderGroupRect;
 		public string				name;
 		public SerializableColor	color;
 
-		[System.NonSerializedAttribute]
+		[System.NonSerialized]
 		public bool					resizing = false;
 
 		bool						moving = false;
 		int							callbackId;
 		int							resizingCallbackId;
 
-		PWGUIManager				PWGUI;
+		PWGUIManager				PWGUI = new PWGUIManager();
 
 		static Texture2D			movepadTexture;
 		static GUIStyle				orderingGroupStyle;
 		static GUIStyle				orderingGroupNameStyle;
 
-		public PWOrderingGroup(Vector2 pos)
+		public void Initialize(Vector2 pos)
 		{
 			orderGroupRect = new Rect();
 			orderGroupRect.position = pos;
 			orderGroupRect.size = new Vector2(240, 120);
 			name = "ordering group";
 			color = (SerializableColor)Color.white;
-			PWGUI = new PWGUIManager();
 		}
 
 		void CreateAnchorRectCallabck(Rect r, MouseCursor cursor, Action callback)
@@ -131,7 +131,7 @@ namespace PW.Core
 			PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref name, true, orderingGroupNameStyle);
 
 			//draw move pad
-			Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(80, 50));
+			Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(50, 30));
 			GUI.DrawTextureWithTexCoords(movePadRect, movepadTexture, new Rect(0, 0, 5, 4));
 			EditorGUIUtility.AddCursorRect(movePadRect, MouseCursor.MoveArrow);
 			if (e.type == EventType.MouseDown && e.button == 0)
@@ -140,7 +140,7 @@ namespace PW.Core
 					moving = true;
 					e.Use();
 				}
-			if ((e.rawType == EventType.MouseUp || e.rawType == EventType.MouseDown) && !movePadRect.Contains(e.mousePosition))
+			if (e.rawType == EventType.MouseUp)
 				moving = false;
 
 			if (moving && e.type == EventType.MouseDrag)

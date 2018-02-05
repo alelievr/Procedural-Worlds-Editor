@@ -4,7 +4,8 @@ using UnityEngine;
 using System;
 
 [System.SerializableAttribute]
-public class SerializableType {
+public class SerializableType
+{
 
 	[SerializeField]
 	public string	typeString;
