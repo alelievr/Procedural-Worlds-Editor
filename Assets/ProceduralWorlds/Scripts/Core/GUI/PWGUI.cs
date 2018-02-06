@@ -106,10 +106,6 @@ namespace PW.Core
 					default:
 						break ;
 				}
-				if (setting.texture != null)
-				{
-					//TODO: call the recalculate function specific to field type
-				}
 			}
 		}
 		

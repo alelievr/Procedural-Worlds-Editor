@@ -7,7 +7,7 @@ using System.Reflection;
 namespace PW.Core
 {
 	[System.Serializable]
-	public class PWArray< T > : IEnumerable< T >
+	public class PWArray< T > : IEnumerable< T >, IPWArray
 	{
 		
 		[SerializeField]
@@ -31,7 +31,7 @@ namespace PW.Core
 		{
 			get { return values.Count; }
 		}
-	
+
 		public List< T > GetValues()
 		{
 			return values;
@@ -109,10 +109,16 @@ namespace PW.Core
 			names.Clear();
 		}
 
-		public  T  this[int index]  
+		public  T  this[int index]
 		{  
 			get { return values[index]; }  
 			set { values.Insert(index, value); }  
+		}
+
+		object IPWArray.this[int index]
+		{
+			get { return this[index]; }
+			set { this[index] = (T)value; }
 		}
 	
 		public IEnumerator< T > GetEnumerator()
@@ -124,6 +130,30 @@ namespace PW.Core
 		{
 			return this.GetEnumerator();
 		}
-	
+
+		List<object> IPWArray.GetGenericValues()
+		{
+			return values.Cast< object >().ToList();
+		}
+
+		object IPWArray.At(int index)
+		{
+			return this.At(index);
+		}
+
+		void IPWArray.GenericAdd(object val)
+		{
+			this.Add((T)val);
+		}
+
+		void IPWArray.GenericAdd(object val, string name)
+		{
+			this.Add((T)val, name);
+		}
+
+		bool IPWArray.GenericAssignAt(int index, object val, string name, bool force)
+		{
+			return this.AssignAt(index, (T)val, name, force);
+		}
 	}
 }

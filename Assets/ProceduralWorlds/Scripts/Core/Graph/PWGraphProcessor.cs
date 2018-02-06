@@ -7,36 +7,18 @@ using System.Linq;
 using System;
 using UnityEngine;
 using UnityEngine.Profiling;
+using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
-using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, System.Collections.Generic.Dictionary< string, PW.Core.PWGraphProcessor.NodeFieldInfo > >;
+using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, System.Collections.Generic.Dictionary< string, System.Reflection.FieldInfo > >;
 
 namespace PW.Core
 {
 	public class PWGraphProcessor
 	{
 
-		public class NodeFieldInfo
-		{
-			public FieldInfo			field;
-			public AtDelegate			at;
-			public AssignAtDelegate		assignAt;
-
-			public NodeFieldInfo(FieldInfo field)
-			{
-				this.field = field;
-			}
-
-			public NodeFieldInfo(FieldInfo field, AtDelegate at, AssignAtDelegate assignAt)
-			{
-				this.field = field;
-				this.at = at;
-				this.assignAt = assignAt;
-			}
-		}
-
-		public delegate object	AtDelegate(int index);
-		public delegate bool	AssignAtDelegate(int index, object val, string name, bool force);
+		public delegate object	AtGenericDelegate(IPWArray array, int index);
+		public delegate bool	AssignAtGenericDelegate(IPWArray array, int index, object val, string name, bool force);
 
 		NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
 		Dictionary< int, PWNode >	nodesDictionary;
@@ -45,19 +27,19 @@ namespace PW.Core
 
 		#region Initialization
 
-		static T AtGeneric< T >(PWArray< T > array, int index)
+		static object GenericAt(IPWArray array, int index)
 		{
 			return array.At(index);
 		}
 
-		static bool AssignAtGeneric< T >(PWArray< T > array, int index, T val, string name, bool force)
+		static bool GenericAssignAt(IPWArray array, int index, object val, string name, bool force)
 		{
-			return array.AssignAt(index, val, name, force);
+			return array.GenericAssignAt(index, val, name, force);
 		}
 		
 		void BakeNode(System.Type t)
 		{
-			var dico = new Dictionary< string, NodeFieldInfo >();
+			var dico = new Dictionary< string, FieldInfo >();
 			bakedNodeFields[t.AssemblyQualifiedName] = dico;
 	
 			foreach (var field in t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
@@ -73,53 +55,7 @@ namespace PW.Core
 				if (skip)
 					continue ;
 				
-				NodeFieldInfo nfi = null;
-
-				if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(PWArray<>))
-				{
-					var pwArrayType = field.FieldType;
-					var pwArrayTemplateType = pwArrayType.GetGenericArguments().First();
-
-					Debug.Log("pwarray: " + pwArrayType + ", template: " + pwArrayTemplateType);
-		
-					try {
-						MethodInfo	atMethod = pwArrayType.GetMethod("At", new Type[]{
-							typeof(int)
-						});
-						MethodInfo	assignAtMethod = pwArrayType.GetMethod("AssignAt");
-
-						Type objectArray = typeof(PWArray<>).MakeGenericType(typeof(object));
-						
-						Debug.Log("assignAtMethod: " + assignAtMethod);
-
-						var assignType = typeof(Func<, , , , >)
-							.MakeGenericType(
-								typeof(int),
-								pwArrayTemplateType,
-								typeof(string),
-								typeof(bool),
-								typeof(bool)
-						);
-
-						Debug.Log("assign type: " + assignType);
-
-						var d = Delegate.CreateDelegate(assignType, assignAtMethod);
-
-
-						Debug.Log("D: " + d);
-						// Func< int, object > at = (Func< int, object >)Delegate.CreateDelegate(typeof(Func< int, object >), atMethod);
-	
-						nfi = new NodeFieldInfo(field, null, null);
-					} catch (Exception e) {
-						Debug.LogError(e);
-						
-						nfi = new NodeFieldInfo(field);
-					}
-				}
-				else
-					nfi = new NodeFieldInfo(field);
-
-				dico[field.Name] = nfi;
+				dico[field.Name] = field;
 			}
 		}
 	
@@ -178,7 +114,7 @@ namespace PW.Core
 					return true;
 				}
 					
-				if (bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].field.GetValue(node) == null)
+				if (bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node) == null)
 				{
 					Debug.Log("[PW Process] tring to assign null value from "
 						+ fromType + "." + link.fromAnchor.fieldName);
@@ -189,13 +125,13 @@ namespace PW.Core
 			return false;
 		}
 		
-		void TrySetValue(NodeFieldInfo prop, object val, PWNode target, PWNode from, bool realMode)
+		void TrySetValue(FieldInfo field, object val, PWNode target, PWNode from, bool realMode)
 		{
 			if (realMode)
-				prop.field.SetValue(target, val);
+				field.SetValue(target, val);
 			else
 				try {
-					prop.field.SetValue(target, val);
+					field.SetValue(target, val);
 				} catch (Exception e) {
 					Debug.LogError("[PWGraph Processor] " + e);
 				}
@@ -214,7 +150,7 @@ namespace PW.Core
 				if (CheckProcessErrors(link, node, realMode))
 					return ;
 
-				var val = bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].field.GetValue(node);
+				var val = bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node);
 				var prop = bakedNodeFields[link.toNode.classAQName][link.toAnchor.fieldName];
 	
 				// Debug.Log("local: " + link.fromNode.classAQName + " / " + node.GetType() + " / " + node.nodeId);
@@ -228,10 +164,10 @@ namespace PW.Core
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
 				{
-					var pwArray = prop.field.GetValue(link.toNode);
+					var pwArray = prop.GetValue(link.toNode);
 
-					//TODO: bake this abomination
-					bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
+					bool b = GenericAssignAt(pwArray as IPWArray, link.toAnchor.fieldIndex, val, link.fromAnchor.name, true);
+					// bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
 
 					if (!b)
 						Debug.LogError("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);
@@ -240,8 +176,9 @@ namespace PW.Core
 				//Local link is a multi-anchor
 				else if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex != -1 && val != null)
 				{
-					//TODO: bake this abomination
-					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
+					Stopwatch	sw = new Stopwatch();
+
+					object localVal = GenericAt(val as IPWArray, link.fromAnchor.fieldIndex);
 
 					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
 				}
@@ -249,12 +186,12 @@ namespace PW.Core
 				//Both are multi-anchors
 				else if (val != null)
 				{
-					//TODO: brun these abominations
-					object localVal = val.GetType().GetMethod("At").Invoke(val, new object[]{link.fromAnchor.fieldIndex});
+					object localVal = GenericAt(val as IPWArray, link.fromAnchor.fieldIndex);
 	
-					var pwArray = prop.field.GetValue(link.toNode);
-					var assign = pwArray.GetType().GetMethod("AssignAt");
-					if (!(bool)assign.Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, localVal, link.fromAnchor.name, true}))
+					var pwArray = prop.GetValue(link.toNode);
+					bool b = GenericAssignAt(pwArray as IPWArray, link.toAnchor.fieldIndex, val, link.fromAnchor.name, true);
+					
+					if (!b)
 						Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);
 				}
 			}

@@ -544,6 +544,16 @@ namespace PW.Core
 			return FindNodeByName(name) as T;
 		}
 
+		public PWNode	FindNodeByType(Type type)
+		{
+			return nodes.FirstOrDefault(n => n.GetType() == type);
+		}
+
+		public T		FindNodeByType< T >() where T : PWNode
+		{
+			return nodes.FirstOrDefault(n => n is T) as T;
+		}
+
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()
 		{
 			return computeOrderSortedNodes;

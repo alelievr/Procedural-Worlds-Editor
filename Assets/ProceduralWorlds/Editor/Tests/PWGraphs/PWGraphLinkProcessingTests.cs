@@ -68,6 +68,36 @@ namespace PW.Tests.Graphs
 
 			Assert.That(surf.surfaceGraph.cells.Count == 3);
 		}
+		
+		[Test]
+		public void PWGraphLinkArrayToArray()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
+
+			var input = graph.FindNodeByType< PWNodeGraphInput >();
+			var output = graph.FindNodeByType< PWNodeGraphOutput >();
+
+			//create 5 links from first input node anchor to [1..5] output anchors
+			for (int i = 0; i < 5; i++)
+			{
+				var inputAnchor = input.outputAnchors.Last();
+				var outputAnchor = output.inputAnchors.Last();
+
+				graph.CreateLink(inputAnchor, outputAnchor);
+			}
+
+			Assert.That(input.outputAnchors.Count() == 1, "input node output anchors count: " + input.outputAnchors.Count() + ", expected to be 1");
+			Assert.That(output.inputAnchors.Count() == 6, "output node input anchors count: " + output.inputAnchors.Count() + ", expected to be 6");
+
+			var inputLinks = input.GetOutputLinks().ToList();
+			var outputLinks = output.GetInputLinks().ToList();
+
+			Assert.That(inputLinks.Count == 5);
+			Assert.That(outputLinks.Count == 5);
+
+			Assert.That(inputLinks[0].toAnchor != inputLinks[1].toAnchor);
+			Assert.That(outputLinks[0].toAnchor != outputLinks[1].toAnchor);
+		}
 	
 	}
 }
