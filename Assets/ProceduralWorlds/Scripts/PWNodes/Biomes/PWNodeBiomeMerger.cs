@@ -94,7 +94,7 @@ namespace PW.Node
 			}
 			else if (finalTerrain.type == SamplerType.Sampler3D)
 			{
-				Debug.Log("TODO");
+				Debug.Log("TODO: 3D Terrains");
 			}
 
 			mergedBiomeTerrain.biomeData = inputBlendedTerrain.biomeData;

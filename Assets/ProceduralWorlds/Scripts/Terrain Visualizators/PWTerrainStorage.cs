@@ -69,7 +69,7 @@ namespace PW
 			chunks[pos] = new Chunk(chunk, userChunkDatas);
 			if (storeMode == PWStorageMode.File)
 			{
-				//TODO: asyn save chunkData ans pos to a file.
+				//TODO: asyn save chunkData and pos to a file.
 			}
 			return chunk;
 		}

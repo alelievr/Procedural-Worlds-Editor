@@ -5,12 +5,11 @@ using UnityEngine;
 //Header rendering and processing for nodes
 namespace PW
 {
-	public partial class PWNode {
+	public partial class PWNode
+	{
 	
 		void RenderHeader()
 		{
-			//TODO: display node color pad
-			
 			RenderRenamable();
 		}
 

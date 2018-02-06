@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
 using PW.Core;
 using PW.Node;
 
@@ -11,9 +12,26 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		public void Duplicate()
+		public void Duplicate(PWGraph attachedGraph)
 		{
-			Debug.Log("TODO :) !");
+			var newNode = ScriptableObject.Instantiate(this);
+
+			foreach (var af in newNode.anchorFields)
+			{
+				af.anchors.ForEach(a => {
+					foreach (var link in a.links)
+						a.RemoveLinkReference(link);
+				});
+			}
+
+			if (attachedGraph != null)
+			{
+				attachedGraph.AddInitializedNode(newNode);
+			}
+
+			newNode.UpdateWorkStatus();
+
+			newNode.rect.position += new Vector2(20, 20);
 		}
 
 		/// <summary>

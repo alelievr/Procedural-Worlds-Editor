@@ -294,7 +294,6 @@ namespace PW
 
 		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
 		{
-			//TODO: update the anchor highlight
 			anchor.highlighMode = PWAnchorHighlight.None;
 
 			//reset link hightlight

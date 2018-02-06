@@ -98,6 +98,48 @@ namespace PW.Tests.Graphs
 			Assert.That(inputLinks[0].toAnchor != inputLinks[1].toAnchor);
 			Assert.That(outputLinks[0].toAnchor != outputLinks[1].toAnchor);
 		}
+		
+		[Test]
+		public void PWGraphLinkArrayToArrayProcess()
+		{
+			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
+
+			var input = graph.FindNodeByType< PWNodeGraphInput >();
+			var output = graph.FindNodeByType< PWNodeGraphOutput >();
+
+			var outputAnchorField = input.outputAnchorFields.First();
+
+			input.SetMultiAnchor("outputValues", 5);
+
+			var inputAnchors = input.outputAnchors.ToList();
+
+			//Link input i anchor to output i anchor
+			for (int i = 0; i < 5; i++)
+			{
+				var inputAnchor = inputAnchors[i];
+				var outputAnchor = output.inputAnchors.Last();
+
+				graph.CreateLink(inputAnchor, outputAnchor);
+			}
+
+			int value = 42;
+
+			foreach (var anchor in input.outputAnchors)
+				input.SetAnchorValue(anchor, value++);
+
+			graph.Process();
+
+			value = 42;
+			
+			var outputAnchors = output.inputAnchors.ToList();
+
+			for (int i = 0; i < 5; i++)
+			{
+				var anchor = outputAnchors[i];
+				var val = output.GetAnchorValue(anchor);
+				Assert.That(val.Equals(value++));
+			}
+		}
 	
 	}
 }

@@ -111,7 +111,6 @@ namespace PW
 
 				if (anchor.anchorFieldRef.multiple)
 				{
-					//TODO: make this code fly
 					var SetValue = fieldInfo.FieldType.GetMethod("AssignAt");
 					SetValue.Invoke(fieldInfo.GetValue(this), new object[]{anchor.fieldIndex, value, anchor.name, true});
 				}
@@ -163,9 +162,34 @@ namespace PW
 			return GetAnchorFromField(fieldName, index);
 		}
 
+		public object					GetAnchorValue(string fieldName, int index)
+		{
+			PWAnchor	anchor = GetAnchorFromField(fieldName, index);
+			return GetAnchorValue(anchor);
+		}
+
+		public object					GetAnchorValue(PWAnchor anchor)
+		{
+			if (anchor != null && anchorFieldInfoMap.ContainsKey(anchor.fieldName))
+			{
+				var fieldInfo = anchorFieldInfoMap[anchor.fieldName];
+
+				if (anchor.anchorFieldRef.multiple)
+				{
+					var at = fieldInfo.FieldType.GetMethod("At");
+					return at.Invoke(fieldInfo.GetValue(this), new object[]{anchor.fieldIndex});
+				}
+				else
+					return fieldInfo.GetValue(this);
+			}
+			else
+				Debug.LogError("Can't get value from anchor " + anchor);
+			
+			return null;
+		}
+
 		public IEnumerable< PWNode >	GetNodesAttachedToAnchor(PWAnchor anchor)
 		{
-			//TODO bake these data to prevent GC
 			return (anchor.anchorType == PWAnchorType.Input) ?
 				from l in anchor.links select l.fromNode : 
 				from l in anchor.links select l.toNode;

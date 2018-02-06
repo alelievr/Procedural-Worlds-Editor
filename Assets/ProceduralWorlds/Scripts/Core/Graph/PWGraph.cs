@@ -217,7 +217,7 @@ namespace PW.Core
 			//check if the object have been initialized, if not, quit.
 			if (!initialized)
 				return ;
-			
+				
 			//Events attach
 			OnPostLinkCreated += LinkPostAddedCallback;
 			OnPostLinkRemoved += LinkPostRemovedCallback;
@@ -234,7 +234,8 @@ namespace PW.Core
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
 			foreach (var node in nodes)
-				node.OnAfterGraphDeserialize(this);
+				if (node != null)
+					node.OnAfterGraphDeserialize(this);
 		}
 
 		public virtual void OnDisable()
@@ -574,16 +575,21 @@ namespace PW.Core
 			
 			newNode.Initialize(this);
 
+			AddInitializedNode(newNode, raiseEvents);
+
+			if (name != null)
+				newNode.name = name;
+			
+			return newNode;
+		}
+
+		public void		AddInitializedNode(PWNode newNode, bool raiseEvents = true)
+		{
 			nodes.Add(newNode);
 			nodesDictionary[newNode.id] = newNode;
 			
 			if (OnNodeAdded != null && raiseEvents)
 				OnNodeAdded(newNode);
-			
-			if (name != null)
-				newNode.name = name;
-			
-			return newNode;
 		}
 		
 		public bool		RemoveNode(int nodeId, bool raiseEvents = true)

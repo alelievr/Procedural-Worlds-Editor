@@ -7,7 +7,6 @@ using System.Linq;
 using System;
 using UnityEngine;
 using UnityEngine.Profiling;
-using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
 using NodeFieldDictionary = System.Collections.Generic.Dictionary< string, System.Collections.Generic.Dictionary< string, System.Reflection.FieldInfo > >;
@@ -176,8 +175,6 @@ namespace PW.Core
 				//Local link is a multi-anchor
 				else if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex != -1 && val != null)
 				{
-					Stopwatch	sw = new Stopwatch();
-
 					object localVal = GenericAt(val as IPWArray, link.fromAnchor.fieldIndex);
 
 					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
@@ -189,7 +186,7 @@ namespace PW.Core
 					object localVal = GenericAt(val as IPWArray, link.fromAnchor.fieldIndex);
 	
 					var pwArray = prop.GetValue(link.toNode);
-					bool b = GenericAssignAt(pwArray as IPWArray, link.toAnchor.fieldIndex, val, link.fromAnchor.name, true);
+					bool b = GenericAssignAt(pwArray as IPWArray, link.toAnchor.fieldIndex, localVal, link.fromAnchor.name, true);
 					
 					if (!b)
 						Debug.Log("[PWGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName);

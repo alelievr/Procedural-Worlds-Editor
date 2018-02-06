@@ -811,13 +811,19 @@ namespace PW.Core
 				for (int y = 0; y < texSize; y++)
 				{
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
-					var biome = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
-					if (biome == null)
-						continue ;
-					Color firstBiomeColor = biome.previewColor;
+					var biome1 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
+					var biome2 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.secondBiomeId);
 
-					//TODO: second biome color:
-					fieldSettings.texture.SetPixel(x, y, firstBiomeColor);
+					if (biome1 == null)
+						continue ;
+					
+					Color firstBiomeColor = biome1.previewColor;
+					Color secondBiomeColor = biome2.previewColor;
+
+					Color pixel = firstBiomeColor * blendInfo.firstBiomeBlendPercent + secondBiomeColor * blendInfo.secondBiomeBlendPercent;
+					pixel.a = 1;
+
+					fieldSettings.texture.SetPixel(x, y, pixel);
 				}
 			fieldSettings.texture.Apply();
 			fieldSettings.update = false;

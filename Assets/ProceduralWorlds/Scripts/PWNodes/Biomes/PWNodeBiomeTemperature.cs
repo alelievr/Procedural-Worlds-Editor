@@ -104,8 +104,6 @@ namespace PW.Node
 				UpdateTemperatureMap();
 				fieldUpdate = false;
 			}
-
-			//TODO: temperature map creation options
 		}
 
 		public override void OnNodeAnchorLink(string prop, int index)

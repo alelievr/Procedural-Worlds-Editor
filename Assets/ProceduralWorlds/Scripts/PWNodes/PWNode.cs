@@ -73,7 +73,6 @@ namespace PW
 		public PWGraph				graphRef;
 		protected PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
 		protected PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
-		//TODO: data and mesh graphs
 
 		public bool					windowNameEdit = false;
 
@@ -113,8 +112,6 @@ namespace PW
 		//event relay, to simplify custom graph events:
 		// public event Action< int >				OnChunkSizeChanged;
 		// public event Action< int >				OnChunkPositionChanged;
-
-		//TODO: send graphRef.RaiseOnNodeSelected when the node select itself
 
 		//default notify reload will be sent to all node childs
 		//also fire a Process event for the target nodes
@@ -231,10 +228,14 @@ namespace PW
 		}
 
 		//here both our node and graph have been deserialized, we can now use it's datas
-		void OnAfterNodeAndGraphDeserialized()
+		void OnAfterNodeAndGraphDeserialized(bool alertGraph = true)
 		{
 			if (deserializationAlreadyNotified)
+			{
+				if (alertGraph)
+					graphRef.NotifyNodeReady(this);
 				return ;
+			}
 			
 			BindEvents();
 
@@ -254,7 +255,9 @@ namespace PW
 
 			//tell to the graph that this node is ready to work
 			this.ready = true;
-			graphRef.NotifyNodeReady(this);
+
+			if (alertGraph)
+				graphRef.NotifyNodeReady(this);
 		}
 
 		//called only once, when the node is created
@@ -277,7 +280,7 @@ namespace PW
 			graphRef = graph;
 
 			//Initialize the rest of the node
-			OnAfterNodeAndGraphDeserialized();
+			OnAfterNodeAndGraphDeserialized(false);
 
 			//call virtual NodeCreation method
 			OnNodeCreation();
