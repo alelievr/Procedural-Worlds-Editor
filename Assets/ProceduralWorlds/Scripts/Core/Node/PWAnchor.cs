@@ -114,7 +114,7 @@ namespace PW.Core
 				Debug.LogError("[PWAnchor] Tried to remove link: " + link);
 			
 			//set to null the object value if we're not anymore linked
-			if (linkCount == 0)
+			if (anchorType == PWAnchorType.Input && linkCount == 0)
 				nodeRef.SetAnchorValue(this, null);
 			
 			//update anchor group

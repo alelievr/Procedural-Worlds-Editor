@@ -15,10 +15,12 @@ namespace PW.Node
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
 		[PWOutput]
-		public FinalTerrain	mergedBiomeTerrain;
+		public FinalTerrain			mergedBiomeTerrain;
 
 		[System.NonSerialized]
 		bool						update;
+
+		Sampler						finalTerrain = null;
 
 		public override void OnNodeCreation()
 		{
@@ -34,9 +36,9 @@ namespace PW.Node
 		{
 			Sampler finalTerrain = null;
 			
-			if (inputBlendedTerrain != null && inputBlendedTerrain.biomeData != null)
-				finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
-				
+			if (mergedBiomeTerrain != null && mergedBiomeTerrain.mergedTerrain != null)
+				finalTerrain = mergedBiomeTerrain.mergedTerrain;
+			
 			EditorGUIUtility.labelWidth = 80;
 			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
 
@@ -63,7 +65,7 @@ namespace PW.Node
 				return ;
 			}
 			
-			Sampler finalTerrain = inputBlendedTerrain.biomeData.terrainRef;
+			finalTerrain = inputBlendedTerrain.biomeData.terrainRef.Clone(finalTerrain);
 
 			if (finalTerrain.type == SamplerType.Sampler2D)
 			{
@@ -98,6 +100,7 @@ namespace PW.Node
 			}
 
 			mergedBiomeTerrain.biomeData = inputBlendedTerrain.biomeData;
+			mergedBiomeTerrain.mergedTerrain = finalTerrain;
 			mergedBiomeTerrain.materializerType = mainGraphRef.materializerType;
 
 			mergedBiomeTerrain.biomeSurfacesList.Clear();

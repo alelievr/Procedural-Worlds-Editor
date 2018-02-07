@@ -137,4 +137,10 @@ public partial class PWGraphEditor
 		AssetDatabase.Refresh();
 	}
 
+	void UnselectAllNodes()
+	{
+		foreach (var node in graph.nodes)
+			node.isSelected = false;
+	}
+
 }

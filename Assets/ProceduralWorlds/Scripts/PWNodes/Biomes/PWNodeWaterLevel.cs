@@ -120,8 +120,7 @@ namespace PW.Node
 				return ;
 			}
 
-			outputBiome.terrain = terrainNoise as Sampler2D;
-			outputBiome.terrain3D = terrainNoise as Sampler3D;
+			outputBiome.terrainRef = terrainNoise;
 			
 			outputBiome.waterLevel = waterLevel;
 

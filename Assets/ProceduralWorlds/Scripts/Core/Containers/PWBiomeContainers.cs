@@ -176,24 +176,44 @@ namespace PW.Biomator
 
 		public Sampler2D			terrain;
 		public Sampler3D			terrain3D;
-		public Sampler				terrainRef { get { return (terrain == null) ? terrain3D : terrain as Sampler; } }
+		public Sampler				terrainRef
+		{
+			get { return (terrain == null) ? terrain3D : terrain as Sampler; }
+			set { terrain = value as Sampler2D; terrain3D = value as Sampler3D; }
+		}
 
 		public Sampler2D			wetness;
 		public Sampler3D			wetness3D;
-		public Sampler				wetnessRef { get { return (wetness == null) ? wetness3D : wetness as Sampler; } }
+		public Sampler				wetnessRef
+		{
+			get { return (wetness == null) ? wetness3D : wetness as Sampler; }
+			set { wetness = value as Sampler2D; wetness3D = value as Sampler3D; }
+		}
 
 		public Sampler2D			temperature;
 		public Sampler3D			temperature3D;
-		public Sampler				temperatureRef { get { return (temperature == null) ? temperature3D : temperature as Sampler; } }
+		public Sampler				temperatureRef
+		{
+			get { return (temperature == null) ? temperature3D : temperature as Sampler; }
+			set { temperature = value as Sampler2D; temperature3D = value as Sampler3D; }
+		}
 		
 		public Vector2Sampler2D		wind;
 		public Vector3Sampler2D		wind3D;
-		public Sampler				windRef { get { return (wind == null) ? wind3D : wind as Sampler; } }
+		public Sampler				windRef
+		{
+			get { return (wind == null) ? wind3D : wind as Sampler; }
+			set { wind = value as Vector2Sampler2D; wind3D = value as Vector3Sampler2D; }
+		}
 		public Sampler2D			lighting;
 		
 		public Sampler2D			air;
 		public Sampler3D			air3D;
-		public Sampler				airRef { get { return (air == null) ? air3D : air as Sampler; } }
+		public Sampler				airRef
+		{
+			get { return (air == null) ? air3D : air as Sampler; }
+			set { air = value as Sampler2D; air3D = value as Sampler3D; }
+		}
 		
 		public ComplexEdaphicData	soil;
 

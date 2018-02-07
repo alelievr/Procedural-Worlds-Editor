@@ -122,6 +122,7 @@ namespace PW.Core
 	public class FinalTerrain
 	{
 		public BiomeData				biomeData;
+		public Sampler					mergedTerrain;
 		public MaterializerType			materializerType;
 
 		public Dictionary< short, BiomeSurfaceGraph >	biomeSurfacesList = new Dictionary< short, BiomeSurfaceGraph >();

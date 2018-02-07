@@ -98,6 +98,7 @@ public partial class PWGraphEditor
 
 				//unselect all others links:
 				UnselectAllLinks();
+				UnselectAllNodes();
 
 				link.selected = true;
 				link.highlight = PWLinkHighlight.Selected;

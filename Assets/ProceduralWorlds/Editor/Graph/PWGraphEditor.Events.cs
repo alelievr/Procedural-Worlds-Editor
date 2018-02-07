@@ -164,22 +164,39 @@ public partial class PWGraphEditor
 	{
 		if (e.type != EventType.ValidateCommand)
 			return ;
+			
+		var selectedNodes = graph.nodes.Where(n => n.isSelected).ToList();
 		
 		switch (e.commandName)
 		{
 			case "Duplicate":
-				var selectedNodes = graph.nodes.Where(n => n.isSelected);
-	
-				Debug.Log("selected nodes: " + selectedNodes.Count());
-				
 				foreach (var node in selectedNodes)
-				{
-					node.Duplicate(graph);
-					Debug.Log("DUP: " + node);
-				}
+					node.Duplicate();
 				break ;
 			case "Delete":
+				var selectedLinks = graph.nodeLinkTable.GetLinks().Where(l => l.selected);
 
+				foreach (var node in selectedNodes)
+					node.RemoveSelf();
+				
+				foreach (var link in selectedLinks)
+					graph.RemoveLink(link);
+				break ;
+			case "Cut":
+				break ;
+			case "Copy":
+				break ;
+			case "Paste":
+				break ;
+			case "FrameSelected":
+				var selectedNode = graph.nodes.FirstOrDefault(n => n.isSelected);
+
+				if (selectedNode != null)
+					graph.panPosition = -selectedNode.rect.position + windowSize / 2 - selectedNode.rect.size / 2;
+				break ;
+			case "Find":
+				break ;
+			case "SelectAll":
 				break ;
 		}
 	}

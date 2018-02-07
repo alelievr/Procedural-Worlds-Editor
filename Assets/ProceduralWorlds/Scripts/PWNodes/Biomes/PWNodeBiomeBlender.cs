@@ -23,7 +23,7 @@ namespace PW.Node
 		bool				biomeCoverageRecap = false;
 
 		[System.NonSerialized]
-		bool				firstGUI = true;
+		bool				updateBiomeMap = true;
 
 		public override void OnNodeCreation()
 		{
@@ -69,7 +69,7 @@ namespace PW.Node
 			else
 				EditorGUILayout.LabelField("no biome data");
 			
-			if (firstGUI)
+			if (updateBiomeMap)
 				PWGUI.SetUpdateForField(0, true);
 
 			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
@@ -84,7 +84,7 @@ namespace PW.Node
 					EditorGUILayout.LabelField("Null biome data/biome tree");
 			}
 
-			firstGUI = false;
+			updateBiomeMap = false;
 		}
 
 		public override void OnNodeProcess()
@@ -152,9 +152,18 @@ namespace PW.Node
 
 		void OnReloadCallback(PWNode from)
 		{
-			//Reload from the editor:
-			if (from == null)
-				BuildBiomeTree();
+			BuildBiomeTree();
+			
+			var tmpPartialBiome = inputBiomes.GetValues().FirstOrDefault(b => b != null && b.biomeDataReference != null);
+			
+			var biomeData = tmpPartialBiome.biomeDataReference;
+
+			if (biomeData != null)
+			{			
+				biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+			
+				updateBiomeMap = true;
+			}
 		}
 		
 		void BuildBiomeTree()

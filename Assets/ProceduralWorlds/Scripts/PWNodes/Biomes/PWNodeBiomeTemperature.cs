@@ -179,10 +179,7 @@ namespace PW.Node
 			fieldUpdate = true;
 
 			if (inputBiome != null)
-			{
-				inputBiome.temperature = localTemperatureMap as Sampler2D;
-				inputBiome.temperature3D = localTemperatureMap as Sampler3D;
-			}
+				inputBiome.temperatureRef = localTemperatureMap;
 
 			outputBiome = inputBiome;
 		}

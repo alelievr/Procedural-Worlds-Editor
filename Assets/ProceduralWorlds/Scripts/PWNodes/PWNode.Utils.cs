@@ -12,26 +12,16 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		public void Duplicate(PWGraph attachedGraph)
+		public void Duplicate()
 		{
-			var newNode = ScriptableObject.Instantiate(this);
+			var newNode = graphRef.CreateNewNode(GetType(), rect.position + new Vector2(50, 50), name);
 
-			foreach (var af in newNode.anchorFields)
+			//copy internal datas to the new node:
+			foreach (var fieldInfo in newNode.undoableFields)
 			{
-				af.anchors.ForEach(a => {
-					foreach (var link in a.links)
-						a.RemoveLinkReference(link);
-				});
+				var value = fieldInfo.GetValue(this);
+				fieldInfo.SetValue(newNode, value);
 			}
-
-			if (attachedGraph != null)
-			{
-				attachedGraph.AddInitializedNode(newNode);
-			}
-
-			newNode.UpdateWorkStatus();
-
-			newNode.rect.position += new Vector2(20, 20);
 		}
 
 		/// <summary>

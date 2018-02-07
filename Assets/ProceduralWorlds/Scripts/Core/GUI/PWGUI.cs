@@ -939,7 +939,12 @@ namespace PW.Core
 			EditorGUILayout.BeginHorizontal();
 			{
 				if (checkboxEnabled)
+				{
+					EditorGUI.BeginChangeCheck();
 					checkbox = EditorGUILayout.Toggle(checkbox);
+					if (EditorGUI.EndChangeCheck())
+						settings.faded = checkbox;
+				}
 				EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
 			}
 			EditorGUILayout.EndHorizontal();
