@@ -20,7 +20,7 @@ namespace PW.Node
 		public PWArray< BiomeData >	outputBiomes = new PWArray< BiomeData >();
 
 		[SerializeField]
-		public PWBiomeSwitchList	switchList = new PWBiomeSwitchList();
+		public BiomeSwitchList	switchList = new BiomeSwitchList();
 
 		public BiomeSwitchMode		switchMode;
 		string[]					biomeSwitchModes;

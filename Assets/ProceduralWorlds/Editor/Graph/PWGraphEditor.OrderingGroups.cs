@@ -29,7 +29,7 @@ public partial class PWGraphEditor
 		Profiler.BeginSample("[PW] Render ordering groups");
 
 		foreach (var orderingGroup in graph.orderingGroups)
-			orderingGroup.Render(graph.panPosition, position.size * (1 / graph.scale), ref graph.editorEvents);
+			orderingGroup.Render(graph, position.size * (1 / graph.scale));
 
 		//if the mouse was not over an ordering group this frame
 		if (!editorEvents.isMouseOverOrderingGroupFrame)

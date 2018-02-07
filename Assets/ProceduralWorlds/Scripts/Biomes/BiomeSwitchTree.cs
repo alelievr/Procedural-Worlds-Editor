@@ -38,7 +38,7 @@ namespace PW.Biomator
 			public float				max;
 			public bool					value;
 			public SwitchMode			mode;
-			public BiomeSwitchMode	biomeSwitchMode;
+			public BiomeSwitchMode		biomeSwitchMode;
 			public PartialBiome			partialBiome;
 			public Color				previewColor;
 			public string				biomeName;

@@ -40,7 +40,7 @@ namespace PW.Biomator
 	}
 
 	[System.Serializable]
-	public class PWBiomeSwitchList
+	public class BiomeSwitchList
 	{
 		public List< BiomeSwitchData >		switchDatas = new List< BiomeSwitchData >();
 
@@ -50,7 +50,7 @@ namespace PW.Biomator
 		public Action< BiomeSwitchData >	OnBiomeDataModified;
 
 		public Sampler						currentSampler;
-		public BiomeSwitchMode			currentSwitchMode;
+		public BiomeSwitchMode				currentSwitchMode;
 		public BiomeData					currentBiomeData;
 		
 		Texture2D			biomeRepartitionPreview;
