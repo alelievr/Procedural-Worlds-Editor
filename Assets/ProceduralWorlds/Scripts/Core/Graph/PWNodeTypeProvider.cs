@@ -107,9 +107,9 @@ namespace PW.Core
 				"To Biome data", typeof(PWNodeBiomeData),
 				"Temperature map", typeof(PWNodeBiomeTemperature),
 				"Wetness map", typeof(PWNodeWetness),
-				"Switch", typeof(PWNodeBiomeSwitch),
-				"Graph", typeof(PWNodeBiome),
-				"Blender", typeof(PWNodeBiomeBlender)
+				"Biome Switch", typeof(PWNodeBiomeSwitch),
+				"Biome Graph", typeof(PWNodeBiome),
+				"Biome Blender", typeof(PWNodeBiomeBlender)
 			),
 			new PWNodeTypeInfoList(PWMainGraph, "Terrain", PWColorSchemeName.Pumpkin,
 				"Biome merger", typeof(PWNodeBiomeMerger)

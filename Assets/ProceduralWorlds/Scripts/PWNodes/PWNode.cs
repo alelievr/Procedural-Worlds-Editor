@@ -402,15 +402,6 @@ namespace PW
 			canWork = true;
 		}
 
-		public void	RemoveSelf()
-		{
-			RemoveAllLinks();
-
-			//the node instance will be removed by the editor at the same time that it's asset
-		
-			ScriptableObject.DestroyImmediate(this, true);
-		}
-
 		void		OnClickedOutside()
 		{
 			if (Event.current.button == 0)

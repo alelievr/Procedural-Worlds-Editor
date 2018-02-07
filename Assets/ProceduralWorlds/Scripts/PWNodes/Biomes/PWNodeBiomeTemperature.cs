@@ -43,6 +43,8 @@ namespace PW.Node
 		[SerializeField]
 		float					maxTemperatureMapInput;
 
+		string					delayedTemperatureKey = "PWNodeBiomeTemperature";
+
 		public override void OnNodeCreation()
 		{
 			name = "Temperature node";
@@ -59,6 +61,10 @@ namespace PW.Node
 				new KeyValuePair< float, Color >(.75f, PWColor.orange),
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
+
+			delayedChanges.BindCallback(delayedTemperatureKey, (unused) => {
+				NotifyReload();
+			});
 		}
 
 		public override void OnNodeGUI()
@@ -100,6 +106,8 @@ namespace PW.Node
 			
 			if (fieldUpdate)
 			{
+				Debug.Log("UPDATE !");
+				delayedChanges.UpdateValue(delayedTemperatureKey);
 				PWGUI.SetUpdateForField(2, true);
 				UpdateTemperatureMap();
 				fieldUpdate = false;
@@ -175,8 +183,6 @@ namespace PW.Node
 			CreateTemperatureMapIfNotExists();
 
 			UpdateTemperatureMap();
-
-			fieldUpdate = true;
 
 			if (inputBiome != null)
 				inputBiome.temperatureRef = localTemperatureMap;

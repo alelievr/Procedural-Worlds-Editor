@@ -155,15 +155,18 @@ namespace PW.Node
 			BuildBiomeTree();
 			
 			var tmpPartialBiome = inputBiomes.GetValues().FirstOrDefault(b => b != null && b.biomeDataReference != null);
+
+			if (tmpPartialBiome == null)
+				return ;
 			
 			var biomeData = tmpPartialBiome.biomeDataReference;
 
-			if (biomeData != null)
-			{			
-				biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+			if (biomeData == null)
+				return ;
 			
-				updateBiomeMap = true;
-			}
+			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+		
+			updateBiomeMap = true;
 		}
 		
 		void BuildBiomeTree()

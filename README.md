@@ -1,10 +1,9 @@
 # [WIP] Procedural Worlds Editor
 
-PWE is a node based procedural terrain editor which support biomes and multiple biomes.
+PWE is a node based procedural terrain editor which aims to support a complex biome system, multiple surface generation algorithms and an easy and powerful API to add anything which is missing in the project.
 
 ## Status of the project:
-[Refactoring]  
-You can have more information on this [trello](https://trello.com/b/ycMeDDPc/procedural-worlds).
+See the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to view the project status and current advancement in the roadmap.
 
 ## Wiki
 [wiki link](https://github.com/alelievr/Procedural-Worlds-Editor/wiki)
