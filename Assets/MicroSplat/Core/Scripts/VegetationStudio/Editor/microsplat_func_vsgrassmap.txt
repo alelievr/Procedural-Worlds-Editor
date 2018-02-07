@@ -1,0 +1,20 @@
+
+      sampler2D _VSGrassMap;
+      float4 _VSGrassFade;
+      half4 _VSTint;
+
+
+      // no per tex is faster, just final value.
+      void VSGrassTexture(inout half3 albedo, Config config, float camDist)
+      {
+         #if _VSGRASSMAP
+            half4 tex = tex2D(_VSGrassMap, config.uv);
+            half3 tint = _VSTint.rgb;
+            #ifdef UNITY_COLORSPACE_GAMMA
+            tint = GammaToLinearSpace(_VSTint.rgb);
+            #endif
+            tex *= half4(tint, _VSTint.a) * 2;
+            float fade = saturate((camDist - _VSGrassFade.x) / max(_VSGrassFade.y, 0.01));
+            albedo = lerp(albedo, BlendMult2X(albedo, tex.rgb), saturate(fade * tex.a));
+         #endif
+      }

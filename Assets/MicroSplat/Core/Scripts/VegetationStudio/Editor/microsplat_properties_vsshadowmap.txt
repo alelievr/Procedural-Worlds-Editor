@@ -1,0 +1,4 @@
+
+      _VSShadowMap("VS Shadow Map", 2D) = "black" {}
+      _VSShadowMapOffsetStrength("VS Shadow Offset/Strength", Vector) = (16,0.13,0.4,0.3)
+      //_VSShadowMapFadeScale("VS Fade and UV Scale", Vector) = (50, 150, 1.1, 1.1)

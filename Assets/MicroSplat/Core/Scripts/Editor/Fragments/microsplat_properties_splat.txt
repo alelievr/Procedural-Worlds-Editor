@@ -1,0 +1,9 @@
+      
+
+      // Splats
+      [NoScaleOffset]_Diffuse ("Diffuse Array", 2DArray) = "white" {}
+      [NoScaleOffset]_NormalSAO ("Normal Array", 2DArray) = "bump" {}
+      [NoScaleOffset]_PerTexProps("Per Texture Properties", 2D) = "black" {}
+      _Contrast("Blend Contrast", Range(0.01, 0.99)) = 0.4
+      _UVScale("UV Scales", Vector) = (45, 45, 0, 0)
+

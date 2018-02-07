@@ -1,0 +1,45 @@
+
+      
+      // surface shaders + tessellation, do not pass go, or
+      // collect $500 - sucks it up and realize you can't use
+      // an Input struct, so you have to hack UV coordinates
+      // and live with only the magic keywords..
+      void vert (inout appdata i) 
+      {
+         #if _TRIPLANAR
+         half3 normal  = UnityObjectToWorldNormal(i.normal);
+         float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
+         float3 sgn = sign(normal);
+         half3 tnorm = max(pow(abs(normal), 10), 0.0001);
+         tnorm /= dot(tnorm, half3(1,1,1));
+
+         i.tangent.xyz = cross(i.normal, mul(unity_WorldToObject, fixed4(0, sgn.x, 0, 0)).xyz * tnorm.x)
+                 + cross(i.normal, mul(unity_WorldToObject, fixed4(0, 0, sgn.y, 0)).xyz * tnorm.y)
+                 + cross(i.normal, mul(unity_WorldToObject, fixed4(0, sgn.z, 0, 0)).xyz * tnorm.z);
+         i.tangent.w = -1;
+         #elif !_MICROMESH
+         float4 tangent;
+         tangent.xyz = cross(UnityObjectToWorldNormal( i.normal ), float3(0,0,1));
+         tangent.w = -1;
+         i.tangent = tangent;
+         #endif
+
+         #if _VSSHADOWMAP || _WINDSHADOWS || _SNOWSHADOWS
+         float3 N = mul((float3x3)unity_ObjectToWorld, i.normal);
+         float3 T = mul((float3x3)unity_ObjectToWorld, i.tangent.xyz);
+         float3 B = cross(N,T) * i.tangent.w;
+         float3x3 worldToTangent = float3x3(T,B,N);
+            #if _VSSHADOWMAP
+            i.color.rgb = mul( worldToTangent, gVSSunDirection.xyz ).xyz;
+            #else
+            i.color.rgb = mul( worldToTangent, normalize(_WorldSpaceLightPos0.xyz) ).xyz;
+            #endif
+
+         #endif
+
+      }
+
+
+
+
+   

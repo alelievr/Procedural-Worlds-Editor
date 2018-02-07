@@ -1,0 +1,81 @@
+
+
+      struct SRPInput 
+      {
+         float2 uv_Control0              : TEXCOORD0;
+         float4 lightmapUVOrVertexSH     : TEXCOORD1; // holds either lightmapUV or vertex SH. depending on LIGHTMAP_ON
+         float3 worldPos                 : TEXCOORD2;
+         half3  worldNormal              : TEXCOORD3;
+         half3 tangent                   : TEXCOORD4;
+         half3 binormal                  : TEXCOORD5;
+         half3 viewDir                   : TEXCOORD6;
+         half4 fogFactorAndVertexLight   : TEXCOORD7; // x: fogFactor, yzw: vertex light
+         float4 clipPos                  : SV_POSITION;
+         #if _TERRAINBLENDING || _VSSHADOWMAP || _WINDSHADOWS || _SNOWSHADOWS
+         fixed4 color                    : TEXCOORD8;
+         #endif
+
+         #if _MICROMESH
+         float2 uv2_Diffuse : TEXCOORD9;
+         #endif
+
+      };
+
+      SRPInput LitPassVertex(appdata i)
+      {
+          SRPInput o = (SRPInput)0;
+
+          #if _TRIPLANAR
+            half3 normal  = TransformObjectToWorldNormal(i.normal)
+            float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
+            float3 sgn = sign(normal);
+            half3 tnorm = max(pow(abs(normal), 10), 0.0001);
+            tnorm /= dot(tnorm, half3(1,1,1));
+
+            i.tangent.xyz = cross(i.normal, mul(unity_WorldToObject, fixed4(0, sgn.x, 0, 0)).xyz * tnorm.x)
+                    + cross(i.normal, mul(unity_WorldToObject, fixed4(0, 0, sgn.y, 0)).xyz * tnorm.y)
+                    + cross(i.normal, mul(unity_WorldToObject, fixed4(0, sgn.z, 0, 0)).xyz * tnorm.z);
+            i.tangent.w = -1;
+         #elif !_MICROMESH
+            float4 tangent;
+            tangent.xyz = cross(UnityObjectToWorldNormal( i.normal ), float3(0,0,1));
+            tangent.w = -1;
+            i.tangent = tangent;
+         #endif
+
+
+          o.uv_Control0 = v.texcoord.xy;
+          #if _MICROMESH
+          o.uv2_Diffuse = v.texcoord1.xy;
+          #endif
+
+          o.posWS = TransformObjectToWorld(v.vertex.xyz);
+          o.clipPos = TransformWorldToHClip(o.posWS);
+          o.viewDir = SafeNormalize(_WorldSpaceCameraPos - o.posWS);
+
+          OutputTangentToWorld(i.tangent, i.normal, o.tangent, o.binormal, o.worldNormal);
+          OUTPUT_LIGHTMAP_UV(v.texcoord1, unity_LightmapST, o.lightmapUVOrVertexSH);
+          OUTPUT_SH(o.worldNormal, o.lightmapUVOrVertexSH);
+
+          half3 vertexLight = VertexLighting(o.posWS, o.worldNormal);
+          half fogFactor = ComputeFogFactor(o.clipPos.z);
+          o.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
+
+          #if _VSSHADOWMAP || _WINDSHADOWS || _SNOWSHADOWS
+            float3x3 worldToTangent = float3x3(o.tangent,o.binormal,o.worldNormal);
+            #if _VSSHADOWMAP
+            i.color.rgb = mul( worldToTangent, gVSSunDirection.xyz ).xyz;
+            #else
+            i.color.rgb = mul( worldToTangent, normalize(_WorldSpaceLightPos0.xyz) ).xyz;
+            #endif
+          #endif
+
+          return o;
+      }
+
+
+
+
+
+
+   

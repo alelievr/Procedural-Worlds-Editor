@@ -1,0 +1,65 @@
+
+      sampler2D _VSShadowMap;
+      float4 _VSShadowMap_TexelSize;
+      float4 _VSShadowMapFadeScale;
+      float4 _VSShadowMapOffsetStrength;
+	   float4 gVSSunDirection;
+      float4 gVSSunSettings;
+
+      void VSShadowTexture(inout MicroSplatLayer o, Input i, Config config, float camDist)
+      {
+         #if _VSSHADOWMAP
+            #if _VSSHADOWTAPNONE
+               const int taps = 1;
+            #elif _VSSHADOWTAPLOW
+               const int taps = 4;
+            #elif _VSSHADOWTAPHIGH
+               const int taps = 16;
+            #else
+               const int taps = 8; // medium
+            #endif
+
+            const int maxTreeHeight = 64;
+            // start at light and raycast back
+            // offset the UVs to the end and subdivide the UV offset
+
+            float2 uvOffset = i.color.xy * _VSShadowMap_TexelSize.xy * maxTreeHeight;
+            float2 uv = config.uv + uvOffset;
+            uvOffset /= taps;
+            // we move down/back along the ray
+            float heightStep = (1.0 / (float)taps);
+            float currentHeight = 1;
+            float maxHeight = 0;
+
+
+            // do taps. 
+            float dist = 1;
+            for (int i = 0; i < taps; ++i)
+            {
+               uv -= uvOffset;
+               currentHeight -= heightStep;
+               half4 tex = tex2D(_VSShadowMap, uv);
+               half top = tex.r;
+               half bottom = 0.13; // hard coded min tree hight for now, use tex.g to see issue with dynamic.
+               if (top > currentHeight && bottom < currentHeight)
+               {
+                  maxHeight = 1;
+                  dist = i * heightStep;
+               }
+            }
+
+
+            if (maxHeight > 0)
+            {
+               float fade = saturate((camDist - _VSShadowMapFadeScale.x) / max(_VSShadowMapFadeScale.y, 0.01));
+               half shadow = fade * _VSShadowMapOffsetStrength.z * dist;
+               shadow *= saturate(gVSSunDirection.w);
+               o.Occlusion = saturate(o.Occlusion - shadow);
+               o.Albedo = saturate(o.Albedo - shadow * _VSShadowMapOffsetStrength.w * gVSSunSettings.x * o.Albedo);
+               o.Smoothness = saturate(o.Smoothness - shadow);
+               o.Normal.xy *= (1-shadow);
+            }
+
+
+         #endif
+      }
