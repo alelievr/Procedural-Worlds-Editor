@@ -23,9 +23,10 @@ namespace PW.Editor
 		public virtual void OnGUI()
 		{
 			if (firstGUILoop)
+			{
+				firstGUILoop = false;
 				OnGUIEnable();
-			
-			firstGUILoop = false;
+			}
 		}
 	
 		public virtual void OnDisable()

@@ -112,10 +112,10 @@ namespace PW.Node
 			}
 
 			//Update switchList values:
-			switchList.currentSwitchMode = switchMode;
 			switchList.currentBiomeData = inputBiome;
 			switchList.currentSampler = currentSampler;
 			
+			switchList.UpdateSwitchMode(switchMode);
 			switchList.UpdateBiomeRepartitionPreview();
 		}
 		

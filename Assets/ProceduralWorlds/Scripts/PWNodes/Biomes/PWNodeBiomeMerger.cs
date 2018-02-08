@@ -81,7 +81,7 @@ namespace PW.Node
 
 						if (terrain == null)
 						{
-							Debug.LogError("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
+							PWUtils.LogErrorMax("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")", 100);
 							continue ;
 						}
 

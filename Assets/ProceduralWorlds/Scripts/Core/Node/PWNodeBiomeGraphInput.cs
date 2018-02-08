@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW.Biomator;
+using System;
+using System.Linq;
+using PW.Node;
 
 namespace PW.Core
 {
@@ -52,13 +55,24 @@ namespace PW.Core
 				BiomeUtils.DrawBiomeInfos(rect, outputPartialBiome.biomeDataReference);
 		}
 
+		int calls = 0;
 		public override void OnNodeProcess()
 		{
+			calls++;
 			if (outputPartialBiome != null)
 				return ;
 			
 			if (previewGraph == null)
 				return ;
+			
+			if (calls > 10)
+				return ;
+			
+			Debug.Log("processing graph: " + graphRef + ", name: " + AssetDatabase.GetAssetPath(graphRef));
+		
+			//check if the preview graph have a reference of this graph.
+			if (!previewGraph.FindNodesByType< PWNodeBiome >().Any(b => b.biomeGraph == graphRef))
+				throw new Exception("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
 			
 			//we process the graph to provide the outputPartialBiome
 			//it require that biomeGraph to be contained in the previewGraph.
@@ -68,7 +82,7 @@ namespace PW.Core
 
 			//if the graph we process does not contains an instance of our biome graph
 			if (outputPartialBiome == null)
-				Debug.LogError("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
+				throw new Exception("[PWBiomeGraph] there is a problem with the biome switch graph in (" + previewGraph + ") ");
 		}
 
 	}

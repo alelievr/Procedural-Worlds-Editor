@@ -63,7 +63,7 @@ namespace PW.Node
 
 		void UpdateGraph()
 		{
-			surfaceGraph.BuildGraph(inputSurfaces.GetValues());
+			surfaceGraph.BuildGraph(inputSurfaces.GetValuesWithoutNull());
 		}
 
 		public override void OnNodeProcessOnce()

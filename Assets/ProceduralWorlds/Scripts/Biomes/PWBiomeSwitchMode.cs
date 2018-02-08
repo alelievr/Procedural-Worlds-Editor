@@ -30,5 +30,6 @@ namespace PW.Biomator
 		Custom7,
 		Custom8,
 		Custom9,*/
+		Count
 	}
 }

@@ -106,7 +106,6 @@ namespace PW.Node
 			
 			if (fieldUpdate)
 			{
-				Debug.Log("UPDATE !");
 				delayedChanges.UpdateValue(delayedTemperatureKey);
 				PWGUI.SetUpdateForField(2, true);
 				UpdateTemperatureMap();

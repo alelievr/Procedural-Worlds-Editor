@@ -16,6 +16,7 @@ namespace PW.Biomator
 		public string				name;
 		public float				absoluteMax; //max value in the map
 		public float				absoluteMin; //min value in the map
+		public BiomeSwitchMode		mode;
 		public SerializableColor	color;
 
 		public BiomeSwitchData(Sampler samp)
@@ -209,6 +210,14 @@ namespace PW.Biomator
 			biomeRepartitionPreview.Apply();
 
 			updatePreview = false;
+		}
+
+		public void UpdateSwitchMode(BiomeSwitchMode mode)
+		{
+			this.currentSwitchMode = mode;
+
+			foreach (var switchData in switchDatas)
+				switchData.mode = mode;
 		}
 
 		public BiomeSwitchData this[int index]

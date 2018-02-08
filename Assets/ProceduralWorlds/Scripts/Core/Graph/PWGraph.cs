@@ -149,6 +149,7 @@ namespace PW.Core
 		public bool								initialized = false;
 		[NonSerialized]
 		public bool								readyToProcess = false;
+		public bool								hasProcessed { get { return graphProcessor.hasProcessed; } }
 
 
 		//public delegates:
@@ -549,10 +550,20 @@ namespace PW.Core
 		{
 			return nodes.FirstOrDefault(n => n.GetType() == type);
 		}
+		
+		public List< PWNode >	FindNodesByType(Type type)
+		{
+			return nodes.Where(n => n.GetType() == type).ToList();
+		}
 
 		public T		FindNodeByType< T >() where T : PWNode
 		{
 			return nodes.FirstOrDefault(n => n is T) as T;
+		}
+		
+		public List< T >	FindNodesByType< T >() where T : PWNode
+		{
+			return nodes.Where(n => n is T).Cast< T >().ToList();
 		}
 
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()

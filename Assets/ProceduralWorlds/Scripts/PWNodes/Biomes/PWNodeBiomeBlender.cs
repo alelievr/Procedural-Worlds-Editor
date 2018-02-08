@@ -38,13 +38,19 @@ namespace PW.Node
 				return ;
 		}
 
-		public BiomeData	GetBiomeData()
+		BiomeData	GetBiomeData()
 		{
-			var biomes = inputBiomes.GetValues();
-			var biomeRef = biomes.FirstOrDefault(b => b.biomeDataReference != null);
-			if (biomeRef == null)
+			var partialbiomes = inputBiomes.GetValues();
+			
+			if (partialbiomes.Count == 0)
 				return null;
-			return biomeRef.biomeDataReference;
+			
+			var biomeDataRef = partialbiomes.FirstOrDefault(pb => pb != null && pb.biomeDataReference != null);
+
+			if (biomeDataRef == null)
+				return null;
+
+			return biomeDataRef.biomeDataReference;
 		}
 
 		public override void OnNodeGUI()
@@ -93,12 +99,7 @@ namespace PW.Node
 				return ;
 
 			var partialBiomes = inputBiomes.GetValues();
-			var tmpPartialBiome = partialBiomes.FirstOrDefault(b => b != null && b.biomeDataReference != null);
-
-			if (tmpPartialBiome == null)
-				return ;
-			
-			var biomeData = tmpPartialBiome.biomeDataReference;
+			var biomeData = GetBiomeData();
 
 			if (biomeData == null)
 				return ;
@@ -127,13 +128,13 @@ namespace PW.Node
 						partialBiome.biomeGraph.SetInput(partialBiomes[id]);
 						partialBiome.biomeGraph.Process();
 
-						Biome b = partialBiome.biomeGraph.GetOutput();
-
-						if (b == null)
+						if (!partialBiome.biomeGraph.hasProcessed)
 						{
 							Debug.LogError("[PWBiomeBlender] Can't process properly the biome graph '" + partialBiome.biomeGraph + "'");
 							continue ;
 						}
+
+						Biome b = partialBiome.biomeGraph.GetOutput();
 
 						if (outputBlendedBiomeTerrain.biomes.Contains(b))
 						{
@@ -171,12 +172,7 @@ namespace PW.Node
 		
 		void BuildBiomeTree()
 		{
-			var partialbiomes = inputBiomes.GetValues();
-
-			if (partialbiomes.Count == 0)
-				return ;
-
-			var biomeData = partialbiomes[0].biomeDataReference;
+			BiomeData biomeData = GetBiomeData();
 
 			if (biomeData == null)
 			{

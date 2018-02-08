@@ -24,6 +24,8 @@ namespace PW.Core
 
 		PWGraph						currentGraph;
 
+		public bool					hasProcessed = false;
+
 		#region Initialization
 
 		static object GenericAt(IPWArray array, int index)
@@ -231,18 +233,29 @@ namespace PW.Core
 			bool	realMode = graph.IsRealMode();
 			
 			currentGraph = graph;
+
+			hasProcessed = false;
 		
 			if (graph.GetComputeSortedNodes() == null)
 				graph.UpdateComputeOrder();
 			
-			foreach (var node in graph.GetComputeSortedNodes())
-			{
-				//ignore unlinked nodes
-				if (node.computeOrder < 0)
-					continue ;
-				
-				calculTime += ProcessNode(node, realMode);
+			try {
+				foreach (var node in graph.GetComputeSortedNodes())
+				{
+					//ignore unlinked nodes
+					if (node.computeOrder < 0)
+						continue ;
+					
+					calculTime += ProcessNode(node, realMode);
+				}
+			} catch (Exception e) {
+				Debug.LogError(e);
+				Debug.Log("Stopping graph processing due to an unexpected error");
+				return calculTime;
 			}
+			
+			hasProcessed = true;
+
 			return calculTime;
 		}
 
