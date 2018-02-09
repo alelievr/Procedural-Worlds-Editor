@@ -811,8 +811,8 @@ namespace PW.Core
 				for (int y = 0; y < texSize; y++)
 				{
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
-					var biome1 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
-					var biome2 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.secondBiomeId);
+					var biome1 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.firstBiomeId);
+					var biome2 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.secondBiomeId);
 
 					if (biome1 == null)
 						continue ;

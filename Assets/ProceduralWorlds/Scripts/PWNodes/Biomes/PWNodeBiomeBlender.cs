@@ -80,9 +80,9 @@ namespace PW.Node
 
 			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
 			{
-				if (biomeData != null && biomeData.biomeTree != null)
+				if (biomeData != null && biomeData.biomeSwitchGraph != null)
 				{
-					foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
+					foreach (var biomeCoverageKP in biomeData.biomeSwitchGraph.GetBiomeCoverage())
 						if (biomeCoverageKP.Value > 0)
 							EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
 				}
@@ -105,12 +105,10 @@ namespace PW.Node
 				return ;
 			
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt)
-				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
 			if (!biomeData.biomeSwitchGraph.isBuilt)
 				biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
 
-			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
@@ -149,7 +147,6 @@ namespace PW.Node
 				}
 			}
 
-			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
 			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
 
@@ -167,7 +164,7 @@ namespace PW.Node
 			if (biomeData == null)
 				return ;
 			
-			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
 		
 			updateBiomeMap = true;
 		}
@@ -182,7 +179,7 @@ namespace PW.Node
 				return ;
 			}
 
-			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
+			biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
 		}
 		
 		public override void OnNodeProcessOnce()
@@ -200,7 +197,7 @@ namespace PW.Node
 			}
 
 			//build the biome tree:
-			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
+			biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
 		}
 
 		public override void OnNodeDisable()

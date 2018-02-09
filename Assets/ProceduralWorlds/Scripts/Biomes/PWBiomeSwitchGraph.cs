@@ -6,69 +6,15 @@ using PW.Biomator;
 using PW.Node;
 using System;
 using System.Linq;
+using System.Diagnostics;
+using PW.Biomator.SwitchGraph;
+
+using Debug = UnityEngine.Debug;
 
 namespace PW.Biomator
 {
 	public class BiomeSwitchGraph
 	{
-		public class BiomeSwitchCellParam
-		{
-			public bool			enabled;
-			public float		min;
-			public float		max;
-
-			public BiomeSwitchCellParam(bool enabled = false, float min = 1e20f, float max = -1e20f)
-			{
-				this.enabled = enabled;
-				this.min = min;
-				this.max = max;
-			}
-		}
-
-		public class BiomeSwitchCell
-		{
-			public List< BiomeSwitchCell >	links = new List< BiomeSwitchCell >();
-			public float					weight;
-			public string					name;
-			public Color					color;
-
-			public BiomeSwitchCellParam[]	switchParams;
-
-			public			BiomeSwitchCell()
-			{
-				switchParams = new BiomeSwitchCellParam[(int)BiomeSwitchMode.Count];
-
-				for (int i = 0; i < switchParams.Length; i++)
-					switchParams[i] = new BiomeSwitchCellParam(false);
-			}
-
-			public void		BindBiomeSwitch(BiomeSwitchData switchData)
-			{
-				name = switchData.name;
-				color = switchData.color;
-			}
-
-			public bool		Overlaps(BiomeSwitchCell cell)
-			{
-				for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
-					if (cell.switchParams[i].enabled && switchParams[i].enabled
-						&& !PWUtils.Overlap(switchParams[i].min, switchParams[i].max, cell.switchParams[i].min, cell.switchParams[i].max))
-							return false;
-				return true;
-			}
-
-			public override string ToString()
-			{
-				string s = name + " = ";
-
-				for (int i = 0; i < switchParams.Length; i++)
-					if (switchParams[i].enabled)
-						s += ((BiomeSwitchMode)i + ": " + switchParams[i].min + "->" + switchParams[i].max);
-
-				return s;
-			}
-		}
-
 		public BiomeSwitchCell				rootCell;
 		public BiomeSwitchCell				lastCell;
 		public List< BiomeSwitchCell >		cells = new List< BiomeSwitchCell >();
@@ -77,17 +23,30 @@ namespace PW.Biomator
 		public bool							isBuilt = false;
 
 		[System.NonSerialized]
+		short								biomeIdCount = 0;
+
+		[System.NonSerialized]
+		Dictionary< string, PartialBiome >		partialBiomePerName = new Dictionary< string, PartialBiome >();
+		[System.NonSerialized]
+		Dictionary< short, PartialBiome >		partialBiomePerId = new Dictionary< short, PartialBiome >();
+		[System.NonSerialized]
+		Dictionary< BiomeSwitchMode, float >	biomeCoverage = new Dictionary< BiomeSwitchMode, float >();
+
+		[System.NonSerialized]
 		public Dictionary< BiomeSwitchMode, Vector2 >	paramRanges = new Dictionary< BiomeSwitchMode, Vector2 >();
 
 		public bool BuildGraph(PWNode rootNode)
 		{
-			isBuilt = false;
+			ResetGraph();
 
 			Stack< PWNode > biomeNodes = new Stack< PWNode >();
 
 			biomeNodes.Push(rootNode);
 
 			BiomeSwitchCell currentCell = null;
+
+			//fill param range dictionary (used to compute weights)
+			FillParamRange(rootNode);
 
 			while (biomeNodes.Count > 0)
 			{
@@ -96,22 +55,32 @@ namespace PW.Biomator
 
 				if (nodeType == typeof(PWNodeBiome))
 				{
-					currentCell = new BiomeSwitchCell();
-
 					//get all precedent switch data in the order of the tree (start from rootNode)
 					var precedentSwitchDatas = GetPrecedentSwitchDatas(currentNode, rootNode);
 
-					//get last biomeSwitch and initialize the cell wit it
-					currentCell.BindBiomeSwitch(precedentSwitchDatas.Last());
+					var biomeNode = currentNode as PWNodeBiome;
+					var lastSwitch = precedentSwitchDatas.Last();
+					currentCell = new BiomeSwitchCell();
+					
+					//Set cell and partial biome remaining empty params
+					currentCell.name = biomeNode.outputBiome.name = lastSwitch.name;
+					currentCell.id = biomeNode.outputBiome.id = biomeIdCount++;
+					currentCell.color = biomeNode.outputBiome.previewColor = lastSwitch.color;
+					currentCell.weight = currentCell.GetWeight(paramRanges);
+
+					//add the partial biome to utility dic accessors:
+					partialBiomePerName[currentCell.name] = biomeNode.outputBiome;
+					partialBiomePerId[currentCell.id] = biomeNode.outputBiome;
 
 					//load all access condition for this biome switch
 					foreach (var sd in precedentSwitchDatas)
 					{
-						var param = currentCell.switchParams[(int)sd.mode];
+						var param = currentCell.switchParams[sd.mode];
 
 						param.enabled = true;
 						param.min = sd.min;
 						param.max = sd.max;
+						biomeCoverage[sd.mode] += (sd.max - sd.min) / (sd.absoluteMax - sd.absoluteMin);
 					}
 				}
 				else if (nodeType == typeof(PWNodeBiomeBlender))
@@ -128,33 +97,9 @@ namespace PW.Biomator
 					biomeNodes.Push(outputNode);
 			}
 
-			//fill param range dictionary (used to compute weights)
-			FillParamRange(rootNode);
+			//Generate links between all linkable nodes
+			BuildLinks();
 			
-			foreach (var cell1 in cells)
-			{
-				foreach (var cell2 in cells)
-				{
-					if (cell1 == cell2)
-						continue ;
-					
-					if (cell1.Overlaps(cell2))
-						AddLink(cell1, cell2);
-				}
-
-				cell1.links.Sort((c1, c2) => {
-					//reverse sort:
-					return c2.weight.CompareTo(c1.weight);
-				});
-			}
-
-			foreach (var cell in cells)
-			{
-				Debug.Log("Cell: " + cell);
-				foreach (var l in cell.links)
-					Debug.Log("	link: " + l);
-			}
-
 			rootCell = cells.First();
 
 			if (!CheckValid())
@@ -163,6 +108,20 @@ namespace PW.Biomator
 			isBuilt = true;
 
 			return true;
+		}
+
+		void ResetGraph()
+		{
+			isBuilt = false;
+			biomeIdCount = 0;
+
+			cells.Clear();
+			partialBiomePerId.Clear();
+			partialBiomePerName.Clear();
+			paramRanges.Clear();
+
+			for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
+				biomeCoverage[(BiomeSwitchMode)i] = 0;
 		}
 
 		void FillParamRange(PWNode rootNode)
@@ -216,7 +175,9 @@ namespace PW.Biomator
 							//aquatic		-> 1
 
 							int anchorIndex = link.fromAnchor.fieldIndex;
-							precedentSwitchDatas.Add(new BiomeSwitchData(){min = anchorIndex, max = anchorIndex});
+							var waterBiomeSwitchData = new BiomeSwitchData(){min = anchorIndex - .5f, max = anchorIndex + .5f, absoluteMin = -.5f, absoluteMax = 1.5f};
+							waterBiomeSwitchData.color = (SerializableColor)((anchorIndex == 0) ? Color.red : Color.blue);
+							precedentSwitchDatas.Add(waterBiomeSwitchData);
 						}
 				}
 				else
@@ -235,10 +196,29 @@ namespace PW.Biomator
 			return precedentSwitchDatas;
 		}
 
-		void AddLink(BiomeSwitchCell cell1, BiomeSwitchCell cell2)
+		void BuildLinks()
 		{
-			if (!cell1.links.Any(c1 => c1 == cell2))
-				cell1.links.Add(cell2);
+			foreach (var cell1 in cells)
+			{
+				foreach (var cell2 in cells)
+				{
+					if (cell1 == cell2)
+						continue ;
+					
+					bool b = (cell1.Overlaps(cell2));
+
+					if (b)
+					{
+						if (!cell1.links.Any(c1 => c1 == cell2))
+							cell1.links.Add(cell2);
+					}
+				}
+
+				cell1.links.Sort((c1, c2) => {
+					//reverse sort:
+					return c2.weight.CompareTo(c1.weight);
+				});
+			}
 		}
 
 		bool CheckValid()
@@ -267,5 +247,151 @@ namespace PW.Biomator
 			return false;
 		}
 
+		BiomeSwitchCell		CheckForBetterCell(BiomeSwitchCell cell, BiomeSwitchValues values)
+		{
+			foreach (var link in cell.links)
+				if (link.Matches(values))
+					return link;
+			
+			return null;
+		}
+
+		BiomeSwitchCell		FindBestCell(BiomeSwitchCell cell, BiomeSwitchValues values)
+		{
+			BiomeSwitchCell	bestCell = null;
+			float			minGap = 1e20f;
+
+			foreach (var link in cell.links)
+			{
+				if (link.Matches(values))
+					return link;
+				
+				float gap = link.GapWidth(cell);
+				if (gap > 0 && gap < minGap)
+				{
+					minGap = gap;
+					bestCell = link;
+				}
+			}
+
+			return bestCell;
+		}
+
+		public BiomeSwitchCell	FindBiome(BiomeSwitchValues values)
+		{
+			BiomeSwitchCell currentCell = (lastCell == null) ? rootCell : lastCell;
+
+			if (!isBuilt || currentCell == null)
+				return null;
+			
+			int maxSearchDepth = 100;
+			int	i = 0;
+			
+
+			while (true)
+			{
+				if (i > maxSearchDepth)
+				{
+					Debug.LogError("[BiomeSurfaceGraph] Infinite loop detected, exiting ...");
+					return null;
+				}
+				
+				i++;
+				if (currentCell.Matches(values))
+				{
+					//try to find a better link
+					var betterCell = CheckForBetterCell(currentCell, values);
+					
+					//if there is nothing better, we've the solution
+					if (betterCell == null)
+					{
+						lastCell = currentCell;
+						return currentCell;
+					}
+					else
+						currentCell = betterCell;
+					
+					continue ;
+				}
+				else
+				{
+					//find the best link to take to get near from the node we look for
+					currentCell = FindBestCell(currentCell, values);
+
+					if (currentCell == null)
+						return null;
+				}
+			}
+		}
+
+		public void FillBiomeMap(BiomeData biomeData)
+		{
+			biomeData.ids.Clear();
+
+			int		terrainSize = biomeData.terrainRef.size;
+			var		biomeSwitchValues = new BiomeSwitchValues();
+
+			var		waterHeight = biomeData.waterHeight;
+			var		terrainHeight = biomeData.terrain;
+			var		temperature = biomeData.temperature;
+			var		wetness = biomeData.wetness;
+			
+			biomeData.biomeIds = new BiomeMap2D(terrainHeight.size, terrainHeight.step);
+
+			Stopwatch sw = new Stopwatch();
+
+			sw.Start();
+
+			for (int x = 0; x < terrainSize; x++)
+				for (int y = 0; y < terrainSize; y++)
+				{
+					biomeSwitchValues[BiomeSwitchMode.Water] = (waterHeight != null && waterHeight[x, y] > 0) ? 1 : 0;
+					biomeSwitchValues[BiomeSwitchMode.Height] = (terrainHeight != null) ? terrainHeight[x, y] : 0;
+					biomeSwitchValues[BiomeSwitchMode.Temperature] = (temperature != null) ? temperature[x, y] : 0;
+					biomeSwitchValues[BiomeSwitchMode.Wetness] = (wetness != null) ? wetness[x, y] : 0;
+
+					var		biomeSwicthCell = FindBiome(biomeSwitchValues);
+					short	biomeId = biomeSwicthCell.id;
+
+					//TODO: optimize this with a dictionary, it's way too slow
+					if (!biomeData.ids.Contains(biomeId))
+						biomeData.ids.Add(biomeId);
+					
+					biomeData.biomeIds.SetFirstBiomeId(x, y, biomeId);
+				}
+			
+			sw.Stop();
+
+			Debug.Log("Graph build time: " + sw.ElapsedMilliseconds);
+		}
+
+		public int GetBiomeCount()
+		{
+			return cells.Count;
+		}
+
+		public PartialBiome GetBiome(string name)
+		{
+			PartialBiome	ret;
+
+			partialBiomePerName.TryGetValue(name, out ret);
+
+			return ret;
+		}
+
+		public PartialBiome GetBiome(short id)
+		{
+			PartialBiome	ret;
+
+			partialBiomePerId.TryGetValue(id, out ret);
+
+			return ret;
+		}
+
+		public Dictionary< BiomeSwitchMode, float > GetBiomeCoverage()
+		{
+			return biomeCoverage;
+		}
+	
 	}
 }
