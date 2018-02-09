@@ -43,6 +43,7 @@ namespace PW.Node
 
 			outputBiome.isWaterless = false;
 			outputBiome.biomeTreeStartPoint = this;
+			outputBiome.biomeSwitchGraphStartPoint = this;
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => {
 				NotifyReload();

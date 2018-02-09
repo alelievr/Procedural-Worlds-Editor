@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace PW.Biomator
 {
-	public class PWBiomeSwitchGraph
+	public class BiomeSwitchGraph
 	{
 		public class BiomeSwitchCellParam
 		{
@@ -17,7 +17,7 @@ namespace PW.Biomator
 			public float		min;
 			public float		max;
 
-			public BiomeSwitchCellParam(bool enabled = false, float min = 0, float max = 0)
+			public BiomeSwitchCellParam(bool enabled = false, float min = 1e20f, float max = -1e20f)
 			{
 				this.enabled = enabled;
 				this.min = min;
@@ -48,17 +48,22 @@ namespace PW.Biomator
 				color = switchData.color;
 			}
 
-			/*public bool		Overlaps(BiomeSwitchCell cell)
+			public bool		Overlaps(BiomeSwitchCell cell)
 			{
-
-			}*/
+				for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
+					if (cell.switchParams[i].enabled && switchParams[i].enabled
+						&& !PWUtils.Overlap(switchParams[i].min, switchParams[i].max, cell.switchParams[i].min, cell.switchParams[i].max))
+							return false;
+				return true;
+			}
 
 			public override string ToString()
 			{
 				string s = name + " = ";
 
 				for (int i = 0; i < switchParams.Length; i++)
-					s += ((BiomeSwitchMode)i + ": " + switchParams[i].min + "->" + switchParams[i].max);
+					if (switchParams[i].enabled)
+						s += ((BiomeSwitchMode)i + ": " + switchParams[i].min + "->" + switchParams[i].max);
 
 				return s;
 			}
@@ -102,8 +107,11 @@ namespace PW.Biomator
 					//load all access condition for this biome switch
 					foreach (var sd in precedentSwitchDatas)
 					{
-						var param = new BiomeSwitchCellParam{enabled = false, min = 0, max = 0};
-						currentCell.switchParams[(int)sd.mode] = param;
+						var param = currentCell.switchParams[(int)sd.mode];
+
+						param.enabled = true;
+						param.min = sd.min;
+						param.max = sd.max;
 					}
 				}
 				else if (nodeType == typeof(PWNodeBiomeBlender))
@@ -120,32 +128,13 @@ namespace PW.Biomator
 					biomeNodes.Push(outputNode);
 			}
 
-			foreach (var cell in cells)
-				Debug.Log(cell);
-			
-			/*
 			//fill param range dictionary (used to compute weights)
-			foreach (var switchList in switchDatasList)
-			{
-				if (switchList.Count == 0)
-					continue ;
-				
-				var firstSwitch = switchList.switchDatas.First();
-
-				paramRanges[switchList.currentSwitchMode] = new Vector2(firstSwitch.absoluteMin, firstSwitch.absoluteMax);
-				
-				foreach (var switchData in switchList.switchDatas)
-					bSwitchMap[switchData] = new BiomeSwitchCell(switchList.currentSwitchMode);
-			}
+			FillParamRange(rootNode);
 			
-			foreach (var cell1KP in bSwitchMap)
+			foreach (var cell1 in cells)
 			{
-				var cell1 = cell1KP.Value;
-
-				foreach (var cell2KP in bSwitchMap)
+				foreach (var cell2 in cells)
 				{
-					var cell2 = cell2KP.Value;
-
 					if (cell1 == cell2)
 						continue ;
 					
@@ -157,18 +146,49 @@ namespace PW.Biomator
 					//reverse sort:
 					return c2.weight.CompareTo(c1.weight);
 				});
+			}
 
-				cells.Add(cell1);
-			}*/
+			foreach (var cell in cells)
+			{
+				Debug.Log("Cell: " + cell);
+				foreach (var l in cell.links)
+					Debug.Log("	link: " + l);
+			}
+
+			rootCell = cells.First();
 
 			if (!CheckValid())
 				return false;
 
-			rootCell = cells.First();
-
 			isBuilt = true;
 
 			return true;
+		}
+
+		void FillParamRange(PWNode rootNode)
+		{
+			Stack< PWNode >	currentNodes = new Stack< PWNode >();
+			PWNode			currentNode = rootNode;
+
+			while (currentNodes.Count > 0)
+			{
+				currentNode = currentNodes.Pop();
+				
+				foreach (var outputNode in currentNode.GetOutputNodes())
+					currentNodes.Push(outputNode);
+
+				if (!(currentNode is PWNodeBiomeSwitch))
+					continue ;
+
+				var switchList = (currentNode as PWNodeBiomeSwitch).switchList;
+
+				var firstSwitch = switchList.switchDatas.First();
+
+				Vector2 currentRange = paramRanges[switchList.currentSwitchMode];
+				currentRange.x = Mathf.Min(currentRange.x, firstSwitch.absoluteMin);
+				currentRange.y = Mathf.Max(currentRange.y, firstSwitch.absoluteMax);
+				paramRanges[switchList.currentSwitchMode] = currentRange;
+			}
 		}
 
 		List< BiomeSwitchData > GetPrecedentSwitchDatas(PWNode currentNode, PWNode rootNode)
@@ -183,12 +203,31 @@ namespace PW.Biomator
 				if (n.GetType() != typeof(PWNodeBiomeSwitch))
 					break ;
 				
-				int index = n.GetOutputNodes().ToList().FindIndex(c => c == prevNode);
-
-				if (index == -1)
-					throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
+				var switches = (n as PWNodeBiomeSwitch).switchList;
 				
-				precedentSwitchDatas.Add((n as PWNodeBiomeSwitch).switchList[index]);
+				if (switches.currentSwitchMode == BiomeSwitchMode.Water)
+				{
+					var outputLinks = n.GetOutputLinks();
+
+					foreach (var link in outputLinks)
+						if (link.toNode == prevNode)
+						{
+							//terrestrial	-> 0
+							//aquatic		-> 1
+
+							int anchorIndex = link.fromAnchor.fieldIndex;
+							precedentSwitchDatas.Add(new BiomeSwitchData(){min = anchorIndex, max = anchorIndex});
+						}
+				}
+				else
+				{
+					int index = n.GetOutputNodes().ToList().FindIndex(c => c == prevNode);
+	
+					if (index == -1)
+						throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
+					
+					precedentSwitchDatas.Add(switches[index]);
+				}
 			}
 
 			precedentSwitchDatas.Reverse();

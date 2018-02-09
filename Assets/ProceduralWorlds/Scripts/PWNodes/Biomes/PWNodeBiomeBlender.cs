@@ -107,6 +107,8 @@ namespace PW.Node
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeTree.isBuilt)
 				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
+			if (!biomeData.biomeSwitchGraph.isBuilt)
+				biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
 
 			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
 

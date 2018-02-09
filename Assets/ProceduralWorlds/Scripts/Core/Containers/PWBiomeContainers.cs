@@ -163,7 +163,9 @@ namespace PW.Biomator
 	public class BiomeData
 	{
 		public BiomeSwitchTree		biomeTree;
+		public BiomeSwitchGraph		biomeSwitchGraph;
 		public PWNode				biomeTreeStartPoint;
+		public PWNode				biomeSwitchGraphStartPoint;
 
 		public bool					isWaterless;
 
@@ -226,6 +228,7 @@ namespace PW.Biomator
 		public BiomeData()
 		{
 			biomeTree = new BiomeSwitchTree();
+			biomeSwitchGraph = new BiomeSwitchGraph();
 			datas = new Sampler2D[9];
 			datas3D = new Sampler3D[9];
 			isWaterless = true;

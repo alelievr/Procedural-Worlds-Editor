@@ -62,6 +62,7 @@ namespace PW.Node
 
 			outputBiome.isWaterless = true;
 			outputBiome.biomeTreeStartPoint = this;
+			outputBiome.biomeSwitchGraphStartPoint = this;
 		}
 
 		public override void OnNodeProcess()

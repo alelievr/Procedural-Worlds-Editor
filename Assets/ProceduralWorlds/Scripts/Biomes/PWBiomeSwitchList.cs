@@ -25,7 +25,8 @@ namespace PW.Biomator
 			name = "swampland";
 			min = 70;
 			max = 90;
-			color = (SerializableColor)new Color(0.196f, 0.804f, 0.196f, 1);
+			var rand = new System.Random();
+			color = (SerializableColor)new Color((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble());
 		}
 
 		public void UpdateSampler(Sampler samp)
@@ -41,7 +42,7 @@ namespace PW.Biomator
 	}
 
 	[System.Serializable]
-	public class BiomeSwitchList
+	public class BiomeSwitchList : IEnumerable< BiomeSwitchData >
 	{
 		public List< BiomeSwitchData >		switchDatas = new List< BiomeSwitchData >();
 
@@ -218,6 +219,17 @@ namespace PW.Biomator
 
 			foreach (var switchData in switchDatas)
 				switchData.mode = mode;
+		}
+
+		IEnumerator< BiomeSwitchData > IEnumerable< BiomeSwitchData >.GetEnumerator()
+		{
+			foreach (var sw in switchDatas)
+				yield return sw;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			yield return switchDatas;
 		}
 
 		public BiomeSwitchData this[int index]
