@@ -161,7 +161,6 @@ namespace PW.Node
 		}
 
 		//no process needed else than assignation, this node only exists for user visual organization.
-		//switch values are collected form BiomeSwitchTree to create a biome tree.
 
 		void AdjustOutputBiomeArraySize()
 		{
