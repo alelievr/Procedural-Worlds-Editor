@@ -76,10 +76,10 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 				Vector4 biomeInfo = Vector4.zero;
 				var biomePoint = biomes.GetBiomeBlendInfo(x, z);
 
-				biomeInfo.x = biomePoint.firstBiomeId;
-				biomeInfo.y = biomePoint.firstBiomeBlendPercent;
-				biomeInfo.z = biomePoint.secondBiomeId;
-				biomeInfo.w = biomePoint.secondBiomeBlendPercent;
+				// biomeInfo.x = biomePoint.firstBiomeId;
+				// biomeInfo.y = biomePoint.firstBiomeBlendPercent;
+				// biomeInfo.z = biomePoint.secondBiomeId;
+				// biomeInfo.w = biomePoint.secondBiomeBlendPercent;
 				blendInfos.Add(biomeInfo);
 			}
 		topDownTerrainMesh.SetUVs(1, blendInfos);

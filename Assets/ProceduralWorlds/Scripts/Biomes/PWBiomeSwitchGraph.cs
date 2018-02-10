@@ -114,6 +114,8 @@ namespace PW.Biomator
 		{
 			isBuilt = false;
 			biomeIdCount = 0;
+			rootCell = null;
+			lastCell = null;
 
 			cells.Clear();
 			partialBiomePerId.Clear();
@@ -205,7 +207,7 @@ namespace PW.Biomator
 					if (cell1 == cell2)
 						continue ;
 					
-					bool b = (cell1.Overlaps(cell2));
+					bool b = (cell1.Overlaps(cell2.switchParams));
 
 					if (b)
 					{
@@ -251,7 +253,8 @@ namespace PW.Biomator
 		{
 			foreach (var link in cell.links)
 				if (link.Matches(values))
-					return link;
+					if (link.weight < cell.weight)
+						return link;
 			
 			return null;
 		}
@@ -324,7 +327,7 @@ namespace PW.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData)
+		public void FillBiomeMap(BiomeData biomeData, float blendPercent = 10f)
 		{
 			biomeData.ids.Clear();
 
@@ -336,11 +339,14 @@ namespace PW.Biomator
 			var		temperature = biomeData.temperature;
 			var		wetness = biomeData.wetness;
 			
-			biomeData.biomeIds = new BiomeMap2D(terrainHeight.size, terrainHeight.step);
+			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrainHeight.size, terrainHeight.step))
+				biomeData.biomeMap = new BiomeMap2D(terrainHeight.size, terrainHeight.step);
 
 			Stopwatch sw = new Stopwatch();
 
 			sw.Start();
+
+			var blendParams = new BiomeSwitchCellParams();
 
 			for (int x = 0; x < terrainSize; x++)
 				for (int y = 0; y < terrainSize; y++)
@@ -350,19 +356,24 @@ namespace PW.Biomator
 					biomeSwitchValues[BiomeSwitchMode.Temperature] = (temperature != null) ? temperature[x, y] : 0;
 					biomeSwitchValues[BiomeSwitchMode.Wetness] = (wetness != null) ? wetness[x, y] : 0;
 
-					var		biomeSwicthCell = FindBiome(biomeSwitchValues);
-					short	biomeId = biomeSwicthCell.id;
+					blendParams.ImportValues(biomeSwitchValues, blendPercent);
 
-					//TODO: optimize this with a dictionary, it's way too slow
+					var		biomeSwitchCell = FindBiome(biomeSwitchValues);
+					short	biomeId = biomeSwitchCell.id;
+
 					if (!biomeData.ids.Contains(biomeId))
 						biomeData.ids.Add(biomeId);
 					
-					biomeData.biomeIds.SetFirstBiomeId(x, y, biomeId);
+					biomeData.biomeMap.SetPrimaryBiomeId(x, y, biomeId);
+
+					foreach (var link in biomeSwitchCell.links)
+						if (link.Overlaps(blendParams))
+							biomeData.biomeMap.AddBiome(x, y, link.id, 0);
 				}
 			
 			sw.Stop();
 
-			Debug.Log("Graph build time: " + sw.ElapsedMilliseconds);
+			Debug.Log("Graph build time: " + sw.Elapsed.Milliseconds);
 		}
 
 		public int GetBiomeCount()

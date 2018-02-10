@@ -69,7 +69,7 @@ namespace PW.Node
 
 			if (finalTerrain.type == SamplerType.Sampler2D)
 			{
-				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeIds;
+				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeMap;
 
 				(finalTerrain as Sampler2D).Foreach((x, y, val) => {
 					float ret = 0;
@@ -85,10 +85,10 @@ namespace PW.Node
 							continue ;
 						}
 
-						if (biome.id == biomeInfo.firstBiomeId)
-							ret += terrain[x, y] * biomeInfo.firstBiomeBlendPercent;
-						else if (biome.id == biomeInfo.secondBiomeId)
-							ret += terrain[x, y] * biomeInfo.secondBiomeBlendPercent;
+						//TODO: test this blending !
+						for (int i = 0; i < biomeInfo.length; i++)
+							if (biomeInfo.biomeIds[i] == biome.id)
+								ret += terrain[x, y] * biomeInfo.biomeBlends[i] / biomeInfo.totalBlend;
 					}
 
 					return ret;

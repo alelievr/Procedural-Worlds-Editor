@@ -38,6 +38,11 @@ namespace PW.Node
 				return ;
 		}
 
+		public override void OnNodeDisable()
+		{
+			OnReload -= OnReloadCallback;
+		}
+
 		BiomeData	GetBiomeData()
 		{
 			var partialbiomes = inputBiomes.GetValues();
@@ -68,7 +73,7 @@ namespace PW.Node
 
 			if (biomeData != null)
 			{
-				if (biomeData.biomeIds != null)
+				if (biomeData.biomeMap != null)
 					PWGUI.BiomeMap2DPreview(biomeData);
 				//TODO: biome 3D preview
 			}
@@ -91,6 +96,17 @@ namespace PW.Node
 			}
 
 			updateBiomeMap = false;
+		}
+		
+		public override void OnNodeProcessOnce()
+		{
+			var partialBiomes = inputBiomes.GetValues();
+			var biomeData = partialBiomes[0].biomeDataReference;
+
+			foreach (var partialBiome in partialBiomes)
+				partialBiome.biomeGraph.ProcessOnce();
+
+			BuildBiomeSwitchGraph();
 		}
 
 		public override void OnNodeProcess()
@@ -152,24 +168,19 @@ namespace PW.Node
 
 		void OnReloadCallback(PWNode from)
 		{
-			BuildBiomeTree();
+			BuildBiomeSwitchGraph();
 			
-			var tmpPartialBiome = inputBiomes.GetValues().FirstOrDefault(b => b != null && b.biomeDataReference != null);
-
-			if (tmpPartialBiome == null)
-				return ;
+			var biomeData = GetBiomeData();
 			
-			var biomeData = tmpPartialBiome.biomeDataReference;
-
-			if (biomeData == null)
-				return ;
-			
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
-		
-			updateBiomeMap = true;
+			//if the reload does not comes from the editor
+			if (from != null)
+			{
+				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
+				updateBiomeMap = true;
+			}
 		}
 		
-		void BuildBiomeTree()
+		void BuildBiomeSwitchGraph()
 		{
 			BiomeData biomeData = GetBiomeData();
 
@@ -180,29 +191,6 @@ namespace PW.Node
 			}
 
 			biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
-		}
-		
-		public override void OnNodeProcessOnce()
-		{
-			var partialBiomes = inputBiomes.GetValues();
-			var biomeData = partialBiomes[0].biomeDataReference;
-
-			foreach (var partialBiome in partialBiomes)
-				partialBiome.biomeGraph.ProcessOnce();
-
-			if (biomeData == null)
-			{
-				Debug.LogWarning("Can't build the biome albedo map, need to access to Biome datas !");
-				return ;
-			}
-
-			//build the biome tree:
-			biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
-		}
-
-		public override void OnNodeDisable()
-		{
-			OnReload -= OnReloadCallback;
 		}
 	}
 }

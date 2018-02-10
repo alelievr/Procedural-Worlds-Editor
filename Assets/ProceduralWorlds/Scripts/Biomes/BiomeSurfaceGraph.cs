@@ -63,6 +63,7 @@ namespace PW.Biomator
 				bSwitchCellMap[bSwitch] = new BiomeSurfaceCell();
 			
 			cells.Clear();
+			lastCell = null;
 
 			foreach (var bSwitch in surfacesSwitches)
 			{

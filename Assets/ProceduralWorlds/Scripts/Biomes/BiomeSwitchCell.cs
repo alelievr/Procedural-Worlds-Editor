@@ -15,11 +15,11 @@ namespace PW.Biomator.SwitchGraph
 
 		public BiomeSwitchCellParams	switchParams = new BiomeSwitchCellParams();
 
-		public bool		Overlaps(BiomeSwitchCell cell)
+		public bool		Overlaps(BiomeSwitchCellParams cellParams)
 		{
 			for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
-				if (cell.switchParams[i].enabled && switchParams[i].enabled
-					&& !PWUtils.Overlap(switchParams[i].min, switchParams[i].max, cell.switchParams[i].min, cell.switchParams[i].max))
+				if (cellParams[i].enabled && switchParams[i].enabled
+					&& !PWUtils.Overlap(switchParams[i].min, switchParams[i].max, cellParams[i].min, cellParams[i].max))
 						return false;
 			return true;
 		}

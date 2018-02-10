@@ -57,16 +57,45 @@ namespace PW.Biomator
 
 	public struct BiomeBlendPoint
 	{
-		public short	firstBiomeId;
-		public short	secondBiomeId;
-        public float	firstBiomeBlendPercent;
-        public float	secondBiomeBlendPercent;
+		public int		length;
+		public float	totalBlend;
+
+		public short[]	biomeIds;
+		public float[]	biomeBlends;
+
+		public short	firstBiomeId { get { return biomeIds[0]; } }
+		public float	firstBiomePercent { get { return biomeBlends[0]; } }
+
+		public void		SetBlendPoint(short id, float blend, int index = -1)
+		{
+			if (index == -1)
+				index = length;
+			
+			if (index == 0)
+			{
+				length = 0;
+				totalBlend = 0;
+			}
+			
+			//if there is too many biome to blend, discard
+			if (index > biomeIds.Length)
+				return ;
+			
+			biomeIds[index] = id;
+			biomeBlends[index] = blend;
+
+			totalBlend += blend;
+			
+			length++;
+		}
     }
 
 	public class BiomeMap2D : Sampler
 	{
 		public bool			init = false;
 		BiomeBlendPoint[]	blendMap;
+
+		readonly int		maxBiomeBlend = 4;
 
 		public BiomeMap2D(int size, float step)
 		{
@@ -79,14 +108,26 @@ namespace PW.Biomator
 			this.size = size;
 			blendMap = new BiomeBlendPoint[size * size];
 			this.step = (step == -1) ? this.step : step;
+			
+			for (int i = 0; i < blendMap.Length; i++)
+			{
+				blendMap[i].biomeIds = new short[maxBiomeBlend];
+				blendMap[i].biomeBlends = new float[maxBiomeBlend];
+			}
 		}
 		
-		public void SetFirstBiomeId(int x, int y, short id)
+		public void SetPrimaryBiomeId(int x, int y, short id)
 		{
 			int		i = x + y * size;
-			blendMap[i].firstBiomeId = id;
-			blendMap[i].firstBiomeBlendPercent = 1;
-			//TODO: blending here
+
+			blendMap[i].SetBlendPoint(id, 1, 0);
+		}
+
+		public void AddBiome(int x, int y, short id, float blend)
+		{
+			int i = x + y * size;
+
+			blendMap[i].SetBlendPoint(id, blend);
 		}
 
 		public BiomeBlendPoint	GetBiomeBlendInfo(int x, int y)
@@ -170,8 +211,8 @@ namespace PW.Biomator
 		public bool					isWaterless;
 
 		//biome disosition maps (can be 2D or 3D)
-		public BiomeMap2D			biomeIds;
-		public BiomeMap3D			biomeIds3D;
+		public BiomeMap2D			biomeMap;
+		public BiomeMap3D			biomeMap3D;
 
 		public float				waterLevel;
 		public Sampler2D			waterHeight;
@@ -351,7 +392,7 @@ namespace PW.Biomator
 
 	public class BlendedBiomeTerrain
 	{
-		public BiomeSwitchTree		biomeTree;
+		public BiomeSwitchGraph		biomeSwitchGraph;
 		public BiomeData			biomeData;
 
 		public List< Biome >		biomes = new List< Biome >();

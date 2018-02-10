@@ -131,19 +131,17 @@ namespace PW
 		//send reload event to all node of the specified type
 		public void NotifyReload(Type targetType)
 		{
-			var nodes = from node in graphRef.nodes
-						where node.GetType() == targetType
-						select node;
+			var nodes = graphRef.FindNodesByType(targetType);
 			
 			foreach (var node in nodes)
 				node.Reload(this);
 		}
 
-		//send reload to all nodes with a computeOrder smaller than minComputeOrder.
+		//send reload to all nodes with a computeOrder bigger than minComputeOrder
 		public void NotifyReload(int minComputeOrder)
 		{
 			var nodes = from node in graphRef.nodes
-						where node.computeOrder >= minComputeOrder
+						where node.computeOrder > minComputeOrder
 						select node;
 
 			foreach (var node in nodes)

@@ -79,7 +79,7 @@ namespace PW.Biomator
             reprderableSwitchDataList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 			{
 				BiomeSwitchData elem = switchDatas[index];
-				
+
                 rect.y += 2;
 				int		floatFieldSize = 70;
 				int		colorFieldSize = 20;
@@ -113,6 +113,8 @@ namespace PW.Biomator
 					updatePreview = true;
 				}
 				EditorGUIUtility.labelWidth = 0;
+				
+				elem.UpdateSampler(currentSampler);
 
 				switchDatas[index] = elem;
             };

@@ -768,12 +768,12 @@ namespace PW.Core
 
 		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool settings = true, bool debug = true)
 		{
-			if (biomeData.biomeIds == null)
+			if (biomeData.biomeMap == null)
 			{
 				Debug.Log("biomeData does not contains biome map 2D");
 				return ;
 			}
-			int texSize = biomeData.biomeIds.size;
+			int texSize = biomeData.biomeMap.size;
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.BiomeMapPreview, () => {
 				var state = new PWGUISettings();
 				state.filterMode = FilterMode.Point;
@@ -801,7 +801,7 @@ namespace PW.Core
 			if (fieldSettings.biomeData == null || fieldSettings.texture == null)
 				return ;
 			
-			var map = fieldSettings.biomeData.biomeIds;
+			var map = fieldSettings.biomeData.biomeMap;
 			int texSize = map.size;
 			
 			if (texSize != fieldSettings.texture.width)
@@ -812,15 +812,17 @@ namespace PW.Core
 				{
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
 					var biome1 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.firstBiomeId);
-					var biome2 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.secondBiomeId);
+					// var biome2 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.secondBiomeId);
 
 					if (biome1 == null)
 						continue ;
 					
 					Color firstBiomeColor = biome1.previewColor;
-					Color secondBiomeColor = biome2.previewColor;
+					// Color secondBiomeColor = biome2.previewColor;
 
-					Color pixel = firstBiomeColor * blendInfo.firstBiomeBlendPercent + secondBiomeColor * blendInfo.secondBiomeBlendPercent;
+					//TODO: biome color blending
+					
+					Color pixel = firstBiomeColor;// * blendInfo.firstBiomeBlendPercent + secondBiomeColor * blendInfo.secondBiomeBlendPercent;
 					pixel.a = 1;
 
 					fieldSettings.texture.SetPixel(x, y, pixel);
