@@ -13,6 +13,8 @@ using Debug = UnityEngine.Debug;
 
 namespace PW.Biomator
 {
+	public class BiomeParamRange : Dictionary< BiomeSwitchMode, Vector2 > {}
+
 	public class BiomeSwitchGraph
 	{
 		public BiomeSwitchCell				rootCell;
@@ -33,7 +35,7 @@ namespace PW.Biomator
 		Dictionary< BiomeSwitchMode, float >	biomeCoverage = new Dictionary< BiomeSwitchMode, float >();
 
 		[System.NonSerialized]
-		public Dictionary< BiomeSwitchMode, Vector2 >	paramRanges = new Dictionary< BiomeSwitchMode, Vector2 >();
+		public BiomeParamRange				paramRanges = new BiomeParamRange();
 
 		public bool BuildGraph(PWNode rootNode)
 		{
@@ -129,7 +131,9 @@ namespace PW.Biomator
 		void FillParamRange(PWNode rootNode)
 		{
 			Stack< PWNode >	currentNodes = new Stack< PWNode >();
-			PWNode			currentNode = rootNode;
+			PWNode			currentNode;
+
+			currentNodes.Push(rootNode);
 
 			while (currentNodes.Count > 0)
 			{
@@ -145,7 +149,8 @@ namespace PW.Biomator
 
 				var firstSwitch = switchList.switchDatas.First();
 
-				Vector2 currentRange = paramRanges[switchList.currentSwitchMode];
+				Vector2 currentRange;
+				paramRanges.TryGetValue(switchList.currentSwitchMode, out currentRange);
 				currentRange.x = Mathf.Min(currentRange.x, firstSwitch.absoluteMin);
 				currentRange.y = Mathf.Max(currentRange.y, firstSwitch.absoluteMax);
 				paramRanges[switchList.currentSwitchMode] = currentRange;
@@ -327,7 +332,7 @@ namespace PW.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData, float blendPercent = 10f)
+		public void FillBiomeMap(BiomeData biomeData, float blendPercent = .2f)
 		{
 			biomeData.ids.Clear();
 
@@ -351,12 +356,16 @@ namespace PW.Biomator
 			for (int x = 0; x < terrainSize; x++)
 				for (int y = 0; y < terrainSize; y++)
 				{
-					biomeSwitchValues[BiomeSwitchMode.Water] = (waterHeight != null && waterHeight[x, y] > 0) ? 1 : 0;
-					biomeSwitchValues[BiomeSwitchMode.Height] = (terrainHeight != null) ? terrainHeight[x, y] : 0;
-					biomeSwitchValues[BiomeSwitchMode.Temperature] = (temperature != null) ? temperature[x, y] : 0;
-					biomeSwitchValues[BiomeSwitchMode.Wetness] = (wetness != null) ? wetness[x, y] : 0;
+					if (waterHeight != null)
+						biomeSwitchValues[BiomeSwitchMode.Water] = (waterHeight[x, y] > 0) ? 1 : 0;
+					if (terrainHeight != null)
+						biomeSwitchValues[BiomeSwitchMode.Height] = terrainHeight[x, y];
+					if (temperature != null)
+						biomeSwitchValues[BiomeSwitchMode.Temperature] = temperature[x, y];
+					if (wetness != null)
+						biomeSwitchValues[BiomeSwitchMode.Wetness] = wetness[x, y];
 
-					blendParams.ImportValues(biomeSwitchValues, blendPercent);
+					blendParams.ImportValues(biomeSwitchValues, blendPercent, paramRanges);
 
 					var		biomeSwitchCell = FindBiome(biomeSwitchValues);
 					short	biomeId = biomeSwitchCell.id;
@@ -368,12 +377,15 @@ namespace PW.Biomator
 
 					foreach (var link in biomeSwitchCell.links)
 						if (link.Overlaps(blendParams))
-							biomeData.biomeMap.AddBiome(x, y, link.id, 0);
+						{
+							float blend = link.ComputeBlend(paramRanges, biomeSwitchValues, blendPercent);
+							biomeData.biomeMap.AddBiome(x, y, link.id, blend);
+						}
 				}
 			
 			sw.Stop();
 
-			Debug.Log("Graph build time: " + sw.Elapsed.Milliseconds);
+			Debug.Log("Fill biome map time: " + sw.Elapsed.Milliseconds);
 		}
 
 		public int GetBiomeCount()

@@ -32,9 +32,19 @@ namespace PW.Biomator.SwitchGraph
 				switchParams[i] = new BiomeSwitchCellParam(false);
 		}
 
-		public void ImportValues(BiomeSwitchValues values, float blendPercent)
+		public void ImportValues(BiomeSwitchValues values, float blendPercent, BiomeParamRange ranges)
 		{
-			//TODO: import values with min and max generated from values and blendPercent
+			for (int i = 0; i < values.switchValues.Length; i++)
+			{
+				var mode = (BiomeSwitchMode)i;
+				if (values.enabled[i] && i != (int)BiomeSwitchMode.Water && ranges.ContainsKey(mode))
+				{
+					float range = ranges[mode].magnitude;
+					float min = values[i] - (range * blendPercent);
+					float max = values[i] + (range * blendPercent);
+					switchParams[i] = new BiomeSwitchCellParam(true, min, max);
+				}
+			}
 		}
 
 		public BiomeSwitchCellParam this[int index]
@@ -53,10 +63,12 @@ namespace PW.Biomator.SwitchGraph
 	public class BiomeSwitchValues
 	{
 		public float[]		switchValues;
+		public bool[]		enabled;
 
 		public BiomeSwitchValues()
 		{
 			switchValues = new float[(int)BiomeSwitchMode.Count];
+			enabled = new bool[(int)BiomeSwitchMode.Count];
 
 			for (int i = 0; i < switchValues.Length; i++)
 				switchValues[i] = new float();
@@ -65,7 +77,7 @@ namespace PW.Biomator.SwitchGraph
 		public float this[int index]
 		{
 			get { return switchValues[index]; }
-			set { switchValues[index] = value; }
+			set { enabled[index] = true; switchValues[index] = value; }
 		}
 
 		public float this[BiomeSwitchMode mode]

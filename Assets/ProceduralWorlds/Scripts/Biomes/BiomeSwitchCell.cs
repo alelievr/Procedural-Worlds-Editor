@@ -24,7 +24,7 @@ namespace PW.Biomator.SwitchGraph
 			return true;
 		}
 
-		public float	GetWeight(Dictionary< BiomeSwitchMode, Vector2 > paramRanges)
+		public float	GetWeight(BiomeParamRange paramRanges)
 		{
 			float	weight = 0;
 
@@ -42,15 +42,31 @@ namespace PW.Biomator.SwitchGraph
 			return weight;
 		}
 
-		public override string ToString()
+		public float ComputeBlend(BiomeParamRange ranges, BiomeSwitchValues values, float blendPercent)
 		{
-			string s = name + " = ";
+			float	blend = 0;
+			float	blendParamCount = 1;
 
-			for (int i = 0; i < switchParams.Length; i++)
-				if (switchParams[i].enabled)
-					s += ((BiomeSwitchMode)i + ": " + switchParams[i].min + "->" + switchParams[i].max);
+			for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
+			{
+				if (!ranges.ContainsKey((BiomeSwitchMode)i))
+					continue ;
+				
+				//Compute biome blend using blendPercent
+				float v = values[i];
+				Vector2 r = ranges[(BiomeSwitchMode)i];
+				float p = r.magnitude * blendPercent;
+				float b = Mathf.Abs(v - r.x);
 
-			return s;
+				if (r.magnitude == 0)
+					continue ;
+
+				blend += Mathf.Abs(b / p);
+
+				blendParamCount++;
+			}
+
+			return blend / blendParamCount;
 		}
 
 		public bool Matches(BiomeSwitchValues bsv)
@@ -79,6 +95,17 @@ namespace PW.Biomator.SwitchGraph
 				}
 			
 			return gap;
+		}
+
+		public override string ToString()
+		{
+			string s = name + " = ";
+
+			for (int i = 0; i < switchParams.Length; i++)
+				if (switchParams[i].enabled)
+					s += ((BiomeSwitchMode)i + ": " + switchParams[i].min + "->" + switchParams[i].max);
+
+			return s;
 		}
 	}
 }
