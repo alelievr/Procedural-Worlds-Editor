@@ -292,10 +292,13 @@ namespace PW.Biomator
 			if (!isBuilt || currentCell == null)
 				return null;
 			
+			//since there is no default state, we can do this:
+			if (currentCell.Matches(values))
+				return currentCell;
+			
 			int maxSearchDepth = 100;
 			int	i = 0;
 			
-
 			while (true)
 			{
 				if (i > maxSearchDepth)
