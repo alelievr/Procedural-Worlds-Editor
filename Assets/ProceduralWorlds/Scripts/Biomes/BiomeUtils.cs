@@ -13,10 +13,6 @@ namespace PW.Biomator
 	public static class BiomeUtils
 	{
 
-		static bool			terrainFoldout = false;
-		static bool			wetnessFoldout = false;
-		static bool			temperatureFoldout = false;
-		static bool			waterFoldout = false;
 		static bool			update = false;
 		static Color[]		blackTexture;
 		static PWGUIManager	PWGUI = new PWGUIManager();
@@ -35,25 +31,12 @@ namespace PW.Biomator
 			update = GUILayout.Button("Update maps");
 
 			//2D maps:
-			if (b.terrain != null)
-				if ((terrainFoldout = EditorGUILayout.Foldout(terrainFoldout, "Terrain 2D")))
-					PWGUI.Sampler2DPreview(b.terrain, update);
-
-			if (b.waterHeight != null)
-				if ((waterFoldout = EditorGUILayout.Foldout(waterFoldout, "Water map")))
-					PWGUI.Sampler2DPreview(b.waterHeight, update);
-
-			if (b.wetness != null)
-				if ((wetnessFoldout = EditorGUILayout.Foldout(wetnessFoldout, "Wetness map")))
-					PWGUI.Sampler2DPreview(b.wetness, update);
-			
-			if (b.temperature != null)
-				if ((temperatureFoldout = EditorGUILayout.Foldout(temperatureFoldout, "Temperature map")))
-					PWGUI.Sampler2DPreview(b.temperature, update);
-			
-			//3D maps:
-			if (b.terrain3D != null)
-				EditorGUILayout.LabelField("Terrain: 3D");
+			foreach (var samplerDataKP in b.biomeSamplerNameMap)
+			{
+				if (!samplerDataKP.Value.is3D)
+					PWGUI.Sampler2DPreview(samplerDataKP.Key, samplerDataKP.Value.data2D);
+				//TODO: 3D maps preview
+			}
 		}
 
 	}

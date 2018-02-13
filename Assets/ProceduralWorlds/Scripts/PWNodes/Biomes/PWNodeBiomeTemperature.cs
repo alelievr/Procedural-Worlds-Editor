@@ -11,7 +11,7 @@ namespace PW.Node
 	{
 
 		[PWInput("biome datas")]
-		public BiomeData		inputBiome;
+		public BiomeData		inputBiomeData;
 		[PWInput("temperature map"), PWNotRequired]
 		public Sampler			temperatureMap;
 
@@ -134,10 +134,13 @@ namespace PW.Node
 
 		void UpdateTemperatureMap()
 		{
-			if (localTemperatureMap == null)
+			if (localTemperatureMap == null || inputBiomeData == null)
 				return ;
 			
 			var inputTemperatureMap = temperatureMap as Sampler2D;
+				
+			var terrain = inputBiomeData.GetSampler2D(BiomeSamplerName.terrainHeight);
+			var waterHeight = inputBiomeData.GetSampler2D(BiomeSamplerName.waterHeight);
 
 			(localTemperatureMap as Sampler2D).Foreach((x, y, val) => {
 				float	terrainMod = 0;
@@ -148,13 +151,10 @@ namespace PW.Node
 				if (!internalTemperatureMap)
 					mapValue = Mathf.Lerp(Mathf.Max(minTemperature, minTemperatureMapInput), Mathf.Min(maxTemperature, maxTemperatureMapInput), inputTemperatureMap[x, y]);
 
-				if (inputBiome != null)
-				{
-					if (terrainHeightMultiplier != 0)
-						terrainMod = inputBiome.terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
-					if (waterMultiplier != 0)
-						waterMod = inputBiome.waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
-				}
+				if (terrainHeightMultiplier != 0 && terrain != null)
+					terrainMod = terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
+				if (waterMultiplier != 0 && waterHeight != null)
+					waterMod = waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
 				return Mathf.Clamp(mapValue + terrainMod + waterMod, minTemperature, maxTemperature);
 			});
 
@@ -183,16 +183,16 @@ namespace PW.Node
 
 			UpdateTemperatureMap();
 
-			if (inputBiome != null)
-				inputBiome.temperatureRef = localTemperatureMap;
+			if (inputBiomeData != null)
+				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
 
-			outputBiome = inputBiome;
+			outputBiome = inputBiomeData;
 		}
 
 		//to prebuild the biome tree:
 		public override void OnNodeProcessOnce()
 		{
-			outputBiome = inputBiome;
+			outputBiome = inputBiomeData;
 		}
 
 	}

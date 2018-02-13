@@ -122,7 +122,7 @@ namespace PW.Node
 			
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeSwitchGraph.isBuilt)
-				biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
+				biomeData.biomeSwitchGraph.BuildGraph(biomeData);
 
 			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
 
@@ -190,7 +190,7 @@ namespace PW.Node
 				return ;
 			}
 
-			biomeData.biomeSwitchGraph.BuildGraph(biomeData.biomeSwitchGraphStartPoint);
+			biomeData.biomeSwitchGraph.BuildGraph(biomeData);
 		}
 	}
 }

@@ -120,22 +120,24 @@ namespace PW.Node
 				return ;
 			}
 
-			outputBiome.terrainRef = terrainNoise;
-			
+			outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, terrainNoise);
+
 			outputBiome.waterLevel = waterLevel;
 
 			if (terrainNoise.type == SamplerType.Sampler2D)
 			{
 				//terrain mapping
-				outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+				var mappedTerrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, mappedTerrain);
 
 				//waterHeight evaluation
-				outputBiome.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-				outputBiome.waterHeight.min = mapMin;
-				outputBiome.waterHeight.max = mapMax;
-				outputBiome.terrain.Foreach((x, y, val) => {
-					outputBiome.waterHeight[x, y] = waterLevel - val;
+				Sampler2D waterHeight = waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+				waterHeight.min = mapMin;
+				waterHeight.max = mapMax;
+				mappedTerrain.Foreach((x, y, val) => {
+					waterHeight[x, y] = waterLevel - val;
 				});
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.waterHeight, waterHeight);
 			}
 			else
 				; //TODO

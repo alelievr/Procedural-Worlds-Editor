@@ -65,7 +65,8 @@ namespace PW.Node
 				return ;
 			}
 			
-			finalTerrain = inputBlendedTerrain.biomeData.terrainRef.Clone(finalTerrain);
+			var inputTerrain = inputBlendedTerrain.biomeData.GetSampler(BiomeSamplerName.terrainHeight);
+			finalTerrain = inputTerrain.Clone(finalTerrain);
 
 			if (finalTerrain.type == SamplerType.Sampler2D)
 			{

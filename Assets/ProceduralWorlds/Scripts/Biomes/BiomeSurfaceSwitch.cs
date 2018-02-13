@@ -19,7 +19,6 @@ namespace PW.Biomator
 		public float				maxHeight;
 
 		//param limit
-		public BiomeSwitchMode		paramType;
 		public bool					paramEnabled;
 		public float				minParam;
 		public float				maxParam;

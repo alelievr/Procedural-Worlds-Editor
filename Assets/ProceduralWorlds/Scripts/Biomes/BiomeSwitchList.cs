@@ -16,15 +16,16 @@ namespace PW.Biomator
 		public string				name;
 		public float				absoluteMax; //max value in the map
 		public float				absoluteMin; //min value in the map
-		public BiomeSwitchMode		mode;
+		public string				samplerName;
 		public SerializableColor	color;
 
-		public BiomeSwitchData(Sampler samp)
+		public BiomeSwitchData(Sampler samp, string samplerName)
 		{
 			UpdateSampler(samp);
 			name = "swampland";
 			min = 70;
 			max = 90;
+			this.samplerName = samplerName;
 			var rand = new System.Random();
 			color = (SerializableColor)new Color((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble());
 		}
@@ -38,7 +39,7 @@ namespace PW.Biomator
 			}
 		}
 
-		public BiomeSwitchData() : this(null) {}
+		public BiomeSwitchData(string samplerName) : this(null, samplerName) {}
 	}
 
 	[System.Serializable]
@@ -52,7 +53,7 @@ namespace PW.Biomator
 		public Action< BiomeSwitchData >	OnBiomeDataModified;
 
 		public Sampler						currentSampler;
-		public BiomeSwitchMode				currentSwitchMode;
+		public string						currentSamplerName;
 		public BiomeData					currentBiomeData;
 		
 		Texture2D			biomeRepartitionPreview;
@@ -128,7 +129,7 @@ namespace PW.Biomator
 			};
 
 			reprderableSwitchDataList.onAddCallback += (ReorderableList l) => {
-				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler);
+				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler, currentSamplerName);
 				switchDatas.Add(bsd);
 				OnBiomeDataAdded(bsd);
 				updatePreview = true;
@@ -145,7 +146,7 @@ namespace PW.Biomator
 
 			//add at least one biome switch:
 			if (switchDatas.Count == 0)
-				switchDatas.Add(new BiomeSwitchData(currentSampler));
+				switchDatas.Add(new BiomeSwitchData(currentSampler, currentSamplerName));
 		}
 
 		public void OnGUI()
@@ -203,7 +204,7 @@ namespace PW.Biomator
 			}
 			
 			//add water if there is and if switch mode is height:
-			if (!currentBiomeData.isWaterless && currentSwitchMode == BiomeSwitchMode.Height)
+			if (!currentBiomeData.isWaterless && currentSamplerName == BiomeSamplerName.terrainHeight)
 			{
 				float rMax = (currentBiomeData.waterLevel / range) * previewTextureWidth;
 				for (int x = 0; x < rMax; x++)
@@ -215,12 +216,12 @@ namespace PW.Biomator
 			updatePreview = false;
 		}
 
-		public void UpdateSwitchMode(BiomeSwitchMode mode)
+		public void UpdateSwitchMode(string samplerName)
 		{
-			this.currentSwitchMode = mode;
+			this.currentSamplerName = samplerName;
 
 			foreach (var switchData in switchDatas)
-				switchData.mode = mode;
+				switchData.samplerName = samplerName;
 		}
 
 		IEnumerator< BiomeSwitchData > IEnumerable< BiomeSwitchData >.GetEnumerator()

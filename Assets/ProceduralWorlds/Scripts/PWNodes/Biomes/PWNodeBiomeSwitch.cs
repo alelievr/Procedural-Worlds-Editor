@@ -22,11 +22,11 @@ namespace PW.Node
 		[SerializeField]
 		public BiomeSwitchList		switchList = new BiomeSwitchList();
 
-		public BiomeSwitchMode		switchMode;
-		string[]					biomeSwitchModes;
+		public string				samplerName;
+		string[]					samplerNames;
 
 		[SerializeField]
-		int						selectedBiomeSwitchMode;
+		int						selectedBiomeSamplerName;
 		[SerializeField]
 		bool					error;
 		string					errorString;
@@ -45,7 +45,8 @@ namespace PW.Node
 		{
 			switchList.OnEnable();
 
-			biomeSwitchModes = Enum.GetNames(typeof(BiomeSwitchMode));
+			samplerNames = BiomeSamplerName.GetNames().ToArray();
+			samplerName = samplerNames[selectedBiomeSamplerName];
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
 
@@ -59,63 +60,47 @@ namespace PW.Node
 
 		void UpdateSwitchMode()
 		{
-			if (switchMode == BiomeSwitchMode.Water)
-				SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
-			else
-				SetMultiAnchor("outputBiomes", switchList.Count, null);
-		}
+			//TODO: set default values for switches
+			switch (samplerName)
+			{
+				case BiomeSamplerName.terrainHeight:
+					break ;
+				case BiomeSamplerName.waterHeight:
+					break ;
+				case BiomeSamplerName.temperature:
+					break ;
+				case BiomeSamplerName.wetness:
+					break ;
+			}
 
-		Dictionary< BiomeSwitchMode, string > switchModeToName = new Dictionary< BiomeSwitchMode, string >()
-		{
-			{BiomeSwitchMode.Water, "waterHeight"},
-			{BiomeSwitchMode.Wetness, "wetness"},
-			{BiomeSwitchMode.Temperature, "temperature"},
-			// {BiomeSwitchMode.Wind, "wind"},
-			// {BiomeSwitchMode.Lighting, "lighting"},
-			// {BiomeSwitchMode.Air, "air"},
-			{BiomeSwitchMode.Height, "terrain"}
-			//soil settings apart.
-		};
+			// if (switchMode == BiomeSwitchMode.Water)
+				// SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
+			// else
+				// SetMultiAnchor("outputBiomes", switchList.Count, null);
+		}
 
 		void CheckForBiomeSwitchErrors()
 		{
 			error = false;
-			if (switchMode.ToString().Contains("Custom"))
-			{
-				//TODO: 3d samplers management
-				int index = (switchMode.ToString().Last() - '0');
-				currentSampler = inputBiome.datas[index];
-				if (inputBiome.datas[index] == null)
-				{
-					errorString = "can't switch on custom value\nat index " + index + ",\ndata not provided";
-					error = true;
-				}
-			}
-			else if (switchModeToName.ContainsKey(switchMode))
-			{
-				var field = inputBiome.GetType().GetField(switchModeToName[switchMode], BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
-				var field3D = inputBiome.GetType().GetField(switchModeToName[switchMode] + "3D", BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
-				object val = null, val3D = null;
 
-				if (field != null)
-					val = field.GetValue(inputBiome);
-				if (field3D != null)
-					val3D = field3D.GetValue(inputBiome);
+			{
+				var field = inputBiome.GetSampler(samplerName);
+				var field3D = inputBiome.GetSampler(samplerName);
 
-				if (val == null && val3D == null)
+				if (field == null || field3D == null)
 				{
-					errorString = "can't switch on field " + switchModeToName[switchMode] + ",\ndata not provided !";
+					errorString = "can't switch on field " + samplerName + ",\ndata not provided !";
 					error = true;
 				}
 				else
-					currentSampler = ((val == null) ? val3D : val) as Sampler;
+					currentSampler = ((field == null) ? field3D : field);
 			}
 
 			//Update switchList values:
 			switchList.currentBiomeData = inputBiome;
 			switchList.currentSampler = currentSampler;
 			
-			switchList.UpdateSwitchMode(switchMode);
+			switchList.UpdateSwitchMode(samplerName);
 			switchList.UpdateBiomeRepartitionPreview();
 		}
 		
@@ -136,8 +121,8 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			{
 				EditorGUIUtility.labelWidth = 80;
-				selectedBiomeSwitchMode = EditorGUILayout.Popup("switch parameter", selectedBiomeSwitchMode, biomeSwitchModes);
-				switchMode = (BiomeSwitchMode)Enum.Parse(typeof(BiomeSwitchMode), biomeSwitchModes[selectedBiomeSwitchMode]);
+				selectedBiomeSamplerName = EditorGUILayout.Popup("switch parameter", selectedBiomeSamplerName, samplerNames);
+				samplerName = samplerNames[selectedBiomeSamplerName];
 			}
 			if (EditorGUI.EndChangeCheck())
 			{
@@ -154,8 +139,7 @@ namespace PW.Node
 				return ;
 			}
 
-			if (switchMode != BiomeSwitchMode.Water)
-				switchList.OnGUI();
+			switchList.OnGUI();
 
 			firstPass = false;
 		}
@@ -165,9 +149,6 @@ namespace PW.Node
 		void AdjustOutputBiomeArraySize()
 		{
 			int		outputArraySize = switchList.Count;
-
-			if (switchMode == BiomeSwitchMode.Water)
-				outputArraySize = 2;
 
 			//we adjust the size of the outputBiomes array to the size of the switchList
 			while (outputBiomes.Count < outputArraySize)

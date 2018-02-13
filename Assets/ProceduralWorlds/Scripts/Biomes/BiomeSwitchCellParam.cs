@@ -26,37 +26,17 @@ namespace PW.Biomator.SwitchGraph
 
 		public BiomeSwitchCellParams()
 		{
-			switchParams = new BiomeSwitchCellParam[(int)BiomeSwitchMode.Count];
+			const int max = BiomeData.maxBiomeSamplers;
+			switchParams = new BiomeSwitchCellParam[max];
 
 			for (int i = 0; i < switchParams.Length; i++)
 				switchParams[i] = new BiomeSwitchCellParam(false);
-		}
-
-		public void ImportValues(BiomeSwitchValues values, float blendPercent, BiomeParamRange ranges)
-		{
-			for (int i = 0; i < values.switchValues.Length; i++)
-			{
-				var mode = (BiomeSwitchMode)i;
-				if (values.enabled[i] && i != (int)BiomeSwitchMode.Water && ranges.ContainsKey(mode))
-				{
-					float range = ranges[mode].magnitude;
-					float min = values[i] - (range * blendPercent);
-					float max = values[i] + (range * blendPercent);
-					switchParams[i] = new BiomeSwitchCellParam(true, min, max);
-				}
-			}
 		}
 
 		public BiomeSwitchCellParam this[int index]
 		{
 			get { return switchParams[index]; }
 			set { switchParams[index] = value; }
-		}
-
-		public BiomeSwitchCellParam this[BiomeSwitchMode mode]
-		{
-			get { return this[(int)mode]; }
-			set { this[(int)mode] = value; }
 		}
 	}
 
@@ -65,10 +45,15 @@ namespace PW.Biomator.SwitchGraph
 		public float[]		switchValues;
 		public bool[]		enabled;
 
+		public int			length;
+
 		public BiomeSwitchValues()
 		{
-			switchValues = new float[(int)BiomeSwitchMode.Count];
-			enabled = new bool[(int)BiomeSwitchMode.Count];
+			const int max = BiomeData.maxBiomeSamplers;
+
+			switchValues = new float[max];
+			enabled = new bool[max];
+			length = 0;
 
 			for (int i = 0; i < switchValues.Length; i++)
 				switchValues[i] = new float();
@@ -76,24 +61,17 @@ namespace PW.Biomator.SwitchGraph
 
 		public float this[int index]
 		{
-			get { return switchValues[index]; }
-			set { enabled[index] = true; switchValues[index] = value; }
+			get
+			{
+				return switchValues[index];
+			}
+			set
+			{
+				enabled[index] = true;
+				switchValues[index] = value;
+				length = (index > length) ? index : length;
+			}
 		}
 
-		public float this[BiomeSwitchMode mode]
-		{
-			get { return this[(int)mode]; }
-			set { this[(int)mode] = value; }
-		}
-
-		public override string ToString()
-		{
-			string	s = "";
-
-			for (int i = 0; i < (int)BiomeSwitchMode.Count; i++)
-				s += (BiomeSwitchMode)i + ": " + switchValues[i] + ", ";
-			
-			return s;
-		}
 	}
 }
