@@ -633,7 +633,6 @@ namespace PW.Core
 			if (fieldSettings.firstRender && e.type != EventType.Layout)
 				return ;
 			fieldSettings.firstRender = false;
-			// Debug.Log("event: " + attachedNode + ":" + e.type);
 
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
@@ -768,11 +767,14 @@ namespace PW.Core
 
 		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool settings = true, bool debug = true)
 		{
+			Event e = Event.current;
+			
 			if (biomeData.biomeMap == null)
 			{
 				Debug.Log("biomeData does not contains biome map 2D");
 				return ;
 			}
+
 			int texSize = biomeData.biomeMap.size;
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.BiomeMapPreview, () => {
 				var state = new PWGUISettings();
@@ -792,8 +794,51 @@ namespace PW.Core
 
 			if (fieldSettings.update)
 				UpdateBiomeMap2D(fieldSettings);
+				
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 
 			TexturePreview(fieldSettings.texture, false, false, false);
+
+			if (settings)
+			{
+				if (previewRect.width > 2)
+					fieldSettings.savedRect = previewRect;
+
+				//draw the setting icon and manage his events
+				int icSettingsSize = 16;
+				int	icSettingsPadding = 4;
+				Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
+	
+				GUI.DrawTexture(icSettingsRect, icSettingsOutline);
+				if (e.type == EventType.MouseDown && e.button == 0)
+				{
+					if (icSettingsRect.Contains(e.mousePosition))
+					{
+						PWBiomeMapSettingsPopup.OpenPopup(fieldSettings);
+						e.Use();
+					}
+				}
+			}
+			
+			if (PWBiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate")))
+			{
+				fieldSettings.debug = PWBiomeMapSettingsPopup.debug;
+			}
+
+			if (fieldSettings.frameSafeDebug && fieldSettings.debug)
+			{
+				Vector2 pixelPos = e.mousePosition - fieldSettings.savedRect.position;
+				Sampler terrain = biomeData.GetSampler(0);
+
+				pixelPos *= terrain.size / fieldSettings.savedRect.width;
+				pixelPos.y = terrain.size - pixelPos.y;
+
+				int x = (int)Mathf.Clamp(pixelPos.x, 0, terrain.size - 1);
+				int y = (int)Mathf.Clamp(pixelPos.y, 0, terrain.size - 1);
+				BiomeBlendPoint point = biomeData.biomeMap.GetBiomeBlendInfo(x, y);
+
+				EditorGUILayout.LabelField("1st biome: " + point.firstBiomeId + " " + point.firstBiomePercent);
+			}
 		}
 
 		void UpdateBiomeMap2D(PWGUISettings fieldSettings)
@@ -807,22 +852,28 @@ namespace PW.Core
 			if (texSize != fieldSettings.texture.width)
 				fieldSettings.texture.Resize(texSize, texSize, TextureFormat.RGBA32, false);
 			
+			var switchGraph = fieldSettings.biomeData.biomeSwitchGraph;
+			
 			for (int x = 0; x < texSize; x++)
 				for (int y = 0; y < texSize; y++)
 				{
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
-					var biome1 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.firstBiomeId);
-					// var biome2 = fieldSettings.biomeData.biomeSwitchGraph.GetBiome(blendInfo.secondBiomeId);
-
-					if (biome1 == null)
-						continue ;
+					var firstBiome = switchGraph.GetBiome(blendInfo.firstBiomeId);
 					
-					Color firstBiomeColor = biome1.previewColor;
-					// Color secondBiomeColor = biome2.previewColor;
+					Color finalColor = firstBiome.previewColor;
 
-					//TODO: biome color blending
+					//start fmor 1 because the first biome have already been retreived
+					for (int i = 1; i < blendInfo.length; i++)
+					{
+						int id = blendInfo.biomeIds[i];
+						float blend = blendInfo.biomeBlends[i];
+
+						var biome = switchGraph.GetBiome((short)id);
+
+						finalColor = Color.Lerp(finalColor, biome.previewColor, blend);
+					}
 					
-					Color pixel = firstBiomeColor;// * blendInfo.firstBiomeBlendPercent + secondBiomeColor * blendInfo.secondBiomeBlendPercent;
+					Color pixel = finalColor;
 					pixel.a = 1;
 
 					fieldSettings.texture.SetPixel(x, y, pixel);

@@ -73,10 +73,11 @@ namespace PW.Node
 					break ;
 			}
 
+			SetMultiAnchor("outputBiomes", switchList.Count, null);
+			
 			// if (switchMode == BiomeSwitchMode.Water)
 				// SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
 			// else
-				// SetMultiAnchor("outputBiomes", switchList.Count, null);
 		}
 
 		void CheckForBiomeSwitchErrors()

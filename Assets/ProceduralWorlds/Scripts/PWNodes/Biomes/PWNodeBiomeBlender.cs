@@ -89,7 +89,10 @@ namespace PW.Node
 				{
 					foreach (var biomeCoverageKP in biomeData.biomeSwitchGraph.GetBiomeCoverage())
 						if (biomeCoverageKP.Value > 0)
-							EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+						{
+							string paramName = biomeData.GetBiomeKey(biomeCoverageKP.Key);
+							EditorGUILayout.LabelField(paramName, (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+						}
 				}
 				else
 					EditorGUILayout.LabelField("Null biome data/biome tree");
@@ -101,7 +104,6 @@ namespace PW.Node
 		public override void OnNodeProcessOnce()
 		{
 			var partialBiomes = inputBiomes.GetValues();
-			var biomeData = partialBiomes[0].biomeDataReference;
 
 			foreach (var partialBiome in partialBiomes)
 				partialBiome.biomeGraph.ProcessOnce();

@@ -84,10 +84,17 @@ namespace PW.Biomator
 				dataSampler.key = key;
 				biomeSamplers[length] = dataSampler;
 				biomeSamplerNameMap[key] = dataSampler;
+
+				length++;
 			}
 
 			biomeSamplerNameMap[key].dataRef = value;
 			biomeSamplerNameMap[key].is3D = (value as Sampler3D != null);
+		}
+		
+		public BiomeDataSampler GetDataSampler(int index)
+		{
+			return biomeSamplers[index];
 		}
 
 		public BiomeDataSampler GetDataSampler(string key)
@@ -99,6 +106,14 @@ namespace PW.Biomator
 			return ret;
 		}
 
+		public Sampler	GetSampler(int index)
+		{
+			if (biomeSamplers[index] == null)
+				return null;
+			
+			return biomeSamplers[index].dataRef;
+		}
+
 		public Sampler	GetSampler(string key)
 		{
 			var data = GetDataSampler(key);
@@ -107,6 +122,16 @@ namespace PW.Biomator
 				return null;
 			
 			return data.dataRef;
+		}
+		
+		public Sampler2D GetSampler2D(int key)
+		{
+			return GetSampler(key) as Sampler2D;
+		}
+
+		public Sampler3D GetSampler3D(int key)
+		{
+			return GetSampler(key) as Sampler3D;
 		}
 
 		public Sampler2D GetSampler2D(string key)

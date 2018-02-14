@@ -22,8 +22,6 @@ namespace PW.Biomator.SwitchGraph
 	{
 		public BiomeSwitchCellParam[]	switchParams;
 
-		public int						Length { get { return switchParams.Length; } }
-
 		public BiomeSwitchCellParams()
 		{
 			const int max = BiomeData.maxBiomeSamplers;
@@ -31,12 +29,6 @@ namespace PW.Biomator.SwitchGraph
 
 			for (int i = 0; i < switchParams.Length; i++)
 				switchParams[i] = new BiomeSwitchCellParam(false);
-		}
-
-		public BiomeSwitchCellParam this[int index]
-		{
-			get { return switchParams[index]; }
-			set { switchParams[index] = value; }
 		}
 	}
 
@@ -69,8 +61,18 @@ namespace PW.Biomator.SwitchGraph
 			{
 				enabled[index] = true;
 				switchValues[index] = value;
-				length = (index > length) ? index : length;
+				length = (index >= length) ? index + 1 : length;
 			}
+		}
+
+		public override string ToString()
+		{
+			string s = "";
+
+			for (int i = 0; i < length; i++)
+				s += i + " -> " + switchValues[i] + ", ";
+			
+			return s;
 		}
 
 	}

@@ -10,11 +10,21 @@ using System.Linq;
 using System.Diagnostics;
 using PW.Biomator.SwitchGraph;
 
+using Sampler = PW.Core.Sampler;
 using Debug = UnityEngine.Debug;
 
 namespace PW.Biomator
 {
-	public class BiomeParamRange : Dictionary< int, Vector2 > {}
+	public class BiomeParamRange
+	{
+		public Vector2[]	ranges = new Vector2[BiomeData.maxBiomeSamplers];
+
+		public void Clear()
+		{
+			for (int i = 0; i < ranges.Length; i++)
+				ranges[i] = new Vector2(float.MaxValue, float.MinValue);
+		}
+	}
 
 	public class BiomeSwitchGraph
 	{
@@ -81,7 +91,7 @@ namespace PW.Biomator
 					foreach (var sd in precedentSwitchDatas)
 					{
 						int index = biomeData.GetBiomeIndex(sd.samplerName);
-						var param = currentCell.switchParams[index];
+						var param = currentCell.switchParams.switchParams[index];
 
 						param.enabled = true;
 						param.min = sd.min;
@@ -134,35 +144,11 @@ namespace PW.Biomator
 
 		void FillParamRange(BiomeData biomeData)
 		{
-			Stack< PWNode >	currentNodes = new Stack< PWNode >();
-			PWNode			currentNode;
-			PWNode			rootNode = biomeData.biomeSwitchGraphStartPoint;
-
-			currentNodes.Push(rootNode);
-
-			while (currentNodes.Count > 0)
+			for (int i = 0; i < biomeData.length; i++)
 			{
-				currentNode = currentNodes.Pop();
-				
-				foreach (var outputNode in currentNode.GetOutputNodes())
-					currentNodes.Push(outputNode);
+				var dataSampler = biomeData.GetDataSampler(i);
 
-				if (!(currentNode is PWNodeBiomeSwitch))
-					continue ;
-
-				var switchList = (currentNode as PWNodeBiomeSwitch).switchList;
-
-				var firstSwitch = switchList.switchDatas.First();
-
-				int index = biomeData.GetBiomeIndex(switchList.currentSamplerName);
-				if (index == -2)
-					continue ;
-
-				Vector2 currentRange;
-				paramRanges.TryGetValue(index, out currentRange);
-				currentRange.x = Mathf.Min(currentRange.x, firstSwitch.absoluteMin);
-				currentRange.y = Mathf.Max(currentRange.y, firstSwitch.absoluteMax);
-				paramRanges[index] = currentRange;
+				paramRanges.ranges[i] = new Vector2(dataSampler.dataRef.min, dataSampler.dataRef.max);
 			}
 		}
 
@@ -180,32 +166,12 @@ namespace PW.Biomator
 				
 				var switches = (n as PWNodeBiomeSwitch).switchList;
 				
-				//TODO: remove this !
-				if (switches.currentSamplerName == BiomeSamplerName.waterHeight)
-				{
-					var outputLinks = n.GetOutputLinks();
+				int index = n.GetOutputNodes().ToList().FindIndex(c => c == prevNode);
 
-					foreach (var link in outputLinks)
-						if (link.toNode == prevNode)
-						{
-							//terrestrial	-> 0
-							//aquatic		-> 1
-
-							int anchorIndex = link.fromAnchor.fieldIndex;
-							var waterBiomeSwitchData = new BiomeSwitchData(BiomeSamplerName.waterHeight){min = anchorIndex - .5f, max = anchorIndex + .5f, absoluteMin = -.5f, absoluteMax = 1.5f};
-							waterBiomeSwitchData.color = (SerializableColor)((anchorIndex == 0) ? Color.red : Color.blue);
-							precedentSwitchDatas.Add(waterBiomeSwitchData);
-						}
-				}
-				else
-				{
-					int index = n.GetOutputNodes().ToList().FindIndex(c => c == prevNode);
-	
-					if (index == -1)
-						throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
-					
-					precedentSwitchDatas.Add(switches[index]);
-				}
+				if (index == -1)
+					throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
+				
+				precedentSwitchDatas.Add(switches[index]);
 			}
 
 			precedentSwitchDatas.Reverse();
@@ -345,22 +311,17 @@ namespace PW.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData, float blendPercent = .2f)
+		public void FillBiomeMap(BiomeData biomeData, float blendPercent = .15f)
 		{
 			biomeData.ids.Clear();
 
-			int		terrainSize = biomeData.GetSampler(BiomeSamplerName.terrainHeight).size;
+			Sampler	terrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
 			var		biomeSwitchValues = new BiomeSwitchValues();
 
 			//TODO: 3D Biome fill map
-
-			var		waterHeight = biomeData.GetSampler2D(BiomeSamplerName.waterHeight);
-			var		terrainHeight = biomeData.GetSampler2D(BiomeSamplerName.terrainHeight);
-			var		temperature = biomeData.GetSampler2D(BiomeSamplerName.temperature);
-			var		wetness = biomeData.GetSampler2D(BiomeSamplerName.wetness);
 			
-			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrainHeight.size, terrainHeight.step))
-				biomeData.biomeMap = new BiomeMap2D(terrainHeight.size, terrainHeight.step);
+			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrain.size, terrain.step))
+				biomeData.biomeMap = new BiomeMap2D(terrain.size, terrain.step);
 
 			Stopwatch sw = new Stopwatch();
 
@@ -370,13 +331,17 @@ namespace PW.Biomator
 
 			var blendParams = new BiomeSwitchCellParams();
 
-			for (int x = 0; x < terrainSize; x++)
-				for (int y = 0; y < terrainSize; y++)
+			float[] ranges = new float[biomeData.length];
+			for (int i = 0; i < biomeData.length; i++)
+				ranges[i] = paramRanges.ranges[i].y - paramRanges.ranges[i].x;
+
+			for (int x = 0; x < terrain.size; x++)
+				for (int y = 0; y < terrain.size; y++)
 				{
 					for (int i = 0; i < biomeData.length; i++)
 					{
 						var val = biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
-						var r = paramRanges[i].y - paramRanges[i].x;
+						var r = ranges[i];
 						var spc = blendParams.switchParams[i];
 						spc.min = val - (r * blendPercent);
 						spc.max = val + (r * blendPercent);
@@ -384,18 +349,26 @@ namespace PW.Biomator
 					}
 
 					var		biomeSwitchCell = FindBiome(biomeSwitchValues);
+
+					if (biomeSwitchCell == null)
+					{
+						Debug.LogError("Biome can't be found for values: " + biomeSwitchValues);
+						return ;
+					}
+
 					short	biomeId = biomeSwitchCell.id;
 
 					biomeData.ids.Add(biomeId);
 					
 					biomeData.biomeMap.SetPrimaryBiomeId(x, y, biomeId);
 
-					foreach (var link in biomeSwitchCell.links)
-						if (link.Overlaps(blendParams))
-						{
-							float blend = link.ComputeBlend(paramRanges, biomeSwitchValues, blendPercent);
-							biomeData.biomeMap.AddBiome(x, y, link.id, blend);
-						}
+					if (blendPercent > 0)
+						foreach (var link in biomeSwitchCell.links)
+							if (link.Overlaps(blendParams))
+							{
+								float blend = link.ComputeBlend(paramRanges, biomeSwitchValues, blendPercent);
+								biomeData.biomeMap.AddBiome(x, y, link.id, blend);
+							}
 				}
 			
 			sw.Stop();

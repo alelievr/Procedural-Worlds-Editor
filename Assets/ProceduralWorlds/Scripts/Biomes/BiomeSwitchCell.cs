@@ -17,11 +17,11 @@ namespace PW.Biomator.SwitchGraph
 
 		public bool		Overlaps(BiomeSwitchCellParams cellParams)
 		{
-			int length = cellParams.Length;
+			int length = cellParams.switchParams.Length;
 			for (int i = 0; i < length; i++)
 			{
-				var c = cellParams[i];
-				var sp = switchParams[i];
+				var c = cellParams.switchParams[i];
+				var sp = switchParams.switchParams[i];
 				if (c.enabled && sp.enabled
 					&& !PWUtils.Overlap(sp.min, sp.max, c.min, c.max))
 						return false;
@@ -33,12 +33,13 @@ namespace PW.Biomator.SwitchGraph
 		{
 			float	weight = 0;
 
-			for (int i = 0; i < switchParams.Length; i++)
+			int length = switchParams.switchParams.Length;
+			for (int i = 0; i < length; i++)
 			{
-				BiomeSwitchCellParam	param = switchParams[i];
+				BiomeSwitchCellParam	param = switchParams.switchParams[i];
 
-				if (param.enabled && paramRanges[i].magnitude != 0)
-					weight += param.max - param.min / paramRanges[i].magnitude;
+				if (param.enabled && paramRanges.ranges[i].magnitude != 0)
+					weight += param.max - param.min / paramRanges.ranges[i].magnitude;
 				else
 					weight += 1;
 			}
@@ -46,25 +47,27 @@ namespace PW.Biomator.SwitchGraph
 			return weight;
 		}
 
-		public float ComputeBlend(BiomeParamRange ranges, BiomeSwitchValues values, float blendPercent)
+		public float ComputeBlend(BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
 		{
 			float	blend = 0;
 			float	blendParamCount = 1;
 
-			foreach (var rangeKP in ranges)
+			int length = values.length;
+			for (int i = 0; i < length; i++)
 			{
-				int i = (int)rangeKP.Key;
-
 				//Compute biome blend using blendPercent
 				float v = values[i];
-				Vector2 r = rangeKP.Value;
+				Vector2 r = param.ranges[i];
 				float mag = r.y - r.x;
 				float p = mag * blendPercent;
 				
-				if (mag == 0)
+				if (mag == 0 || v > r.x + p)
 					continue ;
 
-				blend += (1 - ((v - r.x) / p)) / 2;
+				float b = (.5f - (((v - r.x) / p) / 2));
+				blend += b;
+				
+				// Debug.Log("blend range: " + r + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
 
 				blendParamCount++;
 			}
@@ -74,11 +77,13 @@ namespace PW.Biomator.SwitchGraph
 
 		public bool Matches(BiomeSwitchValues bsv)
 		{
-			for (int i = 0; i < bsv.switchValues.Length; i++)
+			var switchValues = bsv.switchValues;
+			
+			for (int i = 0; i < switchValues.Length; i++)
 			{
-				var  p = this.switchParams[i];
+				var  p = this.switchParams.switchParams[i];
 
-				if (p.enabled && (bsv[i] < p.min || bsv[i] > p.max ))
+				if (p.enabled && (switchValues[i] < p.min || switchValues[i] > p.max ))
 						return false;
 			}
 
@@ -89,12 +94,12 @@ namespace PW.Biomator.SwitchGraph
 		{
 			float gap = 0;
 
-			int length = c2.switchParams.Length;
+			int length = c2.switchParams.switchParams.Length;
 			for (int i = 0; i < length; i++)
-				if (switchParams[i].enabled)
+				if (switchParams.switchParams[i].enabled)
 				{
-					var s1 = switchParams[i];
-					var s2 = c2.switchParams[i];
+					var s1 = switchParams.switchParams[i];
+					var s2 = c2.switchParams.switchParams[i];
 					gap += PWUtils.GapWidth(s1.min, s1.max, s2.min, s2.max);
 				}
 			
@@ -105,9 +110,9 @@ namespace PW.Biomator.SwitchGraph
 		{
 			string s = name + " = ";
 
-			for (int i = 0; i < switchParams.Length; i++)
-				if (switchParams[i].enabled)
-					s += (i + ": " + switchParams[i].min + "->" + switchParams[i].max);
+			for (int i = 0; i < switchParams.switchParams.Length; i++)
+				if (switchParams.switchParams[i].enabled)
+					s += (i + ": " + switchParams.switchParams[i].min + "->" + switchParams.switchParams[i].max);
 
 			return s;
 		}

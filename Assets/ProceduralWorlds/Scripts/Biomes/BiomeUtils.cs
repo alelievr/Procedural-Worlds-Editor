@@ -13,7 +13,6 @@ namespace PW.Biomator
 	public static class BiomeUtils
 	{
 
-		static bool			update = false;
 		static Color[]		blackTexture;
 		static PWGUIManager	PWGUI = new PWGUIManager();
 	
@@ -26,9 +25,8 @@ namespace PW.Biomator
 			}
 
 			PWGUI.StartFrame(view);
-			EditorGUILayout.LabelField("Biome datas:");
 
-			update = GUILayout.Button("Update maps");
+			// update = GUILayout.Button("Update maps");
 
 			//2D maps:
 			foreach (var samplerDataKP in b.biomeSamplerNameMap)

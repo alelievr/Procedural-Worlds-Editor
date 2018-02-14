@@ -56,16 +56,7 @@ namespace PW.Node
 			//recalcul perlin noise values with new seed / position.
 			output.ResizeIfNeeded(graphRef.chunkSize, graphRef.step);
 
-			float scale = 40f;
 			perlin2D.ComputeSampler(output, seed + additionalSeed);
-			// output.Foreach((x, y) => {
-			// 	float nx = (float)x * step + chunkPosition.x;
-			// 	float ny = (float)y * step + chunkPosition.z;
-			// 	float val = PerlinNoise2D.GenerateNoise(nx / scale, ny / scale, 2, 2, 1, 1, seed + additionalSeed);
-			// 	for (int i = 0; i < octaves; i++)
-			// 		val *= 1.2f;
-			// 	return val;
-			// });
 		}
 	}
 }

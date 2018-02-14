@@ -131,9 +131,9 @@ namespace PW.Node
 				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, mappedTerrain);
 
 				//waterHeight evaluation
-				Sampler2D waterHeight = waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-				waterHeight.min = mapMin;
-				waterHeight.max = mapMax;
+				Sampler2D waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+				waterHeight.min = waterLevel - mappedTerrain.max;
+				waterHeight.max = waterLevel;
 				mappedTerrain.Foreach((x, y, val) => {
 					waterHeight[x, y] = waterLevel - val;
 				});
