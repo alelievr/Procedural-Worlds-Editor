@@ -12,18 +12,24 @@ namespace PW.Node
 	{
 
 		[PWInput]
-		public PWArray< PartialBiome >		inputBiomes = new PWArray< PartialBiome >();
+		public PWArray< PartialBiome >	inputBiomes = new PWArray< PartialBiome >();
 
 		[PWOutput]
-		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
+		public BlendedBiomeTerrain		outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 
-		int					maxBiomeBlendCount = 2;
+		[SerializeField]
+		float				biomeBlendPercent = .1f;
+
+		[SerializeField]
+		BiomeBlendMatrix	blendMatrix = new BiomeBlendMatrix();
 
 		[SerializeField]
 		bool				biomeCoverageRecap = false;
 
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
+
+		string				delayedKey = "BiomeBlender";
 
 		public override void OnNodeCreation()
 		{
@@ -33,6 +39,13 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			OnReload += OnReloadCallback;
+
+			delayedChanges.BindCallback(delayedKey, (unused) => {
+				BiomeData data = GetBiomeData();
+
+				data.biomeSwitchGraph.FillBiomeMap(data, biomeBlendPercent);
+				updateBiomeMap = true;
+			});
 			
 			if (inputBiomes.GetValues().Count == 0)
 				return ;
@@ -68,7 +81,12 @@ namespace PW.Node
 			{
 				biomeData = biomes.First().biomeDataReference;
 				EditorGUIUtility.labelWidth = 120;
-			 	maxBiomeBlendCount = EditorGUILayout.IntField("max blended biomes", maxBiomeBlendCount);
+				EditorGUI.BeginChangeCheck();
+				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
+				if (EditorGUI.EndChangeCheck())
+					delayedChanges.UpdateValue(delayedKey);
+				blendMatrix.UpdateMatrixIfNeeded(biomeData);
+				blendMatrix.DrawMatrix();
 			}
 
 			if (biomeData != null)
@@ -81,13 +99,22 @@ namespace PW.Node
 				EditorGUILayout.LabelField("no biome data");
 			
 			if (updateBiomeMap)
-				PWGUI.SetUpdateForField(0, true);
+			{
+				PWGUI.SetUpdateForField(1, true);
+				updateBiomeMap = false;
+			}
 
-			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
+			var biomeCoverage = biomeData.biomeSwitchGraph.GetBiomeCoverage();
+
+			bool biomeCoverageError = biomeCoverage.Any(b => b.Value > 0 && b.Value < 1);
+
+			GUIStyle biomeCoverageFoloutStyle = (biomeCoverageError) ? PWStyles.errorFoldout : EditorStyles.foldout;
+
+			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
 			{
 				if (biomeData != null && biomeData.biomeSwitchGraph != null)
 				{
-					foreach (var biomeCoverageKP in biomeData.biomeSwitchGraph.GetBiomeCoverage())
+					foreach (var biomeCoverageKP in biomeCoverage)
 						if (biomeCoverageKP.Value > 0)
 						{
 							string paramName = biomeData.GetBiomeKey(biomeCoverageKP.Key);
@@ -97,8 +124,6 @@ namespace PW.Node
 				else
 					EditorGUILayout.LabelField("Null biome data/biome tree");
 			}
-
-			updateBiomeMap = false;
 		}
 		
 		public override void OnNodeProcessOnce()
@@ -124,9 +149,9 @@ namespace PW.Node
 			
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeSwitchGraph.isBuilt)
-				biomeData.biomeSwitchGraph.BuildGraph(biomeData);
+				BuildBiomeSwitchGraph();
 
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, biomeBlendPercent);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
@@ -177,7 +202,7 @@ namespace PW.Node
 			//if the reload does not comes from the editor
 			if (from != null)
 			{
-				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData);
+				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, biomeBlendPercent);
 				updateBiomeMap = true;
 			}
 		}

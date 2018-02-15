@@ -232,6 +232,7 @@ namespace PW.Biomator
 
 		BiomeSwitchCell		CheckForBetterCell(BiomeSwitchCell cell, BiomeSwitchValues values)
 		{
+			//check the current node links and find if there is a better solution than the current
 			foreach (var link in cell.links)
 				if (link.Matches(values))
 					if (link.weight < cell.weight)
@@ -245,6 +246,7 @@ namespace PW.Biomator
 			BiomeSwitchCell	bestCell = null;
 			float			minGap = 1e20f;
 
+			//return the best node to get close to the final one
 			foreach (var link in cell.links)
 			{
 				if (link.Matches(values))
@@ -323,14 +325,11 @@ namespace PW.Biomator
 			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrain.size, terrain.step))
 				biomeData.biomeMap = new BiomeMap2D(terrain.size, terrain.step);
 
-			Stopwatch sw = new Stopwatch();
-
 			Profiler.BeginSample("FillBiomeMap");
-
-			sw.Start();
 
 			var blendParams = new BiomeSwitchCellParams();
 
+			//getter for range (faster than dictionary)
 			float[] ranges = new float[biomeData.length];
 			for (int i = 0; i < biomeData.length; i++)
 				ranges[i] = paramRanges.ranges[i].y - paramRanges.ranges[i].x;
@@ -338,6 +337,7 @@ namespace PW.Biomator
 			for (int x = 0; x < terrain.size; x++)
 				for (int y = 0; y < terrain.size; y++)
 				{
+					//fill biomeSwitchValue and blendParams with the current biomeData sampler values
 					for (int i = 0; i < biomeData.length; i++)
 					{
 						var val = biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
@@ -357,25 +357,23 @@ namespace PW.Biomator
 					}
 
 					short	biomeId = biomeSwitchCell.id;
-
+					
 					biomeData.ids.Add(biomeId);
 					
 					biomeData.biomeMap.SetPrimaryBiomeId(x, y, biomeId);
 
+					//add biome that can be blended with the primary biome,
 					if (blendPercent > 0)
 						foreach (var link in biomeSwitchCell.links)
 							if (link.Overlaps(blendParams))
 							{
 								float blend = link.ComputeBlend(paramRanges, biomeSwitchValues, blendPercent);
-								biomeData.biomeMap.AddBiome(x, y, link.id, blend);
+								if (blend > 0.001f)
+									biomeData.biomeMap.AddBiome(x, y, link.id, blend);
 							}
 				}
-			
-			sw.Stop();
 
 			Profiler.EndSample();
-
-			Debug.Log("Fill biome map time: " + sw.Elapsed.Milliseconds);
 		}
 
 		public int GetBiomeCount()

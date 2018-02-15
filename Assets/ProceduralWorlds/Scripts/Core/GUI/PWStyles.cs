@@ -37,6 +37,21 @@ namespace PW.Core
 				return _header;
 			}
 		}
+
+		static GUIStyle _errorFoldout;
+		public static GUIStyle errorFoldout
+		{
+			get
+			{
+				if (_errorFoldout == null)
+				{
+					_errorFoldout = new GUIStyle(EditorStyles.foldout);
+					_errorFoldout.normal.textColor = Color.red;
+				}
+
+				return _errorFoldout;
+			}
+		}
 		
 		static GUIStyle _centeredLabel;
 		public static GUIStyle centeredLabel
@@ -50,6 +65,23 @@ namespace PW.Core
 				}
 
 				return _centeredLabel;
+			}
+		}
+
+		static GUIStyle _debugBox;
+		public static GUIStyle debugBox
+		{
+			get
+			{
+				if (_debugBox == null)
+				{
+					using (new DefaultGUISkin())
+					{
+						_debugBox = new GUIStyle("box");
+					}
+				}
+
+				return _debugBox;
 			}
 		}
 

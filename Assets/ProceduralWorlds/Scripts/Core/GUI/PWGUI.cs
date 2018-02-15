@@ -837,7 +837,22 @@ namespace PW.Core
 				int y = (int)Mathf.Clamp(pixelPos.y, 0, terrain.size - 1);
 				BiomeBlendPoint point = biomeData.biomeMap.GetBiomeBlendInfo(x, y);
 
-				EditorGUILayout.LabelField("1st biome: " + point.firstBiomeId + " " + point.firstBiomePercent);
+				EditorGUILayout.BeginVertical(PWStyles.debugBox);
+				{
+				for (int i = 0; i < point.length; i++)
+				{
+					short biomeId = point.biomeIds[i];
+					float biomeBlend = point.biomeBlends[i];
+					PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
+
+					EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
+					EditorGUI.indentLevel++;
+					EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
+					EditorGUI.indentLevel--;
+				}
+				EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
+				}
+				EditorGUILayout.EndVertical();
 			}
 		}
 
@@ -862,7 +877,7 @@ namespace PW.Core
 					
 					Color finalColor = firstBiome.previewColor;
 
-					//start fmor 1 because the first biome have already been retreived
+					//start from 1 because the first biome have already been retreived
 					for (int i = 1; i < blendInfo.length; i++)
 					{
 						int id = blendInfo.biomeIds[i];
