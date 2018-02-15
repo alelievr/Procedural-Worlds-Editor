@@ -329,8 +329,10 @@ namespace PW
 				isSelected = false;
 		}
 
-		void LinkRemovedCalllback(PWNodeLink link)
+		void LinkRemovedCalllback()
 		{
+			UpdateWorkStatus();
+			Debug.Log("Link removed !");
 		}
 
 		void LinkCreatedCallback(PWNodeLink link)
@@ -346,7 +348,7 @@ namespace PW
 			graphRef.OnClickNowhere += OnClickedOutside;
 			graphRef.OnLinkStartDragged += LinkStartDragCallback;
 			graphRef.OnLinkStopDragged += LinkStopDragCallback;
-			// graphRef.OnLinkRemoved += LinkRemovedCalllback; //unused
+			graphRef.OnPostLinkRemoved += LinkRemovedCalllback;
 			graphRef.OnLinkCreated += LinkCreatedCallback;
 			graphRef.OnLinkCanceled += LinkCanceledCallback;
 			graphRef.OnNodeSelected += NodeSelectedCallback;
@@ -370,7 +372,7 @@ namespace PW
 				graphRef.OnClickNowhere -= OnClickedOutside;
 				graphRef.OnLinkStartDragged -= LinkStartDragCallback;
 				graphRef.OnLinkStopDragged -= LinkStopDragCallback;
-				// graphRef.OnLinkRemoved -= LinkRemovedCalllback; //unused
+				graphRef.OnPostLinkRemoved -= LinkRemovedCalllback;
 				graphRef.OnLinkCreated -= LinkCreatedCallback;
 				graphRef.OnLinkCanceled -= LinkCanceledCallback;
 				graphRef.OnNodeSelected -= NodeSelectedCallback;

@@ -119,6 +119,8 @@ namespace PW.Node
 				Debug.LogError("[PWNodeWaterLevel] null terrain input received !");
 				return ;
 			}
+			
+			outputBiome.Reset();
 
 			outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, terrainNoise);
 
@@ -141,16 +143,6 @@ namespace PW.Node
 			}
 			else
 				; //TODO
-		}
-
-		void CreateNewBiome()
-		{
-
-		}
-
-		public override void OnNodeProcessOnce()
-		{
-			CreateNewBiome();
 		}
 	}
 }

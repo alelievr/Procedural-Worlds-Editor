@@ -29,6 +29,7 @@ public partial class PWGraphEditor
 		//move the node if panPosition changed:
 		node.rect = PWUtils.DecalRect(node.rect, graph.panPosition);
 		Rect decaledRect = GUILayout.Window(id, node.rect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
+		node.visualRect = decaledRect;
 		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 
 		//draw node header:

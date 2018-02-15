@@ -68,6 +68,17 @@ namespace PW.Biomator
 			biomeSwitchGraph = new BiomeSwitchGraph();
 		}
 
+		public void Reset()
+		{
+			ids.Clear();
+			biomeSamplerNameMap.Clear();
+
+			for (int i = 0; i < length; i++)
+				biomeSamplers[i] = null;
+
+			length = 0;
+		}
+
 		public void UpdateSamplerValue(string key, Sampler value)
 		{
 			if (!biomeSamplerNameMap.ContainsKey(key))

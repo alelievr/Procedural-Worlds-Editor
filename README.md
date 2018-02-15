@@ -11,5 +11,7 @@ See the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to view the pr
 
 ## Editor screenshots:
 Main graph
-![](https://image.noelshack.com/fichiers/2017/39/5/1506712114-graph-github.png)
-![](https://image.noelshack.com/fichiers/2017/39/5/1506712364-screen-shot-2017-09-29-at-9-12-23-pm.png)
+![](https://image.noelshack.com/fichiers/2018/07/4/1518696251-screen-shot-2018-02-12-at-11-39-57-pm.png)
+
+Biome graph
+![](https://image.noelshack.com/fichiers/2018/07/4/1518696251-screen-shot-2018-02-12-at-11-48-34-pm.png)

@@ -33,7 +33,7 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
-			CreateNewBiome();
+			CreateNewBiomeData();
 		}
 		
 		public override void OnNodeGUI()
@@ -56,7 +56,7 @@ namespace PW.Node
 				EditorGUILayout.LabelField("Connect a terrain plz.");
 		}
 
-		void				CreateNewBiome()
+		void				CreateNewBiomeData()
 		{
 			outputBiome = new BiomeData();
 
@@ -66,6 +66,8 @@ namespace PW.Node
 
 		public override void OnNodeProcess()
 		{
+			outputBiome.Reset();
+			
 			if (terrain != null && terrain.type == SamplerType.Sampler2D)
 			{
 				//terrain mapping

@@ -313,7 +313,7 @@ namespace PW.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData, float blendPercent = .15f)
+		public void FillBiomeMap(BiomeData biomeData, BiomeBlendMatrix blendMatrix, float blendPercent = .15f)
 		{
 			biomeData.ids.Clear();
 
@@ -365,12 +365,14 @@ namespace PW.Biomator
 					//add biome that can be blended with the primary biome,
 					if (blendPercent > 0)
 						foreach (var link in biomeSwitchCell.links)
+						{
 							if (link.Overlaps(blendParams))
 							{
-								float blend = link.ComputeBlend(paramRanges, biomeSwitchValues, blendPercent);
+								float blend = link.ComputeBlend(blendMatrix, paramRanges, biomeSwitchValues, blendPercent);
 								if (blend > 0.001f)
 									biomeData.biomeMap.AddBiome(x, y, link.id, blend);
 							}
+						}
 				}
 
 			Profiler.EndSample();

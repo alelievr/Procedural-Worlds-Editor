@@ -43,7 +43,7 @@ namespace PW.Node
 			delayedChanges.BindCallback(delayedKey, (unused) => {
 				BiomeData data = GetBiomeData();
 
-				data.biomeSwitchGraph.FillBiomeMap(data, biomeBlendPercent);
+				data.biomeSwitchGraph.FillBiomeMap(data, blendMatrix, biomeBlendPercent);
 				updateBiomeMap = true;
 			});
 			
@@ -86,7 +86,11 @@ namespace PW.Node
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(delayedKey);
 				blendMatrix.UpdateMatrixIfNeeded(biomeData);
-				blendMatrix.DrawMatrix();
+
+				EditorGUI.BeginChangeCheck();
+				blendMatrix.DrawMatrix(biomeData, visualRect);
+				if (EditorGUI.EndChangeCheck())
+					updateBiomeMap = true;
 			}
 
 			if (biomeData != null)
@@ -151,7 +155,7 @@ namespace PW.Node
 			if (!biomeData.biomeSwitchGraph.isBuilt)
 				BuildBiomeSwitchGraph();
 
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, biomeBlendPercent);
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
@@ -202,7 +206,7 @@ namespace PW.Node
 			//if the reload does not comes from the editor
 			if (from != null)
 			{
-				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, biomeBlendPercent);
+				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
 				updateBiomeMap = true;
 			}
 		}

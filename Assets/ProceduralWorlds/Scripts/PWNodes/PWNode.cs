@@ -14,6 +14,7 @@ namespace PW
 	{
 		//Node datas:
 		public Rect					rect = new Rect(400, 400, 200, 50);
+		public Rect					visualRect;
 		public int					id;
 		public bool					renamable = false;
 		public int					computeOrder = 0;

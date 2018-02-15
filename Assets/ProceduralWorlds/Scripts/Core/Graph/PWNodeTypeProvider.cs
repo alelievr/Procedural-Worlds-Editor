@@ -69,7 +69,7 @@ namespace PW.Core
 			//Biomes:
             typeof(PWNodeBiomeData), typeof(PWNodeBiomeBinder), typeof(PWNodeWaterLevel),
         	typeof(PWNodeBiomeBlender), typeof(PWNodeBiomeSwitch), typeof(PWNodeBiomeTemperature),
-            typeof(PWNodeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiome),
+            typeof(PWNodeBiomeWetness), typeof(PWNodeBiomeSurface), typeof(PWNodeBiome),
 			typeof(PWNodeBiomeDataDecomposer), typeof(PWNodeBiomeMerger),
 			
 			//Texturing:
@@ -106,7 +106,7 @@ namespace PW.Core
 				"Water Level", typeof(PWNodeWaterLevel),
 				"To Biome data", typeof(PWNodeBiomeData),
 				"Temperature map", typeof(PWNodeBiomeTemperature),
-				"Wetness map", typeof(PWNodeWetness),
+				"Wetness map", typeof(PWNodeBiomeWetness),
 				"Biome Switch", typeof(PWNodeBiomeSwitch),
 				"Biome Graph", typeof(PWNodeBiome),
 				"Biome Blender", typeof(PWNodeBiomeBlender)
