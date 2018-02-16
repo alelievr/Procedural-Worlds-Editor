@@ -20,6 +20,9 @@ namespace PW.Core
 		[SerializeField]
 		public PWMainGraph			previewGraph = null;
 
+		[System.NonSerialized]
+		int							calls = 0;
+
 		public override void OnNodeCreation()
 		{
 			name = "Biome input";
@@ -53,9 +56,10 @@ namespace PW.Core
 			
 			if (outputPartialBiome != null)
 				BiomeUtils.DrawBiomeInfos(rect, outputPartialBiome.biomeDataReference);
+			
+			calls = 0;
 		}
 
-		int calls = 0;
 		public override void OnNodeProcess()
 		{
 			calls++;

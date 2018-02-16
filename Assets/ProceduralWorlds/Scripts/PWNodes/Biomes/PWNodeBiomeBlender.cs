@@ -21,7 +21,7 @@ namespace PW.Node
 		float				biomeBlendPercent = .1f;
 
 		[SerializeField]
-		BiomeBlendMatrix	blendMatrix = new BiomeBlendMatrix();
+		BiomeBlendList	blendMatrix = new BiomeBlendList();
 
 		[SerializeField]
 		bool				biomeCoverageRecap = false;
@@ -29,7 +29,7 @@ namespace PW.Node
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
 
-		string				delayedKey = "BiomeBlender";
+		string				updateBiomeMapKey = "BiomeBlender";
 
 		public override void OnNodeCreation()
 		{
@@ -40,11 +40,13 @@ namespace PW.Node
 		{
 			OnReload += OnReloadCallback;
 
-			delayedChanges.BindCallback(delayedKey, (unused) => {
+			delayedChanges.BindCallback(updateBiomeMapKey, (unused) => {
 				BiomeData data = GetBiomeData();
 
-				data.biomeSwitchGraph.FillBiomeMap(data, blendMatrix, biomeBlendPercent);
+				FillBiomeMap(data);
 				updateBiomeMap = true;
+
+				NotifyReload();
 			});
 			
 			if (inputBiomes.GetValues().Count == 0)
@@ -84,13 +86,13 @@ namespace PW.Node
 				EditorGUI.BeginChangeCheck();
 				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
 				if (EditorGUI.EndChangeCheck())
-					delayedChanges.UpdateValue(delayedKey);
+					delayedChanges.UpdateValue(updateBiomeMapKey);
 				blendMatrix.UpdateMatrixIfNeeded(biomeData);
 
 				EditorGUI.BeginChangeCheck();
-				blendMatrix.DrawMatrix(biomeData, visualRect);
+				blendMatrix.DrawList(biomeData, visualRect);
 				if (EditorGUI.EndChangeCheck())
-					updateBiomeMap = true;
+					FillBiomeMap(biomeData);
 			}
 
 			if (biomeData != null)
@@ -155,7 +157,7 @@ namespace PW.Node
 			if (!biomeData.biomeSwitchGraph.isBuilt)
 				BuildBiomeSwitchGraph();
 
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
+			FillBiomeMap(biomeData);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
@@ -197,6 +199,12 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
 
+		void FillBiomeMap(BiomeData biomeData)
+		{
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
+			updateBiomeMap = true;
+		}
+
 		void OnReloadCallback(PWNode from)
 		{
 			BuildBiomeSwitchGraph();
@@ -206,7 +214,7 @@ namespace PW.Node
 			//if the reload does not comes from the editor
 			if (from != null)
 			{
-				biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
+				FillBiomeMap(biomeData);
 				updateBiomeMap = true;
 			}
 		}

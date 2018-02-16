@@ -35,7 +35,7 @@ namespace PW.Editor
 		public PWGraphSettingsBar(PWGraph graph)
 		{
 			this.graph = graph;
-			delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); Debug.Log("graph chunk size: " + graph.chunkSize); });
+			delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); });
 		}
 
 		public void LoadStyles()

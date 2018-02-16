@@ -47,35 +47,43 @@ namespace PW.Biomator.SwitchGraph
 			return weight;
 		}
 
-		public float ComputeBlend(BiomeBlendMatrix blendMatrix, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
+		public float ComputeBlend(BiomeBlendList blendMatrix, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
 		{
 			float	blend = 0;
-			float	blendParamCount = 1;
+			float	blendParamCount = 0;
 
 			int length = values.length;
 			for (int i = 0; i < length; i++)
 			{
-				if (!blendMatrix.matrix[i, i])
+				if (!blendMatrix.blendEnabled[i] || !switchParams.switchParams[i].enabled || !values.enabled[i])
 					continue ;
 				
 				//Compute biome blend using blendPercent
-				float v = values[i];
-				Vector2 r = param.ranges[i];
-				float mag = r.y - r.x;
+				float v = values.switchValues[i];
+				float min = switchParams.switchParams[i].min;
+				float max = switchParams.switchParams[i].max;
+				float mag = max - min;
 				float p = mag * blendPercent;
-				
-				if (mag == 0 || v > r.x + p)
-					continue ;
 
-				float b = (.5f - (((v - r.x) / p) / 2));
+				if (mag == 0)
+					continue ;
+				
+				float b = 0;
+				
+				if (v < min && v > min - p)
+					b = .5f + (((v - min) / p) / 2);
+				if (v > max && v < max + p)
+					b = .5f - (((v - max) / p) / 2);
+
 				blend += b;
 				
-				// Debug.Log("blend range: " + r + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
+				// Debug.Log("i: " + i + "blend range: " + min + " to " + max + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
 
-				blendParamCount++;
+				if (b > 0)
+					blendParamCount++;
 			}
 
-			return blend / blendParamCount;
+			return (blendParamCount == 0) ? 0 : blend / blendParamCount;
 		}
 
 		public bool Matches(BiomeSwitchValues bsv)

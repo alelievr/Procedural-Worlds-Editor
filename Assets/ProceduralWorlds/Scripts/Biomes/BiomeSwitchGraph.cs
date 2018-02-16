@@ -313,10 +313,8 @@ namespace PW.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData, BiomeBlendMatrix blendMatrix, float blendPercent = .15f)
+		public void FillBiomeMap(BiomeData biomeData, BiomeBlendList blendMatrix, float blendPercent = .15f)
 		{
-			biomeData.ids.Clear();
-
 			Sampler	terrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
 			var		biomeSwitchValues = new BiomeSwitchValues();
 
