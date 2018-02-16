@@ -61,6 +61,9 @@ namespace PW.Biomator
 		const int			previewTextureWidth = 200;
 		const int			previewTextureHeight = 40;
 		
+		float				min = float.MinValue;
+		float				max = float.MaxValue;
+
 		bool				updatePreview;
 
 		PWGUIManager		PWGUI;
@@ -101,6 +104,9 @@ namespace PW.Biomator
 					elem.name = EditorGUI.TextField(nameRect, elem.name);
 					elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
 					elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+
+					elem.min = Mathf.Max(elem.min, min);
+					elem.max = Mathf.Min(elem.max, max);
 
 					//affect up/down cell value
 					if (elem.min != oldMin && index > 0)
@@ -214,6 +220,12 @@ namespace PW.Biomator
 			biomeRepartitionPreview.Apply();
 
 			updatePreview = false;
+		}
+
+		public void UpdateMinMax(float min, float max)
+		{
+			this.min = min;
+			this.max = max;
 		}
 
 		public void UpdateSwitchMode(string samplerName)

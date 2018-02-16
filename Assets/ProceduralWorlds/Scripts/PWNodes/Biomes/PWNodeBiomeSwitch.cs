@@ -34,6 +34,9 @@ namespace PW.Node
 		[System.NonSerialized]
 		bool					firstPass = true;
 
+		float					relativeMin;
+		float					relativeMax;
+
 		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
 
 		public override void OnNodeCreation()
@@ -60,10 +63,25 @@ namespace PW.Node
 
 		void UpdateSwitchMode()
 		{
+			UpdateRelativeBounds();
+
 			//TODO: set default values for switches
 			switch (samplerName)
 			{
 				case BiomeSamplerName.terrainHeight:
+					if (switchList.Count < 2)
+					{
+						while (switchList.Count < 2)
+							switchList.switchDatas.Add(new BiomeSwitchData(currentSampler, samplerName));
+
+						var d1 = switchList.switchDatas[0];
+						var d2 = switchList.switchDatas[1];
+						
+						d1.min = relativeMin;
+						d1.max = relativeMax / 2;
+						d2.min = relativeMax / 2;
+						d2.max = relativeMax;
+					}
 					break ;
 				case BiomeSamplerName.waterHeight:
 					break ;
@@ -74,28 +92,67 @@ namespace PW.Node
 			}
 
 			SetMultiAnchor("outputBiomes", switchList.Count, null);
+		}
+
+		void UpdateRelativeBounds()
+		{
+			var inputNodes = GetInputNodes();
+
+			if (inputNodes.Count() == 0)
+				return ;
 			
-			// if (switchMode == BiomeSwitchMode.Water)
-				// SetMultiAnchor("outputBiomes", 2, "terrestrial", "aquatic");
-			// else
+			var prevNode = inputNodes.First();
+
+			while (prevNode.GetType() == typeof(PWNodeBiomeSwitch))
+			{
+				PWNodeBiomeSwitch prevSwitch = (PWNodeBiomeSwitch)prevNode;
+
+				if (prevSwitch.samplerName != samplerName)
+				{
+					prevNode = prevNode.GetInputNodes().First();
+					continue ;
+				}
+
+				var prevNodeOutputAnchors = prevSwitch.outputAnchors.ToList();
+	
+				for (int i = 0; i < prevNodeOutputAnchors.Count; i++)
+				{
+					var anchor = prevNodeOutputAnchors[i];
+	
+					if (anchor.links.Any(l => l.toNode == this))
+					{
+						relativeMin = prevSwitch.switchList.switchDatas[i].min;
+						relativeMax = prevSwitch.switchList.switchDatas[i].max;
+					}
+				}
+
+				break ;
+			}
+
+			if (prevNode.GetType() != typeof(PWNodeBiomeSwitch))
+			{
+				if (currentSampler == null)
+					return ;
+				relativeMin = currentSampler.min;
+				relativeMax = currentSampler.max;
+				return ;
+			}
 		}
 
 		void CheckForBiomeSwitchErrors()
 		{
 			error = false;
 
-			{
-				var field = inputBiome.GetSampler(samplerName);
-				var field3D = inputBiome.GetSampler(samplerName);
+			var field = inputBiome.GetSampler(samplerName);
+			var field3D = inputBiome.GetSampler(samplerName);
 
-				if (field == null || field3D == null)
-				{
-					errorString = "can't switch on field " + samplerName + ",\ndata not provided !";
-					error = true;
-				}
-				else
-					currentSampler = ((field == null) ? field3D : field);
+			if (field == null || field3D == null)
+			{
+				errorString = "can't switch on field " + samplerName + ",\ndata not provided !";
+				error = true;
 			}
+			else
+				currentSampler = ((field == null) ? field3D : field);
 
 			//Update switchList values:
 			switchList.currentBiomeData = inputBiome;
@@ -139,6 +196,8 @@ namespace PW.Node
 				EditorGUI.LabelField(errorRect, errorString);
 				return ;
 			}
+
+			switchList.UpdateMinMax(relativeMin, relativeMax);
 
 			switchList.OnGUI();
 
