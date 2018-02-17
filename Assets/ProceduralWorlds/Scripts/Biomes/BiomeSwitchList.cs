@@ -61,14 +61,14 @@ namespace PW.Biomator
 		const int			previewTextureWidth = 200;
 		const int			previewTextureHeight = 40;
 		
-		float				min = float.MinValue;
-		float				max = float.MaxValue;
+		float				relativeMin = float.MinValue;
+		float				relativeMax = float.MaxValue;
 
 		bool				updatePreview;
 
 		PWGUIManager		PWGUI;
 		
-		ReorderableList		reprderableSwitchDataList;
+		ReorderableList		reorderableSwitchDataList;
 
 		public int			Count { get { return switchDatas.Count; } }
 
@@ -76,72 +76,28 @@ namespace PW.Biomator
 		{
 			PWGUI = new PWGUIManager();
 
-			reprderableSwitchDataList = new ReorderableList(switchDatas, typeof(BiomeSwitchData), true, true, true, true);
+			reorderableSwitchDataList = new ReorderableList(switchDatas, typeof(BiomeSwitchData), true, true, true, true);
 
-			reprderableSwitchDataList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
+			reorderableSwitchDataList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
 			
-            reprderableSwitchDataList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-			{
-				BiomeSwitchData elem = switchDatas[index];
+            reorderableSwitchDataList.drawElementCallback = DrawElementCallback;
 
-                rect.y += 2;
-				int		floatFieldSize = 70;
-				int		colorFieldSize = 20;
-				int		nameFieldSize = (int)rect.width - colorFieldSize - 2;
-				float	lineHeight = EditorGUIUtility.singleLineHeight;
-				Rect	nameRect = new Rect(rect.x, rect.y, nameFieldSize, EditorGUIUtility.singleLineHeight);
-				Rect	colorFieldRect = new Rect(rect.x + nameFieldSize + 4, rect.y - 2, colorFieldSize, colorFieldSize);
-				Rect	minRect = new Rect(rect.x, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
-            	Rect	maxRect = new Rect(rect.x + floatFieldSize, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
-
-				EditorGUIUtility.labelWidth = 25;
-				EditorGUI.BeginChangeCheck();
-				{
-					float oldMin = elem.min;
-					float oldMax = elem.max;
-					
-					PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
-					elem.name = EditorGUI.TextField(nameRect, elem.name);
-					elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
-					elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
-
-					elem.min = Mathf.Max(elem.min, min);
-					elem.max = Mathf.Min(elem.max, max);
-
-					//affect up/down cell value
-					if (elem.min != oldMin && index > 0)
-						switchDatas[index - 1].max = elem.min;
-					if (elem.max != oldMax && index + 1 < switchDatas.Count)
-						switchDatas[index + 1].min = elem.max;
-				}
-				if (EditorGUI.EndChangeCheck())
-				{
-					OnBiomeDataModified(elem);
-					updatePreview = true;
-				}
-				EditorGUIUtility.labelWidth = 0;
-				
-				elem.UpdateSampler(currentSampler);
-
-				switchDatas[index] = elem;
-            };
-
-			reprderableSwitchDataList.drawHeaderCallback = (rect) => {
+			reorderableSwitchDataList.drawHeaderCallback = (rect) => {
 				EditorGUI.LabelField(rect, "switches");
 			};
 
-			reprderableSwitchDataList.onReorderCallback += (ReorderableList l) => {
+			reorderableSwitchDataList.onReorderCallback += (ReorderableList l) => {
 				OnBiomeDataReordered();
 			};
 
-			reprderableSwitchDataList.onAddCallback += (ReorderableList l) => {
+			reorderableSwitchDataList.onAddCallback += (ReorderableList l) => {
 				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler, currentSamplerName);
 				switchDatas.Add(bsd);
 				OnBiomeDataAdded(bsd);
 				updatePreview = true;
 			};
 
-			reprderableSwitchDataList.onRemoveCallback += (ReorderableList l) => {
+			reorderableSwitchDataList.onRemoveCallback += (ReorderableList l) => {
 				if (switchDatas.Count > 1)
 				{
 					switchDatas.RemoveAt(l.index);
@@ -155,6 +111,72 @@ namespace PW.Biomator
 				switchDatas.Add(new BiomeSwitchData(currentSampler, currentSamplerName));
 		}
 
+		void DrawElementCallback(Rect rect, int index, bool isActive, bool selected)
+		{
+			BiomeSwitchData elem = switchDatas[index];
+
+			rect.y += 2;
+			int		floatFieldSize = 70;
+			int		colorFieldSize = 20;
+			int		nameFieldSize = (int)rect.width - colorFieldSize - 2;
+			float	lineHeight = EditorGUIUtility.singleLineHeight;
+			Rect	nameRect = new Rect(rect.x, rect.y, nameFieldSize, EditorGUIUtility.singleLineHeight);
+			Rect	colorFieldRect = new Rect(rect.x + nameFieldSize + 4, rect.y - 2, colorFieldSize, colorFieldSize);
+			Rect	minRect = new Rect(rect.x, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
+			Rect	maxRect = new Rect(rect.x + floatFieldSize, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
+
+			EditorGUIUtility.labelWidth = 25;
+			EditorGUI.BeginChangeCheck();
+			{
+				float oldMin = elem.min;
+				float oldMax = elem.max;
+
+				bool first = index == 0;
+				bool last = index == reorderableSwitchDataList.count - 1;
+				
+				PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
+				elem.name = EditorGUI.TextField(nameRect, elem.name);
+				EditorGUI.BeginDisabledGroup(first);
+				elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
+				EditorGUI.EndDisabledGroup();
+				EditorGUI.BeginDisabledGroup(last);
+				elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
+				EditorGUI.EndDisabledGroup();
+
+				if (last)
+				{
+					if (elem.max != relativeMax)
+						GUI.changed = true;
+					elem.max = relativeMax;
+				}
+				if (first)
+				{
+					if (elem.min != relativeMin)
+						GUI.changed = true;
+					elem.min = relativeMin;
+				}
+
+				elem.min = Mathf.Max(elem.min, relativeMin);
+				elem.max = Mathf.Min(elem.max, relativeMax);
+
+				//affect up/down cell value
+				if (elem.min != oldMin && index > 0)
+					switchDatas[index - 1].max = elem.min;
+				if (elem.max != oldMax && index + 1 < switchDatas.Count)
+					switchDatas[index + 1].min = elem.max;
+			}
+			if (EditorGUI.EndChangeCheck())
+			{
+				OnBiomeDataModified(elem);
+				updatePreview = true;
+			}
+			EditorGUIUtility.labelWidth = 0;
+			
+			elem.UpdateSampler(currentSampler);
+
+			switchDatas[index] = elem;
+		}
+
 		public void OnGUI()
 		{
 			PWGUI.StartFrame(new Rect(0, 0, 0, 0));
@@ -164,7 +186,7 @@ namespace PW.Biomator
 
 			using (new DefaultGUISkin())
 			{
-				reprderableSwitchDataList.DoLayoutList();
+				reorderableSwitchDataList.DoLayoutList();
 			}
 
 			if (updatePreview && currentSampler != null)
@@ -204,15 +226,22 @@ namespace PW.Biomator
 				float rMax = ((switchMax - min) / range) * previewTextureWidth;
 				localCoveragePercent += (rMax - rMin) / previewTextureWidth * 100;
 
+				//Clamp values to image size:
+				rMin = Mathf.Clamp(rMin, 0, biomeRepartitionPreview.width);
+				rMax = Mathf.Clamp(rMax, 0, biomeRepartitionPreview.width);
+
 				for (int x = (int)rMin; x < (int)rMax; x++)
 					biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
 				i++;
 			}
-			
+
 			//add water if there is and if switch mode is height:
 			if (!currentBiomeData.isWaterless && currentSamplerName == BiomeSamplerName.terrainHeight)
 			{
 				float rMax = (currentBiomeData.waterLevel / range) * previewTextureWidth;
+
+				rMax = Mathf.Clamp(rMax, 0, biomeRepartitionPreview.width);
+
 				for (int x = 0; x < rMax; x++)
 					biomeRepartitionPreview.SetPixel(x, 0, Color.blue);
 			}
@@ -224,8 +253,8 @@ namespace PW.Biomator
 
 		public void UpdateMinMax(float min, float max)
 		{
-			this.min = min;
-			this.max = max;
+			this.relativeMin = min;
+			this.relativeMax = max;
 		}
 
 		public void UpdateSwitchMode(string samplerName)

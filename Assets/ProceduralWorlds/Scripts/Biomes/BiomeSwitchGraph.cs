@@ -31,6 +31,7 @@ namespace PW.Biomator
 		public BiomeSwitchCell				rootCell;
 		public BiomeSwitchCell				lastCell;
 		public List< BiomeSwitchCell >		cells = new List< BiomeSwitchCell >();
+		public List< Sampler >				builtSamplers = new List< Sampler >();
 
 		[System.NonSerialized]
 		public bool							isBuilt = false;
@@ -83,7 +84,7 @@ namespace PW.Biomator
 					currentCell.color = biomeNode.outputBiome.previewColor = lastSwitch.color;
 					currentCell.weight = currentCell.GetWeight(paramRanges);
 
-					//add the partial biome to utility dic accessors:
+					//add the partial biome to utility dictionary accessors:
 					partialBiomePerName[currentCell.name] = biomeNode.outputBiome;
 					partialBiomePerId[currentCell.id] = biomeNode.outputBiome;
 
@@ -144,11 +145,14 @@ namespace PW.Biomator
 
 		void FillParamRange(BiomeData biomeData)
 		{
+			builtSamplers.Clear();
+
 			for (int i = 0; i < biomeData.length; i++)
 			{
 				var dataSampler = biomeData.GetDataSampler(i);
 
 				paramRanges.ranges[i] = new Vector2(dataSampler.dataRef.min, dataSampler.dataRef.max);
+				builtSamplers.Add(dataSampler.dataRef);
 			}
 		}
 
@@ -166,7 +170,7 @@ namespace PW.Biomator
 				
 				var switches = (n as PWNodeBiomeSwitch).switchList;
 				
-				int index = n.GetOutputNodes().ToList().FindIndex(c => c == prevNode);
+				int index = n.outputAnchors.ToList().FindIndex(a => a.links.Any(l => l.toNode == prevNode));
 
 				if (index == -1)
 					throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");

@@ -25,7 +25,7 @@ namespace PW.Editor
 
 		DelayedChanges			delayedChanges = new DelayedChanges();
 
-		public Action< Rect >	onDrawAdditionalSettings;
+		public Action< Rect >	onDraw;
 
 		readonly string			graphProcessKey = "UpdateGraphProperties";
 
@@ -36,6 +36,7 @@ namespace PW.Editor
 		{
 			this.graph = graph;
 			delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); });
+			onDraw = DrawDefault;
 		}
 
 		public void LoadStyles()
@@ -43,8 +44,9 @@ namespace PW.Editor
 			prefixLabelStyle = new GUIStyle("PrefixLabel");
 		}
 
-		void DrawGraphSettings(Rect currentRect, Event e)
+		void DrawGraphSettings(Rect currentRect)
 		{
+			Event	e = Event.current;
 			EditorGUILayout.Space();
 
 			GUI.SetNextControlName("PWName");
@@ -140,49 +142,42 @@ namespace PW.Editor
 			EditorGUILayout.EndVertical();
 		}
 
-		public void DrawSettingsBar(Rect currentRect)
+		public void Draw(Rect rect)
 		{
-			Event	e = Event.current;
-
 			Profiler.BeginSample("[PW] Rendering settings bar");
-			
-			GUI.DrawTexture(currentRect, PWColorTheme.defaultBackgroundTexture);
+
+			GUI.DrawTexture(rect, PWColorTheme.defaultBackgroundTexture);
 	
 			//add the texturePreviewRect size:
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
-				DrawTerrainPreview(currentRect);
-
-				EditorGUILayout.BeginHorizontal();
-				{
-					previewType = (PWGraphTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
-				}
-				EditorGUILayout.EndHorizontal();
-				
-				//draw main graph settings
-				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-				{
-					DrawGraphSettings(currentRect, e);
-				}
-				EditorGUILayout.EndVertical();
-
-				//call the method to draw additional things determined by the graph.
-				if (onDrawAdditionalSettings != null)
-				{
-					Rect r = EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-					{
-						onDrawAdditionalSettings(r);
-					}
-					EditorGUILayout.EndVertical();
-				}
+				onDraw(rect);
 			}
 			EditorGUILayout.EndScrollView();
 			
 			//free focus of the selected fields
-			if (e.type == EventType.MouseDown)
+			if (Event.current.type == EventType.MouseDown)
 				GUI.FocusControl(null);
 
 			Profiler.EndSample();
+		}
+
+		public void DrawDefault(Rect currentRect)
+		{
+			DrawTerrainPreview(currentRect);
+
+			EditorGUILayout.BeginHorizontal();
+			{
+				previewType = (PWGraphTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
+			}
+			EditorGUILayout.EndHorizontal();
+			
+			//draw main graph settings
+			EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+			{
+				DrawGraphSettings(currentRect);
+			}
+			EditorGUILayout.EndVertical();
 		}
 	}
 }

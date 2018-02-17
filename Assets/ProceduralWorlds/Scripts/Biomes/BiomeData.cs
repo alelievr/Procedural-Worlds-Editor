@@ -170,5 +170,15 @@ namespace PW.Biomator
 			
 			return dataSampler.index;
 		}
+
+		public string GetHash()
+		{
+			string ret = "";
+
+			for (int i = 0; i < length; i++)
+				ret += biomeSamplers[i].dataRef.GetHashCode();
+			
+			return ret;
+		}
 	}
 }

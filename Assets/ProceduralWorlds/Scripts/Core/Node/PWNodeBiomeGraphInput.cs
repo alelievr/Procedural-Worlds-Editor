@@ -71,8 +71,6 @@ namespace PW.Core
 			
 			if (calls > 10)
 				return ;
-			
-			Debug.Log("processing graph: " + graphRef + ", name: " + AssetDatabase.GetAssetPath(graphRef));
 		
 			//check if the preview graph have a reference of this graph.
 			if (!previewGraph.FindNodesByType< PWNodeBiome >().Any(b => b.biomeGraph == graphRef))
@@ -81,8 +79,6 @@ namespace PW.Core
 			//we process the graph to provide the outputPartialBiome
 			//it require that biomeGraph to be contained in the previewGraph.
 			previewGraph.Process();
-
-			Debug.Log("graph: " + biomeGraphRef);
 
 			//if the graph we process does not contains an instance of our biome graph
 			if (outputPartialBiome == null)

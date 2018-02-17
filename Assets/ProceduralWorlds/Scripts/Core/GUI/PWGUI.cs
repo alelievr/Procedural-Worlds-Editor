@@ -820,6 +820,7 @@ namespace PW.Core
 				}
 			}
 			
+			//Copy the parameters of the opened popup when modified
 			if (PWBiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate")))
 			{
 				fieldSettings.debug = PWBiomeMapSettingsPopup.debug;
@@ -839,18 +840,26 @@ namespace PW.Core
 
 				EditorGUILayout.BeginVertical(PWStyles.debugBox);
 				{
-				for (int i = 0; i < point.length; i++)
-				{
-					short biomeId = point.biomeIds[i];
-					float biomeBlend = point.biomeBlends[i];
-					PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
-
-					EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
-					EditorGUI.indentLevel++;
-					EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
-					EditorGUI.indentLevel--;
-				}
-				EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
+					for (int i = 0; i < point.length; i++)
+					{
+						short biomeId = point.biomeIds[i];
+						float biomeBlend = point.biomeBlends[i];
+						PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
+	
+						if (biome == null)
+							continue ;
+	
+						EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
+						EditorGUI.indentLevel++;
+						for (int j = 0; j < biomeData.length; j++)
+						{
+							float val = biomeData.GetSampler2D(j)[x, y];
+							EditorGUILayout.LabelField(biomeData.GetBiomeKey(j) + ": " + val);
+						}
+						EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
+						EditorGUI.indentLevel--;
+					}
+					EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
 				}
 				EditorGUILayout.EndVertical();
 			}
@@ -874,6 +883,12 @@ namespace PW.Core
 				{
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
 					var firstBiome = switchGraph.GetBiome(blendInfo.firstBiomeId);
+
+					if (firstBiome == null)
+					{
+						fieldSettings.texture.SetPixel(x, y, new Color(0, 0, 0, 0));
+						continue ;
+					}
 					
 					Color finalColor = firstBiome.previewColor;
 

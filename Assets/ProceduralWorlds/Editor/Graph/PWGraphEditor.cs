@@ -44,10 +44,13 @@ public partial class PWGraphEditor : PWEditorWindow
 
 
 	//custom editor events:
-	//fired whe the user resize the window
+	//fired whe the user resize the window (old window size in parameter)
 	public event Action< Vector2 >	OnWindowResize;
 	//fired when a graph is loaded/unloaded
 	public event Action< PWGraph >	OnGraphChanged;
+
+	[System.NonSerialized]
+	Type							oldGraphType = null;
 
 
 	public override void OnEnable()
@@ -170,6 +173,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		if (this.graph != null)
 			UnloadGraph(false);
 
+		this.oldGraphType = graph.GetType();
 		this.graph = graph;
 
 		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
@@ -277,10 +281,13 @@ public partial class PWGraphEditor : PWEditorWindow
 	{
 		EditorGUILayout.LabelField("Graph not found, ouble click on a graph asset file to a graph to open it");
 
-		PWGraph newGraph = EditorGUILayout.ObjectField(null, GetType(), false) as PWGraph;
-
-		if (newGraph != null)
-			LoadGraph(newGraph);
+		if (oldGraphType != null)
+		{
+			PWGraph newGraph = EditorGUILayout.ObjectField(null, oldGraphType, false) as PWGraph;
+	
+			if (newGraph != null)
+				LoadGraph(newGraph);
+		}
 	}
 
 	void SelectAndDrag()

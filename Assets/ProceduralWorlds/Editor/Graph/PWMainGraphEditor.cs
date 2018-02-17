@@ -57,7 +57,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
+		layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
 	}
 
 	public override void OnGUIEnable()
@@ -107,9 +107,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 #endregion
 
-	void WindowResizeCallback(Vector2 newSize)
+	void WindowResizeCallback(Vector2 oldSize)
 	{
-		layout.ResizeWindow(newSize, position);
+		layout.ResizeWindow(oldSize, position);
 	}
 
 	void GraphChangedCallback(PWGraph newGraph)
@@ -119,8 +119,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		
 		terrainManager = new PWGraphTerrainManager(graph);
 
-		settingsBar.onDrawAdditionalSettings = (rect) =>
+		settingsBar.onDraw = (rect) =>
 		{
+			settingsBar.DrawDefault(rect);
+
 			terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
 
 			//Main graph sepcific datas:

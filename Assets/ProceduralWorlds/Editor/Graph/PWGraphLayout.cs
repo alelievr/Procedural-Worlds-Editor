@@ -29,7 +29,6 @@ namespace PW.Editor
 
 		public void LoadStyles(Rect position)
 		{
-			//load style: to move
 			resizeHandleColor = EditorGUIUtility.isProSkin
 				? new Color32(56, 56, 56, 255)
 				: new Color32(130, 130, 130, 255);
@@ -76,10 +75,10 @@ namespace PW.Editor
 				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());
 		}
 
-		public void ResizeWindow(Vector2 newSize, Rect position)
+		public void ResizeWindow(Vector2 oldSize, Rect position)
 		{
 			//calcul the ratio for the window move:
-			float r = position.size.x / newSize.x;
+			float r = position.size.x / oldSize.x;
 	
 			h1.handlePosition *= r;
 			h2.handlePosition *= r;

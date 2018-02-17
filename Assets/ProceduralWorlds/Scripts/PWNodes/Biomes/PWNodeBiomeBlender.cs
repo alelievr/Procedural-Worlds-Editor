@@ -29,6 +29,9 @@ namespace PW.Node
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
 
+		[System.NonSerialized]
+		string				lastBiomeDataHash = null;
+
 		string				updateBiomeMapKey = "BiomeBlender";
 
 		public override void OnNodeCreation()
@@ -75,13 +78,15 @@ namespace PW.Node
 
 		public override void OnNodeGUI()
 		{
-			var biomes = inputBiomes.GetValues();
-			BiomeData biomeData = null;
-			if (biomes.Count == 0 || biomes.First() == null)
+			BiomeData biomeData = GetBiomeData();
+
+			if (biomeData == null)
+			{
 				EditorGUILayout.LabelField("biomes not connected !");
+				return ;
+			}
 			else
 			{
-				biomeData = biomes.First().biomeDataReference;
 				EditorGUIUtility.labelWidth = 120;
 				EditorGUI.BeginChangeCheck();
 				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
@@ -156,6 +161,18 @@ namespace PW.Node
 			//run the biome tree precomputing once all the biome tree have been parcoured
 			if (!biomeData.biomeSwitchGraph.isBuilt)
 				BuildBiomeSwitchGraph();
+			
+			if (!graphRef.IsRealMode())
+			{
+				//Rebuild the biome switch graph if the BiomeDatas have been changed
+				if (lastBiomeDataHash != null && lastBiomeDataHash != biomeData.GetHash())
+				{
+					//TODO: FIXME !
+					BuildBiomeSwitchGraph();
+				}
+	
+				lastBiomeDataHash = biomeData.GetHash();
+			}
 
 			FillBiomeMap(biomeData);
 

@@ -87,10 +87,8 @@ public partial class PWGraphEditor
 			}
 		}
 
-		if (editorEvents.isPanning)
-			Undo.RecordObject(graph, "graph pan");
 		if (editorEvents.isDraggingOrderingGroup)
-			Undo.RecordObject(graph, "ordering graph drag");
+			Undo.RecordObject(graph, "ordering group drag");
 		if (GUI.changed)
 			Undo.RecordObject(graph, "something changed");
 			
@@ -117,7 +115,7 @@ public partial class PWGraphEditor
 		//fire the resize event
 		if (windowSize != Vector2.zero && windowSize != position.size)
 			if (OnWindowResize != null)
-				OnWindowResize(position.size);
+				OnWindowResize(windowSize);
 		
 		//zoom
 		if (e.type == EventType.ScrollWheel)

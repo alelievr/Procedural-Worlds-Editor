@@ -26,6 +26,8 @@ namespace PW.Node
 		string[]					samplerNames;
 
 		[SerializeField]
+		bool					alreadyModified = false;
+		[SerializeField]
 		int						selectedBiomeSamplerName;
 		[SerializeField]
 		bool					error;
@@ -33,9 +35,11 @@ namespace PW.Node
 		Sampler					currentSampler;
 		[System.NonSerialized]
 		bool					firstPass = true;
+		[System.NonSerialized]
+		string					lastBiomeDataHash = null;
 
-		float					relativeMin;
-		float					relativeMax;
+		float					relativeMin = float.MinValue;
+		float					relativeMax = float.MaxValue;
 
 		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
 
@@ -51,10 +55,10 @@ namespace PW.Node
 			samplerNames = BiomeSamplerName.GetNames().ToArray();
 			samplerName = samplerNames[selectedBiomeSamplerName];
 
-			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(typeof(PWNodeBiomeBlender)); });
+			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(); });
 
 			switchList.OnBiomeDataAdded = (unused) => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			switchList.OnBiomeDataModified = (unused) => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			switchList.OnBiomeDataModified = (unused) => { alreadyModified = true; UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			switchList.OnBiomeDataRemoved = () => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			switchList.OnBiomeDataReordered = () => { UpdateSwitchMode(); delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			
@@ -65,29 +69,44 @@ namespace PW.Node
 		{
 			UpdateRelativeBounds();
 
-			//TODO: set default values for switches
+			if (switchList.Count > 2 || alreadyModified)
+				return ;
+			
+			while (switchList.Count < 2)
+				switchList.switchDatas.Add(new BiomeSwitchData(currentSampler, samplerName));
+
+			var d1 = switchList.switchDatas[0];
+			var d2 = switchList.switchDatas[1];
+			
+			d1.min = relativeMin;
+			d1.max = relativeMax / 2;
+			d2.min = relativeMax / 2;
+			d2.max = relativeMax;
+			d1.color = (SerializableColor)UnityEngine.Random.ColorHSV();
+			d2.color = (SerializableColor)UnityEngine.Random.ColorHSV();
+
 			switch (samplerName)
 			{
 				case BiomeSamplerName.terrainHeight:
-					if (switchList.Count < 2)
-					{
-						while (switchList.Count < 2)
-							switchList.switchDatas.Add(new BiomeSwitchData(currentSampler, samplerName));
-
-						var d1 = switchList.switchDatas[0];
-						var d2 = switchList.switchDatas[1];
-						
-						d1.min = relativeMin;
-						d1.max = relativeMax / 2;
-						d2.min = relativeMax / 2;
-						d2.max = relativeMax;
-					}
+					d1.name = "Low lands";
+					d2.name = "High lands";
 					break ;
 				case BiomeSamplerName.waterHeight:
+					if (relativeMin < 0 && relativeMax > 0)
+					{
+						d1.max = 0;
+						d2.min = 0;
+					}
+					d1.name = "Terrestrial";
+					d2.name = "Aquatic";
 					break ;
 				case BiomeSamplerName.temperature:
+					d1.name = "Cold";
+					d2.name = "Hot";
 					break ;
 				case BiomeSamplerName.wetness:
+					d1.name = "Dry";
+					d2.name = "Wet";
 					break ;
 			}
 
@@ -101,7 +120,8 @@ namespace PW.Node
 			if (inputNodes.Count() == 0)
 				return ;
 			
-			var prevNode = inputNodes.First();
+			PWNode prevNode = inputNodes.First();
+			PWNode currentNode = this;
 
 			while (prevNode.GetType() == typeof(PWNodeBiomeSwitch))
 			{
@@ -109,7 +129,13 @@ namespace PW.Node
 
 				if (prevSwitch.samplerName != samplerName)
 				{
-					prevNode = prevNode.GetInputNodes().First();
+					inputNodes = prevNode.GetInputNodes();
+
+					if (inputNodes.Count() == 0)
+						return ;
+					
+					currentNode = prevNode;
+					prevNode = inputNodes.First();
 					continue ;
 				}
 
@@ -119,7 +145,7 @@ namespace PW.Node
 				{
 					var anchor = prevNodeOutputAnchors[i];
 	
-					if (anchor.links.Any(l => l.toNode == this))
+					if (anchor.links.Any(l => l.toNode == currentNode))
 					{
 						relativeMin = prevSwitch.switchList.switchDatas[i].min;
 						relativeMax = prevSwitch.switchList.switchDatas[i].max;
@@ -131,8 +157,13 @@ namespace PW.Node
 
 			if (prevNode.GetType() != typeof(PWNodeBiomeSwitch))
 			{
+				//update currentSampler value:
+				if (inputBiome != null)
+					currentSampler = inputBiome.GetSampler(samplerName);
+				
 				if (currentSampler == null)
 					return ;
+				
 				relativeMin = currentSampler.min;
 				relativeMax = currentSampler.max;
 				return ;
@@ -184,11 +215,11 @@ namespace PW.Node
 			}
 			if (EditorGUI.EndChangeCheck())
 			{
-				UpdateSwitchMode();
 				CheckForBiomeSwitchErrors();
+				UpdateSwitchMode();
 			}
 
-			EditorGUILayout.LabelField((currentSampler != null) ? "min: " + currentSampler.min + ", max: " + currentSampler.max : "");
+			EditorGUILayout.LabelField((currentSampler != null) ? "min: " + relativeMin + ", max: " + relativeMax : "");
 
 			if (error)
 			{
@@ -202,6 +233,12 @@ namespace PW.Node
 			switchList.OnGUI();
 
 			firstPass = false;
+
+			//check if biome datas have been modified
+			if (lastBiomeDataHash != null && lastBiomeDataHash != inputBiome.GetHash())
+				CheckForBiomeSwitchErrors();
+
+			lastBiomeDataHash = inputBiome.GetHash();
 		}
 
 		//no process needed else than assignation, this node only exists for user visual organization.
@@ -221,6 +258,8 @@ namespace PW.Node
 		{
 			#if UNITY_EDITOR
 				switchList.UpdateBiomeRepartitionPreview();
+
+				UpdateRelativeBounds();
 			#endif
 
 			AdjustOutputBiomeArraySize();
