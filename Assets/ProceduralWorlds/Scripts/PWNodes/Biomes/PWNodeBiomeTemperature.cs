@@ -160,6 +160,9 @@ namespace PW.Node
 
 			localTemperatureMap.min = minTemperature;
 			localTemperatureMap.max = maxTemperature;
+
+			if (inputBiomeData != null)
+				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
 		}
 
 		void CreateTemperatureMapIfNotExists()
@@ -182,9 +185,6 @@ namespace PW.Node
 			CreateTemperatureMapIfNotExists();
 
 			UpdateTemperatureMap();
-
-			if (inputBiomeData != null)
-				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
 
 			outputBiome = inputBiomeData;
 		}

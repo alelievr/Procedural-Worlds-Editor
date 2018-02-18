@@ -43,6 +43,7 @@ namespace PW
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
 		public bool				isSelected = false;
+		public bool				isProcessing = false;
 
 
 		//Graph datas accessors:
@@ -93,7 +94,7 @@ namespace PW
 
 		//fired when the node received a NotifyReload() or the user pressed Reload button in editor.
 		public event ReloadAction				OnReload;
-		//fired jstu after OnReload event;
+		//fired just after OnReload event;
 		public event ReloadAction				OnPostReload;
 		//fired when the node receive a SendMessage()
 		protected event MessageReceivedAction	OnMessageReceived;
@@ -118,7 +119,7 @@ namespace PW
 		//also fire a Process event for the target nodes
 		public void NotifyReload()
 		{
-			var nodes = graphRef.GetNodeChildsRecursive(this).ToList();
+			var nodes = graphRef.GetNodeChildsRecursive(this);
 
 			foreach (var node in nodes)
 				node.Reload(this);
@@ -162,6 +163,11 @@ namespace PW
 
 		public void Reload(PWNode from)
 		{
+			if (isProcessing)
+			{
+				Debug.LogError("Tried to reload a node from a processing pass !");
+				return ;
+			}
 			if (OnReload != null)
 				OnReload(from);
 			if (OnPostReload != null)

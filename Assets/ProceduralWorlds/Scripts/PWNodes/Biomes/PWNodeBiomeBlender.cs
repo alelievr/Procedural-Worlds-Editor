@@ -29,9 +29,6 @@ namespace PW.Node
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
 
-		[System.NonSerialized]
-		string				lastBiomeDataHash = null;
-
 		string				updateBiomeMapKey = "BiomeBlender";
 
 		public override void OnNodeCreation()
@@ -162,18 +159,6 @@ namespace PW.Node
 			if (!biomeData.biomeSwitchGraph.isBuilt)
 				BuildBiomeSwitchGraph();
 			
-			if (!graphRef.IsRealMode())
-			{
-				//Rebuild the biome switch graph if the BiomeDatas have been changed
-				if (lastBiomeDataHash != null && lastBiomeDataHash != biomeData.GetHash())
-				{
-					//TODO: FIXME !
-					BuildBiomeSwitchGraph();
-				}
-	
-				lastBiomeDataHash = biomeData.GetHash();
-			}
-
 			FillBiomeMap(biomeData);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
@@ -239,6 +224,8 @@ namespace PW.Node
 		void BuildBiomeSwitchGraph()
 		{
 			BiomeData biomeData = GetBiomeData();
+
+			Debug.Log("Biome graph rebuild");
 
 			if (biomeData == null)
 			{

@@ -45,6 +45,7 @@ namespace PW.Node
 			outputBiome.biomeSwitchGraphStartPoint = this;
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => {
+				UpdateWaterMap();
 				NotifyReload();
 			});
 		}
@@ -112,16 +113,8 @@ namespace PW.Node
 			}
 		}
 
-		public override void OnNodeProcess()
+		public void UpdateWaterMap()
 		{
-			if (terrainNoise == null)
-			{
-				Debug.LogError("[PWNodeWaterLevel] null terrain input received !");
-				return ;
-			}
-			
-			outputBiome.Reset();
-
 			outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, terrainNoise);
 
 			outputBiome.waterLevel = waterLevel;
@@ -143,6 +136,19 @@ namespace PW.Node
 			}
 			else
 				; //TODO
+		}
+
+		public override void OnNodeProcess()
+		{
+			if (terrainNoise == null)
+			{
+				Debug.LogError("[PWNodeWaterLevel] null terrain input received !");
+				return ;
+			}
+			
+			outputBiome.Reset();
+
+			UpdateWaterMap();
 		}
 	}
 }

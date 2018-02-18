@@ -711,9 +711,11 @@ namespace PW.Core
 			return link;
 		}
 
-		public IEnumerable< PWNode > GetNodeChildsRecursive(PWNode begin)
+		public List< PWNode > GetNodeChildsRecursive(PWNode begin)
 		{
-			Stack< PWNode > nodeStack = new Stack< PWNode >();
+			var nodeStack = new Stack< PWNode >();
+			var nodesMap = new HashSet< PWNode >();
+			var nodesList = new List< PWNode >();
 
 			nodeStack.Push(begin);
 
@@ -725,8 +727,16 @@ namespace PW.Core
 					nodeStack.Push(outputNode);
 				
 				if (node != begin)
-					yield return node;
+				{
+					if (!nodesMap.Contains(node))
+						nodesList.Add(node);
+					nodesMap.Add(node);
+				}
 			}
+
+			nodesList.Sort((n1, n2) => n1.computeOrder.CompareTo(n2.computeOrder));
+
+			return nodesList;
 		}
 
 	#endregion

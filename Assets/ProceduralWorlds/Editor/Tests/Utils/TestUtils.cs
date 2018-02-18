@@ -94,6 +94,35 @@ namespace PW.Tests
 				.NewNode< PWNodePerlinNoise2D >("perlin noise")
 				.NewNode< PWNodeCurve >("noise remap")
 				.NewNode< PWNodeDebugInfo >("view noise")
+				.Link("perlin noise", "noise remap")
+				.Link("noise remap", "view noise")
+				.Execute()
+				.GetGraph() as PWMainGraph;
+		}
+
+		//                                                +----+
+		//                                              +-> b1 +--+
+		// +--------+      +--------+      +---------+  | +----+  | +----------+
+		// | perlin +------> wlevel +------> bswitch +--+         +-> bblender |
+		// +--------+      +--------+      +---------+  | +----+  | +----------+
+		//                                              +-> b2 +--+
+		//                                                +----+
+
+		public static PWMainGraph	GenerateTestMainGraphBiomeSwitch()
+		{
+			return PWGraphBuilder.NewGraph< PWMainGraph >()
+				.NewNode< PWNodePerlinNoise2D >("perlin")
+				.NewNode< PWNodeWaterLevel >("wlevel")
+				.NewNode< PWNodeBiomeSwitch >("bswitch")
+				.NewNode< PWNodeBiome >("b1")
+				.NewNode< PWNodeBiome >("b2")
+				.NewNode< PWNodeBiomeBlender >("bblender")
+				.Link("perlin", "wlevel")
+				.Link("wlevel", "bswitch")
+				.Link("bswitch", "b1")
+				.Link("bswitch", "b2")
+				.Link("b1", "bblender")
+				.Link("b2", "bblender")
 				.Execute()
 				.GetGraph() as PWMainGraph;
 		}

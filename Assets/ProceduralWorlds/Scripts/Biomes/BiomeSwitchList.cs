@@ -5,6 +5,7 @@ using UnityEditor;
 using PW.Core;
 using UnityEditorInternal;
 using System;
+using System.Linq;
 
 namespace PW.Biomator
 {
@@ -51,20 +52,17 @@ namespace PW.Biomator
 		public Action						OnBiomeDataRemoved;
 		public Action						OnBiomeDataReordered;
 		public Action< BiomeSwitchData >	OnBiomeDataModified;
-
-		public Sampler						currentSampler;
-		public string						currentSamplerName;
-		public BiomeData					currentBiomeData;
 		
 		Texture2D			biomeRepartitionPreview;
 		float				localCoveragePercent;
 		const int			previewTextureWidth = 200;
 		const int			previewTextureHeight = 40;
+
+		string				currentSamplerName;
+		Sampler				currentSampler;
 		
 		float				relativeMin = float.MinValue;
 		float				relativeMax = float.MaxValue;
-
-		bool				updatePreview;
 
 		PWGUIManager		PWGUI;
 		
@@ -94,7 +92,6 @@ namespace PW.Biomator
 				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler, currentSamplerName);
 				switchDatas.Add(bsd);
 				OnBiomeDataAdded(bsd);
-				updatePreview = true;
 			};
 
 			reorderableSwitchDataList.onRemoveCallback += (ReorderableList l) => {
@@ -102,7 +99,6 @@ namespace PW.Biomator
 				{
 					switchDatas.RemoveAt(l.index);
 					OnBiomeDataRemoved();
-					updatePreview = true;
 				}
 			};
 
@@ -144,17 +140,9 @@ namespace PW.Biomator
 				EditorGUI.EndDisabledGroup();
 
 				if (last)
-				{
-					if (elem.max != relativeMax)
-						GUI.changed = true;
 					elem.max = relativeMax;
-				}
 				if (first)
-				{
-					if (elem.min != relativeMin)
-						GUI.changed = true;
 					elem.min = relativeMin;
-				}
 
 				elem.min = Mathf.Max(elem.min, relativeMin);
 				elem.max = Mathf.Min(elem.max, relativeMax);
@@ -166,13 +154,8 @@ namespace PW.Biomator
 					switchDatas[index + 1].min = elem.max;
 			}
 			if (EditorGUI.EndChangeCheck())
-			{
 				OnBiomeDataModified(elem);
-				updatePreview = true;
-			}
 			EditorGUIUtility.labelWidth = 0;
-			
-			elem.UpdateSampler(currentSampler);
 
 			switchDatas[index] = elem;
 		}
@@ -189,9 +172,6 @@ namespace PW.Biomator
 				reorderableSwitchDataList.DoLayoutList();
 			}
 
-			if (updatePreview && currentSampler != null)
-				UpdateBiomeRepartitionPreview();
-
 			EditorGUILayout.LabelField("repartition map: (" + localCoveragePercent.ToString("F1") + "%)");
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			
@@ -202,7 +182,7 @@ namespace PW.Biomator
 			PWGUI.SetScaleModeForField(-1, ScaleMode.StretchToFill);
 		}
 
-		public void UpdateBiomeRepartitionPreview()
+		public void UpdateBiomeRepartitionPreview(BiomeData biomeData)
 		{
 			if (currentSampler == null || biomeRepartitionPreview == null)
 				return ;
@@ -236,9 +216,9 @@ namespace PW.Biomator
 			}
 
 			//add water if there is and if switch mode is height:
-			if (!currentBiomeData.isWaterless && currentSamplerName == BiomeSamplerName.terrainHeight)
+			if (!biomeData.isWaterless && currentSamplerName == BiomeSamplerName.terrainHeight)
 			{
-				float rMax = (currentBiomeData.waterLevel / range) * previewTextureWidth;
+				float rMax = (biomeData.waterLevel / range) * previewTextureWidth;
 
 				rMax = Mathf.Clamp(rMax, 0, biomeRepartitionPreview.width);
 
@@ -247,8 +227,6 @@ namespace PW.Biomator
 			}
 
 			biomeRepartitionPreview.Apply();
-
-			updatePreview = false;
 		}
 
 		public void UpdateMinMax(float min, float max)
@@ -257,12 +235,20 @@ namespace PW.Biomator
 			this.relativeMax = max;
 		}
 
-		public void UpdateSwitchMode(string samplerName)
+		public void UpdateSampler(string samplerName, Sampler currentSampler)
 		{
 			this.currentSamplerName = samplerName;
+			this.currentSampler = currentSampler;
 
 			foreach (var switchData in switchDatas)
+			{
 				switchData.samplerName = samplerName;
+				switchData.UpdateSampler(currentSampler);
+			}
+
+			//update min and max values in the list:
+			switchDatas.First().min = relativeMin;
+			switchDatas.Last().max = relativeMax;
 		}
 
 		IEnumerator< BiomeSwitchData > IEnumerable< BiomeSwitchData >.GetEnumerator()

@@ -17,6 +17,9 @@ namespace PW.Node
 		[PWOutput]
 		public FinalTerrain			mergedBiomeTerrain;
 
+		[SerializeField]
+		bool						biomeTerrainsFoldout;
+
 		[System.NonSerialized]
 		bool						update;
 
@@ -42,10 +45,19 @@ namespace PW.Node
 			EditorGUIUtility.labelWidth = 80;
 			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
 
-			if (finalTerrain != null)
-				PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
-			else
+			if (finalTerrain == null)
+			{
 				EditorGUILayout.LabelField("Null terrain");
+				return ;
+			}
+
+			PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
+
+			biomeTerrainsFoldout = EditorGUILayout.Foldout(biomeTerrainsFoldout, "Show biome terrains");
+
+			if (biomeTerrainsFoldout)
+				foreach (var biome in inputBlendedTerrain.biomes)
+					PWGUI.SamplerPreview(biome.name, biome.modifiedTerrain);
 
 			if (update)
 			{

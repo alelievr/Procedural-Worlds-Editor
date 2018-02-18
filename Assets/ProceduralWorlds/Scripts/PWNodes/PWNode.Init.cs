@@ -332,7 +332,6 @@ namespace PW
 		void LinkRemovedCalllback()
 		{
 			UpdateWorkStatus();
-			Debug.Log("Link removed !");
 		}
 
 		void LinkCreatedCallback(PWNodeLink link)

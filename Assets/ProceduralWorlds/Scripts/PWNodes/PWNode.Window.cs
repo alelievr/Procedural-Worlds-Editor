@@ -159,9 +159,11 @@ namespace PW
 
 		public void Process()
 		{
+			isProcessing = true;
 			OnNodeProcess();
 			if (!realMode)
 				OnPostProcess();
+			isProcessing = false;
 		}
 	}
 }
