@@ -160,12 +160,15 @@ namespace PW.Biomator
 			switchDatas[index] = elem;
 		}
 
-		public void OnGUI()
+		public void OnGUI(BiomeData biomeData)
 		{
 			PWGUI.StartFrame(new Rect(0, 0, 0, 0));
 
 			if (biomeRepartitionPreview == null)
+			{
 				biomeRepartitionPreview = new Texture2D(previewTextureWidth, 1);
+				UpdateBiomeRepartitionPreview(biomeData);
+			}
 
 			using (new DefaultGUISkin())
 			{

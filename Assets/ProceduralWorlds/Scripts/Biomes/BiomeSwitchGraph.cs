@@ -84,8 +84,6 @@ namespace PW.Biomator
 					currentCell.color = biomeNode.outputBiome.previewColor = lastSwitch.color;
 					currentCell.weight = currentCell.GetWeight(paramRanges);
 
-					Debug.Log("bound biome id " + currentCell.id + " to biome " + currentCell.name + "(graph: " + biomeNode.biomeGraph.name + ")");
-
 					//add the partial biome to utility dictionary accessors:
 					partialBiomePerName[currentCell.name] = biomeNode.outputBiome;
 					partialBiomePerId[currentCell.id] = biomeNode.outputBiome;

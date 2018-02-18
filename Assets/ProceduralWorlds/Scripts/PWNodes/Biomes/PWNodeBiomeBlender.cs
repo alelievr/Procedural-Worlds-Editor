@@ -176,7 +176,7 @@ namespace PW.Node
 						if (partialBiome.biomeGraph == null)
 							continue ;
 						
-						partialBiome.biomeGraph.SetInput(partialBiomes[id]);
+						partialBiome.biomeGraph.SetInput(partialBiome);
 						partialBiome.biomeGraph.Process();
 
 						if (!partialBiome.biomeGraph.hasProcessed)
@@ -224,8 +224,6 @@ namespace PW.Node
 		void BuildBiomeSwitchGraph()
 		{
 			BiomeData biomeData = GetBiomeData();
-
-			Debug.Log("Biome graph rebuild");
 
 			if (biomeData == null)
 			{

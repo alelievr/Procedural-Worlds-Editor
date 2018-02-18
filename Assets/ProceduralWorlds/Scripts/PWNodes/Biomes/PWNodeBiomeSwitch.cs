@@ -230,7 +230,7 @@ namespace PW.Node
 				return ;
 			}
 
-			switchList.OnGUI();
+			switchList.OnGUI(inputBiome);
 
 			firstPass = false;
 		}

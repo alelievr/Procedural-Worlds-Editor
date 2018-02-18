@@ -5,14 +5,15 @@ using PW.Core;
 
 namespace PW.Noises
 {
-	public abstract class Noise {
+	public abstract class Noise
+	{
 	
 		public string	name;
-		public bool		hasGraphicAcceleration;
+		public bool		hasComputeShaders;
 	
 		public Noise()
 		{
-			hasGraphicAcceleration = SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null;
+			hasComputeShaders = SystemInfo.graphicsShaderLevel >= 45;
 		}
 
 		public virtual float Get2D(float x, float y, int seed)

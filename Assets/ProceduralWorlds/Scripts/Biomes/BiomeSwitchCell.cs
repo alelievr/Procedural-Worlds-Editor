@@ -119,7 +119,7 @@ namespace PW.Biomator.SwitchGraph
 
 		public override string ToString()
 		{
-			string s = name + " = ";
+			string s = name + " (" + id + ")= ";
 
 			for (int i = 0; i < switchParams.switchParams.Length; i++)
 				if (switchParams.switchParams[i].enabled)
