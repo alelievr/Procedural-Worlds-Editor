@@ -2,6 +2,8 @@
 
 log_file=$(pwd)/unit_test.xml
 
+touch $log_file
+
 echo "Running unit tests"
 /Applications/Unity/Unity.app/Contents/MacOS/Unity \
 	-batchmode \

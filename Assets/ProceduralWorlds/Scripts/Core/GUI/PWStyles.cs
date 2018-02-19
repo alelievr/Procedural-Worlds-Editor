@@ -144,10 +144,7 @@ namespace PW.Core
 			{
 				if (_prefixLabel == null)
 				{
-					using (new DefaultGUISkin())
-					{
-						_prefixLabel = new GUIStyle("PrefixLabel");
-					}
+					_prefixLabel = new GUIStyle("PrefixLabel");
 				}
 
 				return _prefixLabel;
