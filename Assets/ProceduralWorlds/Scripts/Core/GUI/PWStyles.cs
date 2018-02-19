@@ -137,6 +137,23 @@ namespace PW.Core
 			}
 		}
 
+		static GUIStyle _prefixLabel;
+		public static GUIStyle prefixLabel
+		{
+			get
+			{
+				if (_prefixLabel == null)
+				{
+					using (new DefaultGUISkin())
+					{
+						_prefixLabel = new GUIStyle("PrefixLabel");
+					}
+				}
+
+				return _prefixLabel;
+			}
+		}
+
 		public static GUIStyle ColorizeText(GUIStyle text, Color color)
 		{
 			text.normal.textColor = color;

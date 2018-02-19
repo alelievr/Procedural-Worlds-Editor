@@ -20,9 +20,6 @@ namespace PW.Editor
 		[SerializeField]
 		PWGraphTerrainPreview	terrainPreview = new PWGraphTerrainPreview();
 		
-		//Style datas:
-		GUIStyle				prefixLabelStyle;
-
 		DelayedChanges			delayedChanges = new DelayedChanges();
 
 		public Action< Rect >	onDraw;
@@ -41,7 +38,6 @@ namespace PW.Editor
 
 		public void LoadStyles()
 		{
-			prefixLabelStyle = new GUIStyle("PrefixLabel");
 		}
 
 		void DrawGraphSettings(Rect currentRect)
@@ -52,35 +48,10 @@ namespace PW.Editor
 			GUI.SetNextControlName("PWName");
 			graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
 
-			EditorGUI.BeginChangeCheck();
-			{
-				//seed
-				GUI.SetNextControlName("seed");
-				graph.seed = EditorGUILayout.IntField("Seed", graph.seed);
-				
-				//chunk size:
-				GUI.SetNextControlName("chunk size");
-				graph.chunkSize = EditorGUILayout.IntField("Chunk size", graph.chunkSize);
-				graph.chunkSize = Mathf.Clamp(graph.chunkSize, 1, 1024);
-	
-				//step:
-				float min = 0.1f;
-				EditorGUILayout.BeginHorizontal();
-				EditorGUILayout.PrefixLabel("step", prefixLabelStyle);
-				graph.step = graph.PWGUI.Slider(graph.step, ref min, ref graph.maxStep, 0.01f, false, true);
-				EditorGUILayout.EndHorizontal();
-			}
-			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(graphProcessKey);
-
 			EditorGUILayout.Separator();
 
-			EditorGUILayout.LabelField("Is real mode: " + graph.IsRealMode());
-			EditorGUILayout.LabelField("Instance ID: " + graph.GetInstanceID());
-
-			EditorGUILayout.Separator();
-
-			if (GUILayout.Button("Cleanup graphs"))
+			//No need for the moment
+			/*if (GUILayout.Button("Cleanup graphs"))
 			{
 				PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
 
@@ -90,7 +61,7 @@ namespace PW.Editor
 						Debug.Log("destroyed graph: " + graph);
 						GameObject.DestroyImmediate(graph, false);
 					}
-			}
+			}*/
 
 			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();

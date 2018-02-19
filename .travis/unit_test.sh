@@ -1,0 +1,17 @@
+#!/bin/sh
+
+log_file=$(pwd)/unit_test.xml
+
+echo "Running unit tests"
+/Applications/Unity/Unity.app/Contents/MacOS/Unity \
+	-batchmode \
+	-editorTestsResultFile $log_file \
+	-runEditorTests \
+	-projectPath $(pwd)
+
+res=$?
+
+echo "Unit tests:"
+cat $log_file
+
+exit $res

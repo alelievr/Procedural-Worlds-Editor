@@ -35,6 +35,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	//size of the current window, updated each frame
 	protected Vector2			windowSize;
+	protected DelayedChanges	delayedChanges = new DelayedChanges();
 
 
 	//Is the editor on MacOS ?
@@ -157,6 +158,9 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//save the size of the window
 		windowSize = position.size;
+
+		//update delayedChanges
+		delayedChanges.Update();
 	}
 
 	void PlayModeChangeCallback(PlayModeStateChange mode)

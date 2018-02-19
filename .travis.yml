@@ -1,0 +1,7 @@
+os: osx
+
+install:
+    - ./install.sh
+
+script:
+    - ./unit_test.sh

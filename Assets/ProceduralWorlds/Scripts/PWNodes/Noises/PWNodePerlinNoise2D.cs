@@ -54,7 +54,7 @@ namespace PW.Node
 		public override void OnNodeProcess()
 		{
 			//recalcul perlin noise values with new seed / position.
-			output.ResizeIfNeeded(graphRef.chunkSize, graphRef.step);
+			output.ResizeIfNeeded(chunkSize, step);
 
 			perlin2D.ComputeSampler(output, seed + additionalSeed);
 		}
