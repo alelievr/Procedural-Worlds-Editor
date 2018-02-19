@@ -32,6 +32,14 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	[System.NonSerialized]
 	PWMainPresetScreen		presetScreen;
 
+	[SerializeField]
+	bool					scaledPreviewFoldout;
+	[SerializeField]
+	bool					terrainSettingsFoldout;
+	[SerializeField]
+	bool					geologicalSettingsFoldout;
+	bool					scaledPreviewEnabled;
+
 
 #region Initialization and data baking
 
@@ -42,11 +50,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 		window.Show();
 	}
-
-/*	void InitializeNewGraph(PWNodeGraph graph)
-	{
-		//setup splitted panels:
-	}*/
 
 	public override void OnEnable()
 	{
@@ -123,11 +126,30 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		{
 			settingsBar.DrawDefault(rect);
 
-			terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
+			if (PWGUI.BeginFade("Scaled preview", ref scaledPreviewFoldout, false))
+			{
+				using (new DefaultGUISkin())
+				{
+					if (GUILayout.Button("Active", (scaledPreviewEnabled) ? PWStyles.pressedButton : PWStyles.button))
+						scaledPreviewEnabled = !scaledPreviewEnabled;
+				}
 
-			//Main graph sepcific datas:
-			mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
-			mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+				EditorGUILayout.LabelField("olol");
+			}
+			PWGUI.EndFade();
+
+			if (PWGUI.BeginFade("Terrain settings", ref terrainSettingsFoldout, false))
+			{
+				terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
+			}
+			PWGUI.EndFade();
+
+			if (PWGUI.BeginFade("Geological settings", ref geologicalSettingsFoldout, false))
+			{
+				mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+				mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+			}
+			PWGUI.EndFade();
 		};
 	}
 

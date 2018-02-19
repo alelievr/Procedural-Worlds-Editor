@@ -26,8 +26,6 @@ namespace PW.Node
 		[PWOutput]
 		public BiomeSurfaceSwitch	outputSwitch = new BiomeSurfaceSwitch();
 
-		GUIStyle			boxStyle;
-
 		readonly string		biomeSurfaceSwitchKey = "BiomeSurfaceSwitch";
 
 		public override void OnNodeCreation()
@@ -45,14 +43,6 @@ namespace PW.Node
 			});
 			
 			UpdateSurfaceType(biomeGraphRef.surfaceType);
-		}
-
-		public override void OnNodeLoadStyle()
-		{
-			using (new DefaultGUISkin())
-			{
-				boxStyle = new GUIStyle("box");
-			}
 		}
 
 		public void UpdateSurfaceType(BiomeSurfaceType surfaceType)
@@ -83,7 +73,7 @@ namespace PW.Node
 
 			EditorGUI.BeginChangeCheck();
 
-			if (PWGUI.BeginFade("Height limit", boxStyle, ref outputSwitch.heightEnabled))
+			if (PWGUI.BeginFade("Height limit", PWStyles.box, ref outputSwitch.heightEnabled))
 			{
 				EditorGUIUtility.labelWidth = 60;
 				outputSwitch.minHeight = EditorGUILayout.FloatField("From", outputSwitch.minHeight);
@@ -91,12 +81,12 @@ namespace PW.Node
 				EditorGUIUtility.labelWidth = 0;
 			}
 			PWGUI.EndFade();
-			if (PWGUI.BeginFade("Slope limit", boxStyle, ref outputSwitch.slopeEnabled))
+			if (PWGUI.BeginFade("Slope limit", PWStyles.box, ref outputSwitch.slopeEnabled))
 			{
 				PWGUI.MinMaxSlope(0, 90, ref outputSwitch.minSlope, ref outputSwitch.maxSlope);
 			}
 			PWGUI.EndFade();
-			if (PWGUI.BeginFade("Param limit", boxStyle, ref outputSwitch.paramEnabled))
+			if (PWGUI.BeginFade("Param limit", PWStyles.box, ref outputSwitch.paramEnabled))
 			{
 				//TODO: modular input from BiomeSamplerName
 				// outputSwitch.paramType = (BiomeSwitchMode)EditorGUILayout.EnumPopup(outputSwitch.paramType);

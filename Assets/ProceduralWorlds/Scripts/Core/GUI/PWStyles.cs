@@ -85,6 +85,58 @@ namespace PW.Core
 			}
 		}
 
+		static GUIStyle _box;
+		public static GUIStyle box
+		{
+			get
+			{
+				if (_box == null)
+				{
+					using (new DefaultGUISkin())
+					{
+						_box = new GUIStyle("box");
+					}
+				}
+
+				return _box;
+			}
+		}
+
+		static GUIStyle _button;
+		public static GUIStyle button
+		{
+			get
+			{
+				if (_button == null)
+				{
+					using (new DefaultGUISkin())
+					{
+						_button = new GUIStyle("Button");
+					}
+				}
+
+				return _button;
+			}
+		}
+
+		static GUIStyle _pressedButton;
+		public static GUIStyle pressedButton
+		{
+			get
+			{
+				if (_pressedButton == null)
+				{
+					using (new DefaultGUISkin())
+					{
+						_pressedButton = new GUIStyle("Button");
+						_pressedButton.normal.background = _pressedButton.active.background;
+					}
+				}
+
+				return _pressedButton;
+			}
+		}
+
 		public static GUIStyle ColorizeText(GUIStyle text, Color color)
 		{
 			text.normal.textColor = color;

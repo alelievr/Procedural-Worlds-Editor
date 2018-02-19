@@ -21,21 +21,27 @@ public partial class PWGraphEditor : PWEditorWindow
 	public PWBiomeGraph			biomeGraph { get { return graph as PWBiomeGraph; } }
 	public PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
 
+
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.
 	public Dictionary< int, Rect >	eventMasks = new Dictionary< int, Rect >();
 	EventType					savedEventType;
 	bool						restoreEvent;
-	
+
+
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
-	
+	protected PWGUIManager		PWGUI = new PWGUIManager();
+
+
 	//size of the current window, updated each frame
 	protected Vector2			windowSize;
+
 
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
+
 
 	//Layout additional windows
 	protected PWGraphOptionBar			optionBar;
@@ -48,6 +54,7 @@ public partial class PWGraphEditor : PWEditorWindow
 	public event Action< Vector2 >	OnWindowResize;
 	//fired when a graph is loaded/unloaded
 	public event Action< PWGraph >	OnGraphChanged;
+
 
 	[System.NonSerialized]
 	Type							oldGraphType = null;
@@ -93,6 +100,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//update the current GUI settings storage and clear drawed popup list:
 		graph.PWGUI.StartFrame(position);
+		PWGUI.StartFrame(position);
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;

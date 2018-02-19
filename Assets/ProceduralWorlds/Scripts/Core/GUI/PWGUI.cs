@@ -1000,6 +1000,11 @@ namespace PW.Core
 			
 			return BeginFade(new GUIContent(header), style, ref checkbox, false);
 		}
+
+		public bool BeginFade(string header, ref bool checkbox, bool checkboxEnabled = true)
+		{
+			return BeginFade(new GUIContent(header), null, ref checkbox, checkboxEnabled);
+		}
 	
 		public bool BeginFade(string header, GUIStyle style, ref bool checkbox)
 		{
@@ -1012,6 +1017,9 @@ namespace PW.Core
 			var settings = GetGUISettingData(PWGUIFieldType.FadeBlock, () => {
 				return new PWGUISettings();
 			});
+
+			if (style == null)
+				style = PWStyles.box;
 
 			if (settings.fadeStatus == null)
 				settings.fadeStatus = new AnimBool(settings.faded);
