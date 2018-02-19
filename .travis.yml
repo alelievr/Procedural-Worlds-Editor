@@ -1,7 +1,7 @@
 os: osx
 
 install:
-    - ./install.sh
+    - ./.travis/install.sh
 
 script:
-    - ./unit_test.sh
+    - ./.travis/unit_test.sh
