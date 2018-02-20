@@ -90,6 +90,8 @@ namespace PW.Biomator
 
 			reorderableSwitchDataList.onAddCallback += (ReorderableList l) => {
 				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler, currentSamplerName);
+				BiomeSwitchData lastSwitch = switchDatas.Last();
+				bsd.min = lastSwitch.min + (lastSwitch.max - lastSwitch.min) / 2;
 				switchDatas.Add(bsd);
 				OnBiomeDataAdded(bsd);
 			};

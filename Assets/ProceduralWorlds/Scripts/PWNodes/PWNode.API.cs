@@ -69,6 +69,7 @@ namespace PW
 			}
 
 			var anchorField = anchorFieldDictionary[fieldName];
+			Debug.Log("anchor: " + anchorField);
 
 			if (anchorField.anchors.Count > newCount)
 			{

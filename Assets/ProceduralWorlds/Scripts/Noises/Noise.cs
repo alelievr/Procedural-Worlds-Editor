@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
+using System.Runtime.CompilerServices;
 
 namespace PW.Noises
 {

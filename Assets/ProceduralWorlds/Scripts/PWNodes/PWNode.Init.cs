@@ -63,13 +63,14 @@ namespace PW
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
 			List< string > actualFields = new List< string >();
+				
 			foreach (var field in fInfos)
 			{
 				// reading field informations.
 
 				actualFields.Add(field.Name);
 				anchorFieldInfoMap[field.Name] = field;
-				
+
 				if (!anchorFieldDictionary.ContainsKey(field.Name))
 					anchorFieldDictionary[field.Name] = CreateAnchorField();
 				
@@ -134,6 +135,16 @@ namespace PW
 			foreach (var kp in anchorFieldDictionary)
 				if (!actualFields.Contains(kp.Key))
 					toRemoveKeys.Add(kp.Key);
+						
+			//remove duplicate keys in the dictionary (yes it happends ...)
+			HashSet< string > duplicateKeys = new HashSet< string >();
+			foreach (var kp in anchorFieldDictionary)
+			{
+				// if (duplicateKeys.Contains(kp.Key))
+					// toRemoveKeys.Add(kp.Key);
+				duplicateKeys.Add(kp.Key);
+			}
+			
 			foreach (var toRemoveKey in toRemoveKeys)
 				anchorFieldDictionary.Remove(toRemoveKey);
 		}
