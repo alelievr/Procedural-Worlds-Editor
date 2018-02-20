@@ -191,7 +191,7 @@ namespace PW
 		public IEnumerable< PWNode >	GetNodesAttachedToAnchor(PWAnchor anchor)
 		{
 			return (anchor.anchorType == PWAnchorType.Input) ?
-				from l in anchor.links select l.fromNode : 
+				from l in anchor.links select l.fromNode :
 				from l in anchor.links select l.toNode;
 		}
 		

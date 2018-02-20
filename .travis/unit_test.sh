@@ -18,7 +18,4 @@ res=$?
 echo "Unit tests:"
 cat $log_file
 
-echo $res
-ls
-pwd
 exit $res

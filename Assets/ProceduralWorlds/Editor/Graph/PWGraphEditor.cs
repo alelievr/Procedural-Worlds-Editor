@@ -86,6 +86,9 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (graph != null)
 			LoadGraph(graph);
+			
+		//save the size of the window
+		windowSize = position.size;
 	}
 
 	//draw the default node graph:
@@ -155,9 +158,6 @@ public partial class PWGraphEditor : PWEditorWindow
 	
 		//restore masked events:
 		UnMaskEvents();
-		
-		//save the size of the window
-		windowSize = position.size;
 
 		//update delayedChanges
 		delayedChanges.Update();

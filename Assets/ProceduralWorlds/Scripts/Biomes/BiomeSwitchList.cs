@@ -170,7 +170,7 @@ namespace PW.Biomator
 				UpdateBiomeRepartitionPreview(biomeData);
 			}
 
-			using (new DefaultGUISkin())
+			using (DefaultGUISkin.Get())
 			{
 				reorderableSwitchDataList.DoLayoutList();
 			}

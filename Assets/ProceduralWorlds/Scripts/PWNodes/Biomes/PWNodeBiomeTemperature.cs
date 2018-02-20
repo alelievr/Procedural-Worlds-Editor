@@ -34,7 +34,7 @@ namespace PW.Node
 		[SerializeField]
 		Gradient				temperatureGradient;
 		[System.NonSerialized]
-		bool					fieldUpdate = false;
+		bool					updateTemperatureMap = false;
 		[SerializeField]
 		bool					internalTemperatureMap = true;
 
@@ -74,7 +74,7 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			{
 				terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
-				waterMultiplier = PWGUI.Slider(new GUIContent("water multiplier: "), waterMultiplier, -1, 1);
+				waterMultiplier = PWGUI.Slider("water multiplier: ", waterMultiplier, -1, 1);
 	
 				EditorGUILayout.LabelField("temperature limits:");
 				EditorGUILayout.BeginHorizontal();
@@ -90,12 +90,12 @@ namespace PW.Node
 				else
 				{
 					EditorGUILayout.LabelField("Input temperature map range");
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 						EditorGUILayout.MinMaxSlider(ref minTemperatureMapInput, ref maxTemperatureMapInput, minTemperature, maxTemperature);
 				}
 			}
 			if (EditorGUI.EndChangeCheck())
-				fieldUpdate = true;
+				UpdateTemperatureMap();
 			
 			if (localTemperatureMap != null)
 			{
@@ -104,12 +104,11 @@ namespace PW.Node
 				PWGUI.SetDebugForField(2, true);
 			}
 			
-			if (fieldUpdate)
+			if (updateTemperatureMap)
 			{
 				delayedChanges.UpdateValue(delayedTemperatureKey);
 				PWGUI.SetUpdateForField(2, true);
-				UpdateTemperatureMap();
-				fieldUpdate = false;
+				updateTemperatureMap = false;
 			}
 		}
 
@@ -163,6 +162,8 @@ namespace PW.Node
 
 			if (inputBiomeData != null)
 				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
+				
+			updateTemperatureMap = true;
 		}
 
 		void CreateTemperatureMapIfNotExists()

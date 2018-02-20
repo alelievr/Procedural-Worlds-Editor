@@ -47,7 +47,7 @@ namespace PW.Biomator
 				float biomeSamplerNameWidth = BiomeSamplerName.GetNames().Max(n => EditorStyles.label.CalcSize(new GUIContent(n)).x);
 				Rect r = GUILayoutUtility.GetRect(length * foldoutSize + biomeSamplerNameWidth, length * foldoutSize);
 
-				using (new DefaultGUISkin())
+				using (DefaultGUISkin.Get())
 				{
 					GUIStyle coloredLabel = new GUIStyle(EditorStyles.label);
 					for (int i = 0; i < blendEnabled.GetLength(0); i++)

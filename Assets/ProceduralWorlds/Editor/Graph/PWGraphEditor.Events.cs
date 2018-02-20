@@ -111,11 +111,15 @@ public partial class PWGraphEditor
 			editorEvents.isDraggingLink = false;
 			editorEvents.isDraggingNewLink = false;
 		}
-		
+
 		//fire the resize event
 		if (windowSize != Vector2.zero && windowSize != position.size)
+		{
 			if (OnWindowResize != null)
 				OnWindowResize(windowSize);
+			Repaint();
+			windowSize = position.size;
+		}
 		
 		//zoom
 		if (e.type == EventType.ScrollWheel)

@@ -38,7 +38,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	bool					terrainSettingsFoldout;
 	[SerializeField]
 	bool					geologicalSettingsFoldout;
-	bool					scaledPreviewEnabled;
 
 	const string			graphProcessKey = "PWMainGraphEditor";
 
@@ -135,17 +134,16 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
-					if (GUILayout.Button("Active", (scaledPreviewEnabled) ? PWStyles.pressedButton : PWStyles.button))
+					if (GUILayout.Button("Active", (mainGraph.scaledPreviewEnabled) ? PWStyles.pressedButton : PWStyles.button))
 					{
-						scaledPreviewEnabled = !scaledPreviewEnabled;
-						if (scaledPreviewEnabled)
-						{
-						}
+						mainGraph.scaledPreviewEnabled = !mainGraph.scaledPreviewEnabled;
+						mainGraph.Process();
 					}
 				}
 				EditorGUILayout.EndHorizontal();
 
-				EditorGUILayout.LabelField("olol");
+				mainGraph.scaledPreviewRatio = EditorGUILayout.Slider("", mainGraph.scaledPreviewRatio, 1, 128);
+				mainGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("", mainGraph.scaledPreviewChunkSize, mainGraph.chunkSize, 1024);
 			}
 			PWGUI.EndFade();
 
@@ -168,17 +166,21 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				GUI.SetNextControlName("seed");
 				mainGraph.seed = EditorGUILayout.IntField("Seed", mainGraph.seed);
 				
-				//chunk size:
-				GUI.SetNextControlName("chunk size");
-				mainGraph.chunkSize = EditorGUILayout.IntField("Chunk size", mainGraph.chunkSize);
-				mainGraph.chunkSize = Mathf.Clamp(mainGraph.chunkSize, 1, 1024);
-	
-				//step:
-				float min = 0.1f;
-				EditorGUILayout.BeginHorizontal();
-				EditorGUILayout.PrefixLabel("step", PWStyles.prefixLabel);
-				mainGraph.step = mainGraph.PWGUI.Slider(mainGraph.step, ref min, ref mainGraph.maxStep, 0.01f, false, true);
-				EditorGUILayout.EndHorizontal();
+				EditorGUI.BeginDisabledGroup(mainGraph.scaledPreviewEnabled);
+				{
+					//chunk size:
+					GUI.SetNextControlName("chunk size");
+					mainGraph.chunkSize = EditorGUILayout.IntField("Chunk size", mainGraph.chunkSize);
+					mainGraph.chunkSize = Mathf.Clamp(mainGraph.chunkSize, 1, 1024);
+		
+					//step:
+					float min = 0.1f;
+					EditorGUILayout.BeginHorizontal();
+					EditorGUILayout.PrefixLabel("step", PWStyles.prefixLabel);
+					mainGraph.step = mainGraph.PWGUI.Slider(mainGraph.step, ref min, ref mainGraph.maxStep, 0.01f, false, true);
+					EditorGUILayout.EndHorizontal();
+				}
+				EditorGUI.EndDisabledGroup();
 			}
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(graphProcessKey);

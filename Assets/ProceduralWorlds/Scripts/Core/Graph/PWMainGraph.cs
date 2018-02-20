@@ -43,10 +43,10 @@ namespace PW.Core
 		[SerializeField] private int			_chunkSize;
 		public int								chunkSize
 		{
-			get { return _chunkSize; }
+			get { return (!realMode && scaledPreviewEnabled) ? scaledPreviewChunkSize : _chunkSize; }
 			set
 			{
-				if (_chunkSize != value)
+				if (_chunkSize != value && !scaledPreviewEnabled)
 				{
 					_chunkSize = value;
 					if (OnChunkSizeChanged != null)
@@ -73,10 +73,10 @@ namespace PW.Core
 		[SerializeField] private float			_step;
 		public float							step
 		{
-			get { return _step; }
+			get { return (!realMode && scaledPreviewEnabled) ? scaledPreviewRatio * _step : _step; }
 			set
 			{
-				if (_step != value)
+				if (_step != value && !scaledPreviewEnabled)
 				{
 					_step = value;
 					if (OnStepChanged != null)
@@ -98,6 +98,42 @@ namespace PW.Core
 					_geologicTerrainStep = value;
 					if (OnGeologicStepChanged != null)
 						OnGeologicStepChanged(_geologicTerrainStep);
+				}
+			}
+		}
+		
+		[System.NonSerialized]
+		public bool						scaledPreviewEnabled = false;
+		[SerializeField]
+		float							_scaledPreviewRatio;
+		public float					scaledPreviewRatio
+		{
+			get { return _scaledPreviewRatio; }
+			set
+			{
+				if (_scaledPreviewRatio != value)
+				{
+					_scaledPreviewRatio = value;
+					if (OnStepChanged != null)
+					{
+						Debug.Log("On step changed !");
+						OnStepChanged();
+					}
+				}
+			}
+		}
+		[SerializeField]
+		int								_scaledPreviewChunkSize = 32;
+		public int						scaledPreviewChunkSize
+		{
+			get { return _scaledPreviewChunkSize; }
+			set
+			{
+				if (_scaledPreviewChunkSize != value)
+				{
+					_scaledPreviewChunkSize = value;
+					if (OnChunkSizeChanged != null)
+						OnChunkSizeChanged();
 				}
 			}
 		}

@@ -83,7 +83,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 		EditorGUILayout.Space();
 
-		using (new DefaultGUISkin())
+		using (DefaultGUISkin.Get())
 			biomeGraphList.DoLayoutList();
 		
 		if (GUILayout.Button("Refresh"))

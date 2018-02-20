@@ -8,7 +8,24 @@ public class DefaultGUISkin : IDisposable
 {
 	GUISkin		savedSkin;
 
-	public DefaultGUISkin()
+	static DefaultGUISkin	defaultGUISkin;
+
+	//private constructor so the class can't be instatiated somewhere else than in the static Get
+	private DefaultGUISkin()
+	{
+	}
+
+	public static DefaultGUISkin Get()
+	{
+		if (defaultGUISkin == null)
+			defaultGUISkin = new DefaultGUISkin();
+		
+		defaultGUISkin.Init();
+		
+		return defaultGUISkin;
+	}
+
+	public void Init()
 	{
 		savedSkin = GUI.skin;
 		GUI.skin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);

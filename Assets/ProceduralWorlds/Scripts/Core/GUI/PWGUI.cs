@@ -38,8 +38,7 @@ namespace PW.Core
 	[System.Serializable]
 	public class PWGUIManager
 	{
-
-		public static Rect	editorWindowRect;
+		public static bool	displaySamplerStepBounds = false;
 
 		Rect				currentWindowRect;
 
@@ -672,6 +671,8 @@ namespace PW.Core
 					fieldSettings.debug = PWSamplerSettingsPopup.debug;
 
 					UpdateSampler2D(fieldSettings);
+
+					//TODO: add lines for step
 					
 					if (e.type == EventType.ExecuteCommand)
 						e.Use();
@@ -1133,7 +1134,6 @@ namespace PW.Core
 				var s = newGUISettings();
 				s.fieldType = fieldType;
 
-				s.windowPosition = PWUtils.Round(editorWindowRect.size / 2);
 				settingsStorage.Add(s);
 			}
 			if (settingsStorage[currentSettingCount].fieldType != fieldType)

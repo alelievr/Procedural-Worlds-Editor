@@ -31,8 +31,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Sampler2D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Sampler2D(size, step);
@@ -70,8 +69,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Sampler2D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Sampler2D(size, step);
@@ -110,8 +108,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Sampler2D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Sampler2D(size, step);
@@ -150,8 +147,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Vector3Sampler3D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Vector3Sampler3D(size, step);

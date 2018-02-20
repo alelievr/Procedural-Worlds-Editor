@@ -75,7 +75,7 @@ namespace PW.Core
 			{
 				if (_debugBox == null)
 				{
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 					{
 						_debugBox = new GUIStyle("box");
 					}
@@ -92,7 +92,7 @@ namespace PW.Core
 			{
 				if (_box == null)
 				{
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 					{
 						_box = new GUIStyle("box");
 					}
@@ -109,7 +109,7 @@ namespace PW.Core
 			{
 				if (_button == null)
 				{
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 					{
 						_button = new GUIStyle("Button");
 					}
@@ -126,7 +126,7 @@ namespace PW.Core
 			{
 				if (_pressedButton == null)
 				{
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 					{
 						_pressedButton = new GUIStyle("Button");
 						_pressedButton.normal.background = _pressedButton.active.background;

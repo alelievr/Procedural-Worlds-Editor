@@ -142,8 +142,7 @@ namespace PW.Biomator
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as BiomeMap2D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new BiomeMap2D(size, step);
@@ -186,8 +185,7 @@ namespace PW.Biomator
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as BiomeMap3D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new BiomeMap3D(size, step);
