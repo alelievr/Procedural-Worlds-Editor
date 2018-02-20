@@ -17,7 +17,7 @@ namespace PW.Biomator
 		[SerializeField]
 		bool			listFoldout = false;
 
-		public void UpdateMatrixIfNeeded(BiomeData biomeData)
+		public void UpdateIfNeeded(BiomeData biomeData)
 		{
 			if (blendEnabled != null && biomeData.length == blendEnabled.Length)
 				return ;

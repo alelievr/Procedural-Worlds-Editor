@@ -65,14 +65,14 @@ namespace PW.Noises
         public static float GenerateNoise(float x,
                 float y,
                 int octaves = 2,
-                float frequency = 2,
+                float frequency = 2, //scale
                 float lacunarity = 1,
                 float persistence = 1,
                 int seed = -1)
         {
             float ret = 0;
-            x *= frequency;
-            y *= frequency;
+            x *= frequency * noiseScale;
+            y *= frequency * noiseScale;
 
             for (int i = 0; i < octaves; i++)
             {
@@ -105,15 +105,11 @@ namespace PW.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
     
-		public override void ComputeSampler(Sampler samp, int seed)
+		public override void ComputeSampler(Sampler samp, float scale, int seed)
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
 			
-			Stopwatch sw = new Stopwatch();
-
-			sw.Start();
-            
 			if (false)//(hasGraphicAcceleration)
 			{
 				//compute shader here
@@ -123,7 +119,7 @@ namespace PW.Noises
 				if (samp.type == SamplerType.Sampler2D)
 				{
 					(samp as Sampler2D).Foreach((x, y) => {
-						return GenerateNoise(x, y, 2, samp.step, 1, 1, seed);
+						return GenerateNoise(x, y, 4, samp.step * scale, 1, 1, seed);
 					});
 				}
 				else
@@ -131,10 +127,6 @@ namespace PW.Noises
 
 				}
 			}
-
-			sw.Stop();
-
-			Debug.Log("compute perlin noise time: " + sw.Elapsed.TotalMilliseconds);
 		}
 	}
 }

@@ -8,6 +8,7 @@ namespace PW.Noises
 {
 	public abstract class Noise
 	{
+		public const float		noiseScale = 0.01f;
 	
 		public string	name;
 		public bool		hasComputeShaders;
@@ -27,6 +28,6 @@ namespace PW.Noises
 			return 0;
 		}
 
-		public abstract void ComputeSampler(Sampler samp, int seed);
+		public abstract void ComputeSampler(Sampler samp, float scale, int seed);
 	}
 }

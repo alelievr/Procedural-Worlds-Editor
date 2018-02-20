@@ -21,7 +21,7 @@ namespace PW.Node
 		float				biomeBlendPercent = .1f;
 
 		[SerializeField]
-		BiomeBlendList	blendMatrix = new BiomeBlendList();
+		BiomeBlendList		blendList = new BiomeBlendList();
 
 		[SerializeField]
 		bool				biomeCoverageRecap = false;
@@ -89,12 +89,12 @@ namespace PW.Node
 				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(updateBiomeMapKey);
-				blendMatrix.UpdateMatrixIfNeeded(biomeData);
+				blendList.UpdateIfNeeded(biomeData);
 
 				EditorGUI.BeginChangeCheck();
-				blendMatrix.DrawList(biomeData, visualRect);
+				blendList.DrawList(biomeData, visualRect);
 				if (EditorGUI.EndChangeCheck())
-					FillBiomeMap(biomeData);
+					delayedChanges.UpdateValue(updateBiomeMapKey);
 			}
 
 			if (biomeData != null)
@@ -203,7 +203,7 @@ namespace PW.Node
 
 		void FillBiomeMap(BiomeData biomeData)
 		{
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendMatrix, biomeBlendPercent);
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendList, biomeBlendPercent);
 			updateBiomeMap = true;
 		}
 

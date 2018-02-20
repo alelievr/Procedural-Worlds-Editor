@@ -19,6 +19,8 @@ namespace PW.Node
 		float				persistanceMin;
 		[SerializeField]
 		float				persistanceMax;
+		[SerializeField]
+		float				scale = 1f;
 
 		PerlinNoise2D		perlin2D;
 
@@ -43,6 +45,7 @@ namespace PW.Node
 			{
 				persistance = PWGUI.Slider("Persistance: ", persistance, ref persistanceMin, ref persistanceMax);
 				octaves = PWGUI.IntSlider("Octaves: ", octaves, 0, 16);
+				scale = PWGUI.Slider("Scale: ", scale, 0.01f, 10);
 				additionalSeed = EditorGUILayout.IntField("Seed", additionalSeed);
 			}
 			if (EditorGUI.EndChangeCheck())
@@ -56,7 +59,7 @@ namespace PW.Node
 			//recalcul perlin noise values with new seed / position.
 			output.ResizeIfNeeded(chunkSize, step);
 
-			perlin2D.ComputeSampler(output, seed + additionalSeed);
+			perlin2D.ComputeSampler(output, scale, seed + additionalSeed);
 		}
 	}
 }

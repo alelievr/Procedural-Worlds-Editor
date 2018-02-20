@@ -129,6 +129,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		settingsBar.onDraw = (rect) =>
 		{
 			settingsBar.DrawDefault(rect);
+			
+			EditorGUI.BeginChangeCheck();
 
 			if (PWGUI.BeginFade("Scaled preview", ref scaledPreviewFoldout, false))
 			{
@@ -137,17 +139,20 @@ public partial class PWMainGraphEditor : PWGraphEditor
 					if (GUILayout.Button("Active", (mainGraph.scaledPreviewEnabled) ? PWStyles.pressedButton : PWStyles.button))
 					{
 						mainGraph.scaledPreviewEnabled = !mainGraph.scaledPreviewEnabled;
+						PWGUIManager.displaySamplerStepBounds = mainGraph.scaledPreviewEnabled;
 						mainGraph.Process();
 					}
 				}
 				EditorGUILayout.EndHorizontal();
 
-				mainGraph.scaledPreviewRatio = EditorGUILayout.Slider("", mainGraph.scaledPreviewRatio, 1, 128);
-				mainGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("", mainGraph.scaledPreviewChunkSize, mainGraph.chunkSize, 1024);
+				mainGraph.scaledPreviewRatio = EditorGUILayout.Slider("Ratio", mainGraph.scaledPreviewRatio, 1, 128);
+				mainGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("Chunk size", mainGraph.scaledPreviewChunkSize, 32, 2048);
+				float scale = (mainGraph.scaledPreviewRatio * mainGraph.scaledPreviewChunkSize) / (mainGraph.nonModifiedChunkSize * mainGraph.nonModifiedStep);
+				EditorGUILayout.LabelField("Scale: " + scale);
 			}
 			PWGUI.EndFade();
 
-			if (PWGUI.BeginFade("Terrain settings", ref terrainSettingsFoldout, false))
+			if (PWGUI.BeginFade("Renderer settings", ref terrainSettingsFoldout, false))
 			{
 				terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
 			}
@@ -160,7 +165,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			}
 			PWGUI.EndFade();*/
 
-			EditorGUI.BeginChangeCheck();
+			if (PWGUI.BeginFade("Chunk settings"))
 			{
 				//seed
 				GUI.SetNextControlName("seed");
@@ -182,6 +187,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				}
 				EditorGUI.EndDisabledGroup();
 			}
+			PWGUI.EndFade();
+			
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(graphProcessKey);
 		};

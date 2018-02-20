@@ -145,6 +145,8 @@ namespace PW.Core
 				if (_prefixLabel == null)
 				{
 					_prefixLabel = new GUIStyle("PrefixLabel");
+					_prefixLabel.normal.textColor = EditorStyles.label.normal.textColor;
+					_prefixLabel.active.textColor = EditorStyles.label.normal.textColor;
 				}
 
 				return _prefixLabel;

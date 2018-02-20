@@ -671,8 +671,6 @@ namespace PW.Core
 					fieldSettings.debug = PWSamplerSettingsPopup.debug;
 
 					UpdateSampler2D(fieldSettings);
-
-					//TODO: add lines for step
 					
 					if (e.type == EventType.ExecuteCommand)
 						e.Use();
@@ -725,9 +723,17 @@ namespace PW.Core
 			var tex = fieldSettings.texture;
 			if (fieldSettings.sampler2D.size != tex.width)	
 				tex.Resize(fieldSettings.sampler2D.size, fieldSettings.sampler2D.size, TextureFormat.RGBA32, false);
+
+			int scale = (int)(fieldSettings.sampler2D.size / fieldSettings.sampler2D.step);
+
+			if (scale == 0)
+				scale = 1;
 			
 			fieldSettings.sampler2D.Foreach((x, y, val) => {
-				tex.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
+				if (displaySamplerStepBounds && (x % scale == 0 || y % scale == 0))
+					tex.SetPixel(x, y, Color.black);
+				else
+					tex.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
 			}, true);
 			tex.Apply();
 			fieldSettings.update = false;
@@ -879,9 +885,20 @@ namespace PW.Core
 			
 			var switchGraph = fieldSettings.biomeData.biomeSwitchGraph;
 			
+			int scale = (int)(map.size / map.step);
+
+			if (scale == 0)
+				scale = 1;
+
 			for (int x = 0; x < texSize; x++)
 				for (int y = 0; y < texSize; y++)
 				{
+					if (displaySamplerStepBounds && (x % scale == 0 || y % scale == 0))
+					{
+						fieldSettings.texture.SetPixel(x, y, Color.black);
+						continue ;
+					}
+
 					var blendInfo = map.GetBiomeBlendInfo(x, y);
 					var firstBiome = switchGraph.GetBiome(blendInfo.firstBiomeId);
 

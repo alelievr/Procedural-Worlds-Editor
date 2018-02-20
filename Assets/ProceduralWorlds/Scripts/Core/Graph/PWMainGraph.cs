@@ -41,6 +41,7 @@ namespace PW.Core
 		}
 
 		[SerializeField] private int			_chunkSize;
+		public float							nonModifiedChunkSize { get { return _chunkSize; } }		
 		public int								chunkSize
 		{
 			get { return (!realMode && scaledPreviewEnabled) ? scaledPreviewChunkSize : _chunkSize; }
@@ -71,6 +72,7 @@ namespace PW.Core
 		}
 
 		[SerializeField] private float			_step;
+		public float							nonModifiedStep { get { return _step; } }
 		public float							step
 		{
 			get { return (!realMode && scaledPreviewEnabled) ? scaledPreviewRatio * _step : _step; }
@@ -115,10 +117,7 @@ namespace PW.Core
 				{
 					_scaledPreviewRatio = value;
 					if (OnStepChanged != null)
-					{
-						Debug.Log("On step changed !");
 						OnStepChanged();
-					}
 				}
 			}
 		}
