@@ -69,6 +69,7 @@ namespace PW
 			}
 
 			var anchorField = anchorFieldDictionary[fieldName];
+			Debug.Log("anchor: " + anchorField);
 
 			if (anchorField.anchors.Count > newCount)
 			{
@@ -191,8 +192,17 @@ namespace PW
 		public IEnumerable< PWNode >	GetNodesAttachedToAnchor(PWAnchor anchor)
 		{
 			return (anchor.anchorType == PWAnchorType.Input) ?
-				from l in anchor.links select l.fromNode : 
+				from l in anchor.links select l.fromNode :
 				from l in anchor.links select l.toNode;
+		}
+		
+		public void	RemoveSelf()
+		{
+			RemoveAllLinks();
+
+			//the node instance will be removed by the editor at the same time that it's asset
+		
+			ScriptableObject.DestroyImmediate(this, true);
 		}
 	}
 }

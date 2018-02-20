@@ -17,7 +17,7 @@ namespace PW.Core
 		public static bool			update;
 		
 		[System.NonSerializedAttribute]
-		static MethodInfo	gradientField;
+		static MethodInfo			gradientField;
 		
 		SerializableGradient		oldGradient;
 		bool						needUpdate = false;

@@ -63,6 +63,7 @@ namespace PW.Biomator
 				bSwitchCellMap[bSwitch] = new BiomeSurfaceCell();
 			
 			cells.Clear();
+			lastCell = null;
 
 			foreach (var bSwitch in surfacesSwitches)
 			{
@@ -116,7 +117,7 @@ namespace PW.Biomator
 						currentCells.Push(link.toCell);
 			}
 
-			//if all graphb cells are contained in the checkedCell list then it's good
+			//if all graph cells are contained in the checkedCell list then it's good
 			if (cells.All(cell => checkedCells.Contains(cell)))
 				return true;
 			

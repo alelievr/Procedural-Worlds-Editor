@@ -17,6 +17,9 @@ namespace PW.Node
 		[PWOutput]
 		public FinalTerrain			mergedBiomeTerrain;
 
+		[SerializeField]
+		bool						biomeTerrainsFoldout;
+
 		[System.NonSerialized]
 		bool						update;
 
@@ -42,10 +45,19 @@ namespace PW.Node
 			EditorGUIUtility.labelWidth = 80;
 			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
 
-			if (finalTerrain != null)
-				PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
-			else
+			if (finalTerrain == null)
+			{
 				EditorGUILayout.LabelField("Null terrain");
+				return ;
+			}
+
+			PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
+
+			biomeTerrainsFoldout = EditorGUILayout.Foldout(biomeTerrainsFoldout, "Show biome terrains");
+
+			if (biomeTerrainsFoldout)
+				foreach (var biome in inputBlendedTerrain.biomes)
+					PWGUI.SamplerPreview(biome.name, biome.modifiedTerrain);
 
 			if (update)
 			{
@@ -65,11 +77,12 @@ namespace PW.Node
 				return ;
 			}
 			
-			finalTerrain = inputBlendedTerrain.biomeData.terrainRef.Clone(finalTerrain);
+			var inputTerrain = inputBlendedTerrain.biomeData.GetSampler(BiomeSamplerName.terrainHeight);
+			finalTerrain = inputTerrain.Clone(finalTerrain);
 
 			if (finalTerrain.type == SamplerType.Sampler2D)
 			{
-				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeIds;
+				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeMap;
 
 				(finalTerrain as Sampler2D).Foreach((x, y, val) => {
 					float ret = 0;
@@ -81,14 +94,14 @@ namespace PW.Node
 
 						if (terrain == null)
 						{
-							Debug.LogError("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
+							PWUtils.LogErrorMax("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")", 100);
 							continue ;
 						}
 
-						if (biome.id == biomeInfo.firstBiomeId)
-							ret += terrain[x, y] * biomeInfo.firstBiomeBlendPercent;
-						else if (biome.id == biomeInfo.secondBiomeId)
-							ret += terrain[x, y] * biomeInfo.secondBiomeBlendPercent;
+						//TODO: test this blending !
+						for (int i = 0; i < biomeInfo.length; i++)
+							if (biomeInfo.biomeIds[i] == biome.id)
+								ret += terrain[x, y] * biomeInfo.biomeBlends[i] / biomeInfo.totalBlend;
 					}
 
 					return ret;

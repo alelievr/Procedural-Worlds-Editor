@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 using PW;
 using PW.Core;
 using PW.Editor;
@@ -11,10 +12,13 @@ public class PWBiomeGraphEditor : PWGraphEditor
 {
 	
 	[SerializeField]
-	PWGraphLayout		layout = new PWGraphLayout();
+	PWGraphLayout			layout = new PWGraphLayout();
+
+	List< PWBiomeGraph >	biomeGraphs = new List< PWBiomeGraph >();
+	ReorderableList			biomeGraphList;
 
 	[System.NonSerialized]
-	PWBiomePresetScreen	presetScreen;
+	PWBiomePresetScreen		presetScreen;
 
 	[MenuItem("Window/Procedural Worlds/Biome Graph", priority = 2)]
 	static void Init()
@@ -31,10 +35,35 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		OnGraphChanged += GraphLoadedCallback;
 
 		layout.LoadStyles(position);
+
+		biomeGraphList = new ReorderableList(biomeGraphs, typeof(PWBiomeGraph), false, true, false, false);
+
+		biomeGraphList.drawElementCallback = (rect, index, active, focus) => {
+			EditorGUI.LabelField(rect, biomeGraphs[index].name);
+			rect.x += rect.width - 50;
+			rect.width = 50;
+			rect.height = EditorGUIUtility.singleLineHeight;
+			if (GUI.Button(rect, "Open"))
+				LoadGraph(biomeGraphs[index]);
+		};
+		biomeGraphList.drawHeaderCallback = (rect) => {
+			EditorGUI.LabelField(rect, "Biome list");
+		};
+
+		LoadGraphList();
 		
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
+		layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
+	}
+
+	void LoadGraphList()
+	{
+		biomeGraphs.Clear();
+		var resGraphs = Resources.FindObjectsOfTypeAll< PWBiomeGraph >();
+
+		foreach (var biomeGraph in resGraphs)
+			biomeGraphs.Add(biomeGraph);
 	}
 
 	void GraphLoadedCallback(PWGraph graph)
@@ -42,11 +71,26 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		if (graph == null)
 			return ;
 		
-		settingsBar.onDrawAdditionalSettings = DrawBiomeSettingsBar;
+		settingsBar.onDraw = DrawBiomeSettingsBar;
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)
 	{
+		settingsBar.DrawTerrainPreview(rect);
+
+		GUI.SetNextControlName("PWName");
+		graph.name = EditorGUILayout.TextField("Biome name: ", graph.name);
+
+		EditorGUILayout.Space();
+
+		using (DefaultGUISkin.Get())
+			biomeGraphList.DoLayoutList();
+		
+		if (GUILayout.Button("Refresh"))
+			LoadGraphList();
+
+		EditorGUILayout.Space();
+
 		biomeGraph.surfaceType = (BiomeSurfaceType)EditorGUILayout.EnumPopup("Biome surface type", biomeGraph.surfaceType);
 	}
 
@@ -74,9 +118,9 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		layout.Render2ResizablePanel(this, position);
 	}
 	
-	void WindowResizeCallback(Vector2 newSize)
+	void WindowResizeCallback(Vector2 oldSize)
 	{
-		layout.ResizeWindow(newSize, position);
+		layout.ResizeWindow(oldSize, position);
 	}
 
 	public override void OnDisable()

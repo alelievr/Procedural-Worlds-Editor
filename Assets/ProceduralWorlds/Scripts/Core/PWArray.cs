@@ -36,6 +36,11 @@ namespace PW.Core
 		{
 			return values;
 		}
+		
+		public List< T > GetValuesWithoutNull()
+		{
+			return values.Where(v => v != null).ToList();
+		}
 
 		public List< string > GetNames()
 		{

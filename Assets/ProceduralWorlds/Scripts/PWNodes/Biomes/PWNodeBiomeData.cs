@@ -33,7 +33,7 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
-			CreateNewBiome();
+			CreateNewBiomeData();
 		}
 		
 		public override void OnNodeGUI()
@@ -56,20 +56,22 @@ namespace PW.Node
 				EditorGUILayout.LabelField("Connect a terrain plz.");
 		}
 
-		void				CreateNewBiome()
+		void				CreateNewBiomeData()
 		{
 			outputBiome = new BiomeData();
 
 			outputBiome.isWaterless = true;
-			outputBiome.biomeTreeStartPoint = this;
+			outputBiome.biomeSwitchGraphStartPoint = this;
 		}
 
 		public override void OnNodeProcess()
 		{
+			outputBiome.Reset();
+			
 			if (terrain != null && terrain.type == SamplerType.Sampler2D)
 			{
 				//terrain mapping
-				outputBiome.terrain = PWNoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true);
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, PWNoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true));
 			}
 		}
 	}

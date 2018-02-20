@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
 
 namespace PW.Core
 {
@@ -24,6 +26,9 @@ namespace PW.Core
 		static Texture2D			movepadTexture;
 		static GUIStyle				orderingGroupStyle;
 		static GUIStyle				orderingGroupNameStyle;
+
+		[System.NonSerialized]
+		List< PWNode >				innerNodes = new List< PWNode >();
 
 		public void Initialize(Vector2 pos)
 		{
@@ -59,10 +64,10 @@ namespace PW.Core
 			movepadTexture = Resources.Load("movepad") as Texture2D;
 		}
 
-		public void Render(Vector2 graphDecal, Vector2 screenSize, ref PWGraphEditorEventInfo editorEvents)
+		public void Render(PWGraph graph, Vector2 screenSize)
 		{
 			var e = Event.current;
-			Rect screen = new Rect(-graphDecal, screenSize);
+			Rect screen = new Rect(-graph.panPosition, screenSize);
 
 			//check if ordering group is not visible
 			if (!orderGroupRect.Overlaps(screen))
@@ -74,7 +79,7 @@ namespace PW.Core
 			if (orderingGroupStyle == null)
 				LoadStyles();
 
-			Rect		orderGroupWorldRect = PWUtils.DecalRect(orderGroupRect, graphDecal);
+			Rect		orderGroupWorldRect = PWUtils.DecalRect(orderGroupRect, graph.panPosition);
 
 			callbackId = 0;
 
@@ -137,6 +142,7 @@ namespace PW.Core
 			if (e.type == EventType.MouseDown && e.button == 0)
 				if (movePadRect.Contains(e.mousePosition))
 				{
+					innerNodes = graph.nodes.Where(n => n.rect.Overlaps(orderGroupRect)).ToList();
 					moving = true;
 					e.Use();
 				}
@@ -144,7 +150,10 @@ namespace PW.Core
 				moving = false;
 
 			if (moving && e.type == EventType.MouseDrag)
+			{
 				orderGroupRect.position += e.delta;
+				innerNodes.ForEach(n => n.rect.position += e.delta);
+			}
 
 			//draw ordering group
 			GUI.color = color;
@@ -157,8 +166,8 @@ namespace PW.Core
 
 			if (orderGroupWorldRect.Contains(e.mousePosition))
 			{
-				editorEvents.mouseOverOrderingGroup = this;
-				editorEvents.isMouseOverOrderingGroupFrame = true;
+				graph.editorEvents.mouseOverOrderingGroup = this;
+				graph.editorEvents.isMouseOverOrderingGroupFrame = true;
 			}
 		}
 	}

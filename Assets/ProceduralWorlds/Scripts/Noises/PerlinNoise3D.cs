@@ -96,7 +96,7 @@ namespace PW.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
         
-		public override void ComputeSampler(Sampler samp, int seed)
+		public override void ComputeSampler(Sampler samp, float scale, int seed)
         {
             
         }

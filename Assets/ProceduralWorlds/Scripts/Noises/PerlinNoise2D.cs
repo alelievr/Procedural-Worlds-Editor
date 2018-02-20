@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 using PW.Core;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+
+using Debug = UnityEngine.Debug;
 
 namespace PW.Noises
 {
@@ -33,14 +37,17 @@ namespace PW.Noises
            138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
        };
 
+		#if NET_4_6
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		#endif
         static float PerlinValue(float x, float y, int seed = 0)
         {
             x += 12.254f * seed;
             y += 31.964f * seed;
-            int X = (int)Mathf.Floor(x) & 255,
-                Y = (int)Mathf.Floor(y) & 255;
-            x -= Mathf.Floor(x);
-            y -= Mathf.Floor(y);
+            int X = (int)((x < 0) ? (int)x - 1 : (int)x) & 255,
+                Y = (int)((y < 0) ? (int)y - 1 : (int)y) & 255;
+            x -= ((x < 0) ? (int)x - 1 : (int)x);
+            y -= ((y < 0) ? (int)y - 1 : (int)y);
             float u = Fade(x),
                   v = Fade(y);
             int A = p[X] + Y, AA = p[A], AB = p[A + 1],
@@ -52,17 +59,20 @@ namespace PW.Noises
                        Grad(p[BB + 1], x - 1, y - 1)));
         }
 
+		#if NET_4_6
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		#endif
         public static float GenerateNoise(float x,
                 float y,
                 int octaves = 2,
-                float frequency = 2,
+                float frequency = 2, //scale
                 float lacunarity = 1,
                 float persistence = 1,
                 int seed = -1)
         {
             float ret = 0;
-            x *= frequency;
-            y *= frequency;
+            x *= frequency * noiseScale;
+            y *= frequency * noiseScale;
 
             for (int i = 0; i < octaves; i++)
             {
@@ -74,8 +84,19 @@ namespace PW.Noises
             }
             return (Mathf.Clamp((ret + 1f) / 2f, 0, 1));
         }
+		#if NET_4_6
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		#endif
         static float Fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+
+		#if NET_4_6
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		#endif
         static float Lerp(float t, float a, float b) { return a + t * (b - a); }
+
+		#if NET_4_6
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		#endif
         static float Grad(int hash, float x, float y)
         {
             int h = hash & 15;
@@ -84,11 +105,11 @@ namespace PW.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
     
-		public override void ComputeSampler(Sampler samp, int seed)
+		public override void ComputeSampler(Sampler samp, float scale, int seed)
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
-            
+			
 			if (false)//(hasGraphicAcceleration)
 			{
 				//compute shader here
@@ -98,7 +119,7 @@ namespace PW.Noises
 				if (samp.type == SamplerType.Sampler2D)
 				{
 					(samp as Sampler2D).Foreach((x, y) => {
-						return GenerateNoise(x, y, 2, samp.step / 20, 1, 1, seed);
+						return GenerateNoise(x, y, 4, samp.step * scale, 1, 1, seed);
 					});
 				}
 				else

@@ -35,67 +35,6 @@ namespace PW.Core
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		//returns all nodes
 		public IEnumerable< PWNode >			allNodes { get { yield return inputNode; yield return outputNode; foreach (var node in nodes) yield return node; } }
-		
-		[SerializeField] private int			_seed;
-		public int								seed
-		{
-			get{ return _seed; }
-			set
-			{
-				if (_seed != value)
-				{
-					_seed = value;
-					if (OnSeedChanged != null)
-						OnSeedChanged();
-				}
-			}
-		}
-
-		[SerializeField] private int			_chunkSize;
-		public int								chunkSize
-		{
-			get { return _chunkSize; }
-			set
-			{
-				if (_chunkSize != value)
-				{
-					_chunkSize = value;
-					if (OnChunkSizeChanged != null)
-						OnChunkSizeChanged();
-				}
-			}
-		}
-
-		[SerializeField] private Vector3		_chunkPosition;
-		public Vector3							chunkPosition
-		{
-			get { return _chunkPosition; }
-			set
-			{
-				if (_chunkPosition != value)
-				{
-					_chunkPosition = value;
-					if (OnChunkPositionChanged != null)
-						OnChunkPositionChanged();
-				}
-			}
-		}
-
-		[SerializeField] private float			_step;
-		public float							step
-		{
-			get { return _step; }
-			set
-			{
-				if (_step != value)
-				{
-					_step = value;
-					if (OnStepChanged != null)
-						OnStepChanged();
-				}
-			}
-		}
-
 		public PWGraphType						graphType;
 
 
@@ -136,7 +75,6 @@ namespace PW.Core
         public PWGUIManager						PWGUI = new PWGUIManager();
 		[NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
-		public float							maxStep;
 		public bool								presetChoosed = false;
 
 
@@ -149,6 +87,7 @@ namespace PW.Core
 		public bool								initialized = false;
 		[NonSerialized]
 		public bool								readyToProcess = false;
+		public bool								hasProcessed { get { return graphProcessor.hasProcessed; } }
 
 
 		//public delegates:
@@ -171,11 +110,6 @@ namespace PW.Core
 		public event LinkAction					OnLinkRemoved;
 		public event Action						OnPostLinkRemoved;
 		public event LinkAction					OnLinkUnselected;
-		//parameter events:
-		public event Action						OnSeedChanged;
-		public event Action						OnChunkSizeChanged;
-		public event Action						OnStepChanged;
-		public event Action						OnChunkPositionChanged;
 		//graph events:
 		public event Action						OnGraphStructureChanged;
 		public event Action						OnClickNowhere; //when click inside the graph, not on a node nor a link.
@@ -195,12 +129,6 @@ namespace PW.Core
 			realMode = false;
 			presetChoosed = false;
 			
-			//default values:
-			chunkSize = 16;
-			step = 1;
-			maxStep = 4;
-			name = "New Procedural Graph";
-
 			InitializeInputAndOutputNodes();
 			
 			initialized = true;
@@ -549,10 +477,20 @@ namespace PW.Core
 		{
 			return nodes.FirstOrDefault(n => n.GetType() == type);
 		}
+		
+		public List< PWNode >	FindNodesByType(Type type)
+		{
+			return nodes.Where(n => n.GetType() == type).ToList();
+		}
 
 		public T		FindNodeByType< T >() where T : PWNode
 		{
 			return nodes.FirstOrDefault(n => n is T) as T;
+		}
+		
+		public List< T >	FindNodesByType< T >() where T : PWNode
+		{
+			return nodes.Where(n => n is T).Cast< T >().ToList();
 		}
 
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()
@@ -700,9 +638,11 @@ namespace PW.Core
 			return link;
 		}
 
-		public IEnumerable< PWNode > GetNodeChildsRecursive(PWNode begin)
+		public List< PWNode > GetNodeChildsRecursive(PWNode begin)
 		{
-			Stack< PWNode > nodeStack = new Stack< PWNode >();
+			var nodeStack = new Stack< PWNode >();
+			var nodesMap = new HashSet< PWNode >();
+			var nodesList = new List< PWNode >();
 
 			nodeStack.Push(begin);
 
@@ -714,8 +654,16 @@ namespace PW.Core
 					nodeStack.Push(outputNode);
 				
 				if (node != begin)
-					yield return node;
+				{
+					if (!nodesMap.Contains(node))
+						nodesList.Add(node);
+					nodesMap.Add(node);
+				}
 			}
+
+			nodesList.Sort((n1, n2) => n1.computeOrder.CompareTo(n2.computeOrder));
+
+			return nodesList;
 		}
 
 	#endregion

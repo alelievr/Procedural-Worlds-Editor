@@ -38,8 +38,7 @@ namespace PW.Core
 	[System.Serializable]
 	public class PWGUIManager
 	{
-
-		public static Rect	editorWindowRect;
+		public static bool	displaySamplerStepBounds = false;
 
 		Rect				currentWindowRect;
 
@@ -633,7 +632,6 @@ namespace PW.Core
 			if (fieldSettings.firstRender && e.type != EventType.Layout)
 				return ;
 			fieldSettings.firstRender = false;
-			// Debug.Log("event: " + attachedNode + ":" + e.type);
 
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
@@ -725,9 +723,17 @@ namespace PW.Core
 			var tex = fieldSettings.texture;
 			if (fieldSettings.sampler2D.size != tex.width)	
 				tex.Resize(fieldSettings.sampler2D.size, fieldSettings.sampler2D.size, TextureFormat.RGBA32, false);
+
+			int scale = (int)(fieldSettings.sampler2D.size / fieldSettings.sampler2D.step);
+
+			if (scale == 0)
+				scale = 1;
 			
 			fieldSettings.sampler2D.Foreach((x, y, val) => {
-				tex.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
+				if (displaySamplerStepBounds && (x % scale == 0 || y % scale == 0))
+					tex.SetPixel(x, y, Color.black);
+				else
+					tex.SetPixel(x, y, fieldSettings.gradient.Evaluate(Mathf.Clamp01(val)));
 			}, true);
 			tex.Apply();
 			fieldSettings.update = false;
@@ -768,12 +774,15 @@ namespace PW.Core
 
 		public void BiomeMap2DPreview(GUIContent prefix, BiomeData biomeData, bool settings = true, bool debug = true)
 		{
-			if (biomeData.biomeIds == null)
+			Event e = Event.current;
+			
+			if (biomeData.biomeMap == null)
 			{
 				Debug.Log("biomeData does not contains biome map 2D");
 				return ;
 			}
-			int texSize = biomeData.biomeIds.size;
+
+			int texSize = biomeData.biomeMap.size;
 			var fieldSettings = GetGUISettingData(PWGUIFieldType.BiomeMapPreview, () => {
 				var state = new PWGUISettings();
 				state.filterMode = FilterMode.Point;
@@ -792,8 +801,75 @@ namespace PW.Core
 
 			if (fieldSettings.update)
 				UpdateBiomeMap2D(fieldSettings);
+				
+			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 
 			TexturePreview(fieldSettings.texture, false, false, false);
+
+			if (settings)
+			{
+				if (previewRect.width > 2)
+					fieldSettings.savedRect = previewRect;
+
+				//draw the setting icon and manage his events
+				int icSettingsSize = 16;
+				int	icSettingsPadding = 4;
+				Rect icSettingsRect = new Rect(previewRect.x + previewRect.width - icSettingsSize - icSettingsPadding, previewRect.y + icSettingsPadding, icSettingsSize, icSettingsSize);
+	
+				GUI.DrawTexture(icSettingsRect, icSettingsOutline);
+				if (e.type == EventType.MouseDown && e.button == 0)
+				{
+					if (icSettingsRect.Contains(e.mousePosition))
+					{
+						PWBiomeMapSettingsPopup.OpenPopup(fieldSettings);
+						e.Use();
+					}
+				}
+			}
+			
+			//Copy the parameters of the opened popup when modified
+			if (PWBiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate")))
+			{
+				fieldSettings.debug = PWBiomeMapSettingsPopup.debug;
+			}
+
+			if (fieldSettings.frameSafeDebug && fieldSettings.debug)
+			{
+				Vector2 pixelPos = e.mousePosition - fieldSettings.savedRect.position;
+				Sampler terrain = biomeData.GetSampler(0);
+
+				pixelPos *= terrain.size / fieldSettings.savedRect.width;
+				pixelPos.y = terrain.size - pixelPos.y;
+
+				int x = (int)Mathf.Clamp(pixelPos.x, 0, terrain.size - 1);
+				int y = (int)Mathf.Clamp(pixelPos.y, 0, terrain.size - 1);
+				BiomeBlendPoint point = biomeData.biomeMap.GetBiomeBlendInfo(x, y);
+
+				EditorGUILayout.BeginVertical(PWStyles.debugBox);
+				{
+					for (int i = 0; i < point.length; i++)
+					{
+						short biomeId = point.biomeIds[i];
+						float biomeBlend = point.biomeBlends[i];
+						PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
+	
+						if (biome == null)
+							continue ;
+	
+						EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
+						EditorGUI.indentLevel++;
+						for (int j = 0; j < biomeData.length; j++)
+						{
+							float val = biomeData.GetSampler2D(j)[x, y];
+							EditorGUILayout.LabelField(biomeData.GetBiomeKey(j) + ": " + val);
+						}
+						EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
+						EditorGUI.indentLevel--;
+					}
+					EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
+				}
+				EditorGUILayout.EndVertical();
+			}
 		}
 
 		void UpdateBiomeMap2D(PWGUISettings fieldSettings)
@@ -801,26 +877,51 @@ namespace PW.Core
 			if (fieldSettings.biomeData == null || fieldSettings.texture == null)
 				return ;
 			
-			var map = fieldSettings.biomeData.biomeIds;
+			var map = fieldSettings.biomeData.biomeMap;
 			int texSize = map.size;
 			
 			if (texSize != fieldSettings.texture.width)
 				fieldSettings.texture.Resize(texSize, texSize, TextureFormat.RGBA32, false);
 			
+			var switchGraph = fieldSettings.biomeData.biomeSwitchGraph;
+			
+			int scale = (int)(map.size / map.step);
+
+			if (scale == 0)
+				scale = 1;
+
 			for (int x = 0; x < texSize; x++)
 				for (int y = 0; y < texSize; y++)
 				{
-					var blendInfo = map.GetBiomeBlendInfo(x, y);
-					var biome1 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.firstBiomeId);
-					var biome2 = fieldSettings.biomeData.biomeTree.GetBiome(blendInfo.secondBiomeId);
-
-					if (biome1 == null)
+					if (displaySamplerStepBounds && (x % scale == 0 || y % scale == 0))
+					{
+						fieldSettings.texture.SetPixel(x, y, Color.black);
 						continue ;
-					
-					Color firstBiomeColor = biome1.previewColor;
-					Color secondBiomeColor = biome2.previewColor;
+					}
 
-					Color pixel = firstBiomeColor * blendInfo.firstBiomeBlendPercent + secondBiomeColor * blendInfo.secondBiomeBlendPercent;
+					var blendInfo = map.GetBiomeBlendInfo(x, y);
+					var firstBiome = switchGraph.GetBiome(blendInfo.firstBiomeId);
+
+					if (firstBiome == null)
+					{
+						fieldSettings.texture.SetPixel(x, y, new Color(0, 0, 0, 0));
+						continue ;
+					}
+					
+					Color finalColor = firstBiome.previewColor;
+
+					//start from 1 because the first biome have already been retreived
+					for (int i = 1; i < blendInfo.length; i++)
+					{
+						int id = blendInfo.biomeIds[i];
+						float blend = blendInfo.biomeBlends[i];
+
+						var biome = switchGraph.GetBiome((short)id);
+
+						finalColor = Color.Lerp(finalColor, biome.previewColor, blend);
+					}
+					
+					Color pixel = finalColor;
 					pixel.a = 1;
 
 					fieldSettings.texture.SetPixel(x, y, pixel);
@@ -917,6 +1018,11 @@ namespace PW.Core
 			
 			return BeginFade(new GUIContent(header), style, ref checkbox, false);
 		}
+
+		public bool BeginFade(string header, ref bool checkbox, bool checkboxEnabled = true)
+		{
+			return BeginFade(new GUIContent(header), null, ref checkbox, checkboxEnabled);
+		}
 	
 		public bool BeginFade(string header, GUIStyle style, ref bool checkbox)
 		{
@@ -929,6 +1035,9 @@ namespace PW.Core
 			var settings = GetGUISettingData(PWGUIFieldType.FadeBlock, () => {
 				return new PWGUISettings();
 			});
+
+			if (style == null)
+				style = PWStyles.box;
 
 			if (settings.fadeStatus == null)
 				settings.fadeStatus = new AnimBool(settings.faded);
@@ -1042,7 +1151,6 @@ namespace PW.Core
 				var s = newGUISettings();
 				s.fieldType = fieldType;
 
-				s.windowPosition = PWUtils.Round(editorWindowRect.size / 2);
 				settingsStorage.Add(s);
 			}
 			if (settingsStorage[currentSettingCount].fieldType != fieldType)

@@ -1,0 +1,8 @@
+os: osx
+language: c#
+
+install:
+    - ./.travis/install.sh
+
+script:
+    - ./.travis/unit_test.sh

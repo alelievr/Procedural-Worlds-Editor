@@ -219,5 +219,43 @@ namespace PW.Tests.Graphs
 				Assert.That(link.toNode != add2);
 			}
 		}
+
+		//Test biome graph
+		// +----+      +----+
+		// | c1 +------> s1 +----+
+		// +----+      +----+    |
+		//                       |
+		// +----+      +----+    |  +------+
+		// | c2 +------> s2 +-------> surf |
+		// +----+      +----+    |  +------+
+		//                       |
+		// +----+      +----+    |
+		// | c3 +------> s3 +----+
+		// +----+      +----+
+		// c*: PWNodeBiomeSurfaceColor, s*: PWNodeBiomeSurfaceSwitch, surf: PWNodeBiomeSurface
+
+
+		[Test]
+		public void GetNodeChildsRecursive()
+		{
+			PWMainGraph mainGraph = TestUtils.GenerateTestMainGraphBiomeSwitch();
+
+			var wlevel = mainGraph.FindNodeByName("wlevel");
+
+			var recursiveNodesFromC2 = mainGraph.GetNodeChildsRecursive(wlevel);
+
+			//check for duplicates
+			Assert.That(recursiveNodesFromC2.Count == recursiveNodesFromC2.Distinct().Count());
+
+			//check for compute order:
+			for (int i = 0; i < recursiveNodesFromC2.Count - 1; i++)
+			{
+				var node1 = recursiveNodesFromC2[i];
+				var node2 = recursiveNodesFromC2[i + 1];
+
+				Assert.That(node1.computeOrder <= node2.computeOrder, "Nodes from GetNodeChildsRecursive are not computeOrder sorted");
+			}
+		}
+
 	}
 }

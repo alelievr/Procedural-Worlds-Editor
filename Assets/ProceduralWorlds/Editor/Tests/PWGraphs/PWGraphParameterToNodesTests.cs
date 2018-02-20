@@ -18,7 +18,7 @@ namespace PW.Tests.Graphs
 				.NewNode(typeof(PWNodeDebugInfo), "debug")
 				.Link("perlin", "debug")
 				.Execute()
-				.GetGraph();
+				.GetGraph() as PWMainGraph;
 			
 			perlinNode = graph.FindNodeByName< PWNodePerlinNoise2D >("perlin");
 			debugNode = graph.FindNodeByName< PWNodeDebugInfo >("debug");

@@ -14,6 +14,7 @@ namespace PW
 	{
 		//Node datas:
 		public Rect					rect = new Rect(400, 400, 200, 50);
+		public Rect					visualRect;
 		public int					id;
 		public bool					renamable = false;
 		public int					computeOrder = 0;
@@ -42,13 +43,14 @@ namespace PW
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
 		public bool				isSelected = false;
+		public bool				isProcessing = false;
 
 
 		//Graph datas accessors:
-		protected Vector3		chunkPosition { get { return graphRef.chunkPosition; } }
-		protected int			chunkSize { get { return graphRef.chunkSize; } }
-		protected int			seed { get { return graphRef.seed; } }
-		protected float			step { get { return graphRef.step; } }
+		protected Vector3		chunkPosition { get { return mainGraphRef.chunkPosition; } }
+		protected int			chunkSize { get { return mainGraphRef.chunkSize; } }
+		protected int			seed { get { return mainGraphRef.seed; } }
+		protected float			step { get { return mainGraphRef.step; } }
 		protected PWGraphEditorEventInfo editorEvents { get { return graphRef.editorEvents; } }
 
 
@@ -92,7 +94,7 @@ namespace PW
 
 		//fired when the node received a NotifyReload() or the user pressed Reload button in editor.
 		public event ReloadAction				OnReload;
-		//fired jstu after OnReload event;
+		//fired just after OnReload event;
 		public event ReloadAction				OnPostReload;
 		//fired when the node receive a SendMessage()
 		protected event MessageReceivedAction	OnMessageReceived;
@@ -117,7 +119,7 @@ namespace PW
 		//also fire a Process event for the target nodes
 		public void NotifyReload()
 		{
-			var nodes = graphRef.GetNodeChildsRecursive(this).ToList();
+			var nodes = graphRef.GetNodeChildsRecursive(this);
 
 			foreach (var node in nodes)
 				node.Reload(this);
@@ -131,19 +133,17 @@ namespace PW
 		//send reload event to all node of the specified type
 		public void NotifyReload(Type targetType)
 		{
-			var nodes = from node in graphRef.nodes
-						where node.GetType() == targetType
-						select node;
+			var nodes = graphRef.FindNodesByType(targetType);
 			
 			foreach (var node in nodes)
 				node.Reload(this);
 		}
 
-		//send reload to all nodes with a computeOrder smaller than minComputeOrder.
+		//send reload to all nodes with a computeOrder bigger than minComputeOrder
 		public void NotifyReload(int minComputeOrder)
 		{
 			var nodes = from node in graphRef.nodes
-						where node.computeOrder >= minComputeOrder
+						where node.computeOrder > minComputeOrder
 						select node;
 
 			foreach (var node in nodes)
@@ -163,6 +163,11 @@ namespace PW
 
 		public void Reload(PWNode from)
 		{
+			if (isProcessing)
+			{
+				Debug.LogError("Tried to reload a node from a processing pass !");
+				return ;
+			}
 			if (OnReload != null)
 				OnReload(from);
 			if (OnPostReload != null)
@@ -400,15 +405,6 @@ namespace PW
 			}
 			
 			canWork = true;
-		}
-
-		public void	RemoveSelf()
-		{
-			RemoveAllLinks();
-
-			//the node instance will be removed by the editor at the same time that it's asset
-		
-			ScriptableObject.DestroyImmediate(this, true);
 		}
 
 		void		OnClickedOutside()

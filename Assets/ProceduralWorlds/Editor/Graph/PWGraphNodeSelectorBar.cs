@@ -49,7 +49,7 @@ namespace PW.Editor
 
 		public void LoadStyles()
 		{
-			using (new DefaultGUISkin())
+			using (DefaultGUISkin.Get())
 			{
 				toolbarStyle = new GUIStyle("Toolbar");
 				toolbarSearchTextStyle = new GUIStyle("ToolbarSeachTextField");

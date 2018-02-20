@@ -81,8 +81,8 @@ namespace PW.Core
 		{
 			var links = anchors[index].links;
 
-			foreach (var link in links)
-				nodeRef.RemoveLink(link);
+			while (links.Count > 0)
+				nodeRef.RemoveLink(links.First());
 			anchors.RemoveAt(index);
 		}
 

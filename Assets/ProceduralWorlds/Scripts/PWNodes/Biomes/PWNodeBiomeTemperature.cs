@@ -11,7 +11,7 @@ namespace PW.Node
 	{
 
 		[PWInput("biome datas")]
-		public BiomeData		inputBiome;
+		public BiomeData		inputBiomeData;
 		[PWInput("temperature map"), PWNotRequired]
 		public Sampler			temperatureMap;
 
@@ -34,7 +34,7 @@ namespace PW.Node
 		[SerializeField]
 		Gradient				temperatureGradient;
 		[System.NonSerialized]
-		bool					fieldUpdate = false;
+		bool					updateTemperatureMap = false;
 		[SerializeField]
 		bool					internalTemperatureMap = true;
 
@@ -42,6 +42,8 @@ namespace PW.Node
 		float					minTemperatureMapInput;
 		[SerializeField]
 		float					maxTemperatureMapInput;
+
+		string					delayedTemperatureKey = "PWNodeBiomeTemperature";
 
 		public override void OnNodeCreation()
 		{
@@ -59,6 +61,10 @@ namespace PW.Node
 				new KeyValuePair< float, Color >(.75f, PWColor.orange),
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
+
+			delayedChanges.BindCallback(delayedTemperatureKey, (unused) => {
+				NotifyReload();
+			});
 		}
 
 		public override void OnNodeGUI()
@@ -68,7 +74,7 @@ namespace PW.Node
 			EditorGUI.BeginChangeCheck();
 			{
 				terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
-				waterMultiplier = PWGUI.Slider(new GUIContent("water multiplier: "), waterMultiplier, -1, 1);
+				waterMultiplier = PWGUI.Slider("water multiplier: ", waterMultiplier, -1, 1);
 	
 				EditorGUILayout.LabelField("temperature limits:");
 				EditorGUILayout.BeginHorizontal();
@@ -84,12 +90,12 @@ namespace PW.Node
 				else
 				{
 					EditorGUILayout.LabelField("Input temperature map range");
-					using (new DefaultGUISkin())
+					using (DefaultGUISkin.Get())
 						EditorGUILayout.MinMaxSlider(ref minTemperatureMapInput, ref maxTemperatureMapInput, minTemperature, maxTemperature);
 				}
 			}
 			if (EditorGUI.EndChangeCheck())
-				fieldUpdate = true;
+				UpdateTemperatureMap();
 			
 			if (localTemperatureMap != null)
 			{
@@ -98,11 +104,10 @@ namespace PW.Node
 				PWGUI.SetDebugForField(2, true);
 			}
 			
-			if (fieldUpdate)
+			if (updateTemperatureMap)
 			{
 				PWGUI.SetUpdateForField(2, true);
-				UpdateTemperatureMap();
-				fieldUpdate = false;
+				updateTemperatureMap = false;
 			}
 		}
 
@@ -127,10 +132,13 @@ namespace PW.Node
 
 		void UpdateTemperatureMap()
 		{
-			if (localTemperatureMap == null)
+			if (localTemperatureMap == null || inputBiomeData == null)
 				return ;
 			
 			var inputTemperatureMap = temperatureMap as Sampler2D;
+				
+			var terrain = inputBiomeData.GetSampler2D(BiomeSamplerName.terrainHeight);
+			var waterHeight = inputBiomeData.GetSampler2D(BiomeSamplerName.waterHeight);
 
 			(localTemperatureMap as Sampler2D).Foreach((x, y, val) => {
 				float	terrainMod = 0;
@@ -141,18 +149,20 @@ namespace PW.Node
 				if (!internalTemperatureMap)
 					mapValue = Mathf.Lerp(Mathf.Max(minTemperature, minTemperatureMapInput), Mathf.Min(maxTemperature, maxTemperatureMapInput), inputTemperatureMap[x, y]);
 
-				if (inputBiome != null)
-				{
-					if (terrainHeightMultiplier != 0)
-						terrainMod = inputBiome.terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
-					if (waterMultiplier != 0)
-						waterMod = inputBiome.waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
-				}
+				if (terrainHeightMultiplier != 0 && terrain != null)
+					terrainMod = terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
+				if (waterMultiplier != 0 && waterHeight != null)
+					waterMod = waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
 				return Mathf.Clamp(mapValue + terrainMod + waterMod, minTemperature, maxTemperature);
 			});
 
 			localTemperatureMap.min = minTemperature;
 			localTemperatureMap.max = maxTemperature;
+
+			if (inputBiomeData != null)
+				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
+				
+			updateTemperatureMap = true;
 		}
 
 		void CreateTemperatureMapIfNotExists()
@@ -176,18 +186,13 @@ namespace PW.Node
 
 			UpdateTemperatureMap();
 
-			fieldUpdate = true;
-
-			if (inputBiome != null)
-				inputBiome.temperatureRef = localTemperatureMap;
-
-			outputBiome = inputBiome;
+			outputBiome = inputBiomeData;
 		}
 
 		//to prebuild the biome tree:
 		public override void OnNodeProcessOnce()
 		{
-			outputBiome = inputBiome;
+			outputBiome = inputBiomeData;
 		}
 
 	}

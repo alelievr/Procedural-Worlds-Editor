@@ -36,7 +36,7 @@ public class BiomeSurfaceMapsObjectEditor : Editor
 		showNormalMaps.target = maps.type != SurfaceMapsType.Basic;
 		showComplexMaps.target = maps.type == SurfaceMapsType.Complex;
 
-		using (new DefaultGUISkin())
+		using (DefaultGUISkin.Get())
 		EditorGUILayout.BeginVertical(new GUIStyle("box"));
 		{
 			EditorGUILayout.LabelField("Surface Maps", EditorStyles.boldLabel);

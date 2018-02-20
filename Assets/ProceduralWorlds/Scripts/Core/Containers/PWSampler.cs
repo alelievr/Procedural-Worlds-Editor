@@ -18,6 +18,8 @@ namespace PW.Core
 	*/
 	public abstract class Sampler : IPWCloneable< Sampler >
 	{
+		public const int	maxStep = 1024;
+
 		public int			size;
 		public float		step;
 		public SamplerType	type;
@@ -34,6 +36,9 @@ namespace PW.Core
 
 		public void ResizeIfNeeded(int size, float step)
 		{
+			if (step < 0 || step > maxStep || Single.IsNaN(step))
+				return ;
+			
 			if (NeedResize(size, step))
 				Resize(size, step);
 		}
@@ -112,8 +117,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Sampler2D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Sampler2D(size, step);
@@ -210,8 +214,7 @@ namespace PW.Core
 			if (reuseObject != null)
 			{
 				newSampler = reuseObject as Sampler3D;
-				if (newSampler.size != size)
-					newSampler.Resize(size);
+				newSampler.ResizeIfNeeded(size, step);
 			}
 			else
 				newSampler = new Sampler3D(size, step);

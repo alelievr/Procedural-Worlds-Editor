@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Core;
+using System.Runtime.CompilerServices;
 
 namespace PW.Noises
 {
-	public abstract class Noise {
+	public abstract class Noise
+	{
+		public const float		noiseScale = 0.01f;
 	
 		public string	name;
-		public bool		hasGraphicAcceleration;
+		public bool		hasComputeShaders;
 	
 		public Noise()
 		{
-			hasGraphicAcceleration = SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null;
+			hasComputeShaders = SystemInfo.graphicsShaderLevel >= 45;
 		}
 
 		public virtual float Get2D(float x, float y, int seed)
@@ -25,6 +28,6 @@ namespace PW.Noises
 			return 0;
 		}
 
-		public abstract void ComputeSampler(Sampler samp, int seed);
+		public abstract void ComputeSampler(Sampler samp, float scale, int seed);
 	}
 }

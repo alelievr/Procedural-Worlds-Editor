@@ -52,9 +52,9 @@ namespace PW.Node
 				return ;
 
 			outputBiomeData = inputPartialBiome;
-			outputTerrain = biomeData.terrainRef;
-			outputTemperatureMap = biomeData.temperatureRef;
-			outputWetnessMap = biomeData.wetnessRef;
+			outputTerrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
+			outputTemperatureMap = biomeData.GetSampler(BiomeSamplerName.temperature);
+			outputWetnessMap = biomeData.GetSampler(BiomeSamplerName.wetness);
 		}
 		
 	}

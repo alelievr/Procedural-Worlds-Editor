@@ -16,8 +16,7 @@ namespace PW.Node
 		[PWOutput]
 		public PartialBiome	outputBiome;
 
-		[SerializeField]
-		PWBiomeGraph		biomeGraph;
+		public PWBiomeGraph	biomeGraph;
 
 		Rect				biomeColorPreviewRect;
 

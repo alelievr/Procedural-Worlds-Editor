@@ -107,8 +107,6 @@ namespace PW.Tests.Graphs
 			var input = graph.FindNodeByType< PWNodeGraphInput >();
 			var output = graph.FindNodeByType< PWNodeGraphOutput >();
 
-			var outputAnchorField = input.outputAnchorFields.First();
-
 			input.SetMultiAnchor("outputValues", 5);
 
 			var inputAnchors = input.outputAnchors.ToList();

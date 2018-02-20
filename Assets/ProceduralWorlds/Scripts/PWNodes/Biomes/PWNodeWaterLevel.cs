@@ -42,9 +42,10 @@ namespace PW.Node
 			outputBiome = new BiomeData();
 
 			outputBiome.isWaterless = false;
-			outputBiome.biomeTreeStartPoint = this;
+			outputBiome.biomeSwitchGraphStartPoint = this;
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => {
+				UpdateWaterMap();
 				NotifyReload();
 			});
 		}
@@ -112,6 +113,31 @@ namespace PW.Node
 			}
 		}
 
+		public void UpdateWaterMap()
+		{
+			outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, terrainNoise);
+
+			outputBiome.waterLevel = waterLevel;
+
+			if (terrainNoise.type == SamplerType.Sampler2D)
+			{
+				//terrain mapping
+				var mappedTerrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, mappedTerrain);
+
+				//waterHeight evaluation
+				Sampler2D waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
+				waterHeight.min = waterLevel - mappedTerrain.max;
+				waterHeight.max = waterLevel;
+				mappedTerrain.Foreach((x, y, val) => {
+					waterHeight[x, y] = waterLevel - val;
+				});
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.waterHeight, waterHeight);
+			}
+			else
+				; //TODO
+		}
+
 		public override void OnNodeProcess()
 		{
 			if (terrainNoise == null)
@@ -119,36 +145,10 @@ namespace PW.Node
 				Debug.LogError("[PWNodeWaterLevel] null terrain input received !");
 				return ;
 			}
-
-			outputBiome.terrainRef = terrainNoise;
 			
-			outputBiome.waterLevel = waterLevel;
+			outputBiome.Reset();
 
-			if (terrainNoise.type == SamplerType.Sampler2D)
-			{
-				//terrain mapping
-				outputBiome.terrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
-
-				//waterHeight evaluation
-				outputBiome.waterHeight = new Sampler2D(terrainNoise.size, terrainNoise.step);
-				outputBiome.waterHeight.min = mapMin;
-				outputBiome.waterHeight.max = mapMax;
-				outputBiome.terrain.Foreach((x, y, val) => {
-					outputBiome.waterHeight[x, y] = waterLevel - val;
-				});
-			}
-			else
-				; //TODO
-		}
-
-		void CreateNewBiome()
-		{
-
-		}
-
-		public override void OnNodeProcessOnce()
-		{
-			CreateNewBiome();
+			UpdateWaterMap();
 		}
 	}
 }

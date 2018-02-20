@@ -62,6 +62,8 @@ namespace PW.Node
 			{
 				float d = samp.max - samp.min;
 				(samp as Sampler2D).Foreach((x, y, val) => {
+					if (float.IsNaN(val))
+						return 0;
 					return curve.Evaluate(val / d) * d;
 				});
 			}
@@ -69,6 +71,8 @@ namespace PW.Node
 			{
 				float d = samp.max - samp.min;
 				(samp as Sampler3D).Foreach((x, y, z, val) => {
+					if (float.IsNaN(val))
+						return 0;
 					return curve.Evaluate(val / d) * d;
 				});
 			}

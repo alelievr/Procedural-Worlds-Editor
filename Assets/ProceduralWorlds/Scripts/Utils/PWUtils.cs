@@ -12,6 +12,7 @@ namespace PW
 		static Texture2D	debugTexture;
 		static int			localMaxLog = 0;
 		static int			localMaxLogWarning = 0;
+		static int			localMaxLogError = 0;
 
 		public static Rect DecalRect(Rect r, Vector2 decal, bool newRect = false)
 		{
@@ -154,6 +155,14 @@ namespace PW
 				return ;
 			Debug.LogWarning(p);
 			localMaxLogWarning++;
+		}
+		
+		public static void LogErrorMax(object p, int maxLog)
+		{
+			if (localMaxLogError >= maxLog)
+				return ;
+			Debug.LogError(p);
+			localMaxLogError++;
 		}
 
 		public static Texture2D CreateTexture2DColor(Color c)

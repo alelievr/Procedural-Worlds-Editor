@@ -12,18 +12,24 @@ namespace PW.Node
 	{
 
 		[PWInput]
-		public PWArray< PartialBiome >		inputBiomes = new PWArray< PartialBiome >();
+		public PWArray< PartialBiome >	inputBiomes = new PWArray< PartialBiome >();
 
 		[PWOutput]
-		public BlendedBiomeTerrain	outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
+		public BlendedBiomeTerrain		outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 
-		int					maxBiomeBlendCount = 2;
+		[SerializeField]
+		float				biomeBlendPercent = .1f;
+
+		[SerializeField]
+		BiomeBlendList		blendList = new BiomeBlendList();
 
 		[SerializeField]
 		bool				biomeCoverageRecap = false;
 
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
+
+		string				updateBiomeMapKey = "BiomeBlender";
 
 		public override void OnNodeCreation()
 		{
@@ -33,36 +39,67 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			OnReload += OnReloadCallback;
+
+			delayedChanges.BindCallback(updateBiomeMapKey, (unused) => {
+				BiomeData data = GetBiomeData();
+
+				FillBiomeMap(data);
+				updateBiomeMap = true;
+
+				NotifyReload();
+			});
 			
 			if (inputBiomes.GetValues().Count == 0)
 				return ;
 		}
 
-		public BiomeData	GetBiomeData()
+		public override void OnNodeDisable()
 		{
-			var biomes = inputBiomes.GetValues();
-			var biomeRef = biomes.FirstOrDefault(b => b.biomeDataReference != null);
-			if (biomeRef == null)
+			OnReload -= OnReloadCallback;
+		}
+
+		BiomeData	GetBiomeData()
+		{
+			var partialbiomes = inputBiomes.GetValues();
+			
+			if (partialbiomes.Count == 0)
 				return null;
-			return biomeRef.biomeDataReference;
+			
+			var biomeDataRef = partialbiomes.FirstOrDefault(pb => pb != null && pb.biomeDataReference != null);
+
+			if (biomeDataRef == null)
+				return null;
+
+			return biomeDataRef.biomeDataReference;
 		}
 
 		public override void OnNodeGUI()
 		{
-			var biomes = inputBiomes.GetValues();
-			BiomeData biomeData = null;
-			if (biomes.Count == 0 || biomes.First() == null)
+			BiomeData biomeData = GetBiomeData();
+
+			if (biomeData == null)
+			{
 				EditorGUILayout.LabelField("biomes not connected !");
+				return ;
+			}
 			else
 			{
-				biomeData = biomes.First().biomeDataReference;
 				EditorGUIUtility.labelWidth = 120;
-			 	maxBiomeBlendCount = EditorGUILayout.IntField("max blended biomes", maxBiomeBlendCount);
+				EditorGUI.BeginChangeCheck();
+				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
+				if (EditorGUI.EndChangeCheck())
+					delayedChanges.UpdateValue(updateBiomeMapKey);
+				blendList.UpdateIfNeeded(biomeData);
+
+				EditorGUI.BeginChangeCheck();
+				blendList.DrawList(biomeData, visualRect);
+				if (EditorGUI.EndChangeCheck())
+					delayedChanges.UpdateValue(updateBiomeMapKey);
 			}
 
 			if (biomeData != null)
 			{
-				if (biomeData.biomeIds != null)
+				if (biomeData.biomeMap != null)
 					PWGUI.BiomeMap2DPreview(biomeData);
 				//TODO: biome 3D preview
 			}
@@ -70,21 +107,41 @@ namespace PW.Node
 				EditorGUILayout.LabelField("no biome data");
 			
 			if (updateBiomeMap)
-				PWGUI.SetUpdateForField(0, true);
-
-			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap"))
 			{
-				if (biomeData != null && biomeData.biomeTree != null)
+				PWGUI.SetUpdateForField(1, true);
+				updateBiomeMap = false;
+			}
+
+			var biomeCoverage = biomeData.biomeSwitchGraph.GetBiomeCoverage();
+
+			bool biomeCoverageError = biomeCoverage.Any(b => b.Value > 0 && b.Value < 1);
+
+			GUIStyle biomeCoverageFoloutStyle = (biomeCoverageError) ? PWStyles.errorFoldout : EditorStyles.foldout;
+
+			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
+			{
+				if (biomeData != null && biomeData.biomeSwitchGraph != null)
 				{
-					foreach (var biomeCoverageKP in biomeData.biomeTree.GetBiomeCoverage())
+					foreach (var biomeCoverageKP in biomeCoverage)
 						if (biomeCoverageKP.Value > 0)
-							EditorGUILayout.LabelField(biomeCoverageKP.Key.ToString(), (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+						{
+							string paramName = biomeData.GetBiomeKey(biomeCoverageKP.Key);
+							EditorGUILayout.LabelField(paramName, (biomeCoverageKP.Value * 100).ToString("F2") + "%");
+						}
 				}
 				else
 					EditorGUILayout.LabelField("Null biome data/biome tree");
 			}
+		}
+		
+		public override void OnNodeProcessOnce()
+		{
+			var partialBiomes = inputBiomes.GetValues();
 
-			updateBiomeMap = false;
+			foreach (var partialBiome in partialBiomes)
+				partialBiome.biomeGraph.ProcessOnce();
+
+			BuildBiomeSwitchGraph();
 		}
 
 		public override void OnNodeProcess()
@@ -93,21 +150,16 @@ namespace PW.Node
 				return ;
 
 			var partialBiomes = inputBiomes.GetValues();
-			var tmpPartialBiome = partialBiomes.FirstOrDefault(b => b != null && b.biomeDataReference != null);
-
-			if (tmpPartialBiome == null)
-				return ;
-			
-			var biomeData = tmpPartialBiome.biomeDataReference;
+			var biomeData = GetBiomeData();
 
 			if (biomeData == null)
 				return ;
 			
 			//run the biome tree precomputing once all the biome tree have been parcoured
-			if (!biomeData.biomeTree.isBuilt)
-				biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-
-			biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
+			if (!biomeData.biomeSwitchGraph.isBuilt)
+				BuildBiomeSwitchGraph();
+			
+			FillBiomeMap(biomeData);
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
@@ -124,16 +176,16 @@ namespace PW.Node
 						if (partialBiome.biomeGraph == null)
 							continue ;
 						
-						partialBiome.biomeGraph.SetInput(partialBiomes[id]);
+						partialBiome.biomeGraph.SetInput(partialBiome);
 						partialBiome.biomeGraph.Process();
 
-						Biome b = partialBiome.biomeGraph.GetOutput();
-
-						if (b == null)
+						if (!partialBiome.biomeGraph.hasProcessed)
 						{
 							Debug.LogError("[PWBiomeBlender] Can't process properly the biome graph '" + partialBiome.biomeGraph + "'");
 							continue ;
 						}
+
+						Biome b = partialBiome.biomeGraph.GetOutput();
 
 						if (outputBlendedBiomeTerrain.biomes.Contains(b))
 						{
@@ -146,34 +198,32 @@ namespace PW.Node
 				}
 			}
 
-			outputBlendedBiomeTerrain.biomeTree = biomeData.biomeTree;
 			outputBlendedBiomeTerrain.biomeData = biomeData;
+		}
+
+		void FillBiomeMap(BiomeData biomeData)
+		{
+			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendList, biomeBlendPercent);
+			updateBiomeMap = true;
 		}
 
 		void OnReloadCallback(PWNode from)
 		{
-			BuildBiomeTree();
+			BuildBiomeSwitchGraph();
 			
-			var tmpPartialBiome = inputBiomes.GetValues().FirstOrDefault(b => b != null && b.biomeDataReference != null);
+			var biomeData = GetBiomeData();
 			
-			var biomeData = tmpPartialBiome.biomeDataReference;
-
-			if (biomeData != null)
-			{			
-				biomeData.biomeTree.FillBiomeMap(maxBiomeBlendCount, biomeData);
-			
+			//if the reload does not comes from the editor
+			if (from != null)
+			{
+				FillBiomeMap(biomeData);
 				updateBiomeMap = true;
 			}
 		}
 		
-		void BuildBiomeTree()
+		void BuildBiomeSwitchGraph()
 		{
-			var partialbiomes = inputBiomes.GetValues();
-
-			if (partialbiomes.Count == 0)
-				return ;
-
-			var biomeData = partialbiomes[0].biomeDataReference;
+			BiomeData biomeData = GetBiomeData();
 
 			if (biomeData == null)
 			{
@@ -181,30 +231,7 @@ namespace PW.Node
 				return ;
 			}
 
-			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-		}
-		
-		public override void OnNodeProcessOnce()
-		{
-			var partialBiomes = inputBiomes.GetValues();
-			var biomeData = partialBiomes[0].biomeDataReference;
-
-			foreach (var partialBiome in partialBiomes)
-				partialBiome.biomeGraph.ProcessOnce();
-
-			if (biomeData == null)
-			{
-				Debug.LogWarning("Can't build the biome albedo map, need to access to Biome datas !");
-				return ;
-			}
-
-			//build the biome tree:
-			biomeData.biomeTree.BuildTree(biomeData.biomeTreeStartPoint);
-		}
-
-		public override void OnNodeDisable()
-		{
-			OnReload -= OnReloadCallback;
+			biomeData.biomeSwitchGraph.BuildGraph(biomeData);
 		}
 	}
 }

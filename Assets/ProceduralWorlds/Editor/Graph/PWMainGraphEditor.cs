@@ -32,6 +32,14 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	[System.NonSerialized]
 	PWMainPresetScreen		presetScreen;
 
+	[SerializeField]
+	bool					scaledPreviewFoldout;
+	[SerializeField]
+	bool					terrainSettingsFoldout;
+	[SerializeField]
+	bool					geologicalSettingsFoldout;
+
+	const string			graphProcessKey = "PWMainGraphEditor";
 
 #region Initialization and data baking
 
@@ -43,11 +51,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		window.Show();
 	}
 
-/*	void InitializeNewGraph(PWNodeGraph graph)
-	{
-		//setup splitted panels:
-	}*/
-
 	public override void OnEnable()
 	{
 		base.OnEnable();
@@ -57,7 +60,11 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		
 		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		layout.onDrawSettingsBar = (rect) => settingsBar.DrawSettingsBar(rect);
+		layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
+
+		delayedChanges.BindCallback(graphProcessKey, (unsued) => {
+			graph.Process();
+		});
 	}
 
 	public override void OnGUIEnable()
@@ -107,9 +114,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 #endregion
 
-	void WindowResizeCallback(Vector2 newSize)
+	void WindowResizeCallback(Vector2 oldSize)
 	{
-		layout.ResizeWindow(newSize, position);
+		layout.ResizeWindow(oldSize, position);
 	}
 
 	void GraphChangedCallback(PWGraph newGraph)
@@ -119,13 +126,71 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		
 		terrainManager = new PWGraphTerrainManager(graph);
 
-		settingsBar.onDrawAdditionalSettings = (rect) =>
+		settingsBar.onDraw = (rect) =>
 		{
-			terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
+			settingsBar.DrawDefault(rect);
+			
+			EditorGUI.BeginChangeCheck();
 
-			//Main graph sepcific datas:
-			mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
-			mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+			if (PWGUI.BeginFade("Scaled preview", ref scaledPreviewFoldout, false))
+			{
+				EditorGUILayout.BeginHorizontal();
+				{
+					if (GUILayout.Button("Active", (mainGraph.scaledPreviewEnabled) ? PWStyles.pressedButton : PWStyles.button))
+					{
+						mainGraph.scaledPreviewEnabled = !mainGraph.scaledPreviewEnabled;
+						PWGUIManager.displaySamplerStepBounds = mainGraph.scaledPreviewEnabled;
+						mainGraph.Process();
+					}
+				}
+				EditorGUILayout.EndHorizontal();
+
+				mainGraph.scaledPreviewRatio = EditorGUILayout.Slider("Ratio", mainGraph.scaledPreviewRatio, 1, 128);
+				mainGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("Chunk size", mainGraph.scaledPreviewChunkSize, 32, 2048);
+				float scale = (mainGraph.scaledPreviewRatio * mainGraph.scaledPreviewChunkSize) / (mainGraph.nonModifiedChunkSize * mainGraph.nonModifiedStep);
+				EditorGUILayout.LabelField("Scale: " + scale);
+			}
+			PWGUI.EndFade();
+
+			if (PWGUI.BeginFade("Renderer settings", ref terrainSettingsFoldout, false))
+			{
+				terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
+			}
+			PWGUI.EndFade();
+
+			/*if (PWGUI.BeginFade("Geological settings", ref geologicalSettingsFoldout, false))
+			{
+				mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+				mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+			}
+			PWGUI.EndFade();*/
+
+			if (PWGUI.BeginFade("Chunk settings"))
+			{
+				//seed
+				GUI.SetNextControlName("seed");
+				mainGraph.seed = EditorGUILayout.IntField("Seed", mainGraph.seed);
+				
+				EditorGUI.BeginDisabledGroup(mainGraph.scaledPreviewEnabled);
+				{
+					//chunk size:
+					GUI.SetNextControlName("chunk size");
+					mainGraph.chunkSize = EditorGUILayout.IntField("Chunk size", mainGraph.chunkSize);
+					mainGraph.chunkSize = Mathf.Clamp(mainGraph.chunkSize, 1, 1024);
+		
+					//step:
+					float min = 0.1f;
+					EditorGUILayout.BeginHorizontal();
+					EditorGUILayout.PrefixLabel("step", PWStyles.prefixLabel);
+					mainGraph.step = mainGraph.PWGUI.Slider(mainGraph.step, ref min, ref mainGraph.maxStep, 0.01f, false, true);
+					EditorGUILayout.EndHorizontal();
+				}
+				EditorGUI.EndDisabledGroup();
+			}
+			PWGUI.EndFade();
+			
+			if (EditorGUI.EndChangeCheck())
+				delayedChanges.UpdateValue(graphProcessKey);
 		};
 	}
 

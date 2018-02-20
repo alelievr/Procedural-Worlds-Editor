@@ -21,21 +21,28 @@ public partial class PWGraphEditor : PWEditorWindow
 	public PWBiomeGraph			biomeGraph { get { return graph as PWBiomeGraph; } }
 	public PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
 
+
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.
 	public Dictionary< int, Rect >	eventMasks = new Dictionary< int, Rect >();
 	EventType					savedEventType;
 	bool						restoreEvent;
-	
+
+
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
-	
+	protected PWGUIManager		PWGUI = new PWGUIManager();
+
+
 	//size of the current window, updated each frame
 	protected Vector2			windowSize;
+	protected DelayedChanges	delayedChanges = new DelayedChanges();
+
 
 	//Is the editor on MacOS ?
 	bool 						MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
+
 
 	//Layout additional windows
 	protected PWGraphOptionBar			optionBar;
@@ -44,10 +51,14 @@ public partial class PWGraphEditor : PWEditorWindow
 
 
 	//custom editor events:
-	//fired whe the user resize the window
+	//fired whe the user resize the window (old window size in parameter)
 	public event Action< Vector2 >	OnWindowResize;
 	//fired when a graph is loaded/unloaded
 	public event Action< PWGraph >	OnGraphChanged;
+
+
+	[System.NonSerialized]
+	Type							oldGraphType = null;
 
 
 	public override void OnEnable()
@@ -75,6 +86,9 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (graph != null)
 			LoadGraph(graph);
+			
+		//save the size of the window
+		windowSize = position.size;
 	}
 
 	//draw the default node graph:
@@ -90,6 +104,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		
 		//update the current GUI settings storage and clear drawed popup list:
 		graph.PWGUI.StartFrame(position);
+		PWGUI.StartFrame(position);
 		
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
@@ -143,9 +158,9 @@ public partial class PWGraphEditor : PWEditorWindow
 	
 		//restore masked events:
 		UnMaskEvents();
-		
-		//save the size of the window
-		windowSize = position.size;
+
+		//update delayedChanges
+		delayedChanges.Update();
 	}
 
 	void PlayModeChangeCallback(PlayModeStateChange mode)
@@ -170,6 +185,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		if (this.graph != null)
 			UnloadGraph(false);
 
+		this.oldGraphType = graph.GetType();
 		this.graph = graph;
 
 		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
@@ -277,10 +293,13 @@ public partial class PWGraphEditor : PWEditorWindow
 	{
 		EditorGUILayout.LabelField("Graph not found, ouble click on a graph asset file to a graph to open it");
 
-		PWGraph newGraph = EditorGUILayout.ObjectField(null, GetType(), false) as PWGraph;
-
-		if (newGraph != null)
-			LoadGraph(newGraph);
+		if (oldGraphType != null)
+		{
+			PWGraph newGraph = EditorGUILayout.ObjectField(null, oldGraphType, false) as PWGraph;
+	
+			if (newGraph != null)
+				LoadGraph(newGraph);
+		}
 	}
 
 	void SelectAndDrag()
