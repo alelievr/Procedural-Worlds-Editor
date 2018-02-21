@@ -636,6 +636,8 @@ namespace PW.Core
 			//recreated texture if it has been destoryed:
 			if (fieldSettings.texture == null)
 			{
+				Debug.Log("currentWindow: " + currentWindowRect);
+				Debug.Log("size: " + previewSize);
 				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
 				fieldSettings.texture.filterMode = fieldSettings.filterMode;
 				fieldSettings.samplerTextureUpdated = false;

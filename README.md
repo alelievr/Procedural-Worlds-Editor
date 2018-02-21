@@ -7,6 +7,7 @@ Currently under active developement, if you're interseted in contributing / have
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/alelievr/Procedural-Worlds-Editor.svg)](http://isitmaintained.com/project/alelievr/Procedural-Worlds-Editor "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/alelievr/Procedural-Worlds-Editor.svg)](http://isitmaintained.com/project/alelievr/Procedural-Worlds-Editor "Percentage of issues still open")
 
+![Current version](https://img.shields.io/badge/release-in_dev-9E00FF.svg)
 [![Build Status](https://travis-ci.org/alelievr/Procedural-Worlds-Editor.svg?branch=master)](https://travis-ci.org/alelievr/Procedural-Worlds-Editor)
 
 Consult the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to see the project advancement and on what we're working on.

@@ -32,18 +32,28 @@ namespace PW
 
 		//GUI utils to provide custom fields for Samplers, Range ...
 		[SerializeField]
-		protected PWGUIManager	PWGUI = new PWGUIManager();
+		public PWGUIManager		PWGUI = new PWGUIManager();
 
 
 		//Useful state bools:
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
-		public bool				isDragged = false;
 		[System.NonSerialized]
 		public bool				ready = false;
 		//tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
-		public bool				isSelected = false;
 		public bool				isProcessing = false;
+		//tell if the node was enabled
+		[System.NonSerialized]
+		private bool			isEnabled = false;
+		//Serialization system:
+		[System.NonSerialized]
+		private	bool			deserializationAlreadyNotified = false;
+
+
+		[System.NonSerialized]
+		public PWGraph			graphRef;
+		protected PWMainGraph	mainGraphRef { get { return graphRef as PWMainGraph; } }
+		protected PWBiomeGraph	biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
 
 
 		//Graph datas accessors:
@@ -60,44 +70,10 @@ namespace PW
 
 	#region Internal Node datas and style
 
-		Vector2						graphPan { get { return graphRef.panPosition; } }
-		[SerializeField]
-		int							maxAnchorRenderHeight = 0;
-
-
-		//Utils
-		[System.NonSerialized]
-		protected DelayedChanges	delayedChanges = new DelayedChanges();
-		protected Event				e { get { return Event.current; } }
-
-
-		[System.NonSerialized]
-		public PWGraph				graphRef;
-		protected PWMainGraph		mainGraphRef { get { return graphRef as PWMainGraph; } }
-		protected PWBiomeGraph		biomeGraphRef { get { return graphRef as PWBiomeGraph; } }
-
-		public bool					windowNameEdit = false;
-
-		//Serialization system:
-		[System.NonSerialized]
-		private	bool				deserializationAlreadyNotified = false;
-		//tell if the node was enabled
-		[System.NonSerialized]
-		private bool				isEnabled = false;
-
 	#endregion
 	
-		public delegate void					ReloadAction(PWNode from);
 		public delegate void					AnchorAction(PWAnchor anchor);
-		public delegate void					MessageReceivedAction(PWNode from, object message);
 		public delegate void					LinkAction(PWNodeLink link);
-
-		//fired when the node received a NotifyReload() or the user pressed Reload button in editor.
-		public event ReloadAction				OnReload;
-		//fired just after OnReload event;
-		public event ReloadAction				OnPostReload;
-		//fired when the node receive a SendMessage()
-		protected event MessageReceivedAction	OnMessageReceived;
 
 		//fired when this node was linked
 		protected event AnchorAction			OnAnchorLinked;
@@ -114,86 +90,6 @@ namespace PW
 		//event relay, to simplify custom graph events:
 		// public event Action< int >				OnChunkSizeChanged;
 		// public event Action< int >				OnChunkPositionChanged;
-
-		//default notify reload will be sent to all node childs
-		//also fire a Process event for the target nodes
-		public void NotifyReload()
-		{
-			var nodes = graphRef.GetNodeChildsRecursive(this);
-
-			foreach (var node in nodes)
-				node.Reload(this);
-			
-			//add our node to the process pass
-			nodes.Add(this);
-
-			graphRef.ProcessNodes(nodes);
-		}
-		
-		//send reload event to all node of the specified type
-		public void NotifyReload(Type targetType)
-		{
-			var nodes = graphRef.FindNodesByType(targetType);
-			
-			foreach (var node in nodes)
-				node.Reload(this);
-		}
-
-		//send reload to all nodes with a computeOrder bigger than minComputeOrder
-		public void NotifyReload(int minComputeOrder)
-		{
-			var nodes = from node in graphRef.nodes
-						where node.computeOrder > minComputeOrder
-						select node;
-
-			foreach (var node in nodes)
-				node.Reload(this);
-		}
-
-		public void NotifyReload(PWNode node)
-		{
-			node.Reload(this);
-		}
-
-		public void NotifyReload(IEnumerable< PWNode > nodes)
-		{
-			foreach (var node in nodes)
-				node.Reload(this);
-		}
-
-		public void Reload(PWNode from)
-		{
-			if (isProcessing)
-			{
-				Debug.LogError("Tried to reload a node from a processing pass !");
-				return ;
-			}
-			if (OnReload != null)
-				OnReload(from);
-			if (OnPostReload != null)
-				OnPostReload(from);
-		}
-
-		public void SendMessage(PWNode target, object message)
-		{
-			target.OnMessageReceived(this, message);
-		}
-		
-		public void SendMessage(Type targetType, object message)
-		{
-			var nodes = from node in graphRef.nodes
-						where node.GetType() == targetType
-						select node;
-						
-			foreach (var node in nodes)
-				node.OnMessageReceived(this, message);
-		}
-		
-		public void SendMessage(IEnumerable< PWNode > nodes, object message)
-		{
-			foreach (var node in nodes)
-				node.OnMessageReceived(this, message);
-		}
 
 		public void OnAfterGraphDeserialize(PWGraph graph)
 		{
@@ -225,8 +121,6 @@ namespace PW
 
 			//load the class QA name:
 			classAQName = GetType().AssemblyQualifiedName;
-
-			delayedChanges.Clear();
 
 			if (graphRef != null)
 				OnAfterNodeAndGraphDeserialized();
@@ -327,8 +221,6 @@ namespace PW
 
 		public virtual void OnNodeProcessOnce() {}
 
-		public virtual void OnNodeUnitTest() {}
-
 		public virtual void OnNodeAnchorLink(string propName, int index) {}
 
 		public virtual void OnNodeAnchorUnlink(string propName, int index) {}
@@ -405,18 +297,6 @@ namespace PW
 			}
 			
 			canWork = true;
-		}
-
-		void		OnClickedOutside()
-		{
-			if (Event.current.button == 0)
-			{
-				windowNameEdit = false;
-				GUI.FocusControl(null);
-			}
-			if (Event.current.button == 0 && !Event.current.shift)
-				isSelected = false;
-			isDragged = false;
 		}
 
 	#region Unused (for the moment) overrided functions
