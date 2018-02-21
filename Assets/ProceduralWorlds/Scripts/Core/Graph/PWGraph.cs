@@ -72,7 +72,6 @@ namespace PW.Core
 		public Vector2							panPosition { get { return _panPosition + zoomPanCorrection; } set { _panPosition = value - zoomPanCorrection; } }
 		public float							scale = 2;
 		public Vector2							zoomPanCorrection;
-        public PWGUIManager						PWGUI = new PWGUIManager();
 		[NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
 		public bool								presetChoosed = false;

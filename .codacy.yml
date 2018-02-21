@@ -1,0 +1,10 @@
+exclude_paths:
+    - ProjectSettings/
+    - UnityPackageManager/
+    - .travis/
+    - .vscode/
+    - 'Assets/Editor'
+    - 'Assets/Builtin skin'
+    - 'Assets/PostProcessing'
+    - 'Assets/MicroSplat'
+    - 'Assets/Builtin skin'

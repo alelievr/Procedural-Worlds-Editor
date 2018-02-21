@@ -1,22 +1,24 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
-using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using PW.Core;
-using Debug = UnityEngine.Debug;
+using PW.Biomator;
 
-namespace PW.Biomator
+namespace PW.Editor
 {
-	public static class BiomeUtils
+	public class BiomeDataDrawer : PWDrawer
 	{
+		bool[]		samplerFoldouts;
 
-		static bool[]		samplerFoldouts;
-		static PWGUIManager	PWGUI = new PWGUIManager();
+		BiomeData	b;
+
+		public override void OnEnable()
+		{
+			b = target as BiomeData;
+		}
 	
-		public static void DrawBiomeInfos(Rect view, BiomeData b)
+		public void OnGUI(Rect view)
 		{
 			if (b == null)
 			{
@@ -46,6 +48,11 @@ namespace PW.Biomator
 
 				i++;
 			}
+		}
+
+		public override void OnDisable()
+		{
+			
 		}
 
 	}

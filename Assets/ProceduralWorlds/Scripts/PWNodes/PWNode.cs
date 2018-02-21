@@ -30,10 +30,6 @@ namespace PW
 		public List< PWAnchorField >	outputAnchorFields = new List< PWAnchorField >();
 		public IEnumerable< PWAnchorField > anchorFields { get { foreach (var ia in inputAnchorFields) yield return ia; foreach (var ao in outputAnchorFields) yield return ao; } }
 
-		//GUI utils to provide custom fields for Samplers, Range ...
-		[SerializeField]
-		public PWGUIManager		PWGUI = new PWGUIManager();
-
 
 		//Useful state bools:
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }

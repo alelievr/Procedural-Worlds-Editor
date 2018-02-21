@@ -9,6 +9,7 @@ Currently under active developement, if you're interseted in contributing / have
 
 ![Current version](https://img.shields.io/badge/release-in_dev-9E00FF.svg)
 [![Build Status](https://travis-ci.org/alelievr/Procedural-Worlds-Editor.svg?branch=master)](https://travis-ci.org/alelievr/Procedural-Worlds-Editor)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/15c578a373384328b55afadd2c3eeba5)](https://www.codacy.com/app/alelievr/Procedural-Worlds-Editor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=alelievr/Procedural-Worlds-Editor&amp;utm_campaign=Badge_Grade)
 
 Consult the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to see the project advancement and on what we're working on.
 

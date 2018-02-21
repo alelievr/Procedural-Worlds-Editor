@@ -107,6 +107,7 @@ public partial class PWGraphEditor : PWEditorWindow
 	public override void OnGUIEnable()
 	{
 		LoadStyles();
+		LoadOrderingGroupStyles();
 
 		if (graph != null)
 			LoadGraph(graph);
