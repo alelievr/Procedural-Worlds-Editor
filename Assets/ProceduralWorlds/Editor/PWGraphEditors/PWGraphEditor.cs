@@ -50,11 +50,35 @@ public partial class PWGraphEditor : PWEditorWindow
 	protected PWGraphSettingsBar		settingsBar;
 
 
-	//custom editor events:
+	//public delegates:
+	public delegate void					NodeAction(PWNode node);
+		public delegate void					LinkAction(PWNodeLink link);
+
+	
 	//fired whe the user resize the window (old window size in parameter)
 	public event Action< Vector2 >	OnWindowResize;
 	//fired when a graph is loaded/unloaded
 	public event Action< PWGraph >	OnGraphChanged;
+	//fired when a node is selected
+	public event NodeAction			OnNodeSelected;
+	//fired when a node is unselected
+	public event NodeAction			OnNodeUnselected;
+	//fired when fore reload button in the editor is pressed
+	public event Action				OnForceReload;
+	//fired when fore reload once button in the editor is pressed
+	public event Action				OnForceReloadOnce;
+	//fired when clicking inside the graph, not on a node nor a link.
+	public event Action				OnClickNowhere;
+	//fired when a link is not created and dropped in the void
+	public event Action				OnLinkCanceled;
+	//fired when a link start been dragged by the editor
+	public event Action< PWAnchor >	OnLinkStartDragged;
+	//fired when a link stop been dragged by the editor
+	public event Action				OnLinkStopDragged;
+	//fired when a link is selected
+	public event LinkAction			OnLinkSelected;
+	//fired when a link is unselected
+	public event LinkAction			OnLinkUnselected;
 
 
 	[System.NonSerialized]

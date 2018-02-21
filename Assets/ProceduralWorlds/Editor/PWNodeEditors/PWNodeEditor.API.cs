@@ -25,11 +25,11 @@ namespace PW.Editor
 		{
 			var nodes = graphRef.GetNodeChildsRecursive(node);
 
-			foreach (var node in node.nodes)
-				node.Reload(this);
+			foreach (var n in nodes)
+				n.Reload(node);
 			
 			//add our node to the process pass
-			nodes.Add(this);
+			nodes.Add(node);
 
 			graphRef.ProcessNodes(nodes);
 		}
@@ -39,30 +39,30 @@ namespace PW.Editor
 		{
 			var nodes = graphRef.FindNodesByType(targetType);
 			
-			foreach (var node in nodes)
-				node.Reload(this);
+			foreach (var n in nodes)
+				n.Reload(node);
 		}
 
 		//send reload to all nodes with a computeOrder bigger than minComputeOrder
 		public void NotifyReload(int minComputeOrder)
 		{
-			var nodes = from node in graphRef.nodes
-						where node.computeOrder > minComputeOrder
-						select node;
+			var nodes = from n in graphRef.nodes
+						where n.computeOrder > minComputeOrder
+						select n;
 
-			foreach (var node in nodes)
-				node.Reload(this);
+			foreach (var n in nodes)
+				n.Reload(node);
 		}
 
-		public void NotifyReload(PWNode node)
+		public void NotifyReload(PWNode n)
 		{
-			node.Reload(this);
+			n.Reload(node);
 		}
 
 		public void NotifyReload(IEnumerable< PWNode > nodes)
 		{
-			foreach (var node in nodes)
-				node.Reload(this);
+			foreach (var n in nodes)
+				n.Reload(node);
 		}
 
 		public void Reload(PWNode from)
@@ -80,23 +80,23 @@ namespace PW.Editor
 
 		public void SendMessage(PWNode target, object message)
 		{
-			target.OnMessageReceived(this, message);
+			target.OnMessageReceived(node, message);
 		}
 		
 		public void SendMessage(Type targetType, object message)
 		{
-			var nodes = from node in graphRef.nodes
-						where node.GetType() == targetType
-						select node;
+			var nodes = from i in graphRef.nodes
+						where i.GetType() == targetType
+						select i;
 						
-			foreach (var node in nodes)
-				node.OnMessageReceived(this, message);
+			foreach (var n in nodes)
+				n.OnMessageReceived(node, message);
 		}
 		
 		public void SendMessage(IEnumerable< PWNode > nodes, object message)
 		{
-			foreach (var node in nodes)
-				node.OnMessageReceived(this, message);
+			foreach (var n in nodes)
+				n.OnMessageReceived(node, message);
 		}
 
 	}

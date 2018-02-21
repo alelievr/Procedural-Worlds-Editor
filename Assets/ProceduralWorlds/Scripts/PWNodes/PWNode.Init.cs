@@ -13,16 +13,6 @@ namespace PW
 {
 	public partial class PWNode
 	{
-		static GUIStyle 			renameNodeTextFieldStyle = null;
-		static GUIStyle				innerNodePaddingStyle = null;
-		static GUIStyle				nodeStyle = null;
-		static bool					styleLoadedStatic = false;
-		[System.NonSerialized]
-		bool						styleLoaded = false;
-		
-		static Texture2D			editIcon = null;
-		static Texture2D			debugIcon = null;
-
 		//anchor 
 		[System.Serializable]
 		protected class AnchorFieldDictionary : SerializableDictionary< string, PWAnchorField > {}
@@ -34,15 +24,6 @@ namespace PW
 
 		[System.NonSerialized]
 		List< FieldInfo >					undoableFields = new List< FieldInfo >();
-
-		void LoadAssets()
-		{
-			editIcon = Resources.Load< Texture2D >("Icons/ic_edit");
-			debugIcon = Resources.Load< Texture2D >("Icons/ic_settings");
-			
-			//set the color scheme name for this node type
-			colorSchemeName = PWNodeTypeProvider.GetNodeColor(GetType());
-		}
 
 		public void LoadStyles()
 		{
@@ -241,79 +222,6 @@ namespace PW
 			}
 		}
 
-		//retarget "Reload" button in the editor to the internal event OnReload:
-		void GraphReloadCallback() { Reload(null); }
-
-		void ForceReloadCallback() { Reload(null); }
-
-		void ForceReloadOnceCallback() { Debug.Log("force reload once: TODO"); }
-
-		void LinkStartDragCallback(PWAnchor fromAnchor)
-		{
-			//disable non-linkable anchors:
-			if (fromAnchor.nodeRef != this)
-				DisableUnlinkableAnchors(fromAnchor);
-		}
-
-		void LinkStopDragCallback()
-		{
-			//reset anchor highlight
-			ResetUnlinkableAnchors();
-
-			//reset link highlight
-			foreach (var anchorField in anchorFields)
-				foreach (var anchor in anchorField.anchors)
-					foreach (var link in anchor.links)
-						link.ResetHighlight();
-		}
-
-		void LinkCanceledCallback()
-		{
-			//reset the highlight mode on anchors:
-		}
-
-		void DraggedLinkOverAnchorCallback(PWAnchor anchor)
-		{
-			if (!PWAnchorUtils.AnchorAreAssignable(editorEvents.startedLinkAnchor, anchor))
-				return ;
-
-			//update anchor highlight
-			if (anchor.anchorType == PWAnchorType.Input)
-			{
-				if (anchor.linkCount >= 1)
-				{
-					//highlight links with delete color
-					foreach (var link in anchor.links)
-						link.highlight = PWLinkHighlight.Delete;
-					anchor.highlighMode = PWAnchorHighlight.AttachReplace;
-				}
-				else
-					anchor.highlighMode = PWAnchorHighlight.AttachNew;
-			}
-			else
-			{
-				//highlight our link with delete color
-				foreach (var link in editorEvents.startedLinkAnchor.links)
-					link.highlight = PWLinkHighlight.Delete;
-				
-				if (anchor.linkCount > 0)
-					anchor.highlighMode = PWAnchorHighlight.AttachAdd;
-				else
-					anchor.highlighMode = PWAnchorHighlight.AttachNew;
-			}
-		}
-
-		void DraggedLinkQuitAnchorCallbck(PWAnchor anchor)
-		{
-			anchor.highlighMode = PWAnchorHighlight.None;
-
-			//reset link hightlight
-			foreach (var link in anchor.links)
-				link.ResetHighlight();
-			foreach (var link in editorEvents.startedLinkAnchor.links)
-				link.ResetHighlight();
-		}
-
 		void AnchorLinkedCallback(PWAnchor anchor)
 		{
 			//CreateLink will raise the OnLinkCreated event in the graph and create the link
@@ -328,45 +236,17 @@ namespace PW
 			// OnLinkRemoved(link);
 		}
 
-		void NodeSelectedCallback(PWNode node)
-		{
-			if (node == this)
-				isSelected = true;
-		}
-
-		void NodeUnselectedCallback(PWNode node)
-		{
-			if (node == this)
-				isSelected = false;
-		}
-
 		void LinkRemovedCalllback()
 		{
 			UpdateWorkStatus();
 		}
 
-		void LinkCreatedCallback(PWNodeLink link)
-		{
-			ResetUnlinkableAnchors();
-		}
-
 		void BindEvents()
 		{
 			//graph events:
-			graphRef.OnForceReload += ForceReloadCallback;
-			graphRef.OnForceReloadOnce += ForceReloadOnceCallback;
-			graphRef.OnClickNowhere += OnClickedOutside;
-			graphRef.OnLinkStartDragged += LinkStartDragCallback;
-			graphRef.OnLinkStopDragged += LinkStopDragCallback;
 			graphRef.OnPostLinkRemoved += LinkRemovedCalllback;
-			graphRef.OnLinkCreated += LinkCreatedCallback;
-			graphRef.OnLinkCanceled += LinkCanceledCallback;
-			graphRef.OnNodeSelected += NodeSelectedCallback;
-			graphRef.OnNodeUnselected += NodeUnselectedCallback;
 
 			//local node events:
-			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
-			OnDraggedLinkQuitAnchor += DraggedLinkQuitAnchorCallbck;
 			OnAnchorLinked += AnchorLinkedCallback;
 			OnAnchorUnlinked += AnchorUnlinkedCallback;
 		}
@@ -377,21 +257,10 @@ namespace PW
 			//null check because this function may be called without the node being initialized
 			if (graphRef != null)
 			{
-				graphRef.OnForceReload -= GraphReloadCallback;
-				graphRef.OnForceReloadOnce -= ForceReloadOnceCallback;
-				graphRef.OnClickNowhere -= OnClickedOutside;
-				graphRef.OnLinkStartDragged -= LinkStartDragCallback;
-				graphRef.OnLinkStopDragged -= LinkStopDragCallback;
 				graphRef.OnPostLinkRemoved -= LinkRemovedCalllback;
-				graphRef.OnLinkCreated -= LinkCreatedCallback;
-				graphRef.OnLinkCanceled -= LinkCanceledCallback;
-				graphRef.OnNodeSelected -= NodeSelectedCallback;
-				graphRef.OnNodeUnselected -= NodeUnselectedCallback;
 			}
 			
 			//local node events:
-			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;
-			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;
 			OnAnchorLinked -= AnchorLinkedCallback;
 			OnAnchorUnlinked -= AnchorUnlinkedCallback;
 		}
