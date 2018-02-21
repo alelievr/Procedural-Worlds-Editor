@@ -40,14 +40,5 @@ namespace PW.Node
 			if (intify)
 				fOutput = Mathf.RoundToInt(fOutput);
 		}
-
-		public override void OnNodeUnitTest()
-		{
-			values = new PWArray< float >() {10, 30, 40, -20};
-
-			OnNodeProcess();
-
-			Assert.That(fOutput == 60);
-		}
 	}
 }

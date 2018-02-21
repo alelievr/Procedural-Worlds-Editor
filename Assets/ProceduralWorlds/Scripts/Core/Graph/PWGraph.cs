@@ -98,25 +98,15 @@ namespace PW.Core
 		//node events:
 		public event NodeAction					OnNodeRemoved;
 		public event NodeAction					OnNodeAdded;
-		public event NodeAction					OnNodeSelected;
-		public event NodeAction					OnNodeUnselected;
 		//link events:
 		//fired when a link start to be dragged
-		public event Action< PWAnchor >			OnLinkStartDragged;
-		public event Action						OnLinkStopDragged;
-		public event Action						OnLinkCanceled;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnPostLinkCreated;
 		public event LinkAction					OnLinkRemoved;
 		public event Action						OnPostLinkRemoved;
-		public event LinkAction					OnLinkUnselected;
 		//graph events:
 		public event Action						OnGraphStructureChanged;
-		public event Action						OnClickNowhere; //when click inside the graph, not on a node nor a link.
 		public event Action						OnAllNodeReady;
-		//editor button events:
-		public event Action						OnForceReload;
-		public event Action						OnForceReloadOnce;
 	
 	#endregion
 
@@ -367,14 +357,6 @@ namespace PW.Core
 		void		LinkPostAddedCallback(PWNodeLink link) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
 		void		LinkPostRemovedCallback() { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
-
-		//event accessors for PWGraphEditor
-		public void RaiseOnClickNowhere() { if (OnClickNowhere != null) OnClickNowhere(); }
-		public void RaiseOnForceReload() { if (OnForceReload != null) OnForceReload(); UpdateComputeOrder(); Process(); }
-		public void RaiseOnForceReloadOnce() { if (OnForceReloadOnce != null) OnForceReloadOnce(); UpdateComputeOrder(); ProcessOnce(); Process(); }
-		public void RaiseOnLinkStartDragged(PWAnchor anchor) { if (OnLinkStartDragged != null) OnLinkStartDragged(anchor); }
-		public void RaiseOnLinkCancenled() { if (OnLinkCanceled != null) OnLinkCanceled(); }
-		public void RaiseOnLinkStopDragged() { if (OnLinkStopDragged != null) OnLinkStopDragged(); }
 
 	#endregion
 	

@@ -37,12 +37,6 @@ namespace PW.Node
 			OnReload -= ReloadCallback;
 		}
 
-		public override void OnNodeLoadStyle()
-		{
-			//build the graph the first times:
-			UpdateGraph();
-		}
-
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 80;

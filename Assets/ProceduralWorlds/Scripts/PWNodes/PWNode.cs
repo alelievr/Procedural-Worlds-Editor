@@ -61,28 +61,18 @@ namespace PW
 		protected int			chunkSize { get { return mainGraphRef.chunkSize; } }
 		protected int			seed { get { return mainGraphRef.seed; } }
 		protected float			step { get { return mainGraphRef.step; } }
-		protected PWGraphEditorEventInfo editorEvents { get { return graphRef.editorEvents; } }
 
 
 		//Debug variables:
 		[SerializeField]
 		public bool				debug = false;
-
-	#region Internal Node datas and style
-
-	#endregion
 	
 		public delegate void					AnchorAction(PWAnchor anchor);
-		public delegate void					LinkAction(PWNodeLink link);
 
 		//fired when this node was linked
 		protected event AnchorAction			OnAnchorLinked;
 		//fired when this node was unlinked
 		protected event AnchorAction			OnAnchorUnlinked;
-		//fired when the dragged link is above an anchor
-		protected event AnchorAction			OnDraggedLinkOverAnchor;
-		//fired when the dragged link quit the zone above the anchor
-		protected event AnchorAction			OnDraggedLinkQuitAnchor;
 
 		//fired only when realMode is false, just after OnNodeProcess is called;
 		public event Action						OnPostProcess;
@@ -99,13 +89,11 @@ namespace PW
 				OnAfterNodeAndGraphDeserialized();
 		}
 
-	#region OnEnable, OnDisable, Initialize
+		#region OnEnable, OnDisable, Initialize
 
 		public void OnEnable()
 		{
 			isEnabled = true;
-
-			LoadAssets();
 			
 			LoadFieldAttributes();
 
@@ -203,15 +191,13 @@ namespace PW
 			}
 		}
 
-	#endregion
+		#endregion
 
-	#region inheritence virtual API
+		#region inheritence virtual API
 
 		public virtual void OnNodeCreation() {}
 
 		public virtual void OnNodeEnable() {}
-
-		public virtual void OnNodeLoadStyle() {}
 
 		public virtual void OnNodeProcess() {}
 
@@ -225,7 +211,7 @@ namespace PW
 
 		public virtual void OnNodeAnchorUnlink(string propName, int index) {}
 
-	#endregion
+		#endregion
 
 		void		OnAnchorEnable()
 		{
@@ -252,28 +238,6 @@ namespace PW
 
 			return newAnchorField;
 		}
-
-		void		DisableUnlinkableAnchors(PWAnchor anchor)
-		{
-			List< PWAnchorField >	anchorFields;
-
-			if (anchor.anchorType == PWAnchorType.Output)
-				anchorFields = inputAnchorFields;
-			else
-				anchorFields = outputAnchorFields;
-			
-			foreach (var anchorField in anchorFields)
-				anchorField.DisableIfUnlinkable(anchor);
-		}
-
-		//reset anchor colors and visibility after a link was dragged.
-		void		ResetUnlinkableAnchors()
-		{
-			foreach (var anchorField in inputAnchorFields)
-				anchorField.ResetLinkable();
-			foreach (var anchorField in outputAnchorFields)
-				anchorField.ResetLinkable();
-		}
 	
 		//Look for required input anchors and check if there are linked, if not we set the canWork bool to false.
 		void		UpdateWorkStatus()
@@ -298,8 +262,18 @@ namespace PW
 			
 			canWork = true;
 		}
+		
+		public void Process()
+		{
+			isProcessing = true;
+			OnNodeProcess();
+			if (!realMode)
+				OnPostProcess();
+			isProcessing = false;
+		}
 
-	#region Unused (for the moment) overrided functions
+		#region Unused (for the moment) overrided functions
+
 		public void	OnDestroy()
 		{
 			// Debug.Log("node " + nodeTypeName + " detroyed !");
@@ -314,7 +288,7 @@ namespace PW
 		{
 			EditorGUILayout.LabelField("nope !");
 		}
-	#endregion
+		#endregion
 
 		public override string ToString()
 		{
