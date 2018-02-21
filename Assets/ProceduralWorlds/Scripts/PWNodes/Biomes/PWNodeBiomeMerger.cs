@@ -17,11 +17,7 @@ namespace PW.Node
 		[PWOutput]
 		public FinalTerrain			mergedBiomeTerrain;
 
-		[SerializeField]
-		bool						biomeTerrainsFoldout;
-
-		[System.NonSerialized]
-		bool						update;
+		public bool					biomeTerrainsFoldout;
 
 		Sampler						finalTerrain = null;
 
@@ -33,37 +29,6 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
-		}
-
-		public override void OnNodeGUI()
-		{
-			Sampler finalTerrain = null;
-			
-			if (mergedBiomeTerrain != null && mergedBiomeTerrain.mergedTerrain != null)
-				finalTerrain = mergedBiomeTerrain.mergedTerrain;
-			
-			EditorGUIUtility.labelWidth = 80;
-			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
-
-			if (finalTerrain == null)
-			{
-				EditorGUILayout.LabelField("Null terrain");
-				return ;
-			}
-
-			PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
-
-			biomeTerrainsFoldout = EditorGUILayout.Foldout(biomeTerrainsFoldout, "Show biome terrains");
-
-			if (biomeTerrainsFoldout)
-				foreach (var biome in inputBlendedTerrain.biomes)
-					PWGUI.SamplerPreview(biome.name, biome.modifiedTerrain);
-
-			if (update)
-			{
-				update = false;
-				PWGUI.SetUpdateForField(0, true);
-			}
 		}
 
 		public override void OnNodeProcess()
@@ -123,8 +88,6 @@ namespace PW.Node
 					Debug.LogError("[PWBiomeMerger] Duplicate biome in the biome graph: " + biome.name + ", id: " + biome.id);
 				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaceGraph;
 			}
-			
-			update = true;
 		}
 		
 	}

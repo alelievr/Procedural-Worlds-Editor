@@ -44,6 +44,8 @@ namespace PW
 		//Serialization system:
 		[System.NonSerialized]
 		private	bool			deserializationAlreadyNotified = false;
+		//GUI option storage
+		public PWGUIManager		PWGUI;
 
 
 		[System.NonSerialized]

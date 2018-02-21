@@ -34,10 +34,6 @@ namespace PW.Node
 		{
 		}
 
-		public override void OnNodeGUI()
-		{
-		}
-
 		public override void OnNodeProcess()
 		{
 			if (inputPartialBiome == null)

@@ -167,12 +167,12 @@ namespace PW.Core
 			});
 
 			// if (e.type == EventType.ExecuteCommand)
-				// Debug.Log("cmd: " + e.commandName + ", hash: " + fieldSettings.GetHashCode() + ", controlId: " + PWColorPicker.controlId);
+				// Debug.Log("cmd: " + e.commandName + ", hash: " + fieldSettings.GetHashCode() + ", controlId: " + PWColorPickerPopup.controlId);
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
-				if (fieldSettings.GetHashCode() == PWColorPicker.controlId)
+				if (fieldSettings.GetHashCode() == PWColorPickerPopup.controlId)
 				{
-					fieldSettings.c = (SerializableColor)PWColorPicker.currentColor;
-					fieldSettings.thumbPosition = PWColorPicker.thumbPosition;
+					fieldSettings.c = (SerializableColor)PWColorPickerPopup.currentColor;
+					fieldSettings.thumbPosition = PWColorPickerPopup.thumbPosition;
 					GUI.changed = true;
 				}
 			
@@ -209,7 +209,7 @@ namespace PW.Core
 			{
 				if (iconRect.Contains(e.mousePosition) || colorPreviewRect.Contains(e.mousePosition))
 				{
-					PWColorPicker.OpenPopup(color, fieldSettings);
+					PWColorPickerPopup.OpenPopup(color, fieldSettings);
 					e.Use();
 				}
 			}

@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using PW.Core;
 using PW.Biomator;
 
@@ -15,35 +14,22 @@ namespace PW.Node
 		[PWInput("temperature map"), PWNotRequired]
 		public Sampler			temperatureMap;
 
-		Sampler					localTemperatureMap;
+		public Sampler			localTemperatureMap;
 		
 		[PWOutput]
 		public BiomeData		outputBiome;
 
-		[SerializeField]
-		float					minTemperature = -30;
-		[SerializeField]
-		float					maxTemperature = 40;
-		[SerializeField]
-		float					terrainHeightMultiplier = 0;
-		[SerializeField]
-		float					waterMultiplier = .2f;
-		[SerializeField]
-		float					averageTemperature = 17;
+		public float			minTemperature = -30;
+		public float			maxTemperature = 40;
+		public float			terrainHeightMultiplier = 0;
+		public float			waterMultiplier = .2f;
+		public float			averageTemperature = 17;
 
-		[SerializeField]
-		Gradient				temperatureGradient;
-		[System.NonSerialized]
-		bool					updateTemperatureMap = false;
-		[SerializeField]
-		bool					internalTemperatureMap = true;
+		public bool				updateTemperatureMap = false;
+		public bool				internalTemperatureMap = true;
 
-		[SerializeField]
-		float					minTemperatureMapInput;
-		[SerializeField]
-		float					maxTemperatureMapInput;
-
-		string					delayedTemperatureKey = "PWNodeBiomeTemperature";
+		public float			minTemperatureMapInput;
+		public float			maxTemperatureMapInput;
 
 		public override void OnNodeCreation()
 		{
@@ -53,62 +39,6 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			UpdateTemperatureMap();
-
-			temperatureGradient = PWUtils.CreateGradient(
-				new KeyValuePair< float, Color >(0f, Color.blue),
-				new KeyValuePair< float, Color >(.25f, Color.cyan),
-				new KeyValuePair< float, Color >(.5f, Color.yellow),
-				new KeyValuePair< float, Color >(.75f, PWColor.orange),
-				new KeyValuePair< float, Color >(1f, Color.red)
-			);
-
-			delayedChanges.BindCallback(delayedTemperatureKey, (unused) => {
-				NotifyReload();
-			});
-		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(GUI.skin.label.lineHeight * 3);
-
-			EditorGUI.BeginChangeCheck();
-			{
-				terrainHeightMultiplier = PWGUI.Slider("height multiplier: ", terrainHeightMultiplier, -1, 1);
-				waterMultiplier = PWGUI.Slider("water multiplier: ", waterMultiplier, -1, 1);
-	
-				EditorGUILayout.LabelField("temperature limits:");
-				EditorGUILayout.BeginHorizontal();
-				{
-					EditorGUIUtility.labelWidth = 30;
-					minTemperature = EditorGUILayout.FloatField("from", minTemperature);
-					maxTemperature = EditorGUILayout.FloatField("to", maxTemperature);
-				}
-				EditorGUILayout.EndHorizontal();
-				EditorGUIUtility.labelWidth = 120;
-				if (internalTemperatureMap)
-					averageTemperature = EditorGUILayout.FloatField("average temperature", averageTemperature);
-				else
-				{
-					EditorGUILayout.LabelField("Input temperature map range");
-					using (DefaultGUISkin.Get())
-						EditorGUILayout.MinMaxSlider(ref minTemperatureMapInput, ref maxTemperatureMapInput, minTemperature, maxTemperature);
-				}
-			}
-			if (EditorGUI.EndChangeCheck())
-				UpdateTemperatureMap();
-			
-			if (localTemperatureMap != null)
-			{
-				PWGUI.Sampler2DPreview(localTemperatureMap as Sampler2D, false, FilterMode.Point);
-				PWGUI.SetGradientForField(2, temperatureGradient);
-				PWGUI.SetDebugForField(2, true);
-			}
-			
-			if (updateTemperatureMap)
-			{
-				PWGUI.SetUpdateForField(2, true);
-				updateTemperatureMap = false;
-			}
 		}
 
 		public override void OnNodeAnchorLink(string prop, int index)
@@ -130,7 +60,7 @@ namespace PW.Node
 			}
 		}
 
-		void UpdateTemperatureMap()
+		public void UpdateTemperatureMap()
 		{
 			if (localTemperatureMap == null || inputBiomeData == null)
 				return ;

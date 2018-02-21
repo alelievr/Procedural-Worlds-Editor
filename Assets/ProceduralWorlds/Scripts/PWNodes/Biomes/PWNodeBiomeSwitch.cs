@@ -4,7 +4,6 @@ using System.Reflection;
 using UnityEngine;
 using System;
 using System.Linq;
-using UnityEditor;
 using PW.Core;
 using PW.Biomator;
 
@@ -23,23 +22,17 @@ namespace PW.Node
 		public BiomeSwitchList		switchList = new BiomeSwitchList();
 
 		public string				samplerName;
-		string[]					samplerNames;
+		public string[]				samplerNames;
 
-		[SerializeField]
-		bool					alreadyModified = false;
-		[SerializeField]
-		int						selectedBiomeSamplerName;
-		[SerializeField]
-		bool					error;
-		string					errorString;
-		Sampler					currentSampler;
-		[System.NonSerialized]
-		bool					firstPass = true;
+		public bool				alreadyModified = false;
+		public int				selectedBiomeSamplerName;
+		public bool				error;
+		public string			errorString;
+		
+		public Sampler			currentSampler;
 
-		float					relativeMin = float.MinValue;
-		float					relativeMax = float.MaxValue;
-
-		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
+		public float			relativeMin = float.MinValue;
+		public float			relativeMax = float.MaxValue;
 
 		public override void OnNodeCreation()
 		{
@@ -48,29 +41,15 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
-			switchList.OnEnable();
-
 			samplerNames = BiomeSamplerName.GetNames().ToArray();
 			samplerName = samplerNames[selectedBiomeSamplerName];
-
-			OnReload += ReloadCallback;
-
-			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(); });
-
-			switchList.OnBiomeDataAdded = (unused) => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			switchList.OnBiomeDataModified = (unused) => { alreadyModified = true; switchList.UpdateBiomeRepartitionPreview(inputBiome); delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			switchList.OnBiomeDataRemoved = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			switchList.OnBiomeDataReordered = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			
 			UpdateSwitchMode();
-		}
-		
-		public override void OnNodeDisable()
-		{
-			OnReload -= ReloadCallback;
+
+			CheckForBiomeSwitchErrors();
 		}
 
-		void UpdateSwitchMode()
+		public void UpdateSwitchMode()
 		{
 			UpdateRelativeBounds();
 
@@ -175,7 +154,7 @@ namespace PW.Node
 			}
 		}
 
-		void CheckForBiomeSwitchErrors()
+		public void CheckForBiomeSwitchErrors()
 		{
 			error = false;
 
@@ -192,50 +171,10 @@ namespace PW.Node
 
 			//Update switchList values:
 			switchList.UpdateSampler(samplerName, currentSampler);
-			switchList.UpdateBiomeRepartitionPreview(inputBiome);
 		}
 		
-		public override void OnNodeGUI()
-		{
-			//return if input biome is null
-			if (inputBiome == null)
-			{
-				error = true;
-				EditorGUILayout.LabelField("null biome input !");
-				return ;
-			}
-
-			if (firstPass)
-				CheckForBiomeSwitchErrors();
-
-			//display popup field to choose the switch source
-			EditorGUI.BeginChangeCheck();
-			{
-				EditorGUIUtility.labelWidth = 80;
-				selectedBiomeSamplerName = EditorGUILayout.Popup("switch parameter", selectedBiomeSamplerName, samplerNames);
-				samplerName = samplerNames[selectedBiomeSamplerName];
-			}
-			if (EditorGUI.EndChangeCheck())
-			{
-				CheckForBiomeSwitchErrors();
-				UpdateSwitchMode();
-			}
-
-			EditorGUILayout.LabelField((currentSampler != null) ? "min: " + relativeMin + ", max: " + relativeMax : "");
-
-			if (error)
-			{
-				Rect errorRect = EditorGUILayout.GetControlRect(false, GUI.skin.label.lineHeight * 3.5f);
-				EditorGUI.LabelField(errorRect, errorString);
-				return ;
-			}
-
-			switchList.OnGUI(inputBiome);
-
-			firstPass = false;
-		}
-
-		void ReloadCallback(PWNode from)
+		//TODO: AH
+		/*void ReloadCallback(PWNode from)
 		{
 			//load the new sampler if there it was modified
 			if (inputBiome != null)
@@ -245,8 +184,7 @@ namespace PW.Node
 
 			switchList.UpdateMinMax(relativeMin, relativeMax);
 			switchList.UpdateSampler(samplerName, currentSampler);
-			switchList.UpdateBiomeRepartitionPreview(inputBiome);
-		}
+		}*/
 
 		void AdjustOutputBiomeArraySize()
 		{

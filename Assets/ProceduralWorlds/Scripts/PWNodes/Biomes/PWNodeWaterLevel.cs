@@ -135,7 +135,9 @@ namespace PW.Node
 				outputBiome.UpdateSamplerValue(BiomeSamplerName.waterHeight, waterHeight);
 			}
 			else
-				; //TODO
+			{
+				//TODO
+			}
 		}
 
 		public override void OnNodeProcess()

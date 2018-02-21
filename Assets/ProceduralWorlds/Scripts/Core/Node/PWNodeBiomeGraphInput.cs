@@ -21,43 +21,11 @@ namespace PW.Core
 		public PWMainGraph			previewGraph = null;
 
 		[System.NonSerialized]
-		int							calls = 0;
+		public int					calls = 0;
 
 		public override void OnNodeCreation()
 		{
 			name = "Biome input";
-		}
-
-		public override void OnNodeEnable()
-		{
-			#if UNITY_EDITOR
-			
-			if (previewGraph == null)
-			{
-				var graphs = Resources.FindObjectsOfTypeAll< PWMainGraph >();
-				if (graphs.Length > 0)
-					previewGraph = graphs[0];
-			}
-
-			#endif
-		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(14);
-			
-			PWGUI.PWArrayField(outputValues);
-
-			EditorGUILayout.LabelField("Preview graph");
-			previewGraph = EditorGUILayout.ObjectField(previewGraph, typeof(PWMainGraph), false) as PWMainGraph;
-
-			if (previewGraph == null)
-				EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
-			
-			if (outputPartialBiome != null)
-				BiomeUtils.DrawBiomeInfos(rect, outputPartialBiome.biomeDataReference);
-			
-			calls = 0;
 		}
 
 		public override void OnNodeProcess()

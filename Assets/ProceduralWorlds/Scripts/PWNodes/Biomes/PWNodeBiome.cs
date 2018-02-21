@@ -18,8 +18,6 @@ namespace PW.Node
 
 		public PWBiomeGraph	biomeGraph;
 
-		Rect				biomeColorPreviewRect;
-
 		public override void OnNodeCreation()
 		{
 			name = "Biome";
@@ -28,35 +26,6 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			outputBiome = new PartialBiome();
-		}
-
-		public override void OnNodeGUI()
-		{
-			EditorGUILayout.LabelField("Biome: " + outputBiome.name);
-			EditorGUILayout.BeginHorizontal();
-			{
-				EditorGUIUtility.labelWidth = 40;
-				EditorGUILayout.LabelField("id: " + outputBiome.id);
-				EditorGUIUtility.labelWidth = 0;
-				Rect colorRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight, GUILayout.ExpandWidth(true));
-				if (e.type == EventType.Repaint)
-					biomeColorPreviewRect = colorRect;
-				EditorGUI.BeginDisabledGroup(false);
-				EditorGUIUtility.DrawColorSwatch(biomeColorPreviewRect, outputBiome.previewColor);
-				EditorGUI.EndDisabledGroup();
-			}
-			EditorGUILayout.EndHorizontal();
-			EditorGUILayout.LabelField("Biome Graph reference");
-			EditorGUI.BeginChangeCheck();
-			biomeGraph = EditorGUILayout.ObjectField(biomeGraph, typeof(PWBiomeGraph), false) as PWBiomeGraph;
-			if (EditorGUI.EndChangeCheck())
-				NotifyReload();
-
-			if (biomeGraph != null)
-			{
-				if (GUILayout.Button("Open " + biomeGraph.name))
-					AssetDatabase.OpenAsset(biomeGraph);
-			}
 		}
 
 		public override void OnNodeProcessOnce()

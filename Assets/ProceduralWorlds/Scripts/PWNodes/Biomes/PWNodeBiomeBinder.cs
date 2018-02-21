@@ -37,10 +37,6 @@ namespace PW.Node
 			name = "Biome binder";
 		}
 
-		public override void OnNodeGUI()
-		{
-		}
-
 		void FillBiomeOutput()
 		{
 			if (inputPartialBiome == null)

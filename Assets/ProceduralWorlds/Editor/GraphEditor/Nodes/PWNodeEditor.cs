@@ -20,6 +20,8 @@ namespace PW.Editor
 
 		//Getters
 		PWGraph						graphRef { get { return node.graphRef; } }
+		PWBiomeGraph				biomeGraphRef { get { return node.graphRef as PWBiomeGraph; } }
+		PWMainGraph					mainGraphRef { get { return node.graphRef as PWMainGraph; } }
 		PWGraphEditorEventInfo		editorEvents { get { return editorEvents; } }
 		protected PWGUIManager		PWGUI { get { return node.PWGUI; } }
 		Vector2						graphPan { get { return node.graphRef.panPosition; } }
@@ -73,8 +75,8 @@ namespace PW.Editor
 			UnBindEvents();
 		}
 		
-		public abstract void OnNodeEnable();
-		public abstract void OnNodeDisable();
+		public virtual void OnNodeEnable() {}
+		public virtual void OnNodeDisable() {}
 		public abstract void OnNodeGUI();
 
 		public virtual void OnNodePreProcess() {}

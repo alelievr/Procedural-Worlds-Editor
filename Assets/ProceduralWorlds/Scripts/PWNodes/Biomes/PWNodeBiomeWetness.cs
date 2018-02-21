@@ -15,7 +15,7 @@ namespace PW.Node
 		[PWOutput]
 		public BiomeData	outputBiomData;
 
-		Sampler2D			wetnessMap;
+		public Sampler2D	wetnessMap;
 
 		public override void OnNodeCreation()
 		{
@@ -25,11 +25,6 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			wetnessMap = new Sampler2D(chunkSize, step);
-		}
-
-		public override void OnNodeGUI()
-		{
-
 		}
 
 		void UpdateWetnessMap()

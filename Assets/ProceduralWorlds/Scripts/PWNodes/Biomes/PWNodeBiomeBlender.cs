@@ -29,8 +29,6 @@ namespace PW.Node
 		[System.NonSerialized]
 		bool				updateBiomeMap = true;
 
-		string				updateBiomeMapKey = "BiomeBlender";
-
 		public override void OnNodeCreation()
 		{
 			name = "Biome blender";
@@ -38,27 +36,11 @@ namespace PW.Node
 
 		public override void OnNodeEnable()
 		{
-			OnReload += OnReloadCallback;
-
-			delayedChanges.BindCallback(updateBiomeMapKey, (unused) => {
-				BiomeData data = GetBiomeData();
-
-				FillBiomeMap(data);
-				updateBiomeMap = true;
-
-				NotifyReload();
-			});
-			
 			if (inputBiomes.GetValues().Count == 0)
 				return ;
 		}
 
-		public override void OnNodeDisable()
-		{
-			OnReload -= OnReloadCallback;
-		}
-
-		BiomeData	GetBiomeData()
+		public BiomeData	GetBiomeData()
 		{
 			var partialbiomes = inputBiomes.GetValues();
 			
@@ -73,67 +55,6 @@ namespace PW.Node
 			return biomeDataRef.biomeDataReference;
 		}
 
-		public override void OnNodeGUI()
-		{
-			BiomeData biomeData = GetBiomeData();
-
-			if (biomeData == null)
-			{
-				EditorGUILayout.LabelField("biomes not connected !");
-				return ;
-			}
-			else
-			{
-				EditorGUIUtility.labelWidth = 120;
-				EditorGUI.BeginChangeCheck();
-				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
-				if (EditorGUI.EndChangeCheck())
-					delayedChanges.UpdateValue(updateBiomeMapKey);
-				blendList.UpdateIfNeeded(biomeData);
-
-				EditorGUI.BeginChangeCheck();
-				blendList.DrawList(biomeData, visualRect);
-				if (EditorGUI.EndChangeCheck())
-					delayedChanges.UpdateValue(updateBiomeMapKey);
-			}
-
-			if (biomeData != null)
-			{
-				if (biomeData.biomeMap != null)
-					PWGUI.BiomeMap2DPreview(biomeData);
-				//TODO: biome 3D preview
-			}
-			else
-				EditorGUILayout.LabelField("no biome data");
-			
-			if (updateBiomeMap)
-			{
-				PWGUI.SetUpdateForField(1, true);
-				updateBiomeMap = false;
-			}
-
-			var biomeCoverage = biomeData.biomeSwitchGraph.GetBiomeCoverage();
-
-			bool biomeCoverageError = biomeCoverage.Any(b => b.Value > 0 && b.Value < 1);
-
-			GUIStyle biomeCoverageFoloutStyle = (biomeCoverageError) ? PWStyles.errorFoldout : EditorStyles.foldout;
-
-			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
-			{
-				if (biomeData != null && biomeData.biomeSwitchGraph != null)
-				{
-					foreach (var biomeCoverageKP in biomeCoverage)
-						if (biomeCoverageKP.Value > 0)
-						{
-							string paramName = biomeData.GetBiomeKey(biomeCoverageKP.Key);
-							EditorGUILayout.LabelField(paramName, (biomeCoverageKP.Value * 100).ToString("F2") + "%");
-						}
-				}
-				else
-					EditorGUILayout.LabelField("Null biome data/biome tree");
-			}
-		}
-		
 		public override void OnNodeProcessOnce()
 		{
 			var partialBiomes = inputBiomes.GetValues();
@@ -207,7 +128,7 @@ namespace PW.Node
 			updateBiomeMap = true;
 		}
 
-		void OnReloadCallback(PWNode from)
+		/*void OnReloadCallback(PWNode from)
 		{
 			BuildBiomeSwitchGraph();
 			
@@ -219,7 +140,7 @@ namespace PW.Node
 				FillBiomeMap(biomeData);
 				updateBiomeMap = true;
 			}
-		}
+		}*/
 		
 		void BuildBiomeSwitchGraph()
 		{

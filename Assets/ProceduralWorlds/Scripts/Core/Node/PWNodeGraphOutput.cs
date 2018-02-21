@@ -15,10 +15,5 @@ namespace PW.Core
 		{
 			name = "Graph output";
 		}
-
-		public override void OnNodeGUI()
-		{
-			PWGUI.PWArrayField(inputValues);
-		}
 	}
 }

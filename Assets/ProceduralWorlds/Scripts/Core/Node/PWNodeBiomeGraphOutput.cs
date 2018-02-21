@@ -19,14 +19,5 @@ namespace PW.Core
 		{
 			name = "Biome output";
 		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(14);
-			
-			EditorGUILayout.LabelField("Biome: " + inputBiome);
-			
-			PWGUI.PWArrayField(inputValues);
-		}
 	}
 }
