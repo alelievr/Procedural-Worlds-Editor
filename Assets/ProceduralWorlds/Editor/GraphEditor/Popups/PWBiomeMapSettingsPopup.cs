@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public class PWBiomeMapSettingsPopup : PWPopup
 	{
@@ -11,8 +11,9 @@ namespace PW.Core
 		
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{
-			PWPopup.OpenPopup< PWBiomeMapSettingsPopup >();
+			var popup = PWPopup.OpenPopup< PWBiomeMapSettingsPopup >();
 
+			popup.name = "Biome map settings";
 			debug = guiSettings.debug;
 			controlId = guiSettings.GetHashCode();
 		}

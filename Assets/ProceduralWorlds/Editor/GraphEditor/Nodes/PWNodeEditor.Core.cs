@@ -4,6 +4,7 @@ using UnityEngine.Profiling;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using System.Reflection;
 using PW.Core;
 using PW.Node;
 
@@ -18,13 +19,13 @@ namespace PW.Editor
 		static bool					styleLoadedStatic = false;
 		[System.NonSerialized]
 		bool						styleLoaded = false;
+		
+		public int					viewHeight = 0; //to keep ???
 
-		public int		viewHeight = 0; //to keep ???
+		List< object >				propertiesBeforeGUI = null;
+		List< object >				propertiesAfterGUI = null;
 
-		List< object >	propertiesBeforeGUI = null;
-		List< object >	propertiesAfterGUI = null;
-
-		void LoadCoreStyle()
+		void LoadCoreResources()
 		{
 			if (!styleLoaded)
 			{
@@ -34,14 +35,24 @@ namespace PW.Editor
 				styleLoaded = true;
 			}
 			if (!styleLoadedStatic)
-				LoadStyles();
+			{
+				//check if style was already initialized:
+				if (innerNodePaddingStyle != null)
+					return ;
+	
+				renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
+				innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
+				nodeStyle = GUI.skin.FindStyle("Node");
+	
+				styleLoadedStatic = true;
+			}
 		}
 
 		void RenderNode()
 		{
 			var e = Event.current;
 
-			Profiler.BeginSample("[PW] " + GetType() + " rendering");
+			Profiler.BeginSample("[PW] " + node.GetType() + " rendering");
 			
 			//update the PWGUI window rect with this window rect:
 			PWGUI.StartFrame(node.rect);
@@ -58,17 +69,17 @@ namespace PW.Editor
 
 			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
 			{
-				isDragged = true;
+				node.isDragged = true;
 				editorEvents.isDraggingNode = true;
 			}
 			if (e.rawType == EventType.MouseUp)
 			{
-				isDragged = false;
+				node.isDragged = false;
 				editorEvents.isDraggingNode = false;
 			}
 
-			if (isDragged)
-				Undo.RecordObject(this, "Node " + name + " dragged");
+			if (node.isDragged)
+				Undo.RecordObject(this, "Node " + node.name + " dragged");
 			
 			//Drag window
 			if (e.button == 0 && !windowNameEdit)
@@ -93,12 +104,12 @@ namespace PW.Editor
 				RestorePropertiesSnapshot(propertiesBeforeGUI);
 
 				//Then record the object
-				Undo.RecordObject(this, "Property updated in " + name);
+				Undo.RecordObject(this, "Property updated in " + node.name);
 
 				//And set back the modified values
 				RestorePropertiesSnapshot(propertiesAfterGUI);
 				
-				// Debug.Log("Undo recorded: in " + GetType());
+				// Debug.Log("Undo recorded: in " + node.GetType());
 			}
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
@@ -121,15 +132,14 @@ namespace PW.Editor
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 				isSelected = !isSelected;
 		}
-		#endif
 
 		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)
 		{
 			if (buffer == null)
-				buffer = new List< object >(new object[undoableFields.Count]);
+				buffer = new List< object >(new object[node.undoableFields.Count]);
 			
-			for (int i = 0; i < undoableFields.Count; i++)
-				buffer[i] = undoableFields[i].GetValue(this);
+			for (int i = 0; i < node.undoableFields.Count; i++)
+				buffer[i] = node.undoableFields[i].GetValue(this);
 			
 			return buffer;
 		}
@@ -156,8 +166,8 @@ namespace PW.Editor
 
 		void RestorePropertiesSnapshot(List< object > properties)
 		{
-			for (int i = 0; i < undoableFields.Count; i++)
-				undoableFields[i].SetValue(this, properties[i]);
+			for (int i = 0; i < node.undoableFields.Count; i++)
+				node.undoableFields[i].SetValue(this, properties[i]);
 		}
 	}
 }

@@ -53,6 +53,7 @@ namespace PW.Editor
 		void OnGUIEnable()
 		{
 			LoadHeaderResouces();
+			LoadCoreResources();
 
 			guiEnabled = true;
 		}

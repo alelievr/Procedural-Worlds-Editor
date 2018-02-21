@@ -21,23 +21,51 @@ namespace PW
 
 		[System.NonSerialized]
 		Dictionary< string, FieldInfo >		anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
-
-		[System.NonSerialized]
-		List< FieldInfo >					undoableFields = new List< FieldInfo >();
-
-		public void LoadStyles()
-		{
-			//check if style was already initialized:
-			if (innerNodePaddingStyle != null)
-				return ;
-
-			renameNodeTextFieldStyle = GUI.skin.FindStyle("RenameNodetextField");
-			innerNodePaddingStyle = GUI.skin.FindStyle("WindowInnerPadding");
-			nodeStyle = GUI.skin.FindStyle("Node");
-
-			styleLoadedStatic = true;
-		}
 		
+		[System.NonSerialized]
+		public List< FieldInfo >			undoableFields = new List< FieldInfo >();
+		
+		void LoadUndoableFields()
+		{
+			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+			undoableFields.Clear();
+			
+			foreach (var fInfo in fInfos)
+			{
+				var attrs = fInfo.GetCustomAttributes(false);
+
+				bool hasSerializeField = false;
+				bool hasNonSerialized = false;
+
+				foreach (var attr in attrs)
+				{
+					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
+						goto skipThisField;
+					
+					if (attr as System.NonSerializedAttribute != null)
+						hasNonSerialized = true;
+					
+					if (attr as SerializeField != null)
+						hasSerializeField = true;
+				}
+
+				if (fInfo.IsPrivate && !hasSerializeField)
+					goto skipThisField;
+				
+				if (hasNonSerialized)
+					goto skipThisField;
+				
+				if (fInfo.IsNotSerialized)
+					goto skipThisField;
+				
+				undoableFields.Add(fInfo);
+
+				skipThisField:
+				continue ;
+			}
+		}
+
 		void LoadFieldAttributes()
 		{
 			//get input variables
@@ -178,47 +206,6 @@ namespace PW
 					else
 						outputAnchorFields.Add(af);
 				}
-			}
-		}
-
-		void LoadUndoableFields()
-		{
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-			undoableFields.Clear();
-			
-			foreach (var fInfo in fInfos)
-			{
-				var attrs = fInfo.GetCustomAttributes(false);
-
-				bool hasSerializeField = false;
-				bool hasNonSerialized = false;
-
-				foreach (var attr in attrs)
-				{
-					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
-						goto skipThisField;
-					
-					if (attr as System.NonSerializedAttribute != null)
-						hasNonSerialized = true;
-					
-					if (attr as SerializeField != null)
-						hasSerializeField = true;
-				}
-
-				if (fInfo.IsPrivate && !hasSerializeField)
-					goto skipThisField;
-				
-				if (hasNonSerialized)
-					goto skipThisField;
-				
-				if (fInfo.IsNotSerialized)
-					goto skipThisField;
-				
-				undoableFields.Add(fInfo);
-
-				skipThisField:
-				continue ;
 			}
 		}
 

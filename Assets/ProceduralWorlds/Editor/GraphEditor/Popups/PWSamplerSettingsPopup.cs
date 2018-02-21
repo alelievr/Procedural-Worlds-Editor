@@ -6,7 +6,7 @@ using System.Reflection;
 using System;
 using PW;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public class PWSamplerSettingsPopup : PWPopup
 	{
@@ -24,8 +24,9 @@ namespace PW.Core
 	
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{
-			PWPopup.OpenPopup< PWSamplerSettingsPopup >();
+			var popup = PWPopup.OpenPopup< PWSamplerSettingsPopup >();
 
+			popup.name = "Sampler settings";
 			gradient = guiSettings.gradient;
 			filterMode = guiSettings.filterMode;
 			texture = guiSettings.texture;

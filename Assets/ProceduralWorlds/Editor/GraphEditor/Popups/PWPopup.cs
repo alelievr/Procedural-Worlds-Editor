@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 //popup system used to display ColorField's ColorPicker and settings windows.
-namespace PW.Core
+namespace PW.Editor
 {
 	public abstract class PWPopup : EditorWindow
 	{

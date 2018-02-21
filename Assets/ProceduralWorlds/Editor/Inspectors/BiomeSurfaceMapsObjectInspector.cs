@@ -8,7 +8,7 @@ using UnityEditor.AnimatedValues;
 using System.IO;
 
 [CustomEditor(typeof(BiomeSurfaceMapsObject))]
-public class BiomeSurfaceMapsObjectEditor : Editor
+public class BiomeSurfaceMapsObjectInspector : Editor
 {
 	[SerializeField]
 	AnimBool	showNormalMaps;

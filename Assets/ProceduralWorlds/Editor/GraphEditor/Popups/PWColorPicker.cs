@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace PW.Core
 {
-	public class PWColorPicker : PWPopup
+	public class PWColorPickerPopup : PWPopup
 	{
 		Texture2D		colorPickerTexture;
 		Texture2D		colorPickerThumb;
@@ -20,11 +20,11 @@ namespace PW.Core
 
 		public static void OpenPopup(Color color, PWGUISettings guiSettings)
 		{
-			PWPopup.OpenPopup< PWColorPicker >(new Vector2(windowSize.x, 340));
+			PWPopup.OpenPopup< PWColorPickerPopup >(new Vector2(windowSize.x, 340));
 
-			PWColorPicker.currentColor = color;
-			PWColorPicker.controlId = guiSettings.GetHashCode();
-			PWColorPicker.thumbPosition = guiSettings.thumbPosition;
+			PWColorPickerPopup.currentColor = color;
+			PWColorPickerPopup.controlId = guiSettings.GetHashCode();
+			PWColorPickerPopup.thumbPosition = guiSettings.thumbPosition;
 		}
 
 		protected override void GUIStart()

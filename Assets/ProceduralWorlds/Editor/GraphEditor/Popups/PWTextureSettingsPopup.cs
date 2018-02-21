@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public class PWTextureSettingsPopup : PWPopup
 	{
@@ -16,8 +16,9 @@ namespace PW.Core
 
 		public static void OpenPopup(FilterMode filterMode, ScaleMode scaleMode, float scaleAspect, Material material, bool debug = false)
 		{
-			PWPopup.OpenPopup< PWTextureSettingsPopup >();
+			var popup = PWPopup.OpenPopup< PWTextureSettingsPopup >();
 
+			popup.name = "Texture settings";
 			PWTextureSettingsPopup.filterMode = filterMode;
 			PWTextureSettingsPopup.scaleMode = scaleMode;
 			PWTextureSettingsPopup.material = material;
