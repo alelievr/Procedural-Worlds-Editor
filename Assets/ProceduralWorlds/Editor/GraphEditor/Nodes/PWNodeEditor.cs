@@ -41,17 +41,32 @@ namespace PW.Editor
 
 		public static Dictionary< PWNode, PWNodeEditor >	openedNodeEdiors = new Dictionary< PWNode, PWNodeEditor >();
 
+		[System.NonSerialized]
 		PWNode						node;
+
+		[System.NonSerialized]
 
 		bool						guiEnabled = false;
 
 		void OnEnable()
 		{
 			node = target as PWNode;
+			
+			if (node == null)
+			{
+				Debug.Log("Destroying unlinked editor !");
+				DestroyImmediate(this);
+				return ;
+			}
+
 			delayedChanges.Clear();
+
+			graphEditor = EditorWindow.focusedWindow as PWGraphEditor;
 
 			//set the PWGUI current node:
 			PWGUI.SetNode(node);
+
+			Debug.Log("Current node: " + node);
 			
 			//add our editor to the list:
 			openedNodeEdiors[node] = this;
@@ -64,6 +79,7 @@ namespace PW.Editor
 		{
 			LoadHeaderResouces();
 			LoadCoreResources();
+			LoadAnchorResources();
 
 			guiEnabled = true;
 		}

@@ -21,6 +21,7 @@ namespace PW
 		public float				processTime = 0f;
 		public string				classAQName;
 		public PWColorSchemeName	colorSchemeName;
+		public int					viewHeight;
 		new public string			name;
 
 		//AnchorField lists
@@ -71,11 +72,6 @@ namespace PW
 		public bool				debug = false;
 	
 		public delegate void					AnchorAction(PWAnchor anchor);
-
-		//fired when this node was linked
-		protected event AnchorAction			OnAnchorLinked;
-		//fired when this node was unlinked
-		protected event AnchorAction			OnAnchorUnlinked;
 
 		//fired only when realMode is false, just after OnNodeProcess is called;
 		public event Action						OnPostProcess;
@@ -244,7 +240,7 @@ namespace PW
 		{
 			isProcessing = true;
 			OnNodeProcess();
-			if (!realMode)
+			if (!realMode && OnPostProcess != null)
 				OnPostProcess();
 			isProcessing = false;
 		}

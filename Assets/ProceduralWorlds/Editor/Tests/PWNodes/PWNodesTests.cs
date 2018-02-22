@@ -29,6 +29,7 @@ namespace PW.Tests.Nodes
 			{
 				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
 				editor.OnNodeUnitTest();
+				UnityEditor.Editor.DestroyImmediate(editor);
 			}
 			
 			builder = PWGraphBuilder.NewGraph< PWMainGraph >();

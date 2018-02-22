@@ -8,7 +8,7 @@ namespace PW.Core
 	{
 	
 		[SerializeField]
-		List< PWGUISettings >	settingsStorage = new List< PWGUISettings >();
+		public List< PWGUISettings >	settingsStorage = new List< PWGUISettings >();
 	
 	}
 }

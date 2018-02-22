@@ -6,6 +6,7 @@ using UnityEditor;
 
 namespace PW.Editor
 {
+	[CustomEditor(typeof(PWNodeCircleNoiseMask))]
 	public class PWNodeCircleNoiseMaskEditor : PWNodeEditor
 	{
 		public PWNodeCircleNoiseMask node;

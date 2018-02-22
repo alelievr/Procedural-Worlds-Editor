@@ -158,6 +158,9 @@ namespace PW.Node
 		{
 			error = false;
 
+			if (inputBiome == null)
+				return ;
+
 			var field = inputBiome.GetSampler(samplerName);
 			var field3D = inputBiome.GetSampler(samplerName);
 

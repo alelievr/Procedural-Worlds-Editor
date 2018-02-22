@@ -34,10 +34,10 @@ public partial class PWGraphEditor
 	[System.NonSerialized]
 	protected bool					styleLoaded = false;
 
-	static void LoadAssets()
+	void LoadAssets()
 	{
 		//load backgrounds and colors as texture
-		nodeEditorBackgroundTexture = Resources.Load< Texture2D >("nodeEditorBackground");
+		nodeEditorBackgroundTexture = Resources.Load< Texture2D >("GUI/nodeEditorBackground");
 		
 		//style
 		nodeGraphWidowStyle = new GUIStyle();
@@ -62,7 +62,7 @@ public partial class PWGraphEditor
 
 	void LoadStyles()
 	{
-		PWGUISkin = Resources.Load("PWEditorSkin") as GUISkin;
+		PWGUISkin = Resources.Load< GUISkin >("PWEditorSkin");
 
 		selectionStyle = PWGUISkin.FindStyle("Selection");
 

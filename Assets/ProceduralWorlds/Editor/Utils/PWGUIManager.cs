@@ -61,7 +61,6 @@ namespace PW.Editor
 			if (node != null)
 			{
 				attachedNode = node;
-				node.OnPostReload += ReloadTextures;
 				node.OnPostProcess += ReloadTextures;
 				settingsStorage = node.PWGUIStorage.settingsStorage;
 				EditorApplication.playModeStateChanged += PlayModeChangedCallback;
@@ -74,7 +73,6 @@ namespace PW.Editor
 		{
 			if (attachedNode != null)
 			{
-				attachedNode.OnPostReload -= ReloadTextures;
 				attachedNode.OnPostProcess -= ReloadTextures;
 				EditorApplication.playModeStateChanged -= PlayModeChangedCallback;
 			}
@@ -605,6 +603,7 @@ namespace PW.Editor
 		public void Sampler2DPreview(GUIContent prefix, Sampler2D samp, bool settings = true, FilterMode fm = FilterMode.Bilinear)
 		{
 			int previewSize = (int)currentWindowRect.width - 20 - 20; //padding + texture margin
+			previewSize = (int)Mathf.Clamp(previewSize, 0, currentWindowRect.width);
 			var e = Event.current;
 
 			if (samp == null)

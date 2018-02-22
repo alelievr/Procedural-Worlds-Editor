@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PW.Core;
 
 //Header rendering and processing for nodes
 namespace PW.Editor

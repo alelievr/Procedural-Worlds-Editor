@@ -19,8 +19,6 @@ namespace PW.Editor
 		static bool					styleLoadedStatic = false;
 		[System.NonSerialized]
 		bool						styleLoaded = false;
-		
-		public int					viewHeight = 0; //to keep ???
 
 		List< object >				propertiesBeforeGUI = null;
 		List< object >				propertiesAfterGUI = null;
@@ -110,15 +108,15 @@ namespace PW.Editor
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)
-				viewHeight = viewH;
+				node.viewHeight = viewH;
 
-			viewHeight = Mathf.Max(viewHeight, maxAnchorRenderHeight);
+			node.viewHeight = Mathf.Max(node.viewHeight, maxAnchorRenderHeight);
 				
 			if (e.type == EventType.Repaint)
-				viewHeight += 24;
+				node.viewHeight += 24;
 			
 			RenderAnchors();
-			ProcessAnchorEvents();
+			// ProcessAnchorEvents();
 
 			Profiler.EndSample();
 
@@ -126,7 +124,13 @@ namespace PW.Editor
 
 			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
+			{
 				node.isSelected = !node.isSelected;
+				if (node.isSelected)
+					graphEditor.RaiseNodeSelected(node);
+				else
+					graphEditor.RaiseNodeUnselected(node);
+			}
 		}
 
 		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)
@@ -135,7 +139,7 @@ namespace PW.Editor
 				buffer = new List< object >(new object[node.undoableFields.Count]);
 			
 			for (int i = 0; i < node.undoableFields.Count; i++)
-				buffer[i] = node.undoableFields[i].GetValue(this);
+				buffer[i] = node.undoableFields[i].GetValue(node);
 			
 			return buffer;
 		}
@@ -163,7 +167,7 @@ namespace PW.Editor
 		void RestorePropertiesSnapshot(List< object > properties)
 		{
 			for (int i = 0; i < node.undoableFields.Count; i++)
-				node.undoableFields[i].SetValue(this, properties[i]);
+				node.undoableFields[i].SetValue(node, properties[i]);
 		}
 	}
 }

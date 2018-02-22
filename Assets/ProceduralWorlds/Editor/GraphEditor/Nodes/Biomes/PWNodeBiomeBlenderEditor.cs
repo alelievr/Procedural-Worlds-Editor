@@ -50,7 +50,8 @@ namespace PW.Editor
 				node.blendList.UpdateIfNeeded(biomeData);
 
 				EditorGUI.BeginChangeCheck();
-				node.blendList.DrawList(biomeData, node.visualRect);
+				//TOOD: Drawer
+				// node.blendList.DrawList(biomeData, node.visualRect);
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(updateBiomeMapKey);
 			}

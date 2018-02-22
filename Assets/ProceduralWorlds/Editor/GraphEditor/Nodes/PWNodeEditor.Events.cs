@@ -11,11 +11,14 @@ namespace PW.Editor
 	{
 		void BindEvents()
 		{
-			graphEditor.OnForceReloadOnce += ForceReloadOnceCallback;
-			graphEditor.OnClickNowhere += OnClickedOutside;
-			graphEditor.OnLinkStartDragged += LinkStartDragCallback;
-			graphEditor.OnLinkStopDragged += LinkStopDragCallback;
-			graphEditor.OnLinkCanceled += LinkCanceledCallback;
+			if (graphEditor != null)
+			{
+				graphEditor.OnForceReloadOnce += ForceReloadOnceCallback;
+				graphEditor.OnClickNowhere += OnClickedOutside;
+				graphEditor.OnLinkStartDragged += LinkStartDragCallback;
+				graphEditor.OnLinkStopDragged += LinkStopDragCallback;
+				graphEditor.OnLinkCanceled += LinkCanceledCallback;
+			}
 
 			graphRef.OnLinkCreated += LinkCreatedCallback;
 
@@ -25,12 +28,15 @@ namespace PW.Editor
 
 		void UnBindEvents()
 		{
-			graphEditor.OnForceReloadOnce -= ForceReloadOnceCallback;
-			graphEditor.OnClickNowhere -= OnClickedOutside;
-			graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
-			graphEditor.OnLinkStopDragged -= LinkStopDragCallback;
-			graphEditor.OnLinkCanceled -= LinkCanceledCallback;
-
+			if (graphEditor != null)
+			{
+				graphEditor.OnForceReloadOnce -= ForceReloadOnceCallback;
+				graphEditor.OnClickNowhere -= OnClickedOutside;
+				graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
+				graphEditor.OnLinkStopDragged -= LinkStopDragCallback;
+				graphEditor.OnLinkCanceled -= LinkCanceledCallback;
+			}
+	
 			graphRef.OnLinkCreated -= LinkCreatedCallback;
 
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;

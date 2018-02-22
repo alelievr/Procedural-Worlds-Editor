@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Profiling;
 using System.Linq;
+using PW;
 
 //Event management for PWGraphs editor
 public partial class PWGraphEditor
@@ -154,7 +155,8 @@ public partial class PWGraphEditor
 				&& !editorEvents.isMouseOverLink
 				&& !editorEvents.isMouseOverOrderingGroup)
 		{
-			OnClickNowhere();
+			if (OnClickNowhere != null)
+				OnClickNowhere();
 
 			UnselectAllLinks();
 		}
@@ -201,5 +203,17 @@ public partial class PWGraphEditor
 			case "SelectAll":
 				break ;
 		}
+	}
+
+	public void RaiseNodeSelected(PWNode node)
+	{
+		if (OnNodeSelected != null)
+			OnNodeSelected(node);
+	}
+
+	public void RaiseNodeUnselected(PWNode node)
+	{
+		if (OnNodeUnselected != null)
+			OnNodeUnselected(node);
 	}
 }

@@ -6,12 +6,13 @@ using UnityEngine.Profiling;
 using System.Linq;
 using PW.Core;
 using PW.Node;
+using PW.Editor;
 using PW;
 
 //Nodes rendering
 public partial class PWGraphEditor
 {
-	Editor editor = null;
+	Dictionary< PWNode, PWNodeEditor > nodeEditors = new Dictionary< PWNode, PWNodeEditor >();
 
 	void RenderDecaledNode(int id, PWNode node)
 	{
@@ -31,11 +32,12 @@ public partial class PWGraphEditor
 		node.rect = PWUtils.DecalRect(node.rect, graph.panPosition);
 		Rect decaledRect;
 
-		editor = Editor.CreateEditor(node);
+		if (!nodeEditors.ContainsKey(node))
+			nodeEditors[node] = Editor.CreateEditor(node) as PWNodeEditor;
 		
 		decaledRect = GUILayout.Window(id, node.rect, (i) => {
-			editor.OnInspectorGUI();
-		}, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle/*, GUILayout.Height(node.viewHeight)*/);
+			nodeEditors[node].OnInspectorGUI();
+		}, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 
 		node.visualRect = decaledRect;
 		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
@@ -47,7 +49,6 @@ public partial class PWGraphEditor
 			float h = nodeStyle.border.top;
 			float w = decaledRect.width - nodeStyle.border.right - nodeStyle.border.left;
 			GUI.color = PWColorTheme.GetNodeColor(node.colorSchemeName);
-			// GUI.DrawTexture(new Rect(0, 0, w, h), nodeHeaderStyle.normal.background);
 			nodeHeaderStyle.Draw(new Rect(decaledRect.x, decaledRect.y, w, h), false, false, false, false);
 			GUI.color = Color.white;
 		}

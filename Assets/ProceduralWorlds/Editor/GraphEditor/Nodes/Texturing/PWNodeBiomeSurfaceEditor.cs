@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PW.Node;
 using UnityEditor;
+using System.Linq;
 
 namespace PW.Editor
 {
@@ -22,7 +23,7 @@ namespace PW.Editor
 		{
 			EditorGUIUtility.labelWidth = 80;
 
-			int switchCount = GetInputNodes().Count();
+			int switchCount = node.GetInputNodes().Count();
 			
 			EditorGUILayout.LabelField("Texturing switches: " + switchCount);
 

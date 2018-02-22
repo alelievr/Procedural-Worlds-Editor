@@ -209,20 +209,6 @@ namespace PW
 			}
 		}
 
-		void AnchorLinkedCallback(PWAnchor anchor)
-		{
-			//CreateLink will raise the OnLinkCreated event in the graph and create the link
-			graphRef.SafeCreateLink(anchor);
-		}
-
-		void AnchorUnlinkedCallback(PWAnchor anchor)
-		{
-			//TODO: unlink the anchor, remove the link.
-
-			//raise internal event 
-			// OnLinkRemoved(link);
-		}
-
 		void LinkRemovedCalllback()
 		{
 			UpdateWorkStatus();
@@ -232,10 +218,6 @@ namespace PW
 		{
 			//graph events:
 			graphRef.OnPostLinkRemoved += LinkRemovedCalllback;
-
-			//local node events:
-			OnAnchorLinked += AnchorLinkedCallback;
-			OnAnchorUnlinked += AnchorUnlinkedCallback;
 		}
 
 		void UnBindEvents()
@@ -246,10 +228,6 @@ namespace PW
 			{
 				graphRef.OnPostLinkRemoved -= LinkRemovedCalllback;
 			}
-			
-			//local node events:
-			OnAnchorLinked -= AnchorLinkedCallback;
-			OnAnchorUnlinked -= AnchorUnlinkedCallback;
 		}
 	}
 }

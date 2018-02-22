@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace PW
+namespace PW.Editor
 {
 	public class PWGUIMaterialPreview
 	{

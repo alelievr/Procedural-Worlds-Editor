@@ -48,8 +48,8 @@ namespace PW.Editor
 			foreach (var anchorField in node.outputAnchorFields)
 				RenderAnchorField(anchorField, ref outputAnchorRect);
 			
-			viewHeight = (int)Mathf.Max(viewHeight, inputAcnhorRect.yMax);
-			viewHeight = (int)Mathf.Max(viewHeight, outputAnchorRect.yMax);
+			node.viewHeight = (int)Mathf.Max(node.viewHeight, inputAcnhorRect.yMax);
+			node.viewHeight = (int)Mathf.Max(node.viewHeight, outputAnchorRect.yMax);
 		}
 
 		public void ProcessAnchorEvents()
@@ -67,7 +67,7 @@ namespace PW.Editor
 			//link anchor event is we release the mouse with a draggingLink.
 			if (editorEvents.isMouseOverAnchor)
 				if (e.rawType == EventType.MouseUp && editorEvents.isDraggingLink)
-					OnAnchorLinked(editorEvents.mouseOverAnchor);
+					graphRef.SafeCreateLink(editorEvents.mouseOverAnchor);
 
 			if (editorEvents.isDraggingLink)
 			{

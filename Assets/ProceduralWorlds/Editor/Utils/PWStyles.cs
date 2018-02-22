@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public static class PWStyles
 	{

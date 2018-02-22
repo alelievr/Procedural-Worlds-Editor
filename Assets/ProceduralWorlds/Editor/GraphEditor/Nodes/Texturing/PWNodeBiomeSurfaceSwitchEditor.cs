@@ -26,7 +26,7 @@ namespace PW.Editor
 
 		public override void OnNodeGUI()
 		{
-			UpdateSurfaceType(biomeGraphRef.surfaceType);
+			node.UpdateSurfaceType(biomeGraphRef.surfaceType);
 
 			EditorGUI.BeginChangeCheck();
 
