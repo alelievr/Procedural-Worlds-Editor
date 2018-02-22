@@ -2,26 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Node;
+using UnityEditor;
 
 namespace PW.Editor
 {
-	public class PWNodeEditor : PWNodeEditor
+	[CustomEditor(typeof(PWNodeBiomeSurfaceModifiers))]
+	public class PWNodeBiomeSurfaceModifierEditor : PWNodeEditor
 	{
-		public PWNode;
-
-		public override void OnNodeEnable()
-		{
-
-		}
+		// public PWNodeBiomeSurfaceModifiers node;
 
 		public override void OnNodeGUI()
 		{
 
-		}
-
-		public override void OnNodeDisable()
-		{
-			
 		}
 	}
 }

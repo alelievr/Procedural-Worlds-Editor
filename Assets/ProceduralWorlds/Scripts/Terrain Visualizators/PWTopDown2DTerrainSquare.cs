@@ -74,7 +74,7 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 			for (int z = 0; z < chunkSize; z++)
 			{
 				Vector4 biomeInfo = Vector4.zero;
-				var biomePoint = biomes.GetBiomeBlendInfo(x, z);
+				// var biomePoint = biomes.GetBiomeBlendInfo(x, z);
 
 				// biomeInfo.x = biomePoint.firstBiomeId;
 				// biomeInfo.y = biomePoint.firstBiomeBlendPercent;

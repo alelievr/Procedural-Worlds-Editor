@@ -154,7 +154,7 @@ public partial class PWGraphEditor
 				&& !editorEvents.isMouseOverLink
 				&& !editorEvents.isMouseOverOrderingGroup)
 		{
-			graph.RaiseOnClickNowhere();
+			OnClickNowhere();
 
 			UnselectAllLinks();
 		}

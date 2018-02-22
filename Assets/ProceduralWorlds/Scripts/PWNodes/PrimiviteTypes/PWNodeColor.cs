@@ -16,11 +16,6 @@ namespace PW.Node
 			name = "Color";
 		}
 
-		public override void OnNodeGUI()
-		{
-			PWGUI.ColorPicker(ref outputColor, true, false);
-		}
-
 		//no process needed
 	}
 }

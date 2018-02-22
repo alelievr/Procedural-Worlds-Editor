@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using PW.Core;
 
 namespace PW.Node
@@ -18,40 +17,16 @@ namespace PW.Node
 		[PWOutput("Terrain output")]
 		public Sampler		outputTerrain;
 
-		public AnimationCurve		curve;
-		[SerializeField]
-		SerializableAnimationCurve	sCurve = new SerializableAnimationCurve();
+		public AnimationCurve				curve;
+		public SerializableAnimationCurve	sCurve = new SerializableAnimationCurve();
 
-		string notifyKey = "curveModify";
-
-		public override void OnNodeCreation()
+		public override void 	OnNodeCreation()
 		{
 			name = "Curve";
 			curve = (AnimationCurve)sCurve;
 		}
 
-		public override void OnNodeEnable()
-		{
-			delayedChanges.BindCallback(notifyKey, (unused) => {
-					NotifyReload();
-					CurveTerrain();
-					sCurve.SetAnimationCurve(curve);
-				});
-		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
-			EditorGUI.BeginChangeCheck();
-			Rect pos = EditorGUILayout.GetControlRect(false, 100);
-			curve = EditorGUI.CurveField(pos, curve);
-			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(notifyKey);
-
-			PWGUI.SamplerPreview(outputTerrain);
-		}
-
-		void					CurveTerrain()
+		public void				CurveTerrain()
 		{
 			if (inputTerrain == null)
 				return ;

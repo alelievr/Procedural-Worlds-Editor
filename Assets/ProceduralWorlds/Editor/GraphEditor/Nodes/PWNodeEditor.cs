@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 using PW.Node;
 using PW.Core;
 using PW;
@@ -17,27 +18,28 @@ namespace PW.Editor
 		protected Event				e { get { return Event.current; } }
 		[System.NonSerialized]
 		protected DelayedChanges	delayedChanges = new DelayedChanges();
+		protected PWGUIManager		PWGUI = new PWGUIManager();
 
 		//Getters
-		PWGraph						graphRef { get { return node.graphRef; } }
-		PWBiomeGraph				biomeGraphRef { get { return node.graphRef as PWBiomeGraph; } }
-		PWMainGraph					mainGraphRef { get { return node.graphRef as PWMainGraph; } }
-		PWGraphEditorEventInfo		editorEvents { get { return editorEvents; } }
-		protected PWGUIManager		PWGUI { get { return node.PWGUI; } }
-		Vector2						graphPan { get { return node.graphRef.panPosition; } }
-		PWGraphEditor				graphEditor;
+		protected PWGraph					graphRef { get { return node.graphRef; } }
+		protected PWBiomeGraph				biomeGraphRef { get { return node.graphRef as PWBiomeGraph; } }
+		protected PWMainGraph				mainGraphRef { get { return node.graphRef as PWMainGraph; } }
+		protected PWGraphEditorEventInfo	editorEvents { get { return editorEvents; } }
+		protected Vector2					graphPan { get { return node.graphRef.panPosition; } }
+		protected Rect						rect { get { return node.rect; } }
+		protected PWGraphEditor				graphEditor;
 
 		//state bools
-		public bool					isSelected = false;
-		public bool					isDragged = false;
-		public bool					windowNameEdit = false;
+		public bool						windowNameEdit = false;
 		
-		public delegate void				AnchorAction(PWAnchor anchor);
+		public delegate void			AnchorAction(PWAnchor anchor);
 		
 		//fired when the dragged link is above an anchor
-		protected event AnchorAction		OnDraggedLinkOverAnchor;
+		protected event AnchorAction	OnDraggedLinkOverAnchor;
 		//fired when the dragged link quit the zone above the anchor
-		protected event AnchorAction		OnDraggedLinkQuitAnchor;
+		protected event AnchorAction	OnDraggedLinkQuitAnchor;
+
+		public static Dictionary< PWNode, PWNodeEditor >	openedNodeEdiors = new Dictionary< PWNode, PWNodeEditor >();
 
 		PWNode						node;
 
@@ -47,6 +49,12 @@ namespace PW.Editor
 		{
 			node = target as PWNode;
 			delayedChanges.Clear();
+
+			//set the PWGUI current node:
+			PWGUI.SetNode(node);
+			
+			//add our editor to the list:
+			openedNodeEdiors[node] = this;
 
 			BindEvents();
 			OnNodeEnable();
@@ -71,6 +79,9 @@ namespace PW.Editor
 	
 		void OnDisable()
 		{
+			//remove our editor:
+			openedNodeEdiors.Remove(node);
+
 			OnNodeDisable();
 			UnBindEvents();
 		}

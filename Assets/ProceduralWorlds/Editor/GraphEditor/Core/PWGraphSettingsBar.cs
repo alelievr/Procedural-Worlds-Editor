@@ -66,10 +66,11 @@ namespace PW.Editor
 			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();
 			{
-				if (GUILayout.Button("Force reload"))
-					graph.RaiseOnForceReload();
-				if (GUILayout.Button("Force reload Once"))
-					graph.RaiseOnForceReloadOnce();
+				//TODO: impement add-on like pattern
+				// if (GUILayout.Button("Force reload"))
+					// graph.RaiseOnForceReload();
+				// if (GUILayout.Button("Force reload Once"))
+					// graph.RaiseOnForceReloadOnce();
 			}
 			EditorGUILayout.EndHorizontal();
 			

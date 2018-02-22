@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using PW.Biomator;
+using System.Linq;
 
 namespace PW.Editor
 {
@@ -60,7 +61,7 @@ namespace PW.Editor
 				switchDatas.Add(new BiomeSwitchData(bsl.sampler, bsl.samplerName));
 		}
 
-		public override void OnGUI(BiomeData biomeData)
+		public void OnGUI(BiomeData biomeData)
 		{
 			PWGUI.StartFrame(new Rect(0, 0, 0, 0));
 
@@ -183,12 +184,6 @@ namespace PW.Editor
 			}
 
 			biomeRepartitionPreview.Apply();
-		}
-
-
-		public override void OnDisable()
-		{
-
 		}
 	}
 }

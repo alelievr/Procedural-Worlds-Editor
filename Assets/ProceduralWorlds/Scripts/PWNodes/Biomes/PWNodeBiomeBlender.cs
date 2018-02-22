@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using PW.Core;
 using PW.Biomator;
@@ -17,17 +16,14 @@ namespace PW.Node
 		[PWOutput]
 		public BlendedBiomeTerrain		outputBlendedBiomeTerrain = new BlendedBiomeTerrain();
 
-		[SerializeField]
-		float				biomeBlendPercent = .1f;
+		public float			biomeBlendPercent = .1f;
 
-		[SerializeField]
-		BiomeBlendList		blendList = new BiomeBlendList();
+		public BiomeBlendList	blendList = new BiomeBlendList();
 
-		[SerializeField]
-		bool				biomeCoverageRecap = false;
+		public bool				biomeCoverageRecap = false;
 
 		[System.NonSerialized]
-		bool				updateBiomeMap = true;
+		public bool				updateBiomeMap = true;
 
 		public override void OnNodeCreation()
 		{
@@ -122,7 +118,7 @@ namespace PW.Node
 			outputBlendedBiomeTerrain.biomeData = biomeData;
 		}
 
-		void FillBiomeMap(BiomeData biomeData)
+		public void FillBiomeMap(BiomeData biomeData)
 		{
 			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendList, biomeBlendPercent);
 			updateBiomeMap = true;

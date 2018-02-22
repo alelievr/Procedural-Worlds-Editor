@@ -31,10 +31,6 @@ namespace PW.Node
 			perlin2D = new PerlinNoise2D();
 		}
 
-		public override void OnNodeGUI()
-		{
-		}
-
 		public override void OnNodeProcess()
 		{
 			//recalcul perlin noise values with new seed / position.

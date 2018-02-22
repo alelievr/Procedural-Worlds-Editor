@@ -20,7 +20,10 @@ namespace PW.Editor
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(); });
 
 			node.switchList.OnBiomeDataAdded = (unused) => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			node.switchList.OnBiomeDataModified = (unused) => { node.alreadyModified = true; node.switchList.UpdateBiomeRepartitionPreview(inputBiome); delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			node.switchList.OnBiomeDataModified = (unused) => {
+				node.alreadyModified = true;
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
+			};
 			node.switchList.OnBiomeDataRemoved = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			node.switchList.OnBiomeDataReordered = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
 		}
@@ -38,7 +41,7 @@ namespace PW.Editor
 			EditorGUI.BeginChangeCheck();
 			{
 				EditorGUIUtility.labelWidth = 80;
-				node.selectedBiomeSamplerName = EditorGUILayout.Popup("switch parameter", selectedBiomeSamplerName, samplerNames);
+				node.selectedBiomeSamplerName = EditorGUILayout.Popup("switch parameter", node.selectedBiomeSamplerName, node.samplerNames);
 				node.samplerName = node.samplerNames[node.selectedBiomeSamplerName];
 			}
 			if (EditorGUI.EndChangeCheck())

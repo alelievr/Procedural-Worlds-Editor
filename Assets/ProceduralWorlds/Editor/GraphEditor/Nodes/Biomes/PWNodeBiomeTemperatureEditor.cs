@@ -71,7 +71,7 @@ namespace PW.Editor
 				PWGUI.SetDebugForField(2, true);
 			}
 			
-			if (updateTemperatureMap)
+			if (node.updateTemperatureMap)
 			{
 				PWGUI.SetUpdateForField(2, true);
 				node.updateTemperatureMap = false;

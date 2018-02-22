@@ -5,37 +5,21 @@ using PW.Editor;
 
 namespace PW.Editor
 {
-	[CustomEditor(typeof(PWNodePerlinNoise2D))]
-	public class PWNodePerlinNoise2DEditor : PWNodeEditor
+	[CustomEditor(typeof(PWNodeAdd))]
+	public class PWNodeAddEditor : PWNodeEditor
 	{
-		PWNodePerlinNoise2D		node;
-		
-		const string noiseSettingsChangedKey = "PerlinNoiseSettings";
+		PWNodeAdd		node;
 
 		public override void OnNodeEnable()
 		{
-			node = target as PWNodePerlinNoise2D;
-			delayedChanges.BindCallback(noiseSettingsChangedKey, (unused) => NotifyReload());
+			node = target as PWNodeAdd;
 		}
 
 		public override void OnNodeGUI()
 		{
-			EditorGUIUtility.labelWidth = 40;
-			EditorGUI.BeginChangeCheck();
-			{
-				node.persistance = PWGUI.Slider("Persistance: ", node.persistance, ref node.persistanceMin, ref node.persistanceMax);
-				node.octaves = PWGUI.IntSlider("Octaves: ", node.octaves, 0, 16);
-				node.scale = PWGUI.Slider("Scale: ", node.scale, 0.01f, 10);
-				node.additionalSeed = EditorGUILayout.IntField("Seed", node.additionalSeed);
-			}
-			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(noiseSettingsChangedKey);
+			EditorGUIUtility.labelWidth = 100;
 
-			PWGUI.Sampler2DPreview(node.output);
-		}
-		
-		public override void OnNodeDisable()
-		{
+			EditorGUILayout.LabelField("result: " + node.fOutput);
 		}
 	}
 }

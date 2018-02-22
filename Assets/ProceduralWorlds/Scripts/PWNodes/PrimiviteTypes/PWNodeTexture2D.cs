@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using PW.Core;
 
 namespace PW.Node
@@ -14,54 +13,17 @@ namespace PW.Node
 		[PWOutput("Material")]
 		public Material			outputMaterial;
 
-		[SerializeField]
-		bool					isMaterialOutput = false;
-		[SerializeField]
-		Vector2					tiling = Vector2.one;
-		[SerializeField]
-		Vector2					offset;
-		[SerializeField]
-		bool					preview = true;
-
-		PWGUIMaterialPreview	matPreview;
+		public bool				isMaterialOutput = false;
+		public Vector2			tiling = Vector2.one;
+		public Vector2			offset;
+		public bool				preview = true;
 
 		public override void OnNodeCreation()
 		{
 			name = "Texture 2D";
 		}
 
-		public override void OnNodeEnable()
-		{
-			matPreview = new PWGUIMaterialPreview();
-		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(EditorGUIUtility.singleLineHeight * 2 + 4);
-			outputTexture = EditorGUILayout.ObjectField(outputTexture, typeof(Texture2D), false) as Texture2D;
-			EditorGUI.BeginChangeCheck();
-			{
-				if ((isMaterialOutput = EditorGUILayout.Toggle("material output", isMaterialOutput)))
-				{
-					if (outputMaterial == null)
-						CreateNewMaterial();
-					tiling = EditorGUILayout.Vector2Field("tiling", tiling);
-					offset = EditorGUILayout.Vector2Field("offset", offset);
-	
-					UpdateMaterialProperties();
-					
-					if ((preview = EditorGUILayout.Foldout(preview, "preview")))
-						matPreview.Render(outputMaterial);
-				}
-				else if (outputTexture != null)
-					if ((preview = EditorGUILayout.Foldout(preview, "preview")))
-						PWGUI.TexturePreview(outputTexture);
-			}
-			if (EditorGUI.EndChangeCheck())
-				UpdateProps();
-		}
-
-		void UpdateProps()
+		public void UpdateProps()
 		{
 			if (isMaterialOutput)
 			{
@@ -77,7 +39,7 @@ namespace PW.Node
 			}
 		}
 
-		void CreateNewMaterial()
+		public void CreateNewMaterial()
 		{
 			outputMaterial = new Material(Shader.Find("Unlit/Texture"));
 			if (outputTexture != null)
@@ -85,7 +47,7 @@ namespace PW.Node
 			UpdateMaterialProperties();
 		}
 
-		void UpdateMaterialProperties()
+		public void UpdateMaterialProperties()
 		{
 			outputMaterial.SetTextureOffset("_MainTex", offset);
 			outputMaterial.SetTextureScale("_MainTex", tiling);
@@ -97,11 +59,6 @@ namespace PW.Node
 		{
 			if (outputMaterial == null && isMaterialOutput)
 				CreateNewMaterial();
-		}
-
-		public override void OnNodeDisable()
-		{
-			matPreview.Cleanup();
 		}
 	}
 }

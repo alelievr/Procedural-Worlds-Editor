@@ -182,7 +182,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 					float min = 0.1f;
 					EditorGUILayout.BeginHorizontal();
 					EditorGUILayout.PrefixLabel("step", PWStyles.prefixLabel);
-					mainGraph.step = mainGraph.PWGUI.Slider(mainGraph.step, ref min, ref mainGraph.maxStep, 0.01f, false, true);
+					mainGraph.step = PWGUI.Slider(mainGraph.step, ref min, ref mainGraph.maxStep, 0.01f, false, true);
 					EditorGUILayout.EndHorizontal();
 				}
 				EditorGUI.EndDisabledGroup();

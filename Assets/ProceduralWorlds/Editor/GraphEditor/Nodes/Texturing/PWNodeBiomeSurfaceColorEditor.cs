@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Node;
+using UnityEditor;
 
 namespace PW.Editor
 {
-	public class PWNodeEditor : PWNodeEditor
+	[CustomEditor(typeof(PWNodeBiomeSurfaceColor))]
+	public class PWNodeBiomeSurfaceColorEditor : PWNodeEditor
 	{
-		public PWNode;
+		public PWNodeBiomeSurfaceColor node;
 
 		public override void OnNodeEnable()
 		{
-
+			node = target as PWNodeBiomeSurfaceColor;
 		}
 
 		public override void OnNodeGUI()
 		{
-
+			PWGUI.ColorPicker("Base color", ref node.surfaceColor.baseColor);
 		}
 
 		public override void OnNodeDisable()

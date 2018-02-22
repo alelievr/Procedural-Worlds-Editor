@@ -5,9 +5,10 @@ using PW.Core;
 
 namespace PW.Node
 {
-	public class PWNodeConstant : PWNode {
+	public class PWNodeConstant : PWNode
+	{
 
-		enum ConstantType
+		public enum ConstantType
 		{
 			Int,
 			Float,
@@ -31,8 +32,7 @@ namespace PW.Node
 		[PWOutput("Vector4")]
 		public Vector4	outv4;
 
-		[SerializeField]
-		ConstantType		selectedConstantType = ConstantType.Float;
+		public ConstantType		selectedConstantType = ConstantType.Float;
 
 		static Dictionary< ConstantType, string > properties = new Dictionary< ConstantType, string >() {
 			{ConstantType.Int, "outi"},
@@ -53,7 +53,7 @@ namespace PW.Node
 			UpdateConstantType();
 		}
 
-		void			UpdateConstantType()
+		public void			UpdateConstantType()
 		{
 			foreach (var propKp in properties)
 				if (propKp.Key == selectedConstantType)
@@ -64,37 +64,5 @@ namespace PW.Node
 					RemoveAllLinksFromAnchor(propKp.Value);
 				}
 		}
-
-		public override void OnNodeGUI()
-		{
-			GUILayout.Space(EditorGUIUtility.singleLineHeight);
-
-			EditorGUI.BeginChangeCheck();
-			EditorGUIUtility.labelWidth = 80;
-			selectedConstantType = (ConstantType)EditorGUILayout.EnumPopup("output mode", selectedConstantType);
-			if (EditorGUI.EndChangeCheck())
-				UpdateConstantType();
-
-			switch (selectedConstantType)
-			{
-				case ConstantType.Int:
-					outi = EditorGUILayout.IntField("Int", outi);
-					break ;
-				case ConstantType.Float:
-					outf = EditorGUILayout.FloatField("Float", outf);
-					break ;
-				case ConstantType.Vector2:
-					outv2 = EditorGUILayout.Vector2Field("Vec2", outv2);
-					break ;
-				case ConstantType.Vector3:
-					outv3 = EditorGUILayout.Vector3Field("Vec3", outv3);
-					break ;
-				case ConstantType.Vector4:
-					outv4 = EditorGUILayout.Vector4Field("Vec4", outv4);
-					break ;
-			}
-		}
-
-		//no process needed
 	}
 }

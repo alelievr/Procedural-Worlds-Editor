@@ -5,6 +5,7 @@ using UnityEditor;
 using System.Reflection;
 using System;
 using PW;
+using PW.Core;
 
 namespace PW.Editor
 {

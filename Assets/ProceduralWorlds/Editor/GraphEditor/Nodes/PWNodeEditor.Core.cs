@@ -28,12 +28,8 @@ namespace PW.Editor
 		void LoadCoreResources()
 		{
 			if (!styleLoaded)
-			{
-				//TODO: this will not works
-				foreach (var anchor in node.anchorFields)
-					anchor.LoadStylesAndAssets();
 				styleLoaded = true;
-			}
+			
 			if (!styleLoadedStatic)
 			{
 				//check if style was already initialized:
@@ -130,7 +126,7 @@ namespace PW.Editor
 
 			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
-				isSelected = !isSelected;
+				node.isSelected = !node.isSelected;
 		}
 
 		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)

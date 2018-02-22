@@ -11,13 +11,12 @@ namespace PW.Editor
 	{
 		void BindEvents()
 		{
-			graphEditor.OnForceReload += ForceReloadCallback;
 			graphEditor.OnForceReloadOnce += ForceReloadOnceCallback;
 			graphEditor.OnClickNowhere += OnClickedOutside;
 			graphEditor.OnLinkStartDragged += LinkStartDragCallback;
 			graphEditor.OnLinkStopDragged += LinkStopDragCallback;
 			graphEditor.OnLinkCanceled += LinkCanceledCallback;
-			
+
 			graphRef.OnLinkCreated += LinkCreatedCallback;
 
 			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
@@ -26,7 +25,6 @@ namespace PW.Editor
 
 		void UnBindEvents()
 		{
-			graphEditor.OnForceReload -= GraphReloadCallback;
 			graphEditor.OnForceReloadOnce -= ForceReloadOnceCallback;
 			graphEditor.OnClickNowhere -= OnClickedOutside;
 			graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
@@ -44,11 +42,6 @@ namespace PW.Editor
 			ResetUnlinkableAnchors();
 		}
 
-		//retarget "Reload" button in the editor to the internal event OnReload:
-		void GraphReloadCallback() { Reload(null); }
-
-		void ForceReloadCallback() { Reload(null); }
-
 		void ForceReloadOnceCallback() { Debug.Log("force reload once: TODO"); }
 
 		void LinkStartDragCallback(PWAnchor fromAnchor)
@@ -64,7 +57,7 @@ namespace PW.Editor
 			ResetUnlinkableAnchors();
 
 			//reset link highlight
-			foreach (var anchorField in anchorFields)
+			foreach (var anchorField in node.anchorFields)
 				foreach (var anchor in anchorField.anchors)
 					foreach (var link in anchor.links)
 						link.ResetHighlight();
@@ -125,8 +118,8 @@ namespace PW.Editor
 				GUI.FocusControl(null);
 			}
 			if (Event.current.button == 0 && !Event.current.shift)
-				isSelected = false;
-			isDragged = false;
+				node.isSelected = false;
+			node.isDragged = false;
 		}
 		
 		void		DisableUnlinkableAnchors(PWAnchor anchor)

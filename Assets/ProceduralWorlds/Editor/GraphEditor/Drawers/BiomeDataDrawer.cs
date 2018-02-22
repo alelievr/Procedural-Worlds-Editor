@@ -50,10 +50,5 @@ namespace PW.Editor
 			}
 		}
 
-		public override void OnDisable()
-		{
-			
-		}
-
 	}
 }

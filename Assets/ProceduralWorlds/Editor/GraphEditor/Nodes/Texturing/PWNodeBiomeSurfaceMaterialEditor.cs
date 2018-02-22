@@ -2,26 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PW.Node;
+using UnityEditor;
 
 namespace PW.Editor
 {
-	public class PWNodeEditor : PWNodeEditor
+	[CustomEditor(typeof(PWNodeBiomeSurfaceMaps))]
+	public class PWNodeBiomeSurfaceMaterialEditor : PWNodeEditor
 	{
-		public PWNode;
+		public PWNodeBiomeSurfaceMaterial node;
 
 		public override void OnNodeEnable()
 		{
-
+			node = target as PWNodeBiomeSurfaceMaterial;
 		}
 
 		public override void OnNodeGUI()
 		{
-
+			node.surfaceMaterial.material = EditorGUILayout.ObjectField(node.surfaceMaterial.material, typeof(Material), false) as Material;
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

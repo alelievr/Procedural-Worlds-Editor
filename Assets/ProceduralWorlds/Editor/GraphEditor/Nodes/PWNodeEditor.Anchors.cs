@@ -6,6 +6,7 @@ using UnityEditor;
 using System.Linq;
 using PW.Core;
 using PW.Node;
+using System;
 
 namespace PW.Editor
 {
@@ -59,9 +60,9 @@ namespace PW.Editor
 
 			//process events on every anchors:
 			foreach (var anchorField in node.inputAnchorFields)
-				anchorField.ProcessEvent(ref editorEvents);
+				ProcessEvent(anchorField);
 			foreach (var anchorField in node.outputAnchorFields)
-				anchorField.ProcessEvent(ref editorEvents);
+				ProcessEvent(anchorField);
 			
 			//link anchor event is we release the mouse with a draggingLink.
 			if (editorEvents.isMouseOverAnchor)
@@ -192,7 +193,7 @@ namespace PW.Editor
 			}
 		}
 
-		public void ProcessEvent(PWAnchorField anchorField, ref PWGraphEditorEventInfo editorEvents)
+		public void ProcessEvent(PWAnchorField anchorField)
 		{
 			var e = Event.current;
 			bool contains = false;

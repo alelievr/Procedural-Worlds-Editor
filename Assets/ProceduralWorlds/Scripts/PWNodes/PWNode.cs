@@ -35,17 +35,22 @@ namespace PW
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
 		[System.NonSerialized]
 		public bool				ready = false;
-		//tell if the node have required unlinked input and so can't Process()
+		//Tell if the node have required unlinked input and so can't Process()
 		public bool				canWork = false;
+		//Is the node processing
 		public bool				isProcessing = false;
-		//tell if the node was enabled
+		//Tell if the node was enabled
 		[System.NonSerialized]
 		private bool			isEnabled = false;
+		//Is the node selected
+		public bool				isSelected = false;
+		//Is the node dragged
+		public bool				isDragged = false;
 		//Serialization system:
 		[System.NonSerialized]
 		private	bool			deserializationAlreadyNotified = false;
 		//GUI option storage
-		public PWGUIManager		PWGUI;
+		public PWGUIManagerStorage		PWGUIStorage = new PWGUIManagerStorage();
 
 
 		[System.NonSerialized]
@@ -102,8 +107,6 @@ namespace PW
 			if (debug)
 				Debug.Log("Node OnEnable: " + GetType());
 
-			//set the PWGUI current node:
-			PWGUI.SetNode(this);
 
 			//load the class QA name:
 			classAQName = GetType().AssemblyQualifiedName;
@@ -136,7 +139,6 @@ namespace PW
 			
 			//send OnEnabled events
 			OnNodeEnable();
-			OnAnchorEnable();
 
 			//tell to the graph that this node is ready to work
 			this.ready = true;
@@ -173,9 +175,6 @@ namespace PW
 
 		public void OnDisable()
 		{
-			foreach (var anchor in anchorFields)
-				anchor.OnDisable();
-			
 			if (debug)
 				Debug.Log("Node " + GetType() + " Disable");
 			
@@ -183,10 +182,7 @@ namespace PW
 
 			//if the node was properly enabled, we call it's onDisable functions
 			if (graphRef != null)
-			{
 				OnNodeDisable();
-				OnAnchorDisable();
-			}
 		}
 
 		#endregion
@@ -211,28 +207,11 @@ namespace PW
 
 		#endregion
 
-		void		OnAnchorEnable()
-		{
-			foreach (var anchorField in inputAnchorFields)
-				anchorField.OnEnable();
-			foreach (var anchorField in outputAnchorFields)
-				anchorField.OnEnable();
-		}
-
-		void		OnAnchorDisable()
-		{
-			foreach (var anchorField in inputAnchorFields)
-				anchorField.OnDisable();
-			foreach (var anchorField in outputAnchorFields)
-				anchorField.OnDisable();
-		}
-
 		PWAnchorField	CreateAnchorField()
 		{
 			PWAnchorField newAnchorField = new PWAnchorField();
 
 			newAnchorField.Initialize(this);
-			newAnchorField.OnEnable();
 
 			return newAnchorField;
 		}

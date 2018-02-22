@@ -5,6 +5,8 @@ using PW.Core;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.Profiling;
+using System;
+using PW;
 
 //Ordering group rendering for PWGraphEditor
 public partial class PWGraphEditor
@@ -38,18 +40,18 @@ public partial class PWGraphEditor
 			graph.orderingGroups.Remove(editorEvents.mouseOverOrderingGroup);
 	}
 
-	void CreateAnchorRectCallabck(Rect r, MouseCursor cursor, Action callback)
+	void CreateAnchorRectCallabck(PWOrderingGroup orderingGroup, Rect r, MouseCursor cursor, Action callback)
 	{
 		EditorGUIUtility.AddCursorRect(r, cursor);
 
-		if (resizing && callbackId == resizingCallbackId && Event.current.type == EventType.MouseDrag)
+		if (orderingGroup.resizing && callbackId == orderingGroup.resizingCallbackId && Event.current.type == EventType.MouseDrag)
 			callback();
 		if (r.Contains(Event.current.mousePosition))
 		{
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
-				resizing = true;
-				resizingCallbackId = callbackId;
+				orderingGroup.resizing = true;
+				orderingGroup.resizingCallbackId = callbackId;
 				Event.current.Use();
 			}
 		}
@@ -93,44 +95,45 @@ public partial class PWGraphEditor
 		int			cornerSize = 14;
 
 		//AH this is ugly
+		var orderGroupRect = orderingGroup.orderGroupRect;
 
-		CreateAnchorRectCallabck( //left resize anchor
+		CreateAnchorRectCallabck(orderingGroup, //left resize anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y + cornerSize, controlSize, orderGroupWorldRect.height - cornerSize * 2),
 			MouseCursor.ResizeHorizontal,
 			() => orderGroupRect.xMin += e.delta.x
 		);
-		CreateAnchorRectCallabck( //right resize anchor
+		CreateAnchorRectCallabck(orderingGroup, //right resize anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - controlSize, orderGroupWorldRect.y + cornerSize, controlSize, orderGroupWorldRect.height - cornerSize * 2),
 			MouseCursor.ResizeHorizontal,
 			() => orderGroupRect.xMax += e.delta.x
 		);
-		CreateAnchorRectCallabck( //top resize anchor
+		CreateAnchorRectCallabck(orderingGroup, //top resize anchor
 			new Rect(orderGroupWorldRect.x + cornerSize, orderGroupWorldRect.y, orderGroupWorldRect.width - cornerSize * 2, controlSize),
 			MouseCursor.ResizeVertical,
 			() => orderGroupRect.yMin += e.delta.y
 		);
-		CreateAnchorRectCallabck( //down resize anchor
+		CreateAnchorRectCallabck(orderingGroup, //down resize anchor
 			new Rect(orderGroupWorldRect.x + cornerSize, orderGroupWorldRect.y + orderGroupWorldRect.height - controlSize, orderGroupWorldRect.width - cornerSize * 2, controlSize),
 			MouseCursor.ResizeVertical,
 			() => orderGroupRect.yMax += e.delta.y
 		);
 
-		CreateAnchorRectCallabck( //top left anchor
+		CreateAnchorRectCallabck(orderingGroup, //top left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
 			() => {orderGroupRect.yMin += e.delta.y; orderGroupRect.xMin += e.delta.x;}
 		);
-		CreateAnchorRectCallabck( //top right anchor
+		CreateAnchorRectCallabck(orderingGroup, //top right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
 			() => {orderGroupRect.yMin += e.delta.y; orderGroupRect.xMax += e.delta.x;}
 		);
-		CreateAnchorRectCallabck( //down left anchor
+		CreateAnchorRectCallabck(orderingGroup, //down left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
 			() => {orderGroupRect.yMax += e.delta.y; orderGroupRect.xMin += e.delta.x;}
 		);
-		CreateAnchorRectCallabck( //down right anchor
+		CreateAnchorRectCallabck(orderingGroup, //down right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
 			() => {orderGroupRect.yMax += e.delta.y; orderGroupRect.xMax += e.delta.x;}
@@ -141,7 +144,7 @@ public partial class PWGraphEditor
 
 		//draw renamable name field
 		orderingGroupNameStyle.normal.textColor = orderingGroup.color;
-		PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref name, true, orderingGroupNameStyle);
+		PWGUI.TextField(orderGroupWorldRect.position + new Vector2(10, -22), ref orderingGroup.name, true, orderingGroupNameStyle);
 
 		//draw move pad
 		Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(50, 30));

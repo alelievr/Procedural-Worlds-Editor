@@ -24,13 +24,6 @@ namespace PW.Node
 			rect.width = 150;
 		}
 
-		public override void OnNodeGUI()
-		{
-			EditorGUIUtility.labelWidth = 100;
-
-			EditorGUILayout.LabelField("result: " + fOutput);
-		}
-
 		public override void OnNodeProcess()
 		{
 			fOutput = 0;

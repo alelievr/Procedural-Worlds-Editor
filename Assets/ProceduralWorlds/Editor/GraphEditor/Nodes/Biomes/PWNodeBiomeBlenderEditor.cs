@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using PW.Node;
 using UnityEditor;
 using PW.Biomator;
+using PW.Core;
 
 namespace PW.Editor
 {
@@ -42,13 +44,13 @@ namespace PW.Editor
 			{
 				EditorGUIUtility.labelWidth = 120;
 				EditorGUI.BeginChangeCheck();
-				biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", biomeBlendPercent, 0f, .5f);
+				node.biomeBlendPercent = PWGUI.Slider("Biome blend ratio: ", node.biomeBlendPercent, 0f, .5f);
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(updateBiomeMapKey);
-				blendList.UpdateIfNeeded(biomeData);
+				node.blendList.UpdateIfNeeded(biomeData);
 
 				EditorGUI.BeginChangeCheck();
-				blendList.DrawList(biomeData, visualRect);
+				node.blendList.DrawList(biomeData, node.visualRect);
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(updateBiomeMapKey);
 			}
@@ -62,10 +64,10 @@ namespace PW.Editor
 			else
 				EditorGUILayout.LabelField("no biome data");
 			
-			if (updateBiomeMap)
+			if (node.updateBiomeMap)
 			{
 				PWGUI.SetUpdateForField(1, true);
-				updateBiomeMap = false;
+				node.updateBiomeMap = false;
 			}
 
 			var biomeCoverage = biomeData.biomeSwitchGraph.GetBiomeCoverage();
@@ -74,7 +76,7 @@ namespace PW.Editor
 
 			GUIStyle biomeCoverageFoloutStyle = (biomeCoverageError) ? PWStyles.errorFoldout : EditorStyles.foldout;
 
-			if (biomeCoverageRecap = EditorGUILayout.Foldout(biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
+			if (node.biomeCoverageRecap = EditorGUILayout.Foldout(node.biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
 			{
 				if (biomeData != null && biomeData.biomeSwitchGraph != null)
 				{

@@ -13,13 +13,11 @@ namespace PW.Node
 		[PWOutput]
 		public Sampler2D	output;
 
-		[SerializeField]
-		float	blur = .5f;
-		[SerializeField]
-		float	radius = .5f;
+		public float		blur = .5f;
+		public float		radius = .5f;
+		public bool			updateEachProcess = false;
 
 		Sampler2D			mask;
-		Texture2D			maskTexture;
 
 		public override void OnNodeCreation()
 		{
@@ -31,7 +29,7 @@ namespace PW.Node
 			mask = new Sampler2D(chunkSize, step);
 		}
 
-		void	CreateNoiseMask()
+		public void	CreateNoiseMask()
 		{
 			if (samp == null)
 				return ;
@@ -40,42 +38,19 @@ namespace PW.Node
 			float		maxDist = samp.size * radius; //simplified max dist to get better noiseMask.
 
 			mask.Resize(samp.size);
-			maskTexture = new Texture2D(chunkSize, chunkSize, TextureFormat.RGBA32, false, false);
 			mask.Foreach((x, y) => {
 				float val = 1 - (Vector2.Distance(new Vector2(x, y), center) / maxDist);
-				maskTexture.SetPixel(x, y, new Color(val, val, val));
 				return val;
 			});
-			maskTexture.Apply();
-		}
-
-		public override void OnNodeGUI()
-		{
-			if (samp == null)
-			{
-				EditorGUILayout.LabelField("Null input noise (Sampler2D)");
-				return ;
-			}
-
-			EditorGUIUtility.labelWidth = 70;
-			EditorGUI.BeginChangeCheck();
-			{
-				blur = EditorGUILayout.Slider("blur", blur, 0, 1);
-				radius = EditorGUILayout.Slider("radius", radius, 0, 1);
-			}
-			if (EditorGUI.EndChangeCheck())
-			{
-				CreateNoiseMask();
-				NotifyReload();
-			}
-			
-			GUILayout.Label(maskTexture);
 		}
 
 		public override void OnNodeProcess()
 		{
-			CreateNoiseMask();
-			samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
+			if (updateEachProcess)
+			{
+				CreateNoiseMask();
+				samp.Foreach((x, y, val) => {return val * (mask[x, y]);});
+			}
 			output = samp;
 		}
 	}

@@ -19,9 +19,5 @@ namespace PW.Editor
 		}
 
 		public abstract void OnEnable();
-
-		public abstract void OnGUI();
-
-		public abstract void OnDisable();
 	}
 }

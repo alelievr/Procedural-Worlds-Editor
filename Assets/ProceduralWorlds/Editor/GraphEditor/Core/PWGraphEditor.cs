@@ -128,7 +128,6 @@ public partial class PWGraphEditor : PWEditorWindow
 		}
 		
 		//update the current GUI settings storage and clear drawed popup list:
-		graph.PWGUI.StartFrame(position);
 		PWGUI.StartFrame(position);
 		
 		//set the skin for the current window

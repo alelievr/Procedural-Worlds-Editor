@@ -30,17 +30,13 @@ public partial class PWGraphEditor
 		//move the node if panPosition changed:
 		node.rect = PWUtils.DecalRect(node.rect, graph.panPosition);
 		Rect decaledRect;
-		if (node.GetType() == typeof(PWNodePerlinNoise2D))
-		{
-			if (editor == null)
-				editor = Editor.CreateEditor(node);
-			
-			decaledRect = GUILayout.Window(id, node.rect, (i) => {
-				editor.OnInspectorGUI();
-			}, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
-		}
-		else
-			decaledRect = GUILayout.Window(id, node.rect, node.OnWindowGUI, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
+
+		editor = Editor.CreateEditor(node);
+		
+		decaledRect = GUILayout.Window(id, node.rect, (i) => {
+			editor.OnInspectorGUI();
+		}, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle/*, GUILayout.Height(node.viewHeight)*/);
+
 		node.visualRect = decaledRect;
 		node.rect = PWUtils.DecalRect(decaledRect, -graph.panPosition);
 

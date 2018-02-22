@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEditor;
+using PW.Core;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public class PWColorPickerPopup : PWPopup
 	{

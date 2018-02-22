@@ -5,33 +5,34 @@ using PW.Editor;
 
 namespace PW.Editor
 {
-	[CustomEditor(typeof(PWNodePerlinNoise2D))]
-	public class PWNodePerlinNoise2DEditor : PWNodeEditor
+	[CustomEditor(typeof(PWNodeCurve))]
+	public class PWNodeCurveEditor : PWNodeEditor
 	{
-		PWNodePerlinNoise2D		node;
+		PWNodeCurve		node;
 		
-		const string noiseSettingsChangedKey = "PerlinNoiseSettings";
-
+		const string notifyKey = "curveModify";
+		
 		public override void OnNodeEnable()
 		{
-			node = target as PWNodePerlinNoise2D;
-			delayedChanges.BindCallback(noiseSettingsChangedKey, (unused) => NotifyReload());
+			node = target as PWNodeCurve;
+			
+			delayedChanges.BindCallback(notifyKey, (unused) => {
+					NotifyReload();
+					node.CurveTerrain();
+					node.sCurve.SetAnimationCurve(node.curve);
+				});
 		}
 
 		public override void OnNodeGUI()
 		{
-			EditorGUIUtility.labelWidth = 40;
+			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
 			EditorGUI.BeginChangeCheck();
-			{
-				node.persistance = PWGUI.Slider("Persistance: ", node.persistance, ref node.persistanceMin, ref node.persistanceMax);
-				node.octaves = PWGUI.IntSlider("Octaves: ", node.octaves, 0, 16);
-				node.scale = PWGUI.Slider("Scale: ", node.scale, 0.01f, 10);
-				node.additionalSeed = EditorGUILayout.IntField("Seed", node.additionalSeed);
-			}
+			Rect pos = EditorGUILayout.GetControlRect(false, 100);
+			node.curve = EditorGUI.CurveField(pos, node.curve);
 			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(noiseSettingsChangedKey);
+				delayedChanges.UpdateValue(notifyKey);
 
-			PWGUI.Sampler2DPreview(node.output);
+			PWGUI.SamplerPreview(node.outputTerrain);
 		}
 		
 		public override void OnNodeDisable()

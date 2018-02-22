@@ -5,11 +5,12 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using PW.Biomator;
+using PW.Core;
 using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 
-namespace PW.Core
+namespace PW.Editor
 {
 	public enum PWGUIStyleType
 	{
@@ -46,10 +47,9 @@ namespace PW.Core
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
 		static GUIStyle		centeredLabel;
+		int					currentSettingCount = 0;
 
-		[SerializeField]
-		List< PWGUISettings >	settingsStorage = new List< PWGUISettings >();
-		int						currentSettingCount = 0;
+		List< PWGUISettings > settingsStorage = new List< PWGUISettings >();
 
 		PWNode				attachedNode;
 		
@@ -63,6 +63,7 @@ namespace PW.Core
 				attachedNode = node;
 				node.OnPostReload += ReloadTextures;
 				node.OnPostProcess += ReloadTextures;
+				settingsStorage = node.PWGUIStorage.settingsStorage;
 				EditorApplication.playModeStateChanged += PlayModeChangedCallback;
 			}
 		}

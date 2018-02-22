@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System.Collections;
 using PW.Core;
 using PW.Node;
+using PW.Editor;
 
 namespace PW.Tests.Nodes
 {
@@ -25,7 +26,10 @@ namespace PW.Tests.Nodes
 			var graph = builder.Execute().GetGraph();
 
 			foreach (var node in graph.nodes)
-				node.OnNodeUnitTest();
+			{
+				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
+				editor.OnNodeUnitTest();
+			}
 			
 			builder = PWGraphBuilder.NewGraph< PWMainGraph >();
 
@@ -35,7 +39,10 @@ namespace PW.Tests.Nodes
 			graph = builder.Execute().GetGraph();
 
 			foreach (var node in graph.nodes)
-				node.OnNodeUnitTest();
+			{
+				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
+				editor.OnNodeUnitTest();
+			}
 		}
 	
 	}
