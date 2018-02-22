@@ -46,13 +46,13 @@ namespace PW.Editor
 		{
 			var e = Event.current;
 
-			Profiler.BeginSample("[PW] " + node.GetType() + " rendering");
+			Profiler.BeginSample("[PW] " + nodeRef.GetType() + " rendering");
 			
 			//update the PWGUI window rect with this window rect:
-			PWGUI.StartFrame(node.rect);
+			PWGUI.StartFrame(nodeRef.rect);
 
 			// set the header of the window as draggable:
-			int width = (int) node.rect.width;
+			int width = (int) nodeRef.rect.width;
 			int padding = 8;
 			Rect dragRect = new Rect(padding, 0, width - padding * 2, 20);
 			
@@ -63,17 +63,17 @@ namespace PW.Editor
 
 			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
 			{
-				node.isDragged = true;
+				nodeRef.isDragged = true;
 				editorEvents.isDraggingNode = true;
 			}
 			if (e.rawType == EventType.MouseUp)
 			{
-				node.isDragged = false;
+				nodeRef.isDragged = false;
 				editorEvents.isDraggingNode = false;
 			}
 
-			if (node.isDragged)
-				Undo.RecordObject(this, "Node " + node.name + " dragged");
+			if (nodeRef.isDragged)
+				Undo.RecordObject(this, "Node " + nodeRef.name + " dragged");
 			
 			//Drag window
 			if (e.button == 0 && !windowNameEdit)
@@ -94,26 +94,26 @@ namespace PW.Editor
 
 			if (PropertiesSnapshotDiffers(propertiesBeforeGUI, propertiesAfterGUI))
 			{
-				//Set back the node values to what they was before the modification
+				//Set back the nodeRef values to what they was before the modification
 				RestorePropertiesSnapshot(propertiesBeforeGUI);
 
 				//Then record the object
-				Undo.RecordObject(this, "Property updated in " + node.name);
+				Undo.RecordObject(this, "Property updated in " + nodeRef.name);
 
 				//And set back the modified values
 				RestorePropertiesSnapshot(propertiesAfterGUI);
 				
-				// Debug.Log("Undo recorded: in " + node.GetType());
+				// Debug.Log("Undo recorded: in " + nodeRef.GetType());
 			}
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)
-				node.viewHeight = viewH;
+				nodeRef.viewHeight = viewH;
 
-			node.viewHeight = Mathf.Max(node.viewHeight, maxAnchorRenderHeight);
+			nodeRef.viewHeight = Mathf.Max(nodeRef.viewHeight, maxAnchorRenderHeight);
 				
 			if (e.type == EventType.Repaint)
-				node.viewHeight += 24;
+				nodeRef.viewHeight += 24;
 			
 			RenderAnchors();
 			// ProcessAnchorEvents();
@@ -125,21 +125,21 @@ namespace PW.Editor
 			Rect selectRect = new Rect(10, 18, rect.width - 20, rect.height - 18);
 			if (e.type == EventType.MouseDown && e.button == 0 && selectRect.Contains(e.mousePosition))
 			{
-				node.isSelected = !node.isSelected;
-				if (node.isSelected)
-					graphEditor.RaiseNodeSelected(node);
+				nodeRef.isSelected = !nodeRef.isSelected;
+				if (nodeRef.isSelected)
+					graphEditor.RaiseNodeSelected(nodeRef);
 				else
-					graphEditor.RaiseNodeUnselected(node);
+					graphEditor.RaiseNodeUnselected(nodeRef);
 			}
 		}
 
 		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)
 		{
 			if (buffer == null)
-				buffer = new List< object >(new object[node.undoableFields.Count]);
+				buffer = new List< object >(new object[nodeRef.undoableFields.Count]);
 			
-			for (int i = 0; i < node.undoableFields.Count; i++)
-				buffer[i] = node.undoableFields[i].GetValue(node);
+			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
+				buffer[i] = nodeRef.undoableFields[i].GetValue(nodeRef);
 			
 			return buffer;
 		}
@@ -166,8 +166,8 @@ namespace PW.Editor
 
 		void RestorePropertiesSnapshot(List< object > properties)
 		{
-			for (int i = 0; i < node.undoableFields.Count; i++)
-				node.undoableFields[i].SetValue(node, properties[i]);
+			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
+				nodeRef.undoableFields[i].SetValue(nodeRef, properties[i]);
 		}
 	}
 }

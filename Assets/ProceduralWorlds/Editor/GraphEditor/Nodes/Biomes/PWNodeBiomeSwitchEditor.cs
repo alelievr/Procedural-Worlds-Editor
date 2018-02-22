@@ -9,9 +9,11 @@ namespace PW.Editor
 	[CustomEditor(typeof(PWNodeBiomeSwitch))]
 	public class PWNodeBiomeSwitchEditor : PWNodeEditor
 	{
-		public PWNodeBiomeSwitch node;
+		public PWNodeBiomeSwitch	node;
 
-		const string			delayedUpdateKey = "BiomeSwitchListUpdate";
+		BiomeSwitchListDrawer		switchListDrawer = new BiomeSwitchListDrawer();
+
+		const string				delayedUpdateKey = "BiomeSwitchListUpdate";
 
 		public override void OnNodeEnable()
 		{
@@ -26,6 +28,8 @@ namespace PW.Editor
 			};
 			node.switchList.OnBiomeDataRemoved = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
 			node.switchList.OnBiomeDataReordered = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
+
+			switchListDrawer.OnEnable(node.switchList);
 		}
 
 		public override void OnNodeGUI()
@@ -59,13 +63,8 @@ namespace PW.Editor
 				return ;
 			}
 
-			//TODO: drawers
-			// node.switchList.OnGUI(node.inputBiome);
+			switchListDrawer.OnGUI(node.inputBiome);
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

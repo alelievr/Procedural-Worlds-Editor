@@ -13,7 +13,6 @@ namespace PW.Editor
 		{
 			if (graphEditor != null)
 			{
-				graphEditor.OnForceReloadOnce += ForceReloadOnceCallback;
 				graphEditor.OnClickNowhere += OnClickedOutside;
 				graphEditor.OnLinkStartDragged += LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged += LinkStopDragCallback;
@@ -30,7 +29,6 @@ namespace PW.Editor
 		{
 			if (graphEditor != null)
 			{
-				graphEditor.OnForceReloadOnce -= ForceReloadOnceCallback;
 				graphEditor.OnClickNowhere -= OnClickedOutside;
 				graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged -= LinkStopDragCallback;
@@ -48,12 +46,10 @@ namespace PW.Editor
 			ResetUnlinkableAnchors();
 		}
 
-		void ForceReloadOnceCallback() { Debug.Log("force reload once: TODO"); }
-
 		void LinkStartDragCallback(PWAnchor fromAnchor)
 		{
 			//disable non-linkable anchors:
-			if (fromAnchor.nodeRef != node)
+			if (fromAnchor.nodeRef != nodeRef)
 				DisableUnlinkableAnchors(fromAnchor);
 		}
 
@@ -63,7 +59,7 @@ namespace PW.Editor
 			ResetUnlinkableAnchors();
 
 			//reset link highlight
-			foreach (var anchorField in node.anchorFields)
+			foreach (var anchorField in nodeRef.anchorFields)
 				foreach (var anchor in anchorField.anchors)
 					foreach (var link in anchor.links)
 						link.ResetHighlight();
@@ -124,8 +120,8 @@ namespace PW.Editor
 				GUI.FocusControl(null);
 			}
 			if (Event.current.button == 0 && !Event.current.shift)
-				node.isSelected = false;
-			node.isDragged = false;
+				nodeRef.isSelected = false;
+			nodeRef.isDragged = false;
 		}
 		
 		void		DisableUnlinkableAnchors(PWAnchor anchor)
@@ -133,9 +129,9 @@ namespace PW.Editor
 			List< PWAnchorField >	anchorFields;
 
 			if (anchor.anchorType == PWAnchorType.Output)
-				anchorFields = node.inputAnchorFields;
+				anchorFields = nodeRef.inputAnchorFields;
 			else
-				anchorFields = node.outputAnchorFields;
+				anchorFields = nodeRef.outputAnchorFields;
 			
 			foreach (var anchorField in anchorFields)
 				anchorField.DisableIfUnlinkable(anchor);
@@ -144,9 +140,9 @@ namespace PW.Editor
 		//reset anchor colors and visibility after a link was dragged.
 		void		ResetUnlinkableAnchors()
 		{
-			foreach (var anchorField in node.inputAnchorFields)
+			foreach (var anchorField in nodeRef.inputAnchorFields)
 				anchorField.ResetLinkable();
-			foreach (var anchorField in node.outputAnchorFields)
+			foreach (var anchorField in nodeRef.outputAnchorFields)
 				anchorField.ResetLinkable();
 		}
 

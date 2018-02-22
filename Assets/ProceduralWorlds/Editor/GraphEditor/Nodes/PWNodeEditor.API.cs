@@ -13,13 +13,13 @@ namespace PW.Editor
 		//also fire a Process event for the target nodes
 		public void NotifyReload()
 		{
-			var nodes = graphRef.GetNodeChildsRecursive(node);
+			var nodes = graphRef.GetNodeChildsRecursive(nodeRef);
 
 			foreach (var editorKP in openedNodeEdiors)
 				editorKP.Value.OnNodePreProcess();
 				
 			//add our node to the process pass
-			nodes.Add(node);
+			nodes.Add(nodeRef);
 
 			graphRef.ProcessNodes(nodes);
 			

@@ -21,12 +21,12 @@ namespace PW.Editor
 		protected PWGUIManager		PWGUI = new PWGUIManager();
 
 		//Getters
-		protected PWGraph					graphRef { get { return node.graphRef; } }
-		protected PWBiomeGraph				biomeGraphRef { get { return node.graphRef as PWBiomeGraph; } }
-		protected PWMainGraph				mainGraphRef { get { return node.graphRef as PWMainGraph; } }
+		protected PWGraph					graphRef { get { return nodeRef.graphRef; } }
+		protected PWBiomeGraph				biomeGraphRef { get { return nodeRef.graphRef as PWBiomeGraph; } }
+		protected PWMainGraph				mainGraphRef { get { return nodeRef.graphRef as PWMainGraph; } }
 		protected PWGraphEditorEventInfo	editorEvents { get { return editorEvents; } }
-		protected Vector2					graphPan { get { return node.graphRef.panPosition; } }
-		protected Rect						rect { get { return node.rect; } }
+		protected Vector2					graphPan { get { return nodeRef.graphRef.panPosition; } }
+		protected Rect						rect { get { return nodeRef.rect; } }
 		protected PWGraphEditor				graphEditor;
 
 		//state bools
@@ -42,19 +42,18 @@ namespace PW.Editor
 		public static Dictionary< PWNode, PWNodeEditor >	openedNodeEdiors = new Dictionary< PWNode, PWNodeEditor >();
 
 		[System.NonSerialized]
-		PWNode						node;
+		PWNode						nodeRef;
 
 		[System.NonSerialized]
-
 		bool						guiEnabled = false;
 
 		void OnEnable()
 		{
-			node = target as PWNode;
+			nodeRef = target as PWNode;
 			
-			if (node == null)
+			if (nodeRef == null)
 			{
-				Debug.Log("Destroying unlinked editor !");
+				Debug.Log("Destroying null target node editor !");
 				DestroyImmediate(this);
 				return ;
 			}
@@ -63,13 +62,11 @@ namespace PW.Editor
 
 			graphEditor = EditorWindow.focusedWindow as PWGraphEditor;
 
-			//set the PWGUI current node:
-			PWGUI.SetNode(node);
-
-			Debug.Log("Current node: " + node);
+			//set the PWGUI current nodeRef:
+			PWGUI.SetNode(nodeRef);
 			
 			//add our editor to the list:
-			openedNodeEdiors[node] = this;
+			openedNodeEdiors[nodeRef] = this;
 
 			BindEvents();
 			OnNodeEnable();
@@ -96,7 +93,7 @@ namespace PW.Editor
 		void OnDisable()
 		{
 			//remove our editor:
-			openedNodeEdiors.Remove(node);
+			openedNodeEdiors.Remove(nodeRef);
 
 			OnNodeDisable();
 			UnBindEvents();

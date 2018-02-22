@@ -51,8 +51,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 
 	//public delegates:
-	public delegate void					NodeAction(PWNode node);
-		public delegate void					LinkAction(PWNodeLink link);
+	public delegate void				NodeAction(PWNode node);
+	public delegate void				LinkAction(PWNodeLink link);
 
 	
 	//fired whe the user resize the window (old window size in parameter)
@@ -280,6 +280,11 @@ public partial class PWGraphEditor : PWEditorWindow
 		//destroy the graph so it's not loaded in the void.
 		if (graph != null)
 			UnloadGraph();
+		
+		//destroy all instantiated node editors
+		foreach (var editorKP in nodeEditors)
+			DestroyImmediate(editorKP.Value);
+		nodeEditors.Clear();
 	}
 
 	void SaveGraph()

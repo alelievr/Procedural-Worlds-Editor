@@ -16,7 +16,7 @@ namespace PW.Editor
 			editIcon = Resources.Load< Texture2D >("Icons/ic_edit");
 			debugIcon = Resources.Load< Texture2D >("Icons/ic_settings");
 			
-			node.colorSchemeName = PWNodeTypeProvider.GetNodeColor(node.GetType());
+			nodeRef.colorSchemeName = PWNodeTypeProvider.GetNodeColor(nodeRef.GetType());
 		}
 	
 		void RenderHeader()
@@ -29,7 +29,7 @@ namespace PW.Editor
 			Event e = Event.current;
 			
 			//rendering node rename field
-			if (node.renamable)
+			if (nodeRef.renamable)
 			{
 				Vector2	winSize = rect.size;
 				Rect	renameRect = new Rect(0, 0, winSize.x, 18);
@@ -43,7 +43,7 @@ namespace PW.Editor
 				if (windowNameEdit)
 				{
 					GUI.SetNextControlName(renameNodeField);
-					node.name = GUI.TextField(renameRect, node.name, renameNodeTextFieldStyle);
+					nodeRef.name = GUI.TextField(renameRect, nodeRef.name, renameNodeTextFieldStyle);
 	
 					if (e.type == EventType.MouseDown && !renameRect.Contains(e.mousePosition))
 					{

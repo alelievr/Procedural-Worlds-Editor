@@ -26,7 +26,7 @@ namespace PW.Editor
 			bsl = target as BiomeSwitchList;
 			switchDatas = bsl.switchDatas;
 
-			reorderableSwitchDataList = new ReorderableList(switchDatas, typeof(BiomeSwitchData), true, true, true, true);
+			reorderableSwitchDataList = new ReorderableList(bsl.switchDatas, typeof(BiomeSwitchData), true, true, true, true);
 
 			reorderableSwitchDataList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
 			
@@ -37,7 +37,8 @@ namespace PW.Editor
 			};
 
 			reorderableSwitchDataList.onReorderCallback += (ReorderableList l) => {
-				bsl.OnBiomeDataReordered();
+				if (bsl.OnBiomeDataReordered != null)
+					bsl.OnBiomeDataReordered();
 			};
 
 			reorderableSwitchDataList.onAddCallback += (ReorderableList l) => {
@@ -45,14 +46,18 @@ namespace PW.Editor
 				BiomeSwitchData lastSwitch = switchDatas.Last();
 				bsd.min = lastSwitch.min + (lastSwitch.max - lastSwitch.min) / 2;
 				switchDatas.Add(bsd);
-				bsl.OnBiomeDataAdded(bsd);
+
+				if (bsl.OnBiomeDataAdded != null)
+					bsl.OnBiomeDataAdded(bsd);
 			};
 
 			reorderableSwitchDataList.onRemoveCallback += (ReorderableList l) => {
 				if (switchDatas.Count > 1)
 				{
 					switchDatas.RemoveAt(l.index);
-					bsl.OnBiomeDataRemoved();
+
+					if (bsl.OnBiomeDataRemoved != null)
+						bsl.OnBiomeDataRemoved();
 				}
 			};
 
@@ -132,7 +137,7 @@ namespace PW.Editor
 				if (elem.max != oldMax && index + 1 < switchDatas.Count)
 					switchDatas[index + 1].min = elem.max;
 			}
-			if (EditorGUI.EndChangeCheck())
+			if (EditorGUI.EndChangeCheck() && bsl.OnBiomeDataModified != null)
 				bsl.OnBiomeDataModified(elem);
 			EditorGUIUtility.labelWidth = 0;
 

@@ -12,6 +12,7 @@ using PW;
 //Nodes rendering
 public partial class PWGraphEditor
 {
+	[System.NonSerialized]
 	Dictionary< PWNode, PWNodeEditor > nodeEditors = new Dictionary< PWNode, PWNodeEditor >();
 
 	void RenderDecaledNode(int id, PWNode node)

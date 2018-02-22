@@ -41,15 +41,15 @@ namespace PW.Editor
 			int			windowHeaderSize = nodeStyle.border.top + nodeStyle.margin.top;
 			int			windowHorizontalPadding = 15;
 			Rect		inputAcnhorRect = new Rect(windowHorizontalPadding - 13, windowHeaderSize, 120, -1);
-			Rect		outputAnchorRect = new Rect(node.rect.width - windowHorizontalPadding, windowHeaderSize, -120, -1);
+			Rect		outputAnchorRect = new Rect(nodeRef.rect.width - windowHorizontalPadding, windowHeaderSize, -120, -1);
 
-			foreach (var anchorField in node.inputAnchorFields)
+			foreach (var anchorField in nodeRef.inputAnchorFields)
 				RenderAnchorField(anchorField, ref inputAcnhorRect);
-			foreach (var anchorField in node.outputAnchorFields)
+			foreach (var anchorField in nodeRef.outputAnchorFields)
 				RenderAnchorField(anchorField, ref outputAnchorRect);
 			
-			node.viewHeight = (int)Mathf.Max(node.viewHeight, inputAcnhorRect.yMax);
-			node.viewHeight = (int)Mathf.Max(node.viewHeight, outputAnchorRect.yMax);
+			nodeRef.viewHeight = (int)Mathf.Max(nodeRef.viewHeight, inputAcnhorRect.yMax);
+			nodeRef.viewHeight = (int)Mathf.Max(nodeRef.viewHeight, outputAnchorRect.yMax);
 		}
 
 		public void ProcessAnchorEvents()
@@ -59,9 +59,9 @@ namespace PW.Editor
 			oldEventInfos = editorEvents.Clone(oldEventInfos);
 
 			//process events on every anchors:
-			foreach (var anchorField in node.inputAnchorFields)
+			foreach (var anchorField in nodeRef.inputAnchorFields)
 				ProcessEvent(anchorField);
-			foreach (var anchorField in node.outputAnchorFields)
+			foreach (var anchorField in nodeRef.outputAnchorFields)
 				ProcessEvent(anchorField);
 			
 			//link anchor event is we release the mouse with a draggingLink.

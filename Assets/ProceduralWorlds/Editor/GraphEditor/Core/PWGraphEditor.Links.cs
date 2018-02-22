@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Profiling;
@@ -96,12 +97,21 @@ public partial class PWGraphEditor
 			{
 				GUIUtility.hotControl = link.controlId;
 
+				PWNodeLink oldSelectedLink = graph.nodeLinkTable.GetLinks().FirstOrDefault(l => l.selected);
+
+				if (oldSelectedLink != null && OnLinkUnselected != null)
+					OnLinkUnselected(oldSelectedLink);
+
 				//unselect all others links:
 				UnselectAllLinks();
 				UnselectAllNodes();
 
 				link.selected = true;
 				link.highlight = PWLinkHighlight.Selected;
+
+				if (OnLinkSelected != null)
+					OnLinkSelected(link);
+				
 				e.Use();
 			}
 		}
