@@ -116,7 +116,7 @@ namespace PW.Editor
 				nodeRef.viewHeight += 24;
 			
 			RenderAnchors();
-			// ProcessAnchorEvents();
+			ProcessAnchorEvents();
 
 			Profiler.EndSample();
 

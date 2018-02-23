@@ -177,10 +177,6 @@ namespace PW.Editor
 
 			renderRect.y += anchorField.offset;
 
-			// if (nodeRef.GetType() == typeof(PWNodeBiomeSwitch))
-				// if (anchorType == PWAnchorType.Output)
-					// Debug.Log("rendering output anchors: " + anchors.Count + ", hashCode: " + GetHashCode());
-
 			foreach (var anchor in anchorField.anchors)
 			{
 				//render anchor if visible and linkable
@@ -200,6 +196,7 @@ namespace PW.Editor
 
 			if (e.type == EventType.ContextClick)
 				Debug.Log(e.mousePosition);
+			
 			foreach (var anchor in anchorField.anchors)
 				if (anchor.visibility == PWVisibility.Visible && anchor.rect.Contains(e.mousePosition))
 				{

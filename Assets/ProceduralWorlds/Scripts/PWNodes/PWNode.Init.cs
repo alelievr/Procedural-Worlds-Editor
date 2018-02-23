@@ -43,10 +43,10 @@ namespace PW
 					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
 						goto skipThisField;
 					
-					if (attr as System.NonSerializedAttribute != null)
+					if (attr is System.NonSerializedAttribute)
 						hasNonSerialized = true;
 					
-					if (attr as SerializeField != null)
+					if (attr is SerializeField)
 						hasSerializeField = true;
 				}
 

@@ -24,7 +24,7 @@ namespace PW.Editor
 		protected PWGraph					graphRef { get { return nodeRef.graphRef; } }
 		protected PWBiomeGraph				biomeGraphRef { get { return nodeRef.graphRef as PWBiomeGraph; } }
 		protected PWMainGraph				mainGraphRef { get { return nodeRef.graphRef as PWMainGraph; } }
-		protected PWGraphEditorEventInfo	editorEvents { get { return editorEvents; } }
+		protected PWGraphEditorEventInfo	editorEvents { get { return graphRef.editorEvents; } }
 		protected Vector2					graphPan { get { return nodeRef.graphRef.panPosition; } }
 		protected Rect						rect { get { return nodeRef.rect; } }
 		protected PWGraphEditor				graphEditor;
@@ -60,8 +60,6 @@ namespace PW.Editor
 
 			delayedChanges.Clear();
 
-			graphEditor = EditorWindow.focusedWindow as PWGraphEditor;
-
 			//set the PWGUI current nodeRef:
 			PWGUI.SetNode(nodeRef);
 			
@@ -70,6 +68,11 @@ namespace PW.Editor
 
 			BindEvents();
 			OnNodeEnable();
+		}
+
+		public void Initialize(PWGraphEditor graphEditor)
+		{
+			this.graphEditor = graphEditor;
 		}
 
 		void OnGUIEnable()

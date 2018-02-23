@@ -34,7 +34,16 @@ namespace PW.Core
         public List< PWNode >					nodes = new List< PWNode >();
         public List< PWOrderingGroup >			orderingGroups = new List< PWOrderingGroup >();
 		//returns all nodes
-		public IEnumerable< PWNode >			allNodes { get { yield return inputNode; yield return outputNode; foreach (var node in nodes) yield return node; } }
+		public IEnumerable< PWNode >			allNodes
+		{
+			get
+			{
+				yield return inputNode;
+				yield return outputNode;
+				foreach (var node in nodes)
+					yield return node;
+			}
+		}
 		public PWGraphType						graphType;
 
 
@@ -353,7 +362,11 @@ namespace PW.Core
 	#region Events handlers
 
 		//retarget link and node events to GraphStructure event
-		void		LinkPostAddedCallback(PWNodeLink link) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
+		void		LinkPostAddedCallback(PWNodeLink link)
+		{
+			if (OnGraphStructureChanged != null)
+				OnGraphStructureChanged();
+		}
 		void		LinkPostRemovedCallback() { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
 		void		NodeCountChangedCallback(PWNode n) { if (OnGraphStructureChanged != null) OnGraphStructureChanged(); }
 

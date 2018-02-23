@@ -43,10 +43,8 @@ namespace PW.Node
 		{
 			samplerNames = BiomeSamplerName.GetNames().ToArray();
 			samplerName = samplerNames[selectedBiomeSamplerName];
-			
-			UpdateSwitchMode();
 
-			CheckForBiomeSwitchErrors();
+			UpdateSwitchMode();
 		}
 
 		public void UpdateSwitchMode()
@@ -171,23 +169,23 @@ namespace PW.Node
 			}
 			else
 				currentSampler = ((field == null) ? field3D : field);
+			
+			currentSampler = inputBiome.GetSampler(samplerName);
 
 			//Update switchList values:
 			switchList.UpdateSampler(samplerName, currentSampler);
 		}
 		
-		//TODO: AH
-		/*void ReloadCallback(PWNode from)
+		public void UpdateSwitchList()
 		{
-			//load the new sampler if there it was modified
 			if (inputBiome != null)
 				currentSampler = inputBiome.GetSampler(samplerName);
 
 			UpdateRelativeBounds();
-
+			
 			switchList.UpdateMinMax(relativeMin, relativeMax);
 			switchList.UpdateSampler(samplerName, currentSampler);
-		}*/
+		}
 
 		void AdjustOutputBiomeArraySize()
 		{

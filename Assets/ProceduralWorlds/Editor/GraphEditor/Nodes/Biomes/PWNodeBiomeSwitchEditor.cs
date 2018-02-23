@@ -21,15 +21,41 @@ namespace PW.Editor
 
 			delayedChanges.BindCallback(delayedUpdateKey, (unused) => { NotifyReload(); });
 
-			node.switchList.OnBiomeDataAdded = (unused) => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			node.switchList.OnBiomeDataModified = (unused) => {
-				node.alreadyModified = true;
+			node.switchList.OnBiomeDataAdded = (unused) => {
+				UpdateAnchorCount();
+				UpdateSwitchList();
 				delayedChanges.UpdateValue(delayedUpdateKey, null);
 			};
-			node.switchList.OnBiomeDataRemoved = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
-			node.switchList.OnBiomeDataReordered = () => { delayedChanges.UpdateValue(delayedUpdateKey, null); };
+			node.switchList.OnBiomeDataModified = (unused) => {
+				node.alreadyModified = true;
+				UpdateSwitchList();
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
+			};
+			node.switchList.OnBiomeDataRemoved = () => {
+				UpdateAnchorCount();
+				UpdateSwitchList();
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
+			};
+			node.switchList.OnBiomeDataReordered = () => {
+				UpdateSwitchList();
+				delayedChanges.UpdateValue(delayedUpdateKey, null);
+			};
 
 			switchListDrawer.OnEnable(node.switchList);
+			
+			node.CheckForBiomeSwitchErrors();
+			UpdateSwitchList();
+		}
+
+		void UpdateAnchorCount()
+		{
+			node.SetMultiAnchor("outputBiomes", node.switchList.Count, null);
+		}
+
+		void UpdateSwitchList()
+		{
+			node.UpdateSwitchList();
+			switchListDrawer.UpdateBiomeRepartitionPreview(node.inputBiome);
 		}
 
 		public override void OnNodeGUI()
@@ -64,6 +90,11 @@ namespace PW.Editor
 			}
 
 			switchListDrawer.OnGUI(node.inputBiome);
+		}
+
+		public override void OnNodePreProcess()
+		{
+			UpdateSwitchList();
 		}
 
 	}

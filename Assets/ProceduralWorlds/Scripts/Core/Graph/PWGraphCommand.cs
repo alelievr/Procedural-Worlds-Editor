@@ -99,7 +99,7 @@ namespace PW.Core
 
 		public override bool Equals(object cmd)
 		{
-			if (cmd as PWGraphCommand == null)
+			if (!(cmd is PWGraphCommand))
 				return false;
 			
 			return ((cmd as PWGraphCommand) == this);

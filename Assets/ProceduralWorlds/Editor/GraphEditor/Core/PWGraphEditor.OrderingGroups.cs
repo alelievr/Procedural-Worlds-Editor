@@ -121,22 +121,28 @@ public partial class PWGraphEditor
 		CreateAnchorRectCallabck(orderingGroup, //top left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
-			() => {orderGroupRect.yMin += e.delta.y; orderGroupRect.xMin += e.delta.x;}
+			() => { orderGroupRect.min += e.delta; }
 		);
 		CreateAnchorRectCallabck(orderingGroup, //top right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
-			() => {orderGroupRect.yMin += e.delta.y; orderGroupRect.xMax += e.delta.x;}
+			() => {
+				orderGroupRect.yMin += e.delta.y;
+				orderGroupRect.xMax += e.delta.x;
+			}
 		);
 		CreateAnchorRectCallabck(orderingGroup, //down left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
-			() => {orderGroupRect.yMax += e.delta.y; orderGroupRect.xMin += e.delta.x;}
+			() => { orderGroupRect.max += e.delta; }
 		);
 		CreateAnchorRectCallabck(orderingGroup, //down right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
-			() => {orderGroupRect.yMax += e.delta.y; orderGroupRect.xMax += e.delta.x;}
+			() => {
+				orderGroupRect.yMax += e.delta.y;
+				orderGroupRect.xMax += e.delta.x;
+			}
 		);
 
 		if (e.rawType == EventType.MouseUp)

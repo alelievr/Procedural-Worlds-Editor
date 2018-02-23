@@ -15,8 +15,8 @@ namespace PW.Editor
 		{
 			var nodes = graphRef.GetNodeChildsRecursive(nodeRef);
 
-			foreach (var editorKP in openedNodeEdiors)
-				editorKP.Value.OnNodePreProcess();
+			foreach (var node in nodes)
+				openedNodeEdiors[node].OnNodePreProcess();
 				
 			//add our node to the process pass
 			nodes.Add(nodeRef);

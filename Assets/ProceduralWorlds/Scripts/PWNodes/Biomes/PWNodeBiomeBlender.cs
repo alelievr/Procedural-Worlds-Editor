@@ -22,9 +22,6 @@ namespace PW.Node
 
 		public bool				biomeCoverageRecap = false;
 
-		[System.NonSerialized]
-		public bool				updateBiomeMap = true;
-
 		public override void OnNodeCreation()
 		{
 			name = "Biome blender";
@@ -121,24 +118,9 @@ namespace PW.Node
 		public void FillBiomeMap(BiomeData biomeData)
 		{
 			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendList, biomeBlendPercent);
-			updateBiomeMap = true;
 		}
-
-		/*void OnReloadCallback(PWNode from)
-		{
-			BuildBiomeSwitchGraph();
-			
-			var biomeData = GetBiomeData();
-			
-			//if the reload does not comes from the editor
-			if (from != null)
-			{
-				FillBiomeMap(biomeData);
-				updateBiomeMap = true;
-			}
-		}*/
 		
-		void BuildBiomeSwitchGraph()
+		public void BuildBiomeSwitchGraph()
 		{
 			BiomeData biomeData = GetBiomeData();
 

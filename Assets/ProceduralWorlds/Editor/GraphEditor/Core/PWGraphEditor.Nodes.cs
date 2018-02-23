@@ -34,7 +34,10 @@ public partial class PWGraphEditor
 		Rect decaledRect;
 
 		if (!nodeEditors.ContainsKey(node))
+		{
 			nodeEditors[node] = Editor.CreateEditor(node) as PWNodeEditor;
+			nodeEditors[node].Initialize(this);
+		}
 		
 		decaledRect = GUILayout.Window(id, node.rect, (i) => {
 			nodeEditors[node].OnInspectorGUI();

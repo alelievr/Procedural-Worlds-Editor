@@ -14,7 +14,10 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeBlender	node;
 
-		string				updateBiomeMapKey = "BiomeBlender";
+		const string				updateBiomeMapKey = "BiomeBlender";
+
+		[System.NonSerialized]
+		bool	updateBiomeMap = false;
 
 		public override void OnNodeEnable()
 		{
@@ -24,7 +27,7 @@ namespace PW.Editor
 				BiomeData data = node.GetBiomeData();
 
 				node.FillBiomeMap(data);
-				node.updateBiomeMap = true;
+				updateBiomeMap = true;
 
 				NotifyReload();
 			});
@@ -65,10 +68,10 @@ namespace PW.Editor
 			else
 				EditorGUILayout.LabelField("no biome data");
 			
-			if (node.updateBiomeMap)
+			if (updateBiomeMap)
 			{
 				PWGUI.SetUpdateForField(1, true);
-				node.updateBiomeMap = false;
+				updateBiomeMap = false;
 			}
 
 			var biomeCoverage = biomeData.biomeSwitchGraph.GetBiomeCoverage();
@@ -93,9 +96,11 @@ namespace PW.Editor
 			}
 		}
 
-		public override void OnNodeDisable()
+		public override void OnNodePreProcess()
 		{
-			
+			node.BuildBiomeSwitchGraph();
+
+			node.FillBiomeMap(node.GetBiomeData());
 		}
 	}
 }

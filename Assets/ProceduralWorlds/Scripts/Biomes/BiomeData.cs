@@ -100,7 +100,7 @@ namespace PW.Biomator
 			}
 
 			biomeSamplerNameMap[key].dataRef = value;
-			biomeSamplerNameMap[key].is3D = (value as Sampler3D != null);
+			biomeSamplerNameMap[key].is3D = value is Sampler3D;
 		}
 		
 		public BiomeDataSampler GetDataSampler(int index)
