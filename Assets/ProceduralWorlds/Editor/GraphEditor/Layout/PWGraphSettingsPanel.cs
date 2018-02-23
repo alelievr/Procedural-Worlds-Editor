@@ -10,7 +10,7 @@ using PW;
 namespace PW.Editor
 {
 	[System.Serializable]
-	public class PWGraphSettingsBar
+	public class PWGraphSettingsPanel : PWGraphPanel
 	{
 		//Graph reference:
 		PWGraph					graph;
@@ -18,23 +18,16 @@ namespace PW.Editor
 		//Settings bar datas:
 		Vector2					scrollbarPosition;
 		[SerializeField]
-		PWGraphTerrainPreview	terrainPreview = new PWGraphTerrainPreview();
-		
-		DelayedChanges			delayedChanges = new DelayedChanges();
+		PWTerrainPreviewPanel	terrainPreview = new PWTerrainPreviewPanel();
 
 		public Action< Rect >	onDraw;
 
 		readonly string			graphProcessKey = "UpdateGraphProperties";
 
 		[SerializeField]
-		PWGraphTerrainPreviewType	previewType = PWGraphTerrainPreviewType.TopDownPlanarView;
+		PWTerrainPreviewType	previewType = PWTerrainPreviewType.TopDownPlanarView;
 
-		public PWGraphSettingsBar(PWGraph graph)
-		{
-			this.graph = graph;
-			delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); });
-			onDraw = DrawDefault;
-		}
+			// delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); });
 
 		public void LoadStyles()
 		{
@@ -84,21 +77,21 @@ namespace PW.Editor
 			delayedChanges.Update();
 		}
 		
-		PWGraphTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
+		PWTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
 		{
 			switch (terrainType)
 			{
 				case PWGraphTerrainType.SideView2D:
-					return PWGraphTerrainPreviewType.SideView;
+					return PWTerrainPreviewType.SideView;
 				case PWGraphTerrainType.TopDown2D:
 				case PWGraphTerrainType.Planar3D:
-					return PWGraphTerrainPreviewType.TopDownPlanarView;
+					return PWTerrainPreviewType.TopDownPlanarView;
 				// case PWGraphTerrainType.Spherical3D:
-					// return PWGraphTerrainPreviewType.TopDownSphericalView;
+					// return PWTerrainPreviewType.TopDownSphericalView;
 				// case PWGraphTerrainType.Cubic3D:
-					// return PWGraphTerrainPreviewType.TopDownCubicView;
+					// return PWTerrainPreviewType.TopDownCubicView;
 				default:
-					return PWGraphTerrainPreviewType.TopDownPlanarView;
+					return PWTerrainPreviewType.TopDownPlanarView;
 			}
 		}
 	
@@ -114,7 +107,7 @@ namespace PW.Editor
 			EditorGUILayout.EndVertical();
 		}
 
-		public void Draw(Rect rect)
+		public override void Draw(Rect rect)
 		{
 			Profiler.BeginSample("[PW] Rendering settings bar");
 
@@ -123,7 +116,7 @@ namespace PW.Editor
 			//add the texturePreviewRect size:
 			scrollbarPosition = EditorGUILayout.BeginScrollView(scrollbarPosition, GUILayout.ExpandWidth(true));
 			{
-				onDraw(rect);
+				base.Draw(rect);
 			}
 			EditorGUILayout.EndScrollView();
 			
@@ -134,13 +127,13 @@ namespace PW.Editor
 			Profiler.EndSample();
 		}
 
-		public void DrawDefault(Rect currentRect)
+		public override void DrawDefault(Rect currentRect)
 		{
 			DrawTerrainPreview(currentRect);
 
 			EditorGUILayout.BeginHorizontal();
 			{
-				previewType = (PWGraphTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
+				previewType = (PWTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
 			}
 			EditorGUILayout.EndHorizontal();
 			

@@ -17,9 +17,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	[SerializeField]
 	PWGraphLayout			layout = new PWGraphLayout();
 	
-	//terrain manager to configure terrain generation / preview
-	PWGraphTerrainManager	terrainManager;
-	
 	//events fields
 	Vector2					lastMousePosition;
 	[System.NonSerialized]
@@ -58,9 +55,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		OnWindowResize += WindowResizeCallback;
 		OnGraphChanged += GraphChangedCallback;
 		
-		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
-		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
+		// layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
+		// layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
+		// layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
 
 		delayedChanges.BindCallback(graphProcessKey, (unsued) => {
 			graph.Process();
@@ -123,10 +120,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	{
 		if (newGraph == null)
 			return ;
-		
-		terrainManager = new PWGraphTerrainManager(graph);
 
-		settingsBar.onDraw = (rect) =>
+		/*settingsBar.onDraw = (rect) =>
 		{
 			settingsBar.DrawDefault(rect);
 			
@@ -158,12 +153,15 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			}
 			PWGUI.EndFade();
 
-			/*if (PWGUI.BeginFade("Geological settings", ref geologicalSettingsFoldout, false))
-			{
-				mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
-				mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
-			}
-			PWGUI.EndFade();*/
+			//Activate this when the geological update will be ready
+			#if false
+				if (PWGUI.BeginFade("Geological settings", ref geologicalSettingsFoldout, false))
+				{
+					mainGraph.geologicTerrainStep = graph.PWGUI.Slider("Geological terrain step: ", mainGraph.geologicTerrainStep, 4, 64);
+					mainGraph.geologicDistanceCheck = graph.PWGUI.IntSlider("Geological search distance: ", mainGraph.geologicDistanceCheck, 1, 4);
+				}
+				PWGUI.EndFade();
+			#endif
 
 			if (PWGUI.BeginFade("Chunk settings"))
 			{
@@ -191,7 +189,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(graphProcessKey);
-		};
+		};*/
 	}
 
 	void LoadStyles()

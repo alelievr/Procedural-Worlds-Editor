@@ -10,7 +10,7 @@ using System;
 
 namespace PW.Editor
 {
-	public class PWGraphNodeSelectorBar
+	public class PWGraphNodeSelectorPanel : PWGraphPanel
 	{
 		//node selector datas
 		Vector2 	selectorScrollPosition;
@@ -40,12 +40,6 @@ namespace PW.Editor
 
 		//node selector callbacks
 		public Action< Type > OnNodeClicked;
-
-		public PWGraphNodeSelectorBar(PWGraph graph)
-		{
-			this.graph = graph;
-			OnNodeClicked = DefaultNodeClickAction;
-		}
 
 		public void LoadStyles()
 		{
@@ -136,6 +130,11 @@ namespace PW.Editor
 			}
 
 			Profiler.EndSample();
+		}
+
+		public override void DrawDefault(Rect rect)
+		{
+			
 		}
 	}
 }

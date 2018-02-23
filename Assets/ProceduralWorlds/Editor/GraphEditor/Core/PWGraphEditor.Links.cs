@@ -213,7 +213,9 @@ public partial class PWGraphEditor
 		Undo.RecordObject(graph, "Link started");
 		graph.editorEvents.startedLinkAnchor = editorEvents.mouseOverAnchor;
 		graph.editorEvents.isDraggingLink = true;
-		OnLinkStartDragged(editorEvents.startedLinkAnchor);
+		
+		if (OnLinkStartDragged != null)
+			OnLinkStartDragged(editorEvents.startedLinkAnchor);
 	}
 
 	void StopDragLink(bool linked)
@@ -224,7 +226,8 @@ public partial class PWGraphEditor
 		if (!linked)
 			OnLinkCanceled();
 		
-		OnLinkStopDragged();
+		if (OnLinkStopDragged != null)
+			OnLinkStopDragged();
 	}
 
 	void DeleteAllAnchorLinks()

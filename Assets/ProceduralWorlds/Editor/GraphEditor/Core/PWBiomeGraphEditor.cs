@@ -52,9 +52,10 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 		LoadGraphList();
 		
-		layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
-		layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
+		//TODO: layout
+		// layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
+		// layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
+		// layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
 	}
 
 	void LoadGraphList()
@@ -71,12 +72,12 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		if (graph == null)
 			return ;
 		
-		settingsBar.onDraw = DrawBiomeSettingsBar;
+		// settingsBar.onDraw = DrawBiomeSettingsBar;
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)
 	{
-		settingsBar.DrawTerrainPreview(rect);
+		// settingsBar.DrawTerrainPreview(rect);
 
 		GUI.SetNextControlName("PWName");
 		graph.name = EditorGUILayout.TextField("Biome name: ", graph.name);

@@ -8,7 +8,7 @@ using System;
 
 namespace PW.Editor
 {
-	public class PWGraphOptionBar
+	public class PWGraphOptionPanel : PWGraphPanel
 	{
 		//graph
 		PWGraph				graph;
@@ -24,11 +24,6 @@ namespace PW.Editor
 
 		public Action< Rect >	onDrawAdditionalOptions;
 
-		public PWGraphOptionBar(PWGraph graph)
-		{
-			this.graph = graph;
-		}
-
 		public void LoadStyles()
 		{
 			rencenterIconTexture = Resources.Load< Texture2D >("Icons/ic_recenter");
@@ -39,7 +34,7 @@ namespace PW.Editor
 			navBarBackgroundStyle = new GUIStyle("NavBarBackground");
 		}
 		
-		public void DrawOptionBar(Rect graphRect)
+		public override void DrawDefault(Rect graphRect)
 		{
 			Event	e = Event.current;
 			bool 	saveGraph = false;

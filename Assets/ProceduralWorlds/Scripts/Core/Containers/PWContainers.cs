@@ -18,18 +18,9 @@ namespace PW.Core
 		public MaterializerType		materializerType;
 
 		public Sampler				terrain;
-		// public Sampler				waterHeight;
-		// public Sampler				wetnessMap;
-		// public Sampler				temperatureMap;
-		// public Sampler				windMap;
-		// public Sampler				lightingMap;
-		// public Sampler				airMap;
 
 		public BiomeMap2D			biomeMap;
 		public BiomeMap3D			biomeMap3D;
-
-		// [System.NonSerialized]
-		// public Dictionary< short, BiomeSurfaces > biomeTexturing;
 
 		public override string ToString()
 		{
@@ -187,8 +178,6 @@ namespace PW.Core
 		public Vector2			windowPosition;
 		public PWGUIFieldType	fieldType;
 
-		[System.NonSerialized]
-		public object	oldState = null;
 		[System.NonSerialized]
 		public bool		firstRender = true;
 

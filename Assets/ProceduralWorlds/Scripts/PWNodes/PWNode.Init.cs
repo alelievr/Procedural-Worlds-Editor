@@ -40,7 +40,7 @@ namespace PW
 
 				foreach (var attr in attrs)
 				{
-					if (attr as PWInputAttribute != null || attr as PWOutputAttribute != null)
+					if (attr is PWInputAttribute || attr is PWOutputAttribute)
 						goto skipThisField;
 					
 					if (attr is System.NonSerializedAttribute)

@@ -12,6 +12,8 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeGraphInput	node;
 
+		BiomeDataDrawer					biomeDataDrawer = new BiomeDataDrawer();
+
 		public override void OnNodeEnable()
 		{
 			node = target as PWNodeBiomeGraphInput;
@@ -38,9 +40,12 @@ namespace PW.Editor
 			if (node.previewGraph == null)
 				EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
 			
-			//TODO: drawer
-			// if (outputPartialBiome != null)
-				// BiomeUtils.DrawBiomeInfos(rect, outputPartialBiome.biomeDataReference);
+			if (node.outputPartialBiome != null)
+			{
+				if (!biomeDataDrawer.isEnabled)
+					biomeDataDrawer.OnEnable(node.outputPartialBiome);
+				biomeDataDrawer.OnGUI(rect);
+			}
 			
 			node.calls = 0;
 		}

@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace PW.Editor
 {
-	public enum PWGraphTerrainPreviewType
+	public enum PWTerrainPreviewType
 	{
 		SideView,
 		TopDownPlanarView,
@@ -19,7 +19,7 @@ namespace PW.Editor
 	}
 
 	[System.Serializable]
-	public class PWGraphTerrainPreview
+	public class PWTerrainPreviewPanel : PWGraphPanel
 	{
 		//preview fields
 		GameObject				previewScene;
@@ -28,7 +28,7 @@ namespace PW.Editor
 		static RenderTexture	previewCameraRenderTexture;
 
 		[SerializeField]
-		PWGraphTerrainPreviewType	loadedPreviewType;
+		PWTerrainPreviewType	loadedPreviewType;
 
 		Event					e { get { return Event.current; } }
 
@@ -37,14 +37,14 @@ namespace PW.Editor
 		[System.NonSerialized]
 		bool					first = true;
 
-		Dictionary< PWGraphTerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< PWGraphTerrainPreviewType, string >()
+		Dictionary< PWTerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< PWTerrainPreviewType, string >()
 		{
-			{ PWGraphTerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
-			{ PWGraphTerrainPreviewType.SideView, PWConstants.previewSideViewPrefabName},
-			{ PWGraphTerrainPreviewType.FreeCamera, PWConstants.previewFree3DPrefabName},
+			{ PWTerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
+			{ PWTerrainPreviewType.SideView, PWConstants.previewSideViewPrefabName},
+			{ PWTerrainPreviewType.FreeCamera, PWConstants.previewFree3DPrefabName},
 		};
 
-		void ReloadPreviewPrefab(PWGraphTerrainPreviewType newPreviewType)
+		void ReloadPreviewPrefab(PWTerrainPreviewType newPreviewType)
 		{
 			string		previewObjectName = previewTypeToPrefabNames[newPreviewType];
 
@@ -61,7 +61,7 @@ namespace PW.Editor
 			loadedPreviewType = newPreviewType;
 		}
 
-		void UpdatePreviewScene(PWGraphTerrainPreviewType previewType)
+		void UpdatePreviewScene(PWTerrainPreviewType previewType)
 		{
 			//if preview scene was destroyed or preview type was changed, reload preview game objects
 			if (previewScene == null || loadedPreviewType != previewType)
@@ -76,7 +76,7 @@ namespace PW.Editor
 			}
 		}
 
-		public void DrawTerrainPreview(Rect previewRect, PWGraphTerrainPreviewType previewType)
+		public void DrawTerrainPreview(Rect previewRect, PWTerrainPreviewType previewType)
 		{
 			Profiler.BeginSample("[PW] Rendering terrain preview");
 
@@ -107,14 +107,19 @@ namespace PW.Editor
 				previewCamera.transform.position += new Vector3(move.x, 0, move.y);
 
 				//move the terrain materializer so it generate terrain around the camera
-				if (PWGraphTerrainManager.terrainReference != null)
-					PWGraphTerrainManager.terrainReference.position = previewCamera.transform.position;
+				if (PWTerrainSettingsPanel.terrainReference != null)
+					PWTerrainSettingsPanel.terrainReference.position = previewCamera.transform.position;
 				e.Use();
 			}
 
 			first = false;
 
 			Profiler.EndSample();
+		}
+
+		public override void DrawDefault(Rect rect)
+		{
+			
 		}
 		
 	}

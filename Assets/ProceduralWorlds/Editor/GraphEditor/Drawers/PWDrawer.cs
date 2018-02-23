@@ -11,11 +11,15 @@ namespace PW.Editor
 		protected PWGUIManager		PWGUI = new PWGUIManager();
 
 		protected object			target;
+		
+		[System.NonSerialized]
+		public bool					isEnabled = false;
 
 		public void OnEnable(object target)
 		{
 			this.target = target;
 			OnEnable();
+			isEnabled = true;
 		}
 
 		public abstract void OnEnable();

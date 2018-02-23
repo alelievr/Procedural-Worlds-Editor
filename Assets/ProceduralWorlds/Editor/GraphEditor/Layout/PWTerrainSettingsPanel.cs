@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEditor;
 using PW.Core;
 using System;
+using PW;
 
 namespace PW.Editor
 {
-	public class PWGraphTerrainManager
+	public class PWTerrainSettingsPanel : PWGraphPanel
 	{
 		//terrain base game object reference
 		public static PWTerrainGenericBase	terrainReference;
@@ -15,7 +16,7 @@ namespace PW.Editor
 		//Graph reference
 		PWGraph							graph;
 
-		PWTerrainGenericBase		terrain;
+		PWTerrainGenericBase			terrain;
 
 		Event							e { get { return Event.current; } }
 
@@ -23,12 +24,6 @@ namespace PW.Editor
 		{
 			{MaterializerType.SquareTileMap, typeof(PWTopDown2DTerrainSquare)},
 		};
-
-
-		public PWGraphTerrainManager(PWGraph graph)
-		{
-			this.graph = graph;
-		}
 
 		public void DrawTerrainSettings(Rect settingsRect, MaterializerType type)
 		{
@@ -63,6 +58,11 @@ namespace PW.Editor
 					ReloadChunks();
 			}
 			EditorGUILayout.EndHorizontal();
+		}
+
+		public override void DrawDefault(Rect rect)
+		{
+			
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them

@@ -17,6 +17,8 @@ namespace PW.Editor
 		[System.NonSerialized]
 		bool						firstRender = false;
 
+		BiomeDataDrawer				biomeDataDrawer = new BiomeDataDrawer();
+
 		public override void OnNodeEnable()
 		{
 			node = target as PWNodeDebugInfo;
@@ -54,11 +56,13 @@ namespace PW.Editor
 					PWGUI.Sampler2DPreview(node.obj as Sampler2D);
 				else if (objType == typeof(Sampler3D))
 				{
+					//TODO: 3D sampler preview
 				}
 				else if (objType == typeof(BiomeData))
 				{
-					//TODO: Drawer
-					// BiomeUtils.DrawBiomeInfos(rect, node.obj as BiomeData);
+					if (!biomeDataDrawer.isEnabled)
+						biomeDataDrawer.OnEnable(node.obj as BiomeData);
+					biomeDataDrawer.OnGUI(rect);
 				}
 			}
 			else

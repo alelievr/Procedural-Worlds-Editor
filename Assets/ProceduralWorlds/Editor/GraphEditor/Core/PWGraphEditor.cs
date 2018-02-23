@@ -44,15 +44,17 @@ public partial class PWGraphEditor : PWEditorWindow
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
 
 
-	//Layout additional windows
-	protected PWGraphOptionBar			optionBar;
-	protected PWGraphNodeSelectorBar	nodeSelectorBar;
-	protected PWGraphSettingsBar		settingsBar;
-
+	//Panels to load when the graph editor is opened (pannel common to eventy PWGraphEditors)
+	protected List< PWGraphPanel >	panels = new List< PWGraphPanel >
+	{
+		new PWGraphOptionPanel(),
+		new PWGraphNodeSelectorPanel(),
+		new PWGraphSettingsPanel(),
+	};
 
 	//public delegates:
-	public delegate void				NodeAction(PWNode node);
-	public delegate void				LinkAction(PWNodeLink link);
+	public delegate void			NodeAction(PWNode node);
+	public delegate void			LinkAction(PWNodeLink link);
 
 	
 	//fired whe the user resize the window (old window size in parameter)
@@ -100,6 +102,10 @@ public partial class PWGraphEditor : PWEditorWindow
 		eventMasks.Clear();
 
 		LoadAssets();
+		
+		//Initialize graph panels
+		foreach (var panel in panels)
+			panel.Initialize(this);
 
 		Profiler.EndSample();
 	}
@@ -230,14 +236,6 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (!styleLoaded)
 			LoadStyles();
-
-		//update graph in views:
-		optionBar = new PWGraphOptionBar(graph);
-		nodeSelectorBar = new PWGraphNodeSelectorBar(graph);
-		settingsBar = new PWGraphSettingsBar(graph);
-		optionBar.LoadStyles();
-		nodeSelectorBar.LoadStyles();
-		settingsBar.LoadStyles();
 
 		if (!graph.initialized)
 		{
