@@ -12,7 +12,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 {
 	
 	[SerializeField]
-	PWGraphLayout			layout = new PWGraphLayout();
+	PWLayout				layout;
 
 	List< PWBiomeGraph >	biomeGraphs = new List< PWBiomeGraph >();
 	ReorderableList			biomeGraphList;
@@ -31,10 +31,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		base.OnEnable();
 		
-		OnWindowResize += WindowResizeCallback;
 		OnGraphChanged += GraphLoadedCallback;
-
-		layout.LoadStyles(position);
 
 		biomeGraphList = new ReorderableList(biomeGraphs, typeof(PWBiomeGraph), false, true, false, false);
 
@@ -49,13 +46,12 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		biomeGraphList.drawHeaderCallback = (rect) => {
 			EditorGUI.LabelField(rect, "Biome list");
 		};
+		
+		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
 
 		LoadGraphList();
 		
-		//TODO: layout
-		// layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
-		// layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		// layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
+		layout.DrawLayout();
 	}
 
 	void LoadGraphList()
@@ -118,17 +114,11 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 		layout.Render2ResizablePanel(this, position);
 	}
-	
-	void WindowResizeCallback(Vector2 oldSize)
-	{
-		layout.ResizeWindow(oldSize, position);
-	}
 
 	public override void OnDisable()
 	{
 		base.OnDisable();
 		
-		OnWindowResize -= WindowResizeCallback;
 		OnGraphChanged -= GraphLoadedCallback;
 	}
 

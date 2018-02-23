@@ -45,7 +45,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 
 	//Panels to load when the graph editor is opened (pannel common to eventy PWGraphEditors)
-	protected List< PWGraphPanel >	panels = new List< PWGraphPanel >
+	protected List< PWLayoutPanel >	panels = new List< PWLayoutPanel >
 	{
 		new PWGraphOptionPanel(),
 		new PWGraphNodeSelectorPanel(),

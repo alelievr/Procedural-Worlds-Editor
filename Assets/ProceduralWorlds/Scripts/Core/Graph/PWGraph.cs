@@ -84,6 +84,7 @@ namespace PW.Core
 		[NonSerialized]
 		public PWGraphEditorEventInfo			editorEvents = new PWGraphEditorEventInfo();
 		public bool								presetChoosed = false;
+		public PWLayoutSettings					layoutSettings = new PWLayoutSettings();
 
 
         //input and output nodes:

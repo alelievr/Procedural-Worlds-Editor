@@ -10,7 +10,7 @@ using System;
 
 namespace PW.Editor
 {
-	public class PWGraphNodeSelectorPanel : PWGraphPanel
+	public class PWGraphNodeSelectorPanel : PWLayoutPanel
 	{
 		//node selector datas
 		Vector2 	selectorScrollPosition;

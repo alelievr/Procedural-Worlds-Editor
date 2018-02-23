@@ -216,4 +216,28 @@ public partial class PWGraphEditor
 		if (OnNodeUnselected != null)
 			OnNodeUnselected(node);
 	}
+
+	public void Reload()
+	{
+		if (OnForceReload != null)
+			OnForceReload();
+		
+		//send preProcess event
+		foreach (var nodeEditorKP in nodeEditors)
+			nodeEditorKP.Value.OnNodePreProcess();
+		
+		graph.Process();
+
+		//send postProcess event
+		foreach (var nodeEditorKP in nodeEditors)
+			nodeEditorKP.Value.OnNodePostProcess();
+	}
+
+	public void ReloadOnce()
+	{
+		if (OnForceReloadOnce != null)
+			OnForceReloadOnce();
+			
+		graph.ProcessOnce();
+	}
 }

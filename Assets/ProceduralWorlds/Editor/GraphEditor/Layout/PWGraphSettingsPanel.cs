@@ -10,11 +10,8 @@ using PW;
 namespace PW.Editor
 {
 	[System.Serializable]
-	public class PWGraphSettingsPanel : PWGraphPanel
+	public class PWGraphSettingsPanel : PWLayoutPanel
 	{
-		//Graph reference:
-		PWGraph					graph;
-
 		//Settings bar datas:
 		Vector2					scrollbarPosition;
 		[SerializeField]
@@ -22,15 +19,14 @@ namespace PW.Editor
 
 		public Action< Rect >	onDraw;
 
-		readonly string			graphProcessKey = "UpdateGraphProperties";
+		const string			graphProcessKey = "UpdateGraphProperties";
 
 		[SerializeField]
 		PWTerrainPreviewType	previewType = PWTerrainPreviewType.TopDownPlanarView;
 
-			// delayedChanges.BindCallback(graphProcessKey, (unused) => { graph.Process(); });
-
-		public void LoadStyles()
+		public override void OnEnable()
 		{
+			delayedChanges.BindCallback(graphProcessKey, (unused) => { graphRef.Process(); });
 		}
 
 		void DrawGraphSettings(Rect currentRect)
@@ -39,31 +35,18 @@ namespace PW.Editor
 			EditorGUILayout.Space();
 
 			GUI.SetNextControlName("PWName");
-			graph.name = EditorGUILayout.TextField("ProceduralWorld name: ", graph.name);
+			graphRef.name = EditorGUILayout.TextField("ProceduralWorld name: ", graphRef.name);
 
 			EditorGUILayout.Separator();
-
-			//No need for the moment
-			/*if (GUILayout.Button("Cleanup graphs"))
-			{
-				PWGraph[] graphs = Resources.FindObjectsOfTypeAll< PWGraph >();
-
-				foreach (var graph in graphs)
-					if (graph.objectName.Contains("(Clone)"))
-					{
-						Debug.Log("destroyed graph: " + graph);
-						GameObject.DestroyImmediate(graph, false);
-					}
-			}*/
 
 			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();
 			{
 				//TODO: impement add-on like pattern
-				// if (GUILayout.Button("Force reload"))
-					// graph.RaiseOnForceReload();
-				// if (GUILayout.Button("Force reload Once"))
-					// graph.RaiseOnForceReloadOnce();
+				if (GUILayout.Button("Force reload"))
+					graphEditor.Reload();
+				if (GUILayout.Button("Force reload Once"))
+					graphEditor.ReloadOnce();
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -72,9 +55,6 @@ namespace PW.Editor
 				&& !GUILayoutUtility.GetLastRect().Contains(e.mousePosition)
 				&& GUI.GetNameOfFocusedControl() == "PWName")
 				GUI.FocusControl(null);
-
-			//update the delayed changes
-			delayedChanges.Update();
 		}
 		
 		PWTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
@@ -137,7 +117,7 @@ namespace PW.Editor
 			}
 			EditorGUILayout.EndHorizontal();
 			
-			//draw main graph settings
+			//draw main graphRef settings
 			EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 			{
 				DrawGraphSettings(currentRect);

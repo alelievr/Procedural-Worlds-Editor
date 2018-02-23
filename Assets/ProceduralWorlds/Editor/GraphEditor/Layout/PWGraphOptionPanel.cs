@@ -8,12 +8,8 @@ using System;
 
 namespace PW.Editor
 {
-	public class PWGraphOptionPanel : PWGraphPanel
+	public class PWGraphOptionPanel : PWLayoutPanel
 	{
-		//graph
-		PWGraph				graph;
-
-
 		//option bar styles:
 		GUIStyle			navBarBackgroundStyle;
 		
@@ -24,7 +20,7 @@ namespace PW.Editor
 
 		public Action< Rect >	onDrawAdditionalOptions;
 
-		public void LoadStyles()
+		public override void OnLoadStyle()
 		{
 			rencenterIconTexture = Resources.Load< Texture2D >("Icons/ic_recenter");
 			fileIconTexture = Resources.Load< Texture2D >("Icons/ic_file");
@@ -48,11 +44,11 @@ namespace PW.Editor
 				{
 					//recenter the graph
 					if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-						graph.panPosition = graphRect.center;
+						graphRef.panPosition = graphRect.center;
 					
 					//ping the current PW object in the project window
 					if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
-						EditorGUIUtility.PingObject(graph);
+						EditorGUIUtility.PingObject(graphRef);
 
 					if (onDrawAdditionalOptions != null)
 						onDrawAdditionalOptions(optionBarRect);
@@ -70,21 +66,21 @@ namespace PW.Editor
 			Profiler.EndSample();
 
 			if (saveGraph)
-				SaveGraph(graph);
+				SaveGraph();
 		}
 
-		void SaveGraph(PWGraph graph)
+		void SaveGraph()
 		{
 			string defaultPath = Application.dataPath + "/ProceduralWorlds/Editor/Resources/GraphPresets/";
 
-			string path = EditorUtility.SaveFilePanel("Save " + graph.name, defaultPath, graph.name, "txt");
+			string path = EditorUtility.SaveFilePanel("Save " + graphRef.name, defaultPath, graphRef.name, "txt");
 
 			if (String.IsNullOrEmpty(path))
 				return ;
 
-			graph.Export(path);
+			graphRef.Export(path);
 
-			//if the exported graph is inside the asset folder
+			//if the exported graphRef is inside the asset folder
 			if (path.Contains(Application.dataPath))
 			{
 				string relativePath = "Assets/" + path.Substring(Application.dataPath.Length + 1);

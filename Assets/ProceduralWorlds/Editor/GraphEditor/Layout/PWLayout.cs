@@ -8,35 +8,50 @@ using Random = UnityEngine.Random;
 
 namespace PW.Editor
 {
-	[System.Serializable]
-	public class PWGraphLayout
+	public class PWLayout
 	{
-		[SerializeField]
-		HorizontalSplitView				h1 = new HorizontalSplitView();
-		[SerializeField]
-		HorizontalSplitView				h2 = new HorizontalSplitView();
-
-		//Styles:
-		Color		resizeHandleColor;
+		List< IPWLayoutSeparator >	layoutSeparators = new List< IPWLayoutSeparator >();
+		List< PWLayoutPanel >		layoutPanels = new List< PWLayoutPanel >();
 
 		Event		e { get { return Event.current; } }
 
 		public delegate void	DrawPanelDelegate(Rect panelRect);
 
-		public DrawPanelDelegate	onDrawSettingsBar;
-		public DrawPanelDelegate	onDrawOptionBar;
-		public DrawPanelDelegate	onDrawNodeSelector;
-
-		public void LoadStyles(Rect position)
+		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
+		public PWLayout(PWGraphEditor graphEditor)
 		{
-			resizeHandleColor = EditorGUIUtility.isProSkin
-				? new Color32(56, 56, 56, 255)
-				: new Color32(130, 130, 130, 255);
+
+		}
+
+		public void DrawLayout()
+		{
+
+		}
+
+		public void AddVerticalResizablePanel(PWGraphEditor graphEditor)
+		{
+			layoutSeparators.Add(new ResizableSplitView(true));
+		}
+
+		public void AddHorizontalResizablePanel(PWGraphEditor graphEditor)
+		{
+			layoutSeparators.Add(new ResizableSplitView(false));
+		}
+
+		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
+		{
+			foreach (var layoutSeparator in layoutSeparators)
+				layoutSeparator.UpdateLayoutSettings(layoutSettings);
+		}
+
+		public void AddPanel(PWLayoutPanel panel)
+		{
+			layoutPanels.Add(panel);
 		}
 
 		public void Render2ResizablePanel(PWGraphEditor graphEditor, Rect position)
 		{
-			//update min and max positions for resizable panel 
+			/*//update min and max positions for resizable panel 
 			h1.UpdateMinMax(position.width / 2, position.width - 3);
 			h2.UpdateMinMax(50, position.width / 2);
 	
@@ -72,16 +87,8 @@ namespace PW.Editor
 			//debug:
 			// Random.InitState(42);
 			// foreach (var mask in graphEditor.eventMasks)
-				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());
+				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());*/
 		}
 
-		public void ResizeWindow(Vector2 oldSize, Rect position)
-		{
-			//calcul the ratio for the window move:
-			float r = position.size.x / oldSize.x;
-	
-			h1.handlePosition *= r;
-			h2.handlePosition *= r;
-		}
 	}
 }

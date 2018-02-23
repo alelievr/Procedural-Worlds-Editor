@@ -15,7 +15,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 {
 
 	[SerializeField]
-	PWGraphLayout			layout = new PWGraphLayout();
+	PWLayout				layout;
 	
 	//events fields
 	Vector2					lastMousePosition;
@@ -52,9 +52,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	{
 		base.OnEnable();
 
-		OnWindowResize += WindowResizeCallback;
 		OnGraphChanged += GraphChangedCallback;
 		
+		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
 		// layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
 		// layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
 		// layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
@@ -64,18 +64,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		});
 	}
 
-	public override void OnGUIEnable()
-	{
-		base.OnGUIEnable();
-		
-		LoadStyles();
-	}
-
 	public override void OnDisable()
 	{
 		base.OnDisable();
 
-		OnWindowResize -= WindowResizeCallback;
 		OnGraphChanged -= GraphChangedCallback;
 	}
 
@@ -110,11 +102,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
     }
 
 #endregion
-
-	void WindowResizeCallback(Vector2 oldSize)
-	{
-		layout.ResizeWindow(oldSize, position);
-	}
 
 	void GraphChangedCallback(PWGraph newGraph)
 	{
@@ -190,11 +177,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(graphProcessKey);
 		};*/
-	}
-
-	void LoadStyles()
-	{
-		layout.LoadStyles(position);
 	}
 
 }

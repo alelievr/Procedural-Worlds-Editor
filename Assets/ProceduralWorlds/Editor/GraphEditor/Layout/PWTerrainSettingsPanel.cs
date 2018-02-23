@@ -8,7 +8,7 @@ using PW;
 
 namespace PW.Editor
 {
-	public class PWTerrainSettingsPanel : PWGraphPanel
+	public class PWTerrainSettingsPanel : PWLayoutPanel
 	{
 		//terrain base game object reference
 		public static PWTerrainGenericBase	terrainReference;

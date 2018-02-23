@@ -19,7 +19,7 @@ namespace PW.Editor
 	}
 
 	[System.Serializable]
-	public class PWTerrainPreviewPanel : PWGraphPanel
+	public class PWTerrainPreviewPanel : PWLayoutPanel
 	{
 		//preview fields
 		GameObject				previewScene;
