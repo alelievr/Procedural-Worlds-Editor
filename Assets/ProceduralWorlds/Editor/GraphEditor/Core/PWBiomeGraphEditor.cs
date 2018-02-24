@@ -50,8 +50,6 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
 
 		LoadGraphList();
-		
-		layout.DrawLayout();
 	}
 
 	void LoadGraphList()
@@ -112,7 +110,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 			return ;
 		}
 
-		layout.Render2ResizablePanel(this, position);
+		layout.DrawLayout();
 	}
 
 	public override void OnDisable()

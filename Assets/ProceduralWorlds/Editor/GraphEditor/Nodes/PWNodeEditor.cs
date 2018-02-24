@@ -95,6 +95,9 @@ namespace PW.Editor
 	
 		void OnDisable()
 		{
+			if (nodeRef == null)
+				return ;
+			
 			//remove our editor:
 			openedNodeEdiors.Remove(nodeRef);
 

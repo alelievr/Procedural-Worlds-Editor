@@ -38,7 +38,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 	const string			graphProcessKey = "PWMainGraphEditor";
 
-#region Initialization and data baking
+	#region Initialization and data baking
 
 	[MenuItem("Window/Procedural Worlds/Main Graph", priority = 1)]
 	static void Init()
@@ -55,9 +55,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		OnGraphChanged += GraphChangedCallback;
 		
 		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
-		// layout.onDrawNodeSelector = (rect) => nodeSelectorBar.DrawNodeSelector(rect);
-		// layout.onDrawOptionBar = (rect) => optionBar.DrawOptionBar(rect);
-		// layout.onDrawSettingsBar = (rect) => settingsBar.Draw(rect);
 
 		delayedChanges.BindCallback(graphProcessKey, (unsued) => {
 			graph.Process();
@@ -71,9 +68,9 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		OnGraphChanged -= GraphChangedCallback;
 	}
 
-#endregion
+	#endregion
 
-#region Global GUI rendering
+	#region Global GUI rendering
 
 	//call all rendering methods:
     public override void OnGUI()
@@ -98,10 +95,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			return ;
 		}
 
-		layout.Render2ResizablePanel(this, position);
+		layout.DrawLayout();
     }
 
-#endregion
+	#endregion
 
 	void GraphChangedCallback(PWGraph newGraph)
 	{

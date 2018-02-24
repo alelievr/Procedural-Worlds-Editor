@@ -15,7 +15,8 @@ namespace PW.Editor
 
 		PWGraphEditor		graphEditor;
 
-		PWLayoutSettings	layoutSettings;
+		[System.NonSerialized]
+		PWLayoutSetting		layoutSetting;
 	
 		[SerializeField]
 		Rect				savedRect;
@@ -34,8 +35,8 @@ namespace PW.Editor
 		{
 			Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 			
-			internHandlerPosition = (int)layoutSettings.separatorPosition;
-	
+			internHandlerPosition = (int)layoutSetting.separatorPosition;
+
 			//if we are in the first frame, provide the true width value for layout (the only information we have currently)
 			if (first)
 			{
@@ -63,9 +64,9 @@ namespace PW.Editor
 		public Rect Split()
 		{
 			EditorGUILayout.EndVertical();
-			
+
 			//left bar separation and resize:
-			Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, layoutSettings.separatorWidth, availableRect.height);
+			Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, layoutSetting.separatorWidth, availableRect.height);
 			Rect handleCatchRect = new Rect(internHandlerPosition - 1, availableRect.y, 6f, availableRect.height);
 			EditorGUI.DrawRect(handleRect, Color.white);
 			EditorGUIUtility.AddCursorRect(handleCatchRect, MouseCursor.ResizeHorizontal);
@@ -73,12 +74,12 @@ namespace PW.Editor
 			if (Event.current.type == EventType.MouseDown && handleCatchRect.Contains(Event.current.mousePosition))
 				resize = true;
 			if (lastMouseX != -1 && resize)
-				layoutSettings.separatorPosition += Event.current.mousePosition.x - lastMouseX;
+				layoutSetting.separatorPosition += Event.current.mousePosition.x - lastMouseX;
 			if (Event.current.rawType == EventType.MouseUp)
 				resize = false;
 			lastMouseX = Event.current.mousePosition.x;
-			internHandlerPosition = (int)Mathf.Clamp(layoutSettings.separatorPosition, layoutSettings.minWidth, layoutSettings.maxWidth);
-			layoutSettings.separatorPosition = Mathf.Clamp(layoutSettings.separatorPosition, layoutSettings.minWidth, layoutSettings.maxWidth);
+			internHandlerPosition = (int)Mathf.Clamp(layoutSetting.separatorPosition, layoutSetting.minWidth, layoutSetting.maxWidth);
+			layoutSetting.separatorPosition = Mathf.Clamp(layoutSetting.separatorPosition, layoutSetting.minWidth, layoutSetting.maxWidth);
 	
 			if (resize && Event.current.isMouse)
 				Event.current.Use();
@@ -94,10 +95,18 @@ namespace PW.Editor
 			return new Rect();
 		}
 
-		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
+		public PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting layoutSetting)
 		{
-			this.layoutSettings = layoutSettings;
-			layoutSettings.vertical = vertical;
+			if (layoutSetting == null)
+				return null;
+
+			if (!layoutSetting.initialized)
+				return this.layoutSetting;
+
+			this.layoutSetting = layoutSetting;
+			layoutSetting.vertical = vertical;
+			
+			return null;
 		}
 	}
 }

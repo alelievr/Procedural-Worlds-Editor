@@ -7,7 +7,7 @@ namespace PW.Editor
 	{
 		void Initialize(PWGraphEditor graphEditor);
 
-		void UpdateLayoutSettings(PWLayoutSettings layoutSettings);
+		PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting layoutSettings);
 
 		Rect Begin();
 

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace PW.Core
 {
 	[System.Serializable]
-	public class PWLayoutSettings
+	public class PWLayoutSetting
 	{
 		public float	minWidth;
 		public float	maxWidth;
@@ -19,5 +19,13 @@ namespace PW.Core
 		public float	separatorWidth;
 
 		public bool		vertical;
+		
+		public bool		initialized;
+	}
+
+	[System.Serializable]
+	public class PWLayoutSettings
+	{
+		public List< PWLayoutSetting >	settings = new List< PWLayoutSetting >();
 	}
 }

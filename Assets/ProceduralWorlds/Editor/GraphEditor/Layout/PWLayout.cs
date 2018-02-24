@@ -10,38 +10,84 @@ namespace PW.Editor
 {
 	public class PWLayout
 	{
+		[System.NonSerialized]
 		List< IPWLayoutSeparator >	layoutSeparators = new List< IPWLayoutSeparator >();
+		[System.NonSerialized]
 		List< PWLayoutPanel >		layoutPanels = new List< PWLayoutPanel >();
 
-		Event		e { get { return Event.current; } }
+		Event						e { get { return Event.current; } }
 
-		public delegate void	DrawPanelDelegate(Rect panelRect);
+		PWGraphEditor				graphEditor;
+
+		PWGraph						oldGraph;
+
+		public delegate void		DrawPanelDelegate(Rect panelRect);
 
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
 		public PWLayout(PWGraphEditor graphEditor)
 		{
-
+			this.graphEditor = graphEditor;
 		}
 
 		public void DrawLayout()
 		{
+			if (oldGraph != null && oldGraph != graphEditor.graph && graphEditor.graph != null)
+				UpdateLayoutSettings(graphEditor.graph.layoutSettings);
 
+			int sepCount = layoutSeparators.Count;
+			
+			for (int i = 0; i < sepCount; i++)
+			{
+				var panel = layoutPanels[i];
+				var separator = layoutSeparators[i];
+			
+				Rect r = separator.Begin();
+				panel.Draw(r);
+				separator.Split();
+				separator.End();
+			}
+
+			oldGraph = graphEditor.graph;
 		}
 
-		public void AddVerticalResizablePanel(PWGraphEditor graphEditor)
+		public void AddVerticalResizablePanel(PWLayoutSetting defaultSetting)
 		{
-			layoutSeparators.Add(new ResizableSplitView(true));
+			IPWLayoutSeparator sep = new ResizableSplitView(true);
+
+			sep.Initialize(graphEditor);
+			sep.UpdateLayoutSetting(defaultSetting);
+
+			layoutSeparators.Add(sep);
 		}
 
-		public void AddHorizontalResizablePanel(PWGraphEditor graphEditor)
+		public void AddHorizontalResizablePanel(PWLayoutSetting defaultSetting)
 		{
-			layoutSeparators.Add(new ResizableSplitView(false));
+			IPWLayoutSeparator sep = new ResizableSplitView(false);
+
+			sep.Initialize(graphEditor);
+			layoutSeparators.Add(sep);
 		}
 
 		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
 		{
+			int		index = 0;
+
 			foreach (var layoutSeparator in layoutSeparators)
-				layoutSeparator.UpdateLayoutSettings(layoutSettings);
+			{
+				if (layoutSettings.settings.Count <= index)
+					layoutSettings.settings.Add(new PWLayoutSetting());
+				
+				var layoutSetting = layoutSettings.settings[index];
+
+				var newLayout = layoutSeparator.UpdateLayoutSetting(layoutSetting);
+
+				//if the old layout was not initialized, we assign the new into the layout list of the graph.
+				if (newLayout != null)
+					layoutSettings.settings[index] = newLayout;
+
+
+				index++;
+			}
 		}
 
 		public void AddPanel(PWLayoutPanel panel)
@@ -49,12 +95,8 @@ namespace PW.Editor
 			layoutPanels.Add(panel);
 		}
 
-		public void Render2ResizablePanel(PWGraphEditor graphEditor, Rect position)
+		/*public void Render2ResizablePanel(Rect position)
 		{
-			/*//update min and max positions for resizable panel 
-			h1.UpdateMinMax(position.width / 2, position.width - 3);
-			h2.UpdateMinMax(50, position.width / 2);
-	
 			//split view and call delegates
 			h1.Begin();
 			Rect firstPanel = h2.Begin();
@@ -87,8 +129,8 @@ namespace PW.Editor
 			//debug:
 			// Random.InitState(42);
 			// foreach (var mask in graphEditor.eventMasks)
-				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());*/
-		}
+				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());
+		}*/
 
 	}
 }
