@@ -18,7 +18,10 @@ Consult the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to see the
 
 ## Editor screenshots:
 Main graph
-![](https://image.noelshack.com/fichiers/2018/07/4/1518696251-screen-shot-2018-02-12-at-11-39-57-pm.png)
+![](https://image.noelshack.com/fichiers/2018/09/3/1519838245-github1.jpg)
 
 Biome graph
 ![](https://image.noelshack.com/fichiers/2018/07/4/1518696251-screen-shot-2018-02-12-at-11-48-34-pm.png)
+
+Current editor interface
+![](https://image.noelshack.com/fichiers/2018/09/3/1519838326-github2.jpg)
