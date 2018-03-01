@@ -13,7 +13,7 @@ namespace PW.Tests.Nodes
 	{
 	
 		[Test]
-		public void PWGraphNodesSimplePasses()
+		public static void PWGraphNodesSimplePasses()
 		{
 			var allMainNodeInfos = PWNodeTypeProvider.GetAllowedNodesForGraph(PWGraphType.Main);
 

@@ -26,10 +26,10 @@ namespace PW.Tests.Graphs
 		//            +---> Add3+    
 		//                +-----+
 
-		string tmpFilePath = Application.temporaryCachePath + "/tmp_graph.txt";
+		static string tmpFilePath = Application.temporaryCachePath + "/tmp_graph.txt";
 
 		[Test]
-		public void PWGraphExport()
+		static public void PWGraphExport()
 		{
 			var graph = TestUtils.GenerateTestMainGraph();
 
@@ -42,7 +42,7 @@ namespace PW.Tests.Graphs
 		}
 	
 		[Test]
-		public void PWGraphImport()
+		static public void PWGraphImport()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -64,7 +64,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphImportBiome()
+		static public void PWGraphImportBiome()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >().GetGraph();
 
@@ -78,7 +78,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphImportMainWhiteSpaces()
+		static public void PWGraphImportMainWhiteSpaces()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -92,7 +92,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphExportImportDuplicateNodeNames()
+		static public void PWGraphExportImportDuplicateNodeNames()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -115,7 +115,7 @@ namespace PW.Tests.Graphs
 			CompareGraphs(graph, importedGraph);
 		}
 
-		void CompareGraphs(PWGraph g1, PWGraph g2)
+		static void CompareGraphs(PWGraph g1, PWGraph g2)
 		{
 			//Compare the two graphs node and link count:
 			Assert.That(g1.nodes.Count == g2.nodes.Count, "Bad node count !");

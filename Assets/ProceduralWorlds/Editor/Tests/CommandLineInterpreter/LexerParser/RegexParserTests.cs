@@ -16,7 +16,7 @@ namespace PW.Tests.CLI
 		#region NewNode command tests
 	
 		[Test]
-		public void WhiteSpaceNewNodeCommand()
+		public static void WhiteSpaceNewNodeCommand()
 		{
 			PWGraphCommand cmd;
 	
@@ -29,7 +29,7 @@ namespace PW.Tests.CLI
 		}
 	
 		[Test]
-		public void WellFormatedNewNodeCommand()
+		public static void WellFormatedNewNodeCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "addName");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -41,7 +41,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WellFormatedWhitespaceNewNodeCommand()
+		public static void WellFormatedWhitespaceNewNodeCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "add node name");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -53,7 +53,7 @@ namespace PW.Tests.CLI
 		}
 	
 		[Test]
-		public void WhiteSpaceNewNodeWithPositionCommand()
+		public static void WhiteSpaceNewNodeWithPositionCommand()
 		{
 			PWGraphCommand cmd = PWGraphCLI.Parse("  	  NewNode 	      PWNodeAdd  	    add  	    (  	 42,   -42 	   )	 ");
 	
@@ -65,7 +65,7 @@ namespace PW.Tests.CLI
 		}
 	
 		[Test]
-		public void WellFormatedNewNodeWithPositionCommand()
+		public static void WellFormatedNewNodeWithPositionCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "addName", new Vector2(42, -42));
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -78,7 +78,7 @@ namespace PW.Tests.CLI
 		}
 	
 		[Test]
-		public void BadTypeNewNodeCommand()
+		public static void BadTypeNewNodeCommand()
 		{
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeUnknown unknown");
@@ -91,7 +91,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void missingNameNewNodeCommand()
+		public static void missingNameNewNodeCommand()
 		{
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeAdd");
@@ -102,7 +102,7 @@ namespace PW.Tests.CLI
 		}
 	
 		[Test]
-		public void TooManyArgumentsNewNodeCommand()
+		public static void TooManyArgumentsNewNodeCommand()
 		{
 			try {
 				PWGraphCLI.Parse("NewNode PWNodeAdd node node node node");
@@ -115,7 +115,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void WellFormatedNewNodeWithDataCommand()
+		public static void WellFormatedNewNodeWithDataCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new PWGraphCLIAttributes() {{"persistance", 2.4f}, {"octaves", 3}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -131,7 +131,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WellFormatedNewNodeWithPositionAndDataCommand()
+		public static void WellFormatedNewNodeWithPositionAndDataCommand()
 		{
 			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistance", 1.4f}, {"octaves", 2}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -151,7 +151,7 @@ namespace PW.Tests.CLI
 		#region Link command tests
 	
 		[Test]
-		public void WellFormatedLinkCommand()
+		public static void WellFormatedLinkCommand()
 		{
 			string s = PWGraphCLI.GenerateLinkCommand("node1", "node2");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -162,7 +162,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WellFormatedLinkCommandNameWhitespaces()
+		public static void WellFormatedLinkCommandNameWhitespaces()
 		{
 			string s = PWGraphCLI.GenerateLinkCommand("node 1", "node 2");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -173,7 +173,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WhiteSpaceLinkCommand()
+		public static void WhiteSpaceLinkCommand()
 		{
 			PWGraphCommand cmd = PWGraphCLI.Parse("    	 	 	Link 		 	 node1   	node2	 	      ");
 	
@@ -187,7 +187,7 @@ namespace PW.Tests.CLI
 		#region LinkAnchor command tests
 
 		[Test]
-		public void WellFormatedLinkAnchorCommand()
+		public static void WellFormatedLinkAnchorCommand()
 		{
 			string s = PWGraphCLI.GenerateLinkAnchorCommand("node1", 1, "node2", 4);
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -200,7 +200,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WellFormatedLinkAnchorCommandNameWhitespaces()
+		public static void WellFormatedLinkAnchorCommandNameWhitespaces()
 		{
 			string s = PWGraphCLI.GenerateLinkAnchorCommand("node 1", 1, "node 2", 4);
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -214,7 +214,7 @@ namespace PW.Tests.CLI
 		
 
 		[Test]
-		public void WellFormatedLinkAnchorNameCommand()
+		public static void WellFormatedLinkAnchorNameCommand()
 		{
 			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node1", "a1", "node2", "a2");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -227,7 +227,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void WellFormatedLinkAnchorNameCommandNameWhitespaces()
+		public static void WellFormatedLinkAnchorNameCommandNameWhitespaces()
 		{
 			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node 1", "a1", "node 2", "a2");
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
@@ -244,7 +244,7 @@ namespace PW.Tests.CLI
 		#region Command parser tests
 	
 		[Test]
-		public void UnknowCommand()
+		public static void UnknowCommand()
 		{
 			try {
 				PWGraphCLI.Parse("BlaBlaBla arg1 arg2");
@@ -255,7 +255,7 @@ namespace PW.Tests.CLI
 		}
 		
 		[Test]
-		public void EmptyCommand()
+		public static void EmptyCommand()
 		{
 			try {
 				PWGraphCLI.Parse("");

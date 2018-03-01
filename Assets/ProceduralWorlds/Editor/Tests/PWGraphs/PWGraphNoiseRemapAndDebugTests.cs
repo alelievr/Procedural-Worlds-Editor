@@ -12,7 +12,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphNoiseRemapAndDebugNodes()
+		public static void PWGraphNoiseRemapAndDebugNodes()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")

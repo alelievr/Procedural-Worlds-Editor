@@ -27,7 +27,7 @@ namespace PW.Tests.Nodes
 		//                +-----+
 	
 		[Test]
-		public void PWNodeAPIGetNodesAttachedToAnchorArray()
+		public static void PWNodeAPIGetNodesAttachedToAnchorArray()
 		{
 			PWMainGraph graph = TestUtils.GenerateTestMainGraph();
 	
@@ -49,7 +49,7 @@ namespace PW.Tests.Nodes
 		}
 		
 		[Test]
-		public void PWNodeAPIGetNodesAttachedToAnchor()
+		public static void PWNodeAPIGetNodesAttachedToAnchor()
 		{
 			PWMainGraph graph = TestUtils.GenerateTestMainGraph();
 	

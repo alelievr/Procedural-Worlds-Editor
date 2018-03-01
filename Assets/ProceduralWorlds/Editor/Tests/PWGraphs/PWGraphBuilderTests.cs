@@ -14,7 +14,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphBuilderAddNode()
+		public static void PWGraphBuilderAddNode()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeBiome >("biome")
@@ -25,7 +25,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphBuilderLinkSimple()
+		public static void PWGraphBuilderLinkSimple()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodePerlinNoise2D >("perlin")
@@ -45,7 +45,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphBuilderBiomeGraph()
+		public static void PWGraphBuilderBiomeGraph()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWBiomeGraph >()
 				.NewNode< PWNodeBiomeSurfaceColor >("c")
@@ -75,7 +75,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphBuilderLinkArray()
+		public static void PWGraphBuilderLinkArray()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeAdd >("add")
@@ -126,7 +126,7 @@ namespace PW.Tests.Graphs
 		//                +-----+
 
 		[Test]
-		public void PWGraphBuilderMainGraph()
+		public static void PWGraphBuilderMainGraph()
 		{
 			var graph = TestUtils.GenerateTestMainGraph();
 
@@ -201,7 +201,7 @@ namespace PW.Tests.Graphs
 			Assert.That(debug2InputAnchor.links[0].fromAnchor == add2OutputAnchor);
 		}
 
-		bool ScrambledEqual(IEnumerable< PWAnchor > anchorList1, IEnumerable< PWAnchor > anchorList2)
+		static bool ScrambledEqual(IEnumerable< PWAnchor > anchorList1, IEnumerable< PWAnchor > anchorList2)
 		{
 			return anchorList1.All(a1 => anchorList2.Contains(a1));
 		}
@@ -222,7 +222,7 @@ namespace PW.Tests.Graphs
 
 
 		[Test]
-		public void PWGraphBuilderBiomeLinkArray()
+		public static void PWGraphBuilderBiomeLinkArray()
 		{
 			var graph = TestUtils.GenerateTestBiomeGraph();
 			

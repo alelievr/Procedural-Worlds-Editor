@@ -43,15 +43,6 @@ public partial class PWGraphEditor : PWEditorWindow
 	//Is the command (on MacOs) or control (on other OSs) is pressed
 	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
 
-
-	//Panels to load when the graph editor is opened (pannel common to eventy PWGraphEditors)
-	protected List< PWLayoutPanel >	panels = new List< PWLayoutPanel >
-	{
-		new PWGraphOptionPanel(),
-		new PWGraphNodeSelectorPanel(),
-		new PWGraphSettingsPanel(),
-	};
-
 	//public delegates:
 	public delegate void			NodeAction(PWNode node);
 	public delegate void			LinkAction(PWNodeLink link);
@@ -103,10 +94,6 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		LoadAssets();
 		
-		//Initialize graph panels
-		foreach (var panel in panels)
-			panel.Initialize(this);
-
 		Profiler.EndSample();
 	}
 

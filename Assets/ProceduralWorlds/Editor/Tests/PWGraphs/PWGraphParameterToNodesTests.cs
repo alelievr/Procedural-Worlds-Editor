@@ -11,7 +11,7 @@ namespace PW.Tests.Graphs
 	public class PWGraphParameterToNodesTests
 	{
 
-		PWMainGraph CreateTestGraph(out PWNodePerlinNoise2D perlinNode, out PWNodeDebugInfo debugNode)
+		static PWMainGraph CreateTestGraph(out PWNodePerlinNoise2D perlinNode, out PWNodeDebugInfo debugNode)
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
@@ -32,7 +32,7 @@ namespace PW.Tests.Graphs
 		}
 	
 		[Test]
-		public void PWMainGraphParameterToProcessedNodes()
+		public static void PWMainGraphParameterToProcessedNodes()
 		{
 			PWNodePerlinNoise2D perlinNode;
 			PWNodeDebugInfo		debugNode;

@@ -22,7 +22,7 @@ namespace PW.Tests.Biomator
 		//                                                +----+
 
 		[Test]
-		public void SimpleSwitchGraphBuild()
+		public static void SimpleSwitchGraphBuild()
 		{
 			PWMainGraph		graph = TestUtils.GenerateTestMainGraphBiomeSwitch();
 			BiomeData		bd = new BiomeData();

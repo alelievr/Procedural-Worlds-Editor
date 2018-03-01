@@ -34,14 +34,10 @@ namespace PW.Editor
 		Rect		windowRect;
 
 
-		//Graph reference
-		PWGraph		graph;
-
-
 		//node selector callbacks
 		public Action< Type > OnNodeClicked;
 
-		public void LoadStyles()
+		public override void OnLoadStyle()
 		{
 			using (DefaultGUISkin.Get())
 			{
@@ -57,7 +53,7 @@ namespace PW.Editor
 
 		void DefaultNodeClickAction(Type t)
 		{
-			graph.CreateNewNode(t, -graph.panPosition + windowRect.center);
+			graphRef.CreateNewNode(t, -graphRef.panPosition + windowRect.center);
 		}
 		
 		Rect DrawSelectorCase(string name, PWColorSchemeName colorSchemeName, bool title = false)
@@ -90,7 +86,7 @@ namespace PW.Editor
 			}
 			GUILayout.EndHorizontal();
 			
-			foreach (var nodeCategory in PWNodeTypeProvider.GetAllowedNodesForGraph(graph.graphType))
+			foreach (var nodeCategory in PWNodeTypeProvider.GetAllowedNodesForGraph(graphRef.graphType))
 			{
 				DrawSelectorCase(nodeCategory.title, nodeCategory.colorSchemeName, true);
 				foreach (var nodeCase in nodeCategory.typeInfos.Where(n => n.name.IndexOf(searchString, System.StringComparison.OrdinalIgnoreCase) >= 0))
@@ -103,7 +99,7 @@ namespace PW.Editor
 			}
 		}
 	
-		public void DrawNodeSelector(Rect currentRect)
+		public override void DrawDefault(Rect currentRect)
 		{
 			Profiler.BeginSample("[PW] Rendering node selector");
 
@@ -130,11 +126,6 @@ namespace PW.Editor
 			}
 
 			Profiler.EndSample();
-		}
-
-		public override void DrawDefault(Rect rect)
-		{
-			
 		}
 	}
 }

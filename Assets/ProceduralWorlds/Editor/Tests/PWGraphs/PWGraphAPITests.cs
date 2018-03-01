@@ -13,7 +13,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphCreateNewNode()
+		public static void PWGraphCreateNewNode()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -25,7 +25,7 @@ namespace PW.Tests.Graphs
 		}
 	
 		[Test]
-		public void PWGraphCreateNewNodeEventDisabled()
+		public static void PWGraphCreateNewNodeEventDisabled()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -37,7 +37,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphCreateLink()
+		public static void PWGraphCreateLink()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -60,7 +60,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphCreateLinkEventDisabled()
+		public static void PWGraphCreateLinkEventDisabled()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -83,7 +83,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void PWGraphSafeCreateLinkDuplicate()
+		public static void PWGraphSafeCreateLinkDuplicate()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("slider")
@@ -103,7 +103,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void FindNodeByName()
+		public static void FindNodeByName()
 		{
 			const string addNodeName = "add";
 			const string colorNodeName = "c_o_l_o_r";
@@ -122,7 +122,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void FindNodeByNameNotFound()
+		public static void FindNodeByNameNotFound()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().Execute().GetGraph();
 
@@ -130,7 +130,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void RemoveNode()
+		public static void RemoveNode()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("slider")
@@ -146,7 +146,7 @@ namespace PW.Tests.Graphs
 		}
 
 		[Test]
-		public void RemoveNodeWithoutEvents()
+		public static void RemoveNodeWithoutEvents()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("slider")
@@ -175,7 +175,7 @@ namespace PW.Tests.Graphs
 		//                +-----+
 
 		[Test]
-		public void RemoveNodeLinks()
+		public static void RemoveNodeLinks()
 		{
 			var graph = TestUtils.GenerateTestMainGraph();
 
@@ -187,7 +187,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void RemoveNodeLinksWithoutEvents()
+		public static void RemoveNodeLinksWithoutEvents()
 		{
 			var graph = TestUtils.GenerateTestMainGraph();
 
@@ -198,7 +198,7 @@ namespace PW.Tests.Graphs
 			RemoveNodeLinkAsserts(graph);
 		}
 
-		void RemoveNodeLinkAsserts(PWGraph graph)
+		static void RemoveNodeLinkAsserts(PWGraph graph)
 		{
 			var add1 = graph.FindNodeByName("add1");
 			var add2 = graph.FindNodeByName("add2");
@@ -236,7 +236,7 @@ namespace PW.Tests.Graphs
 
 
 		[Test]
-		public void GetNodeChildsRecursive()
+		public static void GetNodeChildsRecursive()
 		{
 			PWMainGraph mainGraph = TestUtils.GenerateTestMainGraphBiomeSwitch();
 

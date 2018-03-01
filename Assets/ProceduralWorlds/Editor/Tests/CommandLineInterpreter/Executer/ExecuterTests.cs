@@ -13,7 +13,7 @@ namespace PW.Tests.CLI
 	{
 	
 		[Test]
-		public void PerlinNoiseToDebugNodeExecution()
+		public static void PerlinNoiseToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
 			string	debugNodeName = "debug";
@@ -37,7 +37,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void PerlinNoiseWithAttributesToDebugNodeExecution()
+		public static void PerlinNoiseWithAttributesToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
 			var perlinAttributes = new PWGraphCLIAttributes() {
@@ -56,7 +56,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void EmptyGraph()
+		public static void EmptyGraph()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().Execute().GetGraph();
 
@@ -66,7 +66,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void SliderNodeAnchorLinkedToAddNodeExecution()
+		public static void SliderNodeAnchorLinkedToAddNodeExecution()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("s1")

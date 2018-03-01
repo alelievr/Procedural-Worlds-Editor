@@ -4,7 +4,7 @@ using PW.Core;
 
 namespace PW.Editor
 {
-	public class ResizableSplitView : IPWLayoutSeparator
+	public class ResizablePanelSeparator : PWLayoutSeparator
 	{
 	
 		bool				resize = false;
@@ -13,11 +13,6 @@ namespace PW.Editor
 		float				lastMouseX = -1;
 		bool				vertical;
 
-		PWGraphEditor		graphEditor;
-
-		[System.NonSerialized]
-		PWLayoutSetting		layoutSetting;
-	
 		[SerializeField]
 		Rect				savedRect;
 	
@@ -26,12 +21,12 @@ namespace PW.Editor
 	
 		Event				e { get { return Event.current; } }
 
-		public ResizableSplitView(bool vertical)
+		public ResizablePanelSeparator(PWLayoutOrientation orientation)
 		{
-			this.vertical = vertical;
+			this.vertical = orientation == PWLayoutOrientation.Vertical;
 		}
 	
-		public Rect Begin()
+		public override Rect Begin()
 		{
 			Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 			
@@ -52,16 +47,13 @@ namespace PW.Editor
 				savedRect = beginRect;
 	
 			first = false;
+
+			EditorGUI.DrawRect(savedRect, Color.red);
 	
 			return savedRect;
 		}
 
-		public void Initialize(PWGraphEditor graphEditor)
-		{
-			this.graphEditor = graphEditor;
-		}
-
-		public Rect Split()
+		public override Rect Split()
 		{
 			EditorGUILayout.EndVertical();
 
@@ -84,10 +76,12 @@ namespace PW.Editor
 			if (resize && Event.current.isMouse)
 				Event.current.Use();
 	
-			return new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
+			Rect r = new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
+
+			return r;
 		}
 
-		public Rect End()
+		public override Rect End()
 		{
 			EditorGUILayout.EndHorizontal();
 			
@@ -95,18 +89,16 @@ namespace PW.Editor
 			return new Rect();
 		}
 
-		public PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting layoutSetting)
+		public override PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting ls)
 		{
-			if (layoutSetting == null)
-				return null;
+			PWLayoutSetting ret;
 
-			if (!layoutSetting.initialized)
-				return this.layoutSetting;
+			ret = base.UpdateLayoutSetting(ls);
 
-			this.layoutSetting = layoutSetting;
-			layoutSetting.vertical = vertical;
+			if (ret == null && ls != null)
+				ls.vertical = vertical;
 			
-			return null;
+			return ret;
 		}
 	}
 }

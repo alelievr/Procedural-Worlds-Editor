@@ -14,7 +14,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphLinkProcessSimple()
+		public static void PWGraphLinkProcessSimple()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("slider")
@@ -51,7 +51,7 @@ namespace PW.Tests.Graphs
 
 
 		[Test]
-		public void PWGraphLinkProcessOnceArray()
+		public static void PWGraphLinkProcessOnceArray()
 		{
 			var graph = TestUtils.GenerateTestBiomeGraph();
 			
@@ -70,7 +70,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphLinkArrayToArray()
+		public static void PWGraphLinkArrayToArray()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 
@@ -100,7 +100,7 @@ namespace PW.Tests.Graphs
 		}
 		
 		[Test]
-		public void PWGraphLinkArrayToArrayProcess()
+		public static void PWGraphLinkArrayToArrayProcess()
 		{
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().GetGraph();
 

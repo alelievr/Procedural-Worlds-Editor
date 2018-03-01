@@ -7,19 +7,23 @@ namespace PW.Editor
 {
 	public abstract class PWLayoutPanel
 	{
-		public delegate void		OnGUI(Rect rect);
+		public delegate void			OnGUI(Rect rect);
 
-		protected PWGraphEditor		graphEditor;
-		protected PWGraph			graphRef { get { return graphEditor.graph; } }
+		public List< PWLayoutPanel >	childPanels = new List< PWLayoutPanel >();
+
+		public PWLayoutSeparator		separator;
+
+		protected PWGraphEditor			graphEditor;
+		protected PWGraph				graphRef { get { return graphEditor.graph; } }
 		
-		protected DelayedChanges	delayedChanges = new DelayedChanges();
+		protected DelayedChanges		delayedChanges = new DelayedChanges();
 
-		public OnGUI				onGUI;
+		public OnGUI					onGUI;
 
-		Rect						oldWindowRect;
+		Rect							oldWindowRect;
 
 		[System.NonSerialized]
-		bool						first = true;
+		bool							first = true;
 
 		public void Initialize(PWGraphEditor graphEditor)
 		{

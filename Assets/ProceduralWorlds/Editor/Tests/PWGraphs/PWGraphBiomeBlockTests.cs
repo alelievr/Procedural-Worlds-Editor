@@ -10,7 +10,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphBiomeBlockTestsSimplePasses()
+		public static void PWGraphBiomeBlockTestsSimplePasses()
 		{
 			// Use the Assert class to test conditions.
 		}

@@ -109,6 +109,17 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 			return ;
 		}
+			
+		//reset current layout:
+		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.R && e.shift)
+		{
+			if (graph != null)
+			{
+				graph.layoutSettings.settings.Clear();
+				layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+				e.Use();
+			}
+		}
 
 		layout.DrawLayout();
 	}

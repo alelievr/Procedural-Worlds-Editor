@@ -13,7 +13,7 @@ namespace PW.Tests.CLI
 	{
 	
 		[Test]
-		public void PerlinNoiseNodeToDebugNodeParsedCommands()
+		public static void PerlinNoiseNodeToDebugNodeParsedCommands()
 		{
 			var builder = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
@@ -41,7 +41,7 @@ namespace PW.Tests.CLI
 		}
 
 		[Test]
-		public void SliderNodeToAddNodeWithAnchorLink()
+		public static void SliderNodeToAddNodeWithAnchorLink()
 		{
 			var builder = PWGraphBuilder.NewGraph< PWMainGraph >()
 				.NewNode< PWNodeSlider >("s1")

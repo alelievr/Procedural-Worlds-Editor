@@ -26,25 +26,29 @@ namespace PW.Editor
 			var settingsPanel = CreateLayoutPanel< PWGraphSettingsPanel >(graphEditor);
 			var nodeSelectorPanel = CreateLayoutPanel< PWGraphNodeSelectorPanel >(graphEditor);
 
+			float minWidth = 40;
+			int	p20 = Mathf.FloorToInt(graphEditor.position.width * .2f);
+			int	p50 = Mathf.FloorToInt(graphEditor.position.width * .5f);
+			int	p80 = Mathf.FloorToInt(graphEditor.position.width * .8f);
+
 			var resizablePanel1Settings = new PWLayoutSetting {
-				separatorPosition = 200,
+				separatorPosition = p20,
 				separatorWidth = 4,
-				minWidth = 40,
-				maxWidth = 500,
+				minWidth = minWidth,
+				maxWidth = p50,
 				initialized = true,
 			};
-			var resizablePanel2Settings = new PWLayoutSetting{
-				separatorPosition = 800,
+			var resizablePanel2Settings = new PWLayoutSetting {
+				separatorPosition = p80,
 				separatorWidth = 4,
-				minWidth = 80,
-				maxWidth = 1000,
+				minWidth = p50,
+				maxWidth = graphEditor.position.width - minWidth,
 				initialized = true,
+				second = true,
 			};
 
-			layout.AddVerticalResizablePanel(resizablePanel1Settings);
-			layout.AddPanel(settingsPanel);
-			layout.AddVerticalResizablePanel(resizablePanel2Settings);
-			layout.AddPanel(nodeSelectorPanel);
+			layout.AddVerticalResizablePanel(resizablePanel1Settings, settingsPanel);
+			layout.AddVerticalResizablePanel(resizablePanel2Settings, nodeSelectorPanel);
 
 			if (graphEditor.graph != null)
 				layout.UpdateLayoutSettings(graphEditor.graph.layoutSettings);

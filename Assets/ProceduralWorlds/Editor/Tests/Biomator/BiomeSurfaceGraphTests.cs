@@ -25,7 +25,7 @@ namespace PW.Tests.Biomator
 			public float maxSlope;
 		}
 
-		List< BiomeSurfaceSwitch > BSCDataToSurfaces(BSCData[] switches)
+		static List< BiomeSurfaceSwitch > BSCDataToSurfaces(BSCData[] switches)
 		{
 			List< BiomeSurfaceSwitch > switchList = new List< BiomeSurfaceSwitch >();
 
@@ -63,7 +63,7 @@ namespace PW.Tests.Biomator
 		//		                 |slope: 30-60 |
 		//		                 +-------------+
 
-		public List< BiomeSurfaceSwitch > GenerateValidBiomeSurfaces()
+		public static List< BiomeSurfaceSwitch > GenerateValidBiomeSurfaces()
 		{
 			var switches = new[] {
 				new BSCData{name = "1", heightEnabled = true, minHeight = 0f, maxHeight = 40f},
@@ -88,7 +88,7 @@ namespace PW.Tests.Biomator
 		//			|slope: nope  |
 		//			+-------------+
 
-		public List< BiomeSurfaceSwitch > GenerateInvalidHoleBiomeSurfaces()
+		public static List< BiomeSurfaceSwitch > GenerateInvalidHoleBiomeSurfaces()
 		{
 			var switches = new[] {
 				new BSCData{name = "1", heightEnabled = true, minHeight = 0f, maxHeight = 30f},
@@ -100,7 +100,7 @@ namespace PW.Tests.Biomator
 		}
 
 		[Test]
-		public void BiomeSurfaceGraphValidGraph()
+		public static void BiomeSurfaceGraphValidGraph()
 		{
 			var graph = new BiomeSurfaceGraph();
 			graph.BuildGraph(GenerateValidBiomeSurfaces());
@@ -118,7 +118,7 @@ namespace PW.Tests.Biomator
 		
 
 		[Test]
-		public void BiomeSurfaceGraphValidGraphOutOfBounds()
+		public static void BiomeSurfaceGraphValidGraphOutOfBounds()
 		{
 			var graph = new BiomeSurfaceGraph();
 			graph.BuildGraph(GenerateValidBiomeSurfaces());
@@ -131,7 +131,7 @@ namespace PW.Tests.Biomator
 		}
 
 		[Test]
-		public void BiomeSurfaceGraphValidGraphBounds()
+		public static void BiomeSurfaceGraphValidGraphBounds()
 		{
 			var graph = new BiomeSurfaceGraph();
 			graph.BuildGraph(GenerateValidBiomeSurfaces());
@@ -146,7 +146,7 @@ namespace PW.Tests.Biomator
 		}
 
 		[Test]
-		public void BiomeSurfaceGraphInvalidHoleGraph()
+		public static void BiomeSurfaceGraphInvalidHoleGraph()
 		{
 			var graph = new BiomeSurfaceGraph();
 			bool valid = graph.BuildGraph(GenerateInvalidHoleBiomeSurfaces());

@@ -10,7 +10,7 @@ namespace PW.Tests.Graphs
 	{
 	
 		[Test]
-		public void PWGraphInputAndOutputTestsSimplePasses()
+		public static void PWGraphInputAndOutputTestsSimplePasses()
 		{
 		}
 	

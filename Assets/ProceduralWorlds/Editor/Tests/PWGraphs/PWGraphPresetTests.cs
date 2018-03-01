@@ -12,11 +12,11 @@ namespace PW.Tests.Graphs
 	public class PWGraphPresetTests
 	{
 
-		string mainGraphPresetPath = "GraphPresets/Main";
+		static string mainGraphPresetPath = "GraphPresets/Main";
 		// string biomeGraphPresetPath = "GraphPresets/Biome";
 	
 		[Test]
-		public void PWMainGraphPresets()
+		public static void PWMainGraphPresets()
 		{
 			TextAsset[] mainGraphPresets = Resources.LoadAll< TextAsset >(mainGraphPresetPath);
 

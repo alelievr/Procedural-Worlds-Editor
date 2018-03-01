@@ -10,12 +10,9 @@ namespace PW.Editor
 {
 	public class PWLayout
 	{
-		[System.NonSerialized]
-		List< IPWLayoutSeparator >	layoutSeparators = new List< IPWLayoutSeparator >();
-		[System.NonSerialized]
-		List< PWLayoutPanel >		layoutPanels = new List< PWLayoutPanel >();
+		PWLayoutPanel				mainPanel;
 
-		Event						e { get { return Event.current; } }
+		static Event				e { get { return Event.current; } }
 
 		PWGraphEditor				graphEditor;
 
@@ -23,10 +20,39 @@ namespace PW.Editor
 
 		public delegate void		DrawPanelDelegate(Rect panelRect);
 
+		PWLayoutPanel				lastPanel;
+
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
 		public PWLayout(PWGraphEditor graphEditor)
 		{
 			this.graphEditor = graphEditor;
+		}
+
+		void DrawLayoutPanel(PWLayoutPanel panel)
+		{
+			var setting = panel.separator.GetLayoutSetting();
+
+			if (setting == null)
+				return ;
+
+			if (setting.second)
+			{
+				Rect r = panel.separator.Begin();
+				foreach (var p in panel.childPanels)
+					DrawLayoutPanel(p);
+				panel.separator.Split();
+				panel.Draw(r);
+				panel.separator.End();
+			}
+			else
+			{
+				Rect r = panel.separator.Begin();
+				panel.Draw(r);
+				panel.separator.Split();
+				foreach (var p in panel.childPanels)
+					DrawLayoutPanel(p);
+				panel.separator.End();
+			}
 		}
 
 		public void DrawLayout()
@@ -34,65 +60,78 @@ namespace PW.Editor
 			if (oldGraph != null && oldGraph != graphEditor.graph && graphEditor.graph != null)
 				UpdateLayoutSettings(graphEditor.graph.layoutSettings);
 
-			int sepCount = layoutSeparators.Count;
-			
-			for (int i = 0; i < sepCount; i++)
-			{
-				var panel = layoutPanels[i];
-				var separator = layoutSeparators[i];
-			
-				Rect r = separator.Begin();
-				panel.Draw(r);
-				separator.Split();
-				separator.End();
-			}
+			DrawLayoutPanel(mainPanel);
 
 			oldGraph = graphEditor.graph;
 		}
 
-		public void AddVerticalResizablePanel(PWLayoutSetting defaultSetting)
+		PWLayoutPanel AddPanel(PWLayoutSetting defaultSetting, PWLayoutSeparator sep, PWLayoutPanel panel, PWLayoutPanel parentPanel)
 		{
-			IPWLayoutSeparator sep = new ResizableSplitView(true);
-
 			sep.Initialize(graphEditor);
-			sep.UpdateLayoutSetting(defaultSetting);
 
-			layoutSeparators.Add(sep);
+			sep.UpdateLayoutSetting(defaultSetting);
+		
+			if (parentPanel == null)
+				parentPanel = lastPanel;
+
+			if (mainPanel == null)
+				mainPanel = panel;
+			else
+				parentPanel.childPanels.Add(panel);
+
+			panel.separator = sep;
+			lastPanel = panel;
+			return null;
 		}
 
-		public void AddHorizontalResizablePanel(PWLayoutSetting defaultSetting)
+		public PWLayoutPanel AddVerticalResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
 		{
-			IPWLayoutSeparator sep = new ResizableSplitView(false);
+			return AddPanel(defaultSetting, new ResizablePanelSeparator(PWLayoutOrientation.Vertical), panel, parentPanel);
+		}
 
-			sep.Initialize(graphEditor);
-			layoutSeparators.Add(sep);
+		public PWLayoutPanel AddHorizontalResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		{
+			return AddPanel(defaultSetting, new ResizablePanelSeparator(PWLayoutOrientation.Horizontal), panel, parentPanel);
+		}
+
+		public PWLayoutPanel AddVerticalStaticPanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		{
+			return AddPanel(defaultSetting, new StaticPanelSeparator(PWLayoutOrientation.Vertical), panel, parentPanel);
+		}
+
+		public PWLayoutPanel AddHorizontalStaticPanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		{
+			return AddPanel(defaultSetting, new StaticPanelSeparator(PWLayoutOrientation.Horizontal), panel, parentPanel);
 		}
 
 		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
 		{
 			int		index = 0;
 
-			foreach (var layoutSeparator in layoutSeparators)
+			var panels = new Stack< PWLayoutPanel >();
+
+			panels.Push(mainPanel);
+
+			while (panels.Count != 0)
 			{
+				var panel = panels.Pop();
+
 				if (layoutSettings.settings.Count <= index)
 					layoutSettings.settings.Add(new PWLayoutSetting());
 				
 				var layoutSetting = layoutSettings.settings[index];
 
-				var newLayout = layoutSeparator.UpdateLayoutSetting(layoutSetting);
+				var newLayout = panel.separator.UpdateLayoutSetting(layoutSetting);
 
 				//if the old layout was not initialized, we assign the new into the layout list of the graph.
 				if (newLayout != null)
 					layoutSettings.settings[index] = newLayout;
 
+				foreach (var p in panel.childPanels)
+					panels.Push(p);
 
 				index++;
 			}
-		}
-
-		public void AddPanel(PWLayoutPanel panel)
-		{
-			layoutPanels.Add(panel);
 		}
 
 		/*public void Render2ResizablePanel(Rect position)
