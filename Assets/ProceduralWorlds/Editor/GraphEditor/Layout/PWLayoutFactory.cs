@@ -25,6 +25,7 @@ namespace PW.Editor
 
 			var settingsPanel = CreateLayoutPanel< PWGraphSettingsPanel >(graphEditor);
 			var nodeSelectorPanel = CreateLayoutPanel< PWGraphNodeSelectorPanel >(graphEditor);
+			var optionPanel = CreateLayoutPanel< PWGraphOptionPanel >(graphEditor);
 
 			float minWidth = 40;
 			int	p20 = Mathf.FloorToInt(graphEditor.position.width * .2f);
@@ -44,16 +45,23 @@ namespace PW.Editor
 				minWidth = p50,
 				maxWidth = graphEditor.position.width - minWidth,
 				initialized = true,
-				second = true,
+				// second = true,
+			};
+			var staticPanelSettings = new PWLayoutSetting {
+				separatorPosition = EditorGUIUtility.singleLineHeight,
+				initialized = true,
 			};
 
 			layout.AddVerticalResizablePanel(resizablePanel1Settings, settingsPanel);
+			// layout.AddHorizontalStaticPanel(staticPanelSettings, optionPanel);
 			layout.AddVerticalResizablePanel(resizablePanel2Settings, nodeSelectorPanel);
+			
+			// Debug.Log("Sep2: " + optionPanel.separator.GetLayoutSetting());
+
 
 			if (graphEditor.graph != null)
 				layout.UpdateLayoutSettings(graphEditor.graph.layoutSettings);
-				
-
+			
 			return layout;
 		}
 	}

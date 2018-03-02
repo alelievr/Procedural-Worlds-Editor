@@ -6,6 +6,7 @@ namespace PW.Editor
 {
 	public class ResizablePanelSeparator : PWLayoutSeparator
 	{
+		bool				debug = false;
 	
 		bool				resize = false;
 		Rect				availableRect;
@@ -28,7 +29,7 @@ namespace PW.Editor
 	
 		public override Rect Begin()
 		{
-			Rect tmpRect = EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+			Rect tmpRect = EditorGUILayout.BeginHorizontal();
 			
 			internHandlerPosition = (int)layoutSetting.separatorPosition;
 
@@ -42,13 +43,17 @@ namespace PW.Editor
 			if (e.type == EventType.Repaint)
 				availableRect = tmpRect;
 	
-			Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition), GUILayout.ExpandHeight(true));
+			float w = internHandlerPosition - layoutSetting.minWidth;
+			Rect beginRect = EditorGUILayout.BeginVertical(GUILayout.Width(w), GUILayout.MaxWidth(w));
 			if (e.type == EventType.Repaint)
 				savedRect = beginRect;
+
+			savedRect.width = internHandlerPosition;
+
+			if (debug)
+				EditorGUI.DrawRect(savedRect, Color.blue);
 	
 			first = false;
-
-			EditorGUI.DrawRect(savedRect, Color.red);
 	
 			return savedRect;
 		}
@@ -56,6 +61,13 @@ namespace PW.Editor
 		public override Rect Split()
 		{
 			EditorGUILayout.EndVertical();
+			
+			//separator rect:
+			EditorGUILayout.BeginVertical(GUILayout.Width(layoutSetting.separatorWidth));
+			GUILayout.Space(layoutSetting.separatorWidth);
+			EditorGUILayout.EndVertical();
+
+			EditorGUILayout.BeginVertical(GUILayout.Width(internHandlerPosition - availableRect.x - layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
 
 			//left bar separation and resize:
 			Rect handleRect = new Rect(internHandlerPosition - 1, availableRect.y, layoutSetting.separatorWidth, availableRect.height);
@@ -76,17 +88,19 @@ namespace PW.Editor
 			if (resize && Event.current.isMouse)
 				Event.current.Use();
 	
-			Rect r = new Rect(internHandlerPosition + 3, availableRect.y, availableRect.width - internHandlerPosition, availableRect.height);
+			float w = availableRect.width - internHandlerPosition;
+			Rect r = new Rect(internHandlerPosition + layoutSetting.separatorWidth, availableRect.y, w, availableRect.height);
+
+			if (debug)
+				EditorGUI.DrawRect(r, Color.green);
 
 			return r;
 		}
 
-		public override Rect End()
+		public override void End()
 		{
+			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
-			
-			//TODO: rect
-			return new Rect();
 		}
 
 		public override PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting ls)

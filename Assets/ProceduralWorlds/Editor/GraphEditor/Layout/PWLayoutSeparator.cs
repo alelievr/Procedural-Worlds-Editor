@@ -31,6 +31,6 @@ namespace PW.Editor
 
 		public abstract Rect Split();
 
-		public abstract Rect End();
+		public abstract void End();
 	}
 }

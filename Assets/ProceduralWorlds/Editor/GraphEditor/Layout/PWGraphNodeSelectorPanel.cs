@@ -94,7 +94,9 @@ namespace PW.Editor
 					Rect clickableRect = DrawSelectorCase(nodeCase.name, nodeCategory.colorSchemeName);
 
 					if (e.type == EventType.MouseDown && e.button == 0 && clickableRect.Contains(Event.current.mousePosition))
+					{
 						OnNodeClicked(nodeCase.type);
+					}
 				}
 			}
 		}
@@ -108,22 +110,15 @@ namespace PW.Editor
 
 			windowRect = new Rect(0, 0, currentRect.xMin + currentRect.width, currentRect.yMin + currentRect.height);
 	
-			//Pyramid of layouts:
+			selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
 			{
-				EditorGUILayout.BeginHorizontal(GUILayout.Width(currentRect.width), GUILayout.Height(currentRect.height));
+				EditorGUILayout.BeginVertical(panelBackgroundStyle);
 				{
-					selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
-					{
-						EditorGUILayout.BeginVertical(panelBackgroundStyle);
-						{
-							DrawSelector();
-						}
-						EditorGUILayout.EndVertical();
-					}
-					EditorGUILayout.EndScrollView();
+					DrawSelector();
 				}
-				EditorGUILayout.EndHorizontal();
+				EditorGUILayout.EndVertical();
 			}
+			EditorGUILayout.EndScrollView();
 
 			Profiler.EndSample();
 		}

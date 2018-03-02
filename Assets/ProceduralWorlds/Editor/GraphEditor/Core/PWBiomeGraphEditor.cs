@@ -109,7 +109,7 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 			return ;
 		}
-			
+		
 		//reset current layout:
 		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.R && e.shift)
 		{

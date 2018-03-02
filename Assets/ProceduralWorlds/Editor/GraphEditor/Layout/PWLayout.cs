@@ -32,21 +32,24 @@ namespace PW.Editor
 		{
 			var setting = panel.separator.GetLayoutSetting();
 
+
 			if (setting == null)
 				return ;
 
 			if (setting.second)
 			{
-				Rect r = panel.separator.Begin();
+				panel.separator.Begin();
 				foreach (var p in panel.childPanels)
 					DrawLayoutPanel(p);
-				panel.separator.Split();
+				Rect r = panel.separator.Split();
 				panel.Draw(r);
+				EditorGUILayout.LabelField("GKLJKLHRJHFIUHSLKJFEOJ");
 				panel.separator.End();
 			}
 			else
 			{
 				Rect r = panel.separator.Begin();
+				EditorGUILayout.LabelField("IOFJEOIJEIOGJOEIG");
 				panel.Draw(r);
 				panel.separator.Split();
 				foreach (var p in panel.childPanels)
@@ -73,6 +76,9 @@ namespace PW.Editor
 		
 			if (parentPanel == null)
 				parentPanel = lastPanel;
+			
+			if (parentPanel == panel)
+				return null;
 
 			if (mainPanel == null)
 				mainPanel = panel;
@@ -81,7 +87,8 @@ namespace PW.Editor
 
 			panel.separator = sep;
 			lastPanel = panel;
-			return null;
+
+			return panel;
 		}
 
 		public PWLayoutPanel AddVerticalResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
