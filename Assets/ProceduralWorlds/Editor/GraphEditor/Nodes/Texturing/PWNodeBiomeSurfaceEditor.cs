@@ -12,7 +12,7 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeSurface node;
 		
-		GUIContent		surfaceGraphError = new GUIContent("Surface graph not built !", "You have a gap in some parameter so the graph can't be correctly built");
+		readonly GUIContent		surfaceGraphError = new GUIContent("Surface graph not built !", "You have a gap in some parameter so the graph can't be correctly built");
 
 		public override void OnNodeEnable()
 		{
@@ -33,9 +33,5 @@ namespace PW.Editor
 				EditorGUILayout.LabelField(surfaceGraphError, PWStyles.errorLabel);
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

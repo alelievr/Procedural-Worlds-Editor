@@ -78,9 +78,5 @@ namespace PW.Editor
 			}
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

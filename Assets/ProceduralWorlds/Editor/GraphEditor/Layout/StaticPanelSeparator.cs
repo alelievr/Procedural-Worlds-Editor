@@ -10,6 +10,8 @@ namespace PW.Editor
 	{
 		public bool		vertical;
 
+		Rect			lastRect;
+
 		public StaticPanelSeparator(PWLayoutOrientation orientation)
 		{
 			vertical = orientation == PWLayoutOrientation.Vertical;
@@ -17,24 +19,25 @@ namespace PW.Editor
 
 		public override Rect Begin()
 		{
+			Rect r;
+			
 			if (vertical)
-				return EditorGUILayout.BeginVertical(GUILayout.Width(layoutSetting.separatorPosition), GUILayout.ExpandHeight(true));
+				r = EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 			else
-				return EditorGUILayout.BeginHorizontal(GUILayout.Height(layoutSetting.separatorPosition), GUILayout.ExpandWidth(true));
+				r = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
+			
+			if (e.type == EventType.Repaint)
+				lastRect = r;
+			
+			return lastRect;
 		}
 
-		public override Rect Split()
+		public override void End()
 		{
 			if (vertical)
 				EditorGUILayout.EndVertical();
 			else
 				EditorGUILayout.EndHorizontal();
-			
-			return new Rect();
-		}
-
-		public override void End()
-		{
 		}
 	}
 

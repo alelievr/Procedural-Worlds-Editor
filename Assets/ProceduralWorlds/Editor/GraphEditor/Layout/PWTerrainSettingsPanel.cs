@@ -13,12 +13,7 @@ namespace PW.Editor
 		//terrain base game object reference
 		public static PWTerrainGenericBase	terrainReference;
 
-		//Graph reference
-		PWGraph							graph;
-
 		PWTerrainGenericBase			terrain;
-
-		Event							e { get { return Event.current; } }
 
 		Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
 		{
@@ -62,7 +57,7 @@ namespace PW.Editor
 
 		public override void DrawDefault(Rect rect)
 		{
-			
+			EditorGUILayout.LabelField("TODO");
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them
@@ -74,15 +69,15 @@ namespace PW.Editor
 				return ;
 			}
 
-			PWMainGraph mainGraph = graph as PWMainGraph;
+			PWMainGraph mainGraph = graphRef as PWMainGraph;
 
 			if (mainGraph != null)
 			{
 				//if the graph we have is not the same / have been modified since last generation, we replace it
-				if (terrain.graph != null && terrain.graph.GetHashCode() != graph.GetHashCode())
+				if (terrain.graph != null && terrain.graph.GetHashCode() != graphRef.GetHashCode())
 					GameObject.DestroyImmediate(terrain.graph);
 				
-				terrain.InitGraph(graph.Clone() as PWMainGraph);
+				terrain.InitGraph(graphRef.Clone() as PWMainGraph);
 				
 				terrain.DestroyAllChunks();
 

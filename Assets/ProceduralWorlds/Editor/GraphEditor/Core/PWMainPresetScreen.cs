@@ -9,15 +9,15 @@ namespace PW.Editor
 {
 	public class PWMainPresetScreen : PWPresetScreen
 	{
-		Texture2D	preset2DSideViewTexture;
-		Texture2D	preset2DTopDownViewTexture;
-		Texture2D	preset3DPlaneTexture;
-		Texture2D	preset3DSphericalTexture;
-		Texture2D	preset3DCubicTexture;
-		Texture2D	preset1DDensityFieldTexture;
-		Texture2D	preset2DDensityFieldTexture;
-		Texture2D	preset3DDensityFieldTexture;
-		// Texture2D	presetMeshTetxure;
+		readonly Texture2D	preset2DSideViewTexture;
+		readonly Texture2D	preset2DTopDownViewTexture;
+		readonly Texture2D	preset3DPlaneTexture;
+		readonly Texture2D	preset3DSphericalTexture;
+		readonly Texture2D	preset3DCubicTexture;
+		readonly Texture2D	preset1DDensityFieldTexture;
+		readonly Texture2D	preset2DDensityFieldTexture;
+		readonly Texture2D	preset3DDensityFieldTexture;
+		// readonly Texture2D	presetMeshTetxure;
 	
 		PWMainGraph	mainGraph;
 	

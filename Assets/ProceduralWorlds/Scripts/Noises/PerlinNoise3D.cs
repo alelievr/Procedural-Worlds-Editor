@@ -98,7 +98,7 @@ namespace PW.Noises
         
 		public override void ComputeSampler(Sampler samp, float scale, int seed)
         {
-            
+            //Not yet used/implemented, waiting the node upgrade 1
         }
     }
 }

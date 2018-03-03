@@ -62,9 +62,5 @@ namespace PW.Editor
 				node.UpdateInputVisibilities();
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

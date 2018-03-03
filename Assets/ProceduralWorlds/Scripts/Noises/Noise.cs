@@ -10,8 +10,8 @@ namespace PW.Noises
 	{
 		public const float		noiseScale = 0.01f;
 	
-		public string	name;
-		public bool		hasComputeShaders;
+		public string			name;
+		public bool				hasComputeShaders;
 	
 		public Noise()
 		{

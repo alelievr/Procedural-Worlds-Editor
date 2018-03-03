@@ -14,10 +14,10 @@ namespace PW.Editor
 	
 		private class ChangeData
 		{
-			public object			value = null;
-			public double			lastUpdate = 0;
+			public object			value;
+			public double			lastUpdate;
 			public bool				called = true;
-			public Action< object >	callback = null;
+			public Action< object >	callback;
 		}
 	
 		[System.NonSerialized]

@@ -23,10 +23,5 @@ namespace PW.Editor
 			EditorGUIUtility.labelWidth = 100;
 			node.outputDetail.biomeDetailMask = EditorGUILayout.MaskField("details", node.outputDetail.biomeDetailMask, Enum.GetNames(typeof(TerrainDetailType)));
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

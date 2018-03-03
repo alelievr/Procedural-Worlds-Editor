@@ -13,21 +13,26 @@ namespace PW.Editor
 		//option bar styles:
 		GUIStyle			navBarBackgroundStyle;
 		
-		static Texture2D	rencenterIconTexture;
-		static Texture2D	fileIconTexture;
-		static Texture2D	saveIconTexture;
-		// static Texture2D	eyeIconTexture;
-
 		public Action< Rect >	onDrawAdditionalOptions;
+
+		GUIContent			recenterGraphContent;
+		GUIContent			locateGraphContent;
+		GUIContent			saveGraphContent;
+		GUIContent			resetLayoutContent;
 
 		public override void OnLoadStyle()
 		{
-			rencenterIconTexture = Resources.Load< Texture2D >("Icons/ic_recenter");
-			fileIconTexture = Resources.Load< Texture2D >("Icons/ic_file");
-			saveIconTexture = Resources.Load< Texture2D >("Icons/ic_save");
-			// eyeIconTexture = Resources.Load< Texture2D >("Icons/ic_eye");
+			Texture2D rencenterIconTexture = Resources.Load< Texture2D >("Icons/ic_recenter");
+			Texture2D fileIconTexture = Resources.Load< Texture2D >("Icons/ic_file");
+			Texture2D saveIconTexture = Resources.Load< Texture2D >("Icons/ic_save");
+			Texture2D resetIconTexture = Resources.Load< Texture2D >("Icons/ic_reset");
 			
 			navBarBackgroundStyle = new GUIStyle("NavBarBackground");
+
+			recenterGraphContent = new GUIContent(rencenterIconTexture, "Recenter graph");
+			locateGraphContent = new GUIContent(fileIconTexture, "Locate graph asset file");
+			saveGraphContent = new GUIContent(saveIconTexture, "Save graph as text file");
+			resetLayoutContent = new GUIContent(resetIconTexture, "Reset layout");
 		}
 		
 		public override void DrawDefault(Rect graphRect)
@@ -43,18 +48,21 @@ namespace PW.Editor
 				Rect optionBarRect = EditorGUILayout.BeginHorizontal(navBarBackgroundStyle, GUILayout.MaxHeight(40), GUILayout.ExpandWidth(true));
 				{
 					//recenter the graph
-					if (GUILayout.Button(rencenterIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+					if (GUILayout.Button(recenterGraphContent, GUILayout.Width(30), GUILayout.Height(30)))
 						graphRef.panPosition = graphRect.center;
 					
 					//ping the current PW object in the project window
-					if (GUILayout.Button(fileIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+					if (GUILayout.Button(locateGraphContent, GUILayout.Width(30), GUILayout.Height(30)))
 						EditorGUIUtility.PingObject(graphRef);
 
 					if (onDrawAdditionalOptions != null)
 						onDrawAdditionalOptions(optionBarRect);
 
-					if (GUILayout.Button(saveIconTexture, GUILayout.Width(30), GUILayout.Height(30)))
+					if (GUILayout.Button(saveGraphContent, GUILayout.Width(30), GUILayout.Height(30)))
 						saveGraph = true;
+					
+					if (GUILayout.Button(resetLayoutContent, GUILayout.Width(30), GUILayout.Height(30)))
+						graphEditor.ResetLayout();
 				}
 				EditorGUILayout.EndHorizontal();
 		

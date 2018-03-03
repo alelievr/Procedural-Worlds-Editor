@@ -21,7 +21,7 @@ namespace PW.Editor
 		static MethodInfo			gradientField;
 		
 		SerializableGradient		oldGradient;
-		bool						needUpdate = false;
+		bool						needUpdate;
 	
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{

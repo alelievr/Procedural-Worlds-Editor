@@ -21,7 +21,7 @@ namespace PW.Core
 		public PWMainGraph			previewGraph = null;
 
 		[System.NonSerialized]
-		public int					calls = 0;
+		public int					calls;
 
 		public override void OnNodeCreation()
 		{

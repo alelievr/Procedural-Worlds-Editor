@@ -144,6 +144,13 @@ public partial class PWGraphEditor
 				e.Use();
 			}
 		}
+		
+		//reset current layout:
+		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.R && e.shift)
+		{
+			ResetLayout();
+			e.Use();
+		}
 
 		CommandEvents();
 		

@@ -38,10 +38,6 @@ namespace PW.Editor
 
 			PWGUI.Sampler2DPreview(node.output);
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
+	
 	}
 }

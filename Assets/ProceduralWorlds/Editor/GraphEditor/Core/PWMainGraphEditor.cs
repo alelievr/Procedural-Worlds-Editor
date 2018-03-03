@@ -13,9 +13,6 @@ using Object = UnityEngine.Object;
 [System.Serializable]
 public partial class PWMainGraphEditor : PWGraphEditor
 {
-
-	[SerializeField]
-	PWLayout				layout;
 	
 	//events fields
 	Vector2					lastMousePosition;
@@ -93,17 +90,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				LoadGraph(newGraph);
 			
 			return ;
-		}
-		
-		//reset current layout:
-		if (e.type == EventType.KeyDown && e.keyCode == KeyCode.R && e.shift)
-		{
-			if (graph != null)
-			{
-				graph.layoutSettings.settings.Clear();
-				layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
-				e.Use();
-			}
 		}
 
 		layout.DrawLayout();

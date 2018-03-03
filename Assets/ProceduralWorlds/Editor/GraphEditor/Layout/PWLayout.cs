@@ -10,17 +10,17 @@ namespace PW.Editor
 {
 	public class PWLayout
 	{
-		PWLayoutPanel				mainPanel;
+		static Event					e { get { return Event.current; } }
 
-		static Event				e { get { return Event.current; } }
+		PWGraphEditor					graphEditor;
 
-		PWGraphEditor				graphEditor;
+		PWGraph							oldGraph;
 
-		PWGraph						oldGraph;
+		Stack< PWLayoutOrientation >	currentOrientation = new Stack< PWLayoutOrientation >();
 
-		public delegate void		DrawPanelDelegate(Rect panelRect);
+		List< PWLayoutSeparator >		loadedSeparators = new List< PWLayoutSeparator >();
 
-		PWLayoutPanel				lastPanel;
+		List< Action > layoutActions = new List< Action >();
 
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
 		public PWLayout(PWGraphEditor graphEditor)
@@ -28,155 +28,82 @@ namespace PW.Editor
 			this.graphEditor = graphEditor;
 		}
 
-		void DrawLayoutPanel(PWLayoutPanel panel)
-		{
-			var setting = panel.separator.GetLayoutSetting();
-
-
-			if (setting == null)
-				return ;
-
-			if (setting.second)
-			{
-				panel.separator.Begin();
-				foreach (var p in panel.childPanels)
-					DrawLayoutPanel(p);
-				Rect r = panel.separator.Split();
-				panel.Draw(r);
-				EditorGUILayout.LabelField("GKLJKLHRJHFIUHSLKJFEOJ");
-				panel.separator.End();
-			}
-			else
-			{
-				Rect r = panel.separator.Begin();
-				EditorGUILayout.LabelField("IOFJEOIJEIOGJOEIG");
-				panel.Draw(r);
-				panel.separator.Split();
-				foreach (var p in panel.childPanels)
-					DrawLayoutPanel(p);
-				panel.separator.End();
-			}
-		}
-
 		public void DrawLayout()
 		{
 			if (oldGraph != null && oldGraph != graphEditor.graph && graphEditor.graph != null)
 				UpdateLayoutSettings(graphEditor.graph.layoutSettings);
 
-			DrawLayoutPanel(mainPanel);
+			foreach (var layoutAction in layoutActions)
+				layoutAction();
 
 			oldGraph = graphEditor.graph;
 		}
 
-		PWLayoutPanel AddPanel(PWLayoutSetting defaultSetting, PWLayoutSeparator sep, PWLayoutPanel panel, PWLayoutPanel parentPanel)
+		public void BeginHorizontal()
 		{
-			sep.Initialize(graphEditor);
-
-			sep.UpdateLayoutSetting(defaultSetting);
+			currentOrientation.Push(PWLayoutOrientation.Horizontal);
+			layoutActions.Add(() => EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true)));
+		}
 		
-			if (parentPanel == null)
-				parentPanel = lastPanel;
-			
-			if (parentPanel == panel)
-				return null;
-
-			if (mainPanel == null)
-				mainPanel = panel;
-			else
-				parentPanel.childPanels.Add(panel);
-
-			panel.separator = sep;
-			lastPanel = panel;
-
-			return panel;
+		public void EndHorizontal()
+		{
+			layoutActions.Add(() => EditorGUILayout.EndHorizontal());
+			currentOrientation.Pop();
 		}
 
-		public PWLayoutPanel AddVerticalResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		public void BeginVertical()
 		{
-			return AddPanel(defaultSetting, new ResizablePanelSeparator(PWLayoutOrientation.Vertical), panel, parentPanel);
+			currentOrientation.Push(PWLayoutOrientation.Vertical);
+			layoutActions.Add(() => EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true)));
+		}
+		
+		public void EndVertical()
+		{
+			layoutActions.Add(() => EditorGUILayout.EndVertical());
+			currentOrientation.Pop();
 		}
 
-		public PWLayoutPanel AddHorizontalResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		void AddPanel(PWLayoutSeparator sep, PWLayoutPanel panel)
 		{
-			return AddPanel(defaultSetting, new ResizablePanelSeparator(PWLayoutOrientation.Horizontal), panel, parentPanel);
+			layoutActions.Add(() => {
+				Rect r = sep.Begin();
+				panel.Draw(r);
+				sep.End();
+			});
+			loadedSeparators.Add(sep);
 		}
 
-		public PWLayoutPanel AddVerticalStaticPanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		public void ResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
 		{
-			return AddPanel(defaultSetting, new StaticPanelSeparator(PWLayoutOrientation.Vertical), panel, parentPanel);
+			var sep = new ResizablePanelSeparator(currentOrientation.Peek());
+			sep.UpdateLayoutSetting(defaultSetting);
+			AddPanel(sep, panel);
 		}
 
-		public PWLayoutPanel AddHorizontalStaticPanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel, PWLayoutPanel parentPanel = null)
+		public void AutoSizePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
 		{
-			return AddPanel(defaultSetting, new StaticPanelSeparator(PWLayoutOrientation.Horizontal), panel, parentPanel);
+			var sep = new StaticPanelSeparator(currentOrientation.Peek());
+			sep.UpdateLayoutSetting(defaultSetting);
+			AddPanel(sep, panel);
 		}
 
 		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
 		{
 			int		index = 0;
 
-			var panels = new Stack< PWLayoutPanel >();
-
-			panels.Push(mainPanel);
-
-			while (panels.Count != 0)
+			foreach (var sep in loadedSeparators)
 			{
-				var panel = panels.Pop();
-
 				if (layoutSettings.settings.Count <= index)
 					layoutSettings.settings.Add(new PWLayoutSetting());
-				
+
 				var layoutSetting = layoutSettings.settings[index];
-
-				var newLayout = panel.separator.UpdateLayoutSetting(layoutSetting);
-
-				//if the old layout was not initialized, we assign the new into the layout list of the graph.
+				var newLayout = sep.UpdateLayoutSetting(layoutSetting);
 				if (newLayout != null)
 					layoutSettings.settings[index] = newLayout;
-
-				foreach (var p in panel.childPanels)
-					panels.Push(p);
-
+				
 				index++;
 			}
 		}
-
-		/*public void Render2ResizablePanel(Rect position)
-		{
-			//split view and call delegates
-			h1.Begin();
-			Rect firstPanel = h2.Begin();
-			// Debug.Log("firstPanel: " + firstPanel);
-			if (onDrawSettingsBar != null)
-				onDrawSettingsBar(firstPanel);
-			Rect optionBarRect = h2.Split(resizeHandleColor);
-			if (onDrawOptionBar != null)
-				onDrawOptionBar(optionBarRect);
-			optionBarRect = GUILayoutUtility.GetLastRect();
-			h2.End();
-			Rect secondPanel = h1.Split(resizeHandleColor);
-			
-			if (onDrawNodeSelector != null)
-				onDrawNodeSelector(secondPanel);
-			h1.End();
-			
-			if (e.type == EventType.Repaint)
-			{
-				//add the handleWidth to the panel for event mask + 2 pixel for UX
-				firstPanel.width += h1.handleWidth + 2;
-				secondPanel.xMin -= h2.handleWidth + 2;
-
-				//update event masks with our GUI parts
-				graphEditor.eventMasks[0] = firstPanel;
-				graphEditor.eventMasks[1] = optionBarRect;
-				graphEditor.eventMasks[2] = secondPanel;
-			}
-
-			//debug:
-			// Random.InitState(42);
-			// foreach (var mask in graphEditor.eventMasks)
-				// EditorGUI.DrawRect(mask.Value, Random.ColorHSV());
-		}*/
 
 	}
 }

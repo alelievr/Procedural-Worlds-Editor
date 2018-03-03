@@ -63,7 +63,7 @@ namespace PW.Core
 		*/
 
 
-		static bool		debug = false;
+		static bool		debug;
 
 		enum PWGraphToken
 		{
@@ -158,29 +158,29 @@ namespace PW.Core
 			public static List< PWGraphCommandTokenSequence > validSequences = new List< PWGraphCommandTokenSequence >()
 			{
 				//New Node command
-				new PWGraphCommandTokenSequence() {
+				new PWGraphCommandTokenSequence {
 					type = PWGraphCommandType.NewNode,
 					options = PWGraphTokenSequence.newNodeAttrOption,
 					requiredTokens = PWGraphTokenSequence.newNode,
 				},
 				//New Node position command
-				new PWGraphCommandTokenSequence() {
+				new PWGraphCommandTokenSequence {
 					type = PWGraphCommandType.NewNodePosition,
 					requiredTokens = PWGraphTokenSequence.newNodePosition,
 					options = PWGraphTokenSequence.newNodeAttrOption,
 				},
 				//New Link command
-				new PWGraphCommandTokenSequence() {
+				new PWGraphCommandTokenSequence {
 					type = PWGraphCommandType.Link,
 					requiredTokens = PWGraphTokenSequence.newLink,
 				},
 				//New Link Anchor command
-				new PWGraphCommandTokenSequence() {
+				new PWGraphCommandTokenSequence {
 					type = PWGraphCommandType.LinkAnchor,
 					requiredTokens = PWGraphTokenSequence.newLinkAnchor
 				},
 				//New Link Anchor using names command
-				new PWGraphCommandTokenSequence() {
+				new PWGraphCommandTokenSequence {
 					type = PWGraphCommandType.LinkAnchorName,
 					requiredTokens = PWGraphTokenSequence.newLinkAnchorName
 				},

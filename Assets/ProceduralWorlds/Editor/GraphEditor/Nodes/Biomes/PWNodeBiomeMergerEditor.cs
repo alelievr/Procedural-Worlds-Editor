@@ -56,9 +56,5 @@ namespace PW.Editor
 			update = true;
 		}
 
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

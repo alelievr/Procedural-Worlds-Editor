@@ -26,7 +26,7 @@ namespace PW.Core
 
 
 		//anchor name
-		public string				name = null;
+		public string				name;
 		//enabled ?
 		public bool					enabled = true;
 		//number of links connected to this anchor

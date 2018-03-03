@@ -8,7 +8,7 @@ namespace PW.Editor
 {
 	public class PWBiomeMapSettingsPopup : PWPopup
 	{
-		public static bool debug = false;
+		public static bool debug;
 		
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{

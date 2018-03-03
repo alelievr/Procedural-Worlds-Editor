@@ -27,10 +27,10 @@ namespace PW.Editor
 			var nodeSelectorPanel = CreateLayoutPanel< PWGraphNodeSelectorPanel >(graphEditor);
 			var optionPanel = CreateLayoutPanel< PWGraphOptionPanel >(graphEditor);
 
-			float minWidth = 40;
+			float minWidth = 60;
 			int	p20 = Mathf.FloorToInt(graphEditor.position.width * .2f);
+			int	p15 = Mathf.FloorToInt(graphEditor.position.width * .15f);
 			int	p50 = Mathf.FloorToInt(graphEditor.position.width * .5f);
-			int	p80 = Mathf.FloorToInt(graphEditor.position.width * .8f);
 
 			var resizablePanel1Settings = new PWLayoutSetting {
 				separatorPosition = p20,
@@ -39,25 +39,27 @@ namespace PW.Editor
 				maxWidth = p50,
 				initialized = true,
 			};
+			//the layout infos (width, min, max, ...) are inverted because leftBar is true
 			var resizablePanel2Settings = new PWLayoutSetting {
-				separatorPosition = p80,
+				separatorPosition = p15,
 				separatorWidth = 4,
-				minWidth = p50,
-				maxWidth = graphEditor.position.width - minWidth,
+				minWidth = minWidth,
+				maxWidth = p50,
 				initialized = true,
-				// second = true,
+				leftBar = true,
 			};
 			var staticPanelSettings = new PWLayoutSetting {
 				separatorPosition = EditorGUIUtility.singleLineHeight,
 				initialized = true,
 			};
 
-			layout.AddVerticalResizablePanel(resizablePanel1Settings, settingsPanel);
-			// layout.AddHorizontalStaticPanel(staticPanelSettings, optionPanel);
-			layout.AddVerticalResizablePanel(resizablePanel2Settings, nodeSelectorPanel);
-			
-			// Debug.Log("Sep2: " + optionPanel.separator.GetLayoutSetting());
-
+			layout.BeginHorizontal();
+			{
+				layout.ResizablePanel(resizablePanel1Settings, settingsPanel);
+				layout.AutoSizePanel(staticPanelSettings, optionPanel);
+				layout.ResizablePanel(resizablePanel2Settings, nodeSelectorPanel);
+			}
+			layout.EndHorizontal();
 
 			if (graphEditor.graph != null)
 				layout.UpdateLayoutSettings(graphEditor.graph.layoutSettings);

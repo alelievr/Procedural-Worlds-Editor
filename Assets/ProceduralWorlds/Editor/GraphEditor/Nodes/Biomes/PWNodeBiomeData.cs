@@ -36,10 +36,5 @@ namespace PW.Editor
 			else
 				EditorGUILayout.LabelField("Connect a terrain plz.");
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

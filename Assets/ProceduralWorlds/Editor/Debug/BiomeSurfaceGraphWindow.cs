@@ -14,6 +14,13 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 
 	List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
 	ReorderableList				switchList;
+	
+	[SerializeField]
+	List< BiomeSurfaceGraph.BiomeSurfaceCell > cellMap = new List< BiomeSurfaceGraph.BiomeSurfaceCell >();
+	[SerializeField]
+	List< Rect >				windowMap = new List< Rect >();
+	
+	bool						mouseOverNode;
 
 	float						searchHeight;
 	float						searchSlope;
@@ -91,13 +98,6 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 		if (surfaceSwitches.Count > 0)
 			biomeSurfaceGraph.BuildGraph(surfaceSwitches);
 	}
-
-	[SerializeField]
-	List< BiomeSurfaceGraph.BiomeSurfaceCell > cellMap = new List< BiomeSurfaceGraph.BiomeSurfaceCell >();
-	[SerializeField]
-	List< Rect > windowMap = new List< Rect >();
-	
-	bool mouseOverNode = false;
 
 	public void OnGUI()
 	{

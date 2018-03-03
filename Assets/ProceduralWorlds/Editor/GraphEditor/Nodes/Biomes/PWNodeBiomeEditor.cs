@@ -48,10 +48,5 @@ namespace PW.Editor
 					AssetDatabase.OpenAsset(node.biomeGraph);
 			}
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

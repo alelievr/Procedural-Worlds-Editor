@@ -13,15 +13,15 @@ namespace PW.Editor
 	//Node core rendering
 	public abstract partial class PWNodeEditor
 	{
-		static GUIStyle 			renameNodeTextFieldStyle = null;
-		static GUIStyle				innerNodePaddingStyle = null;
-		static GUIStyle				nodeStyle = null;
-		static bool					styleLoadedStatic = false;
+		static GUIStyle 			renameNodeTextFieldStyle;
+		static GUIStyle				innerNodePaddingStyle;
+		static GUIStyle				nodeStyle;
+		static bool					styleLoadedStatic;
 		[System.NonSerialized]
-		bool						styleLoaded = false;
+		bool						styleLoaded;
 
-		List< object >				propertiesBeforeGUI = null;
-		List< object >				propertiesAfterGUI = null;
+		List< object >				propertiesBeforeGUI;
+		List< object >				propertiesAfterGUI;
 
 		void LoadCoreResources()
 		{

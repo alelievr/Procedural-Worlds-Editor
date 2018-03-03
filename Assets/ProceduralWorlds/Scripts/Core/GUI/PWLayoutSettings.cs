@@ -19,7 +19,7 @@ namespace PW.Core
 		public float	separatorWidth;
 
 		public bool		vertical;
-		public bool		second;
+		public bool		leftBar;
 		
 		public bool		initialized;
 	}

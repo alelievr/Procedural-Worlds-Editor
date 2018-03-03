@@ -17,31 +17,33 @@ public partial class PWGraphEditor : PWEditorWindow
 {
 
 	//the reference to the graph in public for the AssetHandlers class
-	public PWGraph				graph;
-	public PWBiomeGraph			biomeGraph { get { return graph as PWBiomeGraph; } }
-	public PWMainGraph			mainGraph { get { return graph as PWMainGraph; } }
+	public PWGraph					graph;
+	public PWBiomeGraph				biomeGraph { get { return graph as PWBiomeGraph; } }
+	public PWMainGraph				mainGraph { get { return graph as PWMainGraph; } }
 
 
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.
 	public Dictionary< int, Rect >	eventMasks = new Dictionary< int, Rect >();
-	EventType					savedEventType;
-	bool						restoreEvent;
+	EventType						savedEventType;
+	bool							restoreEvent;
 
 
 	protected PWGraphEditorEventInfo editorEvents { get { return graph.editorEvents; } }
-	protected PWGUIManager		PWGUI = new PWGUIManager();
+	protected PWGUIManager			PWGUI = new PWGUIManager();
 
 
-	//size of the current window, updated each frame
-	protected Vector2			windowSize;
-	protected DelayedChanges	delayedChanges = new DelayedChanges();
+	//Editor datas
+	protected Vector2				windowSize;
+	[SerializeField]
+	protected PWLayout				layout;
+	protected DelayedChanges		delayedChanges = new DelayedChanges();
 
 
 	//Is the editor on MacOS ?
-	bool 						MacOS;
+	bool 							MacOS;
 	//Is the command (on MacOs) or control (on other OSs) is pressed
-	bool						commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
+	bool							commandOSKey { get { return (MacOS && e.command) || (!MacOS && e.control); } }
 
 	//public delegates:
 	public delegate void			NodeAction(PWNode node);
@@ -256,6 +258,15 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		if (OnGraphChanged != null)
 			OnGraphChanged(null);
+	}
+
+	public void ResetLayout()
+	{
+		if (graph != null)
+		{
+			graph.layoutSettings.settings.Clear();
+			layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+		}
 	}
 
 	public override void OnDisable()

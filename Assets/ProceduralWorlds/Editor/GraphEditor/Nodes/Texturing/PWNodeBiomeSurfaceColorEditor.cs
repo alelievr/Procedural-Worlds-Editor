@@ -20,10 +20,5 @@ namespace PW.Editor
 		{
 			PWGUI.ColorPicker("Base color", ref node.surfaceColor.baseColor);
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

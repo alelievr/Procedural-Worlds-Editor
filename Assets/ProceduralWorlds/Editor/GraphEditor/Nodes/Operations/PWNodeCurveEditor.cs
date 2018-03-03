@@ -34,9 +34,5 @@ namespace PW.Editor
 
 			PWGUI.SamplerPreview(node.outputTerrain);
 		}
-		
-		public override void OnNodeDisable()
-		{
-		}
 	}
 }

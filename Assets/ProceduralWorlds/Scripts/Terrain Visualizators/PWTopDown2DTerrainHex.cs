@@ -7,11 +7,10 @@ using PW.Biomator;
 
 public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 {
+	static readonly Gradient			rainbow = PWUtils.CreateRainbowGradient();
 
-	static Gradient			rainbow = null;
-
-	static Mesh				topDownTerrainMesh = null;
-	static int				topDownTerrainMeshSize = 0;
+	static Mesh				topDownTerrainMesh;
+	static int				topDownTerrainMeshSize;
 
 	void	GenerateTopDownTerrainMesh()
 	{
@@ -71,12 +70,6 @@ public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 			for (int z = 0; z < chunkSize; z++)
 			{
 				Vector4 biomeInfo = Vector4.zero;
-				// var biomePoint = biomes.GetBiomeBlendInfo(x, z);
-
-				// biomeInfo.x = biomePoint.firstBiomeId;
-				// biomeInfo.y = biomePoint.firstBiomeBlendPercent;
-				// biomeInfo.z = biomePoint.secondBiomeId;
-				// biomeInfo.w = biomePoint.secondBiomeBlendPercent;
 				blendInfos.Add(biomeInfo);
 			}
 		topDownTerrainMesh.SetUVs(1, blendInfos);
@@ -94,9 +87,6 @@ public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 			return null;
 
 		Debug.Log("Generating chunk at " + pos);
-		
-		if (rainbow == null)
-			rainbow = PWUtils.CreateRainbowGradient();
 		
 		//create the terrain texture:
 		//TODO: bind the blendMap with biome maps to the terrain shader
@@ -140,10 +130,11 @@ public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 			return ;
 		GameObject		g = chunkGameObject as GameObject;
 
-		if (g == null) //if gameobject have been destroyed by user and reference was lost.
+		//if gameobject have been destroyed by user and reference was lost.
+		if (g == null)
 		{
 			chunkGameObject = RequestCreate(chunk, pos);
-			g = chunkGameObject as GameObject;
+			// g = chunkGameObject as GameObject;
 		}
 		// g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
 	}

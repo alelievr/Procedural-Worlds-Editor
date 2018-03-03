@@ -8,10 +8,10 @@ using PW.Biomator;
 public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 {
 
-	static Gradient			rainbow = null;
+	static Gradient			rainbow;
 
-	static Mesh				topDownTerrainMesh = null;
-	static int				topDownTerrainMeshSize = 0;
+	static Mesh				topDownTerrainMesh;
+	static int				topDownTerrainMeshSize;
 
 	//TODO: generate texture based on texturing dict in the chunkData
 	//TODO: generate Uvs based on this texture
@@ -74,12 +74,6 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 			for (int z = 0; z < chunkSize; z++)
 			{
 				Vector4 biomeInfo = Vector4.zero;
-				// var biomePoint = biomes.GetBiomeBlendInfo(x, z);
-
-				// biomeInfo.x = biomePoint.firstBiomeId;
-				// biomeInfo.y = biomePoint.firstBiomeBlendPercent;
-				// biomeInfo.z = biomePoint.secondBiomeId;
-				// biomeInfo.w = biomePoint.secondBiomeBlendPercent;
 				blendInfos.Add(biomeInfo);
 			}
 		topDownTerrainMesh.SetUVs(1, blendInfos);

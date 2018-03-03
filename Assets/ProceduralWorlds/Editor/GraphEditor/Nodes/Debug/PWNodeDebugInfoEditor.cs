@@ -68,10 +68,5 @@ namespace PW.Editor
 			else
 				EditorGUILayout.LabelField("null");
 		}
-
-		public override void OnNodeDisable()
-		{
-			
-		}
 	}
 }

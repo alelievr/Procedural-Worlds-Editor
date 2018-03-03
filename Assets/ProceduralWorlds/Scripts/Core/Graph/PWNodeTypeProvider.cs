@@ -15,8 +15,8 @@ namespace PW.Core
 
         public class PWNodeTypeInfo
         {
-			public string				name = null;
-            public Type					type = null;
+			public string				name;
+            public Type					type;
 
 			public PWNodeTypeInfo(string name, Type type)
 			{

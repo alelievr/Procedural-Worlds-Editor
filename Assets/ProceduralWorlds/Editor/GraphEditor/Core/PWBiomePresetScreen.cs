@@ -48,16 +48,19 @@ namespace PW.Editor
 			ImportGraphTextAsset("GraphPresets/Biome/PlainTest1");
 		}
 	
+		//TODO: preset for mountain biome
 		void BuildMountains()
 		{
 	
 		}
 	
+		//TODO: preset for mesa biome
 		void BuildMesa()
 		{
 	
 		}
 	
+		//TODO: preset for swampland biome
 		void BuildSwampland()
 		{
 	

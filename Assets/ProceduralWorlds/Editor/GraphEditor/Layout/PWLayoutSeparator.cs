@@ -6,6 +6,8 @@ namespace PW.Editor
 	public abstract class PWLayoutSeparator
 	{
 		protected PWLayoutSetting	layoutSetting;
+		
+		protected Event				e { get { return Event.current; } }
 
 		public virtual void Initialize(PWGraphEditor graphEditor) {}
 
@@ -28,8 +30,6 @@ namespace PW.Editor
 		}
 
 		public abstract Rect Begin();
-
-		public abstract Rect Split();
 
 		public abstract void End();
 	}
