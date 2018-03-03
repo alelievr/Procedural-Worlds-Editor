@@ -8,11 +8,11 @@ namespace PW.Editor
 	public class PWGUIMaterialPreview
 	{
 	
-		PWGUIMeshPreview		objectPreview;
+		readonly PWGUIMeshPreview	objectPreview;
 
-		Mesh					previewMesh;
+		readonly Mesh				previewMesh;
 
-		bool					showSceneHiddenObjects;
+		bool						showSceneHiddenObjects;
 
 		public PWGUIMaterialPreview(PrimitiveType previewPrimitive = PrimitiveType.Sphere)
 		{

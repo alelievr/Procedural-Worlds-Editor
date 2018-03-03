@@ -10,9 +10,6 @@ using PW.Biomator;
 
 public class PWBiomeGraphEditor : PWGraphEditor
 {
-	
-	[SerializeField]
-	PWLayout				layout;
 
 	List< PWBiomeGraph >	biomeGraphs = new List< PWBiomeGraph >();
 	ReorderableList			biomeGraphList;
@@ -65,14 +62,10 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		if (graph == null)
 			return ;
-		
-		// settingsBar.onDraw = DrawBiomeSettingsBar;
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)
 	{
-		// settingsBar.DrawTerrainPreview(rect);
-
 		GUI.SetNextControlName("PWName");
 		graph.name = EditorGUILayout.TextField("Biome name: ", graph.name);
 

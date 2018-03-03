@@ -65,8 +65,8 @@ namespace PW.Editor
 				windowToUpdate.SendEvent(evt);
 		}
 		
-		protected abstract void OnGUIEnable();
-		protected abstract void GUIStart();
+		protected virtual void OnGUIEnable() {}
+		protected virtual void GUIStart() {}
 		protected abstract void GUIUpdate();
 		
 	}

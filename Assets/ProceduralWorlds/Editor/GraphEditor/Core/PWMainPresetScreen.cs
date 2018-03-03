@@ -9,16 +9,6 @@ namespace PW.Editor
 {
 	public class PWMainPresetScreen : PWPresetScreen
 	{
-		readonly Texture2D	preset2DSideViewTexture;
-		readonly Texture2D	preset2DTopDownViewTexture;
-		readonly Texture2D	preset3DPlaneTexture;
-		readonly Texture2D	preset3DSphericalTexture;
-		readonly Texture2D	preset3DCubicTexture;
-		readonly Texture2D	preset1DDensityFieldTexture;
-		readonly Texture2D	preset2DDensityFieldTexture;
-		readonly Texture2D	preset3DDensityFieldTexture;
-		// readonly Texture2D	presetMeshTetxure;
-	
 		PWMainGraph	mainGraph;
 	
 		public PWMainPresetScreen(PWMainGraph mainGraph)
@@ -26,15 +16,15 @@ namespace PW.Editor
 			this.mainGraph = mainGraph;
 			
 			//loading preset panel images
-			preset2DSideViewTexture = Resources.Load< Texture2D >("preview2DSideView");
-			preset2DTopDownViewTexture = Resources.Load< Texture2D >("preview2DTopDownView");
-			preset3DPlaneTexture = Resources.Load< Texture2D >("preview3DPlane");
-			preset3DSphericalTexture = Resources.Load< Texture2D >("preview3DSpherical");
-			preset3DCubicTexture = Resources.Load< Texture2D >("preview3DCubic");
-			preset1DDensityFieldTexture= Resources.Load< Texture2D >("preview1DDensityField");
-			preset2DDensityFieldTexture = Resources.Load< Texture2D >("preview2DDensityField");
-			preset3DDensityFieldTexture = Resources.Load< Texture2D >("preview3DDensityField");
-			// presetMeshTetxure = Resources.Load< Texture2D >("previewMesh");
+			Texture2D preset2DSideViewTexture = Resources.Load< Texture2D >("preview2DSideView");
+			Texture2D preset2DTopDownViewTexture = Resources.Load< Texture2D >("preview2DTopDownView");
+			Texture2D preset3DPlaneTexture = Resources.Load< Texture2D >("preview3DPlane");
+			Texture2D preset3DSphericalTexture = Resources.Load< Texture2D >("preview3DSpherical");
+			Texture2D preset3DCubicTexture = Resources.Load< Texture2D >("preview3DCubic");
+			Texture2D preset1DDensityFieldTexture= Resources.Load< Texture2D >("preview1DDensityField");
+			Texture2D preset2DDensityFieldTexture = Resources.Load< Texture2D >("preview2DDensityField");
+			Texture2D preset3DDensityFieldTexture = Resources.Load< Texture2D >("preview3DDensityField");
+			// Texture2D presetMeshTetxure = Resources.Load< Texture2D >("previewMesh");
 			
 			PresetCellList	presets = new PresetCellList()
 			{
@@ -62,6 +52,7 @@ namespace PW.Editor
 	
 		void Build2DSideView()
 		{
+			//TODO
 		}
 	
 		void Build2DTopDown()
@@ -71,32 +62,32 @@ namespace PW.Editor
 	
 		void Build3DPlanar()
 		{
-	
+			//TODO
 		}
 	
 		void Build3DSpherical()
 		{
-	
+			//TODO
 		}
 	
 		void Build3DCubic()
 		{
-	
+			//TODO
 		}
 	
 		void Build1DDensity()
 		{
-	
+			//TODO
 		}
 	
 		void Build2DDensity()
 		{
-	
+			//TODO
 		}
 	
 		void Build3DDensity()
 		{
-			
+			//TODO
 		}
 		
 	}

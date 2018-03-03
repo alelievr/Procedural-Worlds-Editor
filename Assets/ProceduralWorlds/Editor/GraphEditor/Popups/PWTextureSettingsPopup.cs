@@ -26,14 +26,6 @@ namespace PW.Editor
 			PWTextureSettingsPopup.debug = debug;
 		}
 
-		protected override void GUIStart()
-		{
-		}
-	
-		protected override void OnGUIEnable()
-		{
-		}
-
 		protected override void GUIUpdate()
 		{
 			EditorGUI.BeginChangeCheck();

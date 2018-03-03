@@ -13,9 +13,7 @@ namespace PW.Editor
 		static DefaultGUISkin	defaultGUISkin;
 	
 		//private constructor so the class can't be instatiated somewhere else than in the static Get
-		private DefaultGUISkin()
-		{
-		}
+		private DefaultGUISkin() {}
 	
 		public static DefaultGUISkin Get()
 		{

@@ -24,7 +24,7 @@ namespace PW.Core
 
 		PWGraph						currentGraph;
 
-		public bool					hasProcessed = false;
+		public bool					hasProcessed;
 
 		#region Initialization
 

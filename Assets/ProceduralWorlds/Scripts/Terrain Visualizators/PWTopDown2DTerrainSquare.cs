@@ -11,7 +11,7 @@ public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 	static Gradient			rainbow;
 
 	static Mesh				topDownTerrainMesh;
-	static int				topDownTerrainMeshSize;
+	static int				topDownTerrainMeshSize = 0;
 
 	//TODO: generate texture based on texturing dict in the chunkData
 	//TODO: generate Uvs based on this texture

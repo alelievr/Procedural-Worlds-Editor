@@ -28,11 +28,6 @@ namespace PW.Editor
 			PWColorPickerPopup.thumbPosition = guiSettings.thumbPosition;
 		}
 
-		protected override void GUIStart()
-		{
-
-		}
-
 		protected override void OnGUIEnable()
 		{
 			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;

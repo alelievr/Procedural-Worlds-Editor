@@ -7,10 +7,8 @@ using PW.Biomator;
 
 public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 {
-	static readonly Gradient			rainbow = PWUtils.CreateRainbowGradient();
-
 	static Mesh				topDownTerrainMesh;
-	static int				topDownTerrainMeshSize;
+	static int				topDownTerrainMeshSize = 0;
 
 	void	GenerateTopDownTerrainMesh()
 	{

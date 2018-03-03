@@ -6,6 +6,7 @@ using PW.Core;
 using System;
 using Random = UnityEngine.Random;
 
+using System.Linq;
 namespace PW.Editor
 {
 	public class PWLayout
@@ -19,6 +20,7 @@ namespace PW.Editor
 		Stack< PWLayoutOrientation >	currentOrientation = new Stack< PWLayoutOrientation >();
 
 		List< PWLayoutSeparator >		loadedSeparators = new List< PWLayoutSeparator >();
+		List< PWLayoutPanel >			loadedPanels = new List< PWLayoutPanel >();
 
 		List< Action > layoutActions = new List< Action >();
 
@@ -71,6 +73,7 @@ namespace PW.Editor
 				sep.End();
 			});
 			loadedSeparators.Add(sep);
+			loadedPanels.Add(panel);
 		}
 
 		public void ResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
@@ -103,6 +106,11 @@ namespace PW.Editor
 				
 				index++;
 			}
+		}
+
+		public T GetPanel< T >() where T : PWLayoutPanel
+		{
+			return loadedPanels.FirstOrDefault(p => p is T) as T;
 		}
 
 	}

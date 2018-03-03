@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace PW.Editor
 {
-	public class PWNodeScriptMenuItem
+	public static class PWNodeScriptMenuItem
 	{
 	
 		static string		nodeTemplate = Application.dataPath + "/ProceduralWorlds/Editor/PWNodeTemplate.cs.txt";

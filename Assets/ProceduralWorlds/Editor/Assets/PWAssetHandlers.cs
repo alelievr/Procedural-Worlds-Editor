@@ -8,7 +8,7 @@ using PW.Biomator;
 
 namespace PW.Editor
 {
-	public class AssetHandlers
+	public class PWAssetHandlers
 	{
 	
 		public static readonly string mainGraphFileName = "New ProceduralWorld";

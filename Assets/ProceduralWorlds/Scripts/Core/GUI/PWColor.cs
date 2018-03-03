@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace PW.Core
 {
-	public static class PWColor {
+	public static class PWColor
+	{
 		
-		public static Color	orange = new Color(1.000f, 0.647f, 0.000f);
+		public static readonly Color	orange = new Color(1.000f, 0.647f, 0.000f);
 		
 		public static Color	HexToColor(int color, bool missingAlpha = true)
 		{

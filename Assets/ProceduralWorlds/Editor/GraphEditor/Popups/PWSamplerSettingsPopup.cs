@@ -35,10 +35,6 @@ namespace PW.Editor
 			controlId = guiSettings.GetHashCode();
 		}
 
-		protected override void OnGUIEnable()
-		{
-		}
-
 		protected override void GUIStart()
 		{
 			gradientField = typeof(EditorGUILayout).GetMethod(

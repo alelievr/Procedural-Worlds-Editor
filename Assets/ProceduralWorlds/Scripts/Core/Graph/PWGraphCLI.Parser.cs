@@ -63,7 +63,7 @@ namespace PW.Core
 		*/
 
 
-		static bool		debug;
+		static readonly bool		debug = false;
 
 		enum PWGraphToken
 		{

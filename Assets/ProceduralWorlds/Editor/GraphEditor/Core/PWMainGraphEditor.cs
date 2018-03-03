@@ -101,10 +101,16 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	{
 		if (newGraph == null)
 			return ;
+		
+		string path = AssetDatabase.GetAssetPath(newGraph);
+		if (String.IsNullOrEmpty(PWGraphFactory.GetMainGraphCreateLocation(path)))
+			Debug.LogWarning("Your main graph is not inside a Resources folder/don't have a dedicated folder");
+		
+		var settingsPanel = layout.GetPanel< PWGraphSettingsPanel >();
 
-		/*settingsBar.onDraw = (rect) =>
+		settingsPanel.onDraw = (rect) =>
 		{
-			settingsBar.DrawDefault(rect);
+			settingsPanel.DrawDefault(rect);
 			
 			EditorGUI.BeginChangeCheck();
 
@@ -130,7 +136,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 
 			if (PWGUI.BeginFade("Renderer settings", ref terrainSettingsFoldout, false))
 			{
-				terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
+				// terrainManager.DrawTerrainSettings(rect, mainGraph.materializerType);
 			}
 			PWGUI.EndFade();
 
@@ -170,7 +176,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(graphProcessKey);
-		};*/
+		};
 	}
 
 }

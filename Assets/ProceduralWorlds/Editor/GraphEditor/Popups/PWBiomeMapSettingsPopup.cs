@@ -24,10 +24,6 @@ namespace PW.Editor
 
 		}
 	
-		protected override void GUIStart()
-		{
-		}
-		
 		protected override void GUIUpdate()
 		{
 			EditorGUI.BeginChangeCheck();

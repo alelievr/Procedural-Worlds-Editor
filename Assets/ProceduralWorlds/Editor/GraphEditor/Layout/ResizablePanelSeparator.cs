@@ -36,6 +36,8 @@ namespace PW.Editor
 					lastRect = r;
 			}
 
+			lastRect.width = internHandlerPosition;
+
 			return lastRect;
 		}
 
