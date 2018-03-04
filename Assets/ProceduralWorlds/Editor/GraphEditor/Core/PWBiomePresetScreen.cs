@@ -23,15 +23,20 @@ namespace PW.Editor
 			mesaTexture = Resources.Load< Texture2D >("");
 			swamplandTexture = Resources.Load< Texture2D >("");
 			
-			PresetCellList	presets = new PresetCellList()
+			PresetCellList	earthLikePresets = new PresetCellList()
 			{
 				{"Earth-like", plainTexture, "Plains / Prairies", BuildPlain},
 				{"Earth-like", mountainTexture, "Mountains", BuildMountains},
 				{"Earth-like", mesaTexture, "Mesas", BuildMesa},
 				{"Earth-like", swamplandTexture, "Swamplands", BuildSwampland},
 			};
+
+			PresetCellBoard	presetBoard = new PresetCellBoard
+			{
+
+			};
 	
-			LoadPresetList(presets);
+			LoadPresetBoard(presetBoard);
 		}
 	
 		void ImportGraphTextAsset(string path)

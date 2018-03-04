@@ -17,6 +17,12 @@ namespace PW.Editor
 			public Action		callback;
 			public bool			enabled;
 		}
+
+		public class PresetColumn
+		{
+			public PresetCellList	cells;
+			public string			name;
+		}
 	
 		public class PresetCellList : List< PresetCell >
 		{
@@ -27,14 +33,29 @@ namespace PW.Editor
 				this.Add(pc);
 			}
 		}
+
+		public class PresetCellBoard : List< PresetColumn >
+		{
+			public void Add(string name, PresetCellList list)
+			{
+				PresetColumn board = new PresetColumn();
+
+				board.cells = list;
+				board.name = name;
+
+				this.Add(board);
+			}
+		}
 		
 		public Action< PresetCell >		onDrawCell;
 		public Action< string >			onDrawHeader;
 	
 		public readonly int				maxColumnCells = 3;
+
+		public readonly int				columns = 4;
 	
 		[System.NonSerialized]
-		PresetCellList					presetCellList = null;
+		PresetCellBoard					presetBoard = null;
 		
 		//scroll position on the preset screen
 		Vector2							presetScrollPos;
@@ -50,9 +71,9 @@ namespace PW.Editor
 			onDrawCell = DefaultDrawCell;
 		}
 	
-		protected void LoadPresetList(PresetCellList presets)
+		protected void LoadPresetBoard(PresetCellBoard presets)
 		{
-			presetCellList = presets;
+			presetBoard = presets;
 	
 			buttonStyle = new GUIStyle("button");
 			buttonStyle.imagePosition = ImagePosition.ImageAbove;
@@ -94,29 +115,15 @@ namespace PW.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		PWGraph DrawGraphInput(PWGraph graph)
-		{
-			currentGraph = graph;
-	
-			if (GUILayout.Button("Load graph"))
-			{
-				currentPickerWindow = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
-				EditorGUIUtility.ShowObjectPicker< PWGraph >(graph, false, "", currentPickerWindow);
-			}
-			
-			if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
-			{
-				UnityEngine.Object selected = null;
-				selected = EditorGUIUtility.GetObjectPickerObject();
-				if (selected != null)
-					graph = (PWGraph)selected;
-			}
-	
-			return graph;
-		}
-	
 		void DrawSelector(PWGraph graph)
 		{
+			for (int i = 0; i < columns; i++)
+			{
+				EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+				{
+				}
+				EditorGUILayout.EndVertical();
+			}
 			GUILayout.FlexibleSpace();
 			EditorGUILayout.BeginVertical();
 			EditorGUILayout.EndVertical();
@@ -129,7 +136,7 @@ namespace PW.Editor
 	
 				EditorGUILayout.BeginHorizontal();
 				
-				foreach (var presetCell in presetCellList)
+				/*foreach (var presetCell in presetCellList)
 				{
 					if (lastheader != presetCell.header)
 					{
@@ -149,7 +156,7 @@ namespace PW.Editor
 	
 					lastheader = presetCell.header;
 					i++;
-				}
+				}*/
 				
 				EditorGUILayout.EndHorizontal();
 	
@@ -167,17 +174,7 @@ namespace PW.Editor
 	
 			presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
 			{
-				EditorGUILayout.LabelField("Procedural Worlds");
-				
-				//Load graph button:
-				EditorGUILayout.BeginHorizontal();
-				{
-					var newGraph = DrawGraphInput(graph);
-	
-					if (newGraph.GetType() == graph.GetType())
-						graph = newGraph;
-				}
-				EditorGUILayout.EndHorizontal();
+				// EditorGUILayout.LabelField("Procedural Worlds");
 				
 				EditorGUILayout.BeginHorizontal();
 				{

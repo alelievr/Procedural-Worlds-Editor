@@ -17,8 +17,6 @@ namespace PW.Editor
 		[SerializeField]
 		PWTerrainPreviewPanel	terrainPreview = new PWTerrainPreviewPanel();
 
-		public Action< Rect >	onDraw;
-
 		const string			graphProcessKey = "UpdateGraphProperties";
 
 		[SerializeField]
@@ -42,7 +40,6 @@ namespace PW.Editor
 			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();
 			{
-				//TODO: impement add-on like pattern
 				if (GUILayout.Button("Force reload"))
 					graphEditor.Reload();
 				if (GUILayout.Button("Force reload Once"))

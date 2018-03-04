@@ -108,7 +108,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		
 		var settingsPanel = layout.GetPanel< PWGraphSettingsPanel >();
 
-		settingsPanel.onDraw = (rect) =>
+		settingsPanel.onGUI = (rect) =>
 		{
 			settingsPanel.DrawDefault(rect);
 			

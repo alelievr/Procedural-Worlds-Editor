@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using PW.Core;
-
+using UnityEditorInternal;
 namespace PW.Editor
 {
     public static class PWGraphFactory
@@ -20,11 +20,14 @@ namespace PW.Editor
 
 		public readonly static string	UnityResourcesFolderName = "Resources";	
     
-        public static T CreateGraph< T >(string directory, string fileName) where T : PWGraph
+        public static T CreateGraph< T >(string directory, string fileName, bool rename = true) where T : PWGraph
         {
+			if (!fileName.EndsWith(".asset"))
+				fileName += ".asset";
+
             //generate the file path
             string path = directory + "/" + fileName;
-    
+
             //Create the directory resource if not exists
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
@@ -36,7 +39,10 @@ namespace PW.Editor
             T mg = ScriptableObject.CreateInstance< T >();
     
             //Create the asset file and let the user rename it
-            ProjectWindowUtil.CreateAsset(mg, path);
+			if (rename)
+				ProjectWindowUtil.CreateAsset(mg, path);
+			else
+				AssetDatabase.CreateAsset(mg, path);
     
             //save and refresh Project view
             AssetDatabase.SaveAssets();
@@ -101,13 +107,17 @@ namespace PW.Editor
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;
 				
-			if (!currentPath.Contains("Resources"))
+			if (!currentPath.Contains(UnityResourcesFolderName))
 				return null;
 			
-			return null;
+			return currentPath;
+		}
+
+		static void CreateMainGraphFoler(string defaultFileName)
+		{
 		}
     
-        public static PWMainGraph CreateMainGraph(string fileName = null)
+        public static void CreateMainGraph(string fileName = null)
         {
             if (fileName == null)
                 fileName = PWMainGraphDefaultName;
@@ -117,10 +127,16 @@ namespace PW.Editor
 			if (String.IsNullOrEmpty(path))
 			{
 				Debug.LogError("Can't create a main graph outside of a Resources folder");
-				return null;
+				return ;
 			}
-            
-            return CreateGraph< PWMainGraph >(path, fileName);
+
+			ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
+				0,
+				ScriptableObject.CreateInstance< DoCreateMainGraph >(),
+				fileName,
+				EditorGUIUtility.FindTexture("Folder Icon"),
+				null
+			);
         }
     
         public static PWBiomeGraph CreateBiomeGraph(string fileName = null)
