@@ -3,67 +3,62 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
 using PW.Core;
 
 namespace PW.Editor
 {
-	public class PWPresetScreen 
+	public abstract class PWPresetScreen 
 	{
 		public class PresetCell
 		{
-			public Texture2D	texture;
-			public string		name;
-			public string		header;
-			public Action		callback;
-			public bool			enabled;
-		}
-
-		public class PresetColumn
-		{
-			public PresetCellList	cells;
+			public Texture2D		texture;
 			public string			name;
+			public string			header;
+			public Action			callback;
+			public bool				enabled;
+
+			public PresetCellList	childs;
 		}
 	
 		public class PresetCellList : List< PresetCell >
 		{
-			public void Add(string header, Texture2D texture, string name, Action callback, bool enabled = true)
+			public void Add(string header, Texture2D texture, string name, Action callback, bool enabled = true, PresetCellList childList = null)
 			{
-				PresetCell	pc = new PresetCell{texture = texture, name = name, header = header, callback = callback, enabled = enabled};
+				PresetCell	pc = new PresetCell
+				{
+					texture = texture,
+					name = name,
+					header = header,
+					callback = callback,
+					enabled = enabled,
+					childs = childList
+				};
 	
 				this.Add(pc);
 			}
 		}
-
-		public class PresetCellBoard : List< PresetColumn >
-		{
-			public void Add(string name, PresetCellList list)
-			{
-				PresetColumn board = new PresetColumn();
-
-				board.cells = list;
-				board.name = name;
-
-				this.Add(board);
-			}
-		}
 		
-		public Action< PresetCell >		onDrawCell;
+		public Func< PresetCell, bool, bool > onDrawCell;
 		public Action< string >			onDrawHeader;
 	
 		public readonly int				maxColumnCells = 3;
-
-		public readonly int				columns = 4;
+		
+		protected PWGraph				currentGraph;
 	
 		[System.NonSerialized]
-		PresetCellBoard					presetBoard = null;
+		PresetCellList					presetList = null;
 		
 		//scroll position on the preset screen
 		Vector2							presetScrollPos;
 		//id for the object picker
 		int								currentPickerWindow;
-		PWGraph							currentGraph;
+		
+		int								columns = 4;
+		List< int >						selectedIndices = new List< int >();
 	
 		GUIStyle						buttonStyle;
+		GUIStyle						selectedButtonStyle;
 	
 		public PWPresetScreen()
 		{
@@ -71,14 +66,63 @@ namespace PW.Editor
 			onDrawCell = DefaultDrawCell;
 		}
 	
-		protected void LoadPresetBoard(PresetCellBoard presets)
+		protected void LoadPresetList(PresetCellList presets)
 		{
-			presetBoard = presets;
+			presetList = presets;
+
+			UpdateColumnCount();
+			UpdateSelectedList();
 	
-			buttonStyle = new GUIStyle("button");
-			buttonStyle.imagePosition = ImagePosition.ImageAbove;
-			buttonStyle.alignment = TextAnchor.MiddleCenter;
-			buttonStyle.fontSize = 12;
+			using (DefaultGUISkin.Get())
+			{
+				buttonStyle = new GUIStyle("LargeButton");
+				buttonStyle.imagePosition = ImagePosition.ImageAbove;
+				buttonStyle.alignment = TextAnchor.MiddleCenter;
+				buttonStyle.fontSize = 12;
+				selectedButtonStyle = new GUIStyle(buttonStyle);
+				selectedButtonStyle.normal.background = selectedButtonStyle.focused.background;
+			}
+		}
+
+		void UpdateColumnCount()
+		{
+			columns = 0;
+			Stack< PresetCellList > currentPresetLists = new Stack< PresetCellList >();
+
+			currentPresetLists.Push(presetList);
+			while (currentPresetLists.Count != 0)
+			{
+				columns = Mathf.Max(columns, currentPresetLists.Count);
+
+				if (columns > 10)
+					break ;
+
+				var cl = currentPresetLists.Pop();
+
+				foreach (var c in cl)
+					if (c.childs != null)
+						currentPresetLists.Push(c.childs);
+			}
+		}
+
+		void UpdateSelectedList()
+		{
+			int i = 0;
+
+			selectedIndices.Clear();
+			PresetCellList currentList = presetList;
+			while (currentList != null)
+			{
+				int index = currentList.FindIndex(l => l.enabled);
+
+				if (index == -1)
+					return ;
+				
+				currentList = currentList[index].childs;
+				
+				selectedIndices.Add(index);
+				i++;
+			}
 		}
 	
 		void DefaultDrawHeader(string header)
@@ -94,91 +138,86 @@ namespace PW.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		void DefaultDrawCell(PresetCell cell)
+		bool DefaultDrawCell(PresetCell cell, bool selected)
 		{
+			bool pressed = false;
+
 			EditorGUILayout.BeginVertical();
 			{
 				GUILayout.FlexibleSpace();
 				EditorGUI.BeginDisabledGroup(!cell.enabled);
 	
 				GUIContent content = new GUIContent(cell.name, cell.texture);
-				if (GUILayout.Button(content, buttonStyle, GUILayout.Width(200), GUILayout.Height(200)))
+				if (GUILayout.Button(content, (selected) ? selectedButtonStyle : buttonStyle, GUILayout.Width(200), GUILayout.Height(200)))
 				{
-					currentGraph.presetChoosed = true;
+					pressed = true;
 					cell.callback();
-					currentGraph.UpdateComputeOrder();
 				}
 	
 				EditorGUI.EndDisabledGroup();
 				GUILayout.FlexibleSpace();
 			}
 			EditorGUILayout.EndVertical();
+
+			return pressed;
+		}
+
+		int DrawColumn(PresetCellList presetList, int selectedIndex)
+		{
+			int newSelectedIndex = selectedIndex;
+			EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+			{
+				int i = 0;
+				foreach (var preset in presetList)
+				{
+					if (onDrawCell(preset, i == selectedIndex))
+						newSelectedIndex = i;
+					i++;
+				}
+			}
+			EditorGUILayout.EndVertical();
+
+			return newSelectedIndex;
 		}
 	
-		void DrawSelector(PWGraph graph)
+		void DrawBoard(PWGraph graph)
 		{
-			for (int i = 0; i < columns; i++)
+			var currentList = presetList;
+			int i = 0;
+
+			while (currentList != null)
 			{
-				EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
-				{
-				}
-				EditorGUILayout.EndVertical();
-			}
-			GUILayout.FlexibleSpace();
-			EditorGUILayout.BeginVertical();
-			EditorGUILayout.EndVertical();
-			EditorGUILayout.BeginVertical();
-			{
-				GUILayout.FlexibleSpace();
-	
-				int i = 0;
-				string lastheader = null;
-	
-				EditorGUILayout.BeginHorizontal();
+				selectedIndices[i] = DrawColumn(currentList, selectedIndices[i]);
 				
-				/*foreach (var presetCell in presetCellList)
-				{
-					if (lastheader != presetCell.header)
-					{
-						EditorGUILayout.EndHorizontal();
-						onDrawHeader(presetCell.header);
-						EditorGUILayout.BeginHorizontal();
-						i = 0;
-					}
-					
-					if (i != 0 && (i % maxColumnCells) == 0)
-					{
-						EditorGUILayout.EndHorizontal();
-						EditorGUILayout.BeginHorizontal();
-					}
-	
-					onDrawCell(presetCell);
-	
-					lastheader = presetCell.header;
-					i++;
-				}*/
-				
-				EditorGUILayout.EndHorizontal();
-	
-				GUILayout.FlexibleSpace();
+				currentList = currentList[selectedIndices[i]].childs;
+				i++;
+
+				if (i > selectedIndices.Count)
+					break ;
 			}
-			EditorGUILayout.EndVertical();
-			EditorGUILayout.BeginVertical();
-			EditorGUILayout.EndVertical();
+
+			//Build button:
+			EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("Build", GUILayout.ExpandWidth(true)))
+				OnBuildPressed();
+			GUILayout.FlexibleSpace();
+			EditorGUILayout.EndVertical();
 		}
 	
 		public PWGraph Draw(Rect window, PWGraph graph)
 		{
 			EditorGUI.DrawRect(new Rect(0, 0, window.width, window.height), PWColorTheme.defaultBackgroundColor);
+
+			currentGraph = graph;
 	
-			presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos);
+			presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos, GUILayout.ExpandHeight(true));
 			{
 				// EditorGUILayout.LabelField("Procedural Worlds");
 				
 				EditorGUILayout.BeginHorizontal();
 				{
-					DrawSelector(graph);
+					DrawBoard(graph);
 				}
 				EditorGUILayout.EndHorizontal();
 			}
@@ -187,5 +226,6 @@ namespace PW.Editor
 			return graph;
 		}
 	
+		public abstract void OnBuildPressed();
 	}
 }

@@ -21,52 +21,56 @@ namespace PW.Editor
 			Texture2D preset3DPlaneTexture = Resources.Load< Texture2D >("preview3DPlane");
 			Texture2D preset3DSphericalTexture = Resources.Load< Texture2D >("preview3DSpherical");
 			Texture2D preset3DCubicTexture = Resources.Load< Texture2D >("preview3DCubic");
-			Texture2D preset1DDensityFieldTexture = Resources.Load< Texture2D >("preview1DDensityField");
-			Texture2D preset2DDensityFieldTexture = Resources.Load< Texture2D >("preview2DDensityField");
-			Texture2D preset3DDensityFieldTexture = Resources.Load< Texture2D >("preview3DDensityField");
-			// Texture2D presetMeshTetxure = Resources.Load< Texture2D >("previewMesh");
-			
-			PresetCellList	outputTypePresets = new PresetCellList
+
+			//Biomes
+			PresetCellList	biomePresets = new PresetCellList
 			{
-				{"2D Terrain", preset2DTopDownViewTexture, "2D Terrain like civilization or warcraft", () => {}, false},
+				{"Earth like", null, "Plain, mountains, beach and oceans", SelectEarthLikeBiome, true}
 			};
 			
-			PresetCellList	terrain2DPresets = new PresetCellList
+			//Terrain types
+			PresetCellList terrainTypePresets = new PresetCellList
 			{
-				{"Top down", preset2DTopDownViewTexture, "2D Terrain like civilization or warcraft", () => {}, false},
-				{"Side view", preset2DSideViewTexture, "2D sideview procedural terrain", Build2DSideView, false},
+				{"Flat terrain", null, "Flat infinite terrain like minecraft", SelectFlatTerrain, true, biomePresets},
+				{"Spherical terrain", null, "Spherical terrain link no man's sky", SelectSphericalTerrain, false, biomePresets},
+				{"Cubic terrain", null, "Cubic terrain like stellar overload", SelectCubicTerrain, false, biomePresets},
 			};
 
-			PresetCellList terrain3DPresets = new PresetCellList
-			{
-				{"3D Terrains", preset3DPlaneTexture , "3D plane procedural terrain", Build3DPlanar, false},
-				{"3D Terrains", preset3DSphericalTexture, "3D spherical procedural terrain", Build3DSpherical, false},
-				{"3D Terrains", preset3DCubicTexture , "3D cubic procedural terrain", Build3DCubic, false},
-			};
-
+			//ISO surfaces
 			PresetCellList terrain2DIsoSurfaces = new PresetCellList
 			{
-
+				{"Square", null, "Square map", SelectSquareIsoSurface, true, terrainTypePresets},
+				{"Hexagon", null, "Hexagon map", SelectHexagonIsoSurface, false, terrainTypePresets},
+				{"Marching cubes", null, "Marching cubes 2D map", SelectMarchingCubesIsoSurface, false, terrainTypePresets},
 			};
 
 			PresetCellList terrain3DIsoSurfaces = new PresetCellList
 			{
-
+				{"Marching cubes", null, "Marching cubes 3D map", SelectMarchingCubesIsoSurface, false, terrainTypePresets},
+				{"Dual countering", null, "Dual countering 3D map", SelectDualCounteringIsoSurface, false, terrainTypePresets}
 			};
-
-			PresetCellList denstidyFields = new PresetCellList
+			
+			//Output type
+			PresetCellList terrain3DPresets = new PresetCellList
 			{
-				{"Density Fields", preset1DDensityFieldTexture, "1D float density field", Build1DDensity, false},
-				{"Density Fields", preset2DDensityFieldTexture, "2D float density field", Build2DDensity, false},
-				{"Density Fields", preset3DDensityFieldTexture, "3D float density field", Build3DDensity, false},
+				{"3D Terrains", preset3DPlaneTexture , "3D plane procedural terrain", Select3DPlanar, false, terrain3DIsoSurfaces},
+				{"3D Terrains", preset3DSphericalTexture, "3D spherical procedural terrain", Select3DSpherical, false, terrain3DIsoSurfaces},
+				{"3D Terrains", preset3DCubicTexture , "3D cubic procedural terrain", Select3DCubic, false, terrain3DIsoSurfaces},
+			};
+			
+			PresetCellList	terrain2DPresets = new PresetCellList
+			{
+				{"Top down", preset2DTopDownViewTexture, "Top down terrain like civilization", SelectTopDown2D, true, terrain2DIsoSurfaces},
+				{"Side view", preset2DSideViewTexture, "Side view terrain like terraria", SelectSideView2D, false},
+			};
+			
+			PresetCellList	outputTypePresets = new PresetCellList
+			{
+				{"2D Terrain", preset2DTopDownViewTexture, "2D Terrain like civilization", Select2DTerrain, true, terrain2DPresets},
+				{"3D Terrain", preset3DPlaneTexture, "3D Terrain like minecraft", Select3DTerrain, false, terrain3DPresets},
 			};
 
-			PresetCellBoard presetBoard = new PresetCellBoard
-			{
-				{"few", outputTypePresets}
-			};
-		
-			LoadPresetBoard(presetBoard);
+			LoadPresetList(outputTypePresets);
 		}
 	
 		void ImportGraphTextAsset(string path)
@@ -78,47 +82,61 @@ namespace PW.Editor
 				.Execute();
 		}
 	
-		void Build2DSideView()
-		{
-			//TODO
-		}
-	
-		void Build2DTopDown()
+		#region output types
+
+		void Select2DTerrain() {}
+
+		void Select3DTerrain() {}
+
+		void SelectTopDown2D() {}
+
+		void SelectSideView2D() {}
+
+		#endregion
+
+		#region Terrain types
+
+		void SelectFlatTerrain() {}
+
+		void SelectCubicTerrain() {}
+
+		void SelectSphericalTerrain() {}
+
+		void Select3DPlanar() {}
+
+		void Select3DSpherical() {}
+
+		void Select3DCubic() {}
+
+		#endregion
+
+		#region Iso surfaces
+
+		void SelectDualCounteringIsoSurface() {}
+
+		void SelectHexagonIsoSurface() {}
+
+		void SelectSquareIsoSurface() {}
+
+		void SelectMarchingCubesIsoSurface() {}
+
+		#endregion
+
+		#region Biomes
+
+		void SelectEarthLikeBiome() {}
+
+		#endregion
+
+		public override void OnBuildPressed()
 		{
 			ImportGraphTextAsset("GraphPresets/Main/TopDown2D");
 			var biomeNodes = mainGraph.FindNodesByType< PWNodeBiome >();
 			// var biomeGraph1 = CreateAndLinkBiomeGraph("GraphPresets/Biome/Realistic/Plain", 0);
+			
+			currentGraph.presetChoosed = true;
+			currentGraph.UpdateComputeOrder();
 		}
 	
-		void Build3DPlanar()
-		{
-			//TODO
-		}
-	
-		void Build3DSpherical()
-		{
-			//TODO
-		}
-	
-		void Build3DCubic()
-		{
-			//TODO
-		}
-	
-		void Build1DDensity()
-		{
-			//TODO
-		}
-	
-		void Build2DDensity()
-		{
-			//TODO
-		}
-	
-		void Build3DDensity()
-		{
-			//TODO
-		}
-		
 	}
 }

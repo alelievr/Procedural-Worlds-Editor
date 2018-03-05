@@ -25,18 +25,18 @@ namespace PW.Editor
 			
 			PresetCellList	earthLikePresets = new PresetCellList()
 			{
-				{"Earth-like", plainTexture, "Plains / Prairies", BuildPlain},
-				{"Earth-like", mountainTexture, "Mountains", BuildMountains},
-				{"Earth-like", mesaTexture, "Mesas", BuildMesa},
-				{"Earth-like", swamplandTexture, "Swamplands", BuildSwampland},
+				{"Plains", plainTexture, "Plains / Prairies", SelectPlains},
+				{"Mountains", mountainTexture, "Mountains", SelectMountains},
+				{"Mesas", mesaTexture, "Mesas", SelectMesas},
+				{"Swamplands", swamplandTexture, "Swamplands", SelectSwamplands},
 			};
 
-			PresetCellBoard	presetBoard = new PresetCellBoard
+			PresetCellList presets = new PresetCellList
 			{
-
+				{"Earth-like", null, "Earth like biomes", SelectEarthLikeBiomes, true, earthLikePresets}
 			};
-	
-			LoadPresetBoard(presetBoard);
+
+			LoadPresetList(presets);
 		}
 	
 		void ImportGraphTextAsset(string path)
@@ -47,28 +47,24 @@ namespace PW.Editor
 				.ImportCommands(file.text.Split('\n'))
 				.Execute();
 		}
+
+		#region Earth like biomes
 	
-		void BuildPlain()
+		void SelectEarthLikeBiomes() {}
+
+		void SelectMesas() {}
+
+		void SelectMountains() {}
+
+		void SelectPlains() {}
+
+		void SelectSwamplands() {}
+
+		#endregion
+
+		public override void OnBuildPressed()
 		{
 			ImportGraphTextAsset("GraphPresets/Biome/PlainTest1");
-		}
-	
-		//TODO: preset for mountain biome
-		void BuildMountains()
-		{
-	
-		}
-	
-		//TODO: preset for mesa biome
-		void BuildMesa()
-		{
-	
-		}
-	
-		//TODO: preset for swampland biome
-		void BuildSwampland()
-		{
-	
 		}
 	}
 }

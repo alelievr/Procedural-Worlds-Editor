@@ -128,6 +128,9 @@ public partial class PWGraphEditor : PWEditorWindow
 		//set the skin for the current window
 		GUI.skin = PWGUISkin;
 
+		if (!graph.presetChoosed)
+			return ;
+
 		//protection against node class rename & corrupted nodes
 		for (int i = 0; i < graph.nodes.Count; i++)
 		{
