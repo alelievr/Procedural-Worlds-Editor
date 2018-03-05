@@ -13,6 +13,8 @@ namespace PW.Editor
 		Texture2D	swamplandTexture;
 	
 		PWBiomeGraph	biomeGraph;
+
+		readonly string	graphFilePrefix = "GraphPresets/Biome/Parts/";
 	
 		public PWBiomePresetScreen(PWBiomeGraph biomeGraph)
 		{
@@ -25,15 +27,15 @@ namespace PW.Editor
 			
 			PresetCellList	earthLikePresets = new PresetCellList()
 			{
-				{"Plains", plainTexture, "Plains / Prairies", SelectPlains},
-				{"Mountains", mountainTexture, "Mountains", SelectMountains},
-				{"Mesas", mesaTexture, "Mesas", SelectMesas},
-				{"Swamplands", swamplandTexture, "Swamplands", SelectSwamplands},
+				{"Plains / Prairies", plainTexture, "Earth/Plain"},
+				{"Mountains", mountainTexture, "Earth/Mountain", false},
+				{"Mesas", mesaTexture, "Earth/Mesa", false},
+				{"Swamplands", swamplandTexture, "Earth/Swampland", false},
 			};
 
 			PresetCellList presets = new PresetCellList
 			{
-				{"Earth-like", null, "Earth like biomes", SelectEarthLikeBiomes, true, earthLikePresets}
+				{"Earth like biomes", null, (string)null, true, earthLikePresets}
 			};
 
 			LoadPresetList(presets);
@@ -48,23 +50,12 @@ namespace PW.Editor
 				.Execute();
 		}
 
-		#region Earth like biomes
-	
-		void SelectEarthLikeBiomes() {}
-
-		void SelectMesas() {}
-
-		void SelectMountains() {}
-
-		void SelectPlains() {}
-
-		void SelectSwamplands() {}
-
-		#endregion
-
 		public override void OnBuildPressed()
 		{
-			ImportGraphTextAsset("GraphPresets/Biome/PlainTest1");
+			foreach (var graphPartFile in graphPartFiles)
+				ImportGraphTextAsset(graphFilePrefix + graphPartFile);
+
+			PWGraphBuilder.FromGraph(biomeGraph).Execute();
 		}
 	}
 }

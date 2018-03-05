@@ -1,0 +1,20 @@
+NewNode PWNodeWaterLevel "biomeData" (199, 210) attr={ waterLevel: 60.7, mapMin: 0, mapMax: 100 }
+NewNode PWNodeBiomeTemperature "Temperature node" (464, 299) attr={ minTemperature: 0, maxTemperature: 30, terrainHeightMultiplier: 0.29, waterMultiplier: -0.18, averageTemperature: 17.1, minTemperatureMapInput: 0, maxTemperatureMapInput: 0 }
+NewNode PWNodeBiomeSwitch "Biome switch" (718, 249) attr={ samplerName: "Water height", selectedBiomeSamplerName: 1, errorString: "", relativeMin: -3.402823E+38, relativeMax: 3.402823E+38 }
+NewNode PWNodeBiomeSwitch "Biome switch0" (956, 114) attr={ samplerName: "Temperature", selectedBiomeSamplerName: 2, errorString: "", relativeMin: -3.402823E+38, relativeMax: 3.402823E+38 }
+NewNode PWNodeBiome "Biome" (1169, 273)
+NewNode PWNodeBiomeMerger "PWNodeBiomeMerger" (1693, 395)
+NewNode PWNodeBiome "Biome0" (1065, 437)
+NewNode PWNodeBiome "Biome1" (1194, 111)
+NewNode PWNodeBiomeBlender "Biome blender" (1457, 345) attr={ biomeBlendPercent: 0.13 }
+
+LinkAnchor "Biome switch0":"outputBiomes" "Biome":"inputBiomeData"
+LinkAnchor "Biome":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Biome switch0":"outputBiomes" "Biome1":"inputBiomeData"
+LinkAnchor "Biome1":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Biome blender":"outputBlendedBiomeTerrain" "PWNodeBiomeMerger":"inputBlendedTerrain"
+LinkAnchor "Biome0":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Temperature node":"outputBiome" "Biome switch":"inputBiome"
+LinkAnchor "biomeData":"outputBiome" "Temperature node":"inputBiomeData"
+LinkAnchor "Biome switch":"outputBiomes" "Biome switch0":"inputBiome"
+LinkAnchor "Biome switch":"outputBiomes" "Biome0":"inputBiomeData"

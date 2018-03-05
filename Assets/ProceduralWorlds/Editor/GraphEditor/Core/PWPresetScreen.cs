@@ -14,7 +14,7 @@ namespace PW.Editor
 		{
 			public Texture2D		texture;
 			public string			name;
-			public string			header;
+			public string			graphPartFile;
 			public Action			callback;
 			public bool				enabled;
 
@@ -23,13 +23,26 @@ namespace PW.Editor
 	
 		public class PresetCellList : List< PresetCell >
 		{
-			public void Add(string header, Texture2D texture, string name, Action callback, bool enabled = true, PresetCellList childList = null)
+			public void Add(string name, Texture2D texture, string graphPartFile, bool enabled = true, PresetCellList childList = null)
 			{
 				PresetCell	pc = new PresetCell
 				{
 					texture = texture,
 					name = name,
-					header = header,
+					graphPartFile = graphPartFile,
+					enabled = enabled,
+					childs = childList
+				};
+	
+				this.Add(pc);
+			}
+			
+			public void Add(string name, Texture2D texture, Action callback, bool enabled = true, PresetCellList childList = null)
+			{
+				PresetCell	pc = new PresetCell
+				{
+					texture = texture,
+					name = name,
 					callback = callback,
 					enabled = enabled,
 					childs = childList
@@ -39,12 +52,12 @@ namespace PW.Editor
 			}
 		}
 		
-		public Func< PresetCell, bool, bool > onDrawCell;
-		public Action< string >			onDrawHeader;
-	
 		public readonly int				maxColumnCells = 3;
 		
 		protected PWGraph				currentGraph;
+		protected List< int >			selectedIndices = new List< int >();
+		protected List< string >		graphPartFiles = new List< string >();
+		protected Vector2[]				scrollBars;
 	
 		[System.NonSerialized]
 		PresetCellList					presetList = null;
@@ -54,17 +67,10 @@ namespace PW.Editor
 		//id for the object picker
 		int								currentPickerWindow;
 		
-		int								columns = 4;
-		List< int >						selectedIndices = new List< int >();
+		int								columns;
 	
 		GUIStyle						buttonStyle;
 		GUIStyle						selectedButtonStyle;
-	
-		public PWPresetScreen()
-		{
-			onDrawHeader = DefaultDrawHeader;
-			onDrawCell = DefaultDrawCell;
-		}
 	
 		protected void LoadPresetList(PresetCellList presets)
 		{
@@ -72,6 +78,7 @@ namespace PW.Editor
 
 			UpdateColumnCount();
 			UpdateSelectedList();
+			UpdateGraphPartFiles();
 	
 			using (DefaultGUISkin.Get())
 			{
@@ -103,6 +110,8 @@ namespace PW.Editor
 					if (c.childs != null)
 						currentPresetLists.Push(c.childs);
 			}
+
+			scrollBars = new Vector2[columns];
 		}
 
 		void UpdateSelectedList()
@@ -124,6 +133,29 @@ namespace PW.Editor
 				i++;
 			}
 		}
+
+		void UpdateGraphPartFiles()
+		{
+			int i = 0;
+
+			PresetCellList currentList = presetList;
+			graphPartFiles.Clear();
+			while (currentList != null)
+			{
+				int index = selectedIndices[i];
+				var cell = currentList[index];
+
+				if (!String.IsNullOrEmpty(cell.graphPartFile))
+					graphPartFiles.Add(cell.graphPartFile);
+				
+				currentList = cell.childs;
+				
+				selectedIndices.Add(index);
+				i++;
+			}
+
+			graphPartFiles.ForEach(a => Debug.Log(a));
+		}
 	
 		void DefaultDrawHeader(string header)
 		{
@@ -138,43 +170,45 @@ namespace PW.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		bool DefaultDrawCell(PresetCell cell, bool selected)
+		bool DefaultDrawCell(PresetCell cell, bool selected, int columnIndex)
 		{
 			bool pressed = false;
 
 			EditorGUILayout.BeginVertical();
 			{
-				GUILayout.FlexibleSpace();
 				EditorGUI.BeginDisabledGroup(!cell.enabled);
 	
 				GUIContent content = new GUIContent(cell.name, cell.texture);
 				if (GUILayout.Button(content, (selected) ? selectedButtonStyle : buttonStyle, GUILayout.Width(200), GUILayout.Height(200)))
 				{
 					pressed = true;
-					cell.callback();
+					if (cell.callback != null)
+						cell.callback();
 				}
 	
 				EditorGUI.EndDisabledGroup();
-				GUILayout.FlexibleSpace();
 			}
 			EditorGUILayout.EndVertical();
 
 			return pressed;
 		}
 
-		int DrawColumn(PresetCellList presetList, int selectedIndex)
+		int DrawColumn(PresetCellList presetList, int columnIndex)
 		{
-			int newSelectedIndex = selectedIndex;
+			int newSelectedIndex = selectedIndices[columnIndex];
 			EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+			scrollBars[columnIndex] = EditorGUILayout.BeginScrollView(scrollBars[columnIndex], GUILayout.ExpandWidth(true));
 			{
 				int i = 0;
 				foreach (var preset in presetList)
 				{
-					if (onDrawCell(preset, i == selectedIndex))
+					if (DefaultDrawCell(preset, i == newSelectedIndex, columnIndex))
 						newSelectedIndex = i;
 					i++;
 				}
 			}
+
+			EditorGUILayout.EndScrollView();
 			EditorGUILayout.EndVertical();
 
 			return newSelectedIndex;
@@ -187,7 +221,12 @@ namespace PW.Editor
 
 			while (currentList != null)
 			{
-				selectedIndices[i] = DrawColumn(currentList, selectedIndices[i]);
+				int newIndex = DrawColumn(currentList, i);
+				if (newIndex != selectedIndices[i])
+				{
+					selectedIndices[i] = newIndex;
+					UpdateGraphPartFiles();
+				}
 				
 				currentList = currentList[selectedIndices[i]].childs;
 				i++;

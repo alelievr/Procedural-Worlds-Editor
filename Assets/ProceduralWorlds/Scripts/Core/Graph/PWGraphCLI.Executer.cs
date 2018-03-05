@@ -143,6 +143,10 @@ namespace PW.Core
 			fromNode = graph.FindNodeByName(command.fromNodeName);
 			toNode = graph.FindNodeByName(command.toNodeName);
 
+			Debug.Log("Graph nodes: ");
+			foreach (var node in graph.nodes)
+				Debug.Log("node: " + node);
+
 			if (fromNode == null)
 				throw new Exception("Node " + command.fromNodeName + " not found in graph while parsing: '" + inputCommand + "'");
 			if (toNode == null)

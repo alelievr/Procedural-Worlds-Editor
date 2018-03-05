@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using System.Linq;
 
 namespace PW.Core
 {
@@ -12,6 +13,9 @@ namespace PW.Core
 		PWGraph	graph;
 
 		List< string >	commands = new List< string >();
+		List< Action< PWGraph > > postExecuteCallbacks = new List< Action< PWGraph > >();
+		
+		readonly List< string > commandOrder = new List< string >{"NewNode", "Link", "LinkAnchor"};
 	
 		//private constructor so you can't instantiate the class
 		PWGraphBuilder() {}
@@ -100,15 +104,40 @@ namespace PW.Core
 			return this;
 		}
 
+		public PWGraphBuilder CustomAfterExecute(Action< PWGraph > callback)
+		{
+			postExecuteCallbacks.Add(callback);
+			return this;
+		}
+		public PWGraphBuilder SortCommands()
+		{
+			//sort command to put CreateNodes in first
+			commands = commands.OrderBy((cmd) => {
+				int index = commandOrder.FindIndex(c => cmd.StartsWith(c));
+				if (index == -1)
+					return commandOrder.Count;
+				return index;
+			}).ToList();
+
+			return this;
+		}
+
 		public PWGraphBuilder Execute(bool clearCommandsOnceExecuted = false)
 		{
+			SortCommands();
+
 			foreach (var cmd in commands)
+			{
+				Debug.Log("Execute command: " + cmd);
 				graph.Execute(cmd);
+			}
 			
 			if (clearCommandsOnceExecuted)
 				commands.Clear();
 
 			graph.UpdateComputeOrder();
+
+			postExecuteCallbacks.ForEach(c => c(graph));
 			
 			return this;
 		}

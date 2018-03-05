@@ -1,14 +1,14 @@
-NewNode PWNodeGraphInput "Input" (-77, 50)
+NewNode PWNodeGraphInput "Input" (-77, 51)
 NewNode PWNodeGraphOutput "Output" (1939, 453)
 NewNode PWNodePerlinNoise2D "perlin" (-74, 119) attr={ persistance: 0, octaves: 0, additionalSeed: 34, persistanceMin: 0, persistanceMax: 0, scale: 1 }
 NewNode PWNodeBiomeTemperature "Temperature node" (464, 299) attr={ minTemperature: 0, maxTemperature: 30, terrainHeightMultiplier: 0.29, waterMultiplier: -0.18, averageTemperature: 17.1, minTemperatureMapInput: 0, maxTemperatureMapInput: 0 }
 NewNode PWNodeBiomeBlender "Biome blender" (1457, 345) attr={ biomeBlendPercent: 0.13 }
-NewNode PWNodeBiomeSwitch "Biome switch" (718, 249) attr={ samplerName: "Water height", selectedBiomeSamplerName: 1, errorString: "", relativeMin: -3.402823E+38, relativeMax: 3.402823E+38 }
+NewNode PWNodeBiomeSwitch "Biome switch" (718, 249) attr={ samplerName: "Water height", selectedBiomeSamplerName: 1, errorString: "", relativeMin: -39.3, relativeMax: 60.7 }
 NewNode PWNodeBiome "Biome" (1169, 273)
 NewNode PWNodeBiomeMerger "PWNodeBiomeMerger" (1693, 395)
 NewNode PWNodeBiome "Biome0" (1065, 437)
 NewNode PWNodeBiome "Biome1" (1194, 111)
-NewNode PWNodeBiomeSwitch "Biome switch0" (956, 114) attr={ samplerName: "Temperature", selectedBiomeSamplerName: 2, errorString: "", relativeMin: -3.402823E+38, relativeMax: 3.402823E+38 }
+NewNode PWNodeBiomeSwitch "Biome switch0" (956, 114) attr={ samplerName: "Temperature", selectedBiomeSamplerName: 2, errorString: "", relativeMin: 0, relativeMax: 30 }
 NewNode PWNodeWaterLevel "Water level" (199, 210) attr={ waterLevel: 60.7, mapMin: 0, mapMax: 100 }
 LinkAnchor "Temperature node":"outputBiome" "Biome switch":"inputBiome"
 LinkAnchor "Water level":"outputBiome" "Temperature node":"inputBiomeData"

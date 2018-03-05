@@ -99,8 +99,10 @@ namespace PW.Editor
 		public override void OnNodePreProcess()
 		{
 			node.BuildBiomeSwitchGraph();
+			var biomeData = node.GetBiomeData();
 
-			node.FillBiomeMap(node.GetBiomeData());
+			if (biomeData != null)
+				node.FillBiomeMap(biomeData);
 		}
 	}
 }
