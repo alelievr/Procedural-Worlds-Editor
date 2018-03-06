@@ -96,7 +96,7 @@ namespace PW.Editor
 			if (biomesIndex < resourcesIndex)
 				return null;
 			
-			return null;
+			return currentPath;
 		}
 
 		public static string GetMainGraphCreateLocation(string currentPath = null)
@@ -148,7 +148,7 @@ namespace PW.Editor
 			
 			if (String.IsNullOrEmpty(path))
 			{
-                Debug.LogError("Can't create a biome graph outside of the Biome folder of one procedural worlds directory");
+                Debug.LogError("Can't create a biome graph outside of the Biome folder of a procedural worlds directory");
 				return null;
 			}
             

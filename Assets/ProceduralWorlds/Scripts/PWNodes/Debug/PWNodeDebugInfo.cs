@@ -14,7 +14,6 @@ namespace PW.Node
 		{
 			name = "Debug Info";
 			renamable = true;
-			obj = "null";
 		}
 	}
 }

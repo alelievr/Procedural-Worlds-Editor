@@ -294,6 +294,10 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	void GraphStructureChangedCallback()
 	{
+		//Do not update the graph if the preset isn't choosed yet, it'll be updated automatically when the preset will be built
+		if (!graph.presetChoosed)
+			return ;
+		
 		graph.UpdateComputeOrder();
 		graph.Process();
 	}

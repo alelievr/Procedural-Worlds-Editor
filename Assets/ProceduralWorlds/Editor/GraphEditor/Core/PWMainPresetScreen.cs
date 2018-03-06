@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using PW.Core;
 using PW.Node;
+using System.IO;
 
 namespace PW.Editor
 {
@@ -12,6 +13,7 @@ namespace PW.Editor
 		PWMainGraph		mainGraph;
 
 		readonly string	graphFilePrefix = "GraphPresets/Main/Parts/";
+		readonly string biomeAssetPrefix = "GraphPresets/Biome/Full/";
 	
 		public PWMainPresetScreen(PWMainGraph mainGraph)
 		{
@@ -77,25 +79,54 @@ namespace PW.Editor
 	
 			builder.ImportCommands(file.text.Split('\n'));
 		}
+
+		List< PWBiomeGraph > CopyBiomesFromPreset(string biomeFolder)
+		{
+			List< PWBiomeGraph > biomes = new List< PWBiomeGraph >();
+
+			string graphPath = mainGraph.assetFilePath;
+			string biomeTargetPath = Path.GetDirectoryName(graphPath) + "/" + PWGraphFactory.PWGraphBiomeFolderName + "/";
+			
+			var biomeGraphs = Resources.LoadAll< PWBiomeGraph >(biomeAssetPrefix + biomeFolder);
+			Debug.Log("biome graphs: " + biomeGraphs.Length);
+			for (int i = 0; i < biomeGraphs.Length; i++)
+			{
+				string name = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(biomeGraphs[i]));
+				var bg = ScriptableObject.Instantiate(biomeGraphs[i]);
+				Debug.Log("bg: " + bg);
+				string path = biomeTargetPath + name + ".asset";
+				AssetDatabase.CreateAsset(bg, path);
+				biomes.Add(bg);
+			}
+			
+			return biomes;
+		}
 	
 		public override void OnBuildPressed()
 		{
 			PWGraphBuilder builder = PWGraphBuilder.FromGraph(mainGraph);
+			List< PWBiomeGraph > biomes = null;
 
 			foreach (var graphPartFile in graphPartFiles)
 			{
 				var file = Resources.Load< TextAsset >(graphFilePrefix + graphPartFile);
 				builder.ImportCommands(file.text.Split('\n'));
+
+				if (graphPartFile.StartsWith("Biomes/"))
+					biomes = CopyBiomesFromPreset(Path.GetFileName(graphPartFile));
 			}
 			
 			builder.Execute();
-			builder.GetGraph().Process();
 			
 			var biomeNodes = mainGraph.FindNodesByType< PWNodeBiome >();
-			// var biomeGraph1 = CreateAndLinkBiomeGraph("GraphPresets/Biome/Realistic/Plain", 0);
+			for (int i = 0; i < biomeNodes.Count; i++)
+			{
+				biomeNodes[i].biomeGraph = biomes[i];
+			}
+
+			builder.GetGraph().Process();
 			
 			currentGraph.presetChoosed = true;
-			currentGraph.UpdateComputeOrder();
 		}
 	
 	}

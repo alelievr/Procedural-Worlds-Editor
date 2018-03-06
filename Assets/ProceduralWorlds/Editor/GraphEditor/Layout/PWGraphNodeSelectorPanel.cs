@@ -34,9 +34,6 @@ namespace PW.Editor
 		Rect		windowRect;
 
 
-		//node selector callbacks
-		public Action< Type > OnNodeClicked;
-
 		public override void OnLoadStyle()
 		{
 			using (DefaultGUISkin.Get())
@@ -95,7 +92,8 @@ namespace PW.Editor
 
 					if (e.type == EventType.MouseDown && e.button == 0 && clickableRect.Contains(Event.current.mousePosition))
 					{
-						OnNodeClicked(nodeCase.type);
+						Vector2 pos = graphEditor.position.center - graphEditor.graph.panPosition;
+						graphEditor.graph.CreateNewNode(nodeCase.type, pos);
 					}
 				}
 			}

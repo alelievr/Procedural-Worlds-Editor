@@ -107,7 +107,7 @@ namespace PW.Core
 		[System.NonSerialized]
 		public bool						scaledPreviewEnabled = false;
 		[SerializeField]
-		float							_scaledPreviewRatio;
+		float							_scaledPreviewRatio = 8;
 		public float					scaledPreviewRatio
 		{
 			get { return _scaledPreviewRatio; }

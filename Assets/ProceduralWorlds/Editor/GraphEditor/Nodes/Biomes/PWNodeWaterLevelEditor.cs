@@ -60,9 +60,9 @@ namespace PW.Editor
 				updateWaterPreview = true;
 			}
 	
-			EditorGUI.BeginChangeCheck();
+			if (node.terrainNoise != null)
 			{
-				if (node.terrainNoise != null)
+				EditorGUI.BeginChangeCheck();
 				{
 					if (node.terrainNoise.type == SamplerType.Sampler2D)
 					{

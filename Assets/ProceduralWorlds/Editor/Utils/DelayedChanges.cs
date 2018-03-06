@@ -48,8 +48,8 @@ namespace PW.Editor
 				var cd = valKP.Value;
 				if (cd.callback != null && !cd.called && EditorApplication.timeSinceStartup - cd.lastUpdate > delayedTime / 1000)
 				{
-					cd.callback(cd.value);
 					cd.called = true;
+					cd.callback(cd.value);
 				}
 				i++;
 			}

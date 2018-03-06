@@ -54,6 +54,12 @@ namespace PW.Node
 					var biomeInfo = biomeMap.GetBiomeBlendInfo(x, y);
 					foreach (var biome in inputBlendedTerrain.biomes)
 					{
+						if (biome == null)
+						{
+							Debug.LogError("Can't access to biome(null) from biome blender inputs");
+							continue ;
+						}
+
 						var terrain = biome.modifiedTerrain as Sampler2D;
 
 						if (terrain == null)
@@ -62,7 +68,6 @@ namespace PW.Node
 							continue ;
 						}
 
-						//TODO: test this blending !
 						for (int i = 0; i < biomeInfo.length; i++)
 							if (biomeInfo.biomeIds[i] == biome.id)
 								ret += terrain[x, y] * biomeInfo.biomeBlends[i] / biomeInfo.totalBlend;
@@ -83,6 +88,9 @@ namespace PW.Node
 			mergedBiomeTerrain.biomeSurfacesList.Clear();
 			foreach (var biome in inputBlendedTerrain.biomes)
 			{
+				if (biome == null)
+					continue ;
+				
 				if (mergedBiomeTerrain.biomeSurfacesList.ContainsKey(biome.id))
 					Debug.LogError("[PWBiomeMerger] Duplicate biome in the biome graph: " + biome.name + ", id: " + biome.id);
 				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaceGraph;

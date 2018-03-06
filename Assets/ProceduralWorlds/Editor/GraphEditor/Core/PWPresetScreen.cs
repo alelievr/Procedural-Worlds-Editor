@@ -36,20 +36,6 @@ namespace PW.Editor
 	
 				this.Add(pc);
 			}
-			
-			public void Add(string name, Texture2D texture, Action callback, bool enabled = true, PresetCellList childList = null)
-			{
-				PresetCell	pc = new PresetCell
-				{
-					texture = texture,
-					name = name,
-					callback = callback,
-					enabled = enabled,
-					childs = childList
-				};
-	
-				this.Add(pc);
-			}
 		}
 		
 		public readonly int				maxColumnCells = 3;

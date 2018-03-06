@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using PW.Core;
 using PW.Node;
+using System;
 
 namespace PW.Editor
 {
@@ -84,6 +85,8 @@ namespace PW.Editor
 
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
+				DrawNullInputGUI();
+
 				OnNodeGUI();
 
 				EditorGUIUtility.labelWidth = 0;
@@ -168,6 +171,20 @@ namespace PW.Editor
 		{
 			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
 				nodeRef.undoableFields[i].SetValue(nodeRef, properties[i]);
+		}
+
+		void DrawNullInputGUI()
+		{
+			foreach (var inputAnchor in nodeRef.inputAnchors)
+			{
+				if (!inputAnchor.required)
+					continue ;
+				
+				//TODO: make this fly
+				FieldInfo fi = nodeRef.GetType().GetField(inputAnchor.fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+				if (fi.GetValue(nodeRef) == null)
+					EditorGUILayout.HelpBox("Null parameter: " + inputAnchor.fieldName, MessageType.Error);
+			}
 		}
 	}
 }

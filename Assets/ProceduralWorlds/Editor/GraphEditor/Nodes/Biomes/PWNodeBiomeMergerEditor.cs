@@ -4,6 +4,7 @@ using UnityEngine;
 using PW.Node;
 using PW.Core;
 using UnityEditor;
+using PW.Biomator;
 
 namespace PW.Editor
 {
@@ -35,6 +36,11 @@ namespace PW.Editor
 				EditorGUILayout.LabelField("Null terrain");
 				return ;
 			}
+			
+			if (!ValidateBlendedTerrainIntegrity())
+			{
+				EditorGUILayout.HelpBox("Null data found in the input blended biomes datas", MessageType.Error);
+			}
 
 			PWGUI.SamplerPreview("Final merged terrain", finalTerrain);
 
@@ -49,6 +55,22 @@ namespace PW.Editor
 				update = false;
 				PWGUI.SetUpdateForField(0, true);
 			}
+		}
+
+		bool ValidateBlendedTerrainIntegrity()
+		{
+			BlendedBiomeTerrain	terrain = node.inputBlendedTerrain;
+
+			if (terrain.biomeData == null || terrain.biomeData.biomeMap == null)
+				return false;
+
+			var biomeMap = terrain.biomeData.biomeMap;
+
+			foreach (var biome in terrain.biomes)
+				if (biome == null)
+					return false;
+			
+			return true;
 		}
 
 		public override void OnNodePostProcess()
