@@ -88,14 +88,19 @@ namespace PW.Editor
 			string biomeTargetPath = Path.GetDirectoryName(graphPath) + "/" + PWGraphFactory.PWGraphBiomeFolderName + "/";
 			
 			var biomeGraphs = Resources.LoadAll< PWBiomeGraph >(biomeAssetPrefix + biomeFolder);
-			Debug.Log("biome graphs: " + biomeGraphs.Length);
 			for (int i = 0; i < biomeGraphs.Length; i++)
 			{
 				string name = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(biomeGraphs[i]));
-				var bg = ScriptableObject.Instantiate(biomeGraphs[i]);
-				Debug.Log("bg: " + bg);
+				var bg = biomeGraphs[i].Clone() as PWBiomeGraph;
 				string path = biomeTargetPath + name + ".asset";
+
 				AssetDatabase.CreateAsset(bg, path);
+				foreach (var node in bg.nodes)
+					AssetDatabase.AddObjectToAsset(node, bg);
+				
+				//Set our graph into biome graph input
+				(bg.inputNode as PWNodeBiomeGraphInput).previewGraph = mainGraph;
+
 				biomes.Add(bg);
 			}
 			

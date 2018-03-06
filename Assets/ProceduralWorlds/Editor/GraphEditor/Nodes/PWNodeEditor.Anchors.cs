@@ -15,7 +15,6 @@ namespace PW.Editor
 	{
 		static Texture2D		errorIcon = null;
 		static Texture2D		anchorTexture = null;
-		// static Texture2D		anchorDisabledTexture = null;
 		
 		static GUIStyle			inputAnchorLabelStyle = null;
 		static GUIStyle			outputAnchorLabelStyle = null;
@@ -28,7 +27,6 @@ namespace PW.Editor
 			boxAnchorStyle = new GUIStyle(GUI.skin.box);
 			boxAnchorStyle.padding = new RectOffset(0, 0, 1, 1);
 			anchorTexture = GUI.skin.box.normal.background;
-			// anchorDisabledTexture = GUI.skin.box.active.background;
 			inputAnchorLabelStyle = GUI.skin.FindStyle("InputAnchorLabel");
 			outputAnchorLabelStyle = GUI.skin.FindStyle("OutputAnchorLabel");
 			
@@ -122,7 +120,6 @@ namespace PW.Editor
 						GUI.color = PWColorTheme.disabledAnchorColor;
 				}
 			}
-			// GUI.DrawTexture(singleAnchor.anchorRect, anchorDisabledTexture); //???
 
 			//Draw the anchor:
 			GUI.DrawTexture(anchor.rect, anchorTexture, ScaleMode.ScaleToFit);

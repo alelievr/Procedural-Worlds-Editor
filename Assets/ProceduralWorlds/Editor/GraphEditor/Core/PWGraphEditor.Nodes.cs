@@ -40,7 +40,10 @@ public partial class PWGraphEditor
 		}
 		
 		decaledRect = GUILayout.Window(id, node.rect, (i) => {
-			nodeEditors[node].OnInspectorGUI();
+			var nodeEditor = nodeEditors[node];
+			nodeEditor.isInsideGraph = true;
+			nodeEditor.OnInspectorGUI();
+			nodeEditor.isInsideGraph = false;
 		}, node.name, (node.isSelected) ? nodeSelectedStyle : nodeStyle, GUILayout.Height(node.viewHeight));
 
 		node.visualRect = decaledRect;

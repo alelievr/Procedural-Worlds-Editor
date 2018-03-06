@@ -127,10 +127,7 @@ namespace PW.Core
 			SortCommands();
 
 			foreach (var cmd in commands)
-			{
-				Debug.Log("Execute command: " + cmd);
 				graph.Execute(cmd);
-			}
 			
 			if (clearCommandsOnceExecuted)
 				commands.Clear();

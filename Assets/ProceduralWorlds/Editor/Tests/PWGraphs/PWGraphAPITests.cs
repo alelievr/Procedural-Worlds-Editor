@@ -141,7 +141,7 @@ namespace PW.Tests.Graphs
 
 			graph.RemoveNode(slider);
 
-			Assert.That(graph.nodes.Count == 2);
+			Assert.That(graph.nodes.Count == 0);
 			Assert.That(graph.FindNodeByName("slider") == null);
 		}
 
@@ -157,7 +157,7 @@ namespace PW.Tests.Graphs
 
 			graph.RemoveNode(slider, false);
 
-			Assert.That(graph.nodes.Count == 2);
+			Assert.That(graph.nodes.Count == 0);
 			Assert.That(graph.FindNodeByName("slider") == null);
 		}
 		

@@ -17,9 +17,9 @@ namespace PW.Editor
 				graphEditor.OnLinkStartDragged += LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged += LinkStopDragCallback;
 				graphEditor.OnLinkCanceled += LinkCanceledCallback;
-			}
 
-			graphRef.OnLinkCreated += LinkCreatedCallback;
+				graphRef.OnLinkCreated += LinkCreatedCallback;
+			}
 
 			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor += DraggedLinkQuitAnchorCallbck;
@@ -33,9 +33,9 @@ namespace PW.Editor
 				graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged -= LinkStopDragCallback;
 				graphEditor.OnLinkCanceled -= LinkCanceledCallback;
-			}
 	
-			graphRef.OnLinkCreated -= LinkCreatedCallback;
+				graphRef.OnLinkCreated -= LinkCreatedCallback;
+			}
 
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;

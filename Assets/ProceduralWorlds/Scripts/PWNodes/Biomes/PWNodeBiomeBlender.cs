@@ -95,7 +95,7 @@ namespace PW.Node
 
 						if (!partialBiome.biomeGraph.hasProcessed)
 						{
-							Debug.LogError("[PWBiomeBlender] Can't process properly the biome graph '" + partialBiome.biomeGraph + "'");
+							Debug.LogError("[PWBiomeBlender] Can't process the biome graph '" + partialBiome.biomeGraph + "'");
 							continue ;
 						}
 

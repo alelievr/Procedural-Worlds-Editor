@@ -130,7 +130,11 @@ namespace PW.Editor
 			{
 				nodeRef.isSelected = !nodeRef.isSelected;
 				if (nodeRef.isSelected)
+				{
 					graphEditor.RaiseNodeSelected(nodeRef);
+					if (nodeInspectorGUIOverloaded)
+						Selection.activeObject = nodeRef;
+				}
 				else
 					graphEditor.RaiseNodeUnselected(nodeRef);
 			}
@@ -171,6 +175,11 @@ namespace PW.Editor
 		{
 			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
 				nodeRef.undoableFields[i].SetValue(nodeRef, properties[i]);
+		}
+
+		void RenderInspector()
+		{
+			OnNodeInspectorGUI();
 		}
 
 		void DrawNullInputGUI()

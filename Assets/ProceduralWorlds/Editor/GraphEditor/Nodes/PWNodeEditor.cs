@@ -12,13 +12,13 @@ namespace PW.Editor
 	public abstract partial class PWNodeEditor : UnityEditor.Editor
 	{
 		[SerializeField]
-		int							maxAnchorRenderHeight = 0;
+		int								maxAnchorRenderHeight;
 
 		//Utils
-		protected Event				e { get { return Event.current; } }
+		protected Event					e { get { return Event.current; } }
 		[System.NonSerialized]
-		protected DelayedChanges	delayedChanges = new DelayedChanges();
-		protected PWGUIManager		PWGUI = new PWGUIManager();
+		protected DelayedChanges		delayedChanges = new DelayedChanges();
+		protected PWGUIManager			PWGUI = new PWGUIManager();
 
 		//Getters
 		protected PWGraph					graphRef { get { return nodeRef.graphRef; } }
@@ -30,7 +30,9 @@ namespace PW.Editor
 		protected PWGraphEditor				graphEditor;
 
 		//state bools
-		public bool						windowNameEdit = false;
+		public bool						windowNameEdit;
+		public bool						isInsideGraph;
+		public bool						nodeInspectorGUIOverloaded { get; private set; }
 		
 		public delegate void			AnchorAction(PWAnchor anchor);
 		
@@ -57,6 +59,8 @@ namespace PW.Editor
 				DestroyImmediate(this);
 				return ;
 			}
+			
+			nodeInspectorGUIOverloaded = GetType().GetMethod("OnNodeInspectorGUI").DeclaringType == GetType();
 
 			delayedChanges.Clear();
 
@@ -77,9 +81,12 @@ namespace PW.Editor
 
 		void OnGUIEnable()
 		{
-			LoadHeaderResouces();
-			LoadCoreResources();
-			LoadAnchorResources();
+			using (PWGUISkin.Get())
+			{
+				LoadHeaderResouces();
+				LoadCoreResources();
+				LoadAnchorResources();
+			}
 
 			guiEnabled = true;
 		}
@@ -89,7 +96,11 @@ namespace PW.Editor
 			if (!guiEnabled)
 				OnGUIEnable();
 			
-			RenderNode();
+			if (isInsideGraph)
+				RenderNode();
+			else
+				RenderInspector();
+				
 			delayedChanges.Update();
 		}
 	
@@ -108,6 +119,7 @@ namespace PW.Editor
 		public virtual void OnNodeEnable() {}
 		public virtual void OnNodeDisable() {}
 		public abstract void OnNodeGUI();
+		public virtual void OnNodeInspectorGUI() {}
 
 		public virtual void OnNodePreProcess() {}
 		public virtual void OnNodePostProcess() {}

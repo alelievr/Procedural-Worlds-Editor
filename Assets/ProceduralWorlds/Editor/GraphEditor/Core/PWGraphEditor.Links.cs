@@ -223,7 +223,7 @@ public partial class PWGraphEditor
 		Debug.Log("linked: " + linked);
 		graph.editorEvents.isDraggingLink = false;
 
-		if (!linked)
+		if (!linked && OnLinkCanceled != null)
 			OnLinkCanceled();
 		
 		if (OnLinkStopDragged != null)

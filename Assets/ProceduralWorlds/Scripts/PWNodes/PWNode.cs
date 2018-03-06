@@ -265,7 +265,7 @@ namespace PW
 
 		public override string ToString()
 		{
-			return "node " + name + "[" + GetType() + "]";
+			return "node " + name + "<" + GetType() + ">(" + id + ")";
 		}
     }
 }

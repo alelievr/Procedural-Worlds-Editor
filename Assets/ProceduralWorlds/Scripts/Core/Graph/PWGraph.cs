@@ -135,8 +135,8 @@ namespace PW.Core
 
 		public virtual void InitializeInputAndOutputNodes()
 		{
-			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(-100, 0));
-			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(100, 0));
+			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(-100, 0), "Input", false, false);
+			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(100, 0), "Output", false, false);
 		}
 
 		public virtual void OnEnable()
@@ -460,7 +460,7 @@ namespace PW.Core
 
 		public PWNode	FindNodeByName(string name)
 		{
-			return nodes.FirstOrDefault(n => n.name == name);
+			return allNodes.FirstOrDefault(n => n.name == name);
 		}
 
 		public T		FindNodeByName< T >(string name) where T : PWNode
@@ -470,22 +470,22 @@ namespace PW.Core
 
 		public PWNode	FindNodeByType(Type type)
 		{
-			return nodes.FirstOrDefault(n => n.GetType() == type);
+			return allNodes.FirstOrDefault(n => n.GetType() == type);
 		}
 		
 		public List< PWNode >	FindNodesByType(Type type)
 		{
-			return nodes.Where(n => n.GetType() == type).ToList();
+			return allNodes.Where(n => n.GetType() == type).ToList();
 		}
 
 		public T		FindNodeByType< T >() where T : PWNode
 		{
-			return nodes.FirstOrDefault(n => n is T) as T;
+			return allNodes.FirstOrDefault(n => n is T) as T;
 		}
 		
 		public List< T >	FindNodesByType< T >() where T : PWNode
 		{
-			return nodes.Where(n => n is T).Cast< T >().ToList();
+			return allNodes.Where(n => n is T).Cast< T >().ToList();
 		}
 
 		public IOrderedEnumerable< PWNode >	GetComputeSortedNodes()
@@ -493,12 +493,12 @@ namespace PW.Core
 			return computeOrderSortedNodes;
 		}
 
-		public T		CreateNewNode< T >(Vector2 position, string name = null) where T : PWNode
+		public T		CreateNewNode< T >(Vector2 position, string name = null, bool raiseEvents = true, bool addToList = true) where T : PWNode
 		{
-			return CreateNewNode(typeof(T), position, name) as T;
+			return CreateNewNode(typeof(T), position, name, raiseEvents, addToList) as T;
 		}
 
-		public PWNode	CreateNewNode(System.Type nodeType, Vector2 position, string name = null, bool raiseEvents = true)
+		public PWNode	CreateNewNode(Type nodeType, Vector2 position, string name = null, bool raiseEvents = true, bool addToList = true)
 		{
 			PWNode newNode = ScriptableObject.CreateInstance(nodeType) as PWNode;
 			
@@ -508,7 +508,7 @@ namespace PW.Core
 			
 			newNode.Initialize(this);
 
-			AddInitializedNode(newNode, raiseEvents);
+			AddInitializedNode(newNode, raiseEvents, addToList);
 
 			if (name != null)
 				newNode.name = name;
@@ -516,9 +516,11 @@ namespace PW.Core
 			return newNode;
 		}
 
-		public void		AddInitializedNode(PWNode newNode, bool raiseEvents = true)
+		public void		AddInitializedNode(PWNode newNode, bool raiseEvents = true, bool addToList = true)
 		{
-			nodes.Add(newNode);
+			if (addToList)
+				nodes.Add(newNode);
+			
 			nodesDictionary[newNode.id] = newNode;
 			
 			if (OnNodeAdded != null && raiseEvents)

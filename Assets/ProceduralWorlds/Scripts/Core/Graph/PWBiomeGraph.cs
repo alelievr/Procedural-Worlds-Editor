@@ -12,8 +12,8 @@ namespace PW.Core
 
 		public override void InitializeInputAndOutputNodes()
 		{
-			inputNode = CreateNewNode< PWNodeBiomeGraphInput >(new Vector2(-100, 0));
-			outputNode = CreateNewNode< PWNodeBiomeGraphOutput >(new Vector2(100, 0));
+			inputNode = CreateNewNode< PWNodeBiomeGraphInput >(new Vector2(-100, 0), "Input", false, false);
+			outputNode = CreateNewNode< PWNodeBiomeGraphOutput >(new Vector2(100, 0), "Output", false, false);
 		}
 
 		public void SetInput(PartialBiome biomeData)

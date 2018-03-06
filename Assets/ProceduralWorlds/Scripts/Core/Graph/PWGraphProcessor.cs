@@ -250,7 +250,6 @@ namespace PW.Core
 				}
 			} catch (Exception e) {
 				Debug.LogError(e);
-				Debug.Log("Stopping graph processing due to an unexpected error");
 				return calculTime;
 			}
 			

@@ -64,8 +64,6 @@ namespace PW.Editor
 			if (terrain.biomeData == null || terrain.biomeData.biomeMap == null)
 				return false;
 
-			var biomeMap = terrain.biomeData.biomeMap;
-
 			foreach (var biome in terrain.biomes)
 				if (biome == null)
 					return false;
