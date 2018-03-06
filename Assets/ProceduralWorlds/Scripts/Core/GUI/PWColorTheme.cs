@@ -80,31 +80,31 @@ namespace PW.Core
 		static Dictionary< PWColorSchemeName, List< Type > > anchorColorSchemeNames = new Dictionary< PWColorSchemeName, List< Type > >()
 		{
 			{
-				PWColorSchemeName.Alizarin, new List< Type >() {
+				PWColorSchemeName.Alizarin, new List< Type > {
 				typeof(float), typeof(Color), typeof(Vector2),
 				typeof(Vector3), typeof(Vector4), typeof(int),
 				typeof(GameObject), typeof(Mesh), typeof(Material),
 				typeof(Texture2D) }
 			}, {
-				PWColorSchemeName.Amethyst, new List< Type >() {}
+				PWColorSchemeName.Amethyst, new List< Type > {}
 			}, {
-				PWColorSchemeName.Emerald, new List< Type >() { typeof(Sampler) }
+				PWColorSchemeName.Emerald, new List< Type >{ typeof(Sampler) }
 			}, {
-				PWColorSchemeName.Carrot, new List< Type >() {
+				PWColorSchemeName.Carrot, new List< Type >{
 					typeof(Biome), typeof(BiomeData), typeof(PartialBiome) }
 			}, {
-				PWColorSchemeName.Pumpkin, new List< Type >() { typeof(BlendedBiomeTerrain) }
+				PWColorSchemeName.Pumpkin, new List< Type >{ typeof(BlendedBiomeTerrain) }
 			}, {
-				PWColorSchemeName.SunFlower, new List< Type >() { typeof(FinalTerrain),
+				PWColorSchemeName.SunFlower, new List< Type > { typeof(FinalTerrain),
 				typeof(BiomeSurfaceMaps), typeof(BiomeSurfaceColor),
 				typeof(BiomeSurfaceMaterial), typeof(BiomeSurfaceSwitch),
 				typeof(BiomeDetails), typeof(BiomeDetail) }
 			}, {
-				PWColorSchemeName.Concrete, new List< Type >() { typeof(TerrainDetail) }
+				PWColorSchemeName.Concrete, new List< Type > { typeof(TerrainDetail) }
 			}, {
-				PWColorSchemeName.PeterRiver, new List< Type >() {}
+				PWColorSchemeName.PeterRiver, new List< Type > {}
 			}, {
-				PWColorSchemeName.Turquoise, new List< Type >() { typeof(BiomeSurfaceGraph) }
+				PWColorSchemeName.Turquoise, new List< Type >{ typeof(BiomeSurfaceGraph) }
 			},
 		};
 

@@ -15,7 +15,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 {
 	
 	//events fields
-	Vector2					lastMousePosition;
 	[System.NonSerialized]
 	Vector2					currentMousePosition;
 

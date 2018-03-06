@@ -135,8 +135,8 @@ namespace PW.Core
 
 		public virtual void InitializeInputAndOutputNodes()
 		{
-			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(-100, 0), "Input", false, false);
-			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(100, 0), "Output", false, false);
+			inputNode = CreateNewNode< PWNodeGraphInput >(new Vector2(-100, 0), "Input", true, false);
+			outputNode = CreateNewNode< PWNodeGraphOutput >(new Vector2(100, 0), "Output", true, false);
 		}
 
 		public virtual void OnEnable()
@@ -160,9 +160,11 @@ namespace PW.Core
 
 			//Send OnAfterSerialize here because when graph's OnEnable function is
 			// called, all it's nodes are already deserialized.
-			foreach (var node in nodes)
+			foreach (var node in allNodes)
+			{
 				if (node != null)
 					node.OnAfterGraphDeserialize(this);
+			}
 		}
 
 		public virtual void OnDisable()

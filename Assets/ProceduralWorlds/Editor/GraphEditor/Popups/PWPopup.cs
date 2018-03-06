@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System;
+using PW.Core;
 
 //popup system used to display ColorField's ColorPicker and settings windows.
 namespace PW.Editor

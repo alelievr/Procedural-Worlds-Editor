@@ -27,7 +27,9 @@ namespace PW.Editor
 			GUILayout.Space(EditorGUIUtility.singleLineHeight);
 			node.outputMesh = EditorGUILayout.ObjectField(node.outputMesh, typeof(Mesh), false) as Mesh;
 
-			if ((node.displayPreview = EditorGUILayout.Foldout(node.displayPreview, "preview")))
+			node.displayPreview = EditorGUILayout.Foldout(node.displayPreview, "preview");
+			
+			if (node.displayPreview)
 			{
 				EditorGUIUtility.labelWidth = 75;
 				

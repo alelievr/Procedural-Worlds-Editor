@@ -78,6 +78,5 @@ namespace PW.Core
 	[AttributeUsage(AttributeTargets.Field)]
 	public class PWNotRequiredAttribute : Attribute
 	{
-		public PWNotRequiredAttribute() {}
 	}
 }

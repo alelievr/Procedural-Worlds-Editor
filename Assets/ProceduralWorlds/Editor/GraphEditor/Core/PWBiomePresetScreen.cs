@@ -7,11 +7,6 @@ namespace PW.Editor
 {
 	public class PWBiomePresetScreen : PWPresetScreen
 	{
-		Texture2D	plainTexture;
-		Texture2D	mountainTexture;
-		Texture2D	mesaTexture;
-		Texture2D	swamplandTexture;
-	
 		PWBiomeGraph	biomeGraph;
 
 		readonly string	graphFilePrefix = "GraphPresets/Biome/Parts/";
@@ -20,10 +15,10 @@ namespace PW.Editor
 		{
 			this.biomeGraph = biomeGraph;
 	
-			plainTexture = Resources.Load< Texture2D >("");
-			mountainTexture = Resources.Load< Texture2D >("");
-			mesaTexture = Resources.Load< Texture2D >("");
-			swamplandTexture = Resources.Load< Texture2D >("");
+			Texture2D plainTexture = Resources.Load< Texture2D >("");
+			Texture2D mountainTexture = Resources.Load< Texture2D >("");
+			Texture2D mesaTexture = Resources.Load< Texture2D >("");
+			Texture2D swamplandTexture = Resources.Load< Texture2D >("");
 			
 			PresetCellList	earthLikePresets = new PresetCellList()
 			{

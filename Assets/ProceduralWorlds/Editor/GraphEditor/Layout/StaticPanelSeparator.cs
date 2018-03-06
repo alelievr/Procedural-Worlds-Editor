@@ -22,9 +22,15 @@ namespace PW.Editor
 			Rect r;
 			
 			if (vertical)
+			{
 				r = EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+				r.width = layoutSetting.separatorPosition;
+			}
 			else
+			{
 				r = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
+				r.height = layoutSetting.separatorPosition;
+			}
 			
 			if (e.type == EventType.Repaint)
 				lastRect = r;

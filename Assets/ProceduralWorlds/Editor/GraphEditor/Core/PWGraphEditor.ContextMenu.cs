@@ -15,27 +15,25 @@ using Debug = UnityEngine.Debug;
 public partial class PWGraphEditor
 {
 
-	GUIContent	newOrderingGroupContent = new GUIContent("New Ordering group");
-	GUIContent	deleteOrderingGroupContent = new GUIContent("Delete Ordering group");
+	readonly GUIContent	newOrderingGroupContent = new GUIContent("New Ordering group");
+	readonly GUIContent	deleteOrderingGroupContent = new GUIContent("Delete Ordering group");
 
-	GUIContent	newLinkContent = new GUIContent("New Link");
-	GUIContent	deleteAllLinksContent = new GUIContent("Delete all links");
-	GUIContent	deleteLinkContent = new GUIContent("Delete link");
+	readonly GUIContent	newLinkContent = new GUIContent("New Link");
+	readonly GUIContent	deleteAllLinksContent = new GUIContent("Delete all links");
+	readonly GUIContent	deleteLinkContent = new GUIContent("Delete link");
 	
-	GUIContent	deleteNodeContent = new GUIContent("Delete node");
-	GUIContent	openNodeScriptContent = new GUIContent("Open C# Script");
+	readonly GUIContent	deleteNodeContent = new GUIContent("Delete node");
+	readonly GUIContent	openNodeScriptContent = new GUIContent("Open C# Script");
 
-	GUIContent	debugNodeContent = new GUIContent("Debug/Node");
-	GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
+	readonly GUIContent	debugNodeContent = new GUIContent("Debug/Node");
+	readonly GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
 
-	GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
+	readonly GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
 
 	protected Event e { get { return Event.current; } }
 
 	void ContextMenu()
 	{
-		Event	e = Event.current;
-		
         if (e.type == EventType.ContextClick)
         {
 			Profiler.BeginSample("[PW] render context menu");

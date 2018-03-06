@@ -11,11 +11,11 @@ namespace PW.Editor
 {
 	public class PWSamplerSettingsPopup : PWPopup
 	{
-		public static Gradient		gradient;
-		public static FilterMode	filterMode;
-		public static Texture		texture;
-		public static bool			debug;
-		public static bool			update;
+		static Gradient		gradient;
+		static FilterMode	filterMode;
+		static Texture		texture;
+		static bool			debug;
+		public static bool	update { get; private set; }
 		
 		[System.NonSerializedAttribute]
 		static MethodInfo			gradientField;
@@ -91,6 +91,14 @@ namespace PW.Editor
 			}
 
 			oldGradient = (SerializableGradient)gradient;
+		}
+
+		public static void UpdateDatas(PWGUISettings settings)
+		{
+			settings.gradient = gradient;
+			settings.serializableGradient = (SerializableGradient)settings.gradient;
+			settings.filterMode = filterMode;
+			settings.debug = debug;
 		}
 	}
 }

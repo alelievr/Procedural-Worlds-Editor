@@ -23,10 +23,7 @@ namespace PW.Tests.Graphs
 			};
 
 			foreach (var node in mainGraph.nodes)
-			{
-				Debug.Log("node: " + node);
 				Assert.That(inputAndOutputTypes.Contains(node.GetType()) == false);
-			}
 		}
 		
 		[Test]

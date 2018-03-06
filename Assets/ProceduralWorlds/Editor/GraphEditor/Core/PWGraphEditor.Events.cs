@@ -20,7 +20,7 @@ public partial class PWGraphEditor
 		{
 			foreach (var eventMask in eventMasks)
 			{
-				if (eventMask.Value.Contains(e.mousePosition))
+				if (eventMask.Contains(e.mousePosition))
 				{
 					//if there is, we say to ignore the event and restore it later
 					restoreEvent = true;

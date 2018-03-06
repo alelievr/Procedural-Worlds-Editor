@@ -14,10 +14,10 @@ namespace PW.Editor
 
 		Vector2			colorPickerPadding = new Vector2(10, 10);
 
-		bool			colorPicking = false;
+		bool			colorPicking;
 
-		public static Color		currentColor;
-		public static Vector2	thumbPosition;
+		static Color	currentColor;
+		static Vector2	thumbPosition;
 
 		public static void OpenPopup(Color color, PWGUISettings guiSettings)
 		{
@@ -30,8 +30,8 @@ namespace PW.Editor
 
 		protected override void OnGUIEnable()
 		{
-			colorPickerTexture = Resources.Load("colorPicker") as Texture2D;
-			colorPickerThumb = Resources.Load("colorPickerThumb") as Texture2D;
+			colorPickerTexture = Resources.Load("GUI/colorPicker") as Texture2D;
+			colorPickerThumb = Resources.Load("GUI/colorPickerThumb") as Texture2D;
 		}
 
 		void DrawRainbowPicker()
@@ -118,6 +118,12 @@ namespace PW.Editor
 				SendUpdate("ColorPickerUpdate");
 				Repaint();
 			}
+		}
+
+		public static void UpdateDatas(PWGUISettings settings)
+		{
+			settings.c = (SerializableColor)currentColor;
+			settings.thumbPosition = thumbPosition;
 		}
 
 	}

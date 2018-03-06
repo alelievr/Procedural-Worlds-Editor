@@ -72,6 +72,12 @@ public partial class PWGraphEditor
 
 	void RenderNode(int id, PWNode node)
 	{
+		if (node == null)
+		{
+			Debug.LogError("null node !");
+			return ;
+		}
+
 		RenderDecaledNode(id, node);
 
 		//check if the mouse is over this node

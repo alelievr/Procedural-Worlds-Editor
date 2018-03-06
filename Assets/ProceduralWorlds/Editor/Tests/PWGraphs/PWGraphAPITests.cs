@@ -257,5 +257,34 @@ namespace PW.Tests.Graphs
 			}
 		}
 
+		[Test]
+		public static void CloneMainGraph()
+		{
+			PWMainGraph mainGraph = TestUtils.GenerateTestMainGraph();
+			PWMainGraph clonedGraph = mainGraph.Clone() as PWMainGraph;
+
+			Assert.That(mainGraph.nodes.Count == clonedGraph.nodes.Count);
+			Assert.That(mainGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
+
+			Assert.That(clonedGraph.readyToProcess == true);
+
+			clonedGraph.Process();
+		}
+		
+
+		[Test]
+		public static void CloneBiomeGraph()
+		{
+			PWBiomeGraph biomeGraph = TestUtils.GenerateTestBiomeGraph();
+			PWBiomeGraph clonedGraph = biomeGraph.Clone() as PWBiomeGraph;
+
+			Assert.That(biomeGraph.nodes.Count == clonedGraph.nodes.Count);
+			Assert.That(biomeGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
+
+			Assert.That(clonedGraph.readyToProcess == true);
+
+			clonedGraph.Process();
+		}
+
 	}
 }

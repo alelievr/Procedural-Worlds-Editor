@@ -85,8 +85,8 @@ namespace PW.Editor
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;
 			
-			int resourcesIndex = currentPath.IndexOf(UnityResourcesFolderName);
-			int biomesIndex = currentPath.IndexOf(PWGraphBiomeFolderName);
+			int resourcesIndex = currentPath.IndexOf(UnityResourcesFolderName, StringComparison.InvariantCulture);
+			int biomesIndex = currentPath.IndexOf(PWGraphBiomeFolderName, StringComparison.InvariantCulture);
 			
 			//if the path don't contains Resources nor Biomes folder
 			if (resourcesIndex == -1 || biomesIndex == -1)

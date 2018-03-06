@@ -13,7 +13,7 @@ namespace PW.Node
 		[PWOutput("Material")]
 		public Material			outputMaterial;
 
-		public bool				isMaterialOutput = false;
+		public bool				isMaterialOutput;
 		public Vector2			tiling = Vector2.one;
 		public Vector2			offset;
 		public bool				preview = true;

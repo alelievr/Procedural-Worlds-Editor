@@ -22,7 +22,8 @@ namespace PW.Editor
 		List< PWLayoutSeparator >		loadedSeparators = new List< PWLayoutSeparator >();
 		List< PWLayoutPanel >			loadedPanels = new List< PWLayoutPanel >();
 
-		List< Action > layoutActions = new List< Action >();
+		List< Action >					layoutActions = new List< Action >();
+		List< Rect >					layoutRects = new List< Rect >();
 
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
 		public PWLayout(PWGraphEditor graphEditor)
@@ -35,6 +36,7 @@ namespace PW.Editor
 			if (oldGraph != null && oldGraph != graphEditor.graph && graphEditor.graph != null)
 				UpdateLayoutSettings(graphEditor.graph.layoutSettings);
 
+			layoutRects.Clear();
 			foreach (var layoutAction in layoutActions)
 				layoutAction();
 
@@ -69,6 +71,7 @@ namespace PW.Editor
 		{
 			layoutActions.Add(() => {
 				Rect r = sep.Begin();
+				layoutRects.Add(r);
 				panel.Draw(r);
 				sep.End();
 			});
@@ -111,6 +114,13 @@ namespace PW.Editor
 		public T GetPanel< T >() where T : PWLayoutPanel
 		{
 			return loadedPanels.FirstOrDefault(p => p is T) as T;
+		}
+
+		public List< Rect> GetRects()
+		{
+			foreach (var p in layoutRects)
+				EditorGUI.DrawRect(p, Random.ColorHSV());
+			return layoutRects;
 		}
 
 	}

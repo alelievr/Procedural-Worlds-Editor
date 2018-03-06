@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace PW.Tests.Graphs
 {
-	public class PWGraphBiomeBlockTests
+	public static class PWGraphBiomeBlockTests
 	{
 	
 		[Test]

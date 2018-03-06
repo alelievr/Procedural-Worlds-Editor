@@ -8,7 +8,7 @@ namespace PW.Editor
 {
 	public class PWBiomeMapSettingsPopup : PWPopup
 	{
-		public static bool debug;
+		static bool debug;
 		
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{
@@ -32,6 +32,11 @@ namespace PW.Editor
 			}
 			if (EditorGUI.EndChangeCheck())
 				SendUpdate("BiomeMapSettingsUpdate");
+		}
+
+		public static void UpdateDatas(PWGUISettings settings)
+		{
+			settings.debug = PWBiomeMapSettingsPopup.debug;
 		}
 	}
 }

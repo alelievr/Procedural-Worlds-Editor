@@ -170,8 +170,7 @@ namespace PW.Editor
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
 				if (fieldSettings.GetHashCode() == PWColorPickerPopup.controlId)
 				{
-					fieldSettings.c = (SerializableColor)PWColorPickerPopup.currentColor;
-					fieldSettings.thumbPosition = PWColorPickerPopup.thumbPosition;
+					PWColorPickerPopup.UpdateDatas(fieldSettings);
 					GUI.changed = true;
 				}
 			
@@ -539,11 +538,7 @@ namespace PW.Editor
 			//render the texture settings window
 			if (e.type == EventType.ExecuteCommand && e.commandName == "TextureSettingsUpdate")
 			{
-				fieldSettings.scaleAspect = PWTextureSettingsPopup.scaleAspect;
-				fieldSettings.scaleMode = PWTextureSettingsPopup.scaleMode;
-				fieldSettings.material = PWTextureSettingsPopup.material;
-				fieldSettings.filterMode = PWTextureSettingsPopup.filterMode;
-				fieldSettings.debug = PWTextureSettingsPopup.debug;
+				PWTextureSettingsPopup.UpdateDatas(fieldSettings);
 				tex.filterMode = fieldSettings.filterMode;
 			}
 
@@ -665,10 +660,7 @@ namespace PW.Editor
 				//if the gradient value have been modified, we update the texture
 				if (PWSamplerSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate")))
 				{
-					fieldSettings.gradient = PWSamplerSettingsPopup.gradient;
-					fieldSettings.serializableGradient = (SerializableGradient)fieldSettings.gradient;
-					fieldSettings.filterMode = PWSamplerSettingsPopup.filterMode;
-					fieldSettings.debug = PWSamplerSettingsPopup.debug;
+					PWSamplerSettingsPopup.UpdateDatas(fieldSettings);
 
 					UpdateSampler2D(fieldSettings);
 					
@@ -830,7 +822,7 @@ namespace PW.Editor
 			//Copy the parameters of the opened popup when modified
 			if (PWBiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (PWSamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate")))
 			{
-				fieldSettings.debug = PWBiomeMapSettingsPopup.debug;
+				PWBiomeMapSettingsPopup.UpdateDatas(fieldSettings);
 			}
 
 			if (fieldSettings.frameSafeDebug && fieldSettings.debug)

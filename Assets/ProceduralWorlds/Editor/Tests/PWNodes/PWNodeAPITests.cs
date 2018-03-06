@@ -11,7 +11,7 @@ using PW;
 
 namespace PW.Tests.Nodes
 {
-	public class PWNodeAPITests
+	public static class PWNodeAPITests
 	{
 		//TestUtils.GenerateTestMainGraph():
 		// 	              +-----+

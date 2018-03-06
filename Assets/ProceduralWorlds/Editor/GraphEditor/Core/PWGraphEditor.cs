@@ -24,7 +24,7 @@ public partial class PWGraphEditor : PWEditorWindow
 
 	//event masks, zones where the graph will not process events,
 	//useful when you want to add a panel on the top of the graph.
-	public Dictionary< int, Rect >	eventMasks = new Dictionary< int, Rect >();
+	public List< Rect >				eventMasks = new List< Rect >();
 	EventType						savedEventType;
 	bool							restoreEvent;
 
@@ -142,6 +142,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		}
 		
 		//disable events if mouse is above an eventMask Rect.
+		eventMasks = layout.GetRects();
 		MaskEvents();
 
 		//profiling

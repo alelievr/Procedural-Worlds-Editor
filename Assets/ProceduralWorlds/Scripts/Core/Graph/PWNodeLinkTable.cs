@@ -16,7 +16,7 @@ namespace PW.Core
 		[SerializeField]
 		LinkTable		linkTable = new LinkTable();
 
-		bool			debug = false;
+		readonly bool			debug;
 	
 		//to be called, fmorAnchor and toAnchor fields in PWNodeLink must be valid
 		public void				AddLink(PWNodeLink link)

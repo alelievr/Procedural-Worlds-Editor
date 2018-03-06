@@ -12,7 +12,7 @@ namespace PW.Tests.Graphs
 	public class PWGraphPresetTests
 	{
 
-		static string mainGraphPresetPath = "GraphPresets/Main";
+		static string mainGraphPresetPath = "GraphPresets/Main/Full";
 		// string biomeGraphPresetPath = "GraphPresets/Biome";
 	
 		[Test]

@@ -11,7 +11,7 @@ namespace PW.Editor
 	{
 		public PWNodeSlider node;
 
-		string changeKey = "Slider";
+		readonly string changeKey = "Slider";
 
 		public override void OnNodeEnable()
 		{

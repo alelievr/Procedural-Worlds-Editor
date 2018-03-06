@@ -11,7 +11,7 @@ namespace PW.Editor
 	{
 		public override void OnNodeGUI()
 		{
-			
+			//nothing to draw here, maybe this node will be merged with the biome input node
 		}
 	}
 }

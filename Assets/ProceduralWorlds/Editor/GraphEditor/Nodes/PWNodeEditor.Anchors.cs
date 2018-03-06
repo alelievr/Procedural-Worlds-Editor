@@ -13,12 +13,12 @@ namespace PW.Editor
 	//Anchor rendering and event processing
 	public abstract partial class PWNodeEditor
 	{
-		static Texture2D		errorIcon = null;
-		static Texture2D		anchorTexture = null;
+		static Texture2D		errorIcon;
+		static Texture2D		anchorTexture;
 		
-		static GUIStyle			inputAnchorLabelStyle = null;
-		static GUIStyle			outputAnchorLabelStyle = null;
-		static GUIStyle			boxAnchorStyle = null;
+		static GUIStyle			inputAnchorLabelStyle;
+		static GUIStyle			outputAnchorLabelStyle;
+		static GUIStyle			boxAnchorStyle;
 
 		PWGraphEditorEventInfo	oldEventInfos;
 

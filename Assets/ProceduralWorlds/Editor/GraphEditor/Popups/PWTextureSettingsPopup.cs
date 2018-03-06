@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using PW.Core;
 
 namespace PW.Editor
 {
 	public class PWTextureSettingsPopup : PWPopup
 	{
 
-		public static ScaleMode		scaleMode;
-		public static float			scaleAspect;
-		public static Material		material;
-		public static FilterMode	filterMode;
-		public static bool			debug;
+		static ScaleMode	scaleMode;
+		static float		scaleAspect;
+		static Material		material;
+		static FilterMode	filterMode;
+		static bool			debug;
 
 		public static void OpenPopup(FilterMode filterMode, ScaleMode scaleMode, float scaleAspect, Material material, bool debug = false)
 		{
@@ -40,6 +41,15 @@ namespace PW.Editor
 			}
 			if (EditorGUI.EndChangeCheck())
 				SendUpdate("TextureSettingsUpdate");
+		}
+
+		public static void UpdateDatas(PWGUISettings settings)
+		{
+			settings.scaleAspect = scaleAspect;
+			settings.scaleMode = scaleMode;
+			settings.material = material;
+			settings.filterMode = filterMode;
+			settings.debug = debug;
 		}
 	}
 }
