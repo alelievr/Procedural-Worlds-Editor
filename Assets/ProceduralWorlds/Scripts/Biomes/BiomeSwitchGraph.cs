@@ -127,6 +127,12 @@ namespace PW.Biomator
 			return true;
 		}
 
+		//Create a switchGraph that always return this biome Id
+		public void BuildTestGraph(short biomeId)
+		{
+			Debug.Log("TODO !");
+		}
+
 		void ResetGraph()
 		{
 			isBuilt = false;

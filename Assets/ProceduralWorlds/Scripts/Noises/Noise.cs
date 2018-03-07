@@ -11,23 +11,29 @@ namespace PW.Noises
 		public const float		noiseScale = 0.01f;
 	
 		public string			name;
-		public bool				hasComputeShaders;
+		public bool				hasComputeShaders { get; private set; }
+
+		public float			scale;
+		public float			persistence;
+		public float			lacunarity;
+		public int				seed;
+		public Vector3			position;
 	
 		public Noise()
 		{
 			hasComputeShaders = SystemInfo.graphicsShaderLevel >= 45;
 		}
 
-		public virtual float Get2D(float x, float y, int seed)
+		public abstract float	GetValue(Vector3 position);
+
+		public virtual void	ComputeSampler2D(Sampler2D samp)
 		{
-			return 0;
+			throw new System.NotImplementedException();
 		}
 
-		public virtual float Get3D(float x, float y, float z, int seed)
+		public virtual void	ComputeSampler3D(Sampler3D samp)
 		{
-			return 0;
+			throw new System.NotImplementedException();
 		}
-
-		public abstract void ComputeSampler(Sampler samp, float scale, int seed);
 	}
 }

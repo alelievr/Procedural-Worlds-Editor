@@ -23,13 +23,16 @@ namespace PW.Editor
 			EditorGUIUtility.labelWidth = 40;
 			EditorGUI.BeginChangeCheck();
 			{
-				node.persistance = PWGUI.Slider("Persistance: ", node.persistance, ref node.persistanceMin, ref node.persistanceMax);
+				node.persistence = PWGUI.Slider("Persistance: ", node.persistence, ref node.persistanceMin, ref node.persistanceMax);
 				node.octaves = PWGUI.IntSlider("Octaves: ", node.octaves, 0, 16);
 				node.scale = PWGUI.Slider("Scale: ", node.scale, 0.01f, 10);
 				node.additionalSeed = EditorGUILayout.IntField("Seed", node.additionalSeed);
 			}
 			if (EditorGUI.EndChangeCheck())
+			{
+				node.perlin2D.UpdateParams(node.scale, node.octaves, node.persistence, node.lacunarity);
 				delayedChanges.UpdateValue(noiseSettingsChangedKey);
+			}
 
 			PWGUI.Sampler2DPreview(node.output);
 		}

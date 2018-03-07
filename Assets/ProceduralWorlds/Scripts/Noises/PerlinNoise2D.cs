@@ -9,6 +9,8 @@ namespace PW.Noises
 {
 	public class PerlinNoise2D : Noise
     {
+		public int octaves;
+
 		static int[] p = {151,160,137,91,90,15,
            131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
            190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -104,8 +106,21 @@ namespace PW.Noises
                   v = h < 4 ? y : x;
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
+
+        public PerlinNoise2D(float scale = 1, int octaves = 2, float persistence = 1, float lacunarity = 1)
+        {
+            UpdateParams(scale, octaves, persistence, lacunarity);
+        }
+
+        public void UpdateParams(float scale, int octaves, float persistence, float lacunarity)
+        {
+            this.scale = scale;
+            this.octaves = octaves;
+            this.persistence = persistence;
+            this.lacunarity = lacunarity;
+        }
     
-		public override void ComputeSampler(Sampler samp, float scale, int seed)
+		public override void ComputeSampler2D(Sampler2D samp)
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
@@ -116,17 +131,15 @@ namespace PW.Noises
 			}
 			else
 			{
-				if (samp.type == SamplerType.Sampler2D)
-				{
-					(samp as Sampler2D).Foreach((x, y) => {
-						return GenerateNoise(x, y, 4, samp.step * scale, 1, 1, seed);
-					});
-				}
-				else
-				{
-
-				}
+                (samp as Sampler2D).Foreach((x, y) => {
+                    return GenerateNoise(x, y, 4, samp.step * scale, 1, 1, seed);
+                });
 			}
+		}
+
+		public override float GetValue(Vector3 position)
+		{
+            return GenerateNoise(position.x, position.y, octaves, scale, 1, 1, seed);
 		}
 	}
 }

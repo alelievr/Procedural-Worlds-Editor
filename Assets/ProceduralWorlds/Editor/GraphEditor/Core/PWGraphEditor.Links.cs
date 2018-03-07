@@ -19,7 +19,7 @@ public partial class PWGraphEditor
 			DrawNodeCurve(editorEvents.startedLinkAnchor, e.mousePosition);
 
 		//render node links
-		foreach (var node in graph.nodes)
+		foreach (var node in graph.allNodes)
 			RenderNodeLinks(node);
 		
 		if (!editorEvents.isMouseOverLinkFrame)

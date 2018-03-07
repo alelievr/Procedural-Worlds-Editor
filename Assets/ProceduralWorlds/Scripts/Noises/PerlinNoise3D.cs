@@ -96,9 +96,14 @@ namespace PW.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
         
-		public override void ComputeSampler(Sampler samp, float scale, int seed)
+		public override void ComputeSampler3D(Sampler3D samp)
         {
-            //Not yet used/implemented, waiting the node upgrade 1
+            throw new System.NotImplementedException();
         }
-    }
+
+		public override float GetValue(Vector3 position)
+		{
+			throw new System.NotImplementedException();
+		}
+	}
 }

@@ -7,18 +7,19 @@ namespace PW.Node
 {
 	public class PWNodePerlinNoise2D : PWNode
 	{
-		public float		persistance;
-		public int			octaves;
-		public int			additionalSeed;
+		public float			persistence;
+		public float			lacunarity;
+		public int				octaves;
+		public int				additionalSeed;
 
-		public float		persistanceMin;
-		public float		persistanceMax;
-		public float		scale = 1f;
+		public float			persistanceMin = 0.1f;
+		public float			persistanceMax = 4f;
+		public float			scale = 1f;
 
 		[PWOutput]
-		public Sampler2D	output;
+		public Sampler2D		output;
 
-		PerlinNoise2D		perlin2D;
+		public PerlinNoise2D	perlin2D;
 
 		public override void OnNodeCreation()
 		{
@@ -36,7 +37,7 @@ namespace PW.Node
 			//recalcul perlin noise values with new seed / position.
 			output.ResizeIfNeeded(chunkSize, step);
 
-			perlin2D.ComputeSampler(output, scale, seed + additionalSeed);
+			perlin2D.ComputeSampler2D(output);
 		}
 	}
 }

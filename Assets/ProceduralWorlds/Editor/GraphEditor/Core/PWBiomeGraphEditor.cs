@@ -46,6 +46,8 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		
 		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
 
+		LoadGUI();
+
 		LoadGraphList();
 	}
 
@@ -58,17 +60,20 @@ public class PWBiomeGraphEditor : PWGraphEditor
 			biomeGraphs.Add(biomeGraph);
 	}
 
-	void GraphLoadedCallback(PWGraph graph)
+	void LoadGUI()
 	{
-		if (graph == null)
-			return ;
-		
 		var settingsPanel = layout.GetPanel< PWGraphSettingsPanel >();
-
+		
 		settingsPanel.onGUI = (rect) => {
 			settingsPanel.DrawDefault(rect);
 			DrawBiomeSettingsBar(rect);
 		};
+	}
+
+	void GraphLoadedCallback(PWGraph graph)
+	{
+		if (graph == null)
+			return ;
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)

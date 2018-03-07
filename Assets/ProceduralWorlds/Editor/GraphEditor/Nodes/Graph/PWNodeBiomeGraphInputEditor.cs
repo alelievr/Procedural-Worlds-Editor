@@ -34,18 +34,25 @@ namespace PW.Editor
 			
 			PWGUI.PWArrayField(node.outputValues);
 
-			EditorGUILayout.LabelField("Preview graph");
-			node.previewGraph = EditorGUILayout.ObjectField(node.previewGraph, typeof(PWMainGraph), false) as PWMainGraph;
+			EditorGUIUtility.labelWidth = 90;
+			node.inputDataMode = (PWNodeBiomeGraphInput.BiomeDataInputMode)EditorGUILayout.EnumPopup("Input data mode", node.inputDataMode);
 
-			if (node.previewGraph == null)
-				EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
-			
-			if (node.outputPartialBiome != null)
+			if (PWGUI.BeginFade("Input mode"))
 			{
-				if (!biomeDataDrawer.isEnabled)
-					biomeDataDrawer.OnEnable(node.outputPartialBiome);
-				biomeDataDrawer.OnGUI(rect);
+				EditorGUILayout.LabelField("Preview graph");
+				node.previewGraph = EditorGUILayout.ObjectField(node.previewGraph, typeof(PWMainGraph), false) as PWMainGraph;
+
+				if (node.previewGraph == null)
+					EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
+				
+				if (node.outputPartialBiome != null)
+				{
+					if (!biomeDataDrawer.isEnabled)
+						biomeDataDrawer.OnEnable(node.outputPartialBiome);
+					biomeDataDrawer.OnGUI(rect);
+				}
 			}
+			PWGUI.EndFade();
 			
 			node.calls = 0;
 		}

@@ -41,7 +41,7 @@ namespace PW.Tests.CLI
 		{
 			string	perlinNodeName = "perlin";
 			var perlinAttributes = new PWGraphCLIAttributes() {
-				{"persistance", 2.4f}, {"octaves", 6}
+				{"persistence", 2.4f}, {"octaves", 6}
 			};
 
 			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
@@ -52,7 +52,7 @@ namespace PW.Tests.CLI
 			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
 
 			Assert.That(perlinNode.octaves == 6, "Perlin node octaves expected to be 6 but was " + perlinNode.octaves);
-			Assert.That(perlinNode.persistance == 2.4f, "Perlin node persistance expected to be 2.4 but was " + perlinNode.persistance);
+			Assert.That(perlinNode.persistence == 2.4f, "Perlin node persistence expected to be 2.4 but was " + perlinNode.persistence);
 		}
 
 		[Test]
