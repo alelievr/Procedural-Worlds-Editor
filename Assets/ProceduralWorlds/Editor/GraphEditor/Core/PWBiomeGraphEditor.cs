@@ -62,6 +62,13 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		if (graph == null)
 			return ;
+		
+		var settingsPanel = layout.GetPanel< PWGraphSettingsPanel >();
+
+		settingsPanel.onGUI = (rect) => {
+			settingsPanel.DrawDefault(rect);
+			DrawBiomeSettingsBar(rect);
+		};
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)
@@ -96,6 +103,10 @@ public class PWBiomeGraphEditor : PWGraphEditor
 				presetScreen = new PWBiomePresetScreen(biomeGraph);
 			
 			var newGraph = presetScreen.Draw(position, graph);
+			
+			//we initialize the layout once the user choosed the preset to generate
+			if (biomeGraph.presetChoosed)
+				ResetLayout();
 
 			if (newGraph != graph)
 				LoadGraph(newGraph);

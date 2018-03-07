@@ -85,6 +85,10 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			
 			var newGraph = presetScreen.Draw(position, graph);
 
+			//we initialize the layout once the user choosed the preset to generate
+			if (mainGraph.presetChoosed)
+				ResetLayout();
+
 			if (newGraph != graph)
 				LoadGraph(newGraph);
 			

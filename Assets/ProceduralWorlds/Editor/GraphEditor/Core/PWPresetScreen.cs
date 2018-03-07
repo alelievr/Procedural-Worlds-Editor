@@ -97,7 +97,7 @@ namespace PW.Editor
 						currentPresetLists.Push(c.childs);
 			}
 
-			scrollBars = new Vector2[columns];
+			scrollBars = new Vector2[columns + 1];
 		}
 
 		void UpdateSelectedList()

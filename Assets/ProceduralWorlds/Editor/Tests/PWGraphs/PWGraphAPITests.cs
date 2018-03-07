@@ -270,7 +270,6 @@ namespace PW.Tests.Graphs
 
 			clonedGraph.Process();
 		}
-		
 
 		[Test]
 		public static void CloneBiomeGraph()

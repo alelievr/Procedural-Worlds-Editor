@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using PW.Core;
 using PW.Biomator;
+using System;
 
 namespace PW.Node
 {
@@ -100,6 +101,9 @@ namespace PW.Node
 						}
 
 						Biome b = partialBiome.biomeGraph.GetOutput();
+
+						if (b == null)
+							throw new Exception("Biome graph " + partialBiome.biomeGraph + " returns null biome");
 
 						if (outputBlendedBiomeTerrain.biomes.Contains(b))
 						{

@@ -21,7 +21,7 @@ public partial class PWGraphEditor
 	{
 		orderingGroupStyle = GUI.skin.FindStyle("OrderingGroup");
 		orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
-		movepadTexture = Resources.Load("movepad") as Texture2D;
+		movepadTexture = Resources.Load("GUI/movepad") as Texture2D;
 	}
 
 
@@ -95,53 +95,54 @@ public partial class PWGraphEditor
 		int			cornerSize = 14;
 
 		//AH this is ugly
-		var orderGroupRect = orderingGroup.orderGroupRect;
-
 		CreateAnchorRectCallabck(orderingGroup, //left resize anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y + cornerSize, controlSize, orderGroupWorldRect.height - cornerSize * 2),
 			MouseCursor.ResizeHorizontal,
-			() => orderGroupRect.xMin += e.delta.x
+			() => orderingGroup.orderGroupRect.xMin += e.delta.x
 		);
 		CreateAnchorRectCallabck(orderingGroup, //right resize anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - controlSize, orderGroupWorldRect.y + cornerSize, controlSize, orderGroupWorldRect.height - cornerSize * 2),
 			MouseCursor.ResizeHorizontal,
-			() => orderGroupRect.xMax += e.delta.x
+			() => orderingGroup.orderGroupRect.xMax += e.delta.x
 		);
 		CreateAnchorRectCallabck(orderingGroup, //top resize anchor
 			new Rect(orderGroupWorldRect.x + cornerSize, orderGroupWorldRect.y, orderGroupWorldRect.width - cornerSize * 2, controlSize),
 			MouseCursor.ResizeVertical,
-			() => orderGroupRect.yMin += e.delta.y
+			() => orderingGroup.orderGroupRect.yMin += e.delta.y
 		);
 		CreateAnchorRectCallabck(orderingGroup, //down resize anchor
 			new Rect(orderGroupWorldRect.x + cornerSize, orderGroupWorldRect.y + orderGroupWorldRect.height - controlSize, orderGroupWorldRect.width - cornerSize * 2, controlSize),
 			MouseCursor.ResizeVertical,
-			() => orderGroupRect.yMax += e.delta.y
+			() => orderingGroup.orderGroupRect.yMax += e.delta.y
 		);
 
 		CreateAnchorRectCallabck(orderingGroup, //top left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
-			() => { orderGroupRect.min += e.delta; }
+			() => { orderingGroup.orderGroupRect.min += e.delta; }
 		);
 		CreateAnchorRectCallabck(orderingGroup, //top right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
 			() => {
-				orderGroupRect.yMin += e.delta.y;
-				orderGroupRect.xMax += e.delta.x;
+				orderingGroup.orderGroupRect.yMin += e.delta.y;
+				orderingGroup.orderGroupRect.xMax += e.delta.x;
 			}
 		);
 		CreateAnchorRectCallabck(orderingGroup, //down left anchor
 			new Rect(orderGroupWorldRect.x, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpRight,
-			() => { orderGroupRect.max += e.delta; }
+			() => {
+				orderingGroup.orderGroupRect.xMin += e.delta.x;
+				orderingGroup.orderGroupRect.yMax += e.delta.y;
+			}
 		);
 		CreateAnchorRectCallabck(orderingGroup, //down right anchor
 			new Rect(orderGroupWorldRect.x + orderGroupWorldRect.width - cornerSize, orderGroupWorldRect.y + orderGroupWorldRect.height - cornerSize, cornerSize, cornerSize),
 			MouseCursor.ResizeUpLeft,
 			() => {
-				orderGroupRect.yMax += e.delta.y;
-				orderGroupRect.xMax += e.delta.x;
+				orderingGroup.orderGroupRect.yMax += e.delta.y;
+				orderingGroup.orderGroupRect.xMax += e.delta.x;
 			}
 		);
 
@@ -159,7 +160,7 @@ public partial class PWGraphEditor
 		if (e.type == EventType.MouseDown && e.button == 0)
 			if (movePadRect.Contains(e.mousePosition))
 			{
-				orderingGroup.innerNodes = graph.nodes.Where(n => n.rect.Overlaps(orderGroupRect)).ToList();
+				orderingGroup.innerNodes = graph.nodes.Where(n => n.rect.Overlaps(orderingGroup.orderGroupRect)).ToList();
 				orderingGroup.moving = true;
 				e.Use();
 			}

@@ -131,7 +131,7 @@ namespace PW.Editor
 
 			builder.GetGraph().Process();
 			
-			currentGraph.presetChoosed = true;
+			mainGraph.presetChoosed = true;
 		}
 	
 	}

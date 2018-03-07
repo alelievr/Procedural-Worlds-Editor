@@ -4,6 +4,7 @@ using UnityEngine;
 using PW.Core;
 using System.Linq;
 using PW.Biomator;
+using System;
 
 namespace PW.Node
 {
@@ -55,18 +56,12 @@ namespace PW.Node
 					foreach (var biome in inputBlendedTerrain.biomes)
 					{
 						if (biome == null)
-						{
-							Debug.LogError("Can't access to biome(null) from biome blender inputs");
-							continue ;
-						}
+							throw new Exception("Can't access to biome(null) from biome blender inputs");
 
 						var terrain = biome.modifiedTerrain as Sampler2D;
 
 						if (terrain == null)
-						{
-							PWUtils.LogErrorMax("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")", 100);
-							continue ;
-						}
+							throw new Exception("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
 
 						for (int i = 0; i < biomeInfo.length; i++)
 							if (biomeInfo.biomeIds[i] == biome.id)

@@ -47,10 +47,17 @@ namespace PW.Editor
 
 		public override void OnBuildPressed()
 		{
-			foreach (var graphPartFile in graphPartFiles)
-				ImportGraphTextAsset(graphFilePrefix + graphPartFile);
+			PWGraphBuilder builder = PWGraphBuilder.FromGraph(biomeGraph);
 
-			PWGraphBuilder.FromGraph(biomeGraph).Execute();
+			foreach (var graphPartFile in graphPartFiles)
+			{
+				var file = Resources.Load< TextAsset >(graphFilePrefix + graphPartFile);
+				builder.ImportCommands(file.text.Split('\n'));
+			}
+
+			builder.Execute();
+
+			biomeGraph.presetChoosed = true;
 		}
 	}
 }

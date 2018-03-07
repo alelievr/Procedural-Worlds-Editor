@@ -65,8 +65,10 @@ namespace PW.Editor
 				return false;
 
 			foreach (var biome in terrain.biomes)
+			{
 				if (biome == null)
 					return false;
+			}
 			
 			return true;
 		}
