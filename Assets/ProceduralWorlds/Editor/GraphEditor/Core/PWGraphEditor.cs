@@ -58,9 +58,9 @@ public partial class PWGraphEditor : PWEditorWindow
 	public event NodeAction			OnNodeSelected;
 	//fired when a node is unselected
 	public event NodeAction			OnNodeUnselected;
-	//fired when fore reload button in the editor is pressed
+	//fired when force reload button in the editor is pressed
 	public event Action				OnForceReload;
-	//fired when fore reload once button in the editor is pressed
+	//fired when force reload once button in the editor is pressed
 	public event Action				OnForceReloadOnce;
 	//fired when clicking inside the graph, not on a node nor a link.
 	public event Action				OnClickNowhere;
@@ -223,6 +223,8 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.OnLinkRemoved += LinkRemovedCallback;
 		graph.OnPostLinkCreated += PostLinkCreatedCallback;
 		graph.OnGraphStructureChanged += GraphStructureChangedCallback;
+		graph.OnGraphPreProcess += GraphPreProcessCallback;
+		graph.OnGraphPostProcess += GraphPostProcessCallback;
 
 		//set the skin for the node style initialization
 		GUI.skin = PWGUISkin;
@@ -251,6 +253,8 @@ public partial class PWGraphEditor : PWEditorWindow
 		graph.OnLinkRemoved -= LinkRemovedCallback;
 		graph.OnPostLinkCreated -= PostLinkCreatedCallback;
 		graph.OnGraphStructureChanged -= GraphStructureChangedCallback;
+		graph.OnGraphPreProcess -= GraphPreProcessCallback;
+		graph.OnGraphPostProcess -= GraphPostProcessCallback;
 
 		SaveGraph();
 

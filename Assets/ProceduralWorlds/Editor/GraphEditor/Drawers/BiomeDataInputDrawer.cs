@@ -21,6 +21,7 @@ namespace PW.Editor
 			base.OnGUI(new Rect());
 
 			EditorGUIUtility.labelWidth = 90;
+			inputData.seed = EditorGUILayout.IntField("Seed", inputData.seed);
 			inputData.size = PWGUI.IntSlider("Chunk size: ", inputData.size, 4, 512);
 			inputData.step = PWGUI.Slider("Step: ", inputData.step, 0.01f, 16);
 

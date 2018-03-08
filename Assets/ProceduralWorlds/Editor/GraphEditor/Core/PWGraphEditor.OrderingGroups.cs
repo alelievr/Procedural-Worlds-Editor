@@ -160,7 +160,7 @@ public partial class PWGraphEditor
 		if (e.type == EventType.MouseDown && e.button == 0)
 			if (movePadRect.Contains(e.mousePosition))
 			{
-				orderingGroup.innerNodes = graph.nodes.Where(n => n.rect.Overlaps(orderingGroup.orderGroupRect)).ToList();
+				orderingGroup.innerNodes = graph.allNodes.Where(n => n.rect.Overlaps(orderingGroup.orderGroupRect)).ToList();
 				orderingGroup.moving = true;
 				e.Use();
 			}

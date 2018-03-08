@@ -116,6 +116,8 @@ namespace PW.Core
 		//graph events:
 		public event Action						OnGraphStructureChanged;
 		public event Action						OnAllNodeReady;
+		public event Action						OnGraphPreProcess;
+		public event Action						OnGraphPostProcess;
 	
 	#endregion
 
@@ -240,13 +242,17 @@ namespace PW.Core
 			clonedGraph.nodes.Clear();
 			foreach (var node in nodes)
 				clonedGraph.nodes.Add(Object.Instantiate(node));
+			clonedGraph.inputNode = Object.Instantiate(inputNode);
+			AddInitializedNode(clonedGraph.inputNode, true, false);
+			clonedGraph.outputNode = Object.Instantiate(outputNode);
+			AddInitializedNode(clonedGraph.outputNode, true, false);
 			
 			//reenable the new graph so the new nodes are taken in account
 			clonedGraph.OnDisable();
 			clonedGraph.OnEnable();
 
-			//reenable all clone graph nodes
-			foreach (var node in clonedGraph.nodes)
+			//reenable all cloned nodes
+			foreach (var node in clonedGraph.allNodes)
 			{
 				node.OnDisable();
 				node.OnEnable();
@@ -263,28 +269,16 @@ namespace PW.Core
 		{
 			if (!readyToProcess)
 				return -1;
+
+			if (OnGraphPreProcess != null)
+				OnGraphPreProcess();
 			
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
-			return graphProcessor.Process(this);
-		}
-
-		public float ProcessFrom(PWGraph graph)
-		{
-			if (!readyToProcess)
-				return -1;
+			float ret = graphProcessor.Process(this);
 			
-			var iNode = (inputNode as PWNodeBiomeGraphInput);
-			var savedRealMode = IsRealMode();
-			var savedBiomeDataMode = iNode.inputDataMode;
+			if (OnGraphPostProcess != null)
+				OnGraphPostProcess();
 			
-			SetRealMode(graph.IsRealMode());
-			iNode.inputDataMode = PWNodeBiomeGraphInput.BiomeDataInputMode.MainGraph;
-
-			float ret = Process();
-
-			iNode.inputDataMode = savedBiomeDataMode;
-			SetRealMode(savedRealMode);
-
 			return ret;
 		}
 
@@ -379,7 +373,7 @@ namespace PW.Core
 
 		public override string ToString()
 		{
-			return name + " " + " [" + GetType() + "]";
+			return this.name + " " + " [" + GetType() + "]";
 		}
 	
 	#region Events handlers

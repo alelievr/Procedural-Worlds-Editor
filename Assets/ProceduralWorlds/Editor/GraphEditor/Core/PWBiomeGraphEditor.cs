@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
@@ -54,11 +56,14 @@ public class PWBiomeGraphEditor : PWGraphEditor
 
 	void LoadGraphList()
 	{
-		biomeGraphs.Clear();
-		var resGraphs = Resources.FindObjectsOfTypeAll< PWBiomeGraph >();
+		string path = AssetDatabase.GetAssetPath(biomeGraph);
+		string resourcesName = PWGraphFactory.UnityResourcesFolderName;
+		path = Path.GetDirectoryName(path);
+		path = path.Substring(path.IndexOf(resourcesName) + resourcesName.Length + 1);
+		var graphAssets = Resources.LoadAll< PWBiomeGraph >(path);
 
-		foreach (var biomeGraph in resGraphs)
-			biomeGraphs.Add(biomeGraph);
+		if (graphAssets != null && graphAssets.Length != 0)
+			biomeGraphs = graphAssets.ToList();
 	}
 
 	void LoadGUI()

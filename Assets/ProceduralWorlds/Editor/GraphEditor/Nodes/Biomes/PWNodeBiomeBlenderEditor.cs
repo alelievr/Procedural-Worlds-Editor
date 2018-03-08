@@ -14,6 +14,8 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeBlender	node;
 
+		BiomeBlendListDrawer		blendListDrawer = new BiomeBlendListDrawer();
+
 		const string				updateBiomeMapKey = "BiomeBlender";
 
 		[System.NonSerialized]
@@ -32,6 +34,7 @@ namespace PW.Editor
 				NotifyReload();
 			});
 			
+			blendListDrawer.OnEnable(node.blendList);
 		}
 
 		public override void OnNodeGUI()
@@ -53,8 +56,7 @@ namespace PW.Editor
 				node.blendList.UpdateIfNeeded(biomeData);
 
 				EditorGUI.BeginChangeCheck();
-				//TOOD: Drawer
-				// node.blendList.DrawList(biomeData, node.visualRect);
+				blendListDrawer.OnGUI(biomeData);
 				if (EditorGUI.EndChangeCheck())
 					delayedChanges.UpdateValue(updateBiomeMapKey);
 			}

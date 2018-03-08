@@ -78,7 +78,19 @@ namespace PW.Node
 
 			outputBlendedBiomeTerrain.biomes.Clear();
 
-			//once the biome data is filled, we call the biome graphs corresponding to the biome id
+			//if the main graph was processed from a biome graph, we process all the available biomes
+			if (mainGraphRef.processedFromBiome)
+				ProcessAllBiomes(partialBiomes);
+			else
+				ProcessChunkBiomes(biomeData, partialBiomes);
+
+
+			outputBlendedBiomeTerrain.biomeData = biomeData;
+		}
+
+		void ProcessChunkBiomes(BiomeData biomeData, List< PartialBiome > partialBiomes)
+		{
+			//We process only the biomes found into the chunk
 			foreach (var id in biomeData.ids)
 			{
 				foreach (var partialBiome in partialBiomes)
@@ -92,8 +104,7 @@ namespace PW.Node
 							continue ;
 						
 						partialBiome.biomeGraph.SetInput(partialBiome);
-						partialBiome.biomeGraph.SetRealMode(graphRef.IsRealMode());
-						partialBiome.biomeGraph.ProcessFrom(graphRef);
+						partialBiome.biomeGraph.ProcessFrom(mainGraphRef);
 
 						if (!partialBiome.biomeGraph.hasProcessed)
 						{
@@ -116,8 +127,15 @@ namespace PW.Node
 					}
 				}
 			}
+		}
 
-			outputBlendedBiomeTerrain.biomeData = biomeData;
+		void ProcessAllBiomes(List< PartialBiome > partialBiomes)
+		{
+			foreach (var p in partialBiomes)
+			{
+				p.biomeGraph.SetInput(p);
+				p.biomeGraph.ProcessFrom(mainGraphRef);
+			}
 		}
 
 		public void FillBiomeMap(BiomeData biomeData)

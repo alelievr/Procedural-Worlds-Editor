@@ -264,7 +264,11 @@ namespace PW.Tests.Graphs
 			PWMainGraph clonedGraph = mainGraph.Clone() as PWMainGraph;
 
 			Assert.That(mainGraph.nodes.Count == clonedGraph.nodes.Count);
+			Assert.That(mainGraph.allNodes.Count() == clonedGraph.allNodes.Count());
 			Assert.That(mainGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
+
+			foreach (var node in clonedGraph.allNodes)
+				Assert.That(mainGraph.allNodes.Contains(node) == false);
 
 			foreach (var node in clonedGraph.allNodes)
 			{
@@ -277,6 +281,9 @@ namespace PW.Tests.Graphs
 
 							Assert.That(clonedGraph.FindNodeById(link.toNode.id) != null);
 							Assert.That(clonedGraph.FindNodeById(link.fromNode.id) != null);
+							
+							Assert.That(mainGraph.allNodes.Contains(link.fromNode) == false);
+							Assert.That(mainGraph.allNodes.Contains(link.toNode) == false);
 						}
 			}
 
@@ -292,9 +299,30 @@ namespace PW.Tests.Graphs
 			PWBiomeGraph clonedGraph = biomeGraph.Clone() as PWBiomeGraph;
 
 			Assert.That(biomeGraph.nodes.Count == clonedGraph.nodes.Count);
+			Assert.That(biomeGraph.allNodes.Count() == clonedGraph.allNodes.Count());
 			Assert.That(biomeGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
 
 			Assert.That(clonedGraph.readyToProcess == true);
+			
+			foreach (var node in clonedGraph.allNodes)
+				Assert.That(biomeGraph.allNodes.Contains(node) == false);
+			
+			foreach (var node in clonedGraph.allNodes)
+			{
+				foreach (var anchorField in node.anchorFields)
+					foreach (var anchor in anchorField.anchors)
+						foreach (var link in anchor.links)
+						{
+							Assert.That(link.toNode != null);
+							Assert.That(link.fromNode != null);
+
+							Assert.That(clonedGraph.FindNodeById(link.toNode.id) != null);
+							Assert.That(clonedGraph.FindNodeById(link.fromNode.id) != null);
+							
+							Assert.That(biomeGraph.allNodes.Contains(link.fromNode) == false);
+							Assert.That(biomeGraph.allNodes.Contains(link.toNode) == false);
+						}
+			}
 
 			clonedGraph.Process();
 		}

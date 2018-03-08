@@ -25,7 +25,7 @@ namespace PW.Tests.Nodes
 			
 			var graph = builder.Execute().GetGraph();
 
-			foreach (var node in graph.nodes)
+			foreach (var node in graph.allNodes)
 			{
 				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
 				editor.Initialize(null);
@@ -33,14 +33,14 @@ namespace PW.Tests.Nodes
 				UnityEditor.Editor.DestroyImmediate(editor);
 			}
 			
-			builder = PWGraphBuilder.NewGraph< PWMainGraph >();
+			builder = PWGraphBuilder.NewGraph< PWBiomeGraph >();
 
 			foreach (var type in PWNodeTypeProvider.GetExlusiveNodeTypesForGraph(PWGraphType.Biome))
 				builder.NewNode(type, type.ToString());
 			
 			graph = builder.Execute().GetGraph();
 
-			foreach (var node in graph.nodes)
+			foreach (var node in graph.allNodes)
 			{
 				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
 				editor.OnNodeUnitTest();

@@ -106,12 +106,8 @@ public partial class PWGraphEditor
 		
 		BeginWindows();
 		{
-			foreach (var node in graph.nodes)
+			foreach (var node in graph.allNodes)
 				RenderNode(nodeId++, node);
-	
-			//display the graph input and output:
-			RenderNode(nodeId++, graph.outputNode);
-			RenderNode(nodeId++, graph.inputNode);
 		}
 		EndWindows();
 

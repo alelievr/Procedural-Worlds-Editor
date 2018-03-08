@@ -107,13 +107,14 @@ namespace PW.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
 
-        public PerlinNoise2D(float scale = 1, int octaves = 2, float persistence = 1, float lacunarity = 1)
+        public PerlinNoise2D(int seed, float scale = 1, int octaves = 2, float persistence = 1, float lacunarity = 1)
         {
-            UpdateParams(scale, octaves, persistence, lacunarity);
+            UpdateParams(seed, scale, octaves, persistence, lacunarity);
         }
 
-        public void UpdateParams(float scale, int octaves, float persistence, float lacunarity)
+        public void UpdateParams(int seed, float scale, int octaves, float persistence, float lacunarity)
         {
+            this.seed = seed;
             this.scale = scale;
             this.octaves = octaves;
             this.persistence = persistence;

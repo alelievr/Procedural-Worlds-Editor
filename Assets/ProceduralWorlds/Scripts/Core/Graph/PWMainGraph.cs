@@ -41,7 +41,7 @@ namespace PW.Core
 		}
 
 		[SerializeField] private int			_chunkSize;
-		public float							nonModifiedChunkSize { get { return _chunkSize; } }		
+		public float							nonModifiedChunkSize { get { return _chunkSize; } }
 		public int								chunkSize
 		{
 			get { return (!realMode && scaledPreviewEnabled) ? scaledPreviewChunkSize : _chunkSize; }
@@ -158,6 +158,9 @@ namespace PW.Core
 		public event Action				OnChunkSizeChanged;
 		public event Action				OnStepChanged;
 		public event Action				OnChunkPositionChanged;
+
+		//state bools:
+		public bool						processedFromBiome { get; private set; }
 		
 		void		BakeNeededGeologicDatas()
 		{
@@ -198,6 +201,13 @@ namespace PW.Core
 		public override void OnDisable()
 		{
 			base.OnDisable();
+		}
+		
+		public void ProcessFrom(PWBiomeGraph biomeGraph)
+		{
+			processedFromBiome = true;
+			Process();
+			processedFromBiome = false;
 		}
     }
 }

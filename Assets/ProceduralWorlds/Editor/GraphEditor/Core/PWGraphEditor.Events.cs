@@ -176,7 +176,7 @@ public partial class PWGraphEditor
 		if (e.type != EventType.ValidateCommand)
 			return ;
 			
-		var selectedNodes = graph.nodes.Where(n => n.isSelected).ToList();
+		var selectedNodes = graph.allNodes.Where(n => n.isSelected).ToList();
 		
 		switch (e.commandName)
 		{
@@ -200,7 +200,7 @@ public partial class PWGraphEditor
 			case "Paste":
 				break ;
 			case "FrameSelected":
-				var selectedNode = graph.nodes.FirstOrDefault(n => n.isSelected);
+				var selectedNode = graph.allNodes.FirstOrDefault(n => n.isSelected);
 
 				if (selectedNode != null)
 					graph.panPosition = -selectedNode.rect.position + windowSize / 2 - selectedNode.rect.size / 2;
@@ -229,12 +229,18 @@ public partial class PWGraphEditor
 		if (OnForceReload != null)
 			OnForceReload();
 		
+		graph.Process();
+	}
+
+	public void GraphPostProcessCallback()
+	{
 		//send preProcess event
 		foreach (var nodeEditorKP in nodeEditors)
 			nodeEditorKP.Value.OnNodePreProcess();
-		
-		graph.Process();
+	}
 
+	public void GraphPreProcessCallback()
+	{
 		//send postProcess event
 		foreach (var nodeEditorKP in nodeEditors)
 			nodeEditorKP.Value.OnNodePostProcess();

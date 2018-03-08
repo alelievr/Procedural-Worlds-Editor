@@ -18,6 +18,11 @@ namespace PW.Editor
 			delayedChanges.BindCallback(noiseSettingsChangedKey, (unused) => NotifyReload());
 		}
 
+		int GetSeed()
+		{
+			return (mainGraphRef != null) ? mainGraphRef.seed + node.additionalSeed : node.additionalSeed;
+		}
+
 		public override void OnNodeGUI()
 		{
 			EditorGUIUtility.labelWidth = 40;
@@ -30,11 +35,16 @@ namespace PW.Editor
 			}
 			if (EditorGUI.EndChangeCheck())
 			{
-				node.perlin2D.UpdateParams(node.scale, node.octaves, node.persistence, node.lacunarity);
+				node.perlin2D.UpdateParams(GetSeed(), node.scale, node.octaves, node.persistence, node.lacunarity);
 				delayedChanges.UpdateValue(noiseSettingsChangedKey);
 			}
 
 			PWGUI.Sampler2DPreview(node.output);
+		}
+
+		public override void OnNodePreProcess()
+		{
+			node.perlin2D.UpdateParams(GetSeed(), node.scale, node.octaves, node.persistence, node.lacunarity);
 		}
 	}
 }

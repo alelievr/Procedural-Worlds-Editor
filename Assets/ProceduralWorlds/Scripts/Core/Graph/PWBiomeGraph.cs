@@ -40,6 +40,25 @@ namespace PW.Core
 		{
 			base.OnDisable();
 		}
-	
+		
+		public float ProcessFrom(PWMainGraph graph)
+		{
+			if (!readyToProcess)
+				return -1;
+			
+			var iNode = (inputNode as PWNodeBiomeGraphInput);
+			var savedRealMode = IsRealMode();
+			var savedBiomeDataMode = iNode.inputDataMode;
+			
+			SetRealMode(graph.IsRealMode());
+			iNode.inputDataMode = PWNodeBiomeGraphInput.BiomeDataInputMode.MainGraph;
+
+			float ret = Process();
+
+			iNode.inputDataMode = savedBiomeDataMode;
+			SetRealMode(savedRealMode);
+
+			return ret;
+		}
 	}
 }

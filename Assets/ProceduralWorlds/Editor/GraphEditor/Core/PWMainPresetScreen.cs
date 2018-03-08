@@ -95,7 +95,7 @@ namespace PW.Editor
 				string path = biomeTargetPath + name + ".asset";
 
 				AssetDatabase.CreateAsset(bg, path);
-				foreach (var node in bg.nodes)
+				foreach (var node in bg.allNodes)
 					AssetDatabase.AddObjectToAsset(node, bg);
 				
 				//Set our graph into biome graph input
@@ -126,8 +126,6 @@ namespace PW.Editor
 			var biomeNodes = mainGraph.FindNodesByType< PWNodeBiome >();
 			for (int i = 0; i < biomeNodes.Count; i++)
 				biomeNodes[i].biomeGraph = biomes[i];
-
-			Debug.LogWarning("Process !");
 
 			builder.GetGraph().Process();
 			

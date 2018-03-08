@@ -122,13 +122,13 @@ namespace PW.Tests.Graphs
 			Assert.That(g1.nodeLinkTable.GetLinks().Count() == g2.nodeLinkTable.GetLinks().Count(), "Bad links count !");
 
 			//Compare node count:
-			Assert.That(g1.nodes.Count == g2.nodes.Count, "Bad node count !");
+			Assert.That(g1.allNodes.Count() == g2.allNodes.Count(), "Bad node count !");
 
 			//Compare for node and links:
-			for (int i = 0; i < g1.nodes.Count; i++)
+			for (int i = 0; i < g1.allNodes.Count(); i++)
 			{
-				var exNode = g1.nodes[i];
-				var newNode = g2.nodes[i];
+				var exNode = g1.allNodes.ElementAt(i);
+				var newNode = g2.allNodes.ElementAt(i);
 
 				Assert.That(exNode.GetType() == newNode.GetType(), "Node type differs: expected " + exNode.GetType() + ", got:" + newNode.GetType());
 

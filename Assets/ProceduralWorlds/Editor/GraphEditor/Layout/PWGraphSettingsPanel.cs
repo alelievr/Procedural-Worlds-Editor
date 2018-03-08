@@ -17,15 +17,8 @@ namespace PW.Editor
 		[SerializeField]
 		PWTerrainPreviewPanel	terrainPreview = new PWTerrainPreviewPanel();
 
-		const string			graphProcessKey = "UpdateGraphProperties";
-
 		[SerializeField]
 		PWTerrainPreviewType	previewType = PWTerrainPreviewType.TopDownPlanarView;
-
-		public override void OnEnable()
-		{
-			delayedChanges.BindCallback(graphProcessKey, (unused) => { graphRef.Process(); });
-		}
 
 		void DrawGraphSettings(Rect currentRect)
 		{

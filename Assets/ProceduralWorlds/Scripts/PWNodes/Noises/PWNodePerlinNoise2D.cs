@@ -29,7 +29,7 @@ namespace PW.Node
 		public override void OnNodeEnable()
 		{
 			output = new Sampler2D(chunkSize, step);
-			perlin2D = new PerlinNoise2D();
+			perlin2D = new PerlinNoise2D(seed);
 		}
 
 		public override void OnNodeProcess()

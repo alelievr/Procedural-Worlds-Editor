@@ -44,13 +44,6 @@ namespace PW.Editor
 		
 						if (node.previewGraph == null)
 							EditorGUILayout.HelpBox("Can't process the graph without a preview graph ", MessageType.Error);
-						
-						if (node.outputPartialBiome != null)
-						{
-							if (!biomeDataDrawer.isEnabled)
-								biomeDataDrawer.OnEnable(node.outputPartialBiome);
-							biomeDataDrawer.OnGUI(rect);
-						}
 					}
 					else
 					{
@@ -60,6 +53,13 @@ namespace PW.Editor
 					}
 				}
 				EditorGUILayout.EndVertical();
+				
+				if (node.outputPartialBiome != null)
+				{
+					if (!biomeDataDrawer.isEnabled)
+						biomeDataDrawer.OnEnable(node.outputPartialBiome);
+					biomeDataDrawer.OnGUI(rect);
+				}
 			}
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(updateInputKey);

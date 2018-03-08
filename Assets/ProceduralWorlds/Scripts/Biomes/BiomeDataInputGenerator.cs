@@ -10,6 +10,7 @@ namespace PW.Biomator
 	[System.Serializable]
 	public class BiomeDataInputGenerator
 	{
+		public int			seed;
 		public int			size = 32;
 		public float		step = 1;
 		public int			maxTerrainHeight = 100;
@@ -43,7 +44,7 @@ namespace PW.Biomator
 			BiomeData biomeData = new BiomeData();
 			BiomeSwitchGraph switchGraph = new BiomeSwitchGraph();
 			Sampler2D terrainHeight = new Sampler2D(size, step);
-			PerlinNoise2D perlin = new PerlinNoise2D();
+			PerlinNoise2D perlin = new PerlinNoise2D(seed);
 
 			perlin.ComputeSampler2D(terrainHeight);
 
