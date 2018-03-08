@@ -22,6 +22,8 @@ namespace PW.Editor
 			int		foldoutSize = 16;
 			int		leftPadding = 10;
 
+			base.OnGUI(new Rect());
+
 			if (bbList.listFoldout)
 			{
 				float biomeSamplerNameWidth = BiomeSamplerName.GetNames().Max(n => EditorStyles.label.CalcSize(new GUIContent(n)).x);

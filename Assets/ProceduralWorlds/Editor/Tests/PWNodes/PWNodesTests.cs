@@ -28,6 +28,7 @@ namespace PW.Tests.Nodes
 			foreach (var node in graph.nodes)
 			{
 				var editor = UnityEditor.Editor.CreateEditor(node) as PWNodeEditor;
+				editor.Initialize(null);
 				editor.OnNodeUnitTest();
 				UnityEditor.Editor.DestroyImmediate(editor);
 			}

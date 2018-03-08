@@ -1033,6 +1033,8 @@ namespace PW.Editor
 
 			if (settings.fadeStatus == null)
 				settings.fadeStatus = new AnimBool(settings.faded);
+				
+			settings.faded = checkbox;
 
 			EditorGUILayout.BeginVertical(style);
 
@@ -1057,11 +1059,12 @@ namespace PW.Editor
 				settings.faded = !settings.faded;
 				e.Use();
 			}
+
+			settings.fadeStatus.target = settings.faded;
+			checkbox = settings.faded;
 			
 			bool display = EditorGUILayout.BeginFadeGroup(settings.fadeStatus.faded);
 			
-			settings.fadeStatus.target = settings.faded;
-
 			return display;
 		}
 

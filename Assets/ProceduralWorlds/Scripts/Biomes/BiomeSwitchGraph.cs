@@ -130,7 +130,11 @@ namespace PW.Biomator
 		//Create a switchGraph that always return this biome Id
 		public void BuildTestGraph(short biomeId)
 		{
-			Debug.Log("TODO !");
+			BiomeSwitchCell bsc = new BiomeSwitchCell();
+
+			bsc.id = biomeId;
+			rootCell = bsc;
+			cells.Add(bsc);
 		}
 
 		void ResetGraph()

@@ -23,11 +23,22 @@ namespace PW.Core
 		[PWOutput]
 		public PWArray< object >	outputValues = new PWArray< object >();
 
-		public PWMainGraph			previewGraph = null;
+		[SerializeField]
+		PWMainGraph					_previewGraph = null;
+		public PWMainGraph			previewGraph
+		{
+			get { return _previewGraph; }
+			set
+			{
+				_previewGraph = value;
+				if (value != null)
+					inputDataMode = BiomeDataInputMode.MainGraph;
+				}
+		}
 
 		public BiomeDataInputGenerator inputDataGenerator = new BiomeDataInputGenerator();
 
-		public BiomeDataInputMode	inputDataMode;
+		public BiomeDataInputMode	inputDataMode = BiomeDataInputMode.Standalone;
 
 		[System.NonSerialized]
 		public int					calls;
@@ -43,12 +54,15 @@ namespace PW.Core
 
 			if (calls > 10)
 				return ;
-		
+			
 			if (inputDataMode == BiomeDataInputMode.MainGraph || graphRef.IsRealMode())
 			{
 				if (outputPartialBiome != null)
 					return ;
-					
+				
+				if (previewGraph == null)
+					throw new Exception("[PWBiomeGraph] can't proces a graph in mainGraph data input mode with a null main graph");
+				
 				//check if the preview graph have a reference of this graph.
 				if (!previewGraph.FindNodesByType< PWNodeBiome >().Any(b => b.biomeGraph == graphRef))
 					throw new Exception("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
@@ -65,7 +79,6 @@ namespace PW.Core
 			{
 				outputPartialBiome = inputDataGenerator.GeneratePartialBiome2D(biomeGraphRef);
 			}
-			
 		}
 
 	}

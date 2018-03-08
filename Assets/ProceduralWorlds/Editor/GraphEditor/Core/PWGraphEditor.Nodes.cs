@@ -162,7 +162,8 @@ public partial class PWGraphEditor
 
 	void UnselectAllNodes()
 	{
-		foreach (var node in graph.nodes)
+		Debug.Log("unselect all !");
+		foreach (var node in graph.allNodes)
 			node.isSelected = false;
 	}
 

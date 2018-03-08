@@ -34,7 +34,7 @@ namespace PW.Node
 				return ;
 		}
 
-		public BiomeData	GetBiomeData()
+		public BiomeData GetBiomeData()
 		{
 			var partialbiomes = inputBiomes.GetValues();
 			
@@ -92,7 +92,8 @@ namespace PW.Node
 							continue ;
 						
 						partialBiome.biomeGraph.SetInput(partialBiome);
-						partialBiome.biomeGraph.Process();
+						partialBiome.biomeGraph.SetRealMode(graphRef.IsRealMode());
+						partialBiome.biomeGraph.ProcessFrom(graphRef);
 
 						if (!partialBiome.biomeGraph.hasProcessed)
 						{

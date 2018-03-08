@@ -69,14 +69,14 @@ namespace PW.Editor
 			
 			//add our editor to the list:
 			openedNodeEdiors[nodeRef] = this;
-
-			BindEvents();
-			OnNodeEnable();
 		}
 
 		public void Initialize(PWGraphEditor graphEditor)
 		{
 			this.graphEditor = graphEditor;
+
+			BindEvents();
+			OnNodeEnable();
 		}
 
 		void OnGUIEnable()

@@ -68,7 +68,7 @@ namespace PW.Editor
 
 		public void OnGUI(BiomeData biomeData)
 		{
-			PWGUI.StartFrame(new Rect(0, 0, 0, 0));
+			base.OnGUI(new Rect());
 
 			if (biomeRepartitionPreview == null)
 			{

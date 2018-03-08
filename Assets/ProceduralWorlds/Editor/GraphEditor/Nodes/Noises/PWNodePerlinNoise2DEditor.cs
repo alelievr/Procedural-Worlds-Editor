@@ -23,7 +23,7 @@ namespace PW.Editor
 			EditorGUIUtility.labelWidth = 40;
 			EditorGUI.BeginChangeCheck();
 			{
-				node.persistence = PWGUI.Slider("Persistance: ", node.persistence, ref node.persistanceMin, ref node.persistanceMax);
+				node.persistence = PWGUI.Slider("persistence: ", node.persistence, ref node.persistenceMin, ref node.persistenceMax);
 				node.octaves = PWGUI.IntSlider("Octaves: ", node.octaves, 0, 16);
 				node.scale = PWGUI.Slider("Scale: ", node.scale, 0.01f, 10);
 				node.additionalSeed = EditorGUILayout.IntField("Seed", node.additionalSeed);

@@ -268,6 +268,26 @@ namespace PW.Core
 			return graphProcessor.Process(this);
 		}
 
+		public float ProcessFrom(PWGraph graph)
+		{
+			if (!readyToProcess)
+				return -1;
+			
+			var iNode = (inputNode as PWNodeBiomeGraphInput);
+			var savedRealMode = IsRealMode();
+			var savedBiomeDataMode = iNode.inputDataMode;
+			
+			SetRealMode(graph.IsRealMode());
+			iNode.inputDataMode = PWNodeBiomeGraphInput.BiomeDataInputMode.MainGraph;
+
+			float ret = Process();
+
+			iNode.inputDataMode = savedBiomeDataMode;
+			SetRealMode(savedRealMode);
+
+			return ret;
+		}
+
 		public void	ProcessOnce()
 		{
 			if (!readyToProcess)

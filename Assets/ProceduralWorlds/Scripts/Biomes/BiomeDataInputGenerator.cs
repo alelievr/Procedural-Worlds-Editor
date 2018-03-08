@@ -7,12 +7,14 @@ using PW.Node;
 
 namespace PW.Biomator
 {
+	[System.Serializable]
 	public class BiomeDataInputGenerator
 	{
-		public int			size;
-		public float		step;
+		public int			size = 32;
+		public float		step = 1;
+		public int			maxTerrainHeight = 100;
 		public bool			isWaterless;
-		public float		waterLevel;
+		public float		waterLevel = 62;
 
 		BiomeMap2D Generate2DBiomeMap(short biomeId)
 		{
@@ -44,6 +46,8 @@ namespace PW.Biomator
 			PerlinNoise2D perlin = new PerlinNoise2D();
 
 			perlin.ComputeSampler2D(terrainHeight);
+
+			terrainHeight = PWNoiseFunctions.Map(terrainHeight, 0, maxTerrainHeight);
 
 			biomeData.waterLevel = waterLevel;
 			biomeData.isWaterless = isWaterless;

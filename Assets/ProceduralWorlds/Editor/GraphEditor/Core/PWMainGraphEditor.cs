@@ -26,11 +26,13 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	PWMainPresetScreen		presetScreen;
 
 	[SerializeField]
-	bool					scaledPreviewFoldout;
+	bool					scaledPreviewFoldout = true;
 	[SerializeField]
 	bool					terrainSettingsFoldout;
 	[SerializeField]
 	bool					geologicalSettingsFoldout;
+	[SerializeField]
+	bool					chunkSettingsFoldout = true;
 
 	const string			graphProcessKey = "PWMainGraphEditor";
 
@@ -94,8 +96,11 @@ public partial class PWMainGraphEditor : PWGraphEditor
 			
 			return ;
 		}
-
+		
 		layout.DrawLayout();
+		
+		if (graph != null)
+			LoadGUI();
     }
 
 	#endregion
@@ -108,7 +113,12 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		string path = AssetDatabase.GetAssetPath(newGraph);
 		if (String.IsNullOrEmpty(PWGraphFactory.GetMainGraphCreateLocation(path)))
 			Debug.LogWarning("Your main graph is not inside a Resources folder/don't have a dedicated folder");
-		
+
+		LoadGUI();
+	}
+
+	void LoadGUI()
+	{
 		var settingsPanel = layout.GetPanel< PWGraphSettingsPanel >();
 
 		settingsPanel.onGUI = (rect) =>
@@ -153,7 +163,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				PWGUI.EndFade();
 			#endif
 
-			if (PWGUI.BeginFade("Chunk settings"))
+			if (PWGUI.BeginFade("Chunk settings", ref chunkSettingsFoldout))
 			{
 				//seed
 				GUI.SetNextControlName("seed");

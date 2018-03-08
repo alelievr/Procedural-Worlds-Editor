@@ -266,6 +266,20 @@ namespace PW.Tests.Graphs
 			Assert.That(mainGraph.nodes.Count == clonedGraph.nodes.Count);
 			Assert.That(mainGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
 
+			foreach (var node in clonedGraph.allNodes)
+			{
+				foreach (var anchorField in node.anchorFields)
+					foreach (var anchor in anchorField.anchors)
+						foreach (var link in anchor.links)
+						{
+							Assert.That(link.toNode != null);
+							Assert.That(link.fromNode != null);
+
+							Assert.That(clonedGraph.FindNodeById(link.toNode.id) != null);
+							Assert.That(clonedGraph.FindNodeById(link.fromNode.id) != null);
+						}
+			}
+
 			Assert.That(clonedGraph.readyToProcess == true);
 
 			clonedGraph.Process();

@@ -117,15 +117,15 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new PWGraphCLIAttributes() {{"persistance", 2.4f}, {"octaves", 3}});
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new PWGraphCLIAttributes() {{"persistence", 2.4f}, {"octaves", 3}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 
 			var parsedAttrs = PWJson.Parse(cmd.attributes);
-			var persistanceAttr = parsedAttrs[0];
+			var persistenceAttr = parsedAttrs[0];
 			var octavesAttr = parsedAttrs[1];
 
-			Assert.That(persistanceAttr.first == "persistance", "The persistance name expected to be 'persistance' but was '" + persistanceAttr.first + "'");
-			Assert.That((float)persistanceAttr.second == 2.4f, "The persistance value expected to be 2.4 but was '" + persistanceAttr.second + "'");
+			Assert.That(persistenceAttr.first == "persistence", "The persistence name expected to be 'persistence' but was '" + persistenceAttr.first + "'");
+			Assert.That((float)persistenceAttr.second == 2.4f, "The persistence value expected to be 2.4 but was '" + persistenceAttr.second + "'");
 			Assert.That(octavesAttr.first == "octaves", "The octaves name expected to be 'octaves' but was '" + octavesAttr.first + "'");
 			Assert.That((int)octavesAttr.second == 3, "The octaves value expected to be 3 but was '" + octavesAttr.second + "'");
 		}
@@ -133,15 +133,15 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithPositionAndDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistance", 1.4f}, {"octaves", 2}});
+			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistence", 1.4f}, {"octaves", 2}});
 			PWGraphCommand cmd = PWGraphCLI.Parse(s);
 
 			var parsedAttrs = PWJson.Parse(cmd.attributes);
-			var persistanceAttr = parsedAttrs[0];
+			var persistenceAttr = parsedAttrs[0];
 			var octavesAttr = parsedAttrs[1];
 
-			Assert.That(persistanceAttr.first == "persistance", "The persistance name expected to be 'persistance' but was '" + persistanceAttr.first + "'");
-			Assert.That((float)persistanceAttr.second == 1.4f, "The persistance value expected to be 1.4 but was '" + persistanceAttr.second + "'");
+			Assert.That(persistenceAttr.first == "persistence", "The persistence name expected to be 'persistence' but was '" + persistenceAttr.first + "'");
+			Assert.That((float)persistenceAttr.second == 1.4f, "The persistence value expected to be 1.4 but was '" + persistenceAttr.second + "'");
 			Assert.That(octavesAttr.first == "octaves", "The octaves name expected to be 'octaves' but was '" + octavesAttr.first + "'");
 			Assert.That((int)octavesAttr.second == 2, "The octaves value expected to be 2 but was '" + octavesAttr.second + "'");
 		}

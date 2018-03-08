@@ -23,5 +23,10 @@ namespace PW.Editor
 		}
 
 		public abstract void OnEnable();
+
+		public void OnGUI(Rect r)
+		{
+			PWGUI.StartFrame(r);
+		}
 	}
 }

@@ -18,7 +18,7 @@ namespace PW.Editor
 			b = target as BiomeData;
 		}
 	
-		public void OnGUI(Rect view)
+		new public void OnGUI(Rect view)
 		{
 			if (b == null)
 			{
@@ -26,7 +26,7 @@ namespace PW.Editor
 				return ;
 			}
 
-			PWGUI.StartFrame(view);
+			base.OnGUI(view);
 
 			if (samplerFoldouts == null || samplerFoldouts.Length != b.length)
 				samplerFoldouts = new bool[b.length];

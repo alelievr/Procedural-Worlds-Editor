@@ -46,7 +46,8 @@ public class PWBiomeGraphEditor : PWGraphEditor
 		
 		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
 
-		LoadGUI();
+		if (graph != null)
+			LoadGUI();
 
 		LoadGraphList();
 	}
@@ -74,6 +75,8 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		if (graph == null)
 			return ;
+		
+		LoadGUI();
 	}
 
 	void DrawBiomeSettingsBar(Rect rect)

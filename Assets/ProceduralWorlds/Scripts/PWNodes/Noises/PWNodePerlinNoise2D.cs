@@ -12,8 +12,8 @@ namespace PW.Node
 		public int				octaves;
 		public int				additionalSeed;
 
-		public float			persistanceMin = 0.1f;
-		public float			persistanceMax = 4f;
+		public float			persistenceMin = 0.1f;
+		public float			persistenceMax = 4f;
 		public float			scale = 1f;
 
 		[PWOutput]
