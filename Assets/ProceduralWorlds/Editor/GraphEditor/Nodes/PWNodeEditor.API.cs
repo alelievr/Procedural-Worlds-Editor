@@ -17,7 +17,7 @@ namespace PW.Editor
 
 			foreach (var node in nodes)
 				openedNodeEdiors[node].OnNodePreProcess();
-				
+			
 			//add our node to the process pass
 			nodes.Add(nodeRef);
 

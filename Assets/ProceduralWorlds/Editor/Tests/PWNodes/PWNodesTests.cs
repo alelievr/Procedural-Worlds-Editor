@@ -33,7 +33,7 @@ namespace PW.Tests.Nodes
 				UnityEditor.Editor.DestroyImmediate(editor);
 			}
 			
-			builder = PWGraphBuilder.NewGraph< PWBiomeGraph >();
+			builder = PWGraphBuilder.NewGraph< PWMainGraph >();
 
 			foreach (var type in PWNodeTypeProvider.GetExlusiveNodeTypesForGraph(PWGraphType.Biome))
 				builder.NewNode(type, type.ToString());

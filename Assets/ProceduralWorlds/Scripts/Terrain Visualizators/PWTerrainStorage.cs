@@ -24,7 +24,7 @@ namespace PW
 	}
 
 	[System.Serializable]
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "ProceduralWorlds/Terrain storage")]
 	public class PWTerrainStorage : ScriptableObject
 	{
 		

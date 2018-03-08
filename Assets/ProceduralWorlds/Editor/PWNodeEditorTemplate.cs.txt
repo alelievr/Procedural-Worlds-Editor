@@ -1,29 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using PW.Core;
+using PW.Node;
 
-namespace PW.Node
+namespace PW.Editor
 {
-	public class #SCRIPTNAME# : PWNode
+	[CustomEditor(typeof(#SCRIPTNAME#))]
+	public class #SCRIPTNAME#Editor : PWNodeEditor
 	{
 	
 		string propUpdateKey = "#NAME#";
 
-		//Called only when the node is created (not when it is enabled/loaded)
-		public override void OnNodeCreation()
-		{
-			name = "#NAME#";
-		}
-
 		public override void OnNodeEnable()
 		{
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
+			
+			delayedChanges.BindCallback(propUpdateKey, (unused) => { NotifyReload(); });
 		}
 
-		public override void OnNodeProcess()
+		public override void OnNodeGUI()
 		{
 			//write here the process which take inputs, transform them and set outputs.
+
+			EditorGUILayout.LabelField("Nothing here");
 		}
 		
 	}

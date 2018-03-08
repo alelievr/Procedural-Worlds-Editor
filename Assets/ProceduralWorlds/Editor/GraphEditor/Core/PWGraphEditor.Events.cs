@@ -232,14 +232,14 @@ public partial class PWGraphEditor
 		graph.Process();
 	}
 
-	public void GraphPostProcessCallback()
+	public void GraphPreProcessCallback()
 	{
 		//send preProcess event
 		foreach (var nodeEditorKP in nodeEditors)
 			nodeEditorKP.Value.OnNodePreProcess();
 	}
 
-	public void GraphPreProcessCallback()
+	public void GraphPostProcessCallback()
 	{
 		//send postProcess event
 		foreach (var nodeEditorKP in nodeEditors)

@@ -96,6 +96,8 @@ public partial class PWGraphEditor : PWEditorWindow
 
 		LoadAssets();
 		
+		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+		
 		Profiler.EndSample();
 	}
 
@@ -271,10 +273,7 @@ public partial class PWGraphEditor : PWEditorWindow
 	public void ResetLayout()
 	{
 		if (graph != null)
-		{
-			graph.layoutSettings.settings.Clear();
-			layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
-		}
+			layout.Reset();
 	}
 
 	public override void OnDisable()

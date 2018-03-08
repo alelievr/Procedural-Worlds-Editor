@@ -29,10 +29,6 @@ namespace PW.Node
 			name = "BiomeData decomposer";
 		}
 
-		public override void OnNodeEnable()
-		{
-		}
-
 		public override void OnNodeProcess()
 		{
 			if (inputPartialBiome == null)

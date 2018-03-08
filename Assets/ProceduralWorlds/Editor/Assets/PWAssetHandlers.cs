@@ -49,19 +49,19 @@ namespace PW.Editor
 			return path;
 		}
 	
-		[MenuItem("Assets/Create/Procedural World", false, 1)]
+		[MenuItem("Assets/Create/ProceduralWorlds/Procedural World", false, -200)]
 		public static void CreateNewProceduralWorld()
 		{
 			PWGraphFactory.CreateMainGraph();
 		}
 	
-		[MenuItem("Assets/Create/Procedural Biome", false, 1)]
+		[MenuItem("Assets/Create/ProceduralWorlds/Procedural Biome", false, -200)]
 		public static void CreateNewProceduralBiome()
 		{
 			PWGraphFactory.CreateBiomeGraph();
 		}
 
-		[MenuItem("Assets/Create/Biome Surface Maps", false, 1)]
+		[MenuItem("Assets/Create/ProceduralWorlds/Biome Surface Maps", false, -1)]
 		public static void CreateBiomeSurfaceMaps()
 		{
 			string path = GetCurrentHierarchyPath();

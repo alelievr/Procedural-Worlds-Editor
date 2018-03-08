@@ -51,8 +51,8 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		base.OnEnable();
 
 		OnGraphChanged += GraphChangedCallback;
-		
-		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+
+		layout.SetOnReset(LoadGUI);
 
 		delayedChanges.BindCallback(graphProcessKey, (unsued) => {
 			graph.Process();
@@ -98,9 +98,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		}
 		
 		layout.DrawLayout();
-		
-		if (graph != null)
-			LoadGUI();
     }
 
 	#endregion
@@ -113,8 +110,6 @@ public partial class PWMainGraphEditor : PWGraphEditor
 		string path = AssetDatabase.GetAssetPath(newGraph);
 		if (String.IsNullOrEmpty(PWGraphFactory.GetMainGraphCreateLocation(path)))
 			Debug.LogWarning("Your main graph is not inside a Resources folder/don't have a dedicated folder");
-
-		LoadGUI();
 	}
 
 	void LoadGUI()

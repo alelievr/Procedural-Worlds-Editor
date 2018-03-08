@@ -57,7 +57,7 @@ namespace PW.Editor
             return mg;
         }
 
-		static string GetCurrentPath()
+		public static string GetCurrentPath()
 		{
 			var path = "";
 			var obj = Selection.activeObject;
@@ -113,10 +113,6 @@ namespace PW.Editor
 			return currentPath;
 		}
 
-		static void CreateMainGraphFoler(string defaultFileName)
-		{
-		}
-    
         public static void CreateMainGraph(string fileName = null)
         {
             if (fileName == null)

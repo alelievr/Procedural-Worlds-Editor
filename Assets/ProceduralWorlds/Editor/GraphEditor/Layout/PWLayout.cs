@@ -25,6 +25,8 @@ namespace PW.Editor
 		List< Action >					layoutActions = new List< Action >();
 		List< Rect >					layoutRects = new List< Rect >();
 
+		Action							resetAction;
+
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
 		public PWLayout(PWGraphEditor graphEditor)
 		{
@@ -121,6 +123,21 @@ namespace PW.Editor
 			foreach (var p in layoutRects)
 				EditorGUI.DrawRect(p, Random.ColorHSV());
 			return layoutRects;
+		}
+
+		public void Reset()
+		{
+			graphEditor.graph.layoutSettings.settings.Clear();
+			UpdateLayoutSettings(graphEditor.graph.layoutSettings);
+			resetAction();
+		}
+
+		public void SetOnReset(Action onReset)
+		{
+			resetAction = onReset;
+			
+			if (graphEditor.graph != null)
+				onReset();
 		}
 
 	}

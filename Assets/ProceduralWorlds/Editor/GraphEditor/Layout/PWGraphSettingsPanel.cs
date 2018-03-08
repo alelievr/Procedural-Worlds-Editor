@@ -20,16 +20,8 @@ namespace PW.Editor
 		[SerializeField]
 		PWTerrainPreviewType	previewType = PWTerrainPreviewType.TopDownPlanarView;
 
-		void DrawGraphSettings(Rect currentRect)
+		public void DrawReloadButtons()
 		{
-			Event	e = Event.current;
-			EditorGUILayout.Space();
-
-			GUI.SetNextControlName("PWName");
-			graphRef.name = EditorGUILayout.TextField("ProceduralWorld name: ", graphRef.name);
-
-			EditorGUILayout.Separator();
-
 			//reload and force reload buttons
 			EditorGUILayout.BeginHorizontal();
 			{
@@ -39,6 +31,19 @@ namespace PW.Editor
 					graphEditor.ReloadOnce();
 			}
 			EditorGUILayout.EndHorizontal();
+		}
+
+		public void DrawGraphSettings(Rect currentRect)
+		{
+			Event	e = Event.current;
+			EditorGUILayout.Space();
+
+			GUI.SetNextControlName("PWName");
+			graphRef.name = EditorGUILayout.TextField("ProceduralWorld name: ", graphRef.name);
+
+			EditorGUILayout.Separator();
+
+			DrawReloadButtons();
 			
 			//unfocus all fields if we click outsize of the settings bar
 			if ((e.type == EventType.MouseDown || e.type == EventType.Ignore)
@@ -73,6 +78,8 @@ namespace PW.Editor
 				Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
 
 				terrainPreview.DrawTerrainPreview(previewRect, previewType);
+
+				previewType = (PWTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -100,12 +107,6 @@ namespace PW.Editor
 		public override void DrawDefault(Rect currentRect)
 		{
 			DrawTerrainPreview(currentRect);
-
-			EditorGUILayout.BeginHorizontal();
-			{
-				previewType = (PWTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
-			}
-			EditorGUILayout.EndHorizontal();
 			
 			//draw main graphRef settings
 			EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
