@@ -67,13 +67,9 @@ namespace PW.Core
 				if (!previewGraph.FindNodesByType< PWNodeBiome >().Any(b => b.biomeGraph == graphRef))
 					throw new Exception("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
 				
-				Debug.Log("processing graph !");
-				
 				//we process the graph to provide the outputPartialBiome
 				//it require that biomeGraph to be contained in the previewGraph.
 				previewGraph.ProcessFrom(biomeGraphRef);
-
-				Debug.Log("graph processed !");
 	
 				//if the graph we process does not contains an instance of our biome graph
 				if (outputPartialBiome == null)

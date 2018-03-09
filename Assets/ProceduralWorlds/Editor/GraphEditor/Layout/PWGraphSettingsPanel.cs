@@ -15,10 +15,7 @@ namespace PW.Editor
 		//Settings bar datas:
 		Vector2					scrollbarPosition;
 		[SerializeField]
-		PWTerrainPreviewPanel	terrainPreview = new PWTerrainPreviewPanel();
-
-		[SerializeField]
-		PWTerrainPreviewType	previewType = PWTerrainPreviewType.TopDownPlanarView;
+		PWTerrainPreviewDrawer	terrainPreview = new PWTerrainPreviewDrawer();
 
 		public void DrawReloadButtons()
 		{
@@ -51,39 +48,14 @@ namespace PW.Editor
 				&& GUI.GetNameOfFocusedControl() == "PWName")
 				GUI.FocusControl(null);
 		}
+
+		public void DrawTerrainPreview(Rect rect)
+		{
+			if (!terrainPreview.isEnabled)
+				terrainPreview.OnEnable(graphRef);
+			terrainPreview.OnGUI(rect);
+		}
 		
-		PWTerrainPreviewType GetPreviewTypeFromTerrainType(PWGraphTerrainType terrainType)
-		{
-			switch (terrainType)
-			{
-				case PWGraphTerrainType.SideView2D:
-					return PWTerrainPreviewType.SideView;
-				case PWGraphTerrainType.TopDown2D:
-				case PWGraphTerrainType.Planar3D:
-					return PWTerrainPreviewType.TopDownPlanarView;
-				// case PWGraphTerrainType.Spherical3D:
-					// return PWTerrainPreviewType.TopDownSphericalView;
-				// case PWGraphTerrainType.Cubic3D:
-					// return PWTerrainPreviewType.TopDownCubicView;
-				default:
-					return PWTerrainPreviewType.TopDownPlanarView;
-			}
-		}
-	
-		public void DrawTerrainPreview(Rect currentRect)
-		{
-			//draw terrain preview
-			EditorGUILayout.BeginVertical(GUILayout.Height(currentRect.width));
-			{
-				Rect previewRect = EditorGUILayout.GetControlRect(false, currentRect.width);
-
-				terrainPreview.DrawTerrainPreview(previewRect, previewType);
-
-				previewType = (PWTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", previewType);
-			}
-			EditorGUILayout.EndVertical();
-		}
-
 		public override void Draw(Rect rect)
 		{
 			Profiler.BeginSample("[PW] Rendering settings bar");

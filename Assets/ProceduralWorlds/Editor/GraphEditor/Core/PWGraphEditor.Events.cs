@@ -77,11 +77,11 @@ public partial class PWGraphEditor
 		}
 		
 		//Graph selection start event 
-		if (e.type == EventType.MouseDown) //if event is mouse down
+		if (e.type == EventType.MouseDown && e.button == 0 && e.modifiers == EventModifiers.None)
 		{
-			if (!editorEvents.isMouseOverSomething //if mouse is not above something
-				&& e.button == 0
-				&& e.modifiers == EventModifiers.None)
+			if (!editorEvents.isMouseOverAnchor
+				&& !editorEvents.isMouseOverLink
+				&& !editorEvents.isMouseOverNode)
 			{
 				editorEvents.selectionStartPoint = e.mousePosition;
 				editorEvents.isSelecting = true;

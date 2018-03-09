@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Reflection;
 using System;
+using System.Text;
 using UnityEngine;
 using PW.Core;
 
@@ -83,7 +84,8 @@ public static class PWJson
 
     public static string Generate(IEnumerable< Pair< string, object > > datas)
     {
-        string  ret = "{ ";
+		StringBuilder sb = new StringBuilder();
+		sb.Append("{");
 
         if (datas == null || datas.Count() == 0)
             throw new Exception("[PWJson] Null datas sent to Json generator");
@@ -91,13 +93,15 @@ public static class PWJson
         var last = datas.Last();
         foreach (var data in datas)
         {
-            ret += data.first + ": ";
-            ret += Jsonify(data.second);
+			sb.Append(data.first);
+			sb.Append(":");
+			sb.Append(Jsonify(data.second));
             if (data != last)
-                ret += ", ";
+				sb.Append(", ");
         }
 
-        return ret + " }";
+		sb.Append("}");
+        return sb.ToString();
     }
 
 	static Regex nameRegex = new Regex("^(\\w{1,}|\"\\w{1,}\")");

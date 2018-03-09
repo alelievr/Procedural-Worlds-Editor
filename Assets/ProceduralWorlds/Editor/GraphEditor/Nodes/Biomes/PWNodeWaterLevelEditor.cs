@@ -33,7 +33,7 @@ namespace PW.Editor
 			waterGradient = PWUtils.CreateGradient(GradientMode.Fixed, 
 				new KeyValuePair< float, Color >(node.waterLevel / (node.mapMax - node.mapMin), Color.blue),
 				new KeyValuePair< float, Color >(1, Color.white));
-			PWGUI.SetGradientForField(0, waterGradient);
+			PWGUI.SetGradientForField(PWGUIFieldType.Sampler2DPreview, 0, waterGradient);
 
 			updateWaterPreview = true;
 		}

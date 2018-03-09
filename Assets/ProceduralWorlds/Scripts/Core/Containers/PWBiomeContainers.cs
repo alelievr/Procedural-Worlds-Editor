@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using PW.Biomator;
 using PW.Core;
+using System.Linq;
 
 namespace PW.Biomator
 {
@@ -55,7 +56,7 @@ namespace PW.Biomator
 		public Sampler3D		gravel;
 	}
 
-	public struct BiomeBlendPoint
+	public struct BiomeBlendPoint : IEquatable< BiomeBlendPoint >
 	{
 		public int		length;
 		public float	totalBlend;
@@ -65,6 +66,16 @@ namespace PW.Biomator
 
 		public short	firstBiomeId { get { return biomeIds[0]; } }
 		public float	firstBiomePercent { get { return biomeBlends[0]; } }
+
+		public bool Equals(BiomeBlendPoint other)
+		{
+			return length == other.length
+				&& totalBlend == other.totalBlend
+				&& firstBiomeId == other.firstBiomeId
+				&& firstBiomePercent == other.firstBiomePercent
+				&& biomeIds.SequenceEqual(other.biomeIds)
+				&& biomeBlends.SequenceEqual(other.biomeBlends);
+		}
 
 		public void		SetBlendPoint(short id, float blend, int index = -1)
 		{

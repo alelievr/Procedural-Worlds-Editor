@@ -22,6 +22,7 @@ namespace PW.Editor
 			
 			PresetCellList	earthLikePresets = new PresetCellList()
 			{
+				{"Biome preset"},
 				{"Plains / Prairies", plainTexture, "Earth/Plain"},
 				{"Mountains", mountainTexture, "Earth/Mountain", false},
 				{"Mesas", mesaTexture, "Earth/Mesa", false},
@@ -30,6 +31,7 @@ namespace PW.Editor
 
 			PresetCellList presets = new PresetCellList
 			{
+				{"Biome category"},
 				{"Earth like biomes", null, (string)null, true, earthLikePresets}
 			};
 

@@ -158,7 +158,7 @@ public partial class PWMainGraphEditor : PWGraphEditor
 				PWGUI.EndFade();
 			#endif
 
-			if (PWGUI.BeginFade("Chunk settings", ref chunkSettingsFoldout))
+			if (PWGUI.BeginFade("Chunk settings", ref chunkSettingsFoldout, false))
 			{
 				//seed
 				GUI.SetNextControlName("seed");

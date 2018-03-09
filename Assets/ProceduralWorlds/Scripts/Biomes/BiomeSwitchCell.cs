@@ -119,13 +119,15 @@ namespace PW.Biomator.SwitchGraph
 
 		public override string ToString()
 		{
-			string s = name + " (" + id + ")= ";
+			var sb = new System.Text.StringBuilder();
+
+			sb.Append(name + " (" + id + ")= ");
 
 			for (int i = 0; i < switchParams.switchParams.Length; i++)
 				if (switchParams.switchParams[i].enabled)
-					s += (i + ": " + switchParams.switchParams[i].min + "->" + switchParams.switchParams[i].max);
+					sb.Append(i + ": " + switchParams.switchParams[i].min + "->" + switchParams.switchParams[i].max);
 
-			return s;
+			return sb.ToString();
 		}
 	}
 }

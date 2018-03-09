@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
@@ -55,12 +56,16 @@ public class PWBiomeGraphEditor : PWGraphEditor
 	{
 		string path = AssetDatabase.GetAssetPath(biomeGraph);
 		string resourcesName = PWGraphFactory.UnityResourcesFolderName;
+
+		if (String.IsNullOrEmpty(path))
+			return ;
+
 		path = Path.GetDirectoryName(path);
 		path = path.Substring(path.IndexOf(resourcesName) + resourcesName.Length + 1);
 		var graphAssets = Resources.LoadAll< PWBiomeGraph >(path);
 
 		if (graphAssets != null && graphAssets.Length != 0)
-			biomeGraphs = graphAssets.ToList();
+			biomeGraphs = graphAssets.Where(b => b != null).ToList();
 	}
 
 	void LoadGUI()

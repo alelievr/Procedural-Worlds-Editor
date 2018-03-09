@@ -8,15 +8,13 @@ using PW.Biomator;
 public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
 {
 
-	static Gradient			rainbow;
+	Gradient		rainbow;
 
-	static Mesh				topDownTerrainMesh;
-	static int				topDownTerrainMeshSize = 0;
+	Mesh			topDownTerrainMesh;
+	int				topDownTerrainMeshSize = 0;
 
 	//TODO: generate texture based on texturing dict in the chunkData
 	//TODO: generate Uvs based on this texture
-
-	public
 
 	void	GenerateTopDownTerrainMesh()
 	{

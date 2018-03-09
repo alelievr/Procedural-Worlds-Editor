@@ -16,6 +16,8 @@ namespace PW.Node
 
 		[PWOutput]
 		public FinalTerrain			mergedBiomeTerrain;
+		
+		public MaterializerType		materializerType;
 
 		public bool					biomeTerrainsFoldout;
 
@@ -78,7 +80,7 @@ namespace PW.Node
 
 			mergedBiomeTerrain.biomeData = inputBlendedTerrain.biomeData;
 			mergedBiomeTerrain.mergedTerrain = finalTerrain;
-			mergedBiomeTerrain.materializerType = mainGraphRef.materializerType;
+			mergedBiomeTerrain.materializerType = materializerType;
 
 			mergedBiomeTerrain.biomeSurfacesList.Clear();
 			foreach (var biome in inputBlendedTerrain.biomes)

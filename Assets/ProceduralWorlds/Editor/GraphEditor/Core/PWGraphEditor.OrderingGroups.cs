@@ -11,11 +11,11 @@ using PW;
 //Ordering group rendering for PWGraphEditor
 public partial class PWGraphEditor
 {
-	int							callbackId;
+	int				callbackId;
 	
-	static Texture2D			movepadTexture;
-	static GUIStyle				orderingGroupStyle;
-	static GUIStyle				orderingGroupNameStyle;
+	Texture2D		movepadTexture;
+	GUIStyle		orderingGroupStyle;
+	GUIStyle		orderingGroupNameStyle;
 	
 	void LoadOrderingGroupStyles()
 	{
@@ -23,7 +23,6 @@ public partial class PWGraphEditor
 		orderingGroupNameStyle = GUI.skin.FindStyle("OrderingGroupNameStyle");
 		movepadTexture = Resources.Load("GUI/movepad") as Texture2D;
 	}
-
 
 	void CreateNewOrderingGroup(object pos)
 	{

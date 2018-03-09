@@ -5,6 +5,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using PW.Biomator;
 using System.Linq;
+using PW.Core;
 
 namespace PW.Editor
 {
@@ -88,7 +89,7 @@ namespace PW.Editor
 			GUILayout.Space(previewTextureHeight);
 
 			PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
-			PWGUI.SetScaleModeForField(-1, ScaleMode.StretchToFill);
+			PWGUI.SetScaleModeForField(PWGUIFieldType.Sampler2DPreview, -1, ScaleMode.StretchToFill);
 		}
 		
 		void DrawElementCallback(Rect rect, int index, bool isActive, bool selected)

@@ -62,7 +62,7 @@ namespace PW.Editor
 			debugIconRect.position += new Vector2(width - debugIconSize, 0);
 			GUI.DrawTexture(debugIconRect, debugIcon);
 
-			if (e.type == EventType.MouseDown && dragRect.Contains(e.mousePosition))
+			if (e.type == EventType.MouseDown && e.button == 0 && dragRect.Contains(e.mousePosition))
 			{
 				nodeRef.isDragged = true;
 				editorEvents.isDraggingNode = true;

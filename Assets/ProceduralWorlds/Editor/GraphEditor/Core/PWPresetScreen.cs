@@ -23,6 +23,8 @@ namespace PW.Editor
 	
 		public class PresetCellList : List< PresetCell >
 		{
+			public string	header;
+
 			public void Add(string name, Texture2D texture, string graphPartFile, bool enabled = true, PresetCellList childList = null)
 			{
 				PresetCell	pc = new PresetCell
@@ -35,6 +37,11 @@ namespace PW.Editor
 				};
 	
 				this.Add(pc);
+			}
+
+			public void Add(string header)
+			{
+				this.header = header;
 			}
 		}
 		
@@ -139,8 +146,6 @@ namespace PW.Editor
 				selectedIndices.Add(index);
 				i++;
 			}
-
-			graphPartFiles.ForEach(a => Debug.Log(a));
 		}
 	
 		void DefaultDrawHeader(string header)
@@ -182,9 +187,18 @@ namespace PW.Editor
 		int DrawColumn(PresetCellList presetList, int columnIndex)
 		{
 			int newSelectedIndex = selectedIndices[columnIndex];
+
 			EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 			scrollBars[columnIndex] = EditorGUILayout.BeginScrollView(scrollBars[columnIndex], GUILayout.ExpandWidth(true));
 			{
+				EditorGUILayout.BeginHorizontal();
+				{
+					GUILayout.FlexibleSpace();
+					EditorGUILayout.LabelField(presetList.header, EditorStyles.whiteBoldLabel);
+					GUILayout.FlexibleSpace();
+				}
+				EditorGUILayout.EndHorizontal();
+
 				int i = 0;
 				foreach (var preset in presetList)
 				{
@@ -193,7 +207,6 @@ namespace PW.Editor
 					i++;
 				}
 			}
-
 			EditorGUILayout.EndScrollView();
 			EditorGUILayout.EndVertical();
 

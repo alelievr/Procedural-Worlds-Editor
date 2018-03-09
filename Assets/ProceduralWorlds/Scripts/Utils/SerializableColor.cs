@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using System;
 
 namespace PW
 {
 	[System.SerializableAttribute]
-	public struct SerializableColor
+	public struct SerializableColor : IEquatable< SerializableColor >
 	{
 		[SerializeField]
 		public float		r;
@@ -56,6 +57,14 @@ namespace PW
 		public override string ToString()
 		{
 			return "r: " + r + ", g: " + g + ", b: " + b + ", a: " + a;
+		}
+
+		public bool Equals(SerializableColor other)
+		{
+			return r == other.r
+				&& g == other.g
+				&& b == other.b
+				&& a == other.a;
 		}
 	}
 }

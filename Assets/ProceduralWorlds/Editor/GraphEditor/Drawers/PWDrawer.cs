@@ -11,6 +11,8 @@ namespace PW.Editor
 		protected PWGUIManager		PWGUI = new PWGUIManager();
 
 		protected object			target;
+
+		protected Event				e { get { return Event.current; } }
 		
 		[System.NonSerialized]
 		public bool					isEnabled = false;

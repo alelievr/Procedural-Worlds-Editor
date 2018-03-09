@@ -21,9 +21,12 @@ namespace PW.Editor
 			switch (terrain.storeMode)
 			{
 				case PWStorageMode.Memory:
-					EditorGUILayout.LabelField("The terrain will not be serialized,");
-					EditorGUILayout.LabelField("this mode must be use when editing the PWgraph");
-					EditorGUILayout.LabelField("or making a lot of changes in the procedural generation process.");
+					EditorGUILayout.HelpBox(
+						"The terrain will not be serialized, " +
+						"this mode must be use when editing the PWgraph " +
+						"or making a lot of changes in the procedural generation process.",
+						MessageType.Info
+					);
 					break ;
 				case PWStorageMode.File:
 					terrain.editorMode = EditorGUILayout.Toggle("Editor mode", terrain.editorMode);

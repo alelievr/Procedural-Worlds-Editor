@@ -17,7 +17,7 @@ namespace PW.Editor
 		public PWGUIMaterialPreview(PrimitiveType previewPrimitive = PrimitiveType.Sphere)
 		{
 			objectPreview = new PWGUIMeshPreview();
-
+			
 			GameObject tmp = GameObject.CreatePrimitive(previewPrimitive);
 			previewMesh = tmp.GetComponent< MeshFilter >().sharedMesh;
 			GameObject.DestroyImmediate(tmp);

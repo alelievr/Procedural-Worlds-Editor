@@ -9,21 +9,16 @@ using System;
 
 public partial class PWGraphEditor
 {
-
-	//editor styles:
-	protected static GUIStyle		defaultNodeWinow;
-	protected static GUIStyle		defaultNodeWinowSelected;
-	
 	//editor textures:
-	public static Texture2D			nodeEditorBackgroundTexture;
+	public Texture2D				nodeEditorBackgroundTexture;
 	
 	//editor skin:
 	protected GUISkin				PWGUISkin;
 
 	//color gradient used for compute time displayed under nodes
-	private static Gradient			greenRedGradient;
+	private Gradient				greenRedGradient;
 	
-	protected static GUIStyle		nodeGraphWidowStyle;
+	protected GUIStyle				nodeGraphWidowStyle;
 	
 	protected GUIStyle				selectionStyle;
 

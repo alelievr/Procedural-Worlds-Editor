@@ -17,6 +17,9 @@ namespace PW.Editor
 		
 		Gradient	temperatureGradient;
 
+		[System.NonSerialized]
+		bool		guiInitialized;
+
 		public override void OnNodeEnable()
 		{
 			node = target as PWNodeBiomeTemperature;
@@ -65,16 +68,19 @@ namespace PW.Editor
 				node.UpdateTemperatureMap();
 			
 			if (node.localTemperatureMap != null)
-			{
 				PWGUI.Sampler2DPreview(node.localTemperatureMap as Sampler2D, false, FilterMode.Point);
-				PWGUI.SetGradientForField(2, temperatureGradient);
-				PWGUI.SetDebugForField(2, true);
-			}
 			
 			if (node.updateTemperatureMap)
 			{
-				PWGUI.SetUpdateForField(2, true);
+				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
 				node.updateTemperatureMap = false;
+			}
+
+			if (!guiInitialized)
+			{
+				PWGUI.SetGradientForField(PWGUIFieldType.Sampler2DPreview, 0, temperatureGradient);
+				PWGUI.SetDebugForField(PWGUIFieldType.Sampler2DPreview, 0, true);
+				guiInitialized = true;
 			}
 		}
 

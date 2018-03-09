@@ -29,6 +29,9 @@ namespace PW.Core
 		public string							objectName { get { return base.name; } }
 
 
+		//Editor datas:
+		public PWTerrainPreviewType				terrainPreviewType;
+
         //public internal graph datas:
 		//returns all nodes in the graph (excluding input and output nodes)
         public List< PWNode >					nodes = new List< PWNode >();

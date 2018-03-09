@@ -29,12 +29,14 @@ namespace PW.Editor
 			//Biomes
 			PresetCellList	biomePresets = new PresetCellList
 			{
+				{"Biome presets"},
 				{"Earth like", null, "Biomes/Earth", true}
 			};
 			
 			//ISO surfaces
 			PresetCellList terrain2DIsoSurfaces = new PresetCellList
 			{
+				{"2D Isosurfaces"},
 				{"Square", null, "IsoSurfaces/Square", true, biomePresets},
 				{"Hexagon", null, "IsoSurfaces/Hexagon", false, biomePresets},
 				{"Marching cubes 2D", null, "IsoSurfaces/MarchingCubes2D", false, biomePresets},
@@ -43,6 +45,7 @@ namespace PW.Editor
 
 			PresetCellList terrain3DIsoSurfaces = new PresetCellList
 			{
+				{"3D Isosurfaces"},
 				{"Marching cubes 3D", null, "IsuSurfaces/MarchingCubes3D", false, biomePresets},
 				{"Dual countering 3D", null, "IsoSurfaces/DualCountering", false, biomePresets},
 				{"Greedy voxels", null, "IsoSurfaces/GreedyVoxel", false, biomePresets}
@@ -51,6 +54,7 @@ namespace PW.Editor
 			//Output type
 			PresetCellList terrain3DPresets = new PresetCellList
 			{
+				{"3D Terrain type"},
 				{"3D planar", preset3DPlanarTexture, "TerrainType/Planar3D", false, terrain3DIsoSurfaces},
 				{"3D spherical", preset3DSphericalTexture, "TerrainType/Spherical3D", false, terrain3DIsoSurfaces},
 				{"3D cubic", preset3DCubicTexture, "TerrainType/Cubic3D", false, terrain3DIsoSurfaces},
@@ -58,6 +62,7 @@ namespace PW.Editor
 			
 			PresetCellList	terrain2DPresets = new PresetCellList
 			{
+				{"2D Terrain type"},
 				{"2D flat", preset2DPlanarTexture, "TerrainType/Planar2D", true, terrain2DIsoSurfaces},
 				{"2D spherical", null, "TerrainType/Spherical2D", false, terrain2DIsoSurfaces},
 				{"2D cubic", preset2DPlanarTexture, "TerrainType/Cubic2D", false, terrain2DIsoSurfaces},
@@ -66,6 +71,7 @@ namespace PW.Editor
 			
 			PresetCellList	outputTypePresets = new PresetCellList
 			{
+				{"Terrain type"},
 				{"2D Terrain like civilization", preset2DPlanarTexture, "Base/2D", true, terrain2DPresets},
 				{"3D Terrain like minecraft", preset3DPlanarTexture, "Base/3D", false, terrain3DPresets},
 			};

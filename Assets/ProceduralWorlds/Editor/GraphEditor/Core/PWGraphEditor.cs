@@ -244,7 +244,8 @@ public partial class PWGraphEditor : PWEditorWindow
 		if (OnGraphChanged != null)
 			OnGraphChanged(graph);
 		
-		graph.Process();
+		if (graph.presetChoosed)
+			graph.Process();
 	}
 
 	public void UnloadGraph(bool unloadAsset = true)

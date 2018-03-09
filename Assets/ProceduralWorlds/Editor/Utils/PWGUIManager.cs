@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using PW.Biomator;
@@ -47,7 +48,7 @@ namespace PW.Editor
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
 		static GUIStyle		centeredLabel;
-		int					currentSettingCount = 0;
+		Dictionary< PWGUIFieldType, int > currentSettingIndices = new Dictionary< PWGUIFieldType, int >();
 
 		List< PWGUISettings > settingsStorage = new List< PWGUISettings >();
 
@@ -632,6 +633,7 @@ namespace PW.Editor
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(previewSize, previewSize, TextureFormat.RGBA32, false);
+				fieldSettings.texture.wrapMode = TextureWrapMode.Clamp;
 				fieldSettings.texture.filterMode = fieldSettings.filterMode;
 				fieldSettings.samplerTextureUpdated = false;
 			}
@@ -787,6 +789,7 @@ namespace PW.Editor
 			if (fieldSettings.texture == null)
 			{
 				fieldSettings.texture = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
+				fieldSettings.texture.wrapMode = TextureWrapMode.Clamp;
 				fieldSettings.update = true;
 				fieldSettings.texture.filterMode = FilterMode.Point;
 			}
@@ -965,6 +968,7 @@ namespace PW.Editor
 				for (int i = 0; i < textureArray.depth; i++)
 				{
 					Texture2D tex = new Texture2D(textureArray.width, textureArray.height, TextureFormat.ARGB32, false);
+					tex.wrapMode = TextureWrapMode.Clamp;
 					tex.SetPixels(textureArray.GetPixels(i));
 					tex.Apply();
 					fieldSettings.textures[i] = tex;
@@ -1025,6 +1029,7 @@ namespace PW.Editor
 		{
 			var e = Event.current;
 			var settings = GetGUISettingData(PWGUIFieldType.FadeBlock, () => {
+				Debug.Log("New GUI Setting: " + settingsStorage.Count);
 				return new PWGUISettings();
 			});
 
@@ -1033,6 +1038,8 @@ namespace PW.Editor
 
 			if (settings.fadeStatus == null)
 				settings.fadeStatus = new AnimBool(settings.faded);
+			
+			AnimBool fadeStatus = settings.fadeStatus as AnimBool;
 				
 			settings.faded = checkbox;
 
@@ -1060,10 +1067,10 @@ namespace PW.Editor
 				e.Use();
 			}
 
-			settings.fadeStatus.target = settings.faded;
+			fadeStatus.target = settings.faded;
 			checkbox = settings.faded;
 			
-			bool display = EditorGUILayout.BeginFadeGroup(settings.fadeStatus.faded);
+			bool display = EditorGUILayout.BeginFadeGroup(fadeStatus.faded);
 			
 			return display;
 		}
@@ -1140,26 +1147,36 @@ namespace PW.Editor
 
 		private T		GetGUISettingData< T >(PWGUIFieldType fieldType, Func< T > newGUISettings) where T : PWGUISettings
 		{
+			if (!currentSettingIndices.ContainsKey(fieldType))
+				currentSettingIndices[fieldType] = 0;
 			
-			if (currentSettingCount == settingsStorage.Count)
+			int fieldIndex = currentSettingIndices[fieldType];
+
+			//TODO: a more intelligent system to get back the stored GUI setting
+			if (fieldIndex == settingsStorage.Count(s => s.fieldType == fieldType))
 			{
 				var s = newGUISettings();
 				s.fieldType = fieldType;
 
 				settingsStorage.Add(s);
 			}
-			if (settingsStorage[currentSettingCount].fieldType != fieldType)
-			{
-				//if the fileType does not match, we reset all GUI datas
-				settingsStorage[currentSettingCount] = newGUISettings();
-				settingsStorage[currentSettingCount].fieldType = fieldType;
-			}
-			return settingsStorage[currentSettingCount++] as T;
+
+			int i = 0;
+			var fieldSetting = settingsStorage.FirstOrDefault(s => {
+				if (i == fieldIndex)
+					return true;
+				if (s.fieldType == fieldType)
+					i++;
+				return false;
+			});
+
+			currentSettingIndices[fieldType]++;
+			return fieldSetting as T;
 		}
 
 		public void	StartFrame(Rect currentWindowRect)
 		{
-			currentSettingCount = 0;
+			currentSettingIndices.Clear();
 
 			this.currentWindowRect = currentWindowRect;
 
@@ -1173,131 +1190,88 @@ namespace PW.Editor
 			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}
 
+		PWGUISettings FindSetting(PWGUIFieldType fieldType, int fieldIndex)
+		{
+			int i = 0;
+			if (fieldIndex >= 0)
+				return settingsStorage.FirstOrDefault(s => {
+					if (i == fieldIndex)
+						return true;
+					if (s.fieldType == fieldType)
+						i++;
+					return false;
+				});
+			else
+				return settingsStorage.LastOrDefault(s => {
+					if (i == -fieldIndex - 1)
+						return true;
+					if (s.fieldType == fieldType)
+						i++;
+					return false;
+				});
+		}
+
 		//A negative value of fieldIndex will take the objectat the specified index starting from the end
-		public void SetGradientForField(int fieldIndex, Gradient g)
+		public void SetGradientForField(PWGUIFieldType fieldType, int fieldIndex, Gradient g)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
+
+			if (setting != null)
 			{
-				foreach (var setting in settingsStorage)
-				{
-					if (setting.gradient == g)
-						continue ;
-					
-					setting.gradient = g;
-					setting.serializableGradient = (SerializableGradient)g;
-					setting.update = true;
-				}
-				return ;
+				setting.gradient = g;
+				setting.serializableGradient = (SerializableGradient)g;
+				setting.update = true;
 			}
-
-			if (fieldIndex >= settingsStorage.Count)
-			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
-			}
-
-			if (settingsStorage[fieldIndex].gradient == g)
-				return ;
-
-			settingsStorage[fieldIndex].gradient = g;
-			settingsStorage[fieldIndex].serializableGradient = (SerializableGradient)g;
-			settingsStorage[fieldIndex].update = true;
 		}
 
-		public void SetDebugForField(int fieldIndex, bool value)
+		public void SetDebugForField(PWGUIFieldType fieldType, int fieldIndex, bool value)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
-			{
-				foreach (var setting in settingsStorage)
-					setting.debug = value;
-				return ;
-			}
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
 
-			if (fieldIndex >= settingsStorage.Count)
+			if (setting != null)
 			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
+				setting.debug = value;
 			}
-			
-			settingsStorage[fieldIndex].debug = value;
 		}
 
-		public void SetScaleModeForField(int fieldIndex, ScaleMode mode)
+		public void SetScaleModeForField(PWGUIFieldType fieldType, int fieldIndex, ScaleMode mode)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
-			{
-				foreach (var setting in settingsStorage)
-					setting.scaleMode = mode;
-				return ;
-			}
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
 
-			if (fieldIndex >= settingsStorage.Count)
+			if (setting != null)
 			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
+				setting.scaleMode = mode;
 			}
-
-			settingsStorage[fieldIndex].scaleMode = mode;
 		}
 		
-		public void SetScaleAspectForField(int fieldIndex, float aspect)
+		public void SetScaleAspectForField(PWGUIFieldType fieldType, int fieldIndex, float aspect)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
-			{
-				foreach (var setting in settingsStorage)
-					setting.scaleAspect = aspect;
-				return ;
-			}
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
 
-			if (fieldIndex >= settingsStorage.Count)
+			if (setting != null)
 			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
+				setting.scaleAspect = aspect;
 			}
-
-			settingsStorage[fieldIndex].scaleAspect = aspect;
 		}
 		
-		public void SetMaterialForField(int fieldIndex, Material mat)
+		public void SetMaterialForField(PWGUIFieldType fieldType, int fieldIndex, Material mat)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
-			{
-				foreach (var setting in settingsStorage)
-					setting.material = mat;
-				return ;
-			}
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
 
-			if (fieldIndex >= settingsStorage.Count)
+			if (setting != null)
 			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
+				setting.material = mat;
 			}
-
-			settingsStorage[fieldIndex].material = mat;
 		}
 		
-		public void SetUpdateForField(int fieldIndex, bool update)
+		public void SetUpdateForField(PWGUIFieldType fieldType, int fieldIndex, bool update)
 		{
-			//if the specified index is negative, we set it to all the GUISettings
-			if (fieldIndex < 0)
-			{
-				foreach (var setting in settingsStorage)
-					setting.update = update;
-				return ;
-			}
+			PWGUISettings setting = FindSetting(fieldType, fieldIndex);
 
-			if (fieldIndex >= settingsStorage.Count)
+			if (setting != null)
 			{
-				Debug.LogWarning("can't find the PWGUI setting datas at index: " + fieldIndex);
-				return ;
+				setting.update = update;
 			}
-
-			settingsStorage[fieldIndex].update = update;
 		}
 
 	#endregion

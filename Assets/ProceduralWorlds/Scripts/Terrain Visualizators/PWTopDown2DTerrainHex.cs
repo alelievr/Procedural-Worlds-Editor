@@ -7,8 +7,8 @@ using PW.Biomator;
 
 public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
 {
-	static Mesh				topDownTerrainMesh;
-	static int				topDownTerrainMeshSize = 0;
+	Mesh			topDownTerrainMesh;
+	int				topDownTerrainMeshSize = 0;
 
 	void	GenerateTopDownTerrainMesh()
 	{

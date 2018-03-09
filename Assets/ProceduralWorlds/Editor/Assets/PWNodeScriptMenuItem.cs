@@ -10,7 +10,6 @@ namespace PW.Editor
 	public static class PWNodeScriptMenuItem
 	{
 		static string		nodeBaseName = "PWNode.cs";
-		static string		nodeEditorBaseName = "PWNodeEditor.cs";
 	
 		[MenuItem("Assets/Create/ProceduralWorlds/PWNode C# Script", false, 200)]
 		private static void CreatePWNodeCSharpScritpt()

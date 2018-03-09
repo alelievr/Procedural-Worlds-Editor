@@ -29,7 +29,12 @@ namespace PW.Editor
 				finalTerrain = node.mergedBiomeTerrain.mergedTerrain;
 			
 			EditorGUIUtility.labelWidth = 80;
-			mainGraphRef.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", mainGraphRef.materializerType);
+			EditorGUI.BeginChangeCheck();
+			node.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", node.materializerType);
+			if (EditorGUI.EndChangeCheck())
+			{
+				PWTerrainPreviewManager.instance.UpdateTerrainMaterializer(node.materializerType);
+			}
 
 			if (finalTerrain == null)
 			{
@@ -53,7 +58,7 @@ namespace PW.Editor
 			if (update)
 			{
 				update = false;
-				PWGUI.SetUpdateForField(0, true);
+				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
 			}
 		}
 

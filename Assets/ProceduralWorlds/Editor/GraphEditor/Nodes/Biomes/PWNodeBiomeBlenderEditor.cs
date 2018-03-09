@@ -62,17 +62,13 @@ namespace PW.Editor
 			}
 
 			if (biomeData != null)
-			{
-				if (biomeData.biomeMap != null)
-					PWGUI.BiomeMap2DPreview(biomeData);
-				//TODO: biome 3D preview
-			}
+				PWGUI.BiomeMap2DPreview(biomeData);
 			else
 				EditorGUILayout.LabelField("no biome data");
 			
 			if (updateBiomeMap)
 			{
-				PWGUI.SetUpdateForField(1, true);
+				PWGUI.SetUpdateForField(PWGUIFieldType.BiomeMapPreview, 0, true);
 				updateBiomeMap = false;
 			}
 

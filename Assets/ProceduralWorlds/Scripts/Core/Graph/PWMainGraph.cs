@@ -139,7 +139,6 @@ namespace PW.Core
 
 		public PWGraphTerrainType		terrainType;
 		public PWGraphProcessMode		processMode;
-		public MaterializerType			materializerType;
 
 		[System.NonSerialized]
 		Vector3							currentChunkPosition;
