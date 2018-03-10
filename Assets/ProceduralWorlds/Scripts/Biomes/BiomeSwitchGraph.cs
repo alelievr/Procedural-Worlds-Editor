@@ -79,9 +79,12 @@ namespace PW.Biomator
 					currentCell = new BiomeSwitchCell();
 					
 					//Set cell and partial biome remaining empty params
-					currentCell.name = biomeNode.outputBiome.name = lastSwitch.name;
-					currentCell.id = biomeNode.outputBiome.id = biomeIdCount++;
-					currentCell.color = biomeNode.outputBiome.previewColor = lastSwitch.color;
+					currentCell.name = lastSwitch.name;
+					biomeNode.outputBiome.name  = lastSwitch.name;
+					biomeNode.outputBiome.id = biomeIdCount++;
+					currentCell.id = biomeNode.outputBiome.id;
+					biomeNode.outputBiome.previewColor = lastSwitch.color;
+					currentCell.color = lastSwitch.color;
 					currentCell.weight = currentCell.GetWeight(paramRanges);
 
 					//add the partial biome to utility dictionary accessors:
@@ -103,7 +106,7 @@ namespace PW.Biomator
 				else if (nodeType == typeof(PWNodeBiomeBlender))
 				{
 					if (currentCell == null)
-						throw new Exception("[PWBiomeSwitchGraph] idk what happened but this is really bad");
+						throw new InvalidOperationException("[PWBiomeSwitchGraph] idk what happened but this is really bad");
 					
 					//if the flow reaches the biomeblender everything is OK and add the current cell to the graph
 					cells.Add(currentCell);
@@ -117,7 +120,8 @@ namespace PW.Biomator
 			//Generate links between all linkable nodes
 			BuildLinks();
 			
-			rootCell = cells.First();
+			if (cells.Count != 0)
+				rootCell = cells.First();
 
 			if (!CheckValid())
 				return false;
@@ -183,7 +187,7 @@ namespace PW.Biomator
 				int index = n.outputAnchors.ToList().FindIndex(a => a.links.Any(l => l.toNode == prevNode));
 
 				if (index == -1)
-					throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
+					throw new InvalidOperationException("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
 				
 				precedentSwitchDatas.Add(switches[index]);
 			}
@@ -222,6 +226,9 @@ namespace PW.Biomator
 		{
 			var	checkedCells = new List< BiomeSwitchCell >();
 			var currentCells = new Stack< BiomeSwitchCell >();
+
+			if (rootCell == null)
+				return false;
 
 			currentCells.Push(rootCell);
 
@@ -352,7 +359,8 @@ namespace PW.Biomator
 					//fill biomeSwitchValue and blendParams with the current biomeData sampler values
 					for (int i = 0; i < biomeData.length; i++)
 					{
-						var val = biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
+						biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
+						var val = biomeSwitchValues[i];
 						var r = ranges[i];
 						var spc = blendParams.switchParams[i];
 						spc.min = val - (r * blendPercent);

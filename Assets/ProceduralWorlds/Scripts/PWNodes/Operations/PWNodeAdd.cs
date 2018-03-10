@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using PW.Core;
-using NUnit.Framework;
 
 namespace PW.Node
 {

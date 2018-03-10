@@ -13,9 +13,6 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeMerger node;
 
-		[System.NonSerialized]
-		bool					update;
-
 		public override void OnNodeEnable()
 		{
 			node = target as PWNodeBiomeMerger;
@@ -54,12 +51,6 @@ namespace PW.Editor
 			if (node.biomeTerrainsFoldout)
 				foreach (var biome in node.inputBlendedTerrain.biomes)
 					PWGUI.SamplerPreview(biome.name, biome.modifiedTerrain);
-
-			if (update)
-			{
-				update = false;
-				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
-			}
 		}
 
 		bool ValidateBlendedTerrainIntegrity()
@@ -76,11 +67,6 @@ namespace PW.Editor
 			}
 			
 			return true;
-		}
-
-		public override void OnNodePostProcess()
-		{
-			update = true;
 		}
 
 	}

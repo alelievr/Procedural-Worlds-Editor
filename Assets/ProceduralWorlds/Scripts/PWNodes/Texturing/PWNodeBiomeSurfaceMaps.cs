@@ -92,6 +92,8 @@ namespace PW.Node
 					foreach (var inputName in inputNames)
 						SetAnchorVisibility(inputName, PWVisibility.Visible);
 					break ;
+				default:
+					break ;
 			}
 		}
 

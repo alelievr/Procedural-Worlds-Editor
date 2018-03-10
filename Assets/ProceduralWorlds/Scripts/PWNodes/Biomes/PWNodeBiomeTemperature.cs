@@ -25,7 +25,6 @@ namespace PW.Node
 		public float			waterMultiplier = .2f;
 		public float			averageTemperature = 17;
 
-		public bool				updateTemperatureMap = false;
 		public bool				internalTemperatureMap = true;
 
 		public float			minTemperatureMapInput;
@@ -91,8 +90,6 @@ namespace PW.Node
 
 			if (inputBiomeData != null)
 				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
-				
-			updateTemperatureMap = true;
 		}
 
 		void CreateTemperatureMapIfNotExists()

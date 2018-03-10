@@ -80,6 +80,7 @@ namespace PW.Editor
 			{
 				GUI.changed = true;
 				needUpdate = false;
+				SendUpdate("SamplerSettingsUpdate");
 
 				//for an unknown reason, EditorWindow.SendEvent dooes not works with gradient field
 				//so here is a workaround to update the main window:

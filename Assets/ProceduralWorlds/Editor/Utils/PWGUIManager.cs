@@ -10,6 +10,7 @@ using PW.Core;
 using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
+using PW.Node;
 
 namespace PW.Editor
 {
@@ -85,10 +86,9 @@ namespace PW.Editor
 				ReloadTextures();
 		}
 
-		void ReloadTextures(PWNode node) { ReloadTextures(); }
-
-		void ReloadTextures()
+		public void ReloadTextures()
 		{
+			settingsStorage = attachedNode.PWGUIStorage.settingsStorage;
 			if (settingsStorage == null)
 				return ;
 			
@@ -639,9 +639,9 @@ namespace PW.Editor
 			}
 
 			//same for the gradient:
-			if (fieldSettings.gradient == null || fieldSettings.gradient.alphaKeys == null)
+			if (fieldSettings.gradient == null)
 				fieldSettings.gradient = fieldSettings.serializableGradient;
-
+				
 			Texture2D	tex = fieldSettings.texture;
 
 			if (samp.size != tex.width)
@@ -1029,7 +1029,6 @@ namespace PW.Editor
 		{
 			var e = Event.current;
 			var settings = GetGUISettingData(PWGUIFieldType.FadeBlock, () => {
-				Debug.Log("New GUI Setting: " + settingsStorage.Count);
 				return new PWGUISettings();
 			});
 
@@ -1163,7 +1162,7 @@ namespace PW.Editor
 
 			int i = 0;
 			var fieldSetting = settingsStorage.FirstOrDefault(s => {
-				if (i == fieldIndex)
+				if (i == fieldIndex && s.fieldType == fieldType)
 					return true;
 				if (s.fieldType == fieldType)
 					i++;
@@ -1195,7 +1194,7 @@ namespace PW.Editor
 			int i = 0;
 			if (fieldIndex >= 0)
 				return settingsStorage.FirstOrDefault(s => {
-					if (i == fieldIndex)
+					if (i == fieldIndex && s.fieldType == fieldType)
 						return true;
 					if (s.fieldType == fieldType)
 						i++;

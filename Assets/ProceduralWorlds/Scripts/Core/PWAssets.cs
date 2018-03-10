@@ -80,7 +80,7 @@ namespace PW.Core
 				AssetDatabase.CreateAsset(ret, fName + ".asset");
 				AssetDatabase.SaveAssets();
 			#else
-				Debug.LogError("Cannot save TextureArray in play mode !" + assetFile);
+				Debug.LogError("Cannot save TextureArray in play mode !");
 				return null;
 			#endif
 			return ret;

@@ -217,7 +217,7 @@ public partial class PWGraphEditor : PWEditorWindow
 		this.graph = graph;
 
 		graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
-		
+
 		//attach to graph events
 		graph.OnNodeAdded += NodeAddedCallback;
 		graph.OnNodeRemoved += NodeRemovedCallback;

@@ -115,7 +115,7 @@ namespace PW.Node
 						Biome b = partialBiome.biomeGraph.GetOutput();
 
 						if (b == null)
-							throw new Exception("Biome graph " + partialBiome.biomeGraph + " returns null biome");
+							throw new InvalidOperationException("Biome graph " + partialBiome.biomeGraph + " returns null biome");
 
 						if (outputBlendedBiomeTerrain.biomes.Contains(b))
 						{

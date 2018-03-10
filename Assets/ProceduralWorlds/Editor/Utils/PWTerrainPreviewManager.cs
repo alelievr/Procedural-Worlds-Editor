@@ -34,6 +34,13 @@ namespace PW.Editor
 		private PWTerrainPreviewManager()
 		{
 			UpdateObjects();
+			EditorApplication.playModeStateChanged += PlayModeChanged;
+		}
+
+		void PlayModeChanged(PlayModeStateChange state)
+		{
+			if (state == PlayModeStateChange.EnteredEditMode)
+				UpdateObjects();
 		}
 
 		void UpdateObjects()
@@ -46,7 +53,10 @@ namespace PW.Editor
 			previewCamera = rootPreview.GetComponentInChildren< Camera >();
 
 			if (previewTexture == null)
+			{
 				previewTexture = new RenderTexture(1000, 1000, 0, RenderTextureFormat.ARGB32);
+				previewTexture.hideFlags = HideFlags.HideAndDontSave;
+			}
 			previewCamera.targetTexture = previewTexture;
 
 			terrainBase = GameObject.FindObjectOfType< PWTerrainGenericBase >();
@@ -84,6 +94,12 @@ namespace PW.Editor
 		{
 			if (terrainBase != null)
 				terrainBase.transform.position = position;
+		}
+
+		~PWTerrainPreviewManager()
+		{
+			if (previewTexture != null)
+				GameObject.DestroyImmediate(previewTexture);
 		}
 	}
 }

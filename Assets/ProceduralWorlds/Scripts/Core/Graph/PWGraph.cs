@@ -560,10 +560,14 @@ namespace PW.Core
 			int id = removeNode.id;
 			nodes.Remove(removeNode);
 			
-			if (OnNodeRemoved != null && raiseEvents)
-				OnNodeRemoved(removeNode);
-			
 			bool success = nodesDictionary.Remove(id);
+			
+			if (OnNodeRemoved != null && raiseEvents)
+			{
+				try {
+					OnNodeRemoved(removeNode);
+				} catch {}
+			}
 
 			removeNode.RemoveSelf();
 

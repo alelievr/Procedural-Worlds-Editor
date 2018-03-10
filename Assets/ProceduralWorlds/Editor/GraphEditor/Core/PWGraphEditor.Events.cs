@@ -183,15 +183,19 @@ public partial class PWGraphEditor
 			case "Duplicate":
 				foreach (var node in selectedNodes)
 					node.Duplicate();
+					
+				e.Use();
 				break ;
 			case "Delete":
 				var selectedLinks = graph.nodeLinkTable.GetLinks().Where(l => l.selected);
-
-				foreach (var node in selectedNodes)
-					node.RemoveSelf();
 				
 				foreach (var link in selectedLinks)
 					graph.RemoveLink(link);
+
+				foreach (var node in selectedNodes)
+					graph.RemoveNode(node);
+
+				e.Use();
 				break ;
 			case "Cut":
 				break ;
@@ -204,10 +208,16 @@ public partial class PWGraphEditor
 
 				if (selectedNode != null)
 					graph.panPosition = -selectedNode.rect.position + windowSize / 2 - selectedNode.rect.size / 2;
+					
+				e.Use();
 				break ;
 			case "Find":
 				break ;
 			case "SelectAll":
+				foreach (var node in graph.allNodes)
+					node.isSelected = true;
+				break ;
+			default:
 				break ;
 		}
 	}

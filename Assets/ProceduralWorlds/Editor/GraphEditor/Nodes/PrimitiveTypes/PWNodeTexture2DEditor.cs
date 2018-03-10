@@ -26,7 +26,9 @@ namespace PW.Editor
 			node.outputTexture = EditorGUILayout.ObjectField(node.outputTexture, typeof(Texture2D), false) as Texture2D;
 			EditorGUI.BeginChangeCheck();
 			{
-				if ((node.isMaterialOutput = EditorGUILayout.Toggle("material output", node.isMaterialOutput)))
+				node.isMaterialOutput = EditorGUILayout.Toggle("material output", node.isMaterialOutput);
+				
+				if (node.isMaterialOutput)
 				{
 					if (node.outputMaterial == null)
 						node.CreateNewMaterial();

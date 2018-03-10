@@ -151,6 +151,8 @@ public partial class PWGraphEditor
 			case PWLinkHighlight.DeleteAndReset:
 				Handles.DrawBezier(startPos, endPos, startTan, endTan, PWColorTheme.deletedColor, null, width + 2);
 				break ;
+			default:
+				break ;
 		}
 		Color c = PWColorTheme.GetLinkColor(colorSchemeName);
 		Handles.DrawBezier(startPos, endPos, startTan, endTan, c, null, width);

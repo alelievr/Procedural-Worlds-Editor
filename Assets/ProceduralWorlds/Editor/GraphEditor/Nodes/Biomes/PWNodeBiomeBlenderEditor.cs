@@ -78,7 +78,9 @@ namespace PW.Editor
 
 			GUIStyle biomeCoverageFoloutStyle = (biomeCoverageError) ? PWStyles.errorFoldout : EditorStyles.foldout;
 
-			if (node.biomeCoverageRecap = EditorGUILayout.Foldout(node.biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle))
+			node.biomeCoverageRecap = EditorGUILayout.Foldout(node.biomeCoverageRecap, "Biome coverage recap", biomeCoverageFoloutStyle);
+			
+			if (node.biomeCoverageRecap)
 			{
 				if (biomeData != null && biomeData.biomeSwitchGraph != null)
 				{

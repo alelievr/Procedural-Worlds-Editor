@@ -33,8 +33,12 @@ public partial class PWMainGraphEditor : PWGraphEditor
 	bool					geologicalSettingsFoldout;
 	[SerializeField]
 	bool					chunkSettingsFoldout = true;
+	[SerializeField]
+	bool					chunkLoaderFoldout = true;
 
 	const string			graphProcessKey = "PWMainGraphEditor";
+
+	ChunkLoaderDrawer		chunkLoaderDrawer = new ChunkLoaderDrawer();
 
 	#region Initialization and data baking
 
@@ -179,6 +183,14 @@ public partial class PWMainGraphEditor : PWGraphEditor
 					EditorGUILayout.EndHorizontal();
 				}
 				EditorGUI.EndDisabledGroup();
+			}
+			PWGUI.EndFade();
+
+			if (PWGUI.BeginFade("Chunkloader settings", ref chunkLoaderFoldout, false))
+			{
+				if (!chunkLoaderDrawer.isEnabled)
+					chunkLoaderDrawer.OnEnable(mainGraph);
+				chunkLoaderDrawer.OnGUI(new Rect());
 			}
 			PWGUI.EndFade();
 			

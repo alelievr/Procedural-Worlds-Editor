@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 namespace PW.Editor
 {
 	[System.Serializable]
-	public class PWTerrainPreviewDrawer : PWDrawer
+	public class TerrainPreviewDrawer : PWDrawer
 	{
 		[SerializeField]
 		PWTerrainPreviewType	loadedPreviewType;
@@ -73,7 +73,9 @@ namespace PW.Editor
 				previewCamera.Render();
 
 			//draw preview texture:
-			GUI.DrawTexture(previewRect, PWTerrainPreviewManager.instance.previewTexture);
+			var renderTexture = PWTerrainPreviewManager.instance.previewTexture;
+			if (renderTexture != null)
+				GUI.DrawTexture(previewRect, renderTexture);
 
 			if (previewRect.Contains(e.mousePosition))
 			{
@@ -82,6 +84,8 @@ namespace PW.Editor
 					case PWTerrainPreviewType.SideView:
 					case PWTerrainPreviewType.TopDownPlanarView:
 						TopDownCameraControls(previewCamera);
+						break ;
+					default:
 						break ;
 				}
 				

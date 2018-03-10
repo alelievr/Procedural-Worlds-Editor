@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using UnityEditorInternal;
 using System.Linq;
 using PW.Core;
 using PW.Biomator;

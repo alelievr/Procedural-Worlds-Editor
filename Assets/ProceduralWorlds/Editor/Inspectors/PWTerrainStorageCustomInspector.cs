@@ -33,6 +33,8 @@ namespace PW.Editor
 					if (!terrain.editorMode)
 						terrain.storageFolder = EditorGUILayout.TextField("storage folder", terrain.storageFolder);
 					break ;
+				default:
+					break ;
 			}
 		}
 	}

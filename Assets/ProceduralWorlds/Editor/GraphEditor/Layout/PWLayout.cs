@@ -25,6 +25,8 @@ namespace PW.Editor
 		List< Action >					layoutActions = new List< Action >();
 		List< Rect >					layoutRects = new List< Rect >();
 
+		List< PWLayoutSetting >			savedDefaultSettings = new List< PWLayoutSetting >();
+
 		Action							resetAction;
 
 		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
@@ -86,6 +88,8 @@ namespace PW.Editor
 			var sep = new ResizablePanelSeparator(currentOrientation.Peek());
 			sep.UpdateLayoutSetting(defaultSetting);
 			AddPanel(sep, panel);
+
+			savedDefaultSettings.Add(defaultSetting.Clone(null));
 		}
 
 		public void AutoSizePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
@@ -127,8 +131,15 @@ namespace PW.Editor
 
 		public void Reset()
 		{
-			graphEditor.graph.layoutSettings.settings.Clear();
-			UpdateLayoutSettings(graphEditor.graph.layoutSettings);
+			var layoutSettings = graphEditor.graph.layoutSettings;
+
+			layoutSettings.settings.Clear();
+
+			foreach (var defaultSetting in savedDefaultSettings)
+				layoutSettings.settings.Add(defaultSetting.Clone(null));
+			
+			UpdateLayoutSettings(layoutSettings);
+
 			resetAction();
 		}
 

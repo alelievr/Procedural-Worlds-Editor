@@ -42,12 +42,6 @@ namespace PW.Editor
 		{
 			GUILayout.Space(GUI.skin.label.lineHeight * 2f);
 				
-			if (node.outputBiome != null)
-			{
-				// BiomeUtils.DrawBiomeInfos(outputBiome);
-				// EditorGUILayout.Separator();
-			}
-
 			EditorGUIUtility.labelWidth = 100;
 
 			EditorGUI.BeginChangeCheck();

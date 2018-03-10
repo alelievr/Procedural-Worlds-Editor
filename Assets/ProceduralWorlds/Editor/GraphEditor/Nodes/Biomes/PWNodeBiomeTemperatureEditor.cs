@@ -13,7 +13,7 @@ namespace PW.Editor
 	{
 		public PWNodeBiomeTemperature node;
 
-		string		delayedTemperatureKey = "PWNodeBiomeTemperature";
+		string		graphReload = "PWNodeBiomeTemperature";
 		
 		Gradient	temperatureGradient;
 
@@ -32,7 +32,7 @@ namespace PW.Editor
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
 			
-			delayedChanges.BindCallback(delayedTemperatureKey, (unused) => {
+			delayedChanges.BindCallback(graphReload, (unused) => {
 				NotifyReload();
 			});
 		}
@@ -65,23 +65,26 @@ namespace PW.Editor
 				}
 			}
 			if (EditorGUI.EndChangeCheck())
+			{
 				node.UpdateTemperatureMap();
+				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
+				delayedChanges.UpdateValue(graphReload);
+			}
 			
 			if (node.localTemperatureMap != null)
 				PWGUI.Sampler2DPreview(node.localTemperatureMap as Sampler2D, false, FilterMode.Point);
 			
-			if (node.updateTemperatureMap)
-			{
-				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
-				node.updateTemperatureMap = false;
-			}
-
 			if (!guiInitialized)
 			{
 				PWGUI.SetGradientForField(PWGUIFieldType.Sampler2DPreview, 0, temperatureGradient);
 				PWGUI.SetDebugForField(PWGUIFieldType.Sampler2DPreview, 0, true);
 				guiInitialized = true;
 			}
+		}
+
+		public override void OnNodePostProcess()
+		{
+			PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
 		}
 
 	}

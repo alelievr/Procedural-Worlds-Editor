@@ -129,9 +129,12 @@ namespace PW.Editor
 			
 			builder.Execute();
 			
-			var biomeNodes = mainGraph.FindNodesByType< PWNodeBiome >();
-			for (int i = 0; i < biomeNodes.Count; i++)
-				biomeNodes[i].biomeGraph = biomes[i];
+			if (biomes != null)
+			{
+				var biomeNodes = mainGraph.FindNodesByType< PWNodeBiome >();
+				for (int i = 0; i < biomeNodes.Count; i++)
+					biomeNodes[i].biomeGraph = biomes[i];
+			}
 
 			builder.GetGraph().Process();
 			

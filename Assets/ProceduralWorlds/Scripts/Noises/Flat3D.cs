@@ -22,7 +22,10 @@ namespace PW.Noises
 		public override void ComputeSampler3D(Sampler3D samp)
 		{
 			if (samp == null)
+			{
 				Debug.LogError("Null sampler sent to Flat noise");
+				return ;
+			}
 
 			samp.Foreach((x, y, z) => {
 				return flatValue;

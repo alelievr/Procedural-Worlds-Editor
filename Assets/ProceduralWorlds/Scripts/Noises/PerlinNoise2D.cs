@@ -133,7 +133,7 @@ namespace PW.Noises
 			else
 			{
                 (samp as Sampler2D).Foreach((x, y) => {
-                    return GenerateNoise(x, y, 4, samp.step * scale, 1, 1, seed);
+                    return GenerateNoise(x, y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });
 			}
 		}

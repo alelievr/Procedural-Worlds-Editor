@@ -1,5 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 using PW.Core;
 using PW.Noises;
 
@@ -7,9 +6,9 @@ namespace PW.Node
 {
 	public class PWNodePerlinNoise2D : PWNode
 	{
-		public float			persistence;
-		public float			lacunarity;
-		public int				octaves;
+		public float			persistence = 1f;
+		public float			lacunarity = 1.5f;
+		public int				octaves = 4;
 		public int				additionalSeed;
 
 		public float			persistenceMin = 0.1f;
@@ -32,10 +31,17 @@ namespace PW.Node
 			perlin2D = new PerlinNoise2D(seed);
 		}
 
+		public int GetSeed()
+		{
+			return (mainGraphRef != null) ? mainGraphRef.seed + additionalSeed : additionalSeed;
+		}
+
 		public override void OnNodeProcess()
 		{
 			//recalcul perlin noise values with new seed / position.
 			output.ResizeIfNeeded(chunkSize, step);
+			
+			perlin2D.UpdateParams(GetSeed(), scale, octaves, persistence, lacunarity);
 
 			perlin2D.ComputeSampler2D(output);
 		}

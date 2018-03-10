@@ -8,7 +8,7 @@ using PW;
 
 namespace PW.Editor
 {
-	public class PWChunkLoaderDrawer : PWDrawer
+	public class ChunkLoaderDrawer : PWDrawer
 	{
 		PWMainGraph		mainGraph;
 

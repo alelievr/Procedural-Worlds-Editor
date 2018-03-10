@@ -121,27 +121,27 @@ namespace PW.Core
 
 		static class PWGraphTokenSequence
 		{
-			public static List< PWGraphToken > newNode = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newNode = new List< PWGraphToken > {
 				PWGraphToken.NewNodeCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
 
-			public static List< PWGraphToken > newNodePosition = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newNodePosition = new List< PWGraphToken > {
 				PWGraphToken.NewNodeCommand, PWGraphToken.Word, PWGraphToken.Word, PWGraphToken.OpenParenthesis, PWGraphToken.IntValue, PWGraphToken.Comma, PWGraphToken.IntValue, PWGraphToken.ClosedParenthesis
 			};
 
-			public static List< PWGraphToken > newLink = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newLink = new List< PWGraphToken > {
 				PWGraphToken.LinkCommand, PWGraphToken.Word, PWGraphToken.Word
 			};
 
-			public static List< PWGraphToken > newLinkAnchor = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newLinkAnchor = new List< PWGraphToken > {
 				PWGraphToken.LinkAnchorCommand, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.IntValue, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.IntValue
 			};
 			
-			public static List< PWGraphToken > newLinkAnchorName = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newLinkAnchorName = new List< PWGraphToken > {
 				PWGraphToken.LinkAnchorCommand, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.Word, PWGraphToken.Word, PWGraphToken.Colon, PWGraphToken.Word
 			};
 
-			public static List< PWGraphToken > newNodeAttrOption = new List< PWGraphToken >() {
+			public readonly static List< PWGraphToken > newNodeAttrOption = new List< PWGraphToken > {
 				PWGraphToken.Attr, PWGraphToken.Equal, PWGraphToken.JsonDatas
 			};
 		}
@@ -155,7 +155,7 @@ namespace PW.Core
 
 		static class PWGraphValidCommandTokenSequence
 		{
-			public static List< PWGraphCommandTokenSequence > validSequences = new List< PWGraphCommandTokenSequence >()
+			public readonly static List< PWGraphCommandTokenSequence > validSequences = new List< PWGraphCommandTokenSequence >
 			{
 				//New Node command
 				new PWGraphCommandTokenSequence {
@@ -188,7 +188,7 @@ namespace PW.Core
 		}
 
 		//token regex list by priority order
-		static List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >()
+		readonly static List< PWGraphTokenDefinition >	tokenDefinitions = new List< PWGraphTokenDefinition >
 		{
 			new PWGraphTokenDefinition(PWGraphToken.LinkAnchorCommand, @"^LinkAnchor"),
 			new PWGraphTokenDefinition(PWGraphToken.LinkCommand, @"^Link"),
@@ -237,7 +237,7 @@ namespace PW.Core
 
 			//thorw exception if the type can't be parse / does not inherit from PWNode
 			if (nodeType == null || !nodeType.IsSubclassOf(typeof(PWNode)))
-				throw new Exception("Type " + type + " not found as a node type (" + nodeType + ")");
+				throw new InvalidOperationException("Type " + type + " not found as a node type (" + nodeType + ")");
 			
 			return nodeType;
 		}
@@ -313,7 +313,7 @@ namespace PW.Core
 				continue ;
 			}
 
-			throw new Exception("Invalid token squence: " + startLine);
+			throw new InvalidOperationException("Invalid token squence: " + startLine);
 		}
 
 		public static PWGraphCommand	Parse(string inputCommand)
@@ -327,13 +327,13 @@ namespace PW.Core
 				match = Match(ref inputCommand);
 
 				if (match == null)
-					throw new Exception("Invalid token at line \"" + inputCommand + "\"");
+					throw new InvalidOperationException("Invalid token at line \"" + inputCommand + "\"");
 
 				lineTokens.Add(match);
 			}
 
 			if (lineTokens.Count == 0)
-				throw new Exception("Invalid empty command: " + inputCommand);
+				throw new InvalidOperationException("Invalid empty command: " + inputCommand);
 
 			return BuildCommand(lineTokens, startLine);
 		}

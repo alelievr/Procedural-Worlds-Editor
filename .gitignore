@@ -33,3 +33,7 @@ sysinfo.txt
 TestResults-*
 *.log
 *.xml
+
+*.app
+*.exe
+*_data/

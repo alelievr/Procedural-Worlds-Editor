@@ -15,7 +15,7 @@ namespace PW.Editor
 		//Settings bar datas:
 		Vector2					scrollbarPosition;
 		[SerializeField]
-		PWTerrainPreviewDrawer	terrainPreview = new PWTerrainPreviewDrawer();
+		TerrainPreviewDrawer	terrainPreview = new TerrainPreviewDrawer();
 
 		public void DrawReloadButtons()
 		{

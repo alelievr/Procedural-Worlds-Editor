@@ -34,9 +34,9 @@ namespace PW.Core
 			var toAnchorField = toNode.inputAnchorFields.Find(af => af.fieldName == command.toAnchorFieldName);
 
 			if (fromAnchorField == null)
-				throw new Exception("Anchor " + command.fromAnchorFieldName + " not found in node: " + fromNode);
+				throw new InvalidOperationException("Anchor " + command.fromAnchorFieldName + " not found in node: " + fromNode);
 			if (toAnchorField == null)
-				throw new Exception("Anchor " + command.toAnchorFieldName + " not found in node: " + toNode);
+				throw new InvalidOperationException("Anchor " + command.toAnchorFieldName + " not found in node: " + toNode);
 			
 			PWAnchor fromAnchor, toAnchor;
 			
@@ -55,9 +55,9 @@ namespace PW.Core
 			var toAnchorFields = toNode.inputAnchorFields;
 
 			if (command.fromAnchorIndex < 0 || command.fromAnchorIndex >= fromAnchorFields.Count)
-				throw new Exception("Anchor " + command.fromAnchorIndex + " out of range in node: " + fromNode);
+				throw new InvalidOperationException("Anchor " + command.fromAnchorIndex + " out of range in node: " + fromNode);
 			if (command.toAnchorIndex < 0 || command.toAnchorIndex >= toAnchorFields.Count)
-				throw new Exception("Anchor " + command.fromAnchorIndex + " out of range in node: " + toNode);
+				throw new InvalidOperationException("Anchor " + command.fromAnchorIndex + " out of range in node: " + toNode);
 			
 			var fromAnchorField = fromAnchorFields[command.fromAnchorIndex];
 			var toAnchorField = toAnchorFields[command.toAnchorIndex];
@@ -133,7 +133,7 @@ namespace PW.Core
 			if (commandTypeFunctions.ContainsKey(command.type))
 				commandTypeFunctions[command.type](graph, command, inputCommand);
 			else
-				throw new Exception("Command type not handled: " + command.type);
+				throw new InvalidOperationException("Command type not handled: " + command.type);
 		}
 
 		#region Utils
@@ -144,9 +144,9 @@ namespace PW.Core
 			toNode = graph.FindNodeByName(command.toNodeName);
 
 			if (fromNode == null)
-				throw new Exception("Node " + command.fromNodeName + " not found in graph while parsing: '" + inputCommand + "'");
+				throw new InvalidOperationException("Node " + command.fromNodeName + " not found in graph while parsing: '" + inputCommand + "'");
 			if (toNode == null)
-				throw new Exception("Node " + command.toNodeName + " not found in graph while parsing: '" + inputCommand + "'");
+				throw new InvalidOperationException("Node " + command.toNodeName + " not found in graph while parsing: '" + inputCommand + "'");
 		}
 
 		static void FindAnchors(PWAnchorField fromAnchorField, PWAnchorField toAnchorField, out PWAnchor fromAnchor, out PWAnchor toAnchor)

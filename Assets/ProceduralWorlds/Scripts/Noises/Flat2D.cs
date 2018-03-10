@@ -22,7 +22,10 @@ namespace PW.Noises
 		public override void ComputeSampler2D(Sampler2D samp)
 		{
 			if (samp == null)
+			{
 				Debug.LogError("Null sampler sent to Flat noise");
+				return ;
+			}
 			
 			samp.Foreach((x, y) => {
 				return flatValue;

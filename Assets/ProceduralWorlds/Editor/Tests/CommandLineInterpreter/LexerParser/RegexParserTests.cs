@@ -87,7 +87,7 @@ namespace PW.Tests.CLI
 				return ;
 			}
 
-			throw new Exception("Unknow node type in newNode command didn't throw an exception");
+			throw new InvalidOperationException("Unknow node type in newNode command didn't throw an exception");
 		}
 
 		[Test]
@@ -98,7 +98,7 @@ namespace PW.Tests.CLI
 			} catch {
 				return ;
 			}
-			throw new Exception("Missing name in newNode command did't throw an exception");
+			throw new InvalidOperationException("Missing name in newNode command did't throw an exception");
 		}
 	
 		[Test]
@@ -111,7 +111,7 @@ namespace PW.Tests.CLI
 				return ;
 			}
 			
-			throw new Exception("too many arguments in newNode command didn't throw an exception");
+			throw new InvalidOperationException("too many arguments in newNode command didn't throw an exception");
 		}
 
 		[Test]
@@ -248,7 +248,7 @@ namespace PW.Tests.CLI
 		{
 			try {
 				PWGraphCLI.Parse("BlaBlaBla arg1 arg2");
-				throw new Exception("no exception was thrown by unknow command");
+				throw new InvalidOperationException("no exception was thrown by unknow command");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
 			}
@@ -259,7 +259,7 @@ namespace PW.Tests.CLI
 		{
 			try {
 				PWGraphCLI.Parse("");
-				throw new Exception("no exception was thrown by an empty command");
+				throw new InvalidOperationException("no exception was thrown by an empty command");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
 			}

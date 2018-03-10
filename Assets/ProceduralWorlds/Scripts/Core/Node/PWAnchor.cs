@@ -156,7 +156,11 @@ namespace PW.Core
 		void Init(PWAnchorField anchorField)
 		{
 			if (anchorField == null)
+			{
 				Debug.LogWarning("Null anchor field passed to Anchor at deserialization");
+				return ;
+			}
+			
 			anchorFieldRef = anchorField;
 			color = anchorField.color;
 			nodeRef = anchorField.nodeRef;

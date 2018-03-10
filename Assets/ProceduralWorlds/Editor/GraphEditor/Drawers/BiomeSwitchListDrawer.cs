@@ -179,7 +179,7 @@ namespace PW.Editor
 			}
 
 			//add water if there is and if switch mode is height:
-			if (!biomeData.isWaterless && bsl.samplerName == BiomeSamplerName.terrainHeight)
+			if (biomeData != null && !biomeData.isWaterless && bsl.samplerName == BiomeSamplerName.terrainHeight)
 			{
 				float rMax = (biomeData.waterLevel / range) * previewTextureWidth;
 

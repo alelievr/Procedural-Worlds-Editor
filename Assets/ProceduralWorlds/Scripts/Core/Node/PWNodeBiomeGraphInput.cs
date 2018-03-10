@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using PW.Biomator;
 using System;
 using System.Linq;
@@ -61,11 +60,11 @@ namespace PW.Core
 					return ;
 				
 				if (previewGraph == null)
-					throw new Exception("[PWBiomeGraph] can't proces a graph in mainGraph data input mode with a null main graph");
+					throw new InvalidOperationException("[PWBiomeGraph] can't proces a graph in mainGraph data input mode with a null main graph");
 				
 				//check if the preview graph have a reference of this graph.
 				if (!previewGraph.FindNodesByType< PWNodeBiome >().Any(b => b.biomeGraph == graphRef))
-					throw new Exception("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
+					throw new InvalidOperationException("[PWBiomeGraph] the specified preview graph (" + previewGraph + ") does not contains a reference of this biome graph");
 				
 				//we process the graph to provide the outputPartialBiome
 				//it require that biomeGraph to be contained in the previewGraph.
@@ -73,7 +72,7 @@ namespace PW.Core
 	
 				//if the graph we process does not contains an instance of our biome graph
 				if (outputPartialBiome == null)
-					throw new Exception("[PWBiomeGraph] " + graphRef + " there is a problem with the biome switch graph in (" + previewGraph + ") ");
+					throw new InvalidOperationException("[PWBiomeGraph] " + graphRef + " there is a problem with the biome switch graph in (" + previewGraph + ") ");
 			}
 			else
 			{

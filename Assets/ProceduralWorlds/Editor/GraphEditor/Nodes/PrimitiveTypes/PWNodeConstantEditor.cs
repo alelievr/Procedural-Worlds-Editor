@@ -43,6 +43,8 @@ namespace PW.Editor
 				case PWNodeConstant.ConstantType.Vector4:
 					node.outv4 = EditorGUILayout.Vector4Field("Vec4", node.outv4);
 					break ;
+				default:
+					break ;
 			}
 		}
 	}

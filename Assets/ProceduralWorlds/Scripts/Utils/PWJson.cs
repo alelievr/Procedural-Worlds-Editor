@@ -74,7 +74,7 @@ public static class PWJson
         Type t = data.GetType();
 
         if (allowedJsonTypes.FindIndex(a => a.type == t) == -1)
-            throw new Exception("[PWJson] Can't jsonify type '" + t + "'");
+            throw new InvalidOperationException("[PWJson] Can't jsonify type '" + t + "'");
 
         if (t == typeof(string))
             return "\"" + (data as string) + "\"";
@@ -88,7 +88,7 @@ public static class PWJson
 		sb.Append("{");
 
         if (datas == null || datas.Count() == 0)
-            throw new Exception("[PWJson] Null datas sent to Json generator");
+            throw new InvalidOperationException("[PWJson] Null datas sent to Json generator");
 
         var last = datas.Last();
         foreach (var data in datas)
@@ -112,7 +112,7 @@ public static class PWJson
 		Match nameMatch = nameRegex.Match(part);
 
 		if (!nameMatch.Success)
-			throw new Exception("[PWJson] Parse error near '" + part + "'");
+			throw new InvalidOperationException("[PWJson] Parse error near '" + part + "'");
 		
 		string name = nameMatch.Value.Replace("\"", String.Empty);
 
@@ -121,7 +121,7 @@ public static class PWJson
 		Match separatorMatch = separatorRegex.Match(part);
 
 		if (!separatorMatch.Success)
-			throw new Exception("[PWJson] Parse error near '" + part + "'");
+			throw new InvalidOperationException("[PWJson] Parse error near '" + part + "'");
 			
 		part = part.Substring(separatorMatch.Value.Length).Trim();
 
@@ -138,7 +138,7 @@ public static class PWJson
 		}
 
 		if (obj == null)
-			throw new Exception("[PWJson] Parse error near '" + part + "'");
+			throw new InvalidOperationException("[PWJson] Parse error near '" + part + "'");
 
 		return new Pair< string, object >(name, obj);
 	}
@@ -151,7 +151,7 @@ public static class PWJson
 
 		//check for enclosing brackets
 		if (!Regex.Match(s, @"^{.*}$").Success)
-			throw new Exception("[PWJson] Bad json format while parsing '" + s + "'");
+			throw new InvalidOperationException("[PWJson] Bad json format while parsing '" + s + "'");
 		
 		//remove enclosing brackets
 		s = s.Substring(1);

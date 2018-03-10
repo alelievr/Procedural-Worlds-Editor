@@ -1,5 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -244,24 +243,6 @@ namespace PW
 				OnPostProcess();
 			isProcessing = false;
 		}
-
-		#region Unused (for the moment) overrided functions
-
-		public void	OnDestroy()
-		{
-			// Debug.Log("node " + nodeTypeName + " detroyed !");
-		}
-
-		public void	OnGUI()
-		{
-			EditorGUILayout.LabelField("You are in the wrong window !");
-		}
-		
-		public void OnInspectorGUI()
-		{
-			EditorGUILayout.LabelField("nope !");
-		}
-		#endregion
 
 		public override string ToString()
 		{

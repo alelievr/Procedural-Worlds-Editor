@@ -58,12 +58,12 @@ namespace PW.Node
 					foreach (var biome in inputBlendedTerrain.biomes)
 					{
 						if (biome == null)
-							throw new Exception("Can't access to biome(null) from biome blender inputs");
+							throw new InvalidOperationException("Can't access to biome(null) from biome blender inputs");
 
 						var terrain = biome.modifiedTerrain as Sampler2D;
 
 						if (terrain == null)
-							throw new Exception("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
+							throw new InvalidOperationException("[PWNodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
 
 						for (int i = 0; i < biomeInfo.length; i++)
 							if (biomeInfo.biomeIds[i] == biome.id)
