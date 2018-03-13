@@ -81,7 +81,11 @@ namespace ProceduralWorlds.Node
 				if (terrainHeightMultiplier != 0 && terrain != null)
 					terrainMod = terrain.At(x, y, true) * terrainHeightMultiplier * temperatureRange;
 				if (waterMultiplier != 0 && waterHeight != null)
-					waterMod = waterHeight.At(x, y, true) * waterMultiplier * temperatureRange;
+				{
+					float wh = waterHeight.At(x, y, false);
+					wh /= (waterHeight.max - waterHeight.min) / 2;
+					waterMod = wh * waterMultiplier * temperatureRange;
+				}
 				return Mathf.Clamp(mapValue + terrainMod + waterMod, minTemperature, maxTemperature);
 			});
 

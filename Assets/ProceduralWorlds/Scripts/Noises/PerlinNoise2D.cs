@@ -132,7 +132,7 @@ namespace ProceduralWorlds.Noises
 			}
 			else
 			{
-                (samp as Sampler2D).Foreach((x, y) => {
+                samp.Foreach((x, y) => {
                     return GenerateNoise(x, y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });
 			}

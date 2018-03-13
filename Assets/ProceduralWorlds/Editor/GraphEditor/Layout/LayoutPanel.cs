@@ -18,6 +18,8 @@ namespace ProceduralWorlds.Editor
 		
 		protected DelayedChanges		delayedChanges = new DelayedChanges();
 
+		protected Event					e { get { return Event.current; } }
+
 		public OnGUI					onGUI;
 
 		Rect							oldWindowRect;

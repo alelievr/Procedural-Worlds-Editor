@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace ProceduralWorlds.Core
 {
-	public class BaseGraphBuilder
+	public class GraphBuilder
 	{
 
 		BaseGraph	graph;
@@ -18,26 +18,26 @@ namespace ProceduralWorlds.Core
 		readonly List< string > commandOrder = new List< string >{"NewNode", "Link", "LinkAnchor"};
 	
 		//private constructor so you can't instantiate the class
-		BaseGraphBuilder() {}
+		GraphBuilder() {}
 	
 		//call this methof to create an instance of this class
-		public static BaseGraphBuilder FromGraph(BaseGraph graph)
+		public static GraphBuilder FromGraph(BaseGraph graph)
 		{
-			BaseGraphBuilder builder = new BaseGraphBuilder();
+			GraphBuilder builder = new GraphBuilder();
 			builder.graph = graph;
 
 			return builder;
 		}
 
-		public static BaseGraphBuilder NewGraph< T >() where T : BaseGraph
+		public static GraphBuilder NewGraph< T >() where T : BaseGraph
 		{
 			if (typeof(T).IsAbstract)
 			{
-				Debug.LogError("[BaseGraphBuilder] Can't instatiate an abstract graph");
+				Debug.LogError("[GraphBuilder] Can't instatiate an abstract graph");
 				return null;
 			}
 
-			BaseGraphBuilder	builder = new BaseGraphBuilder();
+			GraphBuilder	builder = new GraphBuilder();
 
 			builder.graph = ScriptableObject.CreateInstance< T >();
 			builder.graph.Initialize();
@@ -52,64 +52,64 @@ namespace ProceduralWorlds.Core
 			return builder;
 		}
 
-		public BaseGraphBuilder NewNode(Type nodeType, string name, BaseGraphCLIAttributes attributes = null)
+		public GraphBuilder NewNode(Type nodeType, string name, BaseGraphCLIAttributes attributes = null)
 		{
 			if (!nodeType.IsSubclassOf(typeof(BaseNode)))
 			{
-				Debug.Log("[BaseGraphBuilder] unknown node type: '" + nodeType + "'");
+				Debug.Log("[GraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
 			}
 			commands.Add(BaseGraphCLI.GenerateNewNodeCommand(nodeType, name, attributes));
 			return this;
 		}
 
-		public BaseGraphBuilder NewNode< T >(string name, BaseGraphCLIAttributes attributes = null) where T : BaseNode
+		public GraphBuilder NewNode< T >(string name, BaseGraphCLIAttributes attributes = null) where T : BaseNode
 		{
 			commands.Add(BaseGraphCLI.GenerateNewNodeCommand(typeof(T), name, attributes));
 			return this;
 		}
 
-		public BaseGraphBuilder NewNode(Type nodeType, Vector2 position, string name, BaseGraphCLIAttributes attributes = null)
+		public GraphBuilder NewNode(Type nodeType, Vector2 position, string name, BaseGraphCLIAttributes attributes = null)
 		{
 			if (!nodeType.IsSubclassOf(typeof(BaseNode)))
 			{
-				Debug.Log("[BaseGraphBuilder] unknown node type: '" + nodeType + "'");
+				Debug.Log("[GraphBuilder] unknown node type: '" + nodeType + "'");
 				return this;
 			}
 			commands.Add(BaseGraphCLI.GenerateNewNodeCommand(nodeType, name, position, attributes));
 			return this;
 		}
 
-		public BaseGraphBuilder Link(string from, string to)
+		public GraphBuilder Link(string from, string to)
 		{
 			commands.Add(BaseGraphCLI.GenerateLinkCommand(from, to));
 			return this;
 		}
 
-		public BaseGraphBuilder Link(string fromNode, string fromAnchor, string toNode, string toAnchor)
+		public GraphBuilder Link(string fromNode, string fromAnchor, string toNode, string toAnchor)
 		{
 			commands.Add(BaseGraphCLI.GenerateLinkAnchorNameCommand(fromNode, fromAnchor, toNode, toAnchor));
 			return this;
 		}
 
-		public BaseGraphBuilder Link(string fromNode, int fromAnchorIndex, string toNode, int toAnchorIndex)
+		public GraphBuilder Link(string fromNode, int fromAnchorIndex, string toNode, int toAnchorIndex)
 		{
 			commands.Add(BaseGraphCLI.GenerateLinkAnchorCommand(fromNode, fromAnchorIndex, toNode, toAnchorIndex));
 			return this;
 		}
 
-		public BaseGraphBuilder Custom(Action< BaseGraph > callback)
+		public GraphBuilder Custom(Action< BaseGraph > callback)
 		{
 			callback(graph);
 			return this;
 		}
 
-		public BaseGraphBuilder CustomAfterExecute(Action< BaseGraph > callback)
+		public GraphBuilder CustomAfterExecute(Action< BaseGraph > callback)
 		{
 			postExecuteCallbacks.Add(callback);
 			return this;
 		}
-		public BaseGraphBuilder SortCommands()
+		public GraphBuilder SortCommands()
 		{
 			//sort command to put CreateNodes in first
 			commands = commands.OrderBy((cmd) => {
@@ -122,7 +122,7 @@ namespace ProceduralWorlds.Core
 			return this;
 		}
 
-		public BaseGraphBuilder Execute(bool clearCommandsOnceExecuted = false)
+		public GraphBuilder Execute(bool clearCommandsOnceExecuted = false)
 		{
 			SortCommands();
 
@@ -167,7 +167,7 @@ namespace ProceduralWorlds.Core
 			return dstPath;
 		}
 
-		public BaseGraphBuilder Import(string fileName, bool assetPath = true)
+		public GraphBuilder Import(string fileName, bool assetPath = true)
 		{
 			string filePath = fileName;
 
@@ -187,7 +187,7 @@ namespace ProceduralWorlds.Core
 			return this;
 		}
 
-		public BaseGraphBuilder ImportCommands(params string[] cmds)
+		public GraphBuilder ImportCommands(params string[] cmds)
 		{
 			foreach (var cmd in cmds)
 			{

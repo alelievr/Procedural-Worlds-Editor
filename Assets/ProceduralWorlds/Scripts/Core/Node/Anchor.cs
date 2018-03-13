@@ -128,7 +128,7 @@ namespace ProceduralWorlds.Core
 
 			for (int i = 0; i < count; i++)
 				nodeRef.graphRef.RemoveLink(links[0]);
-				
+			
 			//update anchorFieldRef (for multiple anchors)
 			anchorFieldRef.UpdateAnchors();
 		}

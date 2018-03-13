@@ -17,8 +17,8 @@ namespace ProceduralWorlds.Editor
 		private static Func<Rect> topmostRectDelegate;
 
 		// Delegate accessors
-		public static Rect getTopRect { get { return (Rect)GetTopRectDelegate.Invoke (); } }
-		public static Rect getTopRectScreenSpace { get { return (Rect)topmostRectDelegate.Invoke (); } }
+		public static Rect getTopRect { get { return GetTopRectDelegate.Invoke (); } }
+		public static Rect getTopRectScreenSpace { get { return topmostRectDelegate.Invoke (); } }
 
 		// Rect stack for manipulating groups
 		public static List<Rect> currentRectStack { get; private set; }

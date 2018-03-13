@@ -37,19 +37,10 @@ namespace ProceduralWorlds.Editor
 
 			LoadPresetList(presets);
 		}
-	
-		void ImportGraphTextAsset(string path)
-		{
-			var file = Resources.Load< TextAsset >(path);
-	
-			BaseGraphBuilder.FromGraph(biomeGraph)
-				.ImportCommands(file.text.Split('\n'))
-				.Execute();
-		}
 
 		public override void OnBuildPressed()
 		{
-			BaseGraphBuilder builder = BaseGraphBuilder.FromGraph(biomeGraph);
+			GraphBuilder builder = GraphBuilder.FromGraph(biomeGraph);
 
 			foreach (var graphPartFile in graphPartFiles)
 			{

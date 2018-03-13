@@ -12,8 +12,6 @@ namespace ProceduralWorlds.Editor
 
 		readonly Mesh				previewMesh;
 
-		bool						showSceneHiddenObjects;
-
 		public GUIMaterialPreview(PrimitiveType previewPrimitive = PrimitiveType.Sphere)
 		{
 			objectPreview = new GUIMeshPreview();

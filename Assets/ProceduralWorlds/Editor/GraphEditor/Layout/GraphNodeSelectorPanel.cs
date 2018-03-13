@@ -27,12 +27,8 @@ namespace ProceduralWorlds.Editor
 		
 		GUIStyle	panelBackgroundStyle;
 
-
-		//current event
-		Event		e { get { return Event.current; } }
 		//current window rect:
 		Rect		windowRect;
-
 
 		public override void OnLoadStyle()
 		{

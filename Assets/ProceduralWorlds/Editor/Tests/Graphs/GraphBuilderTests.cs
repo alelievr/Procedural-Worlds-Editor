@@ -10,13 +10,13 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphBuilderTests
+	public class GraphBuilderTests
 	{
 	
 		[Test]
-		public static void BaseGraphBuilderAddNode()
+		public static void GraphBuilderAddNode()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeBiome >("biome")
 				.Execute()
 				.GetGraph();
@@ -25,9 +25,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 		
 		[Test]
-		public static void BaseGraphBuilderLinkSimple()
+		public static void GraphBuilderLinkSimple()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodePerlinNoise2D >("perlin")
 				.NewNode< NodeCircleNoiseMask >("mask")
 				.Link("perlin", "mask")
@@ -45,9 +45,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void BaseGraphBuilderBiomeGraph()
+		public static void GraphBuilderBiomeGraph()
 		{
-			var graph = BaseGraphBuilder.NewGraph< BiomeGraph >()
+			var graph = GraphBuilder.NewGraph< BiomeGraph >()
 				.NewNode< NodeBiomeSurfaceColor >("c")
 				.NewNode< NodeBiomeSurfaceSwitch >("s")
 				.NewNode< NodeBiomeSurface >("surf")
@@ -75,9 +75,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 		
 		[Test]
-		public static void BaseGraphBuilderLinkArray()
+		public static void GraphBuilderLinkArray()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeAdd >("add")
 				.NewNode< NodeSlider >("s1")
 				.NewNode< NodeSlider >("s2")
@@ -126,7 +126,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		//                +-----+
 
 		[Test]
-		public static void BaseGraphBuilderWorldGraph()
+		public static void GraphBuilderWorldGraph()
 		{
 			var graph = TestUtils.GenerateTestWorldGraph();
 
@@ -222,7 +222,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 
 		[Test]
-		public static void BaseGraphBuilderBiomeLinkArray()
+		public static void GraphBuilderBiomeLinkArray()
 		{
 			var graph = TestUtils.GenerateTestBiomeGraph();
 			

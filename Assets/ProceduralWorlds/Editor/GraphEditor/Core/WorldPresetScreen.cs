@@ -108,7 +108,7 @@ namespace ProceduralWorlds.Editor
 	
 		public override void OnBuildPressed()
 		{
-			BaseGraphBuilder builder = BaseGraphBuilder.FromGraph(worldGraph);
+			GraphBuilder builder = GraphBuilder.FromGraph(worldGraph);
 			List< BiomeGraph > biomes = null;
 
 			foreach (var graphPartFile in graphPartFiles)

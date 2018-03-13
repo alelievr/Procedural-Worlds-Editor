@@ -14,20 +14,20 @@ namespace ProceduralWorlds.Tests
 	
 		//test main graph
 		// 	              +-----+
-		//            +---> Add1+---+
+		//            +---> add1+---+
 		// +------+   |   +-----+   |   +-----+   +------+
-		// |Slider+---+             +---> Add4+--->Debug1|
+		// |slider+---+             +---> add4+--->debug1|
 		// +------+   |   +-----+       +-----+   +------+
-		//            +---> Add2+---+
+		//            +---> add2+---+
 		// +------+   |   +-----+   |   +------+
-		// |Float +---+             +--->Debug2|
+		// |constant+-+             +--->debug2|
 		// +------+   |   +-----+       +------+
-		//            +---> Add3+    
+		//            +---> add3+    
 		//                +-----+
 	
 		public static WorldGraph	GenerateTestWorldGraph()
 		{
-			return BaseGraphBuilder.NewGraph< WorldGraph >()
+			return GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode(typeof(NodeSlider), "slider")
 				.NewNode(typeof(NodeConstant), "constant")
 				.NewNode(typeof(NodeAdd), "add1")
@@ -63,7 +63,7 @@ namespace ProceduralWorlds.Tests
 	
 		public static BiomeGraph	GenerateTestBiomeGraph()
 		{
-			return BaseGraphBuilder.NewGraph< BiomeGraph >()
+			return GraphBuilder.NewGraph< BiomeGraph >()
 				.NewNode< NodeBiomeSurfaceColor >("c1")
 				.NewNode< NodeBiomeSurfaceColor >("c2")
 				.NewNode< NodeBiomeSurfaceColor >("c3")
@@ -90,7 +90,7 @@ namespace ProceduralWorlds.Tests
 
 		public static WorldGraph	GenerateTestWorldGraphWhitespaces()
 		{
-			return BaseGraphBuilder.NewGraph< WorldGraph >()
+			return GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodePerlinNoise2D >("perlin noise")
 				.NewNode< NodeCurve >("noise remap")
 				.NewNode< NodeDebugInfo >("view noise")
@@ -110,7 +110,7 @@ namespace ProceduralWorlds.Tests
 
 		public static WorldGraph	GenerateTestWorldGraphBiomeSwitch()
 		{
-			return BaseGraphBuilder.NewGraph< WorldGraph >()
+			return GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodePerlinNoise2D >("perlin")
 				.NewNode< NodeWaterLevel >("wlevel")
 				.NewNode< NodeBiomeSwitch >("bswitch")

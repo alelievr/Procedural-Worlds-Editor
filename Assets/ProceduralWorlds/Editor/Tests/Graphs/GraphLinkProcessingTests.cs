@@ -16,7 +16,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		public static void BaseGraphLinkProcessSimple()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("slider")
 				.NewNode< NodeDebugInfo >("debug")
 				.Link("slider", "debug")
@@ -72,7 +72,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		public static void BaseGraphLinkArrayToArray()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var input = graph.FindNodeByType< NodeGraphInput >();
 			var output = graph.FindNodeByType< NodeGraphOutput >();
@@ -102,7 +102,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		public static void BaseGraphLinkArrayToArrayProcess()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var input = graph.FindNodeByType< NodeGraphInput >();
 			var output = graph.FindNodeByType< NodeGraphOutput >();

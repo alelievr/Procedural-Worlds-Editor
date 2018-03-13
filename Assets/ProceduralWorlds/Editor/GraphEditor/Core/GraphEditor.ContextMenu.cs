@@ -38,8 +38,6 @@ public partial class BaseGraphEditor
         {
 			Profiler.BeginSample("[PW] render context menu");
 
-            Vector2 mousePos = e.mousePosition;
-
 			// Now create the menu, add items and show it
 			GenericMenu menu = new GenericMenu();
 			foreach (var nodeCat in NodeTypeProvider.GetAllowedNodesForGraph(graph.graphType))

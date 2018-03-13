@@ -13,9 +13,9 @@ namespace ProceduralWorlds.Tests.Graphs
 	{
 	
 		[Test]
-		public static void BaseGraphCreateNewNode()
+		public static void BaseGraphCreateNewNodeTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var add = graph.CreateNewNode(typeof(NodeAdd), new Vector2(42, -21), "add !");
 
@@ -25,9 +25,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 	
 		[Test]
-		public static void BaseGraphCreateNewNodeEventDisabled()
+		public static void BaseGraphCreateNewNodeEventDisabledTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var add = graph.CreateNewNode(typeof(NodeAdd), new Vector2(42, -21), "add !", false);
 
@@ -37,9 +37,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void BaseGraphCreateLink()
+		public static void BaseGraphCreateLinkTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var slider = graph.CreateNewNode(typeof(NodeSlider), Vector2.zero);
 			var add = graph.CreateNewNode(typeof(NodeAdd), Vector2.zero);
@@ -60,9 +60,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void BaseGraphCreateLinkEventDisabled()
+		public static void BaseGraphCreateLinkEventDisabledTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var slider = graph.CreateNewNode(typeof(NodeSlider), Vector2.zero);
 			var add = graph.CreateNewNode(typeof(NodeAdd), Vector2.zero);
@@ -83,9 +83,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void BaseGraphSafeCreateLinkDuplicate()
+		public static void BaseGraphSafeCreateLinkDuplicateTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("slider")
 				.NewNode< NodeDebugInfo >("debug")
 				.Execute()
@@ -103,13 +103,13 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 		
 		[Test]
-		public static void FindNodeByName()
+		public static void FindNodeByNameTest()
 		{
 			const string addNodeName = "add";
 			const string colorNodeName = "c_o_l_o_r";
 			const string textureNodeName = "   this is a texture ! ";
 
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode(typeof(NodeAdd), addNodeName)
 				.NewNode(typeof(NodeColor), colorNodeName)
 				.NewNode(typeof(NodeTexture2D), textureNodeName)
@@ -122,17 +122,17 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void FindNodeByNameNotFound()
+		public static void FindNodeByNameNotFoundTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().Execute().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().Execute().GetGraph();
 
 			Assert.That(graph.FindNodeByName("inhexistant node") == null);
 		}
 
 		[Test]
-		public static void RemoveNode()
+		public static void RemoveNodeTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("slider")
 				.Execute()
 				.GetGraph();
@@ -146,9 +146,9 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void RemoveNodeWithoutEvents()
+		public static void RemoveNodeWithoutEventsTest()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("slider")
 				.Execute()
 				.GetGraph();
@@ -175,7 +175,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		//                +-----+
 
 		[Test]
-		public static void RemoveNodeLinks()
+		public static void RemoveNodeLinksTest()
 		{
 			var graph = TestUtils.GenerateTestWorldGraph();
 
@@ -187,7 +187,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 		
 		[Test]
-		public static void RemoveNodeLinksWithoutEvents()
+		public static void RemoveNodeLinksWithoutEventsTest()
 		{
 			var graph = TestUtils.GenerateTestWorldGraph();
 
@@ -236,7 +236,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 
 		[Test]
-		public static void GetNodeChildsRecursive()
+		public static void GetNodeChildsRecursiveTest()
 		{
 			WorldGraph worldGraph = TestUtils.GenerateTestWorldGraphBiomeSwitch();
 
@@ -258,7 +258,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void CloneWorldGraph()
+		public static void CloneWorldGraphTest()
 		{
 			WorldGraph worldGraph = TestUtils.GenerateTestWorldGraph();
 			WorldGraph clonedGraph = worldGraph.Clone() as WorldGraph;
@@ -293,7 +293,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 
 		[Test]
-		public static void CloneBiomeGraph()
+		public static void CloneBiomeGraphTest()
 		{
 			BiomeGraph biomeGraph = TestUtils.GenerateTestBiomeGraph();
 			BiomeGraph clonedGraph = biomeGraph.Clone() as BiomeGraph;

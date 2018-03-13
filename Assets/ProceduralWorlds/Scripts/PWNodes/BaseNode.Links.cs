@@ -63,7 +63,9 @@ namespace ProceduralWorlds
 				while (i < anchorField.anchors.Count)
 				{
 					if (anchorField.anchors[i].linkCount != 0)
+					{
 						anchorField.anchors[i].RemoveAllLinks();
+					}
 					i++;
 				}
 			}

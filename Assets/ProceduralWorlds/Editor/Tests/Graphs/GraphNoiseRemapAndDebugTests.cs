@@ -14,7 +14,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		public static void BaseGraphNoiseRemapAndDebugNodes()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode(typeof(NodePerlinNoise2D), "perlin")
 				.NewNode(typeof(NodeCurve), "curve")
 				.NewNode(typeof(NodeDebugInfo), "debug")

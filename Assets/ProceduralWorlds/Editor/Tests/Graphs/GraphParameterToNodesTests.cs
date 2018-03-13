@@ -13,7 +13,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 		static WorldGraph CreateTestGraph(out NodePerlinNoise2D perlinNode, out NodeDebugInfo debugNode)
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode(typeof(NodePerlinNoise2D), "perlin")
 				.NewNode(typeof(NodeDebugInfo), "debug")
 				.Link("perlin", "debug")

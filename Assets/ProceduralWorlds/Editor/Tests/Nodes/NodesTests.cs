@@ -17,7 +17,7 @@ namespace ProceduralWorlds.Tests.Nodes
 		{
 			var allWorldNodeInfos = NodeTypeProvider.GetAllowedNodesForGraph(BaseGraphType.World);
 
-			var builder = BaseGraphBuilder.NewGraph< WorldGraph >();
+			var builder = GraphBuilder.NewGraph< WorldGraph >();
 
 			foreach (var mainTypes in allWorldNodeInfos)
 				foreach (var nodeInfo in mainTypes.typeInfos)
@@ -33,7 +33,7 @@ namespace ProceduralWorlds.Tests.Nodes
 				UnityEditor.Editor.DestroyImmediate(editor);
 			}
 			
-			builder = BaseGraphBuilder.NewGraph< WorldGraph >();
+			builder = GraphBuilder.NewGraph< WorldGraph >();
 
 			foreach (var type in NodeTypeProvider.GetExlusiveNodeTypesForGraph(BaseGraphType.Biome))
 				builder.NewNode(type, type.ToString());

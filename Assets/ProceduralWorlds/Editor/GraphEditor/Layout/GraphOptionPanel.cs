@@ -37,7 +37,6 @@ namespace ProceduralWorlds.Editor
 		
 		public override void DrawDefault(Rect graphRect)
 		{
-			Event	e = Event.current;
 			bool 	saveGraph = false;
 
 			Profiler.BeginSample("[PW] Rendering option bar");

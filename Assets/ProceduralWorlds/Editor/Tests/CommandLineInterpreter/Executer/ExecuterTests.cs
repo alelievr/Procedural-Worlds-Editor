@@ -17,7 +17,7 @@ namespace ProceduralWorlds.Tests.CLI
 		{
 			string	perlinNodeName = "perlin";
 			string	debugNodeName = "debug";
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodePerlinNoise2D >(perlinNodeName)
 				.NewNode< NodeDebugInfo >(debugNodeName)
 				.Link(perlinNodeName, debugNodeName)
@@ -44,7 +44,7 @@ namespace ProceduralWorlds.Tests.CLI
 				{"persistence", 2.4f}, {"octaves", 6}
 			};
 
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodePerlinNoise2D >(perlinNodeName, perlinAttributes)
 				.Execute()
 				.GetGraph();
@@ -58,7 +58,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void EmptyGraph()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().Execute().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().Execute().GetGraph();
 
 			Assert.That(graph != null, "Null graph !");
 			Assert.That(graph.inputNode != null, "Null graph input node while creating empty graph");
@@ -68,7 +68,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void SliderNodeAnchorLinkedToAddNodeExecution()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var graph = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("s1")
 				.NewNode< NodeSlider >("s2")
 				.NewNode< NodeSlider >("s3")

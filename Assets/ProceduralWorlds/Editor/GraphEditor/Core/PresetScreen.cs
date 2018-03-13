@@ -57,8 +57,6 @@ namespace ProceduralWorlds.Editor
 		
 		//scroll position on the preset screen
 		Vector2							presetScrollPos;
-		//id for the object picker
-		int								currentPickerWindow;
 		
 		int								columns;
 	

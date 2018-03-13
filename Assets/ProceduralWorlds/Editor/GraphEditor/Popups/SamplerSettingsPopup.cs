@@ -12,8 +12,8 @@ namespace ProceduralWorlds.Editor
 	public class SamplerSettingsPopup : Popup
 	{
 		Gradient		gradient;
-		FilterMode	filterMode;
-		Texture		texture;
+		FilterMode		filterMode;
+		Texture			texture;
 		bool			debug;
 		public static bool	update { get; private set; }
 		

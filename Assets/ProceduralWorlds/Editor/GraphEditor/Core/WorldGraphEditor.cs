@@ -85,7 +85,7 @@ public partial class WorldGraphEditor : BaseGraphEditor
 		//quit if the graph have been destroyed / does not exists
 		if (graph == null)
 			return ;
-
+		
 		if (!worldGraph.presetChoosed)
 		{
 			if (presetScreen == null)

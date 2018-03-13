@@ -44,7 +44,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		static public void BaseGraphImport()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var exampleGraph = TestUtils.GenerateTestWorldGraph();
 
@@ -66,7 +66,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		static public void BaseGraphImportBiome()
 		{
-			var graph = BaseGraphBuilder.NewGraph< BiomeGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< BiomeGraph >().GetGraph();
 
 			var exampleGraph = TestUtils.GenerateTestBiomeGraph();
 
@@ -80,7 +80,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		static public void BaseGraphImportWorldWhiteSpaces()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var exampleGraph = TestUtils.GenerateTestWorldGraphWhitespaces();
 
@@ -94,7 +94,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		[Test]
 		static public void BaseGraphExportImportDuplicateNodeNames()
 		{
-			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			var s1 = graph.CreateNewNode< NodeSlider >(Vector2.zero, "slider");
 			var s2 = graph.CreateNewNode< NodeSlider >(Vector2.zero, "slider");
@@ -108,7 +108,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 			graph.Export(tmpFilePath);
 
-			var importedGraph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
+			var importedGraph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
 			importedGraph.Import(tmpFilePath);
 

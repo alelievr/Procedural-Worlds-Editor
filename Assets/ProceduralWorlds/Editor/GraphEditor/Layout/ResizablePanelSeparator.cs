@@ -6,7 +6,6 @@ namespace ProceduralWorlds.Editor
 {
 	public class ResizablePanelSeparator : LayoutSeparator
 	{
-		Rect				availableRect;
 		int					internHandlerPosition;
 		readonly bool		vertical;
 

@@ -557,17 +557,17 @@ namespace ProceduralWorlds.Core
 			if (removeNode == inputNode || removeNode == outputNode)
 				return false;
 			
-			int id = removeNode.id;
-			nodes.Remove(removeNode);
-			
-			bool success = nodesDictionary.Remove(id);
-			
 			if (OnNodeRemoved != null && raiseEvents)
 			{
 				try {
 					OnNodeRemoved(removeNode);
 				} catch {}
 			}
+			
+			int id = removeNode.id;
+			nodes.Remove(removeNode);
+			
+			bool success = nodesDictionary.Remove(id);
 
 			removeNode.RemoveSelf();
 

@@ -15,7 +15,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void PerlinNoiseNodeToDebugNodeParsedCommands()
 		{
-			var builder = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var builder = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode(typeof(NodePerlinNoise2D), "perlin")
 				.NewNode(typeof(NodeDebugInfo), "debug")
 				.Link("perlin", "debug");
@@ -43,7 +43,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void SliderNodeToAddNodeWithAnchorLink()
 		{
-			var builder = BaseGraphBuilder.NewGraph< WorldGraph >()
+			var builder = GraphBuilder.NewGraph< WorldGraph >()
 				.NewNode< NodeSlider >("s1")
 				.NewNode< NodeSlider >("s2")
 				.NewNode< NodeSlider >("s3")

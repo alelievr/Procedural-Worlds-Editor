@@ -32,7 +32,6 @@ namespace ProceduralWorlds.Editor
 
 		public void DrawGraphSettings(Rect currentRect)
 		{
-			Event	e = Event.current;
 			EditorGUILayout.Space();
 
 			GUI.SetNextControlName("PWName");

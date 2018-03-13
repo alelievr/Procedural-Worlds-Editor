@@ -24,7 +24,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			{
 				string[] commands = worldGraphPreset.text.Split('\n');
 
-				var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+				var graph = GraphBuilder.NewGraph< WorldGraph >()
 					.ImportCommands(commands)
 					.Execute()
 					.GetGraph();
@@ -53,7 +53,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			{
 				string[] commands = biomeGraphPreset.text.Split('\n');
 
-				var graph = BaseGraphBuilder.NewGraph< BiomeGraph >()
+				var graph = GraphBuilder.NewGraph< BiomeGraph >()
 					.ImportCommands(commands)
 					.Custom((g) => {
 						(g.inputNode as NodeBiomeGraphInput).previewGraph = previewgraph;
