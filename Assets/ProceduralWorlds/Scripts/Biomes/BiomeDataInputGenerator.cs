@@ -48,7 +48,7 @@ namespace ProceduralWorlds.Biomator
 
 			perlin.ComputeSampler2D(terrainHeight);
 
-			terrainHeight = PWNoiseFunctions.Map(terrainHeight, 0, maxTerrainHeight);
+			terrainHeight = NoiseFunctions.Map(terrainHeight, 0, maxTerrainHeight);
 
 			biomeData.waterLevel = waterLevel;
 			biomeData.isWaterless = isWaterless;

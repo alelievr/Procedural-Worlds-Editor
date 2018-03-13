@@ -127,10 +127,10 @@ public partial class BaseGraphEditor
 		{
 			DrawSelectedBezier(startPos, endPos, startTan, endTan, link.colorSchemeName, 4, link.highlight);
 
-			if (link != null && link.highlight == LinkHighlightMode.DeleteAndReset)
+			if (link.highlight == LinkHighlightMode.DeleteAndReset)
 				link.highlight = LinkHighlightMode.None;
 			
-			if (link != null && !link.selected && link.highlight == LinkHighlightMode.Selected)
+			if (!link.selected && link.highlight == LinkHighlightMode.Selected)
 				link.highlight = LinkHighlightMode.None;
 		}
 		else if (e.type == EventType.Layout)

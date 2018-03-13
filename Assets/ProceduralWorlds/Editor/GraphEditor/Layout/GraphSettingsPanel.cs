@@ -10,7 +10,7 @@ using ProceduralWorlds;
 namespace ProceduralWorlds.Editor
 {
 	[System.Serializable]
-	public class BaseGraphSettingsPanel : PWLayoutPanel
+	public class BaseGraphSettingsPanel : LayoutPanel
 	{
 		//Settings bar datas:
 		Vector2					scrollbarPosition;

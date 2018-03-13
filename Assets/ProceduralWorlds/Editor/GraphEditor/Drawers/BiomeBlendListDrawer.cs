@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BiomeBlendListDrawer : PWDrawer
+	public class BiomeBlendListDrawer : Drawer
 	{
 		BiomeBlendList	bbList;
 

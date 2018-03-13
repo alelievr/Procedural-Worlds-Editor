@@ -8,7 +8,7 @@ using System;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BaseGraphOptionPanel : PWLayoutPanel
+	public class BaseGraphOptionPanel : LayoutPanel
 	{
 		//option bar styles:
 		GUIStyle			navBarBackgroundStyle;

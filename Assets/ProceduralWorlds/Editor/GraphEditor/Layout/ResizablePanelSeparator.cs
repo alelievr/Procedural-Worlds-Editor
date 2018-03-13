@@ -4,7 +4,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public class ResizablePanelSeparator : PWLayoutSeparator
+	public class ResizablePanelSeparator : LayoutSeparator
 	{
 		Rect				availableRect;
 		int					internHandlerPosition;
@@ -17,9 +17,9 @@ namespace ProceduralWorlds.Editor
 
 		public bool			draggingHandler { get; private set; }
 
-		public ResizablePanelSeparator(PWLayoutOrientation orientation)
+		public ResizablePanelSeparator(LayoutOrientation orientation)
 		{
-			this.vertical = orientation == PWLayoutOrientation.Vertical;
+			this.vertical = orientation == LayoutOrientation.Vertical;
 		}
 	
 		public override Rect Begin()
@@ -88,9 +88,9 @@ namespace ProceduralWorlds.Editor
 				draggingHandler = false;
 		}
 
-		public override PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting ls)
+		public override LayoutSetting UpdateLayoutSetting(LayoutSetting ls)
 		{
-			PWLayoutSetting ret;
+			LayoutSetting ret;
 
 			ret = base.UpdateLayoutSetting(ls);
 

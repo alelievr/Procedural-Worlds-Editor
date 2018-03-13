@@ -11,7 +11,7 @@ namespace ProceduralWorlds.Editor
     public static class GraphFactory
     {
     
-        //Main graph settings:
+        //World graph settings:
         public readonly static string	WorldGraphDefaultName = "New ProceduralWorld";
     
         //Biome graph settings:

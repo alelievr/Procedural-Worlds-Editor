@@ -8,14 +8,14 @@ using System.IO;
 
 namespace ProceduralWorlds.Editor
 {
-	public class PWMainPresetScreen : PresetScreen
+	public class WorldPresetScreen : PresetScreen
 	{
-		WorldGraph		worldGraph;
+		readonly WorldGraph		worldGraph;
 
-		readonly string	graphFilePrefix = "GraphPresets/Main/Parts/";
+		readonly string	graphFilePrefix = "GraphPresets/World/Parts/";
 		readonly string biomeAssetPrefix = "GraphPresets/Biome/Full/";
 	
-		public PWMainPresetScreen(WorldGraph worldGraph)
+		public WorldPresetScreen(WorldGraph worldGraph)
 		{
 			this.worldGraph = worldGraph;
 			
@@ -79,13 +79,6 @@ namespace ProceduralWorlds.Editor
 			LoadPresetList(outputTypePresets);
 		}
 	
-		void ImportGraphTextAsset(string path, BaseGraphBuilder builder)
-		{
-			var file = Resources.Load< TextAsset >(path);
-	
-			builder.ImportCommands(file.text.Split('\n'));
-		}
-
 		List< BiomeGraph > CopyBiomesFromPreset(string biomeFolder)
 		{
 			List< BiomeGraph > biomes = new List< BiomeGraph >();

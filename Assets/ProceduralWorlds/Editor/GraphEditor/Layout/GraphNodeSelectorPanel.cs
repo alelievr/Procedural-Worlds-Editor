@@ -10,7 +10,7 @@ using System;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BaseGraphNodeSelectorPanel : PWLayoutPanel
+	public class BaseGraphNodeSelectorPanel : LayoutPanel
 	{
 		//node selector datas
 		Vector2 	selectorScrollPosition;

@@ -7,7 +7,7 @@ using ProceduralWorlds.Biomator;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BiomeDataDrawer : PWDrawer
+	public class BiomeDataDrawer : Drawer
 	{
 		bool[]		samplerFoldouts;
 

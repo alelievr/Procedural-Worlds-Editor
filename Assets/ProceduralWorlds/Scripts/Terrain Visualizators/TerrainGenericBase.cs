@@ -13,8 +13,10 @@ namespace ProceduralWorlds
 		// PRIORITY_CIRCLE,
 	}
 
-	public abstract class PWTerrainGenericBase : MonoBehaviour
+	public abstract class TerrainGenericBase : MonoBehaviour
 	{
+		public static readonly string	realModeRootObjectName = "PWWorldRoot";
+
 		public Vector3					position;
 		public int						renderDistance;
 		public PWChunkLoadPatternMode	loadPatternMode;
@@ -53,12 +55,12 @@ namespace ProceduralWorlds
 			graph.UpdateComputeOrder();
 			if (!graph.IsRealMode())
 				terrainRoot = GameObject.Find("PWPreviewTerrain");
-			if (terrainRoot == null)
+			else
 			{
-				terrainRoot = GameObject.Find(PWConstants.realModeRootObjectName);
+				terrainRoot = GameObject.Find(realModeRootObjectName);
 				if (terrainRoot == null)
 				{
-					terrainRoot = new GameObject(PWConstants.realModeRootObjectName);
+					terrainRoot = new GameObject(realModeRootObjectName);
 					terrainRoot.transform.position = Vector3.zero;
 				}
 			}
@@ -113,7 +115,7 @@ namespace ProceduralWorlds
 					var data = RequestChunkGeneric(pos, graph.seed);
 					var userChunkData = OnChunkCreateGeneric(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
-					/*PWWorker.EnqueueTask(
+					/*Worker.EnqueueTask(
 						() => RequestChunk(pos, graph.seed),
 						(chunkData) => {
 							T data = chunkData as T;
@@ -134,7 +136,7 @@ namespace ProceduralWorlds
 		public void	DestroyAllChunks()
 		{
 			Debug.Log("Destroying all chunks");
-			PWWorker.StopAllWorkers(WorkerGenerationId);
+			Worker.StopAllWorkers(WorkerGenerationId);
 			if (terrainStorage == null)
 				return ;
 			terrainStorage.Foreach((pos, terrainData, userData) => {

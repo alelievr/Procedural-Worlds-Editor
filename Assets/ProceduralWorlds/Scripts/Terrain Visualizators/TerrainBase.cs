@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds
 {
 	[System.Serializable]
-	public abstract class PWTerrainBase< T > : PWTerrainGenericBase  where T : ChunkData
+	public abstract class TerrainBase< T > : TerrainGenericBase  where T : ChunkData
 	{
 
 		//Generic to specif bindings:
@@ -31,7 +31,7 @@ namespace ProceduralWorlds
 
 			if (finalTerrain == null)
 			{
-				Debug.LogWarning("[PWTerrainBase] Graph output does not contains T type");
+				Debug.LogWarning("[TerrainBase] Graph output does not contains T type");
 				return null;
 			}
 			

@@ -9,26 +9,26 @@ using Random = UnityEngine.Random;
 using System.Linq;
 namespace ProceduralWorlds.Editor
 {
-	public class PWLayout
+	public class Layout
 	{
-		static Event					e { get { return Event.current; } }
+		static Event				e { get { return Event.current; } }
 
-		BaseGraphEditor					graphEditor;
+		readonly BaseGraphEditor	graphEditor;
 
-		BaseGraph							oldGraph;
+		BaseGraph					oldGraph;
 
-		Stack< PWLayoutOrientation >	currentOrientation = new Stack< PWLayoutOrientation >();
+		Stack< LayoutOrientation >	currentOrientation = new Stack< LayoutOrientation >();
 
-		List< PWLayoutSeparator >		loadedSeparators = new List< PWLayoutSeparator >();
-		List< PWLayoutPanel >			loadedPanels = new List< PWLayoutPanel >();
+		List< LayoutSeparator >		loadedSeparators = new List< LayoutSeparator >();
+		List< LayoutPanel >			loadedPanels = new List< LayoutPanel >();
 
-		List< Action >					layoutActions = new List< Action >();
-		List< Rect >					layoutRects = new List< Rect >();
+		List< Action >				layoutActions = new List< Action >();
+		List< Rect >				layoutRects = new List< Rect >();
 
-		List< PWLayoutSetting >			savedDefaultSettings = new List< PWLayoutSetting >();
+		List< LayoutSetting >		savedDefaultSettings = new List< LayoutSetting >();
 
-		//Private constructor so the only way to create an instance of this class is PWLayoutFactory
-		public PWLayout(BaseGraphEditor graphEditor)
+		//Private constructor so the only way to create an instance of this class is LayoutFactory
+		public Layout(BaseGraphEditor graphEditor)
 		{
 			this.graphEditor = graphEditor;
 		}
@@ -47,7 +47,7 @@ namespace ProceduralWorlds.Editor
 
 		public void BeginHorizontal()
 		{
-			currentOrientation.Push(PWLayoutOrientation.Horizontal);
+			currentOrientation.Push(LayoutOrientation.Horizontal);
 			layoutActions.Add(() => EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true)));
 		}
 		
@@ -59,7 +59,7 @@ namespace ProceduralWorlds.Editor
 
 		public void BeginVertical()
 		{
-			currentOrientation.Push(PWLayoutOrientation.Vertical);
+			currentOrientation.Push(LayoutOrientation.Vertical);
 			layoutActions.Add(() => EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true)));
 		}
 		
@@ -69,7 +69,7 @@ namespace ProceduralWorlds.Editor
 			currentOrientation.Pop();
 		}
 
-		void AddPanel(PWLayoutSeparator sep, PWLayoutPanel panel)
+		void AddPanel(LayoutSeparator sep, LayoutPanel panel)
 		{
 			layoutActions.Add(() => {
 				Rect r = sep.Begin();
@@ -82,7 +82,7 @@ namespace ProceduralWorlds.Editor
 			loadedPanels.Add(panel);
 		}
 
-		public void ResizablePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
+		public void ResizablePanel(LayoutSetting defaultSetting, LayoutPanel panel)
 		{
 			var sep = new ResizablePanelSeparator(currentOrientation.Peek());
 			sep.UpdateLayoutSetting(defaultSetting);
@@ -91,21 +91,21 @@ namespace ProceduralWorlds.Editor
 			savedDefaultSettings.Add(defaultSetting.Clone(null));
 		}
 
-		public void AutoSizePanel(PWLayoutSetting defaultSetting, PWLayoutPanel panel)
+		public void AutoSizePanel(LayoutSetting defaultSetting, LayoutPanel panel)
 		{
 			var sep = new StaticPanelSeparator(currentOrientation.Peek());
 			sep.UpdateLayoutSetting(defaultSetting);
 			AddPanel(sep, panel);
 		}
 
-		public void UpdateLayoutSettings(PWLayoutSettings layoutSettings)
+		public void UpdateLayoutSettings(LayoutSettings layoutSettings)
 		{
 			int		index = 0;
 
 			foreach (var sep in loadedSeparators)
 			{
 				if (layoutSettings.settings.Count <= index)
-					layoutSettings.settings.Add(new PWLayoutSetting());
+					layoutSettings.settings.Add(new LayoutSetting());
 
 				var layoutSetting = layoutSettings.settings[index];
 				var newLayout = sep.UpdateLayoutSetting(layoutSetting);
@@ -116,7 +116,7 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
-		public T GetPanel< T >() where T : PWLayoutPanel
+		public T GetPanel< T >() where T : LayoutPanel
 		{
 			return loadedPanels.FirstOrDefault(p => p is T) as T;
 		}

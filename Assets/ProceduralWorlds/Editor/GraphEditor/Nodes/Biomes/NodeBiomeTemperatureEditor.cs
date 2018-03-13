@@ -13,7 +13,7 @@ namespace ProceduralWorlds.Editor
 	{
 		public NodeBiomeTemperature node;
 
-		string		graphReload = "NodeBiomeTemperature";
+		readonly string	graphReloadKey = "NodeBiomeTemperature";
 		
 		Gradient	temperatureGradient;
 
@@ -32,7 +32,7 @@ namespace ProceduralWorlds.Editor
 				new KeyValuePair< float, Color >(1f, Color.red)
 			);
 			
-			delayedChanges.BindCallback(graphReload, (unused) => {
+			delayedChanges.BindCallback(graphReloadKey, (unused) => {
 				NotifyReload();
 			});
 		}
@@ -68,7 +68,7 @@ namespace ProceduralWorlds.Editor
 			{
 				node.UpdateTemperatureMap();
 				PWGUI.SetUpdateForField(PWGUIFieldType.Sampler2DPreview, 0, true);
-				delayedChanges.UpdateValue(graphReload);
+				delayedChanges.UpdateValue(graphReloadKey);
 			}
 			
 			if (node.localTemperatureMap != null)

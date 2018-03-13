@@ -7,20 +7,20 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public static class PWLayoutFactory
+	public static class LayoutFactory
 	{
-		static T CreateLayoutPanel< T >(BaseGraphEditor graphEditor) where T : PWLayoutPanel, new()
+		static T CreateLayoutPanel< T >(BaseGraphEditor graphEditor) where T : LayoutPanel, new()
 		{
-			PWLayoutPanel panel = new T() as PWLayoutPanel;
+			LayoutPanel panel = new T() as LayoutPanel;
 
 			panel.Initialize(graphEditor);
 			
 			return panel as T;
 		}
 
-		public static PWLayout Create2ResizablePanelLayout(BaseGraphEditor graphEditor)
+		public static Layout Create2ResizablePanelLayout(BaseGraphEditor graphEditor)
 		{
-			PWLayout		layout = new PWLayout(graphEditor);
+			Layout		layout = new Layout(graphEditor);
 			Rect			pos = graphEditor.position;
 
 			var settingsPanel = CreateLayoutPanel< BaseGraphSettingsPanel >(graphEditor);
@@ -32,7 +32,7 @@ namespace ProceduralWorlds.Editor
 			int	p15 = Mathf.FloorToInt(graphEditor.position.width * .15f);
 			int	p50 = Mathf.FloorToInt(graphEditor.position.width * .5f);
 
-			var resizablePanel1Settings = new PWLayoutSetting {
+			var resizablePanel1Settings = new LayoutSetting {
 				separatorPosition = p20,
 				separatorWidth = 4,
 				minWidth = minWidth,
@@ -40,7 +40,7 @@ namespace ProceduralWorlds.Editor
 				initialized = true,
 			};
 			//the layout infos (width, min, max, ...) are inverted because leftBar is true
-			var resizablePanel2Settings = new PWLayoutSetting {
+			var resizablePanel2Settings = new LayoutSetting {
 				separatorPosition = p15,
 				separatorWidth = 4,
 				minWidth = minWidth,
@@ -48,7 +48,7 @@ namespace ProceduralWorlds.Editor
 				initialized = true,
 				leftBar = true,
 			};
-			var staticPanelSettings = new PWLayoutSetting {
+			var staticPanelSettings = new LayoutSetting {
 				separatorPosition = EditorGUIUtility.singleLineHeight,
 				initialized = true,
 			};

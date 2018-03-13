@@ -18,8 +18,8 @@ namespace ProceduralWorlds.Editor
 	}
 	
 	[CustomEditor(typeof(WorldGraph))]
-	public class BaseGraphCustomInspector : UnityEditor.Editor {
-	
+	public class WorldGraphCustomInspector : UnityEditor.Editor
+	{
 		public override void OnInspectorGUI()
 		{
 			EditorGUILayout.LabelField("You can't edit graph datas from the inspector");
@@ -29,8 +29,8 @@ namespace ProceduralWorlds.Editor
 	}
 	
 	[CustomEditor(typeof(BiomeGraph))]
-	public class PWBiomeCustomInspector : UnityEditor.Editor {
-	
+	public class BiomeGraphCustomInspector : UnityEditor.Editor
+	{
 		public override void OnInspectorGUI()
 		{
 			EditorGUILayout.LabelField("You can't edit graph datas from the inspector");

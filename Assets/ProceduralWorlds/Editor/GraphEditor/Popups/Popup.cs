@@ -21,12 +21,13 @@ namespace ProceduralWorlds.Editor
 
 		public EditorWindow	windowToUpdate;
 
-		protected static T OpenPopup< T >(Vector2 windowMinSize, bool allowResize = false) where T : Popup
+		protected static T OpenPopup< T >(int id, Vector2 windowMinSize, bool allowResize = false) where T : Popup
 		{
 			EditorWindow currentWindow = EditorWindow.focusedWindow;
 
 			T window = EditorWindow.CreateInstance< T >();
 
+			controlId = id;
 			window.windowToUpdate = currentWindow;
 			window.ShowAuxWindow();
 			window.minSize = windowMinSize;
@@ -36,9 +37,9 @@ namespace ProceduralWorlds.Editor
 			return window;
 		}
 
-		protected static T OpenPopup< T >() where T : Popup
+		protected static T OpenPopup< T >(int id) where T : Popup
 		{
-			return OpenPopup< T >(windowSize);
+			return OpenPopup< T >(id, windowSize);
 		}
 
 		void OnEnable()
@@ -64,6 +65,16 @@ namespace ProceduralWorlds.Editor
 
 			if (windowToUpdate != null)
 				windowToUpdate.SendEvent(evt);
+		}
+		
+		protected static T FindPopup< T >() where T : Popup
+		{
+			var popups = Resources.FindObjectsOfTypeAll< SamplerSettingsPopup >();
+
+			if (popups == null || popups.Length == 0)
+				return null;
+
+			return popups[0] as T;
 		}
 		
 		protected virtual void OnGUIEnable() {}

@@ -3,15 +3,15 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public abstract class PWLayoutSeparator
+	public abstract class LayoutSeparator
 	{
-		protected PWLayoutSetting	layoutSetting;
+		protected LayoutSetting	layoutSetting;
 		
 		protected Event				e { get { return Event.current; } }
 
 		public virtual void Initialize(BaseGraphEditor graphEditor) {}
 
-		public virtual PWLayoutSetting UpdateLayoutSetting(PWLayoutSetting ls)
+		public virtual LayoutSetting UpdateLayoutSetting(LayoutSetting ls)
 		{
 			if (ls == null)
 				return null;
@@ -24,7 +24,7 @@ namespace ProceduralWorlds.Editor
 			return null;
 		}
 
-		public virtual PWLayoutSetting GetLayoutSetting()
+		public virtual LayoutSetting GetLayoutSetting()
 		{
 			return layoutSetting;
 		}

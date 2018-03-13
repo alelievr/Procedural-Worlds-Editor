@@ -15,11 +15,11 @@ namespace ProceduralWorlds.Tests.Nodes
 		[Test]
 		public static void BaseGraphNodesSimplePasses()
 		{
-			var allMainNodeInfos = NodeTypeProvider.GetAllowedNodesForGraph(BaseGraphType.Main);
+			var allWorldNodeInfos = NodeTypeProvider.GetAllowedNodesForGraph(BaseGraphType.World);
 
 			var builder = BaseGraphBuilder.NewGraph< WorldGraph >();
 
-			foreach (var mainTypes in allMainNodeInfos)
+			foreach (var mainTypes in allWorldNodeInfos)
 				foreach (var nodeInfo in mainTypes.typeInfos)
 				builder.NewNode(nodeInfo.type, nodeInfo.type.ToString());
 			

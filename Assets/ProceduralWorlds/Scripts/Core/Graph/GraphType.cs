@@ -6,7 +6,7 @@ namespace ProceduralWorlds.Core
 {
 	public enum BaseGraphType
 	{
-		Main,
+		World,
 		Biome,
 	}
 }

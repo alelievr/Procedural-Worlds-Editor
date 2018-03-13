@@ -193,7 +193,7 @@ namespace ProceduralWorlds.Core
 
 		public override void OnEnable()
 		{
-			graphType = BaseGraphType.Main;
+			graphType = BaseGraphType.World;
 			base.OnEnable();
 		}
 

@@ -23,7 +23,7 @@ public partial class WorldGraphEditor : BaseGraphEditor
 	Rect					selectionRect;
 
 	[System.NonSerialized]
-	PWMainPresetScreen		presetScreen;
+	WorldPresetScreen		presetScreen;
 
 	[SerializeField]
 	bool					scaledPreviewFoldout = true;
@@ -42,7 +42,7 @@ public partial class WorldGraphEditor : BaseGraphEditor
 
 	#region Initialization and data baking
 
-	[MenuItem("Window/Procedural Worlds/Main Graph", priority = 1)]
+	[MenuItem("Window/Procedural Worlds/World Graph", priority = 1)]
 	static void Init()
 	{
 		WorldGraphEditor window = (WorldGraphEditor)EditorWindow.GetWindow (typeof (WorldGraphEditor));
@@ -89,7 +89,7 @@ public partial class WorldGraphEditor : BaseGraphEditor
 		if (!worldGraph.presetChoosed)
 		{
 			if (presetScreen == null)
-				presetScreen = new PWMainPresetScreen(worldGraph);
+				presetScreen = new WorldPresetScreen(worldGraph);
 			
 			var newGraph = presetScreen.Draw(position, graph);
 
@@ -150,12 +150,6 @@ public partial class WorldGraphEditor : BaseGraphEditor
 				worldGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("Chunk size", worldGraph.scaledPreviewChunkSize, 32, 2048);
 				float scale = (worldGraph.scaledPreviewRatio * worldGraph.scaledPreviewChunkSize) / (worldGraph.nonModifiedChunkSize * worldGraph.nonModifiedStep);
 				EditorGUILayout.LabelField("Scale: " + scale);
-			}
-			PWGUI.EndFade();
-
-			if (PWGUI.BeginFade("Renderer settings", ref terrainSettingsFoldout, false))
-			{
-				// terrainManager.DrawTerrainSettings(rect, worldGraph.materializerType);
 			}
 			PWGUI.EndFade();
 

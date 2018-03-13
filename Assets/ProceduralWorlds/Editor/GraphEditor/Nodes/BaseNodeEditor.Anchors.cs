@@ -79,14 +79,14 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 		
-		Dictionary< AnchorHighlight, Color > highlightModeToColor = new Dictionary< AnchorHighlight, Color > {
+		readonly Dictionary< AnchorHighlight, Color > highlightModeToColor = new Dictionary< AnchorHighlight, Color > {
 			{ AnchorHighlight.AttachAdd, Color.green },
 			{ AnchorHighlight.AttachNew, Color.blue },
 			{ AnchorHighlight.AttachReplace, Color.yellow },
 		};
 
 		//the anchor passed to ths function must be in the `anchors` list
-		void RenderAnchor(AnchorField anchorField, Anchor anchor, ref Rect renderRect, int index)
+		void RenderAnchor(AnchorField anchorField, Anchor anchor, ref Rect renderRect)
 		{
 			//visual parameters for anchors:
 			Vector2		anchorSize = new Vector2(13, 13);
@@ -178,7 +178,10 @@ namespace ProceduralWorlds.Editor
 			{
 				//render anchor if visible and linkable
 				if (anchor.visibility == Visibility.Visible && anchor.isLinkable)
-					RenderAnchor(anchorField, anchor, ref renderRect, index++);
+				{
+					RenderAnchor(anchorField, anchor, ref renderRect);
+					index++;
+				}
 
 				//if anchor is not gone, increment the padding for next anchor
 				if (anchor.visibility != Visibility.Gone)

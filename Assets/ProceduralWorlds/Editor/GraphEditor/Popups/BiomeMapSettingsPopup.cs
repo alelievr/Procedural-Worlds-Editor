@@ -8,20 +8,14 @@ namespace ProceduralWorlds.Editor
 {
 	public class BiomeMapSettingsPopup : Popup
 	{
-		static bool debug;
+		bool debug;
 		
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{
-			var popup = Popup.OpenPopup< BiomeMapSettingsPopup >();
+			var popup = Popup.OpenPopup< BiomeMapSettingsPopup >(guiSettings.GetHashCode());
 
 			popup.name = "Biome map settings";
-			debug = guiSettings.debug;
-			controlId = guiSettings.GetHashCode();
-		}
-		
-		protected override void OnGUIEnable()
-		{
-
+			popup.debug = guiSettings.debug;
 		}
 	
 		protected override void GUIUpdate()
@@ -36,7 +30,12 @@ namespace ProceduralWorlds.Editor
 
 		public static void UpdateDatas(PWGUISettings settings)
 		{
-			settings.debug = BiomeMapSettingsPopup.debug;
+			var popup = FindPopup< BiomeMapSettingsPopup >();
+
+			if (popup == null)
+				return ;
+			
+			settings.debug = popup.debug;
 		}
 	}
 }

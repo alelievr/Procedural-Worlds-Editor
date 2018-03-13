@@ -1,6 +1,6 @@
 namespace ProceduralWorlds.Editor
 {
-	public enum PWLayoutOrientation
+	public enum LayoutOrientation
 	{
 		Vertical,
 		Horizontal,

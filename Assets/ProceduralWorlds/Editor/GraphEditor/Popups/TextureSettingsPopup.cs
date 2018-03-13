@@ -9,22 +9,22 @@ namespace ProceduralWorlds.Editor
 	public class TextureSettingsPopup : Popup
 	{
 
-		static ScaleMode	scaleMode;
-		static float		scaleAspect;
-		static Material		material;
-		static FilterMode	filterMode;
-		static bool			debug;
+		ScaleMode	scaleMode;
+		float		scaleAspect;
+		Material		material;
+		FilterMode	filterMode;
+		bool			debug;
 
-		public static void OpenPopup(FilterMode filterMode, ScaleMode scaleMode, float scaleAspect, Material material, bool debug = false)
+		public static void OpenPopup(PWGUISettings guiSettings)
 		{
-			var popup = Popup.OpenPopup< TextureSettingsPopup >();
+			var popup = Popup.OpenPopup< TextureSettingsPopup >(guiSettings.GetHashCode());
 
 			popup.name = "Texture settings";
-			TextureSettingsPopup.filterMode = filterMode;
-			TextureSettingsPopup.scaleMode = scaleMode;
-			TextureSettingsPopup.material = material;
-			TextureSettingsPopup.scaleAspect = scaleAspect;
-			TextureSettingsPopup.debug = debug;
+			popup.filterMode = guiSettings.filterMode;
+			popup.scaleMode = guiSettings.scaleMode;
+			popup.material = guiSettings.material;
+			popup.scaleAspect = guiSettings.scaleAspect;
+			popup.debug = guiSettings.debug;
 		}
 
 		protected override void GUIUpdate()
@@ -45,11 +45,16 @@ namespace ProceduralWorlds.Editor
 
 		public static void UpdateDatas(PWGUISettings settings)
 		{
-			settings.scaleAspect = scaleAspect;
-			settings.scaleMode = scaleMode;
-			settings.material = material;
-			settings.filterMode = filterMode;
-			settings.debug = debug;
+			var popup = FindPopup< TextureSettingsPopup >();
+
+			if (popup == null)
+				return ;
+			
+			settings.scaleAspect = popup.scaleAspect;
+			settings.scaleMode = popup.scaleMode;
+			settings.material = popup.material;
+			settings.filterMode = popup.filterMode;
+			settings.debug = popup.debug;
 		}
 	}
 }

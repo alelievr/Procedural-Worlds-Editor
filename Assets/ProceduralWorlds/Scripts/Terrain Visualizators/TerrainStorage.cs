@@ -8,7 +8,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds
 {
-	public enum		PWStorageMode
+	public enum		StorageMode
 	{
 		Memory,
 		File,
@@ -45,7 +45,7 @@ namespace ProceduralWorlds
 			public Chunk(ChunkData terrain, object user) : this(terrain, user, ChunkVisibility.Visible) {}
 		}
 
-		public PWStorageMode	storeMode = PWStorageMode.File;
+		public StorageMode	storeMode = StorageMode.File;
 		public string			storageFolder = null;
 		public bool				editorMode;
 
@@ -67,7 +67,7 @@ namespace ProceduralWorlds
 		public ChunkData	AddChunk(Vector3i pos, ChunkData chunk, object userChunkDatas)
 		{
 			chunks[pos] = new Chunk(chunk, userChunkDatas);
-			if (storeMode == PWStorageMode.File)
+			if (storeMode == StorageMode.File)
 			{
 				//TODO: asyn save chunkData and pos to a file.
 			}
@@ -78,7 +78,7 @@ namespace ProceduralWorlds
 		{
 			if (chunks.ContainsKey(pos))
 				return chunks[pos].terrainData;
-			else if (storeMode == PWStorageMode.File)
+			else if (storeMode == StorageMode.File)
 			{
 				//TODO: check if file at pos exists and load it if exists.
 			}

@@ -13,29 +13,31 @@ using Object = UnityEngine.Object;
 namespace ProceduralWorlds.Editor
 {
 	[InitializeOnLoad]
-	public class PWTerrainPreviewManager
+	public class TerrainPreviewManager
 	{
-		public static PWTerrainPreviewManager instance;
+		public static TerrainPreviewManager instance;
+		
+		static readonly string		memoryTerrainStorageAsset = "memoryTerrainStorage";
 
 		public GameObject			previewRoot { get; private set; }
 		public Camera				previewCamera {get; private set; }
 		public RenderTexture		previewTexture { get; private set; }
-		public PWTerrainGenericBase	terrainBase { get; private set; }
+		public TerrainGenericBase	terrainBase { get; private set; }
 		
 		Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
 		{
-			{MaterializerType.SquareTileMap, typeof(PWTopDown2DTerrainSquare)},
+			{MaterializerType.SquareTileMap, typeof(TopDown2DTerrainSquare)},
 		};
 	
-		static PWTerrainPreviewManager()
+		static TerrainPreviewManager()
 		{
-			instance = new PWTerrainPreviewManager();
+			instance = new TerrainPreviewManager();
 		}
 
 		//Private constructor so we can only use this class using it's instance
-		private PWTerrainPreviewManager()
+		private TerrainPreviewManager()
 		{
-			UpdateObjects();
+			UpdateSceneObjects();
 			EditorApplication.playModeStateChanged += PlayModeChanged;
 			EditorSceneManager.sceneOpened += SceneOpenedCallback;
 		}
@@ -43,17 +45,17 @@ namespace ProceduralWorlds.Editor
 		void PlayModeChanged(PlayModeStateChange state)
 		{
 			if (state == PlayModeStateChange.EnteredEditMode)
-				UpdateObjects();
+				UpdateSceneObjects();
 		}
 
 		void SceneOpenedCallback(Scene scene, OpenSceneMode mode)
 		{
-			UpdateObjects();
+			UpdateSceneObjects();
 		}
 
-		void UpdateObjects()
+		public void UpdateSceneObjects()
 		{
-			var rootPreview = GameObject.FindObjectOfType< PWPreviewTerrainRoot >();
+			var rootPreview = GameObject.FindObjectOfType< PreviewTerrainRoot >();
 
 			if (rootPreview == null)
 				return ;
@@ -67,16 +69,16 @@ namespace ProceduralWorlds.Editor
 			}
 			previewCamera.targetTexture = previewTexture;
 
-			terrainBase = GameObject.FindObjectOfType< PWTerrainGenericBase >();
+			terrainBase = GameObject.FindObjectOfType< TerrainGenericBase >();
 
 			//Store chunks into memory
 			if (terrainBase != null && terrainBase.terrainStorage == null)
-				terrainBase.terrainStorage = Resources.Load< TerrainStorage >(PWConstants.memoryTerrainStorageAsset);
+				terrainBase.terrainStorage = Resources.Load< TerrainStorage >(memoryTerrainStorageAsset);
 		}
 
 		public void UpdatePreviewPrefab(string newPrefabName)
 		{
-			var roots = GameObject.FindObjectsOfType< PWPreviewTerrainRoot >();
+			var roots = GameObject.FindObjectsOfType< PreviewTerrainRoot >();
 			for (int i = 0; i < roots.Length; i++)
 				GameObject.DestroyImmediate(roots[i].gameObject);
 			
@@ -84,7 +86,7 @@ namespace ProceduralWorlds.Editor
 			previewRoot.name = newPrefabName;
 
 			//Instantiate the resource file
-			UpdateObjects();
+			UpdateSceneObjects();
 		}
 
 		public void UpdateTerrainMaterializer(MaterializerType materializerType)
@@ -95,7 +97,7 @@ namespace ProceduralWorlds.Editor
 			terrainBase.DestroyAllChunks();
 			var go = terrainBase.gameObject;
 			GameObject.DestroyImmediate(terrainBase);
-			terrainBase = go.AddComponent(materializerTypes[materializerType]) as PWTerrainGenericBase;
+			terrainBase = go.AddComponent(materializerTypes[materializerType]) as TerrainGenericBase;
 		}
 
 		public void UpdateChunkLoaderPosition(Vector3 position)
@@ -104,7 +106,7 @@ namespace ProceduralWorlds.Editor
 				terrainBase.transform.position = position;
 		}
 
-		~PWTerrainPreviewManager()
+		~TerrainPreviewManager()
 		{
 			if (previewTexture != null)
 				GameObject.DestroyImmediate(previewTexture);

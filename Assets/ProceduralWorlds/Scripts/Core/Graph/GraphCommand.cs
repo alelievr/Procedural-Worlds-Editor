@@ -14,7 +14,7 @@ namespace ProceduralWorlds.Core
 		LinkAnchorName,
 	}
 	
-	public class BaseGraphCommand
+	public class BaseGraphCommand : IEquatable< BaseGraphCommand >
 	{
 	
 		public BaseGraphCommandType	type;
@@ -105,6 +105,11 @@ namespace ProceduralWorlds.Core
 			return ((cmd as BaseGraphCommand) == this);
 		}
 
+		public bool Equals(BaseGraphCommand other)
+		{
+			return this.Equals((object)other);
+		}
+
 		public override int GetHashCode()
 		{
 			return position.GetHashCode()
@@ -115,6 +120,5 @@ namespace ProceduralWorlds.Core
 				+ fromNodeName.GetHashCode()
 				+ toNodeName.GetHashCode();
 		}
-	
 	}
 }

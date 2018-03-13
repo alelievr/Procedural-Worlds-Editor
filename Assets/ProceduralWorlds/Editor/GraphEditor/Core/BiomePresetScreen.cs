@@ -7,7 +7,7 @@ namespace ProceduralWorlds.Editor
 {
 	public class BiomePresetScreen : PresetScreen
 	{
-		BiomeGraph	biomeGraph;
+		readonly BiomeGraph	biomeGraph;
 
 		readonly string	graphFilePrefix = "GraphPresets/Biome/Parts/";
 	

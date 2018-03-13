@@ -11,10 +11,10 @@ namespace ProceduralWorlds.Editor
 {
 	public class SamplerSettingsPopup : Popup
 	{
-		static Gradient		gradient;
-		static FilterMode	filterMode;
-		static Texture		texture;
-		static bool			debug;
+		Gradient		gradient;
+		FilterMode	filterMode;
+		Texture		texture;
+		bool			debug;
 		public static bool	update { get; private set; }
 		
 		[System.NonSerializedAttribute]
@@ -25,14 +25,13 @@ namespace ProceduralWorlds.Editor
 	
 		public static void OpenPopup(PWGUISettings guiSettings)
 		{
-			var popup = Popup.OpenPopup< SamplerSettingsPopup >();
+			var popup = Popup.OpenPopup< SamplerSettingsPopup >(guiSettings.GetHashCode());
 
 			popup.name = "Sampler settings";
-			gradient = guiSettings.gradient;
-			filterMode = guiSettings.filterMode;
-			texture = guiSettings.texture;
-			debug = guiSettings.debug;
-			controlId = guiSettings.GetHashCode();
+			popup.gradient = guiSettings.gradient;
+			popup.filterMode = guiSettings.filterMode;
+			popup.texture = guiSettings.texture;
+			popup.debug = guiSettings.debug;
 		}
 
 		protected override void GUIStart()
@@ -96,10 +95,15 @@ namespace ProceduralWorlds.Editor
 
 		public static void UpdateDatas(PWGUISettings settings)
 		{
-			settings.gradient = gradient;
+			var popup = FindPopup< SamplerSettingsPopup >();
+
+			if (popup == null)
+				return ;
+
+			settings.gradient = popup.gradient;
 			settings.serializableGradient = (SerializableGradient)settings.gradient;
-			settings.filterMode = filterMode;
-			settings.debug = debug;
+			settings.filterMode = popup.filterMode;
+			settings.debug = popup.debug;
 		}
 	}
 }

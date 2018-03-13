@@ -36,7 +36,7 @@ public partial class BaseGraphEditor : ProceduralWorldsEditorWindow
 	//Editor datas
 	protected Vector2				windowSize;
 	[SerializeField]
-	protected PWLayout				layout;
+	protected Layout				layout;
 	protected DelayedChanges		delayedChanges = new DelayedChanges();
 
 
@@ -98,7 +98,7 @@ public partial class BaseGraphEditor : ProceduralWorldsEditorWindow
 
 		LoadAssets();
 		
-		layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+		layout = LayoutFactory.Create2ResizablePanelLayout(this);
 		
 		Profiler.EndSample();
 	}
@@ -275,10 +275,11 @@ public partial class BaseGraphEditor : ProceduralWorldsEditorWindow
 
 	public void ResetLayout()
 	{
-		graph.layoutSettings.Reset();
-
 		if (graph != null)
-			layout = PWLayoutFactory.Create2ResizablePanelLayout(this);
+		{
+			graph.layoutSettings.Reset();
+			layout = LayoutFactory.Create2ResizablePanelLayout(this);
+		}
 		
 		if (OnResetLayout != null)
 			OnResetLayout();

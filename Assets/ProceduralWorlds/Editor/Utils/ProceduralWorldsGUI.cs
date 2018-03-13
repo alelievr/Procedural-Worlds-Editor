@@ -69,8 +69,6 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
-		public ProceduralWorldsGUI() {}
-
 		~ProceduralWorldsGUI()
 		{
 			if (attachedNode != null)
@@ -554,7 +552,7 @@ namespace ProceduralWorlds.Editor
 			{
 				if (icSettingsRect.Contains(e.mousePosition))
 				{
-					TextureSettingsPopup.OpenPopup(fieldSettings.filterMode, fieldSettings.scaleMode, fieldSettings.scaleAspect, fieldSettings.material, fieldSettings.debug);
+					TextureSettingsPopup.OpenPopup(fieldSettings);
 					e.Use();
 				}
 			}

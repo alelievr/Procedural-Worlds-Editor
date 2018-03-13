@@ -213,7 +213,7 @@ namespace ProceduralWorlds.Editor
 			return newSelectedIndex;
 		}
 	
-		void DrawBoard(BaseGraph graph)
+		void DrawBoard()
 		{
 			var currentList = presetList;
 			int i = 0;
@@ -255,7 +255,7 @@ namespace ProceduralWorlds.Editor
 				
 				EditorGUILayout.BeginHorizontal();
 				{
-					DrawBoard(graph);
+					DrawBoard();
 				}
 				EditorGUILayout.EndHorizontal();
 			}

@@ -9,11 +9,9 @@ using Object = UnityEngine.Object;
 
 namespace ProceduralWorlds.Editor
 {
-	[System.Serializable]
-	public class TerrainPreviewDrawer : PWDrawer
+	public class TerrainPreviewDrawer : Drawer
 	{
-		[SerializeField]
-		TerrainPreviewType	loadedPreviewType;
+		TerrainPreviewType		loadedPreviewType;
 
 		bool					previewMouseDrag;
 		float					cameraMoveDirection;
@@ -23,19 +21,21 @@ namespace ProceduralWorlds.Editor
 		[System.NonSerialized]
 		bool					first = true;
 
-		BaseGraph					graphRef;
+		BaseGraph				graphRef;
 
-		Dictionary< TerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< TerrainPreviewType, string >()
+		readonly Dictionary< TerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< TerrainPreviewType, string >
 		{
-			{TerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
-			{TerrainPreviewType.SideView, PWConstants.previewSideViewPrefabName},
+			{TerrainPreviewType.TopDownPlanarView, "PWPreviewTopDown2D"},
+			{TerrainPreviewType.SideView, "PWPreviewSideView2D"},
 		};
 		
 		public override void OnEnable()
 		{
 			graphRef = target as BaseGraph;
 
-			PWTerrainPreviewManager.instance.UpdatePreviewPrefab(previewTypeToPrefabNames[graphRef.terrainPreviewType]);
+			loadedPreviewType = graphRef.terrainPreviewType;
+
+			TerrainPreviewManager.instance.UpdateSceneObjects();
 
 			recenterIcon = Resources.Load< Texture2D >("Icons/ic_recenter");
 		}
@@ -45,7 +45,7 @@ namespace ProceduralWorlds.Editor
 			//if preview scene was destroyed or preview type was changed, reload preview game objects
 			if (loadedPreviewType != graphRef.terrainPreviewType)
 			{
-				PWTerrainPreviewManager.instance.UpdatePreviewPrefab(previewTypeToPrefabNames[graphRef.terrainPreviewType]);
+				TerrainPreviewManager.instance.UpdatePreviewPrefab(previewTypeToPrefabNames[graphRef.terrainPreviewType]);
 				loadedPreviewType = graphRef.terrainPreviewType;
 			}
 		}
@@ -71,11 +71,11 @@ namespace ProceduralWorlds.Editor
 
 			UpdatePreviewObjects();
 
-			Camera previewCamera = PWTerrainPreviewManager.instance.previewCamera;
+			Camera previewCamera = TerrainPreviewManager.instance.previewCamera;
 
 			if (previewCamera == null)
 			{
-				DisplayLoadCameraButton();
+				DisplayLoadCameraButton(previewRect);
 				return ;
 			}
 
@@ -83,7 +83,7 @@ namespace ProceduralWorlds.Editor
 				previewCamera.Render();
 
 			//draw preview texture:
-			var renderTexture = PWTerrainPreviewManager.instance.previewTexture;
+			var renderTexture = TerrainPreviewManager.instance.previewTexture;
 			if (renderTexture != null)
 				GUI.DrawTexture(previewRect, renderTexture);
 
@@ -100,16 +100,20 @@ namespace ProceduralWorlds.Editor
 			}
 			
 			//move the terrain materializer so it generate terrain around the camera
-			PWTerrainPreviewManager.instance.UpdateChunkLoaderPosition(previewCamera.transform.position);
+			TerrainPreviewManager.instance.UpdateChunkLoaderPosition(previewCamera.transform.position);
 
 			first = false;
 
 			Profiler.EndSample();
 		}
 
-		void DisplayLoadCameraButton()
+		void DisplayLoadCameraButton(Rect cameraRect)
 		{
-			EditorGUILayout.LabelField("TODO: preview load button");
+			Rect buttonRect = cameraRect;
+			buttonRect.height = EditorGUIUtility.singleLineHeight * 2;
+
+			if (GUI.Button(buttonRect, "Load preview"))
+				TerrainPreviewManager.instance.UpdatePreviewPrefab(previewTypeToPrefabNames[graphRef.terrainPreviewType]);
 		}
 
 		void TopDownCameraControls(Rect previewRect, Camera previewCamera)
@@ -144,8 +148,19 @@ namespace ProceduralWorlds.Editor
 			recenterIconRect.size = new Vector2(15, 15);
 			GUI.DrawTexture(recenterIconRect, recenterIcon);
 
-			if (recenterIconRect.Contains(e.mousePosition))
-				previewCamera.transform.position = Vector3.zero;
+			Vector3 pos = previewCamera.transform.position;
+			if (recenterIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+			{
+				switch (graphRef.terrainPreviewType)
+				{
+					case TerrainPreviewType.TopDownPlanarView:
+						previewCamera.transform.position = new Vector3(0, pos.y, 0);
+						break ;
+					case TerrainPreviewType.SideView:
+						previewCamera.transform.position = new Vector3(0, 0, pos.z);
+						break ;
+				}
+			}
 		}
 	}
 }

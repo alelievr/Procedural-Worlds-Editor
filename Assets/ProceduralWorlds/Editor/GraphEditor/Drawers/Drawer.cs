@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public abstract class PWDrawer
+	public abstract class Drawer
 	{
 		protected ProceduralWorldsGUI		PWGUI = new ProceduralWorldsGUI();
 

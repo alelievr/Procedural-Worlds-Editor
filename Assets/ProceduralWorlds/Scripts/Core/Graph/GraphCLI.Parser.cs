@@ -148,9 +148,9 @@ namespace ProceduralWorlds.Core
 
 		class BaseGraphCommandTokenSequence
 		{
-			public BaseGraphCommandType			type;
-			public List< BaseGraphToken >			requiredTokens = null;
-			public List< BaseGraphToken >			options = null;
+			public BaseGraphCommandType		type;
+			public List< BaseGraphToken >	requiredTokens;
+			public List< BaseGraphToken >	options;
 		}
 
 		static class BaseGraphValidCommandTokenSequence

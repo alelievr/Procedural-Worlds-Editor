@@ -4,7 +4,8 @@ using UnityEngine;
 using System;
 using System.Threading;
 
-public static class PWWorker {
+public static class Worker
+{
 
 	public static int			workerCount {get; private set;}
 	public static int			checkTimeout = 10; //ms

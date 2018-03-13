@@ -5,7 +5,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds
 {
-	public class PWNoiseFunctions
+	public class NoiseFunctions
 	{
 
 		public static Sampler2D Map(Sampler2D samp, float min, float max, bool alloc = false)

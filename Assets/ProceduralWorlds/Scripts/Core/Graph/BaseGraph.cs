@@ -87,7 +87,7 @@ namespace ProceduralWorlds.Core
 		[NonSerialized]
 		public BaseGraphEditorEventInfo			editorEvents = new BaseGraphEditorEventInfo();
 		public bool								presetChoosed = false;
-		public PWLayoutSettings					layoutSettings = new PWLayoutSettings();
+		public LayoutSettings					layoutSettings = new LayoutSettings();
 
 
         //input and output nodes:

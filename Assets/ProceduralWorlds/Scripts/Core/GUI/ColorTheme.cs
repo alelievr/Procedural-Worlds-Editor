@@ -9,10 +9,10 @@ namespace ProceduralWorlds.Core
 	public static class ColorTheme
 	{
 
-		public static Color		selectedColor = new Color(0.000f, 0.000f, 0.804f);
-		public static Color		deletedColor = new Color(1, 0, 0);
-		public static Color		disabledAnchorColor = new Color(.2f, .2f, .2f);
-		public static Color		defaultBackgroundColor = new Color32(57, 57, 57, 255);
+		public static readonly Color		selectedColor = new Color(0.000f, 0.000f, 0.804f);
+		public static readonly Color		deletedColor = new Color(1, 0, 0);
+		public static readonly Color		disabledAnchorColor = new Color(.2f, .2f, .2f);
+		public static readonly Color		defaultBackgroundColor = new Color32(57, 57, 57, 255);
 
 		public class ColorSchemeDict : Dictionary< ColorSchemeName, ColorScheme > {}
 
@@ -47,11 +47,6 @@ namespace ProceduralWorlds.Core
             }
         }
 
-		static ColorTheme()
-		{
-			//bake datas
-		}
-
 		public static Color GetLinkColor(ColorSchemeName csn)
 		{
 			return colorSchemes[csn].linkColor;
@@ -77,7 +72,7 @@ namespace ProceduralWorlds.Core
 			return colorSchemes[csn].selectorCellColor;
 		}
 
-		static Dictionary< ColorSchemeName, List< Type > > anchorColorSchemeNames = new Dictionary< ColorSchemeName, List< Type > >()
+		static Dictionary< ColorSchemeName, List< Type > > anchorColorSchemeNames = new Dictionary< ColorSchemeName, List< Type > >
 		{
 			{
 				ColorSchemeName.Alizarin, new List< Type > {

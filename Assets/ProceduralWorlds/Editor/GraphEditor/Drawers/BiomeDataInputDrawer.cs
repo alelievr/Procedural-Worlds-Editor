@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BiomeDataInputDrawer : PWDrawer
+	public class BiomeDataInputDrawer : Drawer
 	{
 		BiomeDataInputGenerator		inputData;
 		bool						showTerrain = true;

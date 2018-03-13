@@ -13,7 +13,7 @@ namespace ProceduralWorlds.Core
 		BaseGraph	graph;
 
 		List< string >	commands = new List< string >();
-		List< Action< BaseGraph > > postExecuteCallbacks = new List< Action< BaseGraph > >();
+		readonly List< Action< BaseGraph > > postExecuteCallbacks = new List< Action< BaseGraph > >();
 		
 		readonly List< string > commandOrder = new List< string >{"NewNode", "Link", "LinkAnchor"};
 	

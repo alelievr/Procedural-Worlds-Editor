@@ -5,7 +5,7 @@ using ProceduralWorlds;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 
-public class PWTopDown2DTerrainSquare : PWTerrainBase< TopDownChunkData >
+public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 {
 
 	Gradient		rainbow;

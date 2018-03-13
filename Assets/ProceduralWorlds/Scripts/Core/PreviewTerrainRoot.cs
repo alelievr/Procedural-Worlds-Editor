@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PWPreviewTerrainRoot : MonoBehaviour {
+public class PreviewTerrainRoot : MonoBehaviour {
 
 }

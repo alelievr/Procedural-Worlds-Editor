@@ -30,7 +30,7 @@ namespace ProceduralWorlds.Editor
 			node.materializerType = (MaterializerType)EditorGUILayout.EnumPopup("Materializer", node.materializerType);
 			if (EditorGUI.EndChangeCheck())
 			{
-				PWTerrainPreviewManager.instance.UpdateTerrainMaterializer(node.materializerType);
+				TerrainPreviewManager.instance.UpdateTerrainMaterializer(node.materializerType);
 			}
 
 			if (finalTerrain == null)

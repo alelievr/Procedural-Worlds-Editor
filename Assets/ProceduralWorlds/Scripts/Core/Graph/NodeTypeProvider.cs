@@ -156,7 +156,7 @@ namespace ProceduralWorlds.Core
         {
 			switch (graphType)
 			{
-				case BaseGraphType.Main:
+				case BaseGraphType.World:
 					return worldGraphInfoList;
 				case BaseGraphType.Biome:
 					return biomeGraphInfoList;

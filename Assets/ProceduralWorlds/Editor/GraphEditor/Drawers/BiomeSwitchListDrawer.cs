@@ -9,7 +9,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public class BiomeSwitchListDrawer : PWDrawer
+	public class BiomeSwitchListDrawer : Drawer
 	{
 		const int				previewTextureWidth = 200;
 		const int				previewTextureHeight = 40;

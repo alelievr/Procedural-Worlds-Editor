@@ -5,13 +5,13 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public abstract class PWLayoutPanel
+	public abstract class LayoutPanel
 	{
 		public delegate void			OnGUI(Rect rect);
 
-		public List< PWLayoutPanel >	childPanels = new List< PWLayoutPanel >();
+		public List< LayoutPanel >	childPanels = new List< LayoutPanel >();
 
-		public PWLayoutSeparator		separator;
+		public LayoutSeparator		separator;
 
 		protected BaseGraphEditor			graphEditor;
 		protected BaseGraph				graphRef { get { return graphEditor.graph; } }

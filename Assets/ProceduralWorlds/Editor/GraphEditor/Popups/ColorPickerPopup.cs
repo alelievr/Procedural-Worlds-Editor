@@ -16,16 +16,16 @@ namespace ProceduralWorlds.Editor
 
 		bool			colorPicking;
 
-		static Color	currentColor;
-		static Vector2	thumbPosition;
+		Color	currentColor;
+		Vector2	thumbPosition;
 
 		public static void OpenPopup(Color color, PWGUISettings guiSettings)
 		{
-			Popup.OpenPopup< ColorPickerPopup >(new Vector2(windowSize.x, 340));
+			var popup = Popup.OpenPopup< ColorPickerPopup >(guiSettings.GetHashCode(), new Vector2(windowSize.x, 340));
 
-			ColorPickerPopup.currentColor = color;
-			ColorPickerPopup.controlId = guiSettings.GetHashCode();
-			ColorPickerPopup.thumbPosition = guiSettings.thumbPosition;
+			popup.currentColor = color;
+			popup.name = "Cheap color picker";
+			popup.thumbPosition = guiSettings.thumbPosition;
 		}
 
 		protected override void OnGUIEnable()
@@ -122,8 +122,13 @@ namespace ProceduralWorlds.Editor
 
 		public static void UpdateDatas(PWGUISettings settings)
 		{
-			settings.c = (SerializableColor)currentColor;
-			settings.thumbPosition = thumbPosition;
+			var popup = FindPopup< ColorPickerPopup >();
+
+			if (popup == null)
+				return ;
+			
+			settings.c = (SerializableColor)popup.currentColor;
+			settings.thumbPosition = popup.thumbPosition;
 		}
 
 	}

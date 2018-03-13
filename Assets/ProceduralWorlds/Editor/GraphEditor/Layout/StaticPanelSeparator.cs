@@ -6,15 +6,15 @@ using UnityEditor;
 
 namespace ProceduralWorlds.Editor
 {
-	public class StaticPanelSeparator : PWLayoutSeparator
+	public class StaticPanelSeparator : LayoutSeparator
 	{
 		public bool		vertical;
 
 		Rect			lastRect;
 
-		public StaticPanelSeparator(PWLayoutOrientation orientation)
+		public StaticPanelSeparator(LayoutOrientation orientation)
 		{
-			vertical = orientation == PWLayoutOrientation.Vertical;
+			vertical = orientation == LayoutOrientation.Vertical;
 		}
 
 		public override Rect Begin()

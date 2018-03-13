@@ -8,7 +8,7 @@ using ProceduralWorlds.Biomator;
 
 namespace ProceduralWorlds.Editor
 {
-	public class AssetHandlers
+	public static class AssetHandlers
 	{
 	
 		public static readonly string worldGraphFileName = "New ProceduralWorld";

@@ -49,7 +49,7 @@ namespace ProceduralWorlds.Node
 			if (terrain != null && terrain.type == SamplerType.Sampler2D)
 			{
 				//terrain mapping
-				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, PWNoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true));
+				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, NoiseFunctions.Map(terrain as Sampler2D, mapMin, mapMax, true));
 			}
 		}
 	}

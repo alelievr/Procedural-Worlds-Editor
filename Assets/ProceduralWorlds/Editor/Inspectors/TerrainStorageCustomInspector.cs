@@ -17,10 +17,10 @@ namespace ProceduralWorlds.Editor
 	
 		public override void OnInspectorGUI()
 		{
-			terrain.storeMode = (PWStorageMode)EditorGUILayout.EnumPopup(terrain.storeMode);
+			terrain.storeMode = (StorageMode)EditorGUILayout.EnumPopup(terrain.storeMode);
 			switch (terrain.storeMode)
 			{
-				case PWStorageMode.Memory:
+				case StorageMode.Memory:
 					EditorGUILayout.HelpBox(
 						"The terrain will not be serialized, " +
 						"this mode must be use when editing the PWgraph " +
@@ -28,7 +28,7 @@ namespace ProceduralWorlds.Editor
 						MessageType.Info
 					);
 					break ;
-				case PWStorageMode.File:
+				case StorageMode.File:
 					terrain.editorMode = EditorGUILayout.Toggle("Editor mode", terrain.editorMode);
 					if (!terrain.editorMode)
 						terrain.storageFolder = EditorGUILayout.TextField("storage folder", terrain.storageFolder);

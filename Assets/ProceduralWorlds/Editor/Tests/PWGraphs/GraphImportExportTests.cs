@@ -78,7 +78,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		}
 		
 		[Test]
-		static public void BaseGraphImportMainWhiteSpaces()
+		static public void BaseGraphImportWorldWhiteSpaces()
 		{
 			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().GetGraph();
 

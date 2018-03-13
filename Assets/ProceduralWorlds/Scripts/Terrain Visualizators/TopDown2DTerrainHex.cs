@@ -5,7 +5,7 @@ using ProceduralWorlds;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 
-public class PWTopDown2DTerrainHex : PWTerrainBase< TopDownChunkData >
+public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 {
 	Mesh			topDownTerrainMesh;
 	int				topDownTerrainMeshSize = 0;

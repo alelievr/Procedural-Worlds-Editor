@@ -46,7 +46,7 @@ namespace ProceduralWorlds.Node
 			if (terrainNoise.type == SamplerType.Sampler2D)
 			{
 				//terrain mapping
-				var mappedTerrain = PWNoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
+				var mappedTerrain = NoiseFunctions.Map(terrainNoise as Sampler2D, mapMin, mapMax, true);
 				outputBiome.UpdateSamplerValue(BiomeSamplerName.terrainHeight, mappedTerrain);
 
 				//waterHeight evaluation

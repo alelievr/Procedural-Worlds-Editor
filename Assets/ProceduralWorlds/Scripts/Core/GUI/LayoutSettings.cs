@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ProceduralWorlds.Core
 {
 	[System.Serializable]
-	public class PWLayoutSetting : IPWCloneable< PWLayoutSetting >
+	public class LayoutSetting : IPWCloneable< LayoutSetting >
 	{
 		public float	minWidth;
 		public float	maxWidth;
@@ -23,9 +23,9 @@ namespace ProceduralWorlds.Core
 		
 		public bool		initialized;
 
-		public PWLayoutSetting Clone(PWLayoutSetting reuseExisting)
+		public LayoutSetting Clone(LayoutSetting reuseExisting)
 		{
-			PWLayoutSetting setting = new PWLayoutSetting();
+			LayoutSetting setting = new LayoutSetting();
 
 			setting.minHeight = minHeight;
 			setting.maxHeight = maxHeight;
@@ -48,9 +48,9 @@ namespace ProceduralWorlds.Core
 	}
 
 	[System.Serializable]
-	public class PWLayoutSettings
+	public class LayoutSettings
 	{
-		public List< PWLayoutSetting >	settings = new List< PWLayoutSetting >();
+		public List< LayoutSetting >	settings = new List< LayoutSetting >();
 
 		public void Reset()
 		{

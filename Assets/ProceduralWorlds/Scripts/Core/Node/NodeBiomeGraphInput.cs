@@ -23,7 +23,7 @@ namespace ProceduralWorlds.Core
 		public PWArray< object >	outputValues = new PWArray< object >();
 
 		[SerializeField]
-		WorldGraph					_previewGraph = null;
+		WorldGraph					_previewGraph;
 		public WorldGraph			previewGraph
 		{
 			get { return _previewGraph; }

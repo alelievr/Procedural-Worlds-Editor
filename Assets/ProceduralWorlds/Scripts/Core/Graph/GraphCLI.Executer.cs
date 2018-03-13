@@ -15,7 +15,9 @@ namespace ProceduralWorlds.Core
 	public static partial class BaseGraphCLI
 	{
 
-		static Dictionary< BaseGraphCommandType, Action< BaseGraph, BaseGraphCommand, string > > commandTypeFunctions = new Dictionary< BaseGraphCommandType, Action< BaseGraph, BaseGraphCommand, string > >()
+		delegate void CommandAction(BaseGraph graph, BaseGraphCommand command, string originalCommand);
+
+		static Dictionary< BaseGraphCommandType, CommandAction > commandTypeFunctions = new Dictionary< BaseGraphCommandType, CommandAction >
 		{
 			{BaseGraphCommandType.Link, CreateLink},
 			{BaseGraphCommandType.NewNode, CreateNode},

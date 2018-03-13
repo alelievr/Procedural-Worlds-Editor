@@ -8,7 +8,7 @@ using ProceduralWorlds;
 
 namespace ProceduralWorlds.Editor
 {
-	public class ChunkLoaderDrawer : PWDrawer
+	public class ChunkLoaderDrawer : Drawer
 	{
 		WorldGraph		worldGraph;
 
@@ -21,11 +21,14 @@ namespace ProceduralWorlds.Editor
 		{
 			base.OnGUI(r);
 
-			var terrain = PWTerrainPreviewManager.instance.terrainBase;
+			var terrain = TerrainPreviewManager.instance.terrainBase;
 
 			if (terrain == null)
 			{
-				EditorGUILayout.HelpBox("Terrain materializer type not supported (" + worldGraph.terrainPreviewType + ")", MessageType.Warning);
+				if (TerrainPreviewManager.instance.previewRoot == null)
+					EditorGUILayout.HelpBox("You must load the preview to activate chunk generation", MessageType.Warning);
+				else
+					EditorGUILayout.HelpBox("Terrain materializer type not supported (" + worldGraph.terrainPreviewType + ")", MessageType.Warning);
 				return ;
 			}
 			
@@ -40,7 +43,7 @@ namespace ProceduralWorlds.Editor
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them
-		public void ReloadChunks(PWTerrainGenericBase terrain)
+		public void ReloadChunks(TerrainGenericBase terrain)
 		{
 			if (EditorApplication.isPlaying || EditorApplication.isPaused)
 			{
