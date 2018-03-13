@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class DefaultGUISkin : IDisposable
 	{

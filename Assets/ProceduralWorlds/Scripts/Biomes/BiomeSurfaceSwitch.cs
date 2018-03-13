@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	[Serializable]
 	public class BiomeSurfaceSwitch
@@ -30,9 +30,9 @@ namespace PW.Biomator
 
 		public bool					Overlaps(BiomeSurfaceSwitch b2)
 		{
-			bool slopeOverlaps = (!slopeEnabled || !b2.slopeEnabled) || (slopeEnabled && b2.slopeEnabled && PWUtils.Overlap(minSlope, maxSlope, b2.minSlope, b2.maxSlope));
-			bool heightOverlaps = (!heightEnabled || !b2.heightEnabled) || (heightEnabled && b2.heightEnabled && PWUtils.Overlap(minHeight, maxHeight, b2.minHeight, b2.maxHeight));
-			bool paramOverlaps = (!paramEnabled || !b2.paramEnabled) || (paramEnabled && b2.paramEnabled && PWUtils.Overlap(minParam, maxParam, b2.minParam, b2.maxParam));
+			bool slopeOverlaps = (!slopeEnabled || !b2.slopeEnabled) || (slopeEnabled && b2.slopeEnabled && Utils.Overlap(minSlope, maxSlope, b2.minSlope, b2.maxSlope));
+			bool heightOverlaps = (!heightEnabled || !b2.heightEnabled) || (heightEnabled && b2.heightEnabled && Utils.Overlap(minHeight, maxHeight, b2.minHeight, b2.maxHeight));
+			bool paramOverlaps = (!paramEnabled || !b2.paramEnabled) || (paramEnabled && b2.paramEnabled && Utils.Overlap(minParam, maxParam, b2.minParam, b2.maxParam));
 
 			return slopeOverlaps && heightOverlaps && paramOverlaps;
 		}
@@ -63,11 +63,11 @@ namespace PW.Biomator
 			float	gap = 0;
 
 			if (heightEnabled)
-				gap += PWUtils.GapWidth(minHeight, maxHeight, b2.minHeight, b2.maxHeight);
+				gap += Utils.GapWidth(minHeight, maxHeight, b2.minHeight, b2.maxHeight);
 			if (slopeEnabled)
-				gap += PWUtils.GapWidth(minSlope, maxSlope, b2.minSlope, b2.maxSlope);
+				gap += Utils.GapWidth(minSlope, maxSlope, b2.minSlope, b2.maxSlope);
 			if (paramEnabled)
-				gap += PWUtils.GapWidth(minParam, maxParam, b2.minParam, b2.maxParam);
+				gap += Utils.GapWidth(minParam, maxParam, b2.minParam, b2.maxParam);
 			
 			return gap;
 		}

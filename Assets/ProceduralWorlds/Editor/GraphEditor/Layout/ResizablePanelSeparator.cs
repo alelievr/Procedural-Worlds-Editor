@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class ResizablePanelSeparator : PWLayoutSeparator
 	{
@@ -12,6 +12,8 @@ namespace PW.Editor
 
 		[SerializeField]
 		Rect				lastRect;
+
+		Rect				separatorRect;
 
 		public bool			draggingHandler { get; private set; }
 
@@ -55,12 +57,20 @@ namespace PW.Editor
 			}
 		}
 
+		public override Rect GetSeparatorRect()
+		{
+			return separatorRect;
+		}
+
 		void DrawHandleBar()
 		{
 			Rect separatorRect = EditorGUILayout.BeginHorizontal(GUILayout.Width(layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
 			GUILayout.Space(layoutSetting.separatorWidth);
 			EditorGUI.DrawRect(separatorRect, Color.white);
 			EditorGUILayout.EndHorizontal();
+
+			if (e.type == EventType.Repaint)
+				this.separatorRect = separatorRect;
 
 			EditorGUIUtility.AddCursorRect(separatorRect, MouseCursor.ResizeHorizontal);
 

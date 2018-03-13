@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW.Core;
-using PW.Biomator;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
 using UnityEditor.AnimatedValues;
 using System.IO;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(BiomeSurfaceMapsObject))]
 	public class BiomeSurfaceMapsObjectInspector : UnityEditor.Editor

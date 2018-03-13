@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Core;
-using PW.Noises;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Noises;
+using ProceduralWorlds.Node;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	[System.Serializable]
 	public class BiomeDataInputGenerator
@@ -63,7 +63,7 @@ namespace PW.Biomator
 			return biomeData;
 		}
 
-		public PartialBiome		GeneratePartialBiome2D(PWBiomeGraph biomeGraph)
+		public PartialBiome		GeneratePartialBiome2D(BiomeGraph biomeGraph)
 		{
 			PartialBiome partialBiome = new PartialBiome();
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public class BiomeSurfaceGraph
 	{

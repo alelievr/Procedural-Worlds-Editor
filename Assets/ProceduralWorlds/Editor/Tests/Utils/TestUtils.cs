@@ -3,11 +3,11 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
-using PW.Node;
-using PW.Core;
-using PW.Biomator;
+using ProceduralWorlds.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
 
-namespace PW.Tests
+namespace ProceduralWorlds.Tests
 {
 	public static class TestUtils
 	{
@@ -25,17 +25,17 @@ namespace PW.Tests
 		//            +---> Add3+    
 		//                +-----+
 	
-		public static PWMainGraph	GenerateTestMainGraph()
+		public static WorldGraph	GenerateTestWorldGraph()
 		{
-			return PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode(typeof(PWNodeSlider), "slider")
-				.NewNode(typeof(PWNodeConstant), "constant")
-				.NewNode(typeof(PWNodeAdd), "add1")
-				.NewNode(typeof(PWNodeAdd), "add2")
-				.NewNode(typeof(PWNodeAdd), "add3")
-				.NewNode(typeof(PWNodeAdd), "add4")
-				.NewNode(typeof(PWNodeDebugInfo), "debug1")
-				.NewNode(typeof(PWNodeDebugInfo), "debug2")
+			return BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode(typeof(NodeSlider), "slider")
+				.NewNode(typeof(NodeConstant), "constant")
+				.NewNode(typeof(NodeAdd), "add1")
+				.NewNode(typeof(NodeAdd), "add2")
+				.NewNode(typeof(NodeAdd), "add3")
+				.NewNode(typeof(NodeAdd), "add4")
+				.NewNode(typeof(NodeDebugInfo), "debug1")
+				.NewNode(typeof(NodeDebugInfo), "debug2")
 				.Link("slider", "add1")
 				.Link("slider", "add2")
 				.Link("constant", "add2")
@@ -44,7 +44,7 @@ namespace PW.Tests
 				.Link("add4", "debug1")
 				.Link("add2", "debug2")
 				.Execute()
-				.GetGraph() as PWMainGraph;
+				.GetGraph() as WorldGraph;
 		}
 
 		//Test biome graph
@@ -59,18 +59,18 @@ namespace PW.Tests
 		// +----+      +----+    |
 		// | c3 +------> s3 +----+
 		// +----+      +----+
-		// c*: PWNodeBiomeSurfaceColor, s*: PWNodeBiomeSurfaceSwitch, surf: PWNodeBiomeSurface
+		// c*: NodeBiomeSurfaceColor, s*: NodeBiomeSurfaceSwitch, surf: NodeBiomeSurface
 	
-		public static PWBiomeGraph	GenerateTestBiomeGraph()
+		public static BiomeGraph	GenerateTestBiomeGraph()
 		{
-			return PWGraphBuilder.NewGraph< PWBiomeGraph >()
-				.NewNode< PWNodeBiomeSurfaceColor >("c1")
-				.NewNode< PWNodeBiomeSurfaceColor >("c2")
-				.NewNode< PWNodeBiomeSurfaceColor >("c3")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s1")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s2")
-				.NewNode< PWNodeBiomeSurfaceSwitch >("s3")
-				.NewNode< PWNodeBiomeSurface >("surf")
+			return BaseGraphBuilder.NewGraph< BiomeGraph >()
+				.NewNode< NodeBiomeSurfaceColor >("c1")
+				.NewNode< NodeBiomeSurfaceColor >("c2")
+				.NewNode< NodeBiomeSurfaceColor >("c3")
+				.NewNode< NodeBiomeSurfaceSwitch >("s1")
+				.NewNode< NodeBiomeSurfaceSwitch >("s2")
+				.NewNode< NodeBiomeSurfaceSwitch >("s3")
+				.NewNode< NodeBiomeSurface >("surf")
 				.Link("s1", "surf")
 				.Link("s2" ,"surf")
 				.Link("s3" ,"surf")
@@ -78,26 +78,26 @@ namespace PW.Tests
 				.Link("c2" ,"s2")
 				.Link("c3" ,"s3")
 				.Custom(g => {
-					(g as PWBiomeGraph).surfaceType = BiomeSurfaceType.Color;
+					(g as BiomeGraph).surfaceType = BiomeSurfaceType.Color;
 				})
 				.Execute()
-				.GetGraph() as PWBiomeGraph;
+				.GetGraph() as BiomeGraph;
 		}
 
 		// +--------------+     +-------------+   +-----------+
 		// | perlin noise +-----> noise remap +---> view noise|
 		// +--------------+     +-------------+   +-----------+
 
-		public static PWMainGraph	GenerateTestMainGraphWhitespaces()
+		public static WorldGraph	GenerateTestWorldGraphWhitespaces()
 		{
-			return PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodePerlinNoise2D >("perlin noise")
-				.NewNode< PWNodeCurve >("noise remap")
-				.NewNode< PWNodeDebugInfo >("view noise")
+			return BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodePerlinNoise2D >("perlin noise")
+				.NewNode< NodeCurve >("noise remap")
+				.NewNode< NodeDebugInfo >("view noise")
 				.Link("perlin noise", "noise remap")
 				.Link("noise remap", "view noise")
 				.Execute()
-				.GetGraph() as PWMainGraph;
+				.GetGraph() as WorldGraph;
 		}
 
 		//                                                +----+
@@ -108,15 +108,15 @@ namespace PW.Tests
 		//                                              +-> b2 +--+
 		//                                                +----+
 
-		public static PWMainGraph	GenerateTestMainGraphBiomeSwitch()
+		public static WorldGraph	GenerateTestWorldGraphBiomeSwitch()
 		{
-			return PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodePerlinNoise2D >("perlin")
-				.NewNode< PWNodeWaterLevel >("wlevel")
-				.NewNode< PWNodeBiomeSwitch >("bswitch")
-				.NewNode< PWNodeBiome >("b1")
-				.NewNode< PWNodeBiome >("b2")
-				.NewNode< PWNodeBiomeBlender >("bblender")
+			return BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodePerlinNoise2D >("perlin")
+				.NewNode< NodeWaterLevel >("wlevel")
+				.NewNode< NodeBiomeSwitch >("bswitch")
+				.NewNode< NodeBiome >("b1")
+				.NewNode< NodeBiome >("b2")
+				.NewNode< NodeBiomeBlender >("bblender")
 				.Link("perlin", "wlevel")
 				.Link("wlevel", "bswitch")
 				.Link("bswitch", "outputBiomes", "b1", "inputBiomeData")
@@ -124,7 +124,7 @@ namespace PW.Tests
 				.Link("b1", "bblender")
 				.Link("b2", "bblender")
 				.Execute()
-				.GetGraph() as PWMainGraph;
+				.GetGraph() as WorldGraph;
 		}
 	}
 }

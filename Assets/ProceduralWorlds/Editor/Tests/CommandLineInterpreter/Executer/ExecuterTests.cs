@@ -3,11 +3,11 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
-using PW.Core;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Node;
 using System.Linq;
 
-namespace PW.Tests.CLI
+namespace ProceduralWorlds.Tests.CLI
 {
 	public class ExecuterTests
 	{
@@ -17,20 +17,20 @@ namespace PW.Tests.CLI
 		{
 			string	perlinNodeName = "perlin";
 			string	debugNodeName = "debug";
-			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodePerlinNoise2D >(perlinNodeName)
-				.NewNode< PWNodeDebugInfo >(debugNodeName)
+			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodePerlinNoise2D >(perlinNodeName)
+				.NewNode< NodeDebugInfo >(debugNodeName)
 				.Link(perlinNodeName, debugNodeName)
 				.Execute()
 				.GetGraph();
 			
-			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
-			PWNodeDebugInfo debugNode = graph.FindNodeByName(debugNodeName) as PWNodeDebugInfo;
+			NodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as NodePerlinNoise2D;
+			NodeDebugInfo debugNode = graph.FindNodeByName(debugNodeName) as NodeDebugInfo;
 	
 			Assert.That(perlinNode != null, "Perlin node not found in the graph (using FindNodeByName)");
 			Assert.That(debugNode != null, "Debug node not found in the graph (using FindNodeByName)");
 	
-			PWNodeLink link = perlinNode.GetOutputLinks().First();
+			NodeLink link = perlinNode.GetOutputLinks().First();
 	
 			Assert.That(link != null, "Link can't be found in the graph");
 			Assert.That(link.toNode == debugNode);
@@ -40,16 +40,16 @@ namespace PW.Tests.CLI
 		public static void PerlinNoiseWithAttributesToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
-			var perlinAttributes = new PWGraphCLIAttributes() {
+			var perlinAttributes = new BaseGraphCLIAttributes() {
 				{"persistence", 2.4f}, {"octaves", 6}
 			};
 
-			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodePerlinNoise2D >(perlinNodeName, perlinAttributes)
+			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodePerlinNoise2D >(perlinNodeName, perlinAttributes)
 				.Execute()
 				.GetGraph();
 			
-			PWNodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as PWNodePerlinNoise2D;
+			NodePerlinNoise2D perlinNode = graph.FindNodeByName(perlinNodeName) as NodePerlinNoise2D;
 
 			Assert.That(perlinNode.octaves == 6, "Perlin node octaves expected to be 6 but was " + perlinNode.octaves);
 			Assert.That(perlinNode.persistence == 2.4f, "Perlin node persistence expected to be 2.4 but was " + perlinNode.persistence);
@@ -58,7 +58,7 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void EmptyGraph()
 		{
-			var graph = PWGraphBuilder.NewGraph< PWMainGraph >().Execute().GetGraph();
+			var graph = BaseGraphBuilder.NewGraph< WorldGraph >().Execute().GetGraph();
 
 			Assert.That(graph != null, "Null graph !");
 			Assert.That(graph.inputNode != null, "Null graph input node while creating empty graph");
@@ -68,12 +68,12 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void SliderNodeAnchorLinkedToAddNodeExecution()
 		{
-			var graph = PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodeSlider >("s1")
-				.NewNode< PWNodeSlider >("s2")
-				.NewNode< PWNodeSlider >("s3")
-				.NewNode< PWNodeSlider >("s4")
-				.NewNode< PWNodeAdd >("add")
+			var graph = BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodeSlider >("s1")
+				.NewNode< NodeSlider >("s2")
+				.NewNode< NodeSlider >("s3")
+				.NewNode< NodeSlider >("s4")
+				.NewNode< NodeAdd >("add")
 				.Link("s1", "outValue", "add", "values")
 				.Link("s2", "outValue", "add", "values")
 				.Link("s3", 0, "add", 0)

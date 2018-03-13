@@ -4,9 +4,9 @@ using UnityEngine;
 using System.Linq;
 using System.Reflection;
 using System;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	[System.Serializable]
 	public class BiomeBlendList

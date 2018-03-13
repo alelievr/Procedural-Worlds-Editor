@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using PW.Core;
+using ProceduralWorlds.Core;
 using UnityEngine;
 
-namespace PW.Noises
+namespace ProceduralWorlds.Noises
 {
 	public class Flat3D : Noise
 	{

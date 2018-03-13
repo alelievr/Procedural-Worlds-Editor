@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public static class BiomeSamplerName
 	{
@@ -55,7 +55,7 @@ namespace PW.Biomator
 
 		//data for the switch graph (to choose biomes using biomeSamplers)
 		public BiomeSwitchGraph		biomeSwitchGraph;
-		public PWNode				biomeSwitchGraphStartPoint;
+		public BaseNode				biomeSwitchGraphStartPoint;
 
 		//biome maps
 		public BiomeMap2D			biomeMap;

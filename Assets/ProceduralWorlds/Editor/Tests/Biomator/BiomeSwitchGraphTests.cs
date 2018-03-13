@@ -4,12 +4,12 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 using System.Linq;
-using PW.Core;
-using PW.Biomator;
-using PW.Node;
-using PW.Biomator.SwitchGraph;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
+using ProceduralWorlds.Node;
+using ProceduralWorlds.Biomator.SwitchGraph;
 
-namespace PW.Tests.Biomator
+namespace ProceduralWorlds.Tests.Biomator
 {
 	public class BiomeSwitchGraphTests
 	{
@@ -24,13 +24,13 @@ namespace PW.Tests.Biomator
 		[Test]
 		public static void SimpleSwitchGraphBuild()
 		{
-			PWMainGraph		graph = TestUtils.GenerateTestMainGraphBiomeSwitch();
+			WorldGraph		graph = TestUtils.GenerateTestWorldGraphBiomeSwitch();
 			BiomeData		bd = new BiomeData();
 
 			var wlevel = graph.FindNodeByName("wlevel");
-			var bswitch = graph.FindNodeByName< PWNodeBiomeSwitch >("bswitch");
-			var b1 = graph.FindNodeByName< PWNodeBiome >("b1");
-			var b2 = graph.FindNodeByName< PWNodeBiome >("b2");
+			var bswitch = graph.FindNodeByName< NodeBiomeSwitch >("bswitch");
+			var b1 = graph.FindNodeByName< NodeBiome >("b1");
+			var b2 = graph.FindNodeByName< NodeBiome >("b2");
 
 			bd.biomeSwitchGraphStartPoint = wlevel;
 

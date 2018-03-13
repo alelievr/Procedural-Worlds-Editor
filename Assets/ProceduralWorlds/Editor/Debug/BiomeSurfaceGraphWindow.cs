@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW.Core;
-using PW.Biomator;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
 using UnityEditorInternal;
 using System.Linq;
 

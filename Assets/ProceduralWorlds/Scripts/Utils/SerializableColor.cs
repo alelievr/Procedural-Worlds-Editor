@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-namespace PW
+namespace ProceduralWorlds
 {
 	[System.SerializableAttribute]
 	public struct SerializableColor : IEquatable< SerializableColor >

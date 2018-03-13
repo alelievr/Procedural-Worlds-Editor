@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW.Biomator.SwitchGraph
+namespace ProceduralWorlds.Biomator.SwitchGraph
 {
 	public class BiomeSwitchCellParam
 	{

@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW.Core;
+using ProceduralWorlds.Core;
 using System;
-using PW;
+using ProceduralWorlds;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class ChunkLoaderDrawer : PWDrawer
 	{
-		PWMainGraph		mainGraph;
+		WorldGraph		worldGraph;
 
 		public override void OnEnable()
 		{
-			mainGraph =  target as PWMainGraph;
+			worldGraph =  target as WorldGraph;
 		}
 
 		new public void OnGUI(Rect r)
@@ -24,7 +24,10 @@ namespace PW.Editor
 			var terrain = PWTerrainPreviewManager.instance.terrainBase;
 
 			if (terrain == null)
+			{
+				EditorGUILayout.HelpBox("Terrain materializer type not supported (" + worldGraph.terrainPreviewType + ")", MessageType.Warning);
 				return ;
+			}
 			
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
 
@@ -41,17 +44,17 @@ namespace PW.Editor
 		{
 			if (EditorApplication.isPlaying || EditorApplication.isPaused)
 			{
-				Debug.LogError("[Editor Terrain Manager] can't reload chunks from the editor in play mode");
+				Debug.LogError("[Editor Terrain Manager] can't reload chunks in play mode");
 				return ;
 			}
 
-			if (mainGraph != null)
+			if (worldGraph != null)
 			{
 				//if the graph we have is not the same / have been modified since last generation, we replace it
-				if (terrain.graph != null && terrain.graph.GetHashCode() != mainGraph.GetHashCode())
+				if (terrain.graph != null && terrain.graph.GetHashCode() != worldGraph.GetHashCode())
 					GameObject.DestroyImmediate(terrain.graph);
 				
-				terrain.InitGraph(mainGraph.Clone() as PWMainGraph);
+				terrain.InitGraph(worldGraph.Clone() as WorldGraph);
 				
 				terrain.DestroyAllChunks();
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PW
+namespace ProceduralWorlds
 {
     [System.Serializable]
     public struct SerializableKeyframe

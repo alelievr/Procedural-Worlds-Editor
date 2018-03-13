@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
-using PW.Core;
-using PW.Biomator;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
+using ProceduralWorlds.Node;
 using System;
 using System.Linq;
 using System.Diagnostics;
-using PW.Biomator.SwitchGraph;
+using ProceduralWorlds.Biomator.SwitchGraph;
 
-using Sampler = PW.Core.Sampler;
+using Sampler = ProceduralWorlds.Core.Sampler;
 using Debug = UnityEngine.Debug;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public class BiomeParamRange
 	{
@@ -53,9 +53,9 @@ namespace PW.Biomator
 		{
 			ResetGraph();
 
-			PWNode rootNode = biomeData.biomeSwitchGraphStartPoint;
+			BaseNode rootNode = biomeData.biomeSwitchGraphStartPoint;
 
-			Stack< PWNode > biomeNodes = new Stack< PWNode >();
+			Stack< BaseNode > biomeNodes = new Stack< BaseNode >();
 
 			biomeNodes.Push(rootNode);
 
@@ -66,15 +66,15 @@ namespace PW.Biomator
 
 			while (biomeNodes.Count > 0)
 			{
-				PWNode	currentNode = biomeNodes.Pop();
-				Type	nodeType = currentNode.GetType();
+				BaseNode	currentNode = biomeNodes.Pop();
+				Type		nodeType = currentNode.GetType();
 
-				if (nodeType == typeof(PWNodeBiome))
+				if (nodeType == typeof(NodeBiome))
 				{
 					//get all precedent switch data in the order of the tree (start from rootNode)
 					var precedentSwitchDatas = GetPrecedentSwitchDatas(currentNode, rootNode);
 
-					var biomeNode = currentNode as PWNodeBiome;
+					var biomeNode = currentNode as NodeBiome;
 					var lastSwitch = precedentSwitchDatas.Last();
 					currentCell = new BiomeSwitchCell();
 					
@@ -103,7 +103,7 @@ namespace PW.Biomator
 						biomeCoverage[index] += (sd.max - sd.min) / (sd.absoluteMax - sd.absoluteMin);
 					}
 				}
-				else if (nodeType == typeof(PWNodeBiomeBlender))
+				else if (nodeType == typeof(NodeBiomeBlender))
 				{
 					if (currentCell == null)
 						throw new InvalidOperationException("[PWBiomeSwitchGraph] idk what happened but this is really bad");
@@ -170,19 +170,19 @@ namespace PW.Biomator
 			}
 		}
 
-		List< BiomeSwitchData > GetPrecedentSwitchDatas(PWNode currentNode, PWNode rootNode)
+		List< BiomeSwitchData > GetPrecedentSwitchDatas(BaseNode currentNode, BaseNode rootNode)
 		{
 			var precedentSwitchDatas = new List< BiomeSwitchData >();
 
-			PWNode n = currentNode;
+			BaseNode n = currentNode;
 			while (n != rootNode)
 			{
-				PWNode prevNode = n;
+				BaseNode prevNode = n;
 				n = n.GetInputNodes().First();
-				if (n.GetType() != typeof(PWNodeBiomeSwitch))
+				if (n.GetType() != typeof(NodeBiomeSwitch))
 					break ;
 				
-				var switches = (n as PWNodeBiomeSwitch).switchList;
+				var switches = (n as NodeBiomeSwitch).switchList;
 				
 				int index = n.outputAnchors.ToList().FindIndex(a => a.links.Any(l => l.toNode == prevNode));
 

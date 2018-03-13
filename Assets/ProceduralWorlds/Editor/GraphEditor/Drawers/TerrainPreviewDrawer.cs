@@ -3,37 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEditor;
-using PW.Core;
+using ProceduralWorlds.Core;
 using System;
 using Object = UnityEngine.Object;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	[System.Serializable]
 	public class TerrainPreviewDrawer : PWDrawer
 	{
 		[SerializeField]
-		PWTerrainPreviewType	loadedPreviewType;
+		TerrainPreviewType	loadedPreviewType;
 
 		bool					previewMouseDrag;
 		float					cameraMoveDirection;
 
+		Texture2D				recenterIcon;
+
 		[System.NonSerialized]
 		bool					first = true;
 
-		PWGraph					graphRef;
+		BaseGraph					graphRef;
 
-		Dictionary< PWTerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< PWTerrainPreviewType, string >()
+		Dictionary< TerrainPreviewType, string > previewTypeToPrefabNames = new Dictionary< TerrainPreviewType, string >()
 		{
-			{PWTerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
-			{PWTerrainPreviewType.SideView, PWConstants.previewSideViewPrefabName},
+			{TerrainPreviewType.TopDownPlanarView, PWConstants.previewTopDownPrefabName},
+			{TerrainPreviewType.SideView, PWConstants.previewSideViewPrefabName},
 		};
 		
 		public override void OnEnable()
 		{
-			graphRef = target as PWGraph;
+			graphRef = target as BaseGraph;
 
 			PWTerrainPreviewManager.instance.UpdatePreviewPrefab(previewTypeToPrefabNames[graphRef.terrainPreviewType]);
+
+			recenterIcon = Resources.Load< Texture2D >("Icons/ic_recenter");
 		}
 
 		void UpdatePreviewObjects()
@@ -56,7 +60,7 @@ namespace PW.Editor
 
 				DrawTerrainPreview(previewRect);
 
-				graphRef.terrainPreviewType = (PWTerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", graphRef.terrainPreviewType);
+				graphRef.terrainPreviewType = (TerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", graphRef.terrainPreviewType);
 			}
 			EditorGUILayout.EndVertical();
 		}
@@ -69,6 +73,12 @@ namespace PW.Editor
 
 			Camera previewCamera = PWTerrainPreviewManager.instance.previewCamera;
 
+			if (previewCamera == null)
+			{
+				DisplayLoadCameraButton();
+				return ;
+			}
+
 			if (previewCamera != null && first)
 				previewCamera.Render();
 
@@ -77,31 +87,35 @@ namespace PW.Editor
 			if (renderTexture != null)
 				GUI.DrawTexture(previewRect, renderTexture);
 
-			if (previewRect.Contains(e.mousePosition))
+			DrawIcons(previewRect, previewCamera);
+
+			switch (loadedPreviewType)
 			{
-				switch (loadedPreviewType)
-				{
-					case PWTerrainPreviewType.SideView:
-					case PWTerrainPreviewType.TopDownPlanarView:
-						TopDownCameraControls(previewCamera);
-						break ;
-					default:
-						break ;
-				}
-				
-				//move the terrain materializer so it generate terrain around the camera
-				PWTerrainPreviewManager.instance.UpdateChunkLoaderPosition(previewCamera.transform.position);
+				case TerrainPreviewType.SideView:
+				case TerrainPreviewType.TopDownPlanarView:
+					TopDownCameraControls(previewRect, previewCamera);
+					break ;
+				default:
+					break ;
 			}
+			
+			//move the terrain materializer so it generate terrain around the camera
+			PWTerrainPreviewManager.instance.UpdateChunkLoaderPosition(previewCamera.transform.position);
 
 			first = false;
 
 			Profiler.EndSample();
 		}
 
-		void TopDownCameraControls(Camera previewCamera)
+		void DisplayLoadCameraButton()
+		{
+			EditorGUILayout.LabelField("TODO: preview load button");
+		}
+
+		void TopDownCameraControls(Rect previewRect, Camera previewCamera)
 		{
 			//activate drag when mouse down inside preview rect:
-			if (e.type == EventType.MouseDown)
+			if (previewRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
 			{
 				previewMouseDrag = true;
 				e.Use();
@@ -120,6 +134,18 @@ namespace PW.Editor
 
 				e.Use();
 			}
+		}
+
+		void DrawIcons(Rect previewRect, Camera previewCamera)
+		{
+			//Recenter icon:
+			Rect recenterIconRect = previewRect;
+			recenterIconRect.position += new Vector2(4, 6);
+			recenterIconRect.size = new Vector2(15, 15);
+			GUI.DrawTexture(recenterIconRect, recenterIcon);
+
+			if (recenterIconRect.Contains(e.mousePosition))
+				previewCamera.transform.position = Vector3.zero;
 		}
 	}
 }

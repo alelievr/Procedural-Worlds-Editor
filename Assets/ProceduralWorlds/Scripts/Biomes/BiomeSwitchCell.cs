@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 
-namespace PW.Biomator.SwitchGraph
+namespace ProceduralWorlds.Biomator.SwitchGraph
 {
 	public class BiomeSwitchCell
 	{
@@ -23,7 +23,7 @@ namespace PW.Biomator.SwitchGraph
 				var c = cellParams.switchParams[i];
 				var sp = switchParams.switchParams[i];
 				if (c.enabled && sp.enabled
-					&& !PWUtils.Overlap(sp.min, sp.max, c.min, c.max))
+					&& !Utils.Overlap(sp.min, sp.max, c.min, c.max))
 						return false;
 			}
 			return true;
@@ -111,7 +111,7 @@ namespace PW.Biomator.SwitchGraph
 				{
 					var s1 = switchParams.switchParams[i];
 					var s2 = c2.switchParams.switchParams[i];
-					gap += PWUtils.GapWidth(s1.min, s1.max, s2.min, s2.max);
+					gap += Utils.GapWidth(s1.min, s1.max, s2.min, s2.max);
 				}
 			
 			return gap;

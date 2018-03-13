@@ -3,12 +3,12 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
-using PW.Core;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Node;
 using System.Linq;
 using System;
 
-namespace PW.Tests.CLI
+namespace ProceduralWorlds.Tests.CLI
 {
 	public class RegexParserTests
 	{
@@ -18,12 +18,12 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WhiteSpaceNewNodeCommand()
 		{
-			PWGraphCommand cmd;
+			BaseGraphCommand cmd;
 	
-			cmd = PWGraphCLI.Parse("  	  NewNode 	      PWNodeAdd  	    add  	    	 ");
+			cmd = BaseGraphCLI.Parse("  	  NewNode 	      NodeAdd  	    add  	    	 ");
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNode);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
+			Assert.That(cmd.type == BaseGraphCommandType.NewNode);
+			Assert.That(cmd.nodeType == typeof(NodeAdd));
 			Assert.That(cmd.name == "add");
 			Assert.That(cmd.forcePositon == false);
 		}
@@ -31,11 +31,11 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "addName");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodeAdd), "addName");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNode);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
+			Assert.That(cmd.type == BaseGraphCommandType.NewNode);
+			Assert.That(cmd.nodeType == typeof(NodeAdd));
 			Assert.That(cmd.name == "addName");
 			Assert.That(cmd.forcePositon == false);
 		}
@@ -43,11 +43,11 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedWhitespaceNewNodeCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "add node name");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodeAdd), "add node name");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNode);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
+			Assert.That(cmd.type == BaseGraphCommandType.NewNode);
+			Assert.That(cmd.nodeType == typeof(NodeAdd));
 			Assert.That(cmd.name == "add node name");
 			Assert.That(cmd.forcePositon == false);
 		}
@@ -55,10 +55,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WhiteSpaceNewNodeWithPositionCommand()
 		{
-			PWGraphCommand cmd = PWGraphCLI.Parse("  	  NewNode 	      PWNodeAdd  	    add  	    (  	 42,   -42 	   )	 ");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse("  	  NewNode 	      NodeAdd  	    add  	    (  	 42,   -42 	   )	 ");
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNodePosition);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd));
+			Assert.That(cmd.type == BaseGraphCommandType.NewNodePosition);
+			Assert.That(cmd.nodeType == typeof(NodeAdd));
 			Assert.That(cmd.name == "add");
 			Assert.That(cmd.forcePositon == true);
 			Assert.That(cmd.position == new Vector2(42, -42));
@@ -67,11 +67,11 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithPositionCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodeAdd), "addName", new Vector2(42, -42));
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodeAdd), "addName", new Vector2(42, -42));
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.NewNodePosition, "Bad command type: " + cmd.type + " instead of " + PWGraphCommandType.NewNodePosition);
-			Assert.That(cmd.nodeType == typeof(PWNodeAdd), "Bad node type: " + cmd.nodeType + " instead of " + typeof(PWNodeAdd));
+			Assert.That(cmd.type == BaseGraphCommandType.NewNodePosition, "Bad command type: " + cmd.type + " instead of " + BaseGraphCommandType.NewNodePosition);
+			Assert.That(cmd.nodeType == typeof(NodeAdd), "Bad node type: " + cmd.nodeType + " instead of " + typeof(NodeAdd));
 			Assert.That(cmd.name == "addName", "Bad node name: " + cmd.name + " instead of addName");
 			Assert.That(cmd.forcePositon == true, "Forceposition is false but expected to be true");
 			Assert.That(cmd.position == new Vector2(42, -42), "Bad node position: " + cmd.position + " instead of " + new Vector2(42, -42));
@@ -81,7 +81,7 @@ namespace PW.Tests.CLI
 		public static void BadTypeNewNodeCommand()
 		{
 			try {
-				PWGraphCLI.Parse("NewNode PWNodeUnknown unknown");
+				BaseGraphCLI.Parse("NewNode NodeUnknown unknown");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
 				return ;
@@ -94,7 +94,7 @@ namespace PW.Tests.CLI
 		public static void missingNameNewNodeCommand()
 		{
 			try {
-				PWGraphCLI.Parse("NewNode PWNodeAdd");
+				BaseGraphCLI.Parse("NewNode NodeAdd");
 			} catch {
 				return ;
 			}
@@ -105,7 +105,7 @@ namespace PW.Tests.CLI
 		public static void TooManyArgumentsNewNodeCommand()
 		{
 			try {
-				PWGraphCLI.Parse("NewNode PWNodeAdd node node node node");
+				BaseGraphCLI.Parse("NewNode NodeAdd node node node node");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
 				return ;
@@ -117,10 +117,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new PWGraphCLIAttributes() {{"persistence", 2.4f}, {"octaves", 3}});
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new BaseGraphCLIAttributes() {{"persistence", 2.4f}, {"octaves", 3}});
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			var parsedAttrs = PWJson.Parse(cmd.attributes);
+			var parsedAttrs = Jsonizer.Parse(cmd.attributes);
 			var persistenceAttr = parsedAttrs[0];
 			var octavesAttr = parsedAttrs[1];
 
@@ -133,10 +133,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithPositionAndDataCommand()
 		{
-			string s = PWGraphCLI.GenerateNewNodeCommand(typeof(PWNodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new PWGraphCLIAttributes() {{"persistence", 1.4f}, {"octaves", 2}});
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new BaseGraphCLIAttributes() {{"persistence", 1.4f}, {"octaves", 2}});
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			var parsedAttrs = PWJson.Parse(cmd.attributes);
+			var parsedAttrs = Jsonizer.Parse(cmd.attributes);
 			var persistenceAttr = parsedAttrs[0];
 			var octavesAttr = parsedAttrs[1];
 
@@ -153,10 +153,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkCommand()
 		{
-			string s = PWGraphCLI.GenerateLinkCommand("node1", "node2");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkCommand("node1", "node2");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.Link);
+			Assert.That(cmd.type == BaseGraphCommandType.Link);
 			Assert.That(cmd.fromNodeName == "node1");
 			Assert.That(cmd.toNodeName == "node2");
 		}
@@ -164,10 +164,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkCommandNameWhitespaces()
 		{
-			string s = PWGraphCLI.GenerateLinkCommand("node 1", "node 2");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkCommand("node 1", "node 2");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 	
-			Assert.That(cmd.type == PWGraphCommandType.Link);
+			Assert.That(cmd.type == BaseGraphCommandType.Link);
 			Assert.That(cmd.fromNodeName == "node 1");
 			Assert.That(cmd.toNodeName == "node 2");
 		}
@@ -175,9 +175,9 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WhiteSpaceLinkCommand()
 		{
-			PWGraphCommand cmd = PWGraphCLI.Parse("    	 	 	Link 		 	 node1   	node2	 	      ");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse("    	 	 	Link 		 	 node1   	node2	 	      ");
 	
-			Assert.That(cmd.type == PWGraphCommandType.Link);
+			Assert.That(cmd.type == BaseGraphCommandType.Link);
 			Assert.That(cmd.fromNodeName == "node1");
 			Assert.That(cmd.toNodeName == "node2");
 		}
@@ -189,10 +189,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkAnchorCommand()
 		{
-			string s = PWGraphCLI.GenerateLinkAnchorCommand("node1", 1, "node2", 4);
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkAnchorCommand("node1", 1, "node2", 4);
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			Assert.That(cmd.type == PWGraphCommandType.LinkAnchor);
+			Assert.That(cmd.type == BaseGraphCommandType.LinkAnchor);
 			Assert.That(cmd.fromNodeName == "node1");
 			Assert.That(cmd.toNodeName == "node2");
 			Assert.That(cmd.fromAnchorIndex == 1);
@@ -202,10 +202,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkAnchorCommandNameWhitespaces()
 		{
-			string s = PWGraphCLI.GenerateLinkAnchorCommand("node 1", 1, "node 2", 4);
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkAnchorCommand("node 1", 1, "node 2", 4);
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			Assert.That(cmd.type == PWGraphCommandType.LinkAnchor);
+			Assert.That(cmd.type == BaseGraphCommandType.LinkAnchor);
 			Assert.That(cmd.fromNodeName == "node 1");
 			Assert.That(cmd.toNodeName == "node 2");
 			Assert.That(cmd.fromAnchorIndex == 1);
@@ -216,10 +216,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkAnchorNameCommand()
 		{
-			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node1", "a1", "node2", "a2");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkAnchorNameCommand("node1", "a1", "node2", "a2");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			Assert.That(cmd.type == PWGraphCommandType.LinkAnchorName);
+			Assert.That(cmd.type == BaseGraphCommandType.LinkAnchorName);
 			Assert.That(cmd.fromNodeName == "node1");
 			Assert.That(cmd.toNodeName == "node2");
 			Assert.That(cmd.fromAnchorFieldName == "a1");
@@ -229,10 +229,10 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void WellFormatedLinkAnchorNameCommandNameWhitespaces()
 		{
-			string s = PWGraphCLI.GenerateLinkAnchorNameCommand("node 1", "a1", "node 2", "a2");
-			PWGraphCommand cmd = PWGraphCLI.Parse(s);
+			string s = BaseGraphCLI.GenerateLinkAnchorNameCommand("node 1", "a1", "node 2", "a2");
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
-			Assert.That(cmd.type == PWGraphCommandType.LinkAnchorName);
+			Assert.That(cmd.type == BaseGraphCommandType.LinkAnchorName);
 			Assert.That(cmd.fromNodeName == "node 1");
 			Assert.That(cmd.toNodeName == "node 2");
 			Assert.That(cmd.fromAnchorFieldName == "a1");
@@ -247,7 +247,7 @@ namespace PW.Tests.CLI
 		public static void UnknowCommand()
 		{
 			try {
-				PWGraphCLI.Parse("BlaBlaBla arg1 arg2");
+				BaseGraphCLI.Parse("BlaBlaBla arg1 arg2");
 				throw new InvalidOperationException("no exception was thrown by unknow command");
 			} catch {
 				//the exception was thrown so the commmand works as excpected
@@ -258,7 +258,7 @@ namespace PW.Tests.CLI
 		public static void EmptyCommand()
 		{
 			try {
-				PWGraphCLI.Parse("");
+				BaseGraphCLI.Parse("");
 				throw new InvalidOperationException("no exception was thrown by an empty command");
 			} catch {
 				//the exception was thrown so the commmand works as excpected

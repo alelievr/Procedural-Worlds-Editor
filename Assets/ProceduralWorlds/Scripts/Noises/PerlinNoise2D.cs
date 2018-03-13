@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using PW.Core;
+using ProceduralWorlds.Core;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
 
-namespace PW.Noises
+namespace ProceduralWorlds.Noises
 {
 	public class PerlinNoise2D : Noise
     {

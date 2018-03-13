@@ -17,7 +17,7 @@ Consult the [trello](https://trello.com/b/ycMeDDPc/procedural-worlds) to see the
 [wiki link](https://github.com/alelievr/Procedural-Worlds-Editor/wiki)
 
 ## Editor screenshots:
-Main graph
+World graph
 ![](https://image.noelshack.com/fichiers/2018/09/3/1519838245-github1.jpg)
 
 Biome graph

@@ -4,9 +4,9 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 
-namespace PW.Tests.Biomator
+namespace ProceduralWorlds.Tests.Biomator
 {
 	public class BiomeSurfaceGraphTests
 	{

@@ -4,10 +4,10 @@ using UnityEngine.TestTools;
 using System.Collections.Generic;
 using NUnit.Framework;
 using System.Collections;
-using PW.Core;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Node;
 
-namespace PW.Tests.CLI
+namespace ProceduralWorlds.Tests.CLI
 {
 	public class BasicLexerParserTest
 	{
@@ -15,17 +15,17 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void PerlinNoiseNodeToDebugNodeParsedCommands()
 		{
-			var builder = PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode(typeof(PWNodePerlinNoise2D), "perlin")
-				.NewNode(typeof(PWNodeDebugInfo), "debug")
+			var builder = BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode(typeof(NodePerlinNoise2D), "perlin")
+				.NewNode(typeof(NodeDebugInfo), "debug")
 				.Link("perlin", "debug");
 	
 			//list of the expected created commands
-			List< PWGraphCommand > expectedCommands = new List< PWGraphCommand >()
+			List< BaseGraphCommand > expectedCommands = new List< BaseGraphCommand >()
 			{
-				new PWGraphCommand(typeof(PWNodePerlinNoise2D), "perlin"),
-				new PWGraphCommand(typeof(PWNodeDebugInfo), "debug"),
-				new PWGraphCommand("perlin", "debug"),
+				new BaseGraphCommand(typeof(NodePerlinNoise2D), "perlin"),
+				new BaseGraphCommand(typeof(NodeDebugInfo), "debug"),
+				new BaseGraphCommand("perlin", "debug"),
 			};
 	
 			//get the commands as string
@@ -34,7 +34,7 @@ namespace PW.Tests.CLI
 			for (int i = 0; i < expectedCommands.Count; i++)
 			{
 				//Parse the command and get the resulting command object
-				PWGraphCommand cmd = PWGraphCLI.Parse(builderCommands[i]);
+				BaseGraphCommand cmd = BaseGraphCLI.Parse(builderCommands[i]);
 	
 				Assert.That(cmd == expectedCommands[i]);
 			}
@@ -43,28 +43,28 @@ namespace PW.Tests.CLI
 		[Test]
 		public static void SliderNodeToAddNodeWithAnchorLink()
 		{
-			var builder = PWGraphBuilder.NewGraph< PWMainGraph >()
-				.NewNode< PWNodeSlider >("s1")
-				.NewNode< PWNodeSlider >("s2")
-				.NewNode< PWNodeSlider >("s3")
-				.NewNode< PWNodeSlider >("s4")
-				.NewNode< PWNodeAdd >("add")
+			var builder = BaseGraphBuilder.NewGraph< WorldGraph >()
+				.NewNode< NodeSlider >("s1")
+				.NewNode< NodeSlider >("s2")
+				.NewNode< NodeSlider >("s3")
+				.NewNode< NodeSlider >("s4")
+				.NewNode< NodeAdd >("add")
 				.Link("s1", "outValue", "add", "values")
 				.Link("s2", "outValue", "add", "values")
 				.Link("s3", 1, "add", 1)
 				.Link("s4", 1, "add", 1);
 
-			var expectedCommands = new List< PWGraphCommand >()
+			var expectedCommands = new List< BaseGraphCommand >()
 			{
-				new PWGraphCommand(typeof(PWNodeSlider), "s1"),
-				new PWGraphCommand(typeof(PWNodeSlider), "s2"),
-				new PWGraphCommand(typeof(PWNodeSlider), "s3"),
-				new PWGraphCommand(typeof(PWNodeSlider), "s4"),
-				new PWGraphCommand(typeof(PWNodeAdd), "add"),
-				new PWGraphCommand("s1", "outValue", "add", "values"),
-				new PWGraphCommand("s2", "outValue", "add", "values"),
-				new PWGraphCommand("s3", 1, "add", 1),
-				new PWGraphCommand("s4", 1, "add", 1),
+				new BaseGraphCommand(typeof(NodeSlider), "s1"),
+				new BaseGraphCommand(typeof(NodeSlider), "s2"),
+				new BaseGraphCommand(typeof(NodeSlider), "s3"),
+				new BaseGraphCommand(typeof(NodeSlider), "s4"),
+				new BaseGraphCommand(typeof(NodeAdd), "add"),
+				new BaseGraphCommand("s1", "outValue", "add", "values"),
+				new BaseGraphCommand("s2", "outValue", "add", "values"),
+				new BaseGraphCommand("s3", 1, "add", 1),
+				new BaseGraphCommand("s4", 1, "add", 1),
 			};
 
 			var commands = builder.GetCommands();
@@ -72,7 +72,7 @@ namespace PW.Tests.CLI
 			for (int i = 0; i < expectedCommands.Count; i++)
 			{
 				//Parse the command and get the resulting command object
-				PWGraphCommand cmd = PWGraphCLI.Parse(commands[i]);
+				BaseGraphCommand cmd = BaseGraphCLI.Parse(commands[i]);
 	
 				Assert.That(cmd == expectedCommands[i]);
 			}

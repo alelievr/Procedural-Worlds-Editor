@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 using UnityEditor;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class BiomeDataInputDrawer : PWDrawer
 	{

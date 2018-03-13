@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-namespace PW
+namespace ProceduralWorlds
 {
 	[System.SerializableAttribute]
 	public class SerializableGradient {

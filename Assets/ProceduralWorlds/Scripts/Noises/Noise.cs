@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Core;
+using ProceduralWorlds.Core;
 using System.Runtime.CompilerServices;
 
-namespace PW.Noises
+namespace ProceduralWorlds.Noises
 {
 	public abstract class Noise
 	{

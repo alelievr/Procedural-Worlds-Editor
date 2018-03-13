@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public static class GUIScaleUtility
 	{

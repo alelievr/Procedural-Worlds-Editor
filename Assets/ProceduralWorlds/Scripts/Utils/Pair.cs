@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace PW.Core
+namespace ProceduralWorlds.Core
 {
 	[Serializable]
 	public class Pair< T, U >

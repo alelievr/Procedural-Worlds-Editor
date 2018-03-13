@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 using System.Linq;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class BiomeSwitchListDrawer : PWDrawer
 	{

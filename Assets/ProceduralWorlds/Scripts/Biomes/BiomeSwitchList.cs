@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Core;
+using ProceduralWorlds.Core;
 using System;
 using System.Linq;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	[System.Serializable]
 	public class BiomeSwitchData

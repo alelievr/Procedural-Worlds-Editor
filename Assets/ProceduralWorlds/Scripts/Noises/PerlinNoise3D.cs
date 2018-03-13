@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Noises
+namespace ProceduralWorlds.Noises
 {
     public class PerlinNoise3D : Noise
     {

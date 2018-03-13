@@ -1,9 +1,9 @@
 using UnityEditor;
 using UnityEngine;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 using System.Linq;
 
-namespace PW.Editor
+namespace ProceduralWorlds.Editor
 {
 	public class BiomeBlendListDrawer : PWDrawer
 	{
