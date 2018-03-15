@@ -48,6 +48,8 @@ namespace ProceduralWorlds
 				this.graph = graph;
 			else
 				return ;
+
+			Debug.Log("graph is ready: " + graph.readyToProcess);
 			
 			graph.SetRealMode(true);
 			chunkSize = graph.chunkSize;

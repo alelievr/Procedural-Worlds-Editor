@@ -32,7 +32,6 @@ namespace ProceduralWorlds.Tests.Graphs
 			var graph = TestUtils.GenerateTestWorldGraph();
 
 			var add3 = graph.FindNodeByName("add3");
-			var add2 = graph.FindNodeByName< NodeAdd >("add2");
 			var debug = graph.FindNodeByName< NodeDebugInfo >("debug1");
 			var debug2 = graph.FindNodeByName< NodeDebugInfo >("debug2");
 			var slider = graph.FindNodeByName< NodeSlider >("slider");

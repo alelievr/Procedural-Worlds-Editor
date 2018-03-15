@@ -8,6 +8,7 @@ using System.Reflection;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Node;
 using System;
+using System.Reflection.Emit;
 
 namespace ProceduralWorlds.Editor
 {
@@ -23,6 +24,8 @@ namespace ProceduralWorlds.Editor
 
 		List< object >				propertiesBeforeGUI;
 		List< object >				propertiesAfterGUI;
+
+		Dictionary< string, ReflectionUtils.GenericCaller > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericCaller >();
 
 		void LoadCoreResources()
 		{
@@ -189,11 +192,41 @@ namespace ProceduralWorlds.Editor
 				if (!inputAnchor.required)
 					continue ;
 				
-				//TODO: make this fly
-				FieldInfo fi = nodeRef.GetType().GetField(inputAnchor.fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
-				if (fi.GetValue(nodeRef) == null)
+				if (!bakedChildFieldGetters.ContainsKey(inputAnchor.fieldName))
+					bakedChildFieldGetters[inputAnchor.fieldName] = CreateGenericGetter(inputAnchor.fieldName);
+
+				if (bakedChildFieldGetters[inputAnchor.fieldName].Call(nodeRef) == null)
 					EditorGUILayout.HelpBox("Null parameter: " + inputAnchor.fieldName, MessageType.Error);
 			}
 		}
+
+		ReflectionUtils.GenericCaller CreateGenericGetter(string fieldName)
+		{
+			//Create the delegate type that takes our node type in parameter
+			var delegateType = typeof(ReflectionUtils.ChildFieldGetter<>).MakeGenericType(new Type[] { nodeRef.GetType() });
+
+			//Get the child field from base class
+			FieldInfo fi = nodeRef.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+
+			//Create a new method which return the field fi
+			DynamicMethod dm = new DynamicMethod("Get" + fi.Name, typeof(object), new Type[] { nodeRef.GetType() }, nodeRef.GetType());
+			ILGenerator il = dm.GetILGenerator();
+			// Load the instance of the object (argument 0) onto the stack
+			il.Emit(OpCodes.Ldarg_0);
+			// Load the value of the object's field (fi) onto the stack
+			il.Emit(OpCodes.Ldfld, fi);
+			// return the value on the top of the stack
+			il.Emit(OpCodes.Ret);
+
+			//Create a specific type from Caller which will cast the generic type to a specific one to call the generated delegate
+			var callerType = typeof(ReflectionUtils.Caller<>).MakeGenericType(new Type[] { nodeRef.GetType() });
+
+			//Instantiate this type and bind the delegate
+			var genericCaller = Activator.CreateInstance(callerType) as ReflectionUtils.GenericCaller;
+			genericCaller.SetDelegate(dm.CreateDelegate(delegateType));
+
+			return genericCaller;
+		}
 	}
+
 }

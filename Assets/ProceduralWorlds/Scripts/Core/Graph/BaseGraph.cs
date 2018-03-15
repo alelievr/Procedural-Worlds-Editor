@@ -72,7 +72,7 @@ namespace ProceduralWorlds.Core
 		[NonSerialized]
 		protected IOrderedEnumerable< BaseNode >	computeOrderSortedNodes;
 		[NonSerialized]
-		protected Dictionary< int, BaseNode >		nodesDictionary = new Dictionary< int, BaseNode >();
+		protected Dictionary< int, BaseNode >	nodesDictionary = new Dictionary< int, BaseNode >();
 		[NonSerialized]
 		private FieldInfo						inputNodeOutputValues;
 		[NonSerialized]
@@ -264,6 +264,8 @@ namespace ProceduralWorlds.Core
 			//reenable our graph to rebind our nodes to our graph
 			OnDisable();
 			OnEnable();
+
+			Debug.Log("cloned: " + this);
 
 			return clonedGraph;
 		}
