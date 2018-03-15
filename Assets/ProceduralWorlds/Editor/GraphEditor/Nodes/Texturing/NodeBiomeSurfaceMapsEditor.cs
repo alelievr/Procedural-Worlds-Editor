@@ -8,7 +8,7 @@ using ProceduralWorlds.Biomator;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeSurfaceMaps))]
-	public class NodeBiomeSurfaceMapsEditor : NodeEditor
+	public class NodeBiomeSurfaceMapsEditor : BaseNodeEditor
 	{
 		public NodeBiomeSurfaceMaps node;
 

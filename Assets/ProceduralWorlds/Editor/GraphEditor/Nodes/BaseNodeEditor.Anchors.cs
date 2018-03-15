@@ -11,7 +11,7 @@ using System;
 namespace ProceduralWorlds.Editor
 {
 	//Anchor rendering and event processing
-	public abstract partial class NodeEditor
+	public abstract partial class BaseNodeEditor
 	{
 		Texture2D		errorIcon;
 		Texture2D		anchorTexture;

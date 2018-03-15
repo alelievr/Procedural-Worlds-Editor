@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 //Header rendering and processing for nodes
 namespace ProceduralWorlds.Editor
 {
-	public partial class NodeEditor
+	public partial class BaseNodeEditor
 	{
 		static Texture2D			editIcon = null;
 		static Texture2D			debugIcon = null;

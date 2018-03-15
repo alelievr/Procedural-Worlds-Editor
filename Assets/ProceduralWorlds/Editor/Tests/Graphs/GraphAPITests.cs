@@ -288,7 +288,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			}
 
 			Assert.That(clonedGraph.readyToProcess == true);
-
+		
 			clonedGraph.Process();
 		}
 

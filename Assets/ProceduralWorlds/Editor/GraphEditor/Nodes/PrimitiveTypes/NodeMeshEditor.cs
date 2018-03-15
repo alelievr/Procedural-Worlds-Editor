@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeMesh))]
-	public class NodeMeshEditor : NodeEditor
+	public class NodeMeshEditor : BaseNodeEditor
 	{
 		GUIMeshPreview	meshPreview;
 		Material			previewMaterial;

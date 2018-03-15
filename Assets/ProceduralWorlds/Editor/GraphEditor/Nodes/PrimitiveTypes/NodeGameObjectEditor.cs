@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeGameObject))]
-	public class NodeGameObjectEditor : NodeEditor
+	public class NodeGameObjectEditor : BaseNodeEditor
 	{
 		public NodeGameObject		node;
 

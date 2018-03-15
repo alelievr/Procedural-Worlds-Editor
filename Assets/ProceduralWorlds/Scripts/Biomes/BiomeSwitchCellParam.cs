@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 namespace ProceduralWorlds.Biomator.SwitchGraph
 {
@@ -29,6 +30,17 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 
 			for (int i = 0; i < switchParams.Length; i++)
 				switchParams[i] = new BiomeSwitchCellParam(false);
+		}
+
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder();
+
+			foreach (var sp in switchParams)
+				if (sp.enabled)
+					sb.Append(sp.min + " - " + sp.max + " | ");
+			
+			return sb.ToString();
 		}
 	}
 

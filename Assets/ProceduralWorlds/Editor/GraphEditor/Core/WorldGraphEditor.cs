@@ -89,7 +89,7 @@ public partial class WorldGraphEditor : BaseGraphEditor
 		if (!worldGraph.presetChoosed)
 		{
 			if (presetScreen == null)
-				presetScreen = new WorldPresetScreen(worldGraph);
+				presetScreen = new WorldPresetScreen(this);
 			
 			var newGraph = presetScreen.Draw(position, graph);
 

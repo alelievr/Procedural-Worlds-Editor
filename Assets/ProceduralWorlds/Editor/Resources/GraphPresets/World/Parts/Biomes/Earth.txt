@@ -7,6 +7,7 @@ NewNode NodeBiomeMerger "NodeBiomeMerger" (1693, 395)
 NewNode NodeBiome "Biome0" (1065, 437)
 NewNode NodeBiome "Biome1" (1194, 111)
 NewNode NodeBiomeBlender "Biome blender" (1457, 345) attr={ biomeBlendPercent: 0.13 }
+NewNode NodeWorldGraphOutput "Output" (1978, 464)
 
 LinkAnchor "Biome switch0":"outputBiomes" "Biome":"inputBiomeData"
 LinkAnchor "Biome":"outputBiome" "Biome blender":"inputBiomes"
@@ -18,3 +19,4 @@ LinkAnchor "Temperature node":"outputBiome" "Biome switch":"inputBiome"
 LinkAnchor "biomeData":"outputBiome" "Temperature node":"inputBiomeData"
 LinkAnchor "Biome switch":"outputBiomes" "Biome switch0":"inputBiome"
 LinkAnchor "Biome switch":"outputBiomes" "Biome0":"inputBiomeData"
+LinkAnchor "NodeBiomeMerger":"mergedBiomeTerrain" "Output":"finalTerrain"

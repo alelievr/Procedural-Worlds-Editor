@@ -8,9 +8,9 @@ namespace ProceduralWorlds
 	public enum PWChunkLoadPatternMode
 	{
 		CUBIC,
-		// FRUSTUM,
-		// PRIORITY_CUBIC,
-		// PRIORITY_CIRCLE,
+		FRUSTUM,
+		PRIORITY_CUBIC,
+		PRIORITY_CIRCLE,
 	}
 
 	public abstract class TerrainGenericBase : MonoBehaviour
@@ -27,15 +27,14 @@ namespace ProceduralWorlds
 		public int						chunkSize { get; private set; }
 		
 		[HideInInspector]
-		public GameObject		terrainRoot;
-		public bool				initialized {get {return graph != null && terrainRoot != null && graphOutput != null;}}
+		public GameObject				terrainRoot;
+		public bool						initialized { get { return graph != null && terrainRoot != null && graphOutput != null; } }
 		
 		[SerializeField]
 		[HideInInspector]
-		protected NodeGraphOutput	graphOutput = null;
+		protected NodeGraphOutput		graphOutput = null;
 
-		protected	int			oldSeed = 0;
-		protected int			WorkerGenerationId = 42;
+		protected int					oldSeed = 0;
 		
 		void Start ()
 		{
@@ -49,8 +48,6 @@ namespace ProceduralWorlds
 			else
 				return ;
 
-			Debug.Log("graph is ready: " + graph.readyToProcess);
-			
 			graph.SetRealMode(true);
 			chunkSize = graph.chunkSize;
 			graphOutput = graph.outputNode as NodeGraphOutput;
@@ -95,13 +92,6 @@ namespace ProceduralWorlds
 			}
 			yield return position;
 		}
-
-		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);
-		public abstract object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos);
-		public abstract void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
 		
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks()
@@ -117,15 +107,6 @@ namespace ProceduralWorlds
 					var data = RequestChunkGeneric(pos, graph.seed);
 					var userChunkData = OnChunkCreateGeneric(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
-					/*Worker.EnqueueTask(
-						() => RequestChunk(pos, graph.seed),
-						(chunkData) => {
-							T data = chunkData as T;
-							var userChunkData = OnChunkCreate(data, pos);
-							terrainStorage.AddChunk(pos, data, userChunkData);
-						},
-						WorkerGenerationId
-					);*/
 				}
 				else
 				{
@@ -138,7 +119,6 @@ namespace ProceduralWorlds
 		public void	DestroyAllChunks()
 		{
 			Debug.Log("Destroying all chunks");
-			Worker.StopAllWorkers(WorkerGenerationId);
 			if (terrainStorage == null)
 				return ;
 			terrainStorage.Foreach((pos, terrainData, userData) => {
@@ -150,6 +130,13 @@ namespace ProceduralWorlds
 			while (terrainRoot.transform.childCount > 0)
 				DestroyImmediate(terrainRoot.transform.GetChild(0).gameObject);
 		}
+		
+		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);
+		public abstract object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos);
+		public abstract void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		public abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		public abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		public abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
 
 		#region Utils
 		/* Utils function to simplify the downstream scripting: */

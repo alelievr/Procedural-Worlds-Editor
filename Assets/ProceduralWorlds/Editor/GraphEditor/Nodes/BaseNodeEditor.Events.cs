@@ -7,7 +7,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	public abstract partial class NodeEditor
+	public abstract partial class BaseNodeEditor
 	{
 		void BindEvents()
 		{

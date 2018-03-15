@@ -13,7 +13,7 @@ using System.Reflection.Emit;
 namespace ProceduralWorlds.Editor
 {
 	//Node core rendering
-	public abstract partial class NodeEditor
+	public abstract partial class BaseNodeEditor
 	{
 		static GUIStyle 			renameNodeTextFieldStyle;
 		static GUIStyle				innerNodePaddingStyle;

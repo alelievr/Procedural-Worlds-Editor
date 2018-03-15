@@ -9,7 +9,7 @@ using ProceduralWorlds.Biomator;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeMerger))]
-	public class NodeBiomeMergerEditor : NodeEditor
+	public class NodeBiomeMergerEditor : BaseNodeEditor
 	{
 		public NodeBiomeMerger node;
 

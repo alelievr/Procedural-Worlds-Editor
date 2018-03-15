@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeTexture2D))]
-	public class NodeTexture2DEditor : NodeEditor
+	public class NodeTexture2DEditor : BaseNodeEditor
 	{
 		public NodeTexture2D	node;
 		

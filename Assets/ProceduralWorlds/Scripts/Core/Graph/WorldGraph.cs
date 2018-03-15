@@ -191,6 +191,12 @@ namespace ProceduralWorlds.Core
 			processMode = BaseGraphProcessMode.Normal;
 		}
 
+		public override void InitializeInputAndOutputNodes()
+		{
+			inputNode = CreateNewNode< NodeWorldGraphInput >(new Vector2(-100, 0), "World Graph Input", true, false);
+			outputNode = CreateNewNode< NodeWorldGraphOutput >(new Vector2(100, 0), "World Graph Output", true, false);
+		}
+
 		public override void OnEnable()
 		{
 			graphType = BaseGraphType.World;
@@ -207,6 +213,11 @@ namespace ProceduralWorlds.Core
 			processedFromBiome = true;
 			Process();
 			processedFromBiome = false;
+		}
+
+		public FinalTerrain GetOutputTerrain()
+		{
+			return (outputNode as NodeWorldGraphOutput).finalTerrain;
 		}
     }
 }

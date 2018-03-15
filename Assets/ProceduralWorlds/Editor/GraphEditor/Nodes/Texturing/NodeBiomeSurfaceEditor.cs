@@ -8,7 +8,7 @@ using System.Linq;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeSurface))]
-	public class NodeBiomeSurfaceEditor : NodeEditor
+	public class NodeBiomeSurfaceEditor : BaseNodeEditor
 	{
 		public NodeBiomeSurface node;
 		

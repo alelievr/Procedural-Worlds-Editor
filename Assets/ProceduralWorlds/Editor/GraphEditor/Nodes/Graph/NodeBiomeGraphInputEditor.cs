@@ -8,7 +8,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeGraphInput))]
-	public class NodeBiomeGraphInputEditor : NodeEditor
+	public class NodeBiomeGraphInputEditor : BaseNodeEditor
 	{
 		public NodeBiomeGraphInput	node;
 

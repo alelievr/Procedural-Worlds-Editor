@@ -64,7 +64,7 @@ namespace ProceduralWorlds.Core
 
 			//Graph specific:
 			typeof(NodeGraphInput), typeof(NodeGraphOutput), typeof(NodeBiomeGraphInput),
-			typeof(NodeBiomeGraphOutput),
+			typeof(NodeBiomeGraphOutput), typeof(NodeWorldGraphInput), typeof(NodeWorldGraphOutput),
 
 			//Biomes:
             typeof(NodeBiomeData), typeof(NodeBiomeBinder), typeof(NodeWaterLevel),
@@ -134,6 +134,27 @@ namespace ProceduralWorlds.Core
 
 		static List< NodeTypeInfoList > worldGraphInfoList;
 		static List< NodeTypeInfoList > biomeGraphInfoList;
+
+		public static readonly List< Type > inputGraphTypes = new List< Type >
+		{
+			typeof(NodeGraphInput), typeof(NodeBiomeGraphInput), typeof(NodeWorldGraphInput)
+		};
+
+		public static readonly List< Type > outputGraphTypes = new List< Type >
+		{
+			typeof(NodeGraphOutput), typeof(NodeBiomeGraphOutput), typeof(NodeWorldGraphOutput)
+		};
+
+		public static IEnumerable< Type > inputAndOutputTypes
+		{
+			get
+			{
+				foreach (var input in inputGraphTypes)
+					yield return input;
+				foreach (var output in outputGraphTypes)
+					yield return output;
+			}
+		}
 
         static NodeTypeProvider()
 		{

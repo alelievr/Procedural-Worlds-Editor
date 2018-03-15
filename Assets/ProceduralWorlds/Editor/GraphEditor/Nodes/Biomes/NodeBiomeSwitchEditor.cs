@@ -7,7 +7,7 @@ using ProceduralWorlds.Node;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeSwitch))]
-	public class NodeBiomeSwitchEditor : NodeEditor
+	public class NodeBiomeSwitchEditor : BaseNodeEditor
 	{
 		public NodeBiomeSwitch	node;
 

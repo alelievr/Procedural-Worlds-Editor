@@ -9,7 +9,7 @@ using ProceduralWorlds;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(BaseNode))]
-	public abstract partial class NodeEditor : UnityEditor.Editor
+	public abstract partial class BaseNodeEditor : UnityEditor.Editor
 	{
 		[SerializeField]
 		int								maxAnchorRenderHeight;
@@ -41,7 +41,7 @@ namespace ProceduralWorlds.Editor
 		//fired when the dragged link quit the zone above the anchor
 		protected event AnchorAction	OnDraggedLinkQuitAnchor;
 
-		public static Dictionary< BaseNode, NodeEditor >	openedNodeEdiors = new Dictionary< BaseNode, NodeEditor >();
+		public static Dictionary< BaseNode, BaseNodeEditor >	openedNodeEdiors = new Dictionary< BaseNode, BaseNodeEditor >();
 
 		[System.NonSerialized]
 		BaseNode						nodeRef;

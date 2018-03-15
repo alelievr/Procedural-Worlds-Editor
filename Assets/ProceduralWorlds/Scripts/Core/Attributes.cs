@@ -9,10 +9,8 @@ namespace ProceduralWorlds.Core
 	public class InputAttribute : Attribute
 	{
 		public string	name = null;
-		
-		public InputAttribute()
-		{
-		}
+
+		public InputAttribute() {}
 		
 		public InputAttribute(string fieldName)
 		{
@@ -25,9 +23,7 @@ namespace ProceduralWorlds.Core
 	{
 		public string	name = null;
 
-		public OutputAttribute()
-		{
-		}
+		public OutputAttribute() {}
 		
 		public OutputAttribute(string fieldName)
 		{
@@ -40,7 +36,9 @@ namespace ProceduralWorlds.Core
 	{
 		public int		offset;
 		public int		padding = 0;
-		
+
+		public OffsetAttribute() {}
+
 		public OffsetAttribute(int y, int padding)
 		{
 			offset = y;
@@ -57,6 +55,11 @@ namespace ProceduralWorlds.Core
 	public class ColorAttribute : Attribute
 	{
 		public Color		color;
+
+		public ColorAttribute()
+		{
+			color = Color.grey;
+		}
 
 		public ColorAttribute(float r, float g, float b)
 		{

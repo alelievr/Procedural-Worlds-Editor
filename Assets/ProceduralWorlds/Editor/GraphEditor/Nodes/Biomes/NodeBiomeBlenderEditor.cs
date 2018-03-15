@@ -10,7 +10,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeBlender))]
-	public class NodeBiomeBlenderEditor : NodeEditor
+	public class NodeBiomeBlenderEditor : BaseNodeEditor
 	{
 		public NodeBiomeBlender	node;
 
@@ -101,7 +101,7 @@ namespace ProceduralWorlds.Editor
 			node.BuildBiomeSwitchGraph();
 			var biomeData = node.GetBiomeData();
 
-			if (biomeData != null)
+			if (biomeData != null && biomeData.biomeSwitchGraph.isBuilt)
 				node.FillBiomeMap(biomeData);
 		}
 	}

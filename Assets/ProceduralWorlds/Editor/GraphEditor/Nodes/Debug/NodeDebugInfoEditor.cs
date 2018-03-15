@@ -10,7 +10,7 @@ using System;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeDebugInfo))]
-	public class NodeDebugInfoEditor : NodeEditor
+	public class NodeDebugInfoEditor : BaseNodeEditor
 	{
 		public NodeDebugInfo		node;
 

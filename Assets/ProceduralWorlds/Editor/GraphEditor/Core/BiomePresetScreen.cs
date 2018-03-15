@@ -7,13 +7,14 @@ namespace ProceduralWorlds.Editor
 {
 	public class BiomePresetScreen : PresetScreen
 	{
-		readonly BiomeGraph	biomeGraph;
+		readonly BiomeGraphEditor	biomeGraphEditor;
+		BiomeGraph					biomeGraph { get { return biomeGraphEditor.biomeGraph; } }
 
 		readonly string	graphFilePrefix = "GraphPresets/Biome/Parts/";
 	
-		public BiomePresetScreen(BiomeGraph biomeGraph)
+		public BiomePresetScreen(BiomeGraphEditor biomeGraphEditor)
 		{
-			this.biomeGraph = biomeGraph;
+			this.biomeGraphEditor = biomeGraphEditor;
 	
 			Texture2D plainTexture = Resources.Load< Texture2D >("");
 			Texture2D mountainTexture = Resources.Load< Texture2D >("");

@@ -27,11 +27,11 @@ namespace ProceduralWorlds
 			graph.Process();
 
 			oldSeed = seed;
-			FinalTerrain finalTerrain = graph.GetOutput< FinalTerrain >();
+			FinalTerrain finalTerrain = graph.GetOutputTerrain();
 
 			if (finalTerrain == null)
 			{
-				Debug.LogWarning("[TerrainBase] Graph output does not contains T type");
+				Debug.LogWarning("[TerrainBase] Graph output terrain is null !");
 				return null;
 			}
 			
@@ -71,6 +71,15 @@ namespace ProceduralWorlds
 			else
 				terrainStorage.AddChunk(pos, terrainData, userData);
 			return userData;
+		}
+
+		public void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain)
+		{
+			chunk.size = finalTerrain.mergedTerrain.size;
+			chunk.materializerType = finalTerrain.materializerType;
+			chunk.terrain = finalTerrain.mergedTerrain;
+			chunk.biomeMap = finalTerrain.biomeData.biomeMap;
+			chunk.biomeMap3D = null;
 		}
 	}
 }

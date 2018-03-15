@@ -8,7 +8,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeWaterLevel))]
-	public class NodeWaterLevelEditor : NodeEditor
+	public class NodeWaterLevelEditor : BaseNodeEditor
 	{
 		public NodeWaterLevel node;
 		

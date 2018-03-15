@@ -1,27 +1,28 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using ProceduralWorlds.Core;
+using ProceduralWorlds.Node;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Editor
 {
-	public class #SCRIPTNAME# : BaseNode
+	[CustomEditor(typeof(NodeWorldGraphOutput))]
+	public class NodeWorldGraphOutputEditor : BaseNodeEditor
 	{
-
-		//Called only when the node is created (not when it is enabled/loaded)
-		public override void OnNodeCreation()
-		{
-			name = "#NAME#";
-		}
+		NodeWorldGraphOutput node;
 
 		public override void OnNodeEnable()
 		{
+			node = target as NodeWorldGraphOutput;
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
 		}
 
-		public override void OnNodeProcess()
+		public override void OnNodeGUI()
 		{
 			//write here the process which take inputs, transform them and set outputs.
+
+			PWGUI.PWArrayField(node.inputValues);
 		}
 		
 	}

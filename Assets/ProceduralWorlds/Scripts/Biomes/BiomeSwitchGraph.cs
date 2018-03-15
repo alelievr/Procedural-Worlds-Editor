@@ -339,6 +339,12 @@ namespace ProceduralWorlds.Biomator
 			Sampler	terrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
 			var		biomeSwitchValues = new BiomeSwitchValues();
 
+			if (!isBuilt)
+			{
+				Debug.LogError("Biome switch graph is not built, you can't fill the biome map !");
+				return ;
+			}
+
 			//TODO: 3D Biome fill map
 			
 			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrain.size, terrain.step))
@@ -373,6 +379,9 @@ namespace ProceduralWorlds.Biomator
 					if (biomeSwitchCell == null)
 					{
 						Debug.LogError("Biome can't be found for values: " + biomeSwitchValues);
+
+						foreach (var c in cells)
+							Debug.Log("c: " + c.name + " -> " + c.switchParams);
 						return ;
 					}
 

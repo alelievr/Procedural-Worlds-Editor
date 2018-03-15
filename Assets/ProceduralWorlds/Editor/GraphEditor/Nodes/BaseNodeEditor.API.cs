@@ -8,7 +8,7 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Editor
 {
-	public abstract partial class NodeEditor
+	public abstract partial class BaseNodeEditor
 	{
 		//default notify reload will be sent to all node childs
 		//also fire a Process event for the target nodes

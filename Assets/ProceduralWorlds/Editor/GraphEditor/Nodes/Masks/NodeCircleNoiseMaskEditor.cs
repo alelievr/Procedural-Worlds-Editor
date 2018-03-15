@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeCircleNoiseMask))]
-	public class NodeCircleNoiseMaskEditor : NodeEditor
+	public class NodeCircleNoiseMaskEditor : BaseNodeEditor
 	{
 		public NodeCircleNoiseMask node;
 

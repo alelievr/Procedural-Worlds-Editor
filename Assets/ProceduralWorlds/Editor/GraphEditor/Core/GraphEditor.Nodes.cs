@@ -13,7 +13,7 @@ using ProceduralWorlds;
 public partial class BaseGraphEditor
 {
 	[System.NonSerialized]
-	Dictionary< BaseNode, NodeEditor > nodeEditors = new Dictionary< BaseNode, NodeEditor >();
+	Dictionary< BaseNode, BaseNodeEditor > nodeEditors = new Dictionary< BaseNode, BaseNodeEditor >();
 
 	void RenderDecaledNode(int id, BaseNode node)
 	{
@@ -35,7 +35,7 @@ public partial class BaseGraphEditor
 
 		if (!nodeEditors.ContainsKey(node))
 		{
-			nodeEditors[node] = Editor.CreateEditor(node) as NodeEditor;
+			nodeEditors[node] = Editor.CreateEditor(node) as BaseNodeEditor;
 			nodeEditors[node].Initialize(this);
 		}
 		

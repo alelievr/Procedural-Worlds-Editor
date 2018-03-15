@@ -7,18 +7,18 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(#SCRIPTNAME#))]
-	public class #SCRIPTNAME#Editor : BaseNodeEditor
+	[CustomEditor(typeof(NodeWorldGraphInput))]
+	public class NodeWorldGraphInputEditor : BaseNodeEditor
 	{
-		#SCRIPTNAME#	node;
-
-		string propUpdateKey = "#NAME#";
+		NodeWorldGraphInput	node;
+	
+		string propUpdateKey = "NodeWorldGraphInput";
 
 		public override void OnNodeEnable()
 		{
 			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
 
-			node = target as #SCRIPTNAME#;
+			node = target as NodeWorldGraphInput;
 			
 			delayedChanges.BindCallback(propUpdateKey, (unused) => { NotifyReload(); });
 		}
@@ -27,7 +27,7 @@ namespace ProceduralWorlds.Editor
 		{
 			//write here the process which take inputs, transform them and set outputs.
 
-			EditorGUILayout.LabelField("Nothing here");
+			PWGUI.PWArrayField(node.outputValues);
 		}
 		
 	}

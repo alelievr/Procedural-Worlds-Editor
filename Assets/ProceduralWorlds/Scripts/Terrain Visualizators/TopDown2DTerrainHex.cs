@@ -126,9 +126,10 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 	{
 		if (chunk == null)
 			return ;
+		
 		GameObject		g = chunkGameObject as GameObject;
 
-		//if gameobject have been destroyed by user and reference was lost.
+		//if gameobject have been destroyed by user and reference was lost, we regenerate the chunk
 		if (g == null)
 		{
 			chunkGameObject = RequestCreate(chunk, pos);

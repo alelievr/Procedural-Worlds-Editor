@@ -69,7 +69,7 @@ namespace ProceduralWorlds.Editor
 		
 		protected static T FindPopup< T >() where T : Popup
 		{
-			var popups = Resources.FindObjectsOfTypeAll< SamplerSettingsPopup >();
+			var popups = Resources.FindObjectsOfTypeAll< T >();
 
 			if (popups == null || popups.Length == 0)
 				return null;

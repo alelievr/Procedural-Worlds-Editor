@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeSurfaceModifiers))]
-	public class NodeBiomeSurfaceModifierEditor : NodeEditor
+	public class NodeBiomeSurfaceModifierEditor : BaseNodeEditor
 	{
 		// public NodeBiomeSurfaceModifiers node;
 

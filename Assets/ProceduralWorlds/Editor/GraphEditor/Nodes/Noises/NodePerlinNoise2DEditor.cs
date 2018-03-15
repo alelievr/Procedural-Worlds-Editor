@@ -6,7 +6,7 @@ using ProceduralWorlds.Editor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodePerlinNoise2D))]
-	public class NodePerlinNoise2DEditor : NodeEditor
+	public class NodePerlinNoise2DEditor : BaseNodeEditor
 	{
 		NodePerlinNoise2D		node;
 		

@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Editor
 		
 		string nodeEditorTemplate
 		{
-			get { return Application.dataPath + ProceduralWorldsEditorPath + "NodeEditorTemplate.cs.txt"; }
+			get { return Application.dataPath + ProceduralWorldsEditorPath + "BaseNodeEditorTemplate.cs.txt"; }
 		}
 
 		static MethodInfo	createScriptAsset = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetFromTemplate", BindingFlags.Static | BindingFlags.NonPublic);

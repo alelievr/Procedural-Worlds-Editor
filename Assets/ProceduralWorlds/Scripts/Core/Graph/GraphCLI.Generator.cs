@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Core
 			List< string > nodeNames = new List< string >();
 			var nodeToNameMap = new Dictionary< BaseNode, string >();
 
-			foreach (var node in graph.nodes)
+			foreach (var node in graph.allNodes)
 			{
 				var attrs = new BaseGraphCLIAttributes();
 

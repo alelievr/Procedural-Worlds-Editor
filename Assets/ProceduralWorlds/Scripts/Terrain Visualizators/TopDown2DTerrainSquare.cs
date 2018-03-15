@@ -79,8 +79,10 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 
 	public override TopDownChunkData CreateChunkData(FinalTerrain terrain)
 	{
-		Debug.Log("TODO !");
-		return null;
+		TopDownChunkData chunk = new TopDownChunkData();
+
+		FillChunkData(chunk as ChunkData, terrain);
+		return chunk;
 	}
 	
 	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)

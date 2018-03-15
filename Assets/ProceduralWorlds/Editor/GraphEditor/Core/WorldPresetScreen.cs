@@ -10,14 +10,15 @@ namespace ProceduralWorlds.Editor
 {
 	public class WorldPresetScreen : PresetScreen
 	{
-		readonly WorldGraph		worldGraph;
+		readonly WorldGraphEditor		worldGraphEditor;
+		WorldGraph						worldGraph { get { return worldGraphEditor.worldGraph; } }
 
 		readonly string	graphFilePrefix = "GraphPresets/World/Parts/";
 		readonly string biomeAssetPrefix = "GraphPresets/Biome/Full/";
 	
-		public WorldPresetScreen(WorldGraph worldGraph)
+		public WorldPresetScreen(WorldGraphEditor worldGraphEditor)
 		{
-			this.worldGraph = worldGraph;
+			this.worldGraphEditor = worldGraphEditor;
 			
 			//loading preset panel images
 			Texture2D preset2DSideViewTexture = Resources.Load< Texture2D >("PresetImages/preview2DSideView");

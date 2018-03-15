@@ -7,7 +7,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeColor))]
-	public class NodeColorEditor : NodeEditor
+	public class NodeColorEditor : BaseNodeEditor
 	{
 		public NodeColor node;
 

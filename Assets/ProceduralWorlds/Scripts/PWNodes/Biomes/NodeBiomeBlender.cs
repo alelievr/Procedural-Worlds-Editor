@@ -55,8 +55,6 @@ namespace ProceduralWorlds.Node
 
 			foreach (var partialBiome in partialBiomes)
 				partialBiome.biomeGraph.ProcessOnce();
-
-			BuildBiomeSwitchGraph();
 		}
 
 		public override void OnNodeProcess()

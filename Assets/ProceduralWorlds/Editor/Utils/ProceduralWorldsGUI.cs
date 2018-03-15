@@ -164,14 +164,14 @@ namespace ProceduralWorlds.Editor
 				return colorSettings;
 			});
 
-			// if (e.type == EventType.ExecuteCommand)
-				// Debug.Log("cmd: " + e.commandName + ", hash: " + fieldSettings.GetHashCode() + ", controlId: " + ColorPickerPopup.controlId);
 			if (e.type == EventType.ExecuteCommand && e.commandName == "ColorPickerUpdate")
+			{
 				if (fieldSettings.GetHashCode() == ColorPickerPopup.controlId)
 				{
 					ColorPickerPopup.UpdateDatas(fieldSettings);
 					GUI.changed = true;
 				}
+			}
 			
 			color = fieldSettings.c;
 			

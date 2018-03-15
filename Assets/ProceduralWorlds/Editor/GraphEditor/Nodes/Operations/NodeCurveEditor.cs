@@ -6,7 +6,7 @@ using ProceduralWorlds.Editor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeCurve))]
-	public class NodeCurveEditor : NodeEditor
+	public class NodeCurveEditor : BaseNodeEditor
 	{
 		NodeCurve		node;
 		

@@ -27,7 +27,7 @@ namespace ProceduralWorlds.Tests.Nodes
 
 			foreach (var node in graph.allNodes)
 			{
-				var editor = UnityEditor.Editor.CreateEditor(node) as NodeEditor;
+				var editor = UnityEditor.Editor.CreateEditor(node) as BaseNodeEditor;
 				editor.Initialize(null);
 				editor.OnNodeUnitTest();
 				UnityEditor.Editor.DestroyImmediate(editor);
@@ -42,7 +42,7 @@ namespace ProceduralWorlds.Tests.Nodes
 
 			foreach (var node in graph.allNodes)
 			{
-				var editor = UnityEditor.Editor.CreateEditor(node) as NodeEditor;
+				var editor = UnityEditor.Editor.CreateEditor(node) as BaseNodeEditor;
 				editor.OnNodeUnitTest();
 			}
 		}

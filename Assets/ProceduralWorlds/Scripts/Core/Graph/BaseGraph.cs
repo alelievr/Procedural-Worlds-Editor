@@ -241,14 +241,18 @@ namespace ProceduralWorlds.Core
 			// that we need to clone each nodes and assign them to this new graph.
 			BaseGraph clonedGraph = Object.Instantiate(this);
 
+			clonedGraph.name += "(Clone)";
+
 			//clean and add copies of nodes into the cloned graph
 			clonedGraph.nodes.Clear();
 			foreach (var node in nodes)
 				clonedGraph.nodes.Add(Object.Instantiate(node));
+
 			clonedGraph.inputNode = Object.Instantiate(inputNode);
-			AddInitializedNode(clonedGraph.inputNode, true, false);
+			clonedGraph.AddInitializedNode(clonedGraph.inputNode, true, false);
+
 			clonedGraph.outputNode = Object.Instantiate(outputNode);
-			AddInitializedNode(clonedGraph.outputNode, true, false);
+			clonedGraph.AddInitializedNode(clonedGraph.outputNode, true, false);
 			
 			//reenable the new graph so the new nodes are taken in account
 			clonedGraph.OnDisable();
@@ -264,8 +268,6 @@ namespace ProceduralWorlds.Core
 			//reenable our graph to rebind our nodes to our graph
 			OnDisable();
 			OnEnable();
-
-			Debug.Log("cloned: " + this);
 
 			return clonedGraph;
 		}

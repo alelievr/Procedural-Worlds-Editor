@@ -121,7 +121,7 @@ public class BiomeGraphEditor : BaseGraphEditor
 		if (!biomeGraph.presetChoosed)
 		{
 			if (presetScreen == null)
-				presetScreen = new BiomePresetScreen(biomeGraph);
+				presetScreen = new BiomePresetScreen(this);
 			
 			var newGraph = presetScreen.Draw(position, graph);
 			

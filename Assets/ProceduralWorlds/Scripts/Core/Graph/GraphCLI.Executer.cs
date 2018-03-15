@@ -100,9 +100,9 @@ namespace ProceduralWorlds.Core
 			BaseNode node = null;
 			
 			//if we receive a CreateNode with input/output graph nodes, we assign them so we don't have multiple inout/output nodes
-			if (command.nodeType == typeof(NodeGraphInput) || command.nodeType == typeof(NodeBiomeGraphInput))
+			if (NodeTypeProvider.inputGraphTypes.Contains(command.nodeType))
 				node = graph.inputNode;
-			else if (command.nodeType == typeof(NodeGraphOutput) || command.nodeType == typeof(NodeBiomeGraphOutput))
+			else if (NodeTypeProvider.outputGraphTypes.Contains(command.nodeType))
 				node = graph.outputNode;
 			else
 				node = graph.CreateNewNode(command.nodeType, position);

@@ -9,7 +9,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeBiomeTemperature))]
-	public class NodeBiomeTemperatureEditor : NodeEditor
+	public class NodeBiomeTemperatureEditor : BaseNodeEditor
 	{
 		public NodeBiomeTemperature node;
 

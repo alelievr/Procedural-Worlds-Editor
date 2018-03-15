@@ -8,7 +8,7 @@ using UnityEditor;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(NodeGraphOutput))]
-	public class NodeGraphOutputEditor : NodeEditor
+	public class NodeGraphOutputEditor : BaseNodeEditor
 	{
 		public NodeGraphOutput node;
 
