@@ -15,6 +15,11 @@ namespace ProceduralWorlds.Editor
 		public override void OnEnable()
 		{
 			worldGraph =  target as WorldGraph;
+
+			var terrain = TerrainPreviewManager.instance.terrainBase;
+
+			if (terrain != null)
+				ReloadChunks(terrain);
 		}
 
 		new public void OnGUI(Rect r)
@@ -32,9 +37,14 @@ namespace ProceduralWorlds.Editor
 				return ;
 			}
 			
-			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
-			terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
-			terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
+			EditorGUI.BeginChangeCheck();
+			{
+				terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
+				terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
+				terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
+			}
+			if (EditorGUI.EndChangeCheck())
+				ReloadChunks(terrain);
 
 			EditorGUILayout.BeginHorizontal();
 			{
@@ -51,23 +61,12 @@ namespace ProceduralWorlds.Editor
 		{
 			if (EditorApplication.isPlaying || EditorApplication.isPaused)
 			{
-				Debug.LogError("[Editor Terrain Manager] can't reload chunks in play mode");
+				Debug.LogError("[ChunkLoader] can't reload chunks in play mode");
 				return ;
 			}
 
 			if (worldGraph != null)
-			{
-				//if the graph we have is not the same / have been modified since last generation, we replace it
-				if (terrain.graph != null && terrain.graph.GetHashCode() != worldGraph.GetHashCode())
-					GameObject.DestroyImmediate(terrain.graph);
-				
-				terrain.InitGraph(worldGraph.Clone() as WorldGraph);
-				
-				terrain.DestroyAllChunks();
-
-				//UpdateChunks will regenerate all deleted chunks
-				terrain.UpdateChunks(true);
-			}
+				terrain.ReloadChunks(worldGraph);
 		}
 	}
 }

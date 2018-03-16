@@ -14,8 +14,6 @@ namespace ProceduralWorlds.Editor
 
 		public static AssetMoveResult OnWillMoveAsset(string fromPath, string toPath)
 		{
-			Debug.Log("moving " + fromPath + " to " + toPath);
-
 			//check if we are moving a procedural worlds directory
 			if (Directory.Exists(fromPath))
 			{
@@ -35,7 +33,7 @@ namespace ProceduralWorlds.Editor
 
 				if (String.IsNullOrEmpty(GraphFactory.GetWorldGraphCreateLocation(toPath)))
 				{
-					Debug.LogError("Can't move the Procedural world directory");
+					Debug.LogError("Can't move the Procedural world directory to " + newAssetPath + ": Not a Resources directory");
 					return AssetMoveResult.FailedMove;
 				}
 				

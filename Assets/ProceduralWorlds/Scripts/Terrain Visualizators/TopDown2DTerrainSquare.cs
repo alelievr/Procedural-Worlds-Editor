@@ -7,7 +7,7 @@ using ProceduralWorlds.Biomator;
 
 public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 {
-	public int		yPosition;
+	public float	yPosition;
 
 	Gradient		rainbow;
 
@@ -92,8 +92,6 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 			return null;
 
 		pos.y = yPosition;
-
-		Debug.Log("Generating chunk at " + pos);
 		
 		if (rainbow == null)
 			rainbow = Utils.CreateRainbowGradient();
@@ -146,5 +144,12 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 			g = chunkGameObject as GameObject;
 		}
 		// g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
+	}
+	
+	public override Vector3 GetChunkPosition(Vector3 pos)
+	{
+		pos.y = yPosition;
+
+		return pos;
 	}
 }

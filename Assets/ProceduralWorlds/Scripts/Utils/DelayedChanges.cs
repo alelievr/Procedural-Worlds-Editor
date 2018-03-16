@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using UnityEditor;
 
-namespace ProceduralWorlds.Editor
+namespace ProceduralWorlds.Core
 {
 	public class DelayedChanges
 	{

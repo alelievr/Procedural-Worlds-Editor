@@ -20,20 +20,18 @@ namespace ProceduralWorlds
 
 		public Vector3					oldChunkPosition;
 		public int						renderDistance;
-		public ChunkLoadPatternMode	loadPatternMode;
+		public ChunkLoadPatternMode		loadPatternMode;
 		public WorldGraph				graph;
 
 		public TerrainStorage			terrainStorage;
 		public float					terrainScale = .1f; //10 cm per point
-		
+
 		protected int					chunkSize;
 		
-		[HideInInspector]
 		public GameObject				terrainRoot;
 		public bool						initialized { get { return graph != null && terrainRoot != null && graphOutput != null; } }
 		
 		[SerializeField]
-		[HideInInspector]
 		protected NodeGraphOutput		graphOutput = null;
 
 		protected int					oldSeed = 0;
@@ -46,7 +44,10 @@ namespace ProceduralWorlds
 		void OnEnable()
 		{
 			if (terrainStorage != null && terrainStorage.storeMode == StorageMode.Memory)
-				DestroyAllChunks();
+			{
+				if (!Application.isPlaying && graph != null)
+					DestroyAllChunks();
+			}
 		}
 
 		public virtual void Update()
@@ -105,7 +106,7 @@ namespace ProceduralWorlds
 						for (int z = -renderDistance; z <= renderDistance; z++)
 						{
 							Vector3 chunkPos = pos + new Vector3(x * chunkSize, 0, z * chunkSize);
-							yield return chunkPos;
+							yield return GetChunkPosition(chunkPos);
 						}
 					yield break ;
 				default:
@@ -114,6 +115,8 @@ namespace ProceduralWorlds
 			}
 			yield return position;
 		}
+
+		public virtual Vector3 GetChunkPosition(Vector3 pos) { return pos; }
 		
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks(bool ignorePositionCheck = false)
@@ -156,9 +159,9 @@ namespace ProceduralWorlds
 
 		public void	DestroyAllChunks()
 		{
-			Debug.Log("Destroying all chunks");
 			if (terrainStorage == null)
 				return ;
+
 			terrainStorage.Foreach((pos, terrainData, userData) => {
 				OnChunkDestroyGeneric(terrainData, userData, (Vector3)pos);
 			});
@@ -167,6 +170,15 @@ namespace ProceduralWorlds
 			//manually cleanup remaining GOs:
 			while (terrainRoot.transform.childCount > 0)
 				DestroyImmediate(terrainRoot.transform.GetChild(0).gameObject);
+		}
+
+		public void ReloadChunks(WorldGraph graph)
+		{
+			InitGraph(graph.Clone() as WorldGraph);
+
+			DestroyAllChunks();
+			
+			UpdateChunks(true);
 		}
 		
 		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);

@@ -7,6 +7,8 @@ using ProceduralWorlds.Biomator;
 
 public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 {
+	public float	yPosition;
+
 	Mesh			topDownTerrainMesh;
 	int				topDownTerrainMeshSize = 0;
 
@@ -84,8 +86,6 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 		if (chunk == null)
 			return null;
 
-		Debug.Log("Generating chunk at " + pos);
-		
 		//create the terrain texture:
 		//TODO: bind the blendMap with biome maps to the terrain shader
 		//TODO: bind all vertex datas from the mesh
@@ -136,5 +136,12 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 			// g = chunkGameObject as GameObject;
 		}
 		// g.GetComponent< MeshRenderer >().sharedMaterial.SetTexture("_MainTex", chunk.texture);
+	}
+
+	public override Vector3 GetChunkPosition(Vector3 pos)
+	{
+		pos.y = yPosition;
+
+		return pos;
 	}
 }
