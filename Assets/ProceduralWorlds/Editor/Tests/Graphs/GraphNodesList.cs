@@ -17,13 +17,8 @@ namespace ProceduralWorlds.Tests.Graphs
 		{
 			var worldGraph = TestUtils.GenerateTestWorldGraph();
 
-			Type[] inputAndOutputTypes = new Type[]{
-				typeof(NodeBiomeGraphInput), typeof(NodeBiomeGraphOutput),
-				typeof(NodeGraphInput), typeof(NodeGraphOutput)
-			};
-
 			foreach (var node in worldGraph.nodes)
-				Assert.That(inputAndOutputTypes.Contains(node.GetType()) == false);
+				Assert.That(NodeTypeProvider.inputAndOutputTypes.Contains(node.GetType()) == false);
 		}
 		
 		[Test]
@@ -31,15 +26,10 @@ namespace ProceduralWorlds.Tests.Graphs
 		{
 			var worldGraph = TestUtils.GenerateTestWorldGraph();
 
-			Type[] inputAndOutputTypes = new Type[]{
-				typeof(NodeBiomeGraphInput), typeof(NodeBiomeGraphOutput),
-				typeof(NodeGraphInput), typeof(NodeGraphOutput)
-			};
-
 			bool found = false;
 			foreach (var node in worldGraph.allNodes)
 			{
-				found = found || inputAndOutputTypes.Contains(node.GetType());
+				found = found || NodeTypeProvider.inputAndOutputTypes.Contains(node.GetType());
 			}
 
 			Assert.That(found == true, "BaseGraph.allNodes don't contains input/output nodes");

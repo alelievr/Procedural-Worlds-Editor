@@ -82,7 +82,7 @@ namespace ProceduralWorlds.Core
         //editor datas:
 		[SerializeField] Vector2				_panPosition;
 		public Vector2							panPosition { get { return _panPosition + zoomPanCorrection; } set { _panPosition = value - zoomPanCorrection; } }
-		public float							scale = 2;
+		public float							scale = 1;
 		public Vector2							zoomPanCorrection;
 		[NonSerialized]
 		public BaseGraphEditorEventInfo			editorEvents = new BaseGraphEditorEventInfo();
@@ -147,7 +147,7 @@ namespace ProceduralWorlds.Core
 		public virtual void OnEnable()
 		{
 			//check if the object have been initialized, if not, quit.
-			if (!initialized)
+			if (!initialized || inputNode == null)
 				return ;
 				
 			//Events attach
@@ -294,7 +294,6 @@ namespace ProceduralWorlds.Core
 			if (!readyToProcess)
 				return ;
 			
-			Debug.LogWarning("Process once called !");
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			graphProcessor.ProcessOnce(this);
 		}

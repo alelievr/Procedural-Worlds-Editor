@@ -74,8 +74,8 @@ namespace ProceduralWorlds.Tests.Graphs
 		{
 			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
-			var input = graph.FindNodeByType< NodeGraphInput >();
-			var output = graph.FindNodeByType< NodeGraphOutput >();
+			var input = graph.FindNodeByType< NodeWorldGraphInput >();
+			var output = graph.FindNodeByType< NodeWorldGraphOutput >();
 
 			//create 5 links from first input node anchor to [1..5] output anchors
 			for (int i = 0; i < 5; i++)
@@ -87,7 +87,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			}
 
 			Assert.That(input.outputAnchors.Count() == 1, "input node output anchors count: " + input.outputAnchors.Count() + ", expected to be 1");
-			Assert.That(output.inputAnchors.Count() == 6, "output node input anchors count: " + output.inputAnchors.Count() + ", expected to be 6");
+			Assert.That(output.inputAnchors.Count() == 7, "output node input anchors count: " + output.inputAnchors.Count() + ", expected to be 7");
 
 			var inputLinks = input.GetOutputLinks().ToList();
 			var outputLinks = output.GetInputLinks().ToList();
@@ -104,8 +104,8 @@ namespace ProceduralWorlds.Tests.Graphs
 		{
 			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph();
 
-			var input = graph.FindNodeByType< NodeGraphInput >();
-			var output = graph.FindNodeByType< NodeGraphOutput >();
+			var input = graph.FindNodeByType< NodeWorldGraphInput >();
+			var output = graph.FindNodeByType< NodeWorldGraphOutput >();
 
 			input.SetMultiAnchor("outputValues", 5);
 
@@ -129,11 +129,11 @@ namespace ProceduralWorlds.Tests.Graphs
 
 			value = 42;
 			
-			var outputAnchors = output.inputAnchors.ToList();
+			var af = output.inputAnchorFields.FirstOrDefault(a => a.multiple);
 
 			for (int i = 0; i < 5; i++)
 			{
-				var anchor = outputAnchors[i];
+				var anchor = af.anchors[i];
 				var val = output.GetAnchorValue(anchor);
 				Assert.That(val.Equals(value++));
 			}

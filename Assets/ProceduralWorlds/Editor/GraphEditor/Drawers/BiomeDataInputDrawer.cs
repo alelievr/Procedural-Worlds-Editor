@@ -28,6 +28,9 @@ namespace ProceduralWorlds.Editor
 			if (PWGUI.BeginFade("Terrain", ref showTerrain, false))
 			{
 				inputData.maxTerrainHeight = PWGUI.IntSlider("Terrain height: ", inputData.maxTerrainHeight, 0, 1000);
+				inputData.octaves = PWGUI.IntSlider("Noise octaves: ", inputData.octaves, 1, 8);
+				inputData.persistance = PWGUI.Slider("Noise persistance: ", inputData.persistance, 0f, 2f);
+				inputData.lacunarity = PWGUI.Slider("Noise lacunarity: ", inputData.lacunarity, 0f, 2f);
 				inputData.isWaterless = EditorGUILayout.Toggle("Is waterless", inputData.isWaterless);
 				if (!inputData.isWaterless)
 					inputData.waterLevel = PWGUI.IntSlider("WaterLevel: ", (int)inputData.waterLevel, 0, 100);

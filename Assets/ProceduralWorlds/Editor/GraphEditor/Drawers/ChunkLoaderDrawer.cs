@@ -33,11 +33,15 @@ namespace ProceduralWorlds.Editor
 			}
 			
 			terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
+			terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
+			terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
 
 			EditorGUILayout.BeginHorizontal();
 			{
 				if (GUILayout.Button("Generate terrain"))
 					ReloadChunks(terrain);
+				if (GUILayout.Button("Cleanup terrain"))
+					terrain.DestroyAllChunks();
 			}
 			EditorGUILayout.EndHorizontal();
 		}
@@ -61,8 +65,8 @@ namespace ProceduralWorlds.Editor
 				
 				terrain.DestroyAllChunks();
 
-				//updateChunks will regenerate all deleted chunks
-				terrain.UpdateChunks();
+				//UpdateChunks will regenerate all deleted chunks
+				terrain.UpdateChunks(true);
 			}
 		}
 	}

@@ -7,6 +7,7 @@ using ProceduralWorlds.Biomator;
 
 public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 {
+	public int		yPosition;
 
 	Gradient		rainbow;
 
@@ -89,6 +90,8 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 	{
 		if (chunk == null)
 			return null;
+
+		pos.y = yPosition;
 
 		Debug.Log("Generating chunk at " + pos);
 		

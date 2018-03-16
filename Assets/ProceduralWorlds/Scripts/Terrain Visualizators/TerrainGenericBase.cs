@@ -5,7 +5,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds
 {
-	public enum PWChunkLoadPatternMode
+	public enum ChunkLoadPatternMode
 	{
 		CUBIC,
 		FRUSTUM,
@@ -13,18 +13,20 @@ namespace ProceduralWorlds
 		PRIORITY_CIRCLE,
 	}
 
+	[ExecuteInEditMode]
 	public abstract class TerrainGenericBase : MonoBehaviour
 	{
 		public static readonly string	realModeRootObjectName = "PWWorldRoot";
 
-		public Vector3					position;
+		public Vector3					oldChunkPosition;
 		public int						renderDistance;
-		public PWChunkLoadPatternMode	loadPatternMode;
+		public ChunkLoadPatternMode	loadPatternMode;
 		public WorldGraph				graph;
+
 		public TerrainStorage			terrainStorage;
 		public float					terrainScale = .1f; //10 cm per point
 		
-		public int						chunkSize { get; private set; }
+		protected int					chunkSize;
 		
 		[HideInInspector]
 		public GameObject				terrainRoot;
@@ -36,9 +38,20 @@ namespace ProceduralWorlds
 
 		protected int					oldSeed = 0;
 		
-		void Start ()
+		public virtual void Start ()
 		{
 			InitGraph(graph);
+		}
+
+		void OnEnable()
+		{
+			if (terrainStorage != null && terrainStorage.storeMode == StorageMode.Memory)
+				DestroyAllChunks();
+		}
+
+		public virtual void Update()
+		{
+			UpdateChunks();
 		}
 		
 		public void InitGraph(WorldGraph graph)
@@ -64,20 +77,29 @@ namespace ProceduralWorlds
 				}
 			}
 			graph.ProcessOnce();
+			
+			UpdateChunks(true);
+		}
+
+		Vector3 RoundPositionToChunk(Vector3 position)
+		{
+			if (chunkSize > 0 && terrainScale > 0)
+				position = Utils.Round((position * (1 / terrainScale)) / chunkSize) * chunkSize;
+			else
+				position = Vector3.zero;
+			
+			return position;
 		}
 		
 		//Generate 2D positions
-		IEnumerable< Vector3 > GenerateChunkPositions()
+		IEnumerable< Vector3 > GenerateChunkPositions(Vector3 position)
 		{
 			//snap position to the nearest chunk:
-			if (chunkSize > 0)
-				position = Utils.Round(position / chunkSize) * chunkSize;
-			else
-				position = Vector3.zero;
+			position = RoundPositionToChunk(position);
 
 			switch (loadPatternMode)
 			{
-				case PWChunkLoadPatternMode.CUBIC:
+				case ChunkLoadPatternMode.CUBIC:
 					Vector3 pos = position;
 					for (int x = -renderDistance; x <= renderDistance; x++)
 						for (int z = -renderDistance; z <= renderDistance; z++)
@@ -94,13 +116,18 @@ namespace ProceduralWorlds
 		}
 		
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
-		public void	UpdateChunks()
+		public void	UpdateChunks(bool ignorePositionCheck = false)
 		{
-			Debug.Log("Updating chunks, storage: " + terrainStorage);
 			if (terrainStorage == null)
 				return ;
+			
+			Vector3 currentPos = transform.position;
+			Vector3 currentChunkPos = RoundPositionToChunk(currentPos);
+			
+			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
+				return ;
 
-			foreach (var pos in GenerateChunkPositions())
+			foreach (var pos in GenerateChunkPositions(currentPos))
 			{
 				if (!terrainStorage.isLoaded(pos))
 				{
@@ -114,6 +141,17 @@ namespace ProceduralWorlds
 					OnChunkRenderGeneric(chunk.terrainData, chunk.userData, pos);
 				}
 			}
+
+			oldChunkPosition = currentChunkPos;
+		}
+
+		void OnDrawGizmos()
+		{
+			Gizmos.color = Color.red;
+			Gizmos.DrawSphere(oldChunkPosition, 4);
+
+			Gizmos.color = Color.blue;
+			Gizmos.DrawSphere(RoundPositionToChunk(transform.position), 4);
 		}
 
 		public void	DestroyAllChunks()

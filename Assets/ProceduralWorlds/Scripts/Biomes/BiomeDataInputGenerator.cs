@@ -11,6 +11,9 @@ namespace ProceduralWorlds.Biomator
 	public class BiomeDataInputGenerator
 	{
 		public int			seed;
+		public int			octaves = 3;
+		public float		persistance = .85f;
+		public float		lacunarity = 1.5f;
 		public int			size = 32;
 		public float		step = 1;
 		public int			maxTerrainHeight = 100;
@@ -45,6 +48,8 @@ namespace ProceduralWorlds.Biomator
 			BiomeSwitchGraph switchGraph = new BiomeSwitchGraph();
 			Sampler2D terrainHeight = new Sampler2D(size, step);
 			PerlinNoise2D perlin = new PerlinNoise2D(seed);
+
+			perlin.UpdateParams(seed, step, octaves, persistance, lacunarity);
 
 			perlin.ComputeSampler2D(terrainHeight);
 

@@ -45,7 +45,7 @@ public partial class BaseGraphEditor
 
 		if (orderingGroup.resizing && callbackId == orderingGroup.resizingCallbackId && Event.current.type == EventType.MouseDrag)
 			callback();
-		if (r.Contains(Event.current.mousePosition))
+		if (!editorEvents.isMouseOverNode && !editorEvents.isMouseOverLink && r.Contains(Event.current.mousePosition))
 		{
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{

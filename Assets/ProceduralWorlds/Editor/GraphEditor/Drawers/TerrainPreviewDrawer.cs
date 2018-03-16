@@ -138,6 +138,13 @@ namespace ProceduralWorlds.Editor
 
 				e.Use();
 			}
+
+			//zoom
+			if (previewRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+			{
+				previewCamera.transform.position += new Vector3(0, e.delta.y, 0);
+				e.Use();
+			}
 		}
 
 		void DrawIcons(Rect previewRect, Camera previewCamera)

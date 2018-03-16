@@ -103,7 +103,10 @@ namespace ProceduralWorlds.Editor
 		public void UpdateChunkLoaderPosition(Vector3 position)
 		{
 			if (terrainBase != null)
+			{
 				terrainBase.transform.position = position;
+				terrainBase.UpdateChunks();
+			}
 		}
 
 		~TerrainPreviewManager()
