@@ -6,3 +6,6 @@ install:
 
 script:
     - ./.travis/unit_test.sh
+
+after_success:
+    - ./.travis/performance_report.sh
