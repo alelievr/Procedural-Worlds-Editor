@@ -41,8 +41,6 @@ namespace ProceduralWorlds.Editor
 		//fired when the dragged link quit the zone above the anchor
 		protected event AnchorAction	OnDraggedLinkQuitAnchor;
 
-		public static Dictionary< BaseNode, BaseNodeEditor >	openedNodeEdiors = new Dictionary< BaseNode, BaseNodeEditor >();
-
 		[System.NonSerialized]
 		BaseNode						nodeRef;
 
@@ -66,9 +64,6 @@ namespace ProceduralWorlds.Editor
 
 			//set the PWGUI current nodeRef:
 			PWGUI.SetNode(nodeRef);
-			
-			//add our editor to the list:
-			openedNodeEdiors[nodeRef] = this;
 		}
 
 		public void Initialize(BaseGraphEditor graphEditor)
@@ -93,6 +88,10 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnInspectorGUI()
 		{
+			//if we loose the reference of our node, auto-destruct
+			if (nodeRef == null)
+				DestroyImmediate(this);
+			
 			if (!guiEnabled)
 				OnGUIEnable();
 			
@@ -109,9 +108,6 @@ namespace ProceduralWorlds.Editor
 			if (nodeRef == null)
 				return ;
 			
-			//remove our editor:
-			openedNodeEdiors.Remove(nodeRef);
-
 			OnNodeDisable();
 			UnBindEvents();
 		}

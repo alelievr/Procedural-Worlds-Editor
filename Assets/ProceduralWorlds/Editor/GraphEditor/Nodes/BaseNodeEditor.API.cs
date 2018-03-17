@@ -15,17 +15,18 @@ namespace ProceduralWorlds.Editor
 		public void NotifyReload()
 		{
 			var nodes = graphRef.GetNodeChildsRecursive(nodeRef);
+			var editors = Resources.FindObjectsOfTypeAll< BaseNodeEditor >();
 
-			foreach (var node in nodes)
-				openedNodeEdiors[node].OnNodePreProcess();
+			foreach (var editor in editors)
+				editor.OnNodePreProcess();
 			
 			//add our node to the process pass
 			nodes.Add(nodeRef);
 
 			graphRef.ProcessNodes(nodes);
 			
-			foreach (var editorKP in openedNodeEdiors)
-				editorKP.Value.OnNodePostProcess();
+			foreach (var editor in editors)
+				editor.OnNodePostProcess();
 		}
 
 

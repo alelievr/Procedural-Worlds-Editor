@@ -99,7 +99,6 @@ namespace ProceduralWorlds
 			if (debug)
 				Debug.Log("Node OnEnable: " + GetType());
 
-
 			//load the class QA name:
 			classAQName = GetType().AssemblyQualifiedName;
 

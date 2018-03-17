@@ -44,7 +44,7 @@ namespace ProceduralWorlds.Core
 			
 			FindAnchors(fromAnchorField, toAnchorField, out fromAnchor, out toAnchor);
 
-			graph.SafeCreateLink(fromAnchor, toAnchor);
+			graph.SafeCreateLink(fromAnchor, toAnchor, false);
 		}
 
 		static void CreateLinkAnchor(BaseGraph graph, BaseGraphCommand command, string inputCommand)
@@ -68,7 +68,7 @@ namespace ProceduralWorlds.Core
 			
 			FindAnchors(fromAnchorField, toAnchorField, out fromAnchor, out toAnchor);
 
-			graph.SafeCreateLink(fromAnchor, toAnchor);
+			graph.SafeCreateLink(fromAnchor, toAnchor, false);
 		}
 
 		static void	CreateLink(BaseGraph graph, BaseGraphCommand command, string inputCommand)
@@ -87,7 +87,7 @@ namespace ProceduralWorlds.Core
 						if (inAnchor.linkCount == 1)
 							continue ;
 						
-						graph.CreateLink(outAnchor, inAnchor);
+						graph.CreateLink(outAnchor, inAnchor, false);
 						return ;
 					}
 			

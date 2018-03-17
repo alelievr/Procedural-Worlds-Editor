@@ -600,12 +600,12 @@ namespace ProceduralWorlds.Core
 		}
 
 		//SafeCreateLink will create link and delete other overlapping links if there are
-		public NodeLink	SafeCreateLink(Anchor anchor)
+		public NodeLink	SafeCreateLink(Anchor anchor, bool raiseEvents = true)
 		{
-			return SafeCreateLink(editorEvents.startedLinkAnchor, anchor);
+			return SafeCreateLink(editorEvents.startedLinkAnchor, anchor, raiseEvents);
 		}
 
-		public NodeLink	SafeCreateLink(Anchor fromAnchor, Anchor toAnchor)
+		public NodeLink	SafeCreateLink(Anchor fromAnchor, Anchor toAnchor, bool raiseEvents = true)
 		{
 			Anchor	fAnchor = fromAnchor;
 			Anchor	tAnchor = toAnchor;
@@ -623,7 +623,7 @@ namespace ProceduralWorlds.Core
 			if (tAnchor.linkCount > 0)
 				tAnchor.RemoveAllLinks();
 			
-			return CreateLink(fAnchor, tAnchor);
+			return CreateLink(fAnchor, tAnchor, raiseEvents);
 		}
 
 		//create a link without checking for duplication
@@ -633,7 +633,7 @@ namespace ProceduralWorlds.Core
 			Anchor	fAnchor = fromAnchor;
 			Anchor	tAnchor = toAnchor;
 
-			if (OnPreLinkCreated != null)
+			if (OnPreLinkCreated != null && raiseEvents)
 				OnPreLinkCreated();
 			
 			//swap anchors if input/output are reversed

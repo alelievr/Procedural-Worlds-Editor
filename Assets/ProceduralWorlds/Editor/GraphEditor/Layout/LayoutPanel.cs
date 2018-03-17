@@ -9,11 +9,11 @@ namespace ProceduralWorlds.Editor
 	{
 		public delegate void			OnGUI(Rect rect);
 
-		public List< LayoutPanel >	childPanels = new List< LayoutPanel >();
+		public List< LayoutPanel >		childPanels = new List< LayoutPanel >();
 
-		public LayoutSeparator		separator;
+		public LayoutSeparator			separator;
 
-		protected BaseGraphEditor			graphEditor;
+		protected BaseGraphEditor		graphEditor;
 		protected BaseGraph				graphRef { get { return graphEditor.graph; } }
 		
 		protected DelayedChanges		delayedChanges = new DelayedChanges();

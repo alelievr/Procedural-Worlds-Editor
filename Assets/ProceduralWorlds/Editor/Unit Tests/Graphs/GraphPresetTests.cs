@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Node;
+using ProceduralWorlds.Editor;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
@@ -35,6 +36,22 @@ namespace ProceduralWorlds.Tests.Graphs
 
 				// Assert.That(graph.GetOutput< FinalTerrain >() != null)
 			}
+		}
+
+		[Test]
+		public static void WorldGraphCreationPreset()
+		{
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph() as WorldGraph;
+
+			var we = WorldGraphEditor.CreateInstance< WorldGraphEditor >();
+			we.graph = graph;
+			var wps = new WorldPresetScreen(we);
+
+			wps.OnBuildPressed();
+
+			graph.Process();
+
+			Object.DestroyImmediate(we);
 		}
 		
 		/* 

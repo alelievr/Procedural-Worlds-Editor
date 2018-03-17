@@ -16,7 +16,7 @@ namespace ProceduralWorlds.Editor
 	public class BiomeGraphEditor : BaseGraphEditor
 	{
 	
-		List< BiomeGraph >	biomeGraphs = new List< BiomeGraph >();
+		List< BiomeGraph >		biomeGraphs = new List< BiomeGraph >();
 		ReorderableList			biomeGraphList;
 	
 		[System.NonSerialized]
@@ -34,12 +34,18 @@ namespace ProceduralWorlds.Editor
 			base.OnEnable();
 			
 			OnGraphChanged += GraphLoadedCallback;
-	
-			OnResetLayout += ResetLayout;
+
+			OnResetLayout += ResetLayoutCallback;
 	
 			biomeGraphList = new ReorderableList(biomeGraphs, typeof(BiomeGraph), false, true, false, false);
 	
 			biomeGraphList.drawElementCallback = (rect, index, active, focus) => {
+				if (index < 0 || index >= biomeGraphs.Count || biomeGraphs[index] == null)
+				{
+					EditorGUI.LabelField(rect, "PLease, reload the biome list");
+					return ;
+				}
+				
 				EditorGUI.LabelField(rect, biomeGraphs[index].name);
 				rect.x += rect.width - 50;
 				rect.width = 50;
@@ -145,6 +151,8 @@ namespace ProceduralWorlds.Editor
 			base.OnDisable();
 			
 			OnGraphChanged -= GraphLoadedCallback;
+			
+			OnResetLayout -= ResetLayoutCallback;
 		}
 	
 	}

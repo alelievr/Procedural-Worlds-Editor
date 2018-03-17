@@ -35,7 +35,7 @@ namespace ProceduralWorlds.Editor
 			node.rect = Utils.DecalRect(node.rect, graph.panPosition);
 			Rect decaledRect;
 	
-			if (!nodeEditors.ContainsKey(node))
+			if (!nodeEditors.ContainsKey(node) || nodeEditors[node] == null)
 			{
 				nodeEditors[node] = UnityEditor.Editor.CreateEditor(node) as BaseNodeEditor;
 				nodeEditors[node].Initialize(this);

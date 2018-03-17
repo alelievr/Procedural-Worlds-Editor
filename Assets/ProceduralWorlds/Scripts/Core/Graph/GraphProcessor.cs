@@ -239,7 +239,7 @@ namespace ProceduralWorlds.Core
 			if (graph.GetComputeSortedNodes() == null)
 				graph.UpdateComputeOrder();
 			
-			// try {
+			try {
 				foreach (var node in graph.GetComputeSortedNodes())
 				{
 					//ignore unlinked nodes
@@ -248,10 +248,10 @@ namespace ProceduralWorlds.Core
 					
 					calculTime += ProcessNode(node, realMode);
 				}
-			// } catch (Exception e) {
-				// Debug.LogError(e);
-				// return calculTime;
-			// }
+			} catch (Exception e) {
+				Debug.LogError(e);
+				return calculTime;
+			}
 			
 			hasProcessed = true;
 

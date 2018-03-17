@@ -130,6 +130,7 @@ namespace ProceduralWorlds
 			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
 				return ;
 
+			Debug.Log("gen !");
 			foreach (var pos in GenerateChunkPositions(currentPos))
 			{
 				if (!terrainStorage.isLoaded(pos))
@@ -179,6 +180,8 @@ namespace ProceduralWorlds
 			DestroyAllChunks();
 			
 			UpdateChunks(true);
+
+			Debug.Log("Reloaded 1");
 		}
 		
 		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);

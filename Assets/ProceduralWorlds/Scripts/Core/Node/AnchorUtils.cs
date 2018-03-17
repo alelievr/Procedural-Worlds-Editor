@@ -12,6 +12,9 @@ namespace ProceduralWorlds.Core
 		{
 			if (to == typeof(object))
 				return true;
+			
+			if (from == null || to == null)
+				return false;
 
 			//if to or from are PWArray, we replace the to/from type by their generic type
 			if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(PWArray<>))

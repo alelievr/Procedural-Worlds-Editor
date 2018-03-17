@@ -5,6 +5,7 @@ using UnityEngine.Profiling;
 using ProceduralWorlds.Core;
 using UnityEditor;
 using System;
+using System.Reflection;
 
 namespace ProceduralWorlds.Editor
 {
@@ -19,6 +20,8 @@ namespace ProceduralWorlds.Editor
 		GUIContent			locateGraphContent;
 		GUIContent			saveGraphContent;
 		GUIContent			resetLayoutContent;
+		GUIContent			bugReportContent;
+		GUIContent			tryFixContent;
 
 		public override void OnLoadStyle()
 		{
@@ -26,6 +29,8 @@ namespace ProceduralWorlds.Editor
 			Texture2D fileIconTexture = Resources.Load< Texture2D >("Icons/ic_file");
 			Texture2D saveIconTexture = Resources.Load< Texture2D >("Icons/ic_save");
 			Texture2D resetIconTexture = Resources.Load< Texture2D >("Icons/ic_reset");
+			Texture2D bugReportTexture = Resources.Load< Texture2D >("Icons/ic_bug_report");
+			Texture2D tryFixTexture = Resources.Load< Texture2D >("Icons/ic_fix");
 			
 			navBarBackgroundStyle = new GUIStyle("NavBarBackground");
 
@@ -33,6 +38,8 @@ namespace ProceduralWorlds.Editor
 			locateGraphContent = new GUIContent(fileIconTexture, "Locate graph asset file");
 			saveGraphContent = new GUIContent(saveIconTexture, "Save graph as text file");
 			resetLayoutContent = new GUIContent(resetIconTexture, "Reset layout");
+			bugReportContent = new GUIContent(bugReportTexture, "Report a bug");
+			tryFixContent = new GUIContent(tryFixTexture, "Try to fix anchor and link issues (will remove all links)");
 		}
 		
 		public override void DrawDefault(Rect graphRect)
@@ -62,6 +69,12 @@ namespace ProceduralWorlds.Editor
 					
 					if (GUILayout.Button(resetLayoutContent, GUILayout.Width(30), GUILayout.Height(30)))
 						graphEditor.ResetLayout();
+					
+					if (GUILayout.Button(tryFixContent, GUILayout.Width(30), GUILayout.Height(30)))
+						TryFix();
+
+					if (GUILayout.Button(bugReportContent, GUILayout.Width(30), GUILayout.Height(30)))
+						Application.OpenURL("https://github.com/alelievr/Procedural-Worlds-Editor/issues/new");
 				}
 				EditorGUILayout.EndHorizontal();
 		
@@ -97,6 +110,29 @@ namespace ProceduralWorlds.Editor
 				var graphTextAsset = AssetDatabase.LoadAssetAtPath(relativePath, typeof(TextAsset));
 	
 				ProjectWindowUtil.ShowCreatedAsset(graphTextAsset);
+			}
+		}
+
+		void TryFix()
+		{
+			foreach (var node in graphRef.allNodes)
+			{
+				var loadFields = typeof(BaseNode).GetMethod("LoadFieldAttributes", BindingFlags.NonPublic | BindingFlags.Instance);
+				var clearDupKeys = typeof(BaseNode).GetMethod("RemoveAnchorFieldDulicatedKeys", BindingFlags.NonPublic | BindingFlags.Instance);
+				var updateAnchors = typeof(BaseNode).GetMethod("UpdateAnchorProperties", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (loadFields != null && clearDupKeys != null && updateAnchors != null)
+				{
+					clearDupKeys.Invoke(node, new object[]{});
+					node.anchorFieldDictionary.Clear();
+					loadFields.Invoke(node, new object[]{});
+					node.inputAnchorFields.Clear();
+					node.outputAnchorFields.Clear();
+					updateAnchors.Invoke(node, new object[]{});
+				}
+				else
+					Debug.Log("Ho no ...");
+
 			}
 		}
 

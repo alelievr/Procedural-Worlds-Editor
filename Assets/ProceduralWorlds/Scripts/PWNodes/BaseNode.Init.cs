@@ -15,15 +15,15 @@ namespace ProceduralWorlds
 	{
 		//anchor 
 		[System.Serializable]
-		protected class AnchorFieldDictionary : SerializableDictionary< string, AnchorField > {}
+		public class AnchorFieldDictionary : SerializableDictionary< string, AnchorField > {}
 		[SerializeField]
-		protected AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
+		public AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
 
 		[System.NonSerialized]
 		Dictionary< string, FieldInfo >		anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
 		
 		[System.NonSerialized]
-		public List< FieldInfo >			undoableFields = new List< FieldInfo >();
+		public List< ReflectionUtils.GenericField >	undoableFields = new List< ReflectionUtils.GenericField >();
 		
 		void LoadUndoableFields()
 		{
@@ -59,7 +59,7 @@ namespace ProceduralWorlds
 				if (fInfo.IsNotSerialized)
 					goto skipThisField;
 				
-				undoableFields.Add(fInfo);
+				undoableFields.Add(ReflectionUtils.CreateGenericField(GetType(), fInfo.Name));
 
 				skipThisField:
 				continue ;
@@ -72,6 +72,8 @@ namespace ProceduralWorlds
 			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
 			List< string > actualFields = new List< string >();
+
+			anchorFieldInfoMap.Clear();
 				
 			foreach (var field in fInfos)
 			{
@@ -144,18 +146,29 @@ namespace ProceduralWorlds
 			foreach (var kp in anchorFieldDictionary)
 				if (!actualFields.Contains(kp.Key))
 					toRemoveKeys.Add(kp.Key);
-						
+			
+			foreach (var toRemoveKey in toRemoveKeys)
+				anchorFieldDictionary.Remove(toRemoveKey);
+		}
+
+		void RemoveAnchorFieldDulicatedKeys()
+		{
+			List< string > toRemoveKeys = new List< string >();
+
 			//remove duplicate keys in the dictionary (yes it happends ...)
 			HashSet< string > duplicateKeys = new HashSet< string >();
 			foreach (var kp in anchorFieldDictionary)
 			{
-				// if (duplicateKeys.Contains(kp.Key))
-					// toRemoveKeys.Add(kp.Key);
+				if (duplicateKeys.Contains(kp.Key))
+					toRemoveKeys.Add(kp.Key);
 				duplicateKeys.Add(kp.Key);
 			}
-			
+
 			foreach (var toRemoveKey in toRemoveKeys)
+			{
+				Debug.Log("removing duplicated dictionary key: " + toRemoveKey);
 				anchorFieldDictionary.Remove(toRemoveKey);
+			}
 		}
 
 		void UpdateAnchorProperties()
