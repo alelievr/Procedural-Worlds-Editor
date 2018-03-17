@@ -191,8 +191,6 @@ namespace ProceduralWorlds.Biomator
 					}
 					else
 						currentCell = betterCell;
-					
-					continue ;
 				}
 				else
 				{

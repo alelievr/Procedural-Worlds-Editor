@@ -12,11 +12,11 @@ namespace ProceduralWorlds.Editor
 	[CustomEditor(typeof(NodeBiomeBlender))]
 	public class NodeBiomeBlenderEditor : BaseNodeEditor
 	{
-		public NodeBiomeBlender	node;
+		public NodeBiomeBlender			node;
 
-		BiomeBlendListDrawer		blendListDrawer = new BiomeBlendListDrawer();
+		readonly BiomeBlendListDrawer	blendListDrawer = new BiomeBlendListDrawer();
 
-		const string				updateBiomeMapKey = "BiomeBlender";
+		const string					updateBiomeMapKey = "BiomeBlender";
 
 		[System.NonSerialized]
 		bool	updateBiomeMap = false;

@@ -48,7 +48,6 @@ namespace ProceduralWorlds.Editor
 		static Texture2D	icColor;
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
-		static GUIStyle		centeredLabel;
 		Dictionary< PWGUIFieldType, int > currentSettingIndices = new Dictionary< PWGUIFieldType, int >();
 
 		List< PWGUISettings > settingsStorage = new List< PWGUISettings >();
@@ -420,7 +419,7 @@ namespace ProceduralWorlds.Editor
 					if (!fieldSettings.editing)
 					{
 						name.text += value.ToString();
-						GUILayout.Label(name, centeredLabel);
+						GUILayout.Label(name, Styles.centeredLabel);
 						Rect valueRect = GUILayoutUtility.GetLastRect();
 						if (valueRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
 						{
@@ -1183,8 +1182,6 @@ namespace ProceduralWorlds.Editor
 			icColor = Resources.Load("Icons/ic_color") as Texture2D;
 			icEdit = Resources.Load("Icons/ic_edit") as Texture2D;
 			icSettingsOutline = Resources.Load("Icons/ic_settings_outline") as Texture2D;
-			centeredLabel = new GUIStyle();
-			centeredLabel.alignment = TextAnchor.MiddleCenter;
 		}
 
 		PWGUISettings FindSetting(PWGUIFieldType fieldType, int fieldIndex)

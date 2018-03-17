@@ -123,7 +123,7 @@ namespace ProceduralWorlds.Core
 	*/
 
 	[Serializable]
-	public struct Vector3i
+	public struct Vector3i : IEquatable< Vector3i >
 	{
 		public int	x;
 		public int	y;
@@ -151,6 +151,11 @@ namespace ProceduralWorlds.Core
 		public static implicit operator Vector3i(Vector3 v)
 		{
 			return new Vector3i(v.x, v.y, v.z);
+		}
+
+		public bool Equals(Vector3i other)
+		{
+			return other.x == x && other.y == y && other.z == z;
 		}
 	}
 }

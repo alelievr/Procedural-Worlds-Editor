@@ -15,11 +15,11 @@ namespace ProceduralWorlds
 		public Rect					rect = new Rect(400, 400, 200, 50);
 		public Rect					visualRect;
 		public int					id;
-		public bool					renamable = false;
-		public int					computeOrder = 0;
-		public float				processTime = 0f;
+		public bool					renamable;
+		public int					computeOrder;
+		public float				processTime;
 		public string				classAQName;
-		public ColorSchemeName	colorSchemeName;
+		public ColorSchemeName		colorSchemeName;
 		public int					viewHeight;
 		new public string			name;
 
@@ -34,27 +34,27 @@ namespace ProceduralWorlds
 		//Useful state bools:
 		protected bool			realMode { get { return graphRef.IsRealMode(); } }
 		[System.NonSerialized]
-		public bool				ready = false;
+		public bool				ready;
 		//Tell if the node have required unlinked input and so can't Process()
-		public bool				canWork = false;
+		public bool				canWork;
 		//Is the node processing
-		public bool				isProcessing = false;
+		public bool				isProcessing;
 		//Tell if the node was enabled
 		[System.NonSerialized]
-		private bool			isEnabled = false;
+		private bool			isEnabled;
 		//Is the node selected
-		public bool				isSelected = false;
+		public bool				isSelected;
 		//Is the node dragged
-		public bool				isDragged = false;
+		public bool				isDragged;
 		//Serialization system:
 		[System.NonSerialized]
-		private	bool			deserializationAlreadyNotified = false;
+		private	bool			deserializationAlreadyNotified;
 		//GUI option storage
-		public ProceduralWorldsGUIStorage		PWGUIStorage = new ProceduralWorldsGUIStorage();
+		public ProceduralWorldsGUIStorage	PWGUIStorage = new ProceduralWorldsGUIStorage();
 
 
 		[System.NonSerialized]
-		public BaseGraph			graphRef;
+		public BaseGraph		graphRef;
 		protected WorldGraph	worldGraphRef { get { return graphRef as WorldGraph; } }
 		protected BiomeGraph	biomeGraphRef { get { return graphRef as BiomeGraph; } }
 
@@ -70,14 +70,11 @@ namespace ProceduralWorlds
 		[SerializeField]
 		public bool				debug = false;
 	
-		public delegate void					AnchorAction(Anchor anchor);
+		public delegate void	AnchorAction(Anchor anchor);
 
 		//fired only when realMode is false, just after OnNodeProcess is called;
-		public event Action						OnPostProcess;
+		public event Action		OnPostProcess;
 
-		//event relay, to simplify custom graph events:
-		// public event Action< int >				OnChunkSizeChanged;
-		// public event Action< int >				OnChunkPositionChanged;
 
 		public void OnAfterGraphDeserialize(BaseGraph graph)
 		{

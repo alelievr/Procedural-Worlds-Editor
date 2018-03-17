@@ -34,6 +34,8 @@ namespace ProceduralWorlds.Core
 		//Control id for UnityEditor to select the link:
 		[System.NonSerialized]
 		public int				controlId = -1;
+		[System.NonSerialized]
+		public bool				initialized;
 
 
 		//called once (when link is created only)
@@ -44,6 +46,7 @@ namespace ProceduralWorlds.Core
 			fromNode = fromAnchor.nodeRef;
 			toNode = toAnchor.nodeRef;
 			GUID = System.Guid.NewGuid().ToString();
+			initialized = true;
 		}
 
 		//this function will be called twiced, from the two linked anchors

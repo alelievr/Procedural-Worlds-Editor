@@ -8,10 +8,15 @@ namespace ProceduralWorlds.Node
 	
 		[Output]
 		public float	outValue = .5f;
+
+		public float	sliderValue;
 		
 		public float	min = 0;
 		public float	max = 1;
 	
-		//no process needed, value already set by the slider.
+		public override void OnNodeProcessOnce()
+		{
+			outValue = sliderValue;
+		}
 	}
 }

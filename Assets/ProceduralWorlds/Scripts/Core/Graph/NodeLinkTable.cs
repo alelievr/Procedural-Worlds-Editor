@@ -49,6 +49,11 @@ namespace ProceduralWorlds.Core
 			linkTable.TryGetValue(linkGUID, out ret);
 			return ret;
 		}
+		
+		public bool ContainsLink(string linkGUID)
+		{
+			return linkTable.ContainsKey(linkGUID);
+		}
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{

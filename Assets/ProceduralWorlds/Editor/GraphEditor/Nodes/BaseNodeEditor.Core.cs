@@ -25,7 +25,7 @@ namespace ProceduralWorlds.Editor
 		List< object >				propertiesBeforeGUI;
 		List< object >				propertiesAfterGUI;
 
-		Dictionary< string, ReflectionUtils.GenericCaller > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericCaller >();
+		Dictionary< string, ReflectionUtils.GenericField > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericField >();
 
 		void LoadCoreResources()
 		{
@@ -77,7 +77,7 @@ namespace ProceduralWorlds.Editor
 			}
 
 			if (nodeRef.isDragged)
-				Undo.RecordObject(this, "Node " + nodeRef.name + " dragged");
+				Undo.RecordObject(nodeRef, "Node " + nodeRef.name + " dragged");
 			
 			//Drag window
 			if (e.button == 0 && !windowNameEdit)
@@ -104,7 +104,7 @@ namespace ProceduralWorlds.Editor
 				RestorePropertiesSnapshot(propertiesBeforeGUI);
 
 				//Then record the object
-				Undo.RecordObject(this, "Property updated in " + nodeRef.name);
+				Undo.RecordObject(nodeRef, "Property updated in " + nodeRef.name);
 
 				//And set back the modified values
 				RestorePropertiesSnapshot(propertiesAfterGUI);
@@ -193,39 +193,11 @@ namespace ProceduralWorlds.Editor
 					continue ;
 				
 				if (!bakedChildFieldGetters.ContainsKey(inputAnchor.fieldName))
-					bakedChildFieldGetters[inputAnchor.fieldName] = CreateGenericGetter(inputAnchor.fieldName);
+					bakedChildFieldGetters[inputAnchor.fieldName] = ReflectionUtils.CreateGenericField(nodeRef.GetType(), inputAnchor.fieldName);
 
-				if (bakedChildFieldGetters[inputAnchor.fieldName].Call(nodeRef) == null)
+				if (bakedChildFieldGetters[inputAnchor.fieldName].GetValue(nodeRef) == null)
 					EditorGUILayout.HelpBox("Null parameter: " + inputAnchor.fieldName, MessageType.Error);
 			}
-		}
-
-		ReflectionUtils.GenericCaller CreateGenericGetter(string fieldName)
-		{
-			//Create the delegate type that takes our node type in parameter
-			var delegateType = typeof(ReflectionUtils.ChildFieldGetter<>).MakeGenericType(new Type[] { nodeRef.GetType() });
-
-			//Get the child field from base class
-			FieldInfo fi = nodeRef.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
-
-			//Create a new method which return the field fi
-			DynamicMethod dm = new DynamicMethod("Get" + fi.Name, typeof(object), new Type[] { nodeRef.GetType() }, nodeRef.GetType());
-			ILGenerator il = dm.GetILGenerator();
-			// Load the instance of the object (argument 0) onto the stack
-			il.Emit(OpCodes.Ldarg_0);
-			// Load the value of the object's field (fi) onto the stack
-			il.Emit(OpCodes.Ldfld, fi);
-			// return the value on the top of the stack
-			il.Emit(OpCodes.Ret);
-
-			//Create a specific type from Caller which will cast the generic type to a specific one to call the generated delegate
-			var callerType = typeof(ReflectionUtils.Caller<>).MakeGenericType(new Type[] { nodeRef.GetType() });
-
-			//Instantiate this type and bind the delegate
-			var genericCaller = Activator.CreateInstance(callerType) as ReflectionUtils.GenericCaller;
-			genericCaller.SetDelegate(dm.CreateDelegate(delegateType));
-
-			return genericCaller;
 		}
 	}
 

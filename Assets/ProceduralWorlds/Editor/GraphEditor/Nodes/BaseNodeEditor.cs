@@ -47,7 +47,7 @@ namespace ProceduralWorlds.Editor
 		BaseNode						nodeRef;
 
 		[System.NonSerialized]
-		bool						guiEnabled = false;
+		bool							guiEnabled;
 
 		void OnEnable()
 		{

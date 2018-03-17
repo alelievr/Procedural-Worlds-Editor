@@ -17,15 +17,15 @@ namespace ProceduralWorlds.Editor
 		{
 			node = target as NodeSlider;
 			
-			delayedChanges.BindCallback(changeKey, (value) => { NotifyReload(); });
+			delayedChanges.BindCallback(changeKey, (unused) => { NotifyReload(); });
 		}
 
 		public override void OnNodeGUI()
 		{
 			EditorGUI.BeginChangeCheck();
-			node.outValue = EditorGUILayout.Slider(node.outValue, node.min, node.max);
+			node.sliderValue = EditorGUILayout.Slider(node.sliderValue, node.min, node.max);
 			if (EditorGUI.EndChangeCheck())
-				delayedChanges.UpdateValue(changeKey, node.outValue);
+				delayedChanges.UpdateValue(changeKey);
 		}
 	}
 }

@@ -105,7 +105,7 @@ namespace ProceduralWorlds.Core
 		}
 		
 		[SerializeField]
-		public bool						scaledPreviewEnabled = false;
+		public bool						scaledPreviewEnabled;
 		[SerializeField]
 		float							_scaledPreviewRatio = 8;
 		public float					scaledPreviewRatio

@@ -36,10 +36,10 @@ namespace ProceduralWorlds
 			var newNode = graphRef.CreateNewNode(GetType(), rect.position + new Vector2(50, 50), name);
 
 			//copy internal datas to the new node:
-			foreach (var fieldInfo in newNode.undoableFields)
+			foreach (var field in newNode.undoableFields)
 			{
-				var value = fieldInfo.GetValue(this);
-				fieldInfo.SetValue(newNode, value);
+				var value = field.GetValue(this);
+				field.SetValue(newNode, value);
 			}
 		}
 	}

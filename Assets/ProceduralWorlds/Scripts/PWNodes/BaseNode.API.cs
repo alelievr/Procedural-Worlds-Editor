@@ -199,9 +199,9 @@ namespace ProceduralWorlds
 		{
 			RemoveAllLinks();
 
-			//the node instance will be removed by the editor at the same time that it's asset
-		
-			ScriptableObject.DestroyImmediate(this, true);
+			#if !UNITY_EDITOR
+				ScriptableObject.DestroyImmediate(this, true);
+			#endif
 		}
 	}
 }

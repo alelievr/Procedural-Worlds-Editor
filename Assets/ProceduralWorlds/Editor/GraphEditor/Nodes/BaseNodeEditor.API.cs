@@ -48,7 +48,7 @@ namespace ProceduralWorlds.Editor
 		/// </example>
 		public void RecordUndo()
 		{
-			Undo.RecordObject(this, "Updated property in " + name);
+			Undo.RecordObject(nodeRef, "Updated property in " + name);
 		}
 	}
 }

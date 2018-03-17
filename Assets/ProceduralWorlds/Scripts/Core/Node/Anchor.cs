@@ -13,14 +13,14 @@ namespace ProceduralWorlds.Core
 
 		//AnchorField instance attached to this anchor
 		[System.NonSerialized]
-		public AnchorField		anchorFieldRef;
+		public AnchorField			anchorFieldRef;
 		//Node instance attached to this anchor
 		[System.NonSerialized]
 		public BaseNode				nodeRef;
 
 		//anchor connections:
 		[System.NonSerialized]
-		public List< NodeLink >	links = new List< NodeLink >();
+		public List< NodeLink >		links = new List< NodeLink >();
 		//list of link GUIDs
 		public List< string >		linkGUIDs = new List< string >();
 
@@ -34,12 +34,12 @@ namespace ProceduralWorlds.Core
 		//index of the field, valid only if the attached field is a PWArray
 		public int					fieldIndex = -1;
 		//Contains the type in the PWArray at fieldIndex or anchorField.fieldType if field is not a PWArray
-		[SerializeField] SerializableType	_fieldType;
+		[SerializeField] SerializableType _fieldType;
 		public SerializableType		fieldType { get { return (_fieldType == null) ? anchorFieldRef.fieldType : _fieldType; } set { _fieldType = value; } }
 
 
 		//hightlight mode (for replace / new / delete link visualization)
-		public AnchorHighlight	highlighMode = AnchorHighlight.None;
+		public AnchorHighlight		highlighMode = AnchorHighlight.None;
 		//visual rect of the anchor (from node)
 		public Rect					rect;
 		//visual rect of the anchor (from the graph)
@@ -55,7 +55,7 @@ namespace ProceduralWorlds.Core
 		//anchor field accessors
 		public AnchorType			anchorType { get { return anchorFieldRef.anchorType; } }
 		public string				fieldName { get { return anchorFieldRef.fieldName; } }
-		public ColorSchemeName	colorSchemeName { get { return anchorFieldRef.colorSchemeName; } }
+		public ColorSchemeName		colorSchemeName { get { return anchorFieldRef.colorSchemeName; } }
 		public bool					required { get { return anchorFieldRef.required; } }
 
 		
@@ -70,6 +70,14 @@ namespace ProceduralWorlds.Core
 		{
 			Init(anchorField);
 
+			//We load the link instances using link GUIDs
+			LoadLinks();
+		}
+
+		public void LoadLinks()
+		{
+			links.Clear();
+			
 			//we use the LinkTable in the graph to get the only instance of link stored
 			//	to know why, take a look at the BaseGraph.cs file.
 			var nodeLinkTable = nodeRef.graphRef.nodeLinkTable;
@@ -100,7 +108,6 @@ namespace ProceduralWorlds.Core
 				linkGUIDs.Remove(linkGUID);
 			}
 			
-			//propagate the OnAfterDeserialize event.
 			foreach (var link in links)
 				link.OnAfterDeserialize(this);
 		}

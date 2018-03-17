@@ -152,6 +152,16 @@ namespace ProceduralWorlds.Core
 			}
 		}
 
+		//Iterate over all anchors and if one isn't linked, set it's value to 0
+		public void UpdateAnchorValues()
+		{
+			foreach (var anchor in anchors)
+			{
+				if (anchor.linkCount == 0)
+					nodeRef.SetAnchorValue(anchor, null);
+			}
+		}
+
 		void RemoveDuplicatedUnlinkedAnchors()
 		{
 			bool first = true;

@@ -108,10 +108,12 @@ namespace ProceduralWorlds.Core
 
 
 		//node events:
+		public event NodeAction					OnNodePreRemoved;
 		public event NodeAction					OnNodeRemoved;
 		public event NodeAction					OnNodeAdded;
 		//link events:
 		//fired when a link start to be dragged
+		public event Action						OnPreLinkCreated;
 		public event LinkAction					OnLinkCreated;
 		public event LinkAction					OnPostLinkCreated;
 		public event LinkAction					OnLinkRemoved;
@@ -560,12 +562,8 @@ namespace ProceduralWorlds.Core
 			if (removeNode == inputNode || removeNode == outputNode)
 				return false;
 			
-			if (OnNodeRemoved != null && raiseEvents)
-			{
-				try {
-					OnNodeRemoved(removeNode);
-				} catch {}
-			}
+			if (OnNodePreRemoved != null)
+				OnNodePreRemoved(removeNode);
 			
 			int id = removeNode.id;
 			nodes.Remove(removeNode);
@@ -573,6 +571,9 @@ namespace ProceduralWorlds.Core
 			bool success = nodesDictionary.Remove(id);
 
 			removeNode.RemoveSelf();
+
+			if (OnNodeRemoved != null && raiseEvents)
+				OnNodeRemoved(removeNode);
 
 			return success;
 		}
@@ -631,6 +632,9 @@ namespace ProceduralWorlds.Core
 			NodeLink	link = new NodeLink();
 			Anchor	fAnchor = fromAnchor;
 			Anchor	tAnchor = toAnchor;
+
+			if (OnPreLinkCreated != null)
+				OnPreLinkCreated();
 			
 			//swap anchors if input/output are reversed
 			if (fromAnchor.anchorType != AnchorType.Output)

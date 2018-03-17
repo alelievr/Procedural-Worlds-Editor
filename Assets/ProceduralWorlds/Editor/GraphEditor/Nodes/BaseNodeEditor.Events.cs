@@ -17,10 +17,11 @@ namespace ProceduralWorlds.Editor
 				graphEditor.OnLinkStartDragged += LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged += LinkStopDragCallback;
 				graphEditor.OnLinkCanceled += LinkCanceledCallback;
+				graphEditor.OnUndoRedoPerformed += UndoRedoPerformedCallback;
 
 				graphRef.OnLinkCreated += LinkCreatedCallback;
 			}
-
+	
 			OnDraggedLinkOverAnchor += DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor += DraggedLinkQuitAnchorCallbck;
 		}
@@ -33,12 +34,25 @@ namespace ProceduralWorlds.Editor
 				graphEditor.OnLinkStartDragged -= LinkStartDragCallback;
 				graphEditor.OnLinkStopDragged -= LinkStopDragCallback;
 				graphEditor.OnLinkCanceled -= LinkCanceledCallback;
+				graphEditor.OnUndoRedoPerformed -= UndoRedoPerformedCallback;
 	
 				graphRef.OnLinkCreated -= LinkCreatedCallback;
 			}
 
 			OnDraggedLinkOverAnchor -= DraggedLinkOverAnchorCallback;
 			OnDraggedLinkQuitAnchor -= DraggedLinkQuitAnchorCallbck;
+		}
+
+		void UndoRedoPerformedCallback()
+		{
+			//Reload anchor links
+			foreach (var anchorField in nodeRef.anchorFields)
+			{
+				foreach (var anchor in anchorField.anchors)
+					anchor.LoadLinks();
+				anchorField.UpdateAnchors();
+				anchorField.UpdateAnchorValues();
+			}
 		}
 		
 		void LinkCreatedCallback(NodeLink link)
