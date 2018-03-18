@@ -121,7 +121,7 @@ namespace ProceduralWorlds
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks(bool ignorePositionCheck = false)
 		{
-			if (terrainStorage == null)
+			if (terrainStorage == null || graph == null)
 				return ;
 			
 			Vector3 currentPos = transform.position;

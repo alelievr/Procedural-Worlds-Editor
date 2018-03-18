@@ -67,7 +67,8 @@ namespace ProceduralWorlds.Editor
 				previewTexture = new RenderTexture(1000, 1000, 0, RenderTextureFormat.ARGB32);
 				previewTexture.hideFlags = HideFlags.HideAndDontSave;
 			}
-			previewCamera.targetTexture = previewTexture;
+			if (previewCamera != null)
+				previewCamera.targetTexture = previewTexture;
 
 			terrainBase = GameObject.FindObjectOfType< TerrainGenericBase >();
 
