@@ -27,9 +27,6 @@ namespace ProceduralWorlds.Editor
 		
 		GUIStyle	panelBackgroundStyle;
 
-		//current window rect:
-		Rect		windowRect;
-
 		public override void OnLoadStyle()
 		{
 			using (DefaultGUISkin.Get())
@@ -44,11 +41,6 @@ namespace ProceduralWorlds.Editor
 			panelBackgroundStyle = new GUIStyle("PanelBackground");
 		}
 
-		void DefaultNodeClickAction(Type t)
-		{
-			graphRef.CreateNewNode(t, -graphRef.panPosition + windowRect.center);
-		}
-		
 		Rect DrawSelectorCase(string name, ColorSchemeName colorSchemeName, bool title = false)
 		{
 			if (title)
@@ -88,7 +80,11 @@ namespace ProceduralWorlds.Editor
 
 					if (e.type == EventType.MouseDown && e.button == 0 && clickableRect.Contains(Event.current.mousePosition))
 					{
-						Vector2 pos = graphEditor.position.center - graphEditor.graph.panPosition;
+						Vector2 pan = graphRef.panPosition - graphRef.zoomPanCorrection;
+						Rect c = graphEditor.position;
+						c.position = Vector2.zero;
+						Vector2 center = GUI.matrix.inverse * c.center;
+						Vector2 pos = center - pan - c.center - BaseNode.defaultNodeSize.center;
 						graphEditor.graph.CreateNewNode(nodeCase.type, pos);
 					}
 				}
@@ -101,8 +97,6 @@ namespace ProceduralWorlds.Editor
 
 			//draw selector bar background:
 			GUI.DrawTexture(currentRect, ColorTheme.defaultBackgroundTexture);
-
-			windowRect = new Rect(0, 0, currentRect.xMin + currentRect.width, currentRect.yMin + currentRect.height);
 	
 			selectorScrollPosition = EditorGUILayout.BeginScrollView(selectorScrollPosition, GUILayout.ExpandWidth(true));
 			{

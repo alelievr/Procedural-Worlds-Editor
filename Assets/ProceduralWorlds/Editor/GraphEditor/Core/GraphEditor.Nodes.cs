@@ -161,7 +161,6 @@ namespace ProceduralWorlds.Editor
 		{
 			Undo.DestroyObjectImmediate(node);
 			nodeEditors.Remove(node);
-			Debug.Log("Destroy node");
 			AssetDatabase.SaveAssets();
 			AssetDatabase.Refresh();
 		}

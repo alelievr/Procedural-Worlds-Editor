@@ -11,8 +11,10 @@ namespace ProceduralWorlds
 	[System.SerializableAttribute]
 	public partial class BaseNode : ScriptableObject
 	{
+		public static readonly Rect	defaultNodeSize = new Rect(0, 0, 200, 50);
+
 		//Node datas:
-		public Rect					rect = new Rect(400, 400, 200, 50);
+		public Rect					rect = defaultNodeSize;
 		public Rect					visualRect;
 		public int					id;
 		public bool					renamable;
@@ -117,7 +119,7 @@ namespace ProceduralWorlds
 					graphRef.NotifyNodeReady(this);
 				return ;
 			}
-			
+
 			BindEvents();
 
 			deserializationAlreadyNotified = true;

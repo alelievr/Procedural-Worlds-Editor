@@ -56,7 +56,6 @@ namespace ProceduralWorlds.Editor
 			
 			if (nodeRef == null)
 			{
-				Debug.Log("Destroying null target node editor !");
 				DestroyImmediate(this);
 				return ;
 			}

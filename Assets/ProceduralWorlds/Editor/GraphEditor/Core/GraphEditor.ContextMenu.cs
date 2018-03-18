@@ -49,7 +49,7 @@ namespace ProceduralWorlds.Editor
 				{
 					string menuString = "Create new/" + nodeCat.title + "/";
 					foreach (var nodeClass in nodeCat.typeInfos)
-						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => graph.CreateNewNode(nodeClass.type, -graph.panPosition + mousePosition));
+						menu.AddItem(new GUIContent(menuString + nodeClass.name), false, () => graph.CreateNewNode(nodeClass.type, -graph.panPosition + mousePosition - BaseNode.defaultNodeSize.center));
 				}
 				menu.AddItem(newOrderingGroupContent, false, CreateNewOrderingGroup, e.mousePosition - graph.panPosition);
 				menu.AddItemState(deleteOrderingGroupContent, editorEvents.isMouseOverOrderingGroup, DeleteOrderingGroup);
