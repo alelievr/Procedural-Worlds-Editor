@@ -204,7 +204,6 @@ namespace ProceduralWorlds.Editor
 	
 		void StopDragLink(bool linked)
 		{
-			Debug.Log("linked: " + linked);
 			graph.editorEvents.isDraggingLink = false;
 	
 			if (!linked && OnLinkCanceled != null)

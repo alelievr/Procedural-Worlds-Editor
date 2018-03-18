@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ProceduralWorlds.Core
@@ -7,18 +8,17 @@ namespace ProceduralWorlds.Core
 	[System.Serializable]
 	public class NodeLinkTable : ISerializationCallbackReceiver
 	{
-	
-		[System.Serializable]
-		public class LinkTable : SerializableDictionary< string, NodeLink > {}
-		[System.Serializable]
-		public class AnchorLinkTable : SerializableDictionary< string, List< string > > {}
+		[System.NonSerialized]
+		public Dictionary< string, NodeLink > linkTable = new Dictionary< string, NodeLink >();
 	
 		[SerializeField]
-		LinkTable		linkTable = new LinkTable();
+		List< string >		linkGUIDs = new List< string >();
+		[SerializeField]
+		List< NodeLink >	linkInstancies = new List< NodeLink >();
 
-		readonly bool			debug = false;
+		readonly bool		debug = false;
 	
-		//to be called, fmorAnchor and toAnchor fields in NodeLink must be valid
+		//to be called, fromAnchor and toAnchor fields in NodeLink must be valid
 		public void				AddLink(NodeLink link)
 		{
 			if (link.fromAnchor == null || link.toAnchor == null)
@@ -57,12 +57,22 @@ namespace ProceduralWorlds.Core
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
+			linkTable.Clear();
+
+			//fill node link dictionary for fast access
+			for (int i = 0; i < linkGUIDs.Count; i++)
+				linkTable[linkGUIDs[i]] = linkInstancies[i];
+			
 			if (debug)
 				Debug.Log("after serialization: dict keys: " + linkTable.Count);
 		}
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
+			//set back dictionary values into lists for serialization
+			linkGUIDs = linkTable.Keys.ToList();
+			linkInstancies = linkTable.Values.ToList();
+
 			if (debug)
 				Debug.Log("Before serialization: dict keys: " + linkTable.Count);
 		}

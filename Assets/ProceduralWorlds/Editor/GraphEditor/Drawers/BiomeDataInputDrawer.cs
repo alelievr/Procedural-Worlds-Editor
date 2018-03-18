@@ -9,7 +9,7 @@ namespace ProceduralWorlds.Editor
 	public class BiomeDataInputDrawer : Drawer
 	{
 		BiomeDataInputGenerator		inputData;
-		bool						showTerrain = true;
+		bool						showTerrain;
 
 		public override void OnEnable()
 		{

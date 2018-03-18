@@ -31,7 +31,7 @@ namespace ProceduralWorlds.Editor
 			int	p15 = Mathf.FloorToInt(graphEditor.position.width * .15f);
 			int	p50 = Mathf.FloorToInt(graphEditor.position.width * .5f);
 
-			var resizablePanel1Settings = new LayoutSetting {
+			var resizablePanel1Settings = new LayoutSetting(graphEditor.position) {
 				separatorPosition = p20,
 				separatorWidth = 4,
 				minWidth = minWidth,
@@ -39,7 +39,7 @@ namespace ProceduralWorlds.Editor
 				initialized = true,
 			};
 			//the layout infos (width, min, max, ...) are inverted because leftBar is true
-			var resizablePanel2Settings = new LayoutSetting {
+			var resizablePanel2Settings = new LayoutSetting(graphEditor.position) {
 				separatorPosition = p15,
 				separatorWidth = 4,
 				minWidth = minWidth,
@@ -47,7 +47,7 @@ namespace ProceduralWorlds.Editor
 				initialized = true,
 				leftBar = true,
 			};
-			var staticPanelSettings = new LayoutSetting {
+			var staticPanelSettings = new LayoutSetting(graphEditor.position) {
 				separatorPosition = EditorGUIUtility.singleLineHeight,
 				initialized = true,
 			};

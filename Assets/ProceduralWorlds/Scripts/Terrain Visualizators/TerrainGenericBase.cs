@@ -130,7 +130,6 @@ namespace ProceduralWorlds
 			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
 				return ;
 
-			Debug.Log("gen !");
 			foreach (var pos in GenerateChunkPositions(currentPos))
 			{
 				if (!terrainStorage.isLoaded(pos))

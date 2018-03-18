@@ -85,7 +85,7 @@ namespace ProceduralWorlds.Editor
 			List< BiomeGraph > biomes = new List< BiomeGraph >();
 
 			string graphPath = worldGraph.assetFilePath;
-			string biomeTargetPath = Path.GetDirectoryName(graphPath) + "/" + GraphFactory.BaseGraphBiomeFolderName + "/";
+			string biomeTargetPath = Path.GetDirectoryName(graphPath) + "/" + GraphFactory.baseGraphBiomeFolderName + "/";
 			
 			var biomeGraphs = Resources.LoadAll< BiomeGraph >(biomeAssetPrefix + biomeFolder);
 			for (int i = 0; i < biomeGraphs.Length; i++)

@@ -24,7 +24,7 @@ namespace ProceduralWorlds.Editor
 	    	ProjectWindowUtil.ShowCreatedAsset(graph);
 
 			//create Biome folder:
-			AssetDatabase.CreateFolder(folderPath, GraphFactory.BaseGraphBiomeFolderName);
+			AssetDatabase.CreateFolder(folderPath, GraphFactory.baseGraphBiomeFolderName);
 		}
 	}
 }

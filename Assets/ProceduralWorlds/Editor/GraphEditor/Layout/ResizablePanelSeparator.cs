@@ -98,5 +98,13 @@ namespace ProceduralWorlds.Editor
 			
 			return ret;
 		}
+
+		public override void Resize(Rect oldWindow)
+		{
+			base.Resize(oldWindow);
+
+			Debug.Log("percentmin: " + layoutSetting.minWidthPercent);
+			Debug.Log("percentmax: " + layoutSetting.maxWidthPercent);
+		}
 	}
 }

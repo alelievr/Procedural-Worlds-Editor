@@ -22,7 +22,7 @@ namespace ProceduralWorlds.Core
 		NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
 		Dictionary< int, BaseNode >	nodesDictionary;
 
-		BaseGraph						currentGraph;
+		BaseGraph					currentGraph;
 
 		public bool					hasProcessed;
 
@@ -114,11 +114,12 @@ namespace ProceduralWorlds.Core
 						+ link.toAnchor.fieldName + " in " + toType);
 					return true;
 				}
-					
+				
 				if (bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node) == null)
 				{
-					Debug.Log("[PW Process] tring to assign null value from "
-						+ fromType + "." + link.fromAnchor.fieldName);
+					if (currentGraph.processMode != GraphProcessMode.Once)
+						Debug.Log("[PW Process] tring to assign null value from "
+							+ fromType + "." + link.fromAnchor.fieldName);
 					return true;
 				}
 			}
@@ -168,7 +169,6 @@ namespace ProceduralWorlds.Core
 					var pwArray = prop.GetValue(link.toNode);
 
 					bool b = GenericAssignAt(pwArray as IPWArray, link.toAnchor.fieldIndex, val, link.fromAnchor.name, true);
-					// bool b = (bool)pwArray.GetType().GetMethod("AssignAt").Invoke(pwArray, new object[]{link.toAnchor.fieldIndex, val, link.fromAnchor.name, true});
 
 					if (!b)
 						Debug.LogError("[BaseGraph Processor] Failed to set distant indexed field value: " + link.toAnchor.fieldName + " at index: " + link.toAnchor.fieldIndex);

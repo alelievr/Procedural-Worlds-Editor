@@ -65,7 +65,7 @@ namespace ProceduralWorlds.Editor
 		void LoadGraphList()
 		{
 			string path = AssetDatabase.GetAssetPath(biomeGraph);
-			string resourcesName = GraphFactory.UnityResourcesFolderName;
+			string resourcesName = GraphFactory.unityResourcesFolderName;
 	
 			if (String.IsNullOrEmpty(path))
 				return ;

@@ -98,11 +98,13 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnNodePreProcess()
 		{
-			node.BuildBiomeSwitchGraph();
 			var biomeData = node.GetBiomeData();
 
 			if (biomeData != null && biomeData.biomeSwitchGraph.isBuilt)
+			{
+				node.BuildBiomeSwitchGraph();
 				node.FillBiomeMap(biomeData);
+			}
 		}
 	}
 }

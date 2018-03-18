@@ -37,5 +37,10 @@ namespace ProceduralWorlds.Editor
 		{
 			return Rect.zero;
 		}
+
+		public virtual void Resize(Rect oldWindow)
+		{
+			layoutSetting.windowRect = oldWindow;
+		}
 	}
 }

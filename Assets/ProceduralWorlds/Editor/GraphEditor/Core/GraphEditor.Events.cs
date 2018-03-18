@@ -125,6 +125,7 @@ namespace ProceduralWorlds.Editor
 			//fire the resize event
 			if (windowSize != Vector2.zero && windowSize != position.size)
 			{
+				layout.Resize(new Rect(Vector2.zero, windowSize));
 				if (OnWindowResize != null)
 					OnWindowResize(windowSize);
 				Repaint();

@@ -36,6 +36,7 @@ namespace ProceduralWorlds.Core
 		//returns all nodes in the graph (excluding input and output nodes)
         public List< BaseNode >					nodes = new List< BaseNode >();
         public List< OrderingGroup >			orderingGroups = new List< OrderingGroup >();
+		public GraphProcessMode					processMode;
 		//returns all nodes
 		public IEnumerable< BaseNode >			allNodes
 		{
@@ -278,6 +279,8 @@ namespace ProceduralWorlds.Core
 		{
 			if (!readyToProcess)
 				return -1;
+			
+			processMode = GraphProcessMode.Normal;
 
 			if (OnGraphPreProcess != null)
 				OnGraphPreProcess();
@@ -295,6 +298,8 @@ namespace ProceduralWorlds.Core
 		{
 			if (!readyToProcess)
 				return ;
+				
+			processMode = GraphProcessMode.Once;
 			
 			graphProcessor.UpdateNodeDictionary(nodesDictionary);
 			graphProcessor.ProcessOnce(this);

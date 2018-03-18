@@ -11,12 +11,6 @@ namespace ProceduralWorlds.Core
 {
 	using Node;
 
-	public enum BaseGraphProcessMode
-	{
-		Normal,		//output a disaplayable terrain (with isosurface / oth)
-		Geologic,	//output a structure containing all maps for a chunk (terrain, wet, temp, biomes, ...)
-	}
-
 	[System.SerializableAttribute]
 	public class WorldGraph : BaseGraph
 	{
@@ -138,7 +132,6 @@ namespace ProceduralWorlds.Core
 		}
 
 		public BaseGraphTerrainType		terrainType;
-		public BaseGraphProcessMode		processMode;
 
 		[System.NonSerialized]
 		Vector3							currentChunkPosition;
@@ -164,14 +157,14 @@ namespace ProceduralWorlds.Core
 		void		BakeNeededGeologicDatas()
 		{
 			float		oldStep = step;
-			processMode = BaseGraphProcessMode.Geologic;
+			processMode = GraphProcessMode.Geologic;
 			step = geologicTerrainStep;
 
 			for (int x = 0; x < geologicDistanceCheck; x++)
 				for (int y = 0; y < geologicDistanceCheck; y++)
 					Process();
 
-			processMode = BaseGraphProcessMode.Normal;
+			processMode = GraphProcessMode.Normal;
 			step = oldStep;
 		}
 
@@ -188,7 +181,7 @@ namespace ProceduralWorlds.Core
 			geologicTerrainStep = 8;
 			geologicDistanceCheck = 2;
 	
-			processMode = BaseGraphProcessMode.Normal;
+			processMode = GraphProcessMode.Normal;
 		}
 
 		public override void InitializeInputAndOutputNodes()

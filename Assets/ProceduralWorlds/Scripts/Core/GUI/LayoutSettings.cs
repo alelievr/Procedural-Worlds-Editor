@@ -7,15 +7,47 @@ namespace ProceduralWorlds.Core
 	[System.Serializable]
 	public class LayoutSetting : IPWCloneable< LayoutSetting >
 	{
-		public float	minWidth;
-		public float	maxWidth;
+		public Rect		windowRect;
+
+		public float	minWidthPercent;
+		public float	maxWidthPercent;
 		
-		public float	minHeight;
-		public float	maxHeight;
+		public float	minHeightPercent;
+		public float	maxHeightPercent;
+
+		public float	separatorPositionPercent;
+
+		public float	minWidth
+		{
+			get { return minWidthPercent * windowRect.width; }
+			set { minWidthPercent = value / windowRect.width; }
+		}
+
+		public float	maxWidth
+		{
+			get { return maxWidthPercent * windowRect.width; }
+			set { maxWidthPercent = value / windowRect.width; }
+		}
+		
+		public float	minHeight
+		{
+			get { return minHeightPercent * windowRect.height; }
+			set { minHeightPercent = value / windowRect.height; }
+		}
+
+		public float	maxHeight
+		{
+			get { return maxHeightPercent * windowRect.height; }
+			set { maxHeightPercent = value / windowRect.height; }
+		}
 
 		public bool		canBeResized;
 
-		public float	separatorPosition;
+		public float	separatorPosition
+		{
+			get { /*Debug.Log("sep position: " + separatorPositionPercent);*/ return separatorPositionPercent * windowRect.width; }
+			set { separatorPositionPercent = value / windowRect.width; }
+		}
 		public float	separatorWidth;
 
 		public bool		vertical;
@@ -23,9 +55,16 @@ namespace ProceduralWorlds.Core
 		
 		public bool		initialized;
 
+		public LayoutSetting(Rect window)
+		{
+			Debug.Log("window: " + window);
+
+			windowRect = window;
+		}
+
 		public LayoutSetting Clone(LayoutSetting reuseExisting)
 		{
-			LayoutSetting setting = new LayoutSetting();
+			LayoutSetting setting = new LayoutSetting(windowRect);
 
 			setting.minHeight = minHeight;
 			setting.maxHeight = maxHeight;

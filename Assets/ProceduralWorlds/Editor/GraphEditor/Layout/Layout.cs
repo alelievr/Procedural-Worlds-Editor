@@ -103,7 +103,7 @@ namespace ProceduralWorlds.Editor
 			foreach (var sep in loadedSeparators)
 			{
 				if (layoutSettings.settings.Count <= index)
-					layoutSettings.settings.Add(new LayoutSetting());
+					layoutSettings.settings.Add(new LayoutSetting(graphEditor.position));
 
 				var layoutSetting = layoutSettings.settings[index];
 				var newLayout = sep.UpdateLayoutSetting(layoutSetting);
@@ -122,6 +122,12 @@ namespace ProceduralWorlds.Editor
 		public List< Rect> GetRects()
 		{
 			return layoutRects;
+		}
+
+		public void Resize(Rect oldSize)
+		{
+			foreach (var sep in loadedSeparators)
+				sep.Resize(oldSize);
 		}
 
 	}

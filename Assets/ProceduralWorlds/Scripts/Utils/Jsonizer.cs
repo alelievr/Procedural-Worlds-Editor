@@ -57,7 +57,9 @@ public static class Jsonizer
 	public static readonly JsonTypes allowedJsonTypes = new JsonTypes {
 		{typeof(string), "\"", "\"", new Regex("^\".*\"$"), (val) => val.Trim('"') },
 		{typeof(int), new Regex(@"^" + intRegex + "$"), (val) => int.Parse(val)},
+		{typeof(long), new Regex(@"^" + intRegex + "$"), (val) => long.Parse(val)},
 		{typeof(float), new Regex("^" + floatRegex + "$"), (val) => float.Parse(val) },
+		{typeof(double), new Regex("^" + floatRegex + "$"), (val) => double.Parse(val) },
 		{typeof(Vector2), new Regex("^" + vector2Regex + "$"),
 			(val) => {
 				//Arrrrrg i hate string manipulation in C#

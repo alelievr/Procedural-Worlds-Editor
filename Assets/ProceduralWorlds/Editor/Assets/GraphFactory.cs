@@ -16,9 +16,11 @@ namespace ProceduralWorlds.Editor
     
         //Biome graph settings:
         public readonly static string	BiomeGraphDefaultName = "New ProceduralBiome";
-		public readonly static string	BaseGraphBiomeFolderName = "Biomes";
+		public readonly static string	baseGraphBiomeFolderName = "Biomes";
 
-		public readonly static string	UnityResourcesFolderName = "Resources";	
+		public readonly static string	unityResourcesFolderName = "Resources";	
+
+		public readonly static string	presetGraphFolderName = "GraphPresets";
     
         public static T CreateGraph< T >(string directory, string fileName, bool rename = true) where T : BaseGraph
         {
@@ -84,9 +86,12 @@ namespace ProceduralWorlds.Editor
 
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;
+
+			if (currentPath.IndexOf(presetGraphFolderName) != -1)
+				return currentPath;
 			
-			int resourcesIndex = currentPath.IndexOf(UnityResourcesFolderName, StringComparison.InvariantCulture);
-			int biomesIndex = currentPath.IndexOf(BaseGraphBiomeFolderName, StringComparison.InvariantCulture);
+			int resourcesIndex = currentPath.IndexOf(unityResourcesFolderName, StringComparison.InvariantCulture);
+			int biomesIndex = currentPath.IndexOf(baseGraphBiomeFolderName, StringComparison.InvariantCulture);
 			
 			//if the path don't contains Resources nor Biomes folder
 			if (resourcesIndex == -1 || biomesIndex == -1)
@@ -107,7 +112,7 @@ namespace ProceduralWorlds.Editor
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;
 				
-			if (!currentPath.Contains(UnityResourcesFolderName))
+			if (!currentPath.Contains(unityResourcesFolderName))
 				return null;
 			
 			return currentPath;

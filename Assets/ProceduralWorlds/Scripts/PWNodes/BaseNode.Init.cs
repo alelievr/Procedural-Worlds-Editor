@@ -11,16 +11,19 @@ using ProceduralWorlds.Node;
 //Initialization and data baking for BaseNode
 namespace ProceduralWorlds
 {
-	public partial class BaseNode
+	public partial class BaseNode : ISerializationCallbackReceiver
 	{
 		//anchor 
-		[System.Serializable]
-		public class AnchorFieldDictionary : SerializableDictionary< string, AnchorField > {}
+		[System.NonSerialized]
+		public Dictionary< string, AnchorField >	anchorFieldDictionary = new Dictionary< string, AnchorField >();
+
 		[SerializeField]
-		public AnchorFieldDictionary		anchorFieldDictionary = new AnchorFieldDictionary();
+		public List< string >						anchorFieldNames = new List< string >();
+		[SerializeField]
+		public List< AnchorField >					anchorFieldInstances = new List< AnchorField >();
 
 		[System.NonSerialized]
-		Dictionary< string, FieldInfo >		anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
+		Dictionary< string, FieldInfo >				anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
 		
 		void LoadFieldAttributes()
 		{
@@ -217,6 +220,20 @@ namespace ProceduralWorlds
 				graphRef.OnPostLinkRemoved -= LinkPostRemovedCalllback;
 				graphRef.OnPostLinkCreated -= LinkPostCreatedCallback;
 			}
+		}
+
+		public void OnBeforeSerialize()
+		{
+			anchorFieldNames = anchorFieldDictionary.Keys.ToList();
+			anchorFieldInstances = anchorFieldDictionary.Values.ToList();
+		}
+
+		public void OnAfterDeserialize()
+		{
+			anchorFieldDictionary.Clear();
+
+			for (int i = 0; i < anchorFieldNames.Count; i++)
+				anchorFieldDictionary[anchorFieldNames[i]] = anchorFieldInstances[i];
 		}
 	}
 }

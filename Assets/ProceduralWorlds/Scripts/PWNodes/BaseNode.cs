@@ -103,7 +103,9 @@ namespace ProceduralWorlds
 			classAQName = GetType().AssemblyQualifiedName;
 
 			if (graphRef != null)
+			{
 				OnAfterNodeAndGraphDeserialized();
+			}
 		}
 
 		//here both our node and graph have been deserialized, we can now use it's datas
