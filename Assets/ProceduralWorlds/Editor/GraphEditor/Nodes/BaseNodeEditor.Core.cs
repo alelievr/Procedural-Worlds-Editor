@@ -84,7 +84,7 @@ namespace ProceduralWorlds.Editor
 				GUI.DragWindow(dragRect);
 			
 			//Undo/Redo handling:
-			propertiesBeforeGUI = TakeUndoablePropertiesSnapshot(propertiesBeforeGUI);
+			undoRedoHelper.Beign();
 
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
@@ -96,21 +96,7 @@ namespace ProceduralWorlds.Editor
 			}
 			GUILayout.EndVertical();
 			
-			propertiesAfterGUI = TakeUndoablePropertiesSnapshot(propertiesAfterGUI);
-
-			if (PropertiesSnapshotDiffers(propertiesBeforeGUI, propertiesAfterGUI))
-			{
-				//Set back the nodeRef values to what they was before the modification
-				RestorePropertiesSnapshot(propertiesBeforeGUI);
-
-				//Then record the object
-				Undo.RecordObject(nodeRef, "Property updated in " + nodeRef.name);
-
-				//And set back the modified values
-				RestorePropertiesSnapshot(propertiesAfterGUI);
-				
-				// Debug.Log("Undo recorded: in " + nodeRef.GetType());
-			}
+			undoRedoHelper.End();
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)
@@ -143,42 +129,6 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
-		List< object > TakeUndoablePropertiesSnapshot(List< object > buffer = null)
-		{
-			if (buffer == null)
-				buffer = new List< object >(new object[nodeRef.undoableFields.Count]);
-			
-			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
-				buffer[i] = nodeRef.undoableFields[i].GetValue(nodeRef);
-			
-			return buffer;
-		}
-
-		bool PropertiesSnapshotDiffers(List< object > propertiesList1, List< object > propertiesList2)
-		{
-			if (propertiesList1.Count != propertiesList2.Count)
-				return true;
-			
-			for (int i = 0; i < propertiesList1.Count; i++)
-			{
-				var p1 = propertiesList1[i];
-				var p2 = propertiesList2[i];
-
-				if (p1 == null)
-					continue ;
-
-				if (!p1.Equals(p2))
-					return true;
-			}
-
-			return false;
-		}
-
-		void RestorePropertiesSnapshot(List< object > properties)
-		{
-			for (int i = 0; i < nodeRef.undoableFields.Count; i++)
-				nodeRef.undoableFields[i].SetValue(nodeRef, properties[i]);
-		}
 
 		void RenderInspector()
 		{

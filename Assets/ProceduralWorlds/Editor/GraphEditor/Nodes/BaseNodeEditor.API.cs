@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
@@ -15,7 +16,7 @@ namespace ProceduralWorlds.Editor
 		public void NotifyReload()
 		{
 			var nodes = graphRef.GetNodeChildsRecursive(nodeRef);
-			var editors = Resources.FindObjectsOfTypeAll< BaseNodeEditor >();
+			var editors = Resources.FindObjectsOfTypeAll< BaseNodeEditor >().Where(e => e.graphEditor == graphEditor);
 
 			foreach (var editor in editors)
 				editor.OnNodePreProcess();

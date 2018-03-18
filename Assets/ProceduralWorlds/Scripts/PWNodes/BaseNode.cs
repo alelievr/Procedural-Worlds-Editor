@@ -92,7 +92,7 @@ namespace ProceduralWorlds
 			
 			LoadFieldAttributes();
 
-			LoadUndoableFields();
+			LoadClonableFields();
 
 			UpdateAnchorProperties();
 

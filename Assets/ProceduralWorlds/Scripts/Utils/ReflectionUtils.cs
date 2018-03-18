@@ -5,6 +5,8 @@ using System;
 using System.Reflection.Emit;
 using System.Linq.Expressions;
 
+using Object = UnityEngine.Object;
+
 namespace ProceduralWorlds.Core
 {
 	public static class ReflectionUtils
@@ -16,14 +18,14 @@ namespace ProceduralWorlds.Core
 
 		public interface GenericField
 		{
-			object GetValue(BaseNode node);
-			void SetValue(BaseNode node, object value);
+			object GetValue(Object node);
+			void SetValue(Object node, object value);
 			void SetField(FieldInfo field);
 			void SetSetterDelegate(Delegate d);
 			void SetGetterDelegate(Delegate d);
 		}
 
-		public class Field< T, U > : GenericField where T : BaseNode
+		public class Field< T, U > : GenericField where T : Object
 		{
 			ChildFieldGetter< T > getter;
 			ChildFieldSetter< T, U > setter;
@@ -44,7 +46,7 @@ namespace ProceduralWorlds.Core
 					getter = (ChildFieldGetter< T >)d;
 			}
 
-			public object GetValue(BaseNode node)
+			public object GetValue(Object node)
 			{
 				if (fastReflection)
 					return getter(node as T);
@@ -52,7 +54,7 @@ namespace ProceduralWorlds.Core
 					return field.GetValue(node);
 			}
 
-			public void SetValue(BaseNode node, object value)
+			public void SetValue(Object node, object value)
 			{
 				if (fastReflection)
 					setter(node as T, (U)value);

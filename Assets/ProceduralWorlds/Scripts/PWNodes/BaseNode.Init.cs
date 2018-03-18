@@ -22,50 +22,6 @@ namespace ProceduralWorlds
 		[System.NonSerialized]
 		Dictionary< string, FieldInfo >		anchorFieldInfoMap = new Dictionary< string, FieldInfo >();
 		
-		[System.NonSerialized]
-		public List< ReflectionUtils.GenericField >	undoableFields = new List< ReflectionUtils.GenericField >();
-		
-		void LoadUndoableFields()
-		{
-			System.Reflection.FieldInfo[] fInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-			undoableFields.Clear();
-			
-			foreach (var fInfo in fInfos)
-			{
-				var attrs = fInfo.GetCustomAttributes(false);
-
-				bool hasSerializeField = false;
-				bool hasNonSerialized = false;
-
-				foreach (var attr in attrs)
-				{
-					if (attr is InputAttribute || attr is OutputAttribute)
-						goto skipThisField;
-					
-					if (attr is System.NonSerializedAttribute)
-						hasNonSerialized = true;
-					
-					if (attr is SerializeField)
-						hasSerializeField = true;
-				}
-
-				if (fInfo.IsPrivate && !hasSerializeField)
-					goto skipThisField;
-				
-				if (hasNonSerialized)
-					goto skipThisField;
-				
-				if (fInfo.IsNotSerialized)
-					goto skipThisField;
-				
-				undoableFields.Add(ReflectionUtils.CreateGenericField(GetType(), fInfo.Name));
-
-				skipThisField:
-				continue ;
-			}
-		}
-
 		void LoadFieldAttributes()
 		{
 			//get input variables

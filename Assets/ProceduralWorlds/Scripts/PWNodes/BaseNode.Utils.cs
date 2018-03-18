@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
+using System.Reflection;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Node;
 
@@ -11,6 +12,34 @@ namespace ProceduralWorlds
 {
 	public partial class BaseNode
 	{
+		List< ReflectionUtils.GenericField > clonableFields = new List< ReflectionUtils.GenericField >();
+		
+		void LoadClonableFields()
+		{
+			clonableFields.Clear();
+
+			Type[] unserializableAttributes = {
+				typeof(InputAttribute),
+				typeof(OutputAttribute),
+				typeof(System.NonSerializedAttribute),
+			};
+
+			var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+			foreach (var field in fields)
+			{
+				var attrs = field.GetCustomAttributes(false);
+
+				if (attrs.Any(a => unserializableAttributes.Contains(a.GetType())))
+					continue ;
+				
+				if (field.IsPrivate && !attrs.Any(a => a is SerializeField))
+					continue ;
+				
+				clonableFields.Add(ReflectionUtils.CreateGenericField(GetType(), field.Name));
+			}
+		}
+
 		public IEnumerable< Anchor > inputAnchors
 		{
 			get
@@ -36,7 +65,7 @@ namespace ProceduralWorlds
 			var newNode = graphRef.CreateNewNode(GetType(), rect.position + new Vector2(50, 50), name);
 
 			//copy internal datas to the new node:
-			foreach (var field in newNode.undoableFields)
+			foreach (var field in clonableFields)
 			{
 				var value = field.GetValue(this);
 				field.SetValue(newNode, value);

@@ -47,6 +47,9 @@ namespace ProceduralWorlds.Editor
 		[System.NonSerialized]
 		bool							guiEnabled;
 
+		[System.NonSerialized]
+		UndoRedoHelper					undoRedoHelper;
+
 		void OnEnable()
 		{
 			nodeRef = target as BaseNode;
@@ -57,6 +60,9 @@ namespace ProceduralWorlds.Editor
 				DestroyImmediate(this);
 				return ;
 			}
+
+			undoRedoHelper = new UndoRedoHelper(nodeRef);
+			undoRedoHelper.LoadUndoableFields();
 			
 			nodeInspectorGUIOverloaded = GetType().GetMethod("OnNodeInspectorGUI").DeclaringType == GetType();
 
