@@ -70,7 +70,10 @@ namespace ProceduralWorlds.Editor
 			UpdateColumnCount();
 			UpdateSelectedList();
 			UpdateGraphPartFiles();
-	
+		}
+
+		protected void LoadStyle()
+		{
 			using (DefaultGUISkin.Get())
 			{
 				buttonStyle = new GUIStyle("LargeButton");

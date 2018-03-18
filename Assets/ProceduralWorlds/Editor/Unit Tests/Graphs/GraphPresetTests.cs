@@ -7,6 +7,7 @@ using System.Linq;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Node;
 using ProceduralWorlds.Editor;
+using System.IO;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
@@ -31,10 +32,6 @@ namespace ProceduralWorlds.Tests.Graphs
 					.GetGraph();
 
 				graph.UpdateComputeOrder();
-				
-				//TODO: process the graph and check output
-
-				// Assert.That(graph.GetOutput< FinalTerrain >() != null)
 			}
 		}
 
@@ -46,13 +43,23 @@ namespace ProceduralWorlds.Tests.Graphs
 			var we = WorldGraphEditor.CreateInstance< WorldGraphEditor >();
 			we.graph = graph;
 
-			var wps = new WorldPresetScreen(we);
+			string tmpFolderPath = Application.dataPath + "/Tests_TMP/";
+			string tmpBiomeFolderPath = tmpFolderPath + "/Biomes/";
+
+			if (!Directory.Exists(tmpFolderPath))
+				Directory.CreateDirectory(tmpFolderPath);
+			if (!Directory.Exists(tmpBiomeFolderPath))
+				Directory.CreateDirectory(tmpBiomeFolderPath);
+			
+
+			graph.assetFilePath = tmpFolderPath.Substring(Application.dataPath.Length - "Assets/".Length + 1) + "wg.asset";
+			var wps = new WorldPresetScreen(we, false);
 
 			wps.OnBuildPressed();
 
 			graph.Process();
 
-			Object.DestroyImmediate(we);
+			Directory.Delete(tmpFolderPath, true);
 		}
 		
 		/* 

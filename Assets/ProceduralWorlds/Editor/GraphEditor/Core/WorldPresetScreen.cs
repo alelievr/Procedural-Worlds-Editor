@@ -16,10 +16,18 @@ namespace ProceduralWorlds.Editor
 		readonly string	graphFilePrefix = "GraphPresets/World/Parts/";
 		readonly string biomeAssetPrefix = "GraphPresets/Biome/Full/";
 	
-		public WorldPresetScreen(WorldGraphEditor worldGraphEditor)
+		public WorldPresetScreen(WorldGraphEditor worldGraphEditor, bool loadStyle = true)
 		{
 			this.worldGraphEditor = worldGraphEditor;
-			
+
+			LoadPresetList(LoadPresetBoard());
+
+			if (loadStyle)
+				LoadStyle();
+		}
+
+		public PresetCellList LoadPresetBoard()
+		{
 			//loading preset panel images
 			Texture2D preset2DSideViewTexture = Resources.Load< Texture2D >("PresetImages/preview2DSideView");
 			Texture2D preset2DPlanarTexture = Resources.Load< Texture2D >("PresetImages/preview2DTopDownView");
@@ -77,7 +85,7 @@ namespace ProceduralWorlds.Editor
 				{"3D Terrain like minecraft", preset3DPlanarTexture, "Base/3D", false, terrain3DPresets},
 			};
 
-			LoadPresetList(outputTypePresets);
+			return outputTypePresets;
 		}
 	
 		List< BiomeGraph > CopyBiomesFromPreset(string biomeFolder)

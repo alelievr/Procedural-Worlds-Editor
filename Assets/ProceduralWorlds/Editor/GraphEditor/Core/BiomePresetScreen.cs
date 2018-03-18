@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 
 		readonly string	graphFilePrefix = "GraphPresets/Biome/Parts/";
 	
-		public BiomePresetScreen(BiomeGraphEditor biomeGraphEditor)
+		public BiomePresetScreen(BiomeGraphEditor biomeGraphEditor, bool loadStyle = true)
 		{
 			this.biomeGraphEditor = biomeGraphEditor;
 	
@@ -37,6 +37,9 @@ namespace ProceduralWorlds.Editor
 			};
 
 			LoadPresetList(presets);
+
+			if (loadStyle)
+				LoadStyle();
 		}
 
 		public override void OnBuildPressed()
