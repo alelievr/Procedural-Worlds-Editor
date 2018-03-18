@@ -21,7 +21,6 @@ namespace ProceduralWorlds.Editor
 		public static Layout Create2ResizablePanelLayout(BaseGraphEditor graphEditor)
 		{
 			Layout		layout = new Layout(graphEditor);
-			Rect			pos = graphEditor.position;
 
 			var settingsPanel = CreateLayoutPanel< BaseGraphSettingsPanel >(graphEditor);
 			var nodeSelectorPanel = CreateLayoutPanel< BaseGraphNodeSelectorPanel >(graphEditor);

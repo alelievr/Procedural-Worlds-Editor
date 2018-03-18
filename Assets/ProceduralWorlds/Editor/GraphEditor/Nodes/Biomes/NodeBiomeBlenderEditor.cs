@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Editor
 		const string					updateBiomeMapKey = "BiomeBlender";
 
 		[System.NonSerialized]
-		bool	updateBiomeMap = false;
+		bool	updateBiomeMap;
 
 		public override void OnNodeEnable()
 		{

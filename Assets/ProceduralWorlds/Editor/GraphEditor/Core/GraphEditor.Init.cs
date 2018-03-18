@@ -29,7 +29,7 @@ namespace ProceduralWorlds.Editor
 		protected GUIStyle				nodeSelectedStyle;
 	
 		[System.NonSerialized]
-		protected bool					styleLoaded = false;
+		protected bool					styleLoaded;
 	
 		void LoadAssets()
 		{

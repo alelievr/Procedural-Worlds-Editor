@@ -8,7 +8,7 @@ namespace ProceduralWorlds.Noises
 {
 	public abstract class Noise
 	{
-		public const float		noiseScale = 0.01f;
+		public static readonly float	noiseScale = 0.01f;
 	
 		public string			name;
 		public bool				hasComputeShaders { get; private set; }

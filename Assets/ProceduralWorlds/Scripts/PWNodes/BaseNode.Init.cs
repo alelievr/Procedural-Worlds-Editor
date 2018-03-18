@@ -178,15 +178,33 @@ namespace ProceduralWorlds
 			}
 		}
 
-		void LinkRemovedCalllback()
+		void LinkPostRemovedCalllback()
 		{
 			UpdateWorkStatus();
+		}
+
+		void LinkRemovedCallback(NodeLink link)
+		{
+			if (link.fromNode == this)
+				OnNodeAnchorUnlink(link.fromAnchor.fieldName, link.fromAnchor.fieldIndex);
+			else if (link.toNode == this)
+				OnNodeAnchorUnlink(link.toAnchor.fieldName, link.toAnchor.fieldIndex);
+		}
+
+		void LinkPostCreatedCallback(NodeLink link)
+		{
+			if (link.fromNode == this)
+				OnNodeAnchorLink(link.fromAnchor.fieldName, link.fromAnchor.fieldIndex);
+			else if (link.toNode == this)
+				OnNodeAnchorLink(link.toAnchor.fieldName, link.toAnchor.fieldIndex);
 		}
 
 		void BindEvents()
 		{
 			//graph events:
-			graphRef.OnPostLinkRemoved += LinkRemovedCalllback;
+			graphRef.OnLinkRemoved += LinkRemovedCallback;
+			graphRef.OnPostLinkRemoved += LinkPostRemovedCalllback;
+			graphRef.OnPostLinkCreated += LinkPostCreatedCallback;
 		}
 
 		void UnBindEvents()
@@ -195,7 +213,9 @@ namespace ProceduralWorlds
 			//null check because this function may be called without the node being initialized
 			if (graphRef != null)
 			{
-				graphRef.OnPostLinkRemoved -= LinkRemovedCalllback;
+				graphRef.OnLinkRemoved -= LinkRemovedCallback;
+				graphRef.OnPostLinkRemoved -= LinkPostRemovedCalllback;
+				graphRef.OnPostLinkCreated -= LinkPostCreatedCallback;
 			}
 		}
 	}

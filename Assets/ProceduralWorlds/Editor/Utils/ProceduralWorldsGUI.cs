@@ -498,7 +498,7 @@ namespace ProceduralWorlds.Editor
 			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
 			previewRect.size = (currentWindowRect.width - 20 - 10) * Vector2.one;
 			GUILayout.Space(previewRect.width);
-			TexturePreview(previewRect, tex, settings);
+			TexturePreview(previewRect, tex, settings, settingsStorage, debug);
 			return previewRect;
 		}
 
@@ -657,7 +657,7 @@ namespace ProceduralWorlds.Editor
 			if (settings)
 			{
 				//if the gradient value have been modified, we update the texture
-				if (SamplerSettingsPopup.controlId == fieldSettings.GetHashCode() && (SamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate")))
+				if (SamplerSettingsPopup.controlId == fieldSettings.GetHashCode() && (e.type == EventType.ExecuteCommand && e.commandName == "SamplerSettingsUpdate"))
 				{
 					SamplerSettingsPopup.UpdateDatas(fieldSettings);
 
@@ -820,7 +820,7 @@ namespace ProceduralWorlds.Editor
 			}
 			
 			//Copy the parameters of the opened popup when modified
-			if (BiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (SamplerSettingsPopup.update || (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate")))
+			if (BiomeMapSettingsPopup.controlId == fieldSettings.GetHashCode() && (e.type == EventType.ExecuteCommand && e.commandName == "BiomeMapSettingsUpdate"))
 			{
 				BiomeMapSettingsPopup.UpdateDatas(fieldSettings);
 			}
@@ -833,35 +833,41 @@ namespace ProceduralWorlds.Editor
 				pixelPos *= terrain.size / fieldSettings.savedRect.width;
 				pixelPos.y = terrain.size - pixelPos.y;
 
-				int x = (int)Mathf.Clamp(pixelPos.x, 0, terrain.size - 1);
-				int y = (int)Mathf.Clamp(pixelPos.y, 0, terrain.size - 1);
-				BiomeBlendPoint point = biomeData.biomeMap.GetBiomeBlendInfo(x, y);
-
-				EditorGUILayout.BeginVertical(Styles.debugBox);
-				{
-					for (int i = 0; i < point.length; i++)
-					{
-						short biomeId = point.biomeIds[i];
-						float biomeBlend = point.biomeBlends[i];
-						PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
-	
-						if (biome == null)
-							continue ;
-	
-						EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
-						EditorGUI.indentLevel++;
-						for (int j = 0; j < biomeData.length; j++)
-						{
-							float val = biomeData.GetSampler2D(j)[x, y];
-							EditorGUILayout.LabelField(biomeData.GetBiomeKey(j) + ": " + val);
-						}
-						EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
-						EditorGUI.indentLevel--;
-					}
-					EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
-				}
-				EditorGUILayout.EndVertical();
+				if (pixelPos.x > 0 && pixelPos.y > 0 && pixelPos.x < terrain.size && pixelPos.y < terrain.size)
+					DrawBiomeMapDebugBox(biomeData, pixelPos, terrain);
 			}
+		}
+
+		void DrawBiomeMapDebugBox(BiomeData biomeData, Vector2 pixelPos, Sampler terrain)
+		{
+			int x = (int)Mathf.Clamp(pixelPos.x, 0, terrain.size - 1);
+			int y = (int)Mathf.Clamp(pixelPos.y, 0, terrain.size - 1);
+			BiomeBlendPoint point = biomeData.biomeMap.GetBiomeBlendInfo(x, y);
+
+			EditorGUILayout.BeginVertical(Styles.debugBox);
+			{
+				for (int i = 0; i < point.length; i++)
+				{
+					short biomeId = point.biomeIds[i];
+					float biomeBlend = point.biomeBlends[i];
+					PartialBiome biome = biomeData.biomeSwitchGraph.GetBiome(biomeId);
+
+					if (biome == null)
+						continue ;
+
+					EditorGUILayout.LabelField("Biome " + i + " (id: " + biomeId + "):" + biome.name);
+					EditorGUI.indentLevel++;
+					for (int j = 0; j < biomeData.length; j++)
+					{
+						float val = biomeData.GetSampler2D(j)[x, y];
+						EditorGUILayout.LabelField(biomeData.GetBiomeKey(j) + ": " + val);
+					}
+					EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
+					EditorGUI.indentLevel--;
+				}
+				EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
+			}
+			EditorGUILayout.EndVertical();
 		}
 
 		void UpdateBiomeMap2D(PWGUISettings fieldSettings)

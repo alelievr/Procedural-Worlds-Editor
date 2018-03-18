@@ -14,7 +14,6 @@ namespace ProceduralWorlds.Editor
 		TerrainPreviewType		loadedPreviewType;
 
 		bool					previewMouseDrag;
-		float					cameraMoveDirection;
 
 		Texture2D				recenterIcon;
 

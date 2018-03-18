@@ -9,7 +9,7 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphAPITests
+	public static class BaseGraphAPITests
 	{
 	
 		[Test]

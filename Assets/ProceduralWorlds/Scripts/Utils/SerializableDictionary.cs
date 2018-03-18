@@ -268,12 +268,6 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         _Values[num2] = value;
         _Buckets[index] = num2;
         _Version++;
- 
-        //if (num3 > 100 && HashHelpers.IsWellKnownEqualityComparer(comparer))
-        //{
-        //    comparer = (IEqualityComparer<TKey>)HashHelpers.GetRandomizedEqualityComparer(comparer);
-        //    Resize(entries.Length, true);
-        //}
     }
  
     private void Initialize(int capacity)

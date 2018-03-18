@@ -103,6 +103,7 @@ namespace ProceduralWorlds.Core
 			//removes ghost links (normally never appends)
 			foreach (var linkGUID in linkToRemove)
 			{
+				Debug.LogError("g: " + anchorFieldRef.graphRef);
 				Debug.LogError("[Anchor] Removing link GUID " + linkGUID + " from the link list cauz it was destroyed");
 
 				linkGUIDs.Remove(linkGUID);

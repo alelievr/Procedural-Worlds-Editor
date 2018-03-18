@@ -11,8 +11,6 @@ namespace ProceduralWorlds.Editor
 {
 	public class Layout
 	{
-		static Event				e { get { return Event.current; } }
-
 		readonly BaseGraphEditor	graphEditor;
 
 		BaseGraph					oldGraph;

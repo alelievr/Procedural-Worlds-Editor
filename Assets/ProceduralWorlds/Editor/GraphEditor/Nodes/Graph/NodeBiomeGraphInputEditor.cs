@@ -10,10 +10,10 @@ namespace ProceduralWorlds.Editor
 	[CustomEditor(typeof(NodeBiomeGraphInput))]
 	public class NodeBiomeGraphInputEditor : BaseNodeEditor
 	{
-		public NodeBiomeGraphInput	node;
+		public NodeBiomeGraphInput		node;
 
-		BiomeDataDrawer					biomeDataDrawer = new BiomeDataDrawer();
-		BiomeDataInputDrawer			biomeDataInputDrawer = new BiomeDataInputDrawer();
+		readonly BiomeDataDrawer		biomeDataDrawer = new BiomeDataDrawer();
+		readonly BiomeDataInputDrawer	biomeDataInputDrawer = new BiomeDataInputDrawer();
 
 		readonly string					updateInputKey = "BiomeInputData";
 

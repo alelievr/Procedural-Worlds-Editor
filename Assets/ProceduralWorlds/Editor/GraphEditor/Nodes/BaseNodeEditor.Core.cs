@@ -25,7 +25,7 @@ namespace ProceduralWorlds.Editor
 		List< object >				propertiesBeforeGUI;
 		List< object >				propertiesAfterGUI;
 
-		Dictionary< string, ReflectionUtils.GenericField > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericField >();
+		readonly Dictionary< string, ReflectionUtils.GenericField > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericField >();
 
 		void LoadCoreResources()
 		{

@@ -59,7 +59,7 @@ namespace ProceduralWorlds.Biomator
 
 		//biome maps
 		public BiomeMap2D			biomeMap;
-		// public BiomeMap3D			biomeMap3D;
+		public BiomeMap3D			biomeMap3D;
 
 		public ComplexEdaphicData	soil;
 

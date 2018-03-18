@@ -134,7 +134,6 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 				if (cellMap.Count <= i)
 					cellMap.Add(cell);
 				
-				// windowMap[i] = new Rect(windowMap[i].x, windowMap[i].y, 150, 120);
 				windowMap[i] = GUI.Window(i, windowMap[i], WindowCallback, cell.surface.name);
 				cellMap[i] = cell;
 

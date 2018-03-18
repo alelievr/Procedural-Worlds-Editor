@@ -27,6 +27,12 @@ namespace ProceduralWorlds.Editor
 			
 			EditorGUILayout.LabelField("Texturing switches: " + switchCount);
 
+			if (node.surfaceGraph == null)
+			{
+				EditorGUILayout.LabelField("Null texturing graph !");
+				return ;
+			}
+
 			if (node.surfaceGraph.isBuilt)
 				EditorGUILayout.LabelField("Graph built without error");
 			else

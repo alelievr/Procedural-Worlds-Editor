@@ -8,8 +8,8 @@ namespace ProceduralWorlds.Editor
 {
 	public partial class BaseNodeEditor
 	{
-		static Texture2D			editIcon = null;
-		static Texture2D			debugIcon = null;
+		static Texture2D			editIcon;
+		static Texture2D			debugIcon;
 		
 		void LoadHeaderResouces()
 		{

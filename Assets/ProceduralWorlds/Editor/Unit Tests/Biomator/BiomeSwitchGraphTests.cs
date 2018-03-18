@@ -11,7 +11,7 @@ using ProceduralWorlds.Biomator.SwitchGraph;
 
 namespace ProceduralWorlds.Tests.Biomator
 {
-	public class BiomeSwitchGraphTests
+	public static class BiomeSwitchGraphTests
 	{
 		//                                                +----+
 		//                                              +-> b1 +--+

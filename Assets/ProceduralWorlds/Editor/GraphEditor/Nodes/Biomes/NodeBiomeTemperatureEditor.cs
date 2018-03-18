@@ -49,7 +49,7 @@ namespace ProceduralWorlds.Editor
 				EditorGUILayout.LabelField("temperature limits:");
 				EditorGUILayout.BeginHorizontal();
 				{
-					EditorGUIUtility.labelWidth = 30;
+					EditorGUIUtility.labelWidth = 25;
 					node.minTemperature = EditorGUILayout.FloatField("from", node.minTemperature);
 					node.maxTemperature = EditorGUILayout.FloatField("to", node.maxTemperature);
 				}
@@ -62,6 +62,11 @@ namespace ProceduralWorlds.Editor
 					EditorGUILayout.LabelField("Input temperature map range");
 					using (DefaultGUISkin.Get())
 						EditorGUILayout.MinMaxSlider(ref node.minTemperatureMapInput, ref node.maxTemperatureMapInput, node.minTemperature, node.maxTemperature);
+					EditorGUILayout.BeginHorizontal();
+					EditorGUIUtility.labelWidth = 25;
+					node.minTemperatureMapInput = EditorGUILayout.FloatField("Min", node.minTemperatureMapInput);
+					node.maxTemperatureMapInput = EditorGUILayout.FloatField("Max", node.maxTemperatureMapInput);
+					EditorGUILayout.EndHorizontal();
 				}
 			}
 			if (EditorGUI.EndChangeCheck())

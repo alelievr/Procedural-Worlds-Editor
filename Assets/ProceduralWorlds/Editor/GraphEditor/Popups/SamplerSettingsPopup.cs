@@ -15,7 +15,7 @@ namespace ProceduralWorlds.Editor
 		FilterMode		filterMode;
 		Texture			texture;
 		bool			debug;
-		public static bool	update { get; private set; }
+		public bool		update { get; private set; }
 		
 		[System.NonSerializedAttribute]
 		static MethodInfo			gradientField;
@@ -71,6 +71,9 @@ namespace ProceduralWorlds.Editor
 	
 				EditorGUIUtility.labelWidth = 100;
 				debug = EditorGUILayout.Toggle("debug", debug);
+
+				if (GUILayout.Button("Update"))
+					update = true;
 			}
 			if (EditorGUI.EndChangeCheck())
 				SendUpdate("SamplerSettingsUpdate");
@@ -104,6 +107,7 @@ namespace ProceduralWorlds.Editor
 			settings.serializableGradient = (SerializableGradient)settings.gradient;
 			settings.filterMode = popup.filterMode;
 			settings.debug = popup.debug;
+			settings.update = popup.update;
 		}
 	}
 }

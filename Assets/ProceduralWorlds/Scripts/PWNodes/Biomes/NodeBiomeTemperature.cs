@@ -27,8 +27,8 @@ namespace ProceduralWorlds.Node
 
 		public bool				internalTemperatureMap = true;
 
-		public float			minTemperatureMapInput;
-		public float			maxTemperatureMapInput;
+		public float			minTemperatureMapInput = 0.2f;
+		public float			maxTemperatureMapInput = 0.6f;
 
 		public override void OnNodeCreation()
 		{
@@ -45,7 +45,6 @@ namespace ProceduralWorlds.Node
 			if (prop == "temperatureMap")
 			{
 				internalTemperatureMap = false;
-				UpdateTemperatureMap();
 			}
 		}
 		
@@ -55,7 +54,6 @@ namespace ProceduralWorlds.Node
 			{
 				internalTemperatureMap = true;
 				temperatureMap = null;
-				UpdateTemperatureMap();
 			}
 		}
 

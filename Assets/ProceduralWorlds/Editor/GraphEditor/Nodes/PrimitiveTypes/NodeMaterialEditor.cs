@@ -26,7 +26,9 @@ namespace ProceduralWorlds.Editor
 
 			node.outputMaterial = EditorGUILayout.ObjectField(node.outputMaterial, typeof(Material), false) as Material;
 			
-			if ((node.showPreview = EditorGUILayout.Foldout(node.showPreview, "preview")))
+			node.showPreview = EditorGUILayout.Foldout(node.showPreview, "preview");
+			
+			if (node.showPreview)
 				matPreview.Render(node.outputMaterial);
 
 		}

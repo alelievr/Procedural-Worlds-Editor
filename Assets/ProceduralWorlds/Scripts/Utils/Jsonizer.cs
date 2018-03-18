@@ -9,6 +9,8 @@ using ProceduralWorlds.Core;
 
 public static class Jsonizer
 {
+	static readonly bool debug = false;
+
     public class JsonType
     {
         public Type     type;
@@ -52,7 +54,7 @@ public static class Jsonizer
 	static string vector2Regex = @"\(\s*" + floatRegex + @"\s*,\s*" + floatRegex + @"\)";
 	static string texture2DRegex = @"{\s*Texture2D\s*:\s*(\w+)}";
 
-	public static readonly JsonTypes allowedJsonTypes = new JsonTypes() {
+	public static readonly JsonTypes allowedJsonTypes = new JsonTypes {
 		{typeof(string), "\"", "\"", new Regex("^\".*\"$"), (val) => val.Trim('"') },
 		{typeof(int), new Regex(@"^" + intRegex + "$"), (val) => int.Parse(val)},
 		{typeof(float), new Regex("^" + floatRegex + "$"), (val) => float.Parse(val) },
@@ -129,7 +131,9 @@ public static class Jsonizer
 
 		foreach (var allowedType in allowedJsonTypes)
 		{
-			// Debug.Log("part: [" + part + "], match '" + allowedType.regex + "': " + allowedType.regex.Match(part).Success);
+			if (debug)
+				Debug.Log("part: [" + part + "], match '" + allowedType.regex + "': " + allowedType.regex.Match(part).Success);
+			
 			if (allowedType.regex.Match(part).Success)
 			{
 				 obj = allowedType.parser(part);

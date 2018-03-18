@@ -7,6 +7,8 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 {
 	public class BiomeSwitchCell
 	{
+		static readonly bool			debug = false;
+
 		public List< BiomeSwitchCell >	links = new List< BiomeSwitchCell >();
 		public float					weight;
 		public string					name;
@@ -77,7 +79,8 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 
 				blend += b;
 				
-				// Debug.Log("i: " + i + "blend range: " + min + " to " + max + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
+				if (debug)
+					Debug.Log("i: " + i + "blend range: " + min + " to " + max + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
 
 				if (b > 0)
 					blendParamCount++;

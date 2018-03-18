@@ -46,8 +46,8 @@ namespace ProceduralWorlds.Noises
         {
             x += 12.254f * seed;
             y += 31.964f * seed;
-            int X = (int)((x < 0) ? (int)x - 1 : (int)x) & 255,
-                Y = (int)((y < 0) ? (int)y - 1 : (int)y) & 255;
+            int X = (int)((x < 0) ? x - 1 : x) & 255,
+                Y = (int)((y < 0) ? y - 1 : y) & 255;
             x -= ((x < 0) ? (int)x - 1 : (int)x);
             y -= ((y < 0) ? (int)y - 1 : (int)y);
             float u = Fade(x),

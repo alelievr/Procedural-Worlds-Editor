@@ -31,8 +31,6 @@ namespace ProceduralWorlds.Editor
 			if (samplerFoldouts == null || samplerFoldouts.Length != b.length)
 				samplerFoldouts = new bool[b.length];
 
-			// update = GUILayout.Button("Update maps");
-
 			//2D maps:
 			int i = 0;
 			foreach (var samplerDataKP in b.biomeSamplerNameMap)
