@@ -142,7 +142,7 @@ namespace ProceduralWorlds.Editor
 						if (GUILayout.Button("Active", (worldGraph.scaledPreviewEnabled) ? Styles.pressedButton : Styles.button))
 						{
 							worldGraph.scaledPreviewEnabled = !worldGraph.scaledPreviewEnabled;
-							ProceduralWorldsGUI.displaySamplerStepBounds = worldGraph.scaledPreviewEnabled;
+							ProceduralWorldsGUI.displaySamplerStepBounds = !worldGraph.hideChunkLines && worldGraph.scaledPreviewEnabled;
 							worldGraph.Process();
 						}
 					}
@@ -150,6 +150,10 @@ namespace ProceduralWorlds.Editor
 	
 					worldGraph.scaledPreviewRatio = EditorGUILayout.Slider("Ratio", worldGraph.scaledPreviewRatio, 1, 128);
 					worldGraph.scaledPreviewChunkSize = EditorGUILayout.IntSlider("Chunk size", worldGraph.scaledPreviewChunkSize, 32, 2048);
+					worldGraph.hideChunkLines = EditorGUILayout.Toggle("Hide chunk lines", worldGraph.hideChunkLines);
+					
+					ProceduralWorldsGUI.displaySamplerStepBounds = !worldGraph.hideChunkLines && worldGraph.scaledPreviewEnabled;
+
 					float scale = (worldGraph.scaledPreviewRatio * worldGraph.scaledPreviewChunkSize) / (worldGraph.nonModifiedChunkSize * worldGraph.nonModifiedStep);
 					EditorGUILayout.LabelField("Scale: " + scale);
 				}

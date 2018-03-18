@@ -26,6 +26,7 @@ namespace ProceduralWorlds.Editor
 		
 		readonly GUIContent	deleteNodeContent = new GUIContent("Delete node");
 		readonly GUIContent	openNodeScriptContent = new GUIContent("Open C# Script");
+		readonly GUIContent	openNodeEditorScriptContent = new GUIContent("Open C# Editor Script");
 	
 		readonly GUIContent	debugNodeContent = new GUIContent("Debug/Node");
 		readonly GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
@@ -80,6 +81,7 @@ namespace ProceduralWorlds.Editor
 	
 				var hoveredNode = editorEvents.mouseOverNode;
 				menu.AddItemState(openNodeScriptContent, hoveredNode != null, () => { OpenNodeScript(hoveredNode); });
+				menu.AddItemState(openNodeEditorScriptContent, hoveredNode != null, () => { OpenNodeEditorScript(hoveredNode); });
 				menu.AddItemState(debugNodeContent, hoveredNode != null, () => { hoveredNode.debug = !hoveredNode.debug; }, (hoveredNode != null) ? hoveredNode.debug : false);
 				
 				var hoveredAnchor = editorEvents.mouseOverAnchor;
@@ -103,6 +105,25 @@ namespace ProceduralWorlds.Editor
 	
 			if (File.Exists(filePath))
 				UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(filePath, 21);
+		}
+
+		public void OpenNodeEditorScript(BaseNode node)
+		{
+			var e = UnityEditor.Editor.CreateEditor(node);
+			
+			var monoScript = MonoScript.FromScriptableObject(e);
+
+			if (monoScript == null)
+			{
+				Debug.LogError("Can't find editor file for node: " + node);
+			}
+
+			string filePath = AssetDatabase.GetAssetPath(monoScript);
+
+			if (File.Exists(filePath))
+				UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(filePath, 21);
+
+			DestroyImmediate(e);
 		}
 	}
 }

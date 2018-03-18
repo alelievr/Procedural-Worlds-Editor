@@ -98,8 +98,8 @@ namespace ProceduralWorlds.Core
 			}
 		}
 		
-		[SerializeField]
 		public bool						scaledPreviewEnabled;
+		public bool						hideChunkLines;
 		[SerializeField]
 		float							_scaledPreviewRatio = 8;
 		public float					scaledPreviewRatio

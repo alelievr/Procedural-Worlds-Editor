@@ -49,7 +49,7 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
-		new public void OnGUI(Rect rect)
+		public void OnGUI(Rect rect, bool drawControlFields)
 		{
 			base.OnGUI(rect);
 
@@ -59,7 +59,10 @@ namespace ProceduralWorlds.Editor
 
 				DrawTerrainPreview(previewRect);
 
-				graphRef.terrainPreviewType = (TerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", graphRef.terrainPreviewType);
+				if (drawControlFields)
+				{
+					graphRef.terrainPreviewType = (TerrainPreviewType)EditorGUILayout.EnumPopup("Camera mode", graphRef.terrainPreviewType);
+				}
 			}
 			EditorGUILayout.EndVertical();
 		}

@@ -48,11 +48,11 @@ namespace ProceduralWorlds.Editor
 				GUI.FocusControl(null);
 		}
 
-		public void DrawTerrainPreview(Rect rect)
+		public void DrawTerrainPreview(Rect rect, bool drawPreviewCameraControlFields)
 		{
 			if (!terrainPreview.isEnabled)
 				terrainPreview.OnEnable(graphRef);
-			terrainPreview.OnGUI(rect);
+			terrainPreview.OnGUI(rect, drawPreviewCameraControlFields);
 		}
 		
 		public override void Draw(Rect rect)
@@ -77,7 +77,7 @@ namespace ProceduralWorlds.Editor
 
 		public override void DrawDefault(Rect currentRect)
 		{
-			DrawTerrainPreview(currentRect);
+			DrawTerrainPreview(currentRect, true);
 			
 			//draw main graphRef settings
 			EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));

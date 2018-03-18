@@ -83,7 +83,7 @@ namespace ProceduralWorlds.Editor
 			var settingsPanel = layout.GetPanel< BaseGraphSettingsPanel >();
 			
 			settingsPanel.onGUI = (rect) => {
-				settingsPanel.DrawTerrainPreview(rect);
+				settingsPanel.DrawTerrainPreview(rect, false);
 				DrawBiomeSettingsBar(rect);
 				settingsPanel.DrawReloadButtons();
 			};
