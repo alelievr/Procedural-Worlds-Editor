@@ -47,7 +47,7 @@ namespace ProceduralWorlds.Editor
 		[MenuItem("Window/Procedural Worlds/World Graph", priority = 1)]
 		static void Init()
 		{
-			WorldGraphEditor window = (WorldGraphEditor)EditorWindow.GetWindow (typeof (WorldGraphEditor));
+			WorldGraphEditor window = EditorWindow.GetWindow< WorldGraphEditor >("World Graph");
 	
 			window.Show();
 		}

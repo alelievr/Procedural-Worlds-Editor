@@ -25,7 +25,7 @@ namespace ProceduralWorlds.Editor
 		[MenuItem("Window/Procedural Worlds/Biome Graph", priority = 2)]
 		static void Init()
 		{
-			BiomeGraphEditor window = (BiomeGraphEditor)GetWindow(typeof(BiomeGraphEditor));
+			BiomeGraphEditor window = GetWindow< BiomeGraphEditor >("Biome Graph");
 			window.Show();
 		}
 	

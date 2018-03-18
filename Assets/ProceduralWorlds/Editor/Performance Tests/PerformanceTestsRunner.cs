@@ -77,7 +77,7 @@ namespace ProceduralWorlds.Editor
 			ProfilerDriver.deepProfiling = false;
 
 			//this is totally broken in 2017.3 ...
-			#if UNITY_2017_3
+			#if !UNITY_2017_3
 				
 				ProfilerDriver.LoadProfile(tmpProfilerLogFile, false);
 	

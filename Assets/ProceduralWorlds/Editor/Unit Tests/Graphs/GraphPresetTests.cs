@@ -45,14 +45,14 @@ namespace ProceduralWorlds.Tests.Graphs
 
 			var we = WorldGraphEditor.CreateInstance< WorldGraphEditor >();
 			we.graph = graph;
-			
-			// var wps = new WorldPresetScreen(we);
 
-			// wps.OnBuildPressed();
+			var wps = new WorldPresetScreen(we);
 
-			// graph.Process();
+			wps.OnBuildPressed();
 
-			// Object.DestroyImmediate(we);
+			graph.Process();
+
+			Object.DestroyImmediate(we);
 		}
 		
 		/* 

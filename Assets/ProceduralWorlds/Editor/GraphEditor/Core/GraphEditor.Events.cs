@@ -125,11 +125,13 @@ namespace ProceduralWorlds.Editor
 			//fire the resize event
 			if (windowSize != Vector2.zero && windowSize != position.size)
 			{
-				layout.Resize(new Rect(Vector2.zero, windowSize));
+				layout.Resize(position);
 				if (OnWindowResize != null)
 					OnWindowResize(windowSize);
-				Repaint();
+				
 				windowSize = position.size;
+
+				Repaint();
 			}
 			
 			//zoom

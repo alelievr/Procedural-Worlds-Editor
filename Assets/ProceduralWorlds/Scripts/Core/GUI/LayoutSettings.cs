@@ -45,7 +45,7 @@ namespace ProceduralWorlds.Core
 
 		public float	separatorPosition
 		{
-			get { /*Debug.Log("sep position: " + separatorPositionPercent);*/ return separatorPositionPercent * windowRect.width; }
+			get { return separatorPositionPercent * windowRect.width; }
 			set { separatorPositionPercent = value / windowRect.width; }
 		}
 		public float	separatorWidth;
@@ -57,8 +57,6 @@ namespace ProceduralWorlds.Core
 
 		public LayoutSetting(Rect window)
 		{
-			Debug.Log("window: " + window);
-
 			windowRect = window;
 		}
 
