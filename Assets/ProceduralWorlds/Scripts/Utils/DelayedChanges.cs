@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UnityEditor;
 
 namespace ProceduralWorlds.Core
 {
@@ -29,7 +28,7 @@ namespace ProceduralWorlds.Core
 				values[key] = new ChangeData();
 			var v = values[key];
 			v.value = value;
-			v.lastUpdate = EditorApplication.timeSinceStartup;
+			v.lastUpdate = Time.time;
 			v.called = false;
 		}
 	
@@ -46,7 +45,7 @@ namespace ProceduralWorlds.Core
 			foreach (var valKP in values)
 			{
 				var cd = valKP.Value;
-				if (cd.callback != null && !cd.called && EditorApplication.timeSinceStartup - cd.lastUpdate > delayedTime / 1000)
+				if (cd.callback != null && !cd.called && Time.time - cd.lastUpdate > delayedTime / 1000)
 				{
 					cd.called = true;
 					cd.callback(cd.value);

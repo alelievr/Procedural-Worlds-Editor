@@ -21,6 +21,8 @@ namespace ProceduralWorlds
 		public Vector3					oldChunkPosition;
 		public int						renderDistance;
 		public ChunkLoadPatternMode		loadPatternMode;
+		public WorldGraph				graphAsset;
+		[System.NonSerialized]
 		public WorldGraph				graph;
 
 		public TerrainStorage			terrainStorage;
@@ -29,23 +31,23 @@ namespace ProceduralWorlds
 		protected int					chunkSize;
 		
 		public GameObject				terrainRoot;
-		public bool						initialized { get { return graph != null && terrainRoot != null && graphOutput != null; } }
+		public bool						initialized { get { return graph != null && terrainRoot != null; } }
 		
-		[SerializeField]
-		protected NodeGraphOutput		graphOutput = null;
-
 		protected int					oldSeed = 0;
 		
 		public virtual void Start ()
 		{
-			InitGraph(graph);
+			if (graphAsset != null)
+				InitGraph(graphAsset);
 		}
 
 		void OnEnable()
 		{
+			UpdateTerrainRoot();
+
 			if (terrainStorage != null && terrainStorage.storeMode == StorageMode.Memory)
 			{
-				if (!Application.isPlaying && graph != null)
+				if (!Application.isPlaying && graphAsset != null)
 					DestroyAllChunks();
 			}
 		}
@@ -55,31 +57,32 @@ namespace ProceduralWorlds
 			UpdateChunks();
 		}
 		
-		public void InitGraph(WorldGraph graph)
+		void InitGraph(WorldGraph graphAsset)
 		{
-			if (graph != null)
-				this.graph = graph;
-			else
-				return ;
+			this.graphAsset = graphAsset;
+			this.graph = graphAsset.Clone() as WorldGraph;
 
 			graph.SetRealMode(true);
 			chunkSize = graph.chunkSize;
-			graphOutput = graph.outputNode as NodeGraphOutput;
+
+			if (terrainRoot == null)
+				UpdateTerrainRoot();
+
 			graph.UpdateComputeOrder();
-			if (!graph.IsRealMode())
-				terrainRoot = GameObject.Find("PWPreviewTerrain");
-			else
-			{
-				terrainRoot = GameObject.Find(realModeRootObjectName);
-				if (terrainRoot == null)
-				{
-					terrainRoot = new GameObject(realModeRootObjectName);
-					terrainRoot.transform.position = Vector3.zero;
-				}
-			}
 			graph.ProcessOnce();
 			
 			UpdateChunks(true);
+		}
+
+		void UpdateTerrainRoot()
+		{
+			terrainRoot = GameObject.Find(realModeRootObjectName);
+			if (terrainRoot == null)
+			{
+				Debug.Log("new terrain root !");
+				terrainRoot = new GameObject(realModeRootObjectName);
+				terrainRoot.transform.position = Vector3.zero;
+			}
 		}
 
 		Vector3 RoundPositionToChunk(Vector3 position)
@@ -172,15 +175,13 @@ namespace ProceduralWorlds
 				DestroyImmediate(terrainRoot.transform.GetChild(0).gameObject);
 		}
 
-		public void ReloadChunks(WorldGraph graph)
+		public void ReloadChunks(WorldGraph graphAsset)
 		{
-			InitGraph(graph.Clone() as WorldGraph);
+			InitGraph(graphAsset);
 
 			DestroyAllChunks();
 			
 			UpdateChunks(true);
-
-			Debug.Log("Reloaded 1");
 		}
 		
 		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);

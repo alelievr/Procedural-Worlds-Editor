@@ -33,6 +33,8 @@ namespace ProceduralWorlds.Editor
 		{
 			base.OnEnable();
 			
+			expectedGraphType = typeof(BiomeGraph);
+
 			OnGraphChanged += GraphLoadedCallback;
 
 			OnResetLayout += ResetLayoutCallback;

@@ -83,7 +83,7 @@ namespace ProceduralWorlds.Editor
 	
 	
 		[System.NonSerialized]
-		Type							oldGraphType = null;
+		protected Type					expectedGraphType = null;
 	
 	
 		public override void OnEnable()
@@ -138,6 +138,8 @@ namespace ProceduralWorlds.Editor
 	
 			if (!graph.presetChoosed)
 				return ;
+				
+			RenderBackground();
 	
 			//protection against node class rename & corrupted nodes
 			for (int i = 0; i < graph.nodes.Count; i++)
@@ -231,7 +233,6 @@ namespace ProceduralWorlds.Editor
 			if (this.graph != null)
 				UnloadGraph(false);
 	
-			this.oldGraphType = graph.GetType();
 			this.graph = graph;
 	
 			graph.assetFilePath = AssetDatabase.GetAssetPath(graph);
@@ -351,21 +352,8 @@ namespace ProceduralWorlds.Editor
 				(maxSize.x * 10 / nodeEditorBackgroundTexture.width) * backgroundScale,
 				(maxSize.y * 10 / nodeEditorBackgroundTexture.height) * backgroundScale
 			);
-			
-			GUI.DrawTextureWithTexCoords(position, nodeEditorBackgroundTexture, texCoord);
-		}
-	
-		void RenderGraphNotFound()
-		{
-			EditorGUILayout.LabelField("Graph not found, ouble click on a graph asset file to a graph to open it");
-	
-			if (oldGraphType != null)
-			{
-				BaseGraph newGraph = EditorGUILayout.ObjectField(null, oldGraphType, false) as BaseGraph;
-		
-				if (newGraph != null)
-					LoadGraph(newGraph);
-			}
+
+			GUI.DrawTextureWithTexCoords(position, nodeEditorBackgroundTexture, texCoord, false);
 		}
 	
 		void SelectAndDrag()

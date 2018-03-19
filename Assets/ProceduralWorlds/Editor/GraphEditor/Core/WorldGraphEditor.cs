@@ -55,6 +55,8 @@ namespace ProceduralWorlds.Editor
 		public override void OnEnable()
 		{
 			base.OnEnable();
+			
+			expectedGraphType = typeof(WorldGraph);
 	
 			OnGraphChanged += GraphChangedCallback;
 	

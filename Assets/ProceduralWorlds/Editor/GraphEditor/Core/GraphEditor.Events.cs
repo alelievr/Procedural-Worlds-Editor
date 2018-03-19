@@ -223,6 +223,13 @@ namespace ProceduralWorlds.Editor
 		{
 			if (OnNodeSelected != null)
 				OnNodeSelected(node);
+			
+			if (e.modifiers != EventModifiers.Shift)
+			{
+				foreach (var n in graph.allNodes)
+					n.isSelected = false;
+			}
+			node.isSelected = true;
 		}
 	
 		public void RaiseNodeUnselected(BaseNode node)

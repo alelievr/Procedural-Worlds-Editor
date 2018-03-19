@@ -16,6 +16,8 @@ namespace ProceduralWorlds.Editor
 	public class TerrainPreviewManager
 	{
 		public static TerrainPreviewManager instance;
+
+		public static readonly bool	instantiatePreviewAsPrefab = false;
 		
 		static readonly string		memoryTerrainStorageAsset = "memoryTerrainStorage";
 
@@ -83,7 +85,10 @@ namespace ProceduralWorlds.Editor
 			for (int i = 0; i < roots.Length; i++)
 				GameObject.DestroyImmediate(roots[i].gameObject);
 			
-			previewRoot = PrefabUtility.InstantiatePrefab(Resources.Load< Object >(newPrefabName)) as GameObject;
+			if (instantiatePreviewAsPrefab)
+				previewRoot = PrefabUtility.InstantiatePrefab(Resources.Load< Object >(newPrefabName)) as GameObject;
+			else
+				previewRoot = GameObject.Instantiate(Resources.Load< GameObject >(newPrefabName));
 			previewRoot.name = newPrefabName;
 
 			//Instantiate the resource file

@@ -169,7 +169,7 @@ namespace ProceduralWorlds
 		{
 			Texture2D	ret;
 
-			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+			ret = new Texture2D(1, 1, TextureFormat.RGBA32, false, true);
 			ret.wrapMode = TextureWrapMode.Repeat;
 			ret.SetPixel(0, 0, c);
 			ret.Apply();

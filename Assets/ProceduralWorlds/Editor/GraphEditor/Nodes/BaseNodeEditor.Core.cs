@@ -46,6 +46,8 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
+		IEnumerable< BaseNode > selectedNodeToDrag;
+
 		void RenderNode()
 		{
 			var e = Event.current;
@@ -67,6 +69,7 @@ namespace ProceduralWorlds.Editor
 
 			if (e.type == EventType.MouseDown && e.button == 0 && dragRect.Contains(e.mousePosition))
 			{
+				selectedNodeToDrag = graphRef.allNodes.Where(n => n.isSelected);
 				nodeRef.isDragged = true;
 				editorEvents.isDraggingNode = true;
 			}
@@ -74,6 +77,12 @@ namespace ProceduralWorlds.Editor
 			{
 				nodeRef.isDragged = false;
 				editorEvents.isDraggingNode = false;
+			}
+
+			if (editorEvents.isDraggingNode && e.type == EventType.MouseDrag)
+			{
+				foreach (var node in selectedNodeToDrag)
+					node.rect.position += e.delta;
 			}
 
 			if (nodeRef.isDragged)
