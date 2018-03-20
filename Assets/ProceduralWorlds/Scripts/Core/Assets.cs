@@ -11,7 +11,7 @@ using UnityEditor;
 
 namespace ProceduralWorlds.Core
 {
-	public class Assets
+	public static class Assets
 	{
 
 		public static Texture2DArray	GenerateTexture2DArray(IEnumerable< Texture2D > texs)

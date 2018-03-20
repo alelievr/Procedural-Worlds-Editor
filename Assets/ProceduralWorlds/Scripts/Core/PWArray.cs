@@ -13,8 +13,8 @@ namespace ProceduralWorlds.Core
 		[SerializeField]
 		public int		valuesCount { get { return values.Count; } }
 	
-		List< T >		values;
-		List< string >	names;
+		readonly List< T >		values;
+		readonly List< string >	names;
 
 		public PWArray()
 		{

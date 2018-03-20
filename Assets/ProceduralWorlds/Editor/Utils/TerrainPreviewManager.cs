@@ -15,7 +15,7 @@ namespace ProceduralWorlds.Editor
 	[InitializeOnLoad]
 	public class TerrainPreviewManager
 	{
-		public static TerrainPreviewManager instance;
+		public readonly static TerrainPreviewManager instance;
 
 		public static readonly bool	instantiatePreviewAsPrefab = false;
 		
@@ -26,7 +26,7 @@ namespace ProceduralWorlds.Editor
 		public RenderTexture		previewTexture { get; private set; }
 		public TerrainGenericBase	terrainBase { get; private set; }
 		
-		Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
+		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
 		{
 			{MaterializerType.SquareTileMap, typeof(TopDown2DTerrainSquare)},
 		};

@@ -127,7 +127,7 @@ namespace ProceduralWorlds.Core
 			return false;
 		}
 		
-		void TrySetValue(FieldInfo field, object val, BaseNode target, BaseNode from, bool realMode)
+		void TrySetValue(FieldInfo field, object val, BaseNode target, bool realMode)
 		{
 			if (realMode)
 				field.SetValue(target, val);
@@ -154,14 +154,10 @@ namespace ProceduralWorlds.Core
 
 				var val = bakedNodeFields[link.fromNode.classAQName][link.fromAnchor.fieldName].GetValue(node);
 				var prop = bakedNodeFields[link.toNode.classAQName][link.toAnchor.fieldName];
-	
-				// Debug.Log("local: " + link.fromNode.classAQName + " / " + node.GetType() + " / " + node.nodeId);
-				// Debug.Log("distant: " + link.distantClassAQName + " / " + target.GetType() + " / " + target.nodeId);
-				// Debug.Log("set value: " + val.GetHashCode() + "(" + val + ")" + " to " + target.GetHashCode() + "(" + target + ")");
 
 				//Without multi-anchor, simple assignation
 				if (link.toAnchor.fieldIndex == -1 && link.fromAnchor.fieldIndex == -1)
-					TrySetValue(prop, val, link.toNode, link.fromNode, realMode);
+					TrySetValue(prop, val, link.toNode, realMode);
 				
 				//Distant anchor is a multi-anchor
 				else if (link.toAnchor.fieldIndex != -1 && link.fromAnchor.fieldIndex == -1)
@@ -179,7 +175,7 @@ namespace ProceduralWorlds.Core
 				{
 					object localVal = GenericAt(val as IPWArray, link.fromAnchor.fieldIndex);
 
-					TrySetValue(prop, localVal, link.toNode, link.fromNode, realMode);
+					TrySetValue(prop, localVal, link.toNode, realMode);
 				}
 
 				//Both are multi-anchors

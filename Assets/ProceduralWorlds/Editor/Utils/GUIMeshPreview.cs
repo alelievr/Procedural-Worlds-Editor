@@ -14,8 +14,8 @@ namespace ProceduralWorlds.Editor
 
 		Rect						previewRect = new Rect(0, 0, 170, 170);
 
-		bool						isRotating = false;
-		bool						isPanning = false;
+		bool						isRotating;
+		bool						isPanning;
 
 		float						zoom = 1;
 		float						defaultDistance;
