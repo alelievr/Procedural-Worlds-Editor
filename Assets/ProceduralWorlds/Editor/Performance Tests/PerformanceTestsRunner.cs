@@ -8,8 +8,12 @@ using UnityEngine.Profiling;
 using System.Reflection;
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditorInternal;
 using System.Text;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 
 using Debug = UnityEngine.Debug;
 
@@ -17,6 +21,7 @@ namespace ProceduralWorlds.Editor
 {
 	public static class PerformanceTestsRunner
 	{
+		[Serializable]
 		public struct PerformanceResult
 		{
 			public string	name;
@@ -89,6 +94,13 @@ namespace ProceduralWorlds.Editor
 
 			string text = SerializeResults(resultsList);
 
+			string reportPerfs = System.Environment.GetEnvironmentVariable("PW_REPORT_PERFORMANCES");
+
+			if (reportPerfs == "ON")
+			{
+				ReportPerformaces(resultsList);
+			}
+
 			File.WriteAllText(logFilePath, text);
 		}
 
@@ -135,6 +147,28 @@ namespace ProceduralWorlds.Editor
 			}
 
 			return sb.ToString();
+		}
+
+		static void ReportPerformaces(List< List< PerformanceResult > > resultsList)
+		{
+			string ip = System.Environment.GetEnvironmentVariable("PW_REPORT_IP");
+
+			IPAddress ipa;
+			IPAddress.TryParse(ip, out ipa);
+
+			if (ipa == null)
+				return ;
+			
+			IPEndPoint ipe = new IPEndPoint(ipa, 4204);
+			Socket s = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			s.Connect(ipe);
+
+			if (!s.Connected)
+				return ;
+
+			Stream stream = new NetworkStream(s);
+			var bin = new BinaryFormatter();
+			bin.Serialize(stream, resultsList);
 		}
 	}
 }
