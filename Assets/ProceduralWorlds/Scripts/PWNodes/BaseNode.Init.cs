@@ -56,10 +56,11 @@ namespace ProceduralWorlds
 				System.Object[] attrs = field.GetCustomAttributes(true);
 				foreach (var attr in attrs)
 				{
-					InputAttribute		inputAttr = attr as InputAttribute;
-					OutputAttribute		outputAttr = attr as OutputAttribute;
-					ColorAttribute		colorAttr = attr as ColorAttribute;
-					OffsetAttribute		offsetAttr = attr as OffsetAttribute;
+					InputAttribute			inputAttr = attr as InputAttribute;
+					OutputAttribute			outputAttr = attr as OutputAttribute;
+					ColorAttribute			colorAttr = attr as ColorAttribute;
+					OffsetAttribute			offsetAttr = attr as OffsetAttribute;
+					VisibilityAttribute		visibilityAttr = attr as VisibilityAttribute;
 					NotRequiredAttribute	notRequiredAttr = attr as NotRequiredAttribute;
 
 					if (inputAttr != null)
@@ -83,6 +84,8 @@ namespace ProceduralWorlds
 					}
 					if (notRequiredAttr != null)
 						anchorField.required = false;
+					if (visibilityAttr != null)
+						anchorField.defaultVisibility = visibilityAttr.visibility;
 				}
 				if (anchorField.anchorType == AnchorType.None) //field does not have a PW attribute
 					anchorFieldDictionary.Remove(field.Name);

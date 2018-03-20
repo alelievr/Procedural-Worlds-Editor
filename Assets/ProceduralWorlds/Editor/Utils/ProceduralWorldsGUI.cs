@@ -1274,6 +1274,22 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
+		public void SpaceSkipAnchors()
+		{
+			if (attachedNode == null)
+				return ;
+			
+			float height = 0;
+	
+			foreach (var anchorField in attachedNode.anchorFields)
+				foreach (var anchor in anchorField.anchors)
+					if (!String.IsNullOrEmpty(anchorField.name))
+						height = Mathf.Max(height, anchor.rect.yMin - 5);
+			
+			if (height > 0)
+				EditorGUILayout.GetControlRect(false, height, GUILayout.ExpandWidth(true));
+		}
+	
 	#endregion
 	}
 }

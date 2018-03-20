@@ -21,6 +21,8 @@ namespace ProceduralWorlds.Editor
 		public override void OnNodeGUI()
 		{
 			Sampler finalTerrain = null;
+
+			PWGUI.SpaceSkipAnchors();
 			
 			if (node.mergedBiomeTerrain != null && node.mergedBiomeTerrain.mergedTerrain != null)
 				finalTerrain = node.mergedBiomeTerrain.mergedTerrain;

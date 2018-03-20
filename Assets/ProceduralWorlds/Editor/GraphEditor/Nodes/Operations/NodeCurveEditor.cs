@@ -25,10 +25,13 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(EditorGUIUtility.singleLineHeight * 1.2f);
+			PWGUI.SpaceSkipAnchors();
+
 			EditorGUI.BeginChangeCheck();
-			Rect pos = EditorGUILayout.GetControlRect(false, 100);
-			node.curve = EditorGUI.CurveField(pos, node.curve);
+			{
+				Rect pos = EditorGUILayout.GetControlRect(false, 100);
+				node.curve = EditorGUI.CurveField(pos, node.curve);
+			}
 			if (EditorGUI.EndChangeCheck())
 				delayedChanges.UpdateValue(notifyKey);
 

@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(14);
+			PWGUI.SpaceSkipAnchors();
 			
 			EditorGUILayout.LabelField("Biome: " + node.inputBiome);
 			

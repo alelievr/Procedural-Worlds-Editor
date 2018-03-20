@@ -7,7 +7,7 @@ namespace ProceduralWorlds.Node
 {
 	public class NodeWorldGraphOutput : BaseNode
 	{
-		[Input]
+		[Input("Final terrain")]
 		public FinalTerrain			finalTerrain;
 
 		[Input]

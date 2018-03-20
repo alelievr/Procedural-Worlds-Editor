@@ -79,6 +79,17 @@ namespace ProceduralWorlds.Core
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
+	public class VisibilityAttribute : Attribute
+	{
+		public Visibility visibility;
+
+		public VisibilityAttribute(Visibility visibility)
+		{
+			this.visibility = visibility;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Field)]
 	public class NotRequiredAttribute : Attribute
 	{
 	}

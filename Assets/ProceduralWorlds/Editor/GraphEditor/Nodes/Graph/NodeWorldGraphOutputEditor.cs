@@ -22,6 +22,8 @@ namespace ProceduralWorlds.Editor
 		{
 			//write here the process which take inputs, transform them and set outputs.
 
+			PWGUI.SpaceSkipAnchors();
+
 			PWGUI.PWArrayField(node.inputValues);
 		}
 		

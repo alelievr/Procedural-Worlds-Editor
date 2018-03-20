@@ -28,7 +28,7 @@ namespace ProceduralWorlds.Core
 	{
 		//node instance where the anchor is.
 		public BaseNode						nodeRef;
-		public BaseGraph						graphRef { get { return nodeRef.graphRef; } }
+		public BaseGraph					graphRef { get { return nodeRef.graphRef; } }
 		
 		//list of rendered anchors:
 		public List< Anchor >				anchors = new List< Anchor >();
@@ -51,7 +51,7 @@ namespace ProceduralWorlds.Core
 		//the visual padding between multiple anchor of the same field
 		public int							padding = 0;
 		//color palette of the anchor (by default)
-		public ColorSchemeName			colorSchemeName;
+		public ColorSchemeName				colorSchemeName;
 		//anchor custom color if set
 		public Color						color = new Color(0, 0, 0, 0); //SerializableColor needed ?
 
@@ -66,6 +66,8 @@ namespace ProceduralWorlds.Core
 		//if the anchor is linked to a field
 		[System.NonSerialized]
 		public bool							fieldValidated = false;
+
+		public Visibility					defaultVisibility = Visibility.Visible;
 		
 		//called only when the anchorField is created
 		public void Initialize(BaseNode node)

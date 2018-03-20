@@ -173,6 +173,7 @@ namespace ProceduralWorlds.Core
 			anchorFieldRef = anchorField;
 			color = anchorField.color;
 			nodeRef = anchorField.nodeRef;
+			visibility = anchorField.defaultVisibility;
 		}
 
 		override public string ToString()

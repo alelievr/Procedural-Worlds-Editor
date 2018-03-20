@@ -39,7 +39,7 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnNodeGUI()
 		{
-			GUILayout.Space(GUI.skin.label.lineHeight * 3);
+			PWGUI.SpaceSkipAnchors();
 
 			EditorGUI.BeginChangeCheck();
 			{

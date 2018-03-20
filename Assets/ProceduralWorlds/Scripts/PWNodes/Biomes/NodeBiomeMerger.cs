@@ -11,10 +11,10 @@ namespace ProceduralWorlds.Node
 	public class NodeBiomeMerger : BaseNode
 	{
 
-		[Input]
+		[Input("Blended terrain")]
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
-		[Output]
+		[Output("Merged terrain")]
 		public FinalTerrain			mergedBiomeTerrain;
 		
 		public MaterializerType		materializerType;
