@@ -82,4 +82,9 @@ namespace ProceduralWorlds.Core
 	public class NotRequiredAttribute : Attribute
 	{
 	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class TextSerializeField : Attribute
+	{
+	}
 }

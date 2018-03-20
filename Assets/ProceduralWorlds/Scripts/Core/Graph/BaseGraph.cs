@@ -24,7 +24,6 @@ namespace ProceduralWorlds.Core
 
         //asset datas:
         public string							assetFilePath;
-		public string							PWFolderPath;
         public new string               	    name;
 		public string							objectName { get { return base.name; } }
 

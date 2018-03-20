@@ -71,10 +71,13 @@ namespace ProceduralWorlds.Core
 			NewNodeCommand,
 			LinkCommand,
 			LinkAnchorCommand,
+			GraphAttributeCommand,
 			OpenParenthesis,
 			ClosedParenthesis,
 			Word,
 			IntValue,
+			FloatValue,
+			BoolValue,
 			Comma,
 			Attr,
 			Colon,
@@ -91,8 +94,8 @@ namespace ProceduralWorlds.Core
 
 		class BaseGraphTokenDefinition
 		{
-			Regex					regex;
-			readonly BaseGraphToken	token;
+			public Regex					regex;
+			public readonly BaseGraphToken	token;
 
 			public BaseGraphTokenDefinition(BaseGraphToken graphToken, string regexString)
 			{
@@ -144,6 +147,10 @@ namespace ProceduralWorlds.Core
 			public readonly static List< BaseGraphToken > newNodeAttrOption = new List< BaseGraphToken > {
 				BaseGraphToken.Attr, BaseGraphToken.Equal, BaseGraphToken.JsonDatas
 			};
+
+			public readonly static List< BaseGraphToken > graphAttribute = new List< BaseGraphToken > {
+				BaseGraphToken.GraphAttributeCommand, BaseGraphToken.Word, BaseGraphToken.Word
+			};
 		}
 
 		class BaseGraphCommandTokenSequence
@@ -157,17 +164,17 @@ namespace ProceduralWorlds.Core
 		{
 			public readonly static List< BaseGraphCommandTokenSequence > validSequences = new List< BaseGraphCommandTokenSequence >
 			{
-				//New Node command
-				new BaseGraphCommandTokenSequence {
-					type = BaseGraphCommandType.NewNode,
-					options = BaseGraphTokenSequence.newNodeAttrOption,
-					requiredTokens = BaseGraphTokenSequence.newNode,
-				},
 				//New Node position command
 				new BaseGraphCommandTokenSequence {
 					type = BaseGraphCommandType.NewNodePosition,
 					requiredTokens = BaseGraphTokenSequence.newNodePosition,
 					options = BaseGraphTokenSequence.newNodeAttrOption,
+				},
+				//New Node command
+				new BaseGraphCommandTokenSequence {
+					type = BaseGraphCommandType.NewNode,
+					options = BaseGraphTokenSequence.newNodeAttrOption,
+					requiredTokens = BaseGraphTokenSequence.newNode,
 				},
 				//New Link command
 				new BaseGraphCommandTokenSequence {
@@ -184,6 +191,11 @@ namespace ProceduralWorlds.Core
 					type = BaseGraphCommandType.LinkAnchorName,
 					requiredTokens = BaseGraphTokenSequence.newLinkAnchorName
 				},
+				//Graph field command
+				new BaseGraphCommandTokenSequence {
+					type = BaseGraphCommandType.GraphAttribute,
+					requiredTokens = BaseGraphTokenSequence.graphAttribute,
+				}
 			};
 		}
 
@@ -193,9 +205,12 @@ namespace ProceduralWorlds.Core
 			new BaseGraphTokenDefinition(BaseGraphToken.LinkAnchorCommand, @"^LinkAnchor"),
 			new BaseGraphTokenDefinition(BaseGraphToken.LinkCommand, @"^Link"),
 			new BaseGraphTokenDefinition(BaseGraphToken.NewNodeCommand, @"^NewNode"),
+			new BaseGraphTokenDefinition(BaseGraphToken.GraphAttributeCommand, @"^GraphAttr"),
 			new BaseGraphTokenDefinition(BaseGraphToken.OpenParenthesis, @"^\("),
 			new BaseGraphTokenDefinition(BaseGraphToken.ClosedParenthesis, @"^\)"),
 			new BaseGraphTokenDefinition(BaseGraphToken.IntValue, @"^[-+]?\d+"),
+			new BaseGraphTokenDefinition(BaseGraphToken.FloatValue, @"^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"),
+			new BaseGraphTokenDefinition(BaseGraphToken.BoolValue, @"^(true|false)"),
 			new BaseGraphTokenDefinition(BaseGraphToken.Comma, @"^,"),
 			new BaseGraphTokenDefinition(BaseGraphToken.Attr, @"^attr"),
 			new BaseGraphTokenDefinition(BaseGraphToken.Equal, @"^="),
@@ -204,24 +219,48 @@ namespace ProceduralWorlds.Core
 			new BaseGraphTokenDefinition(BaseGraphToken.Word, "^(\\\"(.*?)\\\"|\\S+)"),
 		};
 
-		static BaseGraphTokenMatch	Match(ref string line)
+		static IEnumerable< BaseGraphTokenDefinition > GetTokenDefinitionsForStartToken(BaseGraphToken firstToken)
 		{
-			BaseGraphTokenMatch	ret = null;
-
-			foreach (var tokenDef in tokenDefinitions)
-				if ((ret = tokenDef.Match(line.Trim())) != null)
-					break ;
-
-			if (ret != null)
+			if (firstToken == BaseGraphToken.Undefined)
 			{
-				if (debug)
-					Debug.Log("Token " + ret.token + " maches value: |" + ret.value + "|, remainingText: |" + ret.remainingText + "|");
-				line = ret.remainingText;
+				foreach (var tokenDef in tokenDefinitions)
+					yield return tokenDef;
+				yield break;
 			}
-			else if (debug)
-				Debug.Log("No token maches found with line: " + line);
+			
+			var seq = BaseGraphValidCommandTokenSequence.validSequences.FirstOrDefault(s => s.requiredTokens.First() == firstToken);
+			List< BaseGraphToken > tokens = new List< BaseGraphToken >();
 
-			return ret;
+			foreach (var token in seq.requiredTokens)
+				tokens.Add(token);
+			if (seq.options != null)
+				foreach (var token in seq.options)
+					tokens.Add(token);
+				
+			foreach (var tokenDef in tokenDefinitions)
+				if (tokens.Contains(tokenDef.token))
+					yield return tokenDef;
+		}
+
+		//returns all possible token matches
+		static BaseGraphTokenMatch	MatchTokens(string line, BaseGraphToken firstToken)
+		{
+			foreach (var tokenDef in GetTokenDefinitionsForStartToken(firstToken))
+			{
+				BaseGraphTokenMatch	ret = tokenDef.Match(line.Trim());
+
+				if (ret != null)
+				{
+					if (debug)
+						Debug.Log("Token " + ret.token + " maches value: |" + ret.value + "|, remainingText: |" + ret.remainingText + "|");
+					return ret;
+				}
+			}
+
+			if (debug)
+				Debug.Log("No token maches found with line: " + line);
+			
+			return null;
 		}
 
 		static Type	TryParseNodeType(string type)
@@ -245,6 +284,29 @@ namespace ProceduralWorlds.Core
 		static Vector2 TryParsePosition(string x, string y)
 		{
 			return new Vector2(Int32.Parse(x), Int32.Parse(y));
+		}
+
+		static object TryParseGraphAttr(string s)
+		{
+			object value = null;
+			int vi;
+			long vl;
+			float vf;
+			double vd;
+			bool vb;
+
+			if (int.TryParse(s, out vi))
+				value = vi;
+			else if (long.TryParse(s, out vl))
+				value = vl;
+			else if (float.TryParse(s, out vf))
+				value = vf;
+			else if (double.TryParse(s, out vd))
+				value = vd;
+			else if (bool.TryParse(s, out vb))
+				value = vb;
+			
+			return value;
 		}
 
 		static BaseGraphCommand CreateGraphCommand(BaseGraphCommandTokenSequence seq, List< BaseGraphTokenMatch > tokens)
@@ -273,6 +335,13 @@ namespace ProceduralWorlds.Core
 						attributes = tokens[10].value;
 					Vector2 position = TryParsePosition(tokens[4].value, tokens[6].value);
 					return new BaseGraphCommand(nodeType, tokens[2].value, position, attributes);
+				case BaseGraphCommandType.GraphAttribute:
+					object value = TryParseGraphAttr(tokens[2].value);
+					
+					if (value == null)
+						return null;
+					
+					return new BaseGraphCommand(tokens[1].value, value);
 				default:
 					return null;
 			}
@@ -318,23 +387,30 @@ namespace ProceduralWorlds.Core
 
 		public static BaseGraphCommand	Parse(string inputCommand)
 		{
-			BaseGraphTokenMatch			match;
 			List< BaseGraphTokenMatch >	lineTokens = new List< BaseGraphTokenMatch >();
 			string						startLine = inputCommand;
+			BaseGraphToken				firstToken = BaseGraphToken.Undefined;
+			bool						first = true;
 
 			while (!String.IsNullOrEmpty(inputCommand))
 			{
-				match = Match(ref inputCommand);
+				var match = MatchTokens(inputCommand, firstToken);
 
 				if (match == null)
 					throw new InvalidOperationException("Invalid token at line \"" + inputCommand + "\"");
 
+				inputCommand = match.remainingText;
+
+				if (first)
+					firstToken = match.token;
+				
 				lineTokens.Add(match);
+				first = false;
 			}
 
 			if (lineTokens.Count == 0)
 				throw new InvalidOperationException("Invalid empty command: " + inputCommand);
-
+			
 			return BuildCommand(lineTokens, startLine);
 		}
 

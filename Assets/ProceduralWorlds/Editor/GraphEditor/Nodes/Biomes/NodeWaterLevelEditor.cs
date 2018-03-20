@@ -14,7 +14,7 @@ namespace ProceduralWorlds.Editor
 		
 		Gradient			waterGradient;
 		
-		bool				updateWaterPreview = false;
+		bool				updateWaterPreview;
 		
 		const string		delayedUpdateKey = "delayedUpdate";
 

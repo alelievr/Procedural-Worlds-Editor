@@ -241,6 +241,46 @@ namespace ProceduralWorlds.Tests.CLI
 
 		#endregion
 
+		#region Graph attribute commands
+
+		[Test]
+		public static void WellFormatedGraphAttributeCommand()
+		{
+			string s = BaseGraphCLI.GenerateGraphAttributeCommand("field", 12.5f);
+
+			Debug.Log("cmd: " + s);
+
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
+
+			Assert.That(cmd.type == BaseGraphCommandType.GraphAttribute);
+			Assert.That(cmd.graphFieldName == "field");
+			Assert.That(cmd.graphFieldValue.Equals(12.5f));
+		}
+
+		[Test]
+		public static void WellFormatedGraphAttributeCommandInvalidType()
+		{
+			string s = BaseGraphCLI.GenerateGraphAttributeCommand("field", new object());
+
+			Assert.That(s == null);
+		}
+		
+		[Test]
+		public static void WellFormatedGraphAttributeTypesCommand()
+		{
+			string s = BaseGraphCLI.GenerateGraphAttributeCommand("field", true);
+			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
+
+			Assert.That(cmd.graphFieldValue.Equals(true));
+			
+			s = BaseGraphCLI.GenerateGraphAttributeCommand("field", 12);
+			cmd = BaseGraphCLI.Parse(s);
+
+			Assert.That(cmd.graphFieldValue.Equals(12));
+		}
+
+		#endregion
+
 		#region Command parser tests
 	
 		[Test]

@@ -7,6 +7,7 @@ using System.Linq;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Node;
 using ProceduralWorlds.Editor;
+using ProceduralWorlds.Biomator;
 using System.IO;
 
 namespace ProceduralWorlds.Tests.Graphs
@@ -15,7 +16,7 @@ namespace ProceduralWorlds.Tests.Graphs
 	{
 
 		static string worldGraphPresetPath = "GraphPresets/World/Full";
-		// string biomeGraphPresetPath = "GraphPresets/Biome";
+		string biomeGraphPresetPath = "GraphPresets/Biome/Full";
 	
 		[Test]
 		public static void WorldGraphPresets()
@@ -62,17 +63,10 @@ namespace ProceduralWorlds.Tests.Graphs
 			Directory.Delete(tmpFolderPath, true);
 		}
 		
-		/* 
-		[Test]
+		//TODO: reactivate this test when the biome graph text files will be up to date
 		public void BiomeGraphPresets()
 		{
 			TextAsset[] biomeGraphPresets = Resources.LoadAll< TextAsset >(biomeGraphPresetPath);
-
-			//TODO: generate a previewGraph for all the biomes here
-			//generate the biome graph in the preview
-			//assign each biomeGraph to the cerated biome node
-			//assign the previewGraph to each biomeGraph
-			//Process()
 
 			foreach (var biomeGraphPreset in biomeGraphPresets)
 			{
@@ -80,15 +74,14 @@ namespace ProceduralWorlds.Tests.Graphs
 
 				var graph = GraphBuilder.NewGraph< BiomeGraph >()
 					.ImportCommands(commands)
-					.Custom((g) => {
-						(g.inputNode as NodeBiomeGraphInput).previewGraph = previewgraph;
-					})
+					.Custom(g => { (g as BiomeGraph).surfaceType = BiomeSurfaceType.Color; })
 					.Execute()
 					.GetGraph();
 				
-				//TODO: process the graph and check output
+				graph.Process();
+				
+				//TODO: check output
 			}
 		}
-		*/
 	}
 }

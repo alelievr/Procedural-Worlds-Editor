@@ -12,13 +12,30 @@ namespace ProceduralWorlds.Core
 	//Command line interpreter for BaseGraph
 	public static partial class BaseGraphCLI
 	{
-
+		public static readonly Type[] allowedGraphAttributeTypes = {typeof(int), typeof(float), typeof(bool), typeof(double), typeof(long)};
+		
 		public static void Export(BaseGraph graph, string filePath)
 		{
 			List< string > commands = new List< string >();
 			List< string > nodeNames = new List< string >();
 			var nodeToNameMap = new Dictionary< BaseNode, string >();
 
+			//GraphAttr commands
+			var fields = graph.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+			foreach (var field in fields)
+			{
+				var attrs = field.GetCustomAttributes(true);
+
+				if (attrs.Any(a => a is TextSerializeField))
+				{
+					string s = GenerateGraphAttributeCommand(field.Name, field.GetValue(graph));
+
+					if (s != null)
+						commands.Add(s);
+				}
+			}
+
+			//CreateNode commands
 			foreach (var node in graph.allNodes)
 			{
 				var attrs = new BaseGraphCLIAttributes();
@@ -56,6 +73,7 @@ namespace ProceduralWorlds.Core
 				commands.Add(GenerateNewNodeCommand(node.GetType(), nodeName, node.rect.position, attrs));
 			}
 		
+			//Link commands
 			foreach (var link in graph.nodeLinkTable.GetLinks())
 			{
 				if (link.fromNode == null || link.toNode == null)
@@ -125,6 +143,14 @@ namespace ProceduralWorlds.Core
 		public static string GenerateLinkAnchorNameCommand(string fromNodeName, string fromAnchorName, string toNodeName, string toAnchorName)
 		{
 			return "LinkAnchor \"" + fromNodeName + "\":\"" + fromAnchorName + "\" " + "\"" + toNodeName + "\":\"" + toAnchorName + "\"";
+		}
+
+		public static string GenerateGraphAttributeCommand(string fieldName, object value)
+		{
+			if (!allowedGraphAttributeTypes.Contains(value.GetType()))
+				return null;
+			
+			return "GraphAttr " + fieldName + " " + value.ToString();
 		}
 
 	}

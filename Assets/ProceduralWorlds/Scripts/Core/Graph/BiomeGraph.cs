@@ -8,6 +8,7 @@ namespace ProceduralWorlds.Core
 	public class BiomeGraph : BaseGraph
 	{
 
+		[TextSerializeField]
 		public BiomeSurfaceType	surfaceType;
 
 		public override void InitializeInputAndOutputNodes()

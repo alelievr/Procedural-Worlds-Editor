@@ -24,6 +24,8 @@ namespace ProceduralWorlds.Editor
 			public double	processOnceTime;
 			public double	processTime;
 
+			public List< Pair< string, float > > nodeProcessTime;
+
 			public long		totalAllocatedMemory;
 			public long		totalReservedMemory;
 			public long		totalUnusedReservedMemory;
@@ -109,6 +111,10 @@ namespace ProceduralWorlds.Editor
 
 			sw.Stop();
 			result.processTime = sw.Elapsed.TotalMilliseconds;
+
+			result.nodeProcessTime = new List< Pair< string, float > >();
+			foreach (var node in graph.allNodes)
+				result.nodeProcessTime.Add(new Pair< string, float >(node.name, node.processTime));
 			
 			result.totalAllocatedMemory = Profiler.GetTotalAllocatedMemoryLong();
 			result.totalReservedMemory = Profiler.GetTotalReservedMemoryLong();

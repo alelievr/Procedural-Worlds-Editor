@@ -97,6 +97,26 @@ namespace ProceduralWorlds.Tests.CLI
 			Assert.That(s3Link.toAnchor != s4Link.toAnchor);
 			Assert.That(s4Link.toAnchor != s1Link.toAnchor);
 		}
+
+		[Test]
+		public static void GraphAttributeCommandFieldExecution()
+		{
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph() as WorldGraph;
+
+			graph.Execute(BaseGraphCLI.GenerateGraphAttributeCommand("scaledPreviewEnabled", true));
+
+			Assert.That(graph.scaledPreviewEnabled == true);
+		}
+		
+		[Test]
+		public static void GraphAttributeCommandPropertyExecution()
+		{
+			var graph = GraphBuilder.NewGraph< WorldGraph >().GetGraph() as WorldGraph;
+
+			graph.Execute(BaseGraphCLI.GenerateGraphAttributeCommand("_chunkSize", 42));
+
+			Assert.That(graph.chunkSize == 42);
+		}
 	
 	}
 }

@@ -37,12 +37,16 @@ namespace ProceduralWorlds.Editor
 	
 					node.UpdateMaterialProperties();
 					
-					if ((node.preview = EditorGUILayout.Foldout(node.preview, "preview")))
+					node.preview = EditorGUILayout.Foldout(node.preview, "preview");
+					if (node.preview)
 						matPreview.Render(node.outputMaterial);
 				}
 				else if (node.outputTexture != null)
-					if ((node.preview = EditorGUILayout.Foldout(node.preview, "preview")))
+				{
+					node.preview = EditorGUILayout.Foldout(node.preview, "preview");
+					if (node.preview)
 						PWGUI.TexturePreview(node.outputTexture);
+				}
 			}
 			if (EditorGUI.EndChangeCheck())
 				node.UpdateProps();

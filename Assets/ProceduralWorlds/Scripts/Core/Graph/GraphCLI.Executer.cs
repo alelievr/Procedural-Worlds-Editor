@@ -24,7 +24,18 @@ namespace ProceduralWorlds.Core
 			{BaseGraphCommandType.NewNodePosition, CreateNode},
 			{BaseGraphCommandType.LinkAnchor, CreateLinkAnchor},
 			{BaseGraphCommandType.LinkAnchorName, CreateLinkAnchorName},
+			{BaseGraphCommandType.GraphAttribute, AssignGraphAttr}
 		};
+
+		static void AssignGraphAttr(BaseGraph graph, BaseGraphCommand command, string inputCommand)
+		{
+			var field = graph.GetType().GetField(command.graphFieldName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+
+			if (field == null)
+				throw new InvalidOperationException("Can't assign graph field '" + command.graphFieldName + "': not found");
+
+			field.SetValue(graph, command.graphFieldValue);
+		}
 		
 		static void CreateLinkAnchorName(BaseGraph graph, BaseGraphCommand command, string inputCommand)
 		{

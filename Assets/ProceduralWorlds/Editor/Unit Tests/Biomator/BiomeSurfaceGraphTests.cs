@@ -39,7 +39,7 @@ namespace ProceduralWorlds.Tests.Biomator
 				bs.maxHeight = s.maxHeight;
 				bs.minSlope = s.minSlope;
 				bs.maxSlope = s.maxSlope;
-				bs.surface = new BiomeSurface(){name = s.name};
+				bs.surface = new BiomeSurface{name = s.name};
 
 				switchList.Add(bs);
 			}

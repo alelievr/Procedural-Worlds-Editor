@@ -12,6 +12,7 @@ namespace ProceduralWorlds.Core
 		Link,
 		LinkAnchor,
 		LinkAnchorName,
+		GraphAttribute,
 	}
 	
 	public class BaseGraphCommand : IEquatable< BaseGraphCommand >
@@ -31,6 +32,9 @@ namespace ProceduralWorlds.Core
 		public int					toAnchorIndex;
 		public string				fromAnchorFieldName;
 		public string				toAnchorFieldName;
+
+		public string				graphFieldName;
+		public object				graphFieldValue;
 
 		//New node constructor
 		public BaseGraphCommand(Type nodeType, string name, string attributes = null)
@@ -80,7 +84,13 @@ namespace ProceduralWorlds.Core
 			this.toAnchorFieldName = toAnchorFieldName;
 		}
 
-		//new link 
+		//Graph attribute
+		public BaseGraphCommand(string fieldName, object value)
+		{
+			this.type = BaseGraphCommandType.GraphAttribute;
+			this.graphFieldName = fieldName;
+			this.graphFieldValue = value;
+		}
 
 		public static bool operator ==(BaseGraphCommand cmd1, BaseGraphCommand cmd2)
 		{

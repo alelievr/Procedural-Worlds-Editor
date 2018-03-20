@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Core
 		public float					maxStep;
 
 		//chunk relative datas
-		[SerializeField] private int			_seed;
+		[TextSerializeField, SerializeField] private int	_seed;
 		public int								seed
 		{
 			get{ return _seed; }
@@ -34,7 +34,7 @@ namespace ProceduralWorlds.Core
 			}
 		}
 
-		[SerializeField] private int			_chunkSize;
+		[TextSerializeField, SerializeField] private int	_chunkSize;
 		public float							nonModifiedChunkSize { get { return _chunkSize; } }
 		public int								chunkSize
 		{
@@ -50,7 +50,7 @@ namespace ProceduralWorlds.Core
 			}
 		}
 
-		[SerializeField] private Vector3		_chunkPosition;
+		[TextSerializeField, SerializeField] private Vector3	_chunkPosition;
 		public Vector3							chunkPosition
 		{
 			get { return _chunkPosition; }
@@ -65,7 +65,7 @@ namespace ProceduralWorlds.Core
 			}
 		}
 
-		[SerializeField] private float			_step;
+		[TextSerializeField, SerializeField] private float	_step;
 		public float							nonModifiedStep { get { return _step; } }
 		public float							step
 		{
@@ -82,7 +82,7 @@ namespace ProceduralWorlds.Core
 		}
 
 		//Geologic datas
-		[SerializeField]
+		[TextSerializeField, SerializeField]
 		float							_geologicTerrainStep;
 		public float					geologicTerrainStep
 		{
@@ -98,9 +98,11 @@ namespace ProceduralWorlds.Core
 			}
 		}
 		
+		[TextSerializeField]
 		public bool						scaledPreviewEnabled;
+		[TextSerializeField]
 		public bool						hideChunkLines;
-		[SerializeField]
+		[TextSerializeField, SerializeField]
 		float							_scaledPreviewRatio = 8;
 		public float					scaledPreviewRatio
 		{
@@ -115,7 +117,7 @@ namespace ProceduralWorlds.Core
 				}
 			}
 		}
-		[SerializeField]
+		[TextSerializeField, SerializeField]
 		int								_scaledPreviewChunkSize = 32;
 		public int						scaledPreviewChunkSize
 		{
