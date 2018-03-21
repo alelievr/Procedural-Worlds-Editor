@@ -15,15 +15,15 @@ namespace ProceduralWorlds.Editor
 
 		BaseGraph					oldGraph;
 
-		Stack< LayoutOrientation >	currentOrientation = new Stack< LayoutOrientation >();
+		readonly Stack< LayoutOrientation >	currentOrientation = new Stack< LayoutOrientation >();
 
-		List< LayoutSeparator >		loadedSeparators = new List< LayoutSeparator >();
-		List< LayoutPanel >			loadedPanels = new List< LayoutPanel >();
+		readonly List< LayoutSeparator >	loadedSeparators = new List< LayoutSeparator >();
+		readonly List< LayoutPanel >		loadedPanels = new List< LayoutPanel >();
 
-		List< Action >				layoutActions = new List< Action >();
-		List< Rect >				layoutRects = new List< Rect >();
+		readonly List< Action >				layoutActions = new List< Action >();
+		readonly List< Rect >				layoutRects = new List< Rect >();
 
-		List< LayoutSetting >		savedDefaultSettings = new List< LayoutSetting >();
+		readonly List< LayoutSetting >		savedDefaultSettings = new List< LayoutSetting >();
 
 		//Private constructor so the only way to create an instance of this class is LayoutFactory
 		public Layout(BaseGraphEditor graphEditor)

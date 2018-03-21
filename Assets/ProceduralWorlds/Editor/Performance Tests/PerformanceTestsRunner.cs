@@ -17,50 +17,87 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Debug = UnityEngine.Debug;
 
-namespace ProceduralWorlds.Editor
-{
-	public static class PerformanceTestsRunner
-	{
 		[Serializable]
-		public struct PerformanceResult
+		public struct NodeProcessTime
+		{
+			public string	name;
+			public float	time;
+
+			public NodeProcessTime(string nodeName, float time)
+			{
+				this.name = nodeName;
+				this.time = time;
+			}
+		}
+
+		[Serializable]
+		public struct PerformanceResult : IEquatable< PerformanceResult >
 		{
 			public string	name;
 
 			public double	processOnceTime;
 			public double	processTime;
 
-			public List< Pair< string, float > > nodeProcessTime;
+			public NodeProcessTime[] nodeProcessTime;
 
 			public long		totalAllocatedMemory;
 			public long		totalReservedMemory;
 			public long		totalUnusedReservedMemory;
 
+			public bool Equals(PerformanceResult other)
+			{
+				return name == other.name;
+			}
+
 			public override string ToString()
 			{
-				var toJsonify = new List< Pair< string, object > >
-				{
-					new Pair< string, object >("name", name),
-					new Pair< string, object >("processOnceTime", processOnceTime),
-					new Pair< string, object >("processTime", processTime),
-					new Pair< string, object >("totalAllocatedMemory", totalAllocatedMemory),
-					new Pair< string, object >("totalReservedMemory", totalReservedMemory),
-					new Pair< string, object >("totalUnusedReservedMemory", totalUnusedReservedMemory),
-				};
-				return Jsonizer.Generate(toJsonify);
+				StringBuilder sb = new StringBuilder();
+
+				sb.Append("name: " + name);
+				sb.Append(", processOnceTime: " + processOnceTime);
+				sb.Append(", processTime: " + processTime);
+				sb.Append(", totalAllocatedMemory: " + totalAllocatedMemory);
+				sb.Append(", rotalReservedMemory: " + totalReservedMemory);
+				sb.Append(", totalUnusedReservedMemory: " + totalUnusedReservedMemory);
+
+				return sb.ToString();
 			}
 		}
+
+		[Serializable]
+		public struct PerformanceResultMulti
+		{
+			public PerformanceResult[] results;
+
+			public PerformanceResultMulti(int count)
+			{
+				results = new PerformanceResult[count];
+			}
+		}
+
+namespace ProceduralWorlds.Editor
+{
+	public static class PerformanceTestsRunner
+	{
 
 		public static readonly string	logFilePath = Path.GetFullPath("performance.log");
 		public static readonly string	profilerDataFile = Path.GetFullPath("performance_profiler.data");
 		public static readonly string	tmpProfilerLogFile = Path.GetFullPath("performance.tmp");
 		public static readonly int		testIterationCount = 6;
 
+		static StreamWriter logFile;
+
 		[MenuItem("Window/Procedural Worlds/Run performance tests", priority = 10)]
 		public static void Run()
 		{
 			string[] performanceGraphGUIDs = AssetDatabase.FindAssets("performance* t:WorldGraph");
 
-			var resultsList = new List< List< PerformanceResult > >();
+			//empty log file:
+			File.WriteAllText(logFilePath, string.Empty);
+
+			logFile = new StreamWriter(File.OpenWrite(logFilePath));
+
+			var resultsList = new List< PerformanceResultMulti >();
 
 			ProfilerDriver.ClearAllFrames();
 			ProfilerDriver.deepProfiling = true;
@@ -72,10 +109,10 @@ namespace ProceduralWorlds.Editor
 				string path = AssetDatabase.GUIDToAssetPath(performanceGraphGUID);
 				WorldGraph graph = AssetDatabase.LoadAssetAtPath(path, typeof(WorldGraph)) as WorldGraph;
 
-				var results = new List< PerformanceResult >();
+				var results = new PerformanceResultMulti(testIterationCount);
 
 				for (int i = 0; i < testIterationCount; i++)
-					results.Add(RunTestForGraph(graph));
+					results.results[i] = RunTestForGraph(graph);
 				
 				resultsList.Add(results);
 			}
@@ -94,14 +131,15 @@ namespace ProceduralWorlds.Editor
 
 			string text = SerializeResults(resultsList);
 
-			string reportPerfs = System.Environment.GetEnvironmentVariable("PW_REPORT_PERFORMANCES");
+			string reportPerfs = Environment.GetEnvironmentVariable("PW_REPORT_PERFORMANCES");
 
 			if (reportPerfs == "ON")
 			{
 				ReportPerformaces(resultsList);
 			}
 
-			File.WriteAllText(logFilePath, text);
+			logFile.Write(text);
+			logFile.Flush();
 		}
 
 		static PerformanceResult RunTestForGraph(WorldGraph graph)
@@ -124,9 +162,12 @@ namespace ProceduralWorlds.Editor
 			sw.Stop();
 			result.processTime = sw.Elapsed.TotalMilliseconds;
 
-			result.nodeProcessTime = new List< Pair< string, float > >();
-			foreach (var node in graph.allNodes)
-				result.nodeProcessTime.Add(new Pair< string, float >(node.name, node.processTime));
+			result.nodeProcessTime = new NodeProcessTime[graph.allNodes.Count()];
+			for (int i = 0; i < result.nodeProcessTime.Length; i++)
+			{
+				var node = graph.allNodes.ElementAt(i);
+				result.nodeProcessTime[i] = new NodeProcessTime(node.name, node.processTime);
+			}
 			
 			result.totalAllocatedMemory = Profiler.GetTotalAllocatedMemoryLong();
 			result.totalReservedMemory = Profiler.GetTotalReservedMemoryLong();
@@ -135,40 +176,57 @@ namespace ProceduralWorlds.Editor
 			return result;
 		}
 
-		static string SerializeResults(List< List< PerformanceResult > > resultsList)
+		static string SerializeResults(List< PerformanceResultMulti > resultsList)
 		{
 			StringBuilder sb = new StringBuilder();
 
 			foreach (var results in resultsList)
 			{
 				sb.AppendLine("---");
-				foreach (var result in results)
+				foreach (var result in results.results)
 					sb.AppendLine(result.ToString());
 			}
 
 			return sb.ToString();
 		}
 
-		static void ReportPerformaces(List< List< PerformanceResult > > resultsList)
+		static void ReportPerformaces(List< PerformanceResultMulti > resultsList)
 		{
-			string ip = System.Environment.GetEnvironmentVariable("PW_REPORT_IP");
+			string ip = Environment.GetEnvironmentVariable("PW_REPORT_IP");
+
+			if (String.IsNullOrEmpty(ip))
+			{
+				logFile.WriteLine("PW_REPORT_IP environement variable is empty !");
+				return ;
+			}
 
 			IPAddress ipa;
 			IPAddress.TryParse(ip, out ipa);
 
 			if (ipa == null)
+			{
+				logFile.WriteLine("Can't parse IP: " + ip);
 				return ;
+			}
 			
-			IPEndPoint ipe = new IPEndPoint(ipa, 4204);
-			Socket s = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-			s.Connect(ipe);
+			try {
+				IPEndPoint ipe = new IPEndPoint(ipa, 4204);
+				Socket s = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+				s.Connect(ipe);
+	
+				if (!s.Connected)
+				{
+					logFile.WriteLine("Can't connect the socket !");
+					return ;
+				}
+	
+				Stream stream = new NetworkStream(s);
+				var bin = new BinaryFormatter();
 
-			if (!s.Connected)
-				return ;
-
-			Stream stream = new NetworkStream(s);
-			var bin = new BinaryFormatter();
-			bin.Serialize(stream, resultsList);
+				bin.Serialize(stream, resultsList.ToArray());
+			} catch (Exception e) {
+				logFile.WriteLine("An error occured: " + e);
+			}
 		}
 	}
 }
