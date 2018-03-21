@@ -29,6 +29,7 @@ namespace ProceduralWorlds
 		public float					terrainScale = .1f; //10 cm per point
 
 		protected int					chunkSize;
+		protected float					step;
 		
 		public GameObject				terrainRoot;
 		public bool						initialized { get { return graph != null && terrainRoot != null; } }
@@ -50,6 +51,13 @@ namespace ProceduralWorlds
 				if (!Application.isPlaying && graphAsset != null)
 					DestroyAllChunks();
 			}
+
+			OnTerrainEnable();
+		}
+
+		void OnDisable()
+		{
+			OnTerrainDisable();
 		}
 
 		public virtual void Update()
@@ -70,8 +78,6 @@ namespace ProceduralWorlds
 
 			graph.UpdateComputeOrder();
 			graph.ProcessOnce();
-			
-			UpdateChunks(true);
 		}
 
 		void UpdateTerrainRoot()
@@ -184,12 +190,17 @@ namespace ProceduralWorlds
 			UpdateChunks(true);
 		}
 		
+		//Chunk abstract methods
 		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);
 		public abstract object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos);
 		public abstract void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		public abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		public abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		public abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
+
+		//Terrain abstract methods
+		public virtual void OnTerrainEnable() {}
+		public virtual void OnTerrainDisable() {}
 
 		#region Utils
 		/* Utils function to simplify the downstream scripting: */
@@ -221,7 +232,7 @@ namespace ProceduralWorlds
 			ret = new GameObject(name);
 			ret.transform.parent = terrainRoot.transform;
 			ret.transform.position = pos;
-			//TODO: implement Sampler* scale (step) in the scale of the object.
+			ret.transform.localScale = Vector3.one * chunkSize * terrainScale;
 
 			return ret;
 		}

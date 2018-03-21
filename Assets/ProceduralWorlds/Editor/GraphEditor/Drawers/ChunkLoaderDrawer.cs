@@ -10,7 +10,9 @@ namespace ProceduralWorlds.Editor
 {
 	public class ChunkLoaderDrawer : Drawer
 	{
-		WorldGraph		worldGraph;
+		WorldGraph			worldGraph;
+
+		UnityEditor.Editor	terrainEditor;
 
 		public override void OnEnable()
 		{
@@ -36,12 +38,18 @@ namespace ProceduralWorlds.Editor
 					EditorGUILayout.HelpBox("Terrain materializer type not supported (" + worldGraph.terrainPreviewType + ")", MessageType.Warning);
 				return ;
 			}
+
+			if (terrainEditor == null)
+			{
+				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
+			}
 			
 			EditorGUI.BeginChangeCheck();
 			{
-				terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
-				terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
-				terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
+				terrainEditor.OnInspectorGUI();
+				// terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
+				// terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
+				// terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
 			}
 			if (EditorGUI.EndChangeCheck())
 				ReloadChunks(terrain);

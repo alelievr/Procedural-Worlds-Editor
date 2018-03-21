@@ -26,12 +26,12 @@ namespace ProceduralWorlds.Noises
 
 		public abstract float	GetValue(Vector3 position);
 
-		public virtual void	ComputeSampler2D(Sampler2D samp)
+		public virtual void	ComputeSampler2D(Sampler2D samp, Vector3 position)
 		{
 			throw new System.NotImplementedException();
 		}
 
-		public virtual void	ComputeSampler3D(Sampler3D samp)
+		public virtual void	ComputeSampler3D(Sampler3D samp, Vector3 position)
 		{
 			throw new System.NotImplementedException();
 		}

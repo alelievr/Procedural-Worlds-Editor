@@ -121,7 +121,7 @@ namespace ProceduralWorlds.Noises
             this.lacunarity = lacunarity;
         }
     
-		public override void ComputeSampler2D(Sampler2D samp)
+		public override void ComputeSampler2D(Sampler2D samp, Vector3 position)
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
@@ -133,7 +133,7 @@ namespace ProceduralWorlds.Noises
 			else
 			{
                 samp.Foreach((x, y) => {
-                    return GenerateNoise(x, y, octaves, samp.step * scale, lacunarity, persistence, seed);
+                    return GenerateNoise(position.x + x, position.z + y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });
 			}
 		}

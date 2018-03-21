@@ -43,7 +43,7 @@ namespace ProceduralWorlds.Node
 			
 			perlin2D.UpdateParams(GetSeed(), scale, octaves, persistence, lacunarity);
 
-			perlin2D.ComputeSampler2D(output);
+			perlin2D.ComputeSampler2D(output, chunkPosition);
 		}
 	}
 }

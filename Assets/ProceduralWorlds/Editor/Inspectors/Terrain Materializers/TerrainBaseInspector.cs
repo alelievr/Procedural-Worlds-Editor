@@ -7,7 +7,6 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(TerrainGenericBase))]
 	public abstract class TerrainBaseInspector : UnityEditor.Editor
 	{
 		TerrainGenericBase terrain;
