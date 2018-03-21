@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using System;
 
-namespace PW
+namespace ProceduralWorlds
 {
     [System.Serializable]
-    public struct SerializableKeyframe
+    public struct SerializableKeyframe : IEquatable< SerializableKeyframe >
     {
         public float inTangent;
         public float outTangent;
@@ -17,8 +18,16 @@ namespace PW
             this.inTangent = inTangent;
             this.outTangent = outTangent;
         }
-    
-        public static implicit operator Keyframe(SerializableKeyframe sk)
+
+		public bool Equals(SerializableKeyframe other)
+		{
+            return other.inTangent == inTangent
+                && other.outTangent == outTangent
+                && other.value == value
+                && other.time == time;
+		}
+
+		public static implicit operator Keyframe(SerializableKeyframe sk)
         {
             return new Keyframe(sk.time, sk.value, sk.inTangent, sk.outTangent);
         }

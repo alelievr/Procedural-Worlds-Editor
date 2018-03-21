@@ -1,16 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using PW.Core;
-using UnityEditorInternal;
+using ProceduralWorlds.Core;
 using System;
 using System.Linq;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	[System.Serializable]
-	public class BiomeSwitchData
+	public class BiomeSwitchData : IEquatable< BiomeSwitchData >
 	{
 		public float				min;
 		public float				max;
@@ -40,11 +38,50 @@ namespace PW.Biomator
 			}
 		}
 
+		public override bool Equals(object obj)
+		{
+			if (obj is BiomeSwitchData)
+				return Equals(obj as BiomeSwitchData);
+			return false;
+		}
+
+		public static bool operator ==(BiomeSwitchData bsd1, BiomeSwitchData bsd2)
+		{
+			return bsd1.Equals(bsd2);
+		}
+		
+		public static bool operator !=(BiomeSwitchData bsd1, BiomeSwitchData bsd2)
+		{
+			return !bsd1.Equals(bsd2);
+		}
+
+		public bool Equals(BiomeSwitchData other)
+		{
+			return min == other.min
+				&& max == other.max
+				&& absoluteMin == other.absoluteMin
+				&& absoluteMax == other.absoluteMax
+				&& samplerName == other.samplerName;
+		}
+
+		public override int GetHashCode()
+		{
+			int hash = 59;
+
+			hash = hash * 31 + min.GetHashCode();
+			hash = hash * 31 + max.GetHashCode();
+			hash = hash * 31 + absoluteMin.GetHashCode();
+			hash = hash * 31 + absoluteMax.GetHashCode();
+			hash = hash * 31 + samplerName.GetHashCode();
+
+			return hash;
+		}
+
 		public BiomeSwitchData(string samplerName) : this(null, samplerName) {}
 	}
 
 	[System.Serializable]
-	public class BiomeSwitchList : IEnumerable< BiomeSwitchData >
+	public class BiomeSwitchList : IEnumerable< BiomeSwitchData >, IEquatable< BiomeSwitchList >
 	{
 		public List< BiomeSwitchData >		switchDatas = new List< BiomeSwitchData >();
 
@@ -53,186 +90,13 @@ namespace PW.Biomator
 		public Action						OnBiomeDataReordered;
 		public Action< BiomeSwitchData >	OnBiomeDataModified;
 		
-		Texture2D			biomeRepartitionPreview;
-		float				localCoveragePercent;
-		const int			previewTextureWidth = 200;
-		const int			previewTextureHeight = 40;
-
-		string				currentSamplerName;
-		Sampler				currentSampler;
+		public string		samplerName;
+		public Sampler		sampler;
 		
-		float				relativeMin = float.MinValue;
-		float				relativeMax = float.MaxValue;
-
-		PWGUIManager		PWGUI;
-		
-		ReorderableList		reorderableSwitchDataList;
+		public float		relativeMin = float.MinValue;
+		public float		relativeMax = float.MaxValue;
 
 		public int			Count { get { return switchDatas.Count; } }
-
-		public void OnEnable()
-		{
-			PWGUI = new PWGUIManager();
-
-			reorderableSwitchDataList = new ReorderableList(switchDatas, typeof(BiomeSwitchData), true, true, true, true);
-
-			reorderableSwitchDataList.elementHeight = EditorGUIUtility.singleLineHeight * 2 + 4; //padding
-			
-            reorderableSwitchDataList.drawElementCallback = DrawElementCallback;
-
-			reorderableSwitchDataList.drawHeaderCallback = (rect) => {
-				EditorGUI.LabelField(rect, "switches");
-			};
-
-			reorderableSwitchDataList.onReorderCallback += (ReorderableList l) => {
-				OnBiomeDataReordered();
-			};
-
-			reorderableSwitchDataList.onAddCallback += (ReorderableList l) => {
-				BiomeSwitchData	bsd = new BiomeSwitchData(currentSampler, currentSamplerName);
-				BiomeSwitchData lastSwitch = switchDatas.Last();
-				bsd.min = lastSwitch.min + (lastSwitch.max - lastSwitch.min) / 2;
-				switchDatas.Add(bsd);
-				OnBiomeDataAdded(bsd);
-			};
-
-			reorderableSwitchDataList.onRemoveCallback += (ReorderableList l) => {
-				if (switchDatas.Count > 1)
-				{
-					switchDatas.RemoveAt(l.index);
-					OnBiomeDataRemoved();
-				}
-			};
-
-			//add at least one biome switch:
-			if (switchDatas.Count == 0)
-				switchDatas.Add(new BiomeSwitchData(currentSampler, currentSamplerName));
-		}
-
-		void DrawElementCallback(Rect rect, int index, bool isActive, bool selected)
-		{
-			BiomeSwitchData elem = switchDatas[index];
-
-			rect.y += 2;
-			int		floatFieldSize = 70;
-			int		colorFieldSize = 20;
-			int		nameFieldSize = (int)rect.width - colorFieldSize - 2;
-			float	lineHeight = EditorGUIUtility.singleLineHeight;
-			Rect	nameRect = new Rect(rect.x, rect.y, nameFieldSize, EditorGUIUtility.singleLineHeight);
-			Rect	colorFieldRect = new Rect(rect.x + nameFieldSize + 4, rect.y - 2, colorFieldSize, colorFieldSize);
-			Rect	minRect = new Rect(rect.x, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
-			Rect	maxRect = new Rect(rect.x + floatFieldSize, rect.y + lineHeight + 2, floatFieldSize, EditorGUIUtility.singleLineHeight);
-
-			EditorGUIUtility.labelWidth = 25;
-			EditorGUI.BeginChangeCheck();
-			{
-				float oldMin = elem.min;
-				float oldMax = elem.max;
-
-				bool first = index == 0;
-				bool last = index == reorderableSwitchDataList.count - 1;
-				
-				PWGUI.ColorPicker(colorFieldRect, ref elem.color, false, true);
-				elem.name = EditorGUI.TextField(nameRect, elem.name);
-				EditorGUI.BeginDisabledGroup(first);
-				elem.min = EditorGUI.FloatField(minRect, "min", elem.min);
-				EditorGUI.EndDisabledGroup();
-				EditorGUI.BeginDisabledGroup(last);
-				elem.max = EditorGUI.FloatField(maxRect, "max", elem.max);
-				EditorGUI.EndDisabledGroup();
-
-				if (last)
-					elem.max = relativeMax;
-				if (first)
-					elem.min = relativeMin;
-
-				elem.min = Mathf.Max(elem.min, relativeMin);
-				elem.max = Mathf.Min(elem.max, relativeMax);
-
-				//affect up/down cell value
-				if (elem.min != oldMin && index > 0)
-					switchDatas[index - 1].max = elem.min;
-				if (elem.max != oldMax && index + 1 < switchDatas.Count)
-					switchDatas[index + 1].min = elem.max;
-			}
-			if (EditorGUI.EndChangeCheck())
-				OnBiomeDataModified(elem);
-			EditorGUIUtility.labelWidth = 0;
-
-			switchDatas[index] = elem;
-		}
-
-		public void OnGUI(BiomeData biomeData)
-		{
-			PWGUI.StartFrame(new Rect(0, 0, 0, 0));
-
-			if (biomeRepartitionPreview == null)
-			{
-				biomeRepartitionPreview = new Texture2D(previewTextureWidth, 1);
-				UpdateBiomeRepartitionPreview(biomeData);
-			}
-
-			using (DefaultGUISkin.Get())
-			{
-				reorderableSwitchDataList.DoLayoutList();
-			}
-
-			EditorGUILayout.LabelField("repartition map: (" + localCoveragePercent.ToString("F1") + "%)");
-			Rect previewRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(0));
-			
-			previewRect.height = previewTextureHeight;
-			GUILayout.Space(previewTextureHeight);
-
-			PWGUI.TexturePreview(previewRect, biomeRepartitionPreview, false);
-			PWGUI.SetScaleModeForField(-1, ScaleMode.StretchToFill);
-		}
-
-		public void UpdateBiomeRepartitionPreview(BiomeData biomeData)
-		{
-			if (currentSampler == null || biomeRepartitionPreview == null)
-				return ;
-			
-			float min = currentSampler.min;
-			float max = currentSampler.max;
-			float range = max - min;
-
-			//clear the current texture:
-			for (int x = 0; x < previewTextureWidth; x++)
-				biomeRepartitionPreview.SetPixel(x, 0, Color.white);
-
-			localCoveragePercent = 0;
-			int		i = 0;
-
-			foreach (var switchData in switchDatas)
-			{
-				float switchMin = Mathf.Max(switchData.min, min);
-				float switchMax = Mathf.Min(switchData.max, max);
-				float rMin = ((switchMin - min) / range) * previewTextureWidth;
-				float rMax = ((switchMax - min) / range) * previewTextureWidth;
-				localCoveragePercent += (rMax - rMin) / previewTextureWidth * 100;
-
-				//Clamp values to image size:
-				rMin = Mathf.Clamp(rMin, 0, biomeRepartitionPreview.width);
-				rMax = Mathf.Clamp(rMax, 0, biomeRepartitionPreview.width);
-
-				for (int x = (int)rMin; x < (int)rMax; x++)
-					biomeRepartitionPreview.SetPixel(x, 0, switchData.color);
-				i++;
-			}
-
-			//add water if there is and if switch mode is height:
-			if (!biomeData.isWaterless && currentSamplerName == BiomeSamplerName.terrainHeight)
-			{
-				float rMax = (biomeData.waterLevel / range) * previewTextureWidth;
-
-				rMax = Mathf.Clamp(rMax, 0, biomeRepartitionPreview.width);
-
-				for (int x = 0; x < rMax; x++)
-					biomeRepartitionPreview.SetPixel(x, 0, Color.blue);
-			}
-
-			biomeRepartitionPreview.Apply();
-		}
 
 		public void UpdateMinMax(float min, float max)
 		{
@@ -240,15 +104,15 @@ namespace PW.Biomator
 			this.relativeMax = max;
 		}
 
-		public void UpdateSampler(string samplerName, Sampler currentSampler)
+		public void UpdateSampler(string samplerName, Sampler sampler)
 		{
-			this.currentSamplerName = samplerName;
-			this.currentSampler = currentSampler;
+			this.samplerName = samplerName;
+			this.sampler = sampler;
 
 			foreach (var switchData in switchDatas)
 			{
 				switchData.samplerName = samplerName;
-				switchData.UpdateSampler(currentSampler);
+				switchData.UpdateSampler(sampler);
 			}
 
 			//update min and max values in the list:
@@ -265,6 +129,45 @@ namespace PW.Biomator
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			yield return switchDatas;
+		}
+
+		public bool Equals(BiomeSwitchList other)
+		{
+			if (switchDatas.Count != other.switchDatas.Count)
+				return false;
+			
+			for (int i = 0; i < switchDatas.Count; i++)
+				if (switchDatas[i] != other.switchDatas[i])
+					return false;
+				
+			return true;
+		}
+
+		public static bool operator ==(BiomeSwitchList bsl1, BiomeSwitchList bsl2)
+		{
+			return bsl1.Equals(bsl2);
+		}
+
+		public static bool operator !=(BiomeSwitchList bsl1, BiomeSwitchList bsl2)
+		{
+			return !bsl1.Equals(bsl2);
+		}
+
+		public override int GetHashCode()
+		{
+			int hash = 149;
+
+			foreach (var switchData in switchDatas)
+				hash = hash * 31 + switchData.GetHashCode();
+			
+			return hash;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is BiomeSwitchList)
+				return Equals(obj as BiomeSwitchList);
+			return false;
 		}
 
 		public BiomeSwitchData this[int index]

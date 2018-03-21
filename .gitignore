@@ -33,3 +33,11 @@ sysinfo.txt
 TestResults-*
 *.log
 *.xml
+*.data
+*.data.meta
+
+*.app
+*.exe
+*_data/
+
+Assets/Tests_TMP*

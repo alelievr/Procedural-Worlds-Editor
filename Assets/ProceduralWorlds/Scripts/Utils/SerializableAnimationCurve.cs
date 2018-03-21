@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace PW
+namespace ProceduralWorlds
 {
     [System.Serializable]
     public class SerializableAnimationCurve

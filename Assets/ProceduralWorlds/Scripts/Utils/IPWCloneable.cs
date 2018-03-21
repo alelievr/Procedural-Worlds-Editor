@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW.Core
+namespace ProceduralWorlds.Core
 {
 	public interface IPWCloneable< T > {
 	

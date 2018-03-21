@@ -1,0 +1,24 @@
+NewNode NodeBiomeGraphInput "Biome input" (-632, -212)
+NewNode NodeBiomeGraphOutput "Biome output" (443, -229)
+NewNode NodeBiomeSurfaceSwitch "Surface switch" (-333, 127) attr={ biomeSurfaceSwitchKey: "BiomeSurfaceSwitch" }
+NewNode NodeBiomeSurfaceColor "Surface color" (-589, 101)
+NewNode NodeBiomeDataDecomposer "BiomeData decomposer" (-333, -178)
+NewNode NodeBiomeSurface "Biome surface" (-77, 281)
+NewNode NodeCurve "Curve" (-77, -128) attr={ notifyKey: "curveModify" }
+NewNode NodeBiomeBinder "Biome binder" (179, -178)
+NewNode NodeBiomeSurfaceColor "Surface color" (-589, 434)
+NewNode NodeBiomeSurfaceColor "Surface color" (-589, 255)
+NewNode NodeBiomeSurfaceSwitch "Surface switch" (-333, 281) attr={ biomeSurfaceSwitchKey: "BiomeSurfaceSwitch" }
+NewNode NodeBiomeSurfaceSwitch "Surface switch" (-333, 459) attr={ biomeSurfaceSwitchKey: "BiomeSurfaceSwitch" }
+Link "Surface color" "Surface switch"
+Link "Biome binder" "Biome output"
+Link "Biome input" "BiomeData decomposer"
+Link "Surface switch" "Biome surface"
+Link "Curve" "Biome binder"
+Link "BiomeData decomposer" "Biome binder"
+Link "BiomeData decomposer" "Curve"
+Link "Surface color" "Surface switch"
+Link "Surface switch" "Biome surface"
+Link "Surface switch" "Biome surface"
+Link "Surface color" "Surface switch"
+Link "Biome surface" "Biome binder"

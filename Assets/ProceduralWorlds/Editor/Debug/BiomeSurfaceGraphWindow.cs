@@ -2,18 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using PW.Core;
-using PW.Biomator;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
 using UnityEditorInternal;
 using System.Linq;
 
 public class BiomeSurfaceGraphWindow : EditorWindow
 {
 
-	BiomeSurfaceGraph			biomeSurfaceGraph = new BiomeSurfaceGraph();
+	readonly BiomeSurfaceGraph	biomeSurfaceGraph = new BiomeSurfaceGraph();
 
-	List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
+	readonly List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
 	ReorderableList				switchList;
+	
+	[SerializeField]
+	List< BiomeSurfaceGraph.BiomeSurfaceCell > cellMap = new List< BiomeSurfaceGraph.BiomeSurfaceCell >();
+	[SerializeField]
+	List< Rect >				windowMap = new List< Rect >();
 
 	float						searchHeight;
 	float						searchSlope;
@@ -92,16 +97,9 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 			biomeSurfaceGraph.BuildGraph(surfaceSwitches);
 	}
 
-	[SerializeField]
-	List< BiomeSurfaceGraph.BiomeSurfaceCell > cellMap = new List< BiomeSurfaceGraph.BiomeSurfaceCell >();
-	[SerializeField]
-	List< Rect > windowMap = new List< Rect >();
-	
-	bool mouseOverNode = false;
-
 	public void OnGUI()
 	{
-		mouseOverNode = false;
+		bool mouseOverNode = false;
 
 		if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout)
 			if (windowMap.Any(w => w.Contains(Event.current.mousePosition)))
@@ -134,7 +132,6 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 				if (cellMap.Count <= i)
 					cellMap.Add(cell);
 				
-				// windowMap[i] = new Rect(windowMap[i].x, windowMap[i].y, 150, 120);
 				windowMap[i] = GUI.Window(i, windowMap[i], WindowCallback, cell.surface.name);
 				cellMap[i] = cell;
 

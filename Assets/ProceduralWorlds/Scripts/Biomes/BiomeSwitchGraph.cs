@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
-using PW.Core;
-using PW.Biomator;
-using PW.Node;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Biomator;
+using ProceduralWorlds.Node;
 using System;
 using System.Linq;
 using System.Diagnostics;
-using PW.Biomator.SwitchGraph;
+using ProceduralWorlds.Biomator.SwitchGraph;
 
-using Sampler = PW.Core.Sampler;
+using Sampler = ProceduralWorlds.Core.Sampler;
 using Debug = UnityEngine.Debug;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public class BiomeParamRange
 	{
@@ -53,9 +53,9 @@ namespace PW.Biomator
 		{
 			ResetGraph();
 
-			PWNode rootNode = biomeData.biomeSwitchGraphStartPoint;
+			BaseNode rootNode = biomeData.biomeSwitchGraphStartPoint;
 
-			Stack< PWNode > biomeNodes = new Stack< PWNode >();
+			Stack< BaseNode > biomeNodes = new Stack< BaseNode >();
 
 			biomeNodes.Push(rootNode);
 
@@ -66,22 +66,25 @@ namespace PW.Biomator
 
 			while (biomeNodes.Count > 0)
 			{
-				PWNode	currentNode = biomeNodes.Pop();
-				Type	nodeType = currentNode.GetType();
+				BaseNode	currentNode = biomeNodes.Pop();
+				Type		nodeType = currentNode.GetType();
 
-				if (nodeType == typeof(PWNodeBiome))
+				if (nodeType == typeof(NodeBiome))
 				{
 					//get all precedent switch data in the order of the tree (start from rootNode)
 					var precedentSwitchDatas = GetPrecedentSwitchDatas(currentNode, rootNode);
 
-					var biomeNode = currentNode as PWNodeBiome;
+					var biomeNode = currentNode as NodeBiome;
 					var lastSwitch = precedentSwitchDatas.Last();
 					currentCell = new BiomeSwitchCell();
 					
 					//Set cell and partial biome remaining empty params
-					currentCell.name = biomeNode.outputBiome.name = lastSwitch.name;
-					currentCell.id = biomeNode.outputBiome.id = biomeIdCount++;
-					currentCell.color = biomeNode.outputBiome.previewColor = lastSwitch.color;
+					currentCell.name = lastSwitch.name;
+					biomeNode.outputBiome.name  = lastSwitch.name;
+					biomeNode.outputBiome.id = biomeIdCount++;
+					currentCell.id = biomeNode.outputBiome.id;
+					biomeNode.outputBiome.previewColor = lastSwitch.color;
+					currentCell.color = lastSwitch.color;
 					currentCell.weight = currentCell.GetWeight(paramRanges);
 
 					//add the partial biome to utility dictionary accessors:
@@ -100,10 +103,10 @@ namespace PW.Biomator
 						biomeCoverage[index] += (sd.max - sd.min) / (sd.absoluteMax - sd.absoluteMin);
 					}
 				}
-				else if (nodeType == typeof(PWNodeBiomeBlender))
+				else if (nodeType == typeof(NodeBiomeBlender))
 				{
 					if (currentCell == null)
-						throw new Exception("[PWBiomeSwitchGraph] idk what happened but this is really bad");
+						throw new InvalidOperationException("[PWBiomeSwitchGraph] idk what happened but this is really bad");
 					
 					//if the flow reaches the biomeblender everything is OK and add the current cell to the graph
 					cells.Add(currentCell);
@@ -117,7 +120,8 @@ namespace PW.Biomator
 			//Generate links between all linkable nodes
 			BuildLinks();
 			
-			rootCell = cells.First();
+			if (cells.Count != 0)
+				rootCell = cells.First();
 
 			if (!CheckValid())
 				return false;
@@ -125,6 +129,16 @@ namespace PW.Biomator
 			isBuilt = true;
 
 			return true;
+		}
+
+		//Create a switchGraph that always return this biome Id
+		public void BuildTestGraph(short biomeId)
+		{
+			BiomeSwitchCell bsc = new BiomeSwitchCell();
+
+			bsc.id = biomeId;
+			rootCell = bsc;
+			cells.Add(bsc);
 		}
 
 		void ResetGraph()
@@ -156,24 +170,24 @@ namespace PW.Biomator
 			}
 		}
 
-		List< BiomeSwitchData > GetPrecedentSwitchDatas(PWNode currentNode, PWNode rootNode)
+		List< BiomeSwitchData > GetPrecedentSwitchDatas(BaseNode currentNode, BaseNode rootNode)
 		{
 			var precedentSwitchDatas = new List< BiomeSwitchData >();
 
-			PWNode n = currentNode;
+			BaseNode n = currentNode;
 			while (n != rootNode)
 			{
-				PWNode prevNode = n;
+				BaseNode prevNode = n;
 				n = n.GetInputNodes().First();
-				if (n.GetType() != typeof(PWNodeBiomeSwitch))
+				if (n.GetType() != typeof(NodeBiomeSwitch))
 					break ;
 				
-				var switches = (n as PWNodeBiomeSwitch).switchList;
+				var switches = (n as NodeBiomeSwitch).switchList;
 				
 				int index = n.outputAnchors.ToList().FindIndex(a => a.links.Any(l => l.toNode == prevNode));
 
 				if (index == -1)
-					throw new Exception("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
+					throw new InvalidOperationException("[PWBiomeSwitchGraph] IMPOSSIBRU !!!!! check your node API !");
 				
 				precedentSwitchDatas.Add(switches[index]);
 			}
@@ -212,6 +226,9 @@ namespace PW.Biomator
 		{
 			var	checkedCells = new List< BiomeSwitchCell >();
 			var currentCells = new Stack< BiomeSwitchCell >();
+
+			if (rootCell == null)
+				return false;
 
 			currentCells.Push(rootCell);
 
@@ -303,8 +320,6 @@ namespace PW.Biomator
 					}
 					else
 						currentCell = betterCell;
-					
-					continue ;
 				}
 				else
 				{
@@ -321,6 +336,12 @@ namespace PW.Biomator
 		{
 			Sampler	terrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
 			var		biomeSwitchValues = new BiomeSwitchValues();
+
+			if (!isBuilt)
+			{
+				Debug.LogError("Biome switch graph is not built, you can't fill the biome map !");
+				return ;
+			}
 
 			//TODO: 3D Biome fill map
 			
@@ -342,7 +363,8 @@ namespace PW.Biomator
 					//fill biomeSwitchValue and blendParams with the current biomeData sampler values
 					for (int i = 0; i < biomeData.length; i++)
 					{
-						var val = biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
+						biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
+						var val = biomeSwitchValues[i];
 						var r = ranges[i];
 						var spc = blendParams.switchParams[i];
 						spc.min = val - (r * blendPercent);
@@ -355,6 +377,9 @@ namespace PW.Biomator
 					if (biomeSwitchCell == null)
 					{
 						Debug.LogError("Biome can't be found for values: " + biomeSwitchValues);
+
+						foreach (var c in cells)
+							Debug.Log("c: " + c.name + " -> " + c.switchParams);
 						return ;
 					}
 

@@ -1,0 +1,34 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.Node;
+
+namespace ProceduralWorlds.Editor
+{
+	[CustomEditor(typeof(#SCRIPTNAME#))]
+	public class #SCRIPTNAME#Editor : BaseNodeEditor
+	{
+		#SCRIPTNAME#	node;
+
+		string propUpdateKey = "#NAME#";
+
+		public override void OnNodeEnable()
+		{
+			//initialize here all unserializable datas used for GUI (like Texture2D, ...)
+
+			node = target as #SCRIPTNAME#;
+			
+			delayedChanges.BindCallback(propUpdateKey, (unused) => { NotifyReload(); });
+		}
+
+		public override void OnNodeGUI()
+		{
+			//write here the process which take inputs, transform them and set outputs.
+
+			EditorGUILayout.LabelField("Nothing here");
+		}
+		
+	}
+}

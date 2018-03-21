@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Biomator;
+using ProceduralWorlds.Biomator;
 
-namespace PW.Biomator.SwitchGraph
+namespace ProceduralWorlds.Biomator.SwitchGraph
 {
 	public class BiomeSwitchCell
 	{
+		static readonly bool			debug = false;
+
 		public List< BiomeSwitchCell >	links = new List< BiomeSwitchCell >();
 		public float					weight;
 		public string					name;
@@ -23,7 +25,7 @@ namespace PW.Biomator.SwitchGraph
 				var c = cellParams.switchParams[i];
 				var sp = switchParams.switchParams[i];
 				if (c.enabled && sp.enabled
-					&& !PWUtils.Overlap(sp.min, sp.max, c.min, c.max))
+					&& !Utils.Overlap(sp.min, sp.max, c.min, c.max))
 						return false;
 			}
 			return true;
@@ -77,7 +79,8 @@ namespace PW.Biomator.SwitchGraph
 
 				blend += b;
 				
-				// Debug.Log("i: " + i + "blend range: " + min + " to " + max + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
+				if (debug)
+					Debug.Log("i: " + i + "blend range: " + min + " to " + max + ", mag: " + mag + ", val: " + v + ", blend percent range: " + p + ", blend: " + b);
 
 				if (b > 0)
 					blendParamCount++;
@@ -111,7 +114,7 @@ namespace PW.Biomator.SwitchGraph
 				{
 					var s1 = switchParams.switchParams[i];
 					var s2 = c2.switchParams.switchParams[i];
-					gap += PWUtils.GapWidth(s1.min, s1.max, s2.min, s2.max);
+					gap += Utils.GapWidth(s1.min, s1.max, s2.min, s2.max);
 				}
 			
 			return gap;
@@ -119,13 +122,15 @@ namespace PW.Biomator.SwitchGraph
 
 		public override string ToString()
 		{
-			string s = name + " (" + id + ")= ";
+			var sb = new System.Text.StringBuilder();
+
+			sb.Append(name + " (" + id + ")= ");
 
 			for (int i = 0; i < switchParams.switchParams.Length; i++)
 				if (switchParams.switchParams[i].enabled)
-					s += (i + ": " + switchParams.switchParams[i].min + "->" + switchParams.switchParams[i].max);
+					sb.Append(i + ": " + switchParams.switchParams[i].min + "->" + switchParams.switchParams[i].max);
 
-			return s;
+			return sb.ToString();
 		}
 	}
 }

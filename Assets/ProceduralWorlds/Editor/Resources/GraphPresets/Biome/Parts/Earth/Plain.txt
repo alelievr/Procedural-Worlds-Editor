@@ -1,0 +1,24 @@
+NewNode NodeBiomeGraphInput "Biome input" (-597, -233) attr={calls:0}
+NewNode NodeBiomeGraphOutput "Biome output" (443, -229)
+NewNode NodeBiomeSurfaceSwitch "Surface switch" (-333, 127)
+NewNode NodeBiomeSurfaceColor "Surface color" (-589, 100)
+NewNode NodeBiomeDataDecomposer "BiomeData decomposer" (-333, -178)
+NewNode NodeBiomeSurface "Biome surface" (-77, 280)
+NewNode NodeCurve "Curve" (-77, -128)
+NewNode NodeBiomeBinder "Biome binder" (179, -178)
+NewNode NodeBiomeSurfaceColor "Surface color0" (-589, 433)
+NewNode NodeBiomeSurfaceColor "Surface color1" (-589, 254)
+NewNode NodeBiomeSurfaceSwitch "Surface switch0" (-333, 280)
+NewNode NodeBiomeSurfaceSwitch "Surface switch1" (-333, 458)
+LinkAnchor "Biome input":"outputPartialBiome" "BiomeData decomposer":"inputPartialBiome"
+LinkAnchor "Surface color":"surfaceColor" "Surface switch":"inputColor"
+LinkAnchor "Surface color1":"surfaceColor" "Surface switch0":"inputColor"
+LinkAnchor "Surface color0":"surfaceColor" "Surface switch1":"inputColor"
+LinkAnchor "Surface switch":"outputSwitch" "Biome surface":"inputSurfaces"
+LinkAnchor "Surface switch0":"outputSwitch" "Biome surface":"inputSurfaces"
+LinkAnchor "Surface switch1":"outputSwitch" "Biome surface":"inputSurfaces"
+LinkAnchor "BiomeData decomposer":"outputBiomeData" "Biome binder":"inputPartialBiome"
+LinkAnchor "Curve":"outputTerrain" "Biome binder":"terrain"
+LinkAnchor "Biome binder":"outputBiome" "Biome output":"inputBiome"
+LinkAnchor "BiomeData decomposer":"outputTerrain" "Curve":"inputTerrain"
+LinkAnchor "Biome surface":"surfaceGraph" "Biome binder":"biomeSurfaceGraph"

@@ -1,0 +1,2 @@
+NewNode NodePerlinNoise2D "perlin" (-74, 119) attr={persistence:0.68, lacunarity:2.36, octaves:4, additionalSeed:34, persistenceMin:0, persistenceMax:3, scale:1}
+LinkAnchor "perlin":"output" "biomeData":"terrainNoise"

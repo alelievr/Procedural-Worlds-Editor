@@ -1,0 +1,32 @@
+GraphAttr _seed 0
+GraphAttr _chunkSize 64
+GraphAttr _step 1
+GraphAttr _geologicTerrainStep 8
+GraphAttr scaledPreviewEnabled False
+GraphAttr hideChunkLines False
+GraphAttr _scaledPreviewRatio 8
+GraphAttr _scaledPreviewChunkSize 128
+NewNode NodeWorldGraphInput "World Graph Input" (-104, -6)
+NewNode NodeWorldGraphOutput "Output" (1978, 463)
+NewNode NodePerlinNoise2D "perlin" (-78, 112) attr={persistence:0.68, lacunarity:2.36, octaves:4, additionalSeed:34, persistenceMin:0, persistenceMax:3, scale:1}
+NewNode NodeWaterLevel "biomeData" (177, 217) attr={waterLevel:60.7, mapMin:0, mapMax:100}
+NewNode NodeBiomeTemperature "Temperature node" (445, 308) attr={minTemperature:0, maxTemperature:30, terrainHeightMultiplier:0.29, waterMultiplier:-0.18, averageTemperature:17.1, minTemperatureMapInput:0, maxTemperatureMapInput:0}
+NewNode NodeBiomeSwitch "Biome switch" (710, 244) attr={samplerName:"Water height", selectedBiomeSamplerName:1, errorString:"", relativeMin:-39.3, relativeMax:60.7}
+NewNode NodeBiomeSwitch "Biome switch0" (957, 115) attr={samplerName:"Temperature", selectedBiomeSamplerName:2, errorString:"", relativeMin:0, relativeMax:30}
+NewNode NodeBiome "Biome" (1170, 274)
+NewNode NodeBiomeMerger "NodeBiomeMerger" (1698, 333)
+NewNode NodeBiome "Biome0" (1066, 438)
+NewNode NodeBiome "Biome1" (1195, 112)
+NewNode NodeBiomeBlender "Biome blender" (1465, 283) attr={biomeBlendPercent:0.14}
+LinkAnchor "perlin":"output" "biomeData":"terrainNoise"
+LinkAnchor "Biome switch0":"outputBiomes" "Biome":"inputBiomeData"
+LinkAnchor "Biome":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Biome switch0":"outputBiomes" "Biome1":"inputBiomeData"
+LinkAnchor "Biome1":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Biome blender":"outputBlendedBiomeTerrain" "NodeBiomeMerger":"inputBlendedTerrain"
+LinkAnchor "Biome0":"outputBiome" "Biome blender":"inputBiomes"
+LinkAnchor "Temperature node":"outputBiome" "Biome switch":"inputBiome"
+LinkAnchor "biomeData":"outputBiome" "Temperature node":"inputBiomeData"
+LinkAnchor "Biome switch":"outputBiomes" "Biome switch0":"inputBiome"
+LinkAnchor "Biome switch":"outputBiomes" "Biome0":"inputBiomeData"
+LinkAnchor "NodeBiomeMerger":"mergedBiomeTerrain" "Output":"finalTerrain"

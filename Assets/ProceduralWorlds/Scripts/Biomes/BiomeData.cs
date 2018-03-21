@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using PW.Core;
+using ProceduralWorlds.Core;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public static class BiomeSamplerName
 	{
@@ -55,11 +55,11 @@ namespace PW.Biomator
 
 		//data for the switch graph (to choose biomes using biomeSamplers)
 		public BiomeSwitchGraph		biomeSwitchGraph;
-		public PWNode				biomeSwitchGraphStartPoint;
+		public BaseNode				biomeSwitchGraphStartPoint;
 
 		//biome maps
 		public BiomeMap2D			biomeMap;
-		// public BiomeMap3D			biomeMap3D;
+		public BiomeMap3D			biomeMap3D;
 
 		public ComplexEdaphicData	soil;
 
@@ -100,7 +100,7 @@ namespace PW.Biomator
 			}
 
 			biomeSamplerNameMap[key].dataRef = value;
-			biomeSamplerNameMap[key].is3D = (value as Sampler3D != null);
+			biomeSamplerNameMap[key].is3D = value is Sampler3D;
 		}
 		
 		public BiomeDataSampler GetDataSampler(int index)

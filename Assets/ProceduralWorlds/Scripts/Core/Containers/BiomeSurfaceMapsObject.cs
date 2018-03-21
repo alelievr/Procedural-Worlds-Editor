@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public class BiomeSurfaceMapsObject : ScriptableObject
 	{

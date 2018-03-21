@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 
-namespace PW.Biomator
+namespace ProceduralWorlds.Biomator
 {
 	public class BiomeSurfaceGraph
 	{
@@ -191,8 +191,6 @@ namespace PW.Biomator
 					}
 					else
 						currentCell = betterCell;
-					
-					continue ;
 				}
 				else
 				{

@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
-namespace PW.Core
+namespace ProceduralWorlds.Core
 {
 	[System.Serializable]
 	public class PWArray< T > : IEnumerable< T >, IPWArray
@@ -13,8 +13,8 @@ namespace PW.Core
 		[SerializeField]
 		public int		valuesCount { get { return values.Count; } }
 	
-		List< T >		values;
-		List< string >	names;
+		readonly List< T >		values;
+		readonly List< string >	names;
 
 		public PWArray()
 		{
