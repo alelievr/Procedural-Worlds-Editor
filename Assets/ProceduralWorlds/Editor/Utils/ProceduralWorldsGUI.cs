@@ -48,7 +48,7 @@ namespace ProceduralWorlds.Editor
 		static Texture2D	icColor;
 		static Texture2D	icEdit;
 		static Texture2D	icSettingsOutline;
-		Dictionary< PWGUIFieldType, int > currentSettingIndices = new Dictionary< PWGUIFieldType, int >();
+		readonly Dictionary< PWGUIFieldType, int > currentSettingIndices = new Dictionary< PWGUIFieldType, int >();
 
 		List< PWGUISettings > settingsStorage = new List< PWGUISettings >();
 
@@ -563,7 +563,6 @@ namespace ProceduralWorlds.Editor
 
 			Vector2 pixelPos = e.mousePosition - textureRect.position;
 
-			// Debug.Log("pixel: " + pixelPos + "texwidth: " + tex.width + ", " + textureRect.width+ ", r:" + tex.width / textureRect.width);
 			if (textureRect.width > 0)
 				pixelPos *= tex.width / textureRect.width;
 
@@ -769,6 +768,7 @@ namespace ProceduralWorlds.Editor
 			
 			if (biomeData.biomeMap == null)
 			{
+				
 				Debug.Log("biomeData does not contains biome map 2D");
 				return ;
 			}
@@ -1025,7 +1025,7 @@ namespace ProceduralWorlds.Editor
 	
 		public bool BeginFade(string header, GUIStyle style, ref bool checkbox)
 		{
-			return BeginFade(new GUIContent(header), style, ref checkbox, true);
+			return BeginFade(new GUIContent(header), style, ref checkbox);
 		}
 
 		public bool BeginFade(GUIContent header, GUIStyle style, ref bool checkbox, bool checkboxEnabled = true)

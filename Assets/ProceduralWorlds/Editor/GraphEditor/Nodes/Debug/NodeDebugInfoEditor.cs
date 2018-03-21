@@ -17,7 +17,7 @@ namespace ProceduralWorlds.Editor
 		[System.NonSerialized]
 		bool						firstRender = false;
 
-		BiomeDataDrawer				biomeDataDrawer = new BiomeDataDrawer();
+		readonly BiomeDataDrawer	biomeDataDrawer = new BiomeDataDrawer();
 
 		public override void OnNodeEnable()
 		{

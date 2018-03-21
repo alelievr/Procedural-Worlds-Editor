@@ -14,7 +14,7 @@ namespace ProceduralWorlds.Node
 		[Output]
 		public float	fOutput;
 	
-		bool			intify = false;
+		public bool	roundToInt = false;
 	
 		public override void OnNodeCreation()
 		{
@@ -28,7 +28,7 @@ namespace ProceduralWorlds.Node
 			foreach (var val in values)
 				fOutput += val;
 			
-			if (intify)
+			if (roundToInt)
 				fOutput = Mathf.RoundToInt(fOutput);
 		}
 	}

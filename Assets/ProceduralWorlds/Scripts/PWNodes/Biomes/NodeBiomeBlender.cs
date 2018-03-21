@@ -10,7 +10,6 @@ namespace ProceduralWorlds.Node
 {
 	public class NodeBiomeBlender : BaseNode
 	{
-
 		[Input]
 		public PWArray< PartialBiome >	inputBiomes = new PWArray< PartialBiome >();
 

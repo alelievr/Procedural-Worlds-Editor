@@ -59,8 +59,6 @@ namespace ProceduralWorlds.Tests.Graphs
 			wps.OnBuildPressed();
 
 			graph.Process();
-
-			Directory.Delete(tmpFolderPath, true);
 		}
 		
 		//TODO: reactivate this test when the biome graph text files will be up to date

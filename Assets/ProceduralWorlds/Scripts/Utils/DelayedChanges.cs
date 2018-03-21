@@ -28,8 +28,17 @@ namespace ProceduralWorlds.Core
 				values[key] = new ChangeData();
 			var v = values[key];
 			v.value = value;
-			v.lastUpdate = Time.time;
+			v.lastUpdate = GetTime();
 			v.called = false;
+		}
+
+		double GetTime()
+		{
+			#if UNITY_EDITOR
+				return UnityEditor.EditorApplication.timeSinceStartup;
+			#else
+				return Time.timeSinceStartup;
+			#endif
 		}
 	
 		public void	BindCallback(string key, Action< object > callback)
@@ -45,7 +54,7 @@ namespace ProceduralWorlds.Core
 			foreach (var valKP in values)
 			{
 				var cd = valKP.Value;
-				if (cd.callback != null && !cd.called && Time.time - cd.lastUpdate > delayedTime / 1000)
+				if (cd.callback != null && !cd.called && GetTime() - cd.lastUpdate > delayedTime / 1000)
 				{
 					cd.called = true;
 					cd.callback(cd.value);

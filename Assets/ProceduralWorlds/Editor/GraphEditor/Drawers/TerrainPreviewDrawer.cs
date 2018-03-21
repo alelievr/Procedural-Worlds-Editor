@@ -97,8 +97,6 @@ namespace ProceduralWorlds.Editor
 				case TerrainPreviewType.TopDownPlanarView:
 					TopDownCameraControls(previewRect, previewCamera);
 					break ;
-				default:
-					break ;
 			}
 			
 			//move the terrain materializer so it generate terrain around the camera
@@ -167,6 +165,8 @@ namespace ProceduralWorlds.Editor
 						break ;
 					case TerrainPreviewType.SideView:
 						previewCamera.transform.position = new Vector3(0, 0, pos.z);
+						break ;
+					default:
 						break ;
 				}
 			}

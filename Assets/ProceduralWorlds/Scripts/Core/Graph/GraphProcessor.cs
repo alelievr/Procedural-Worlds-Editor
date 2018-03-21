@@ -19,12 +19,12 @@ namespace ProceduralWorlds.Core
 		public delegate object	AtGenericDelegate(IPWArray array, int index);
 		public delegate bool	AssignAtGenericDelegate(IPWArray array, int index, object val, string name, bool force);
 
-		NodeFieldDictionary			bakedNodeFields = new NodeFieldDictionary();
-		Dictionary< int, BaseNode >	nodesDictionary;
+		readonly NodeFieldDictionary	bakedNodeFields = new NodeFieldDictionary();
+		Dictionary< int, BaseNode >		nodesDictionary;
 
-		BaseGraph					currentGraph;
+		BaseGraph						currentGraph;
 
-		public bool					hasProcessed;
+		public bool						hasProcessed;
 
 		#region Initialization
 

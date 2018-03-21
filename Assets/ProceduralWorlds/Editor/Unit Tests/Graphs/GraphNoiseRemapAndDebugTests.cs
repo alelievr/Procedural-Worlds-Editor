@@ -8,7 +8,7 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphNoiseRemapAndDebugTests
+	public static class BaseGraphNoiseRemapAndDebugTests
 	{
 	
 		[Test]

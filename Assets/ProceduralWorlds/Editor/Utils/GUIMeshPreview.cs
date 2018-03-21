@@ -10,7 +10,7 @@ namespace ProceduralWorlds.Editor
 	{
 	
 		public PreviewRenderUtility	previewUtility;
-		Camera						cam;
+		readonly Camera				cam;
 
 		Rect						previewRect = new Rect(0, 0, 170, 170);
 

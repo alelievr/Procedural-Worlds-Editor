@@ -11,8 +11,8 @@ namespace ProceduralWorlds.Core
 {
 	public static class ReflectionUtils
 	{
-		public delegate object ChildFieldGetter< T >(T node);
-		public delegate object ChildFieldSetter< T, U >(T node, U value);
+		public delegate object ChildFieldGetter< in T >(T node);
+		public delegate object ChildFieldSetter< in T, U >(T node, U value);
 
 		static readonly bool	fastReflection = false;
 

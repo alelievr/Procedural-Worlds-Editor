@@ -12,7 +12,7 @@ namespace ProceduralWorlds
 {
 	public partial class BaseNode
 	{
-		List< ReflectionUtils.GenericField > clonableFields = new List< ReflectionUtils.GenericField >();
+		readonly List< ReflectionUtils.GenericField > clonableFields = new List< ReflectionUtils.GenericField >();
 		
 		void LoadClonableFields()
 		{

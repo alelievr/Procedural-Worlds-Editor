@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphInputAndOutputTests
+	public static class BaseGraphInputAndOutputTests
 	{
 	
 		[Test]

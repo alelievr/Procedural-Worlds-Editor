@@ -681,8 +681,8 @@ namespace ProceduralWorlds.Core
 			{
 				var node = nodeStack.Pop();
 
-				foreach (var outputNode in node.GetOutputNodes())
-					nodeStack.Push(outputNode);
+				foreach (var outNode in node.GetOutputNodes())
+					nodeStack.Push(outNode);
 				
 				if (node != begin)
 				{

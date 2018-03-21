@@ -90,6 +90,8 @@ namespace ProceduralWorlds.Node
 					d1.name = "Dry";
 					d2.name = "Wet";
 					break ;
+				default:
+					break ;
 			}
 
 			SetMultiAnchor("outputBiomes", switchList.Count, null);
@@ -148,7 +150,6 @@ namespace ProceduralWorlds.Node
 				
 				relativeMin = currentSampler.min;
 				relativeMax = currentSampler.max;
-				return ;
 			}
 		}
 

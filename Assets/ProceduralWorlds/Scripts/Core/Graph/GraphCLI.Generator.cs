@@ -150,7 +150,7 @@ namespace ProceduralWorlds.Core
 			if (!allowedGraphAttributeTypes.Contains(value.GetType()))
 				return null;
 			
-			return "GraphAttr " + fieldName + " " + value.ToString();
+			return "GraphAttr " + fieldName + " " + value;
 		}
 
 	}

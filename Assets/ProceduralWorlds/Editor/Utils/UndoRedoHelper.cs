@@ -8,7 +8,7 @@ namespace ProceduralWorlds.Editor
 {
 	public class UndoRedoHelper
 	{
-		Object target;
+		readonly Object target;
 
 		public List< ReflectionUtils.GenericField > undoableFields = new List< ReflectionUtils.GenericField >();
 

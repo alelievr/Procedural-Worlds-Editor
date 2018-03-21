@@ -105,7 +105,6 @@ namespace ProceduralWorlds.Node
 			if (localTemperatureMap == null || localTemperatureMap.NeedResize(chunkSize, step))
 			{
 				localTemperatureMap = temperatureMap.Clone(localTemperatureMap);
-				return ;
 			}
 		}
 

@@ -177,6 +177,7 @@ namespace ProceduralWorlds.Editor
 			
 			switch (e.commandName)
 			{
+				//TODO: Cut, Copy, Paste, Find
 				case "Duplicate":
 					foreach (var node in selectedNodes)
 						node.Duplicate();
@@ -194,12 +195,6 @@ namespace ProceduralWorlds.Editor
 	
 					e.Use();
 					break ;
-				case "Cut":
-					break ;
-				case "Copy":
-					break ;
-				case "Paste":
-					break ;
 				case "FrameSelected":
 					var selectedNode = graph.allNodes.FirstOrDefault(n => n.isSelected);
 	
@@ -208,13 +203,9 @@ namespace ProceduralWorlds.Editor
 						
 					e.Use();
 					break ;
-				case "Find":
-					break ;
 				case "SelectAll":
 					foreach (var node in graph.allNodes)
 						node.isSelected = true;
-					break ;
-				default:
 					break ;
 			}
 		}

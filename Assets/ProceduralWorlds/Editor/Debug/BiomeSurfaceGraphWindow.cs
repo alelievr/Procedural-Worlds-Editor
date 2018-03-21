@@ -10,17 +10,15 @@ using System.Linq;
 public class BiomeSurfaceGraphWindow : EditorWindow
 {
 
-	BiomeSurfaceGraph			biomeSurfaceGraph = new BiomeSurfaceGraph();
+	readonly BiomeSurfaceGraph	biomeSurfaceGraph = new BiomeSurfaceGraph();
 
-	List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
+	readonly List< BiomeSurfaceSwitch >	surfaceSwitches = new List< BiomeSurfaceSwitch >();
 	ReorderableList				switchList;
 	
 	[SerializeField]
 	List< BiomeSurfaceGraph.BiomeSurfaceCell > cellMap = new List< BiomeSurfaceGraph.BiomeSurfaceCell >();
 	[SerializeField]
 	List< Rect >				windowMap = new List< Rect >();
-	
-	bool						mouseOverNode;
 
 	float						searchHeight;
 	float						searchSlope;
@@ -101,7 +99,7 @@ public class BiomeSurfaceGraphWindow : EditorWindow
 
 	public void OnGUI()
 	{
-		mouseOverNode = false;
+		bool mouseOverNode = false;
 
 		if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout)
 			if (windowMap.Any(w => w.Contains(Event.current.mousePosition)))

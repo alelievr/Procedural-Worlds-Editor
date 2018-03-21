@@ -19,6 +19,8 @@ namespace ProceduralWorlds.Editor
 		{
 			EditorGUIUtility.labelWidth = 100;
 
+			node.roundToInt = EditorGUILayout.Toggle("Round to int", node.roundToInt);
+
 			EditorGUILayout.LabelField("result: " + node.fOutput);
 		}
 	}

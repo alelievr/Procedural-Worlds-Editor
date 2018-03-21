@@ -44,7 +44,7 @@ namespace ProceduralWorlds.Core
 			if (verbose)
 			{
 				Debug.Log("fromType: " + fromType + ", toType: " + toType);
-				Debug.Log(fromType.ToString() + " can be placed into " + toType.ToString() + ": " + AreAssignable(fromType, toType));
+				Debug.Log(fromType + " can be placed into " + toType + ": " + AreAssignable(fromType, toType));
 			}
 			return AreAssignable(fromType, toType);
 		}

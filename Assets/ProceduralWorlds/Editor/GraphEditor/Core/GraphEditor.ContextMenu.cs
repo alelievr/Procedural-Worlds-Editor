@@ -109,9 +109,9 @@ namespace ProceduralWorlds.Editor
 
 		public void OpenNodeEditorScript(BaseNode node)
 		{
-			var e = UnityEditor.Editor.CreateEditor(node);
+			var editor = UnityEditor.Editor.CreateEditor(node);
 			
-			var monoScript = MonoScript.FromScriptableObject(e);
+			var monoScript = MonoScript.FromScriptableObject(editor);
 
 			if (monoScript == null)
 			{
@@ -123,7 +123,7 @@ namespace ProceduralWorlds.Editor
 			if (File.Exists(filePath))
 				UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(filePath, 21);
 
-			DestroyImmediate(e);
+			DestroyImmediate(editor);
 		}
 	}
 }

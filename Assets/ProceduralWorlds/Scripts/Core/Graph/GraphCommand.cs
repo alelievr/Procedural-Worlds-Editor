@@ -18,23 +18,23 @@ namespace ProceduralWorlds.Core
 	public class BaseGraphCommand : IEquatable< BaseGraphCommand >
 	{
 	
-		public BaseGraphCommandType	type;
-		public Vector2				position;
-		public bool					forcePositon;
-		public string				name;
-		public Type					nodeType;
-		public string				fromNodeName;
-		public string				toNodeName;
-		
-		public string				attributes;
+		public readonly BaseGraphCommandType	type;
+		public readonly Vector2				position;
+		public readonly bool					forcePositon;
+		public readonly string				name;
+		public readonly Type					nodeType;
+		public readonly string				fromNodeName;
+		public readonly string				toNodeName;
 
-		public int					fromAnchorIndex;
-		public int					toAnchorIndex;
-		public string				fromAnchorFieldName;
-		public string				toAnchorFieldName;
+		public readonly string				attributes;
 
-		public string				graphFieldName;
-		public object				graphFieldValue;
+		public readonly int					fromAnchorIndex;
+		public readonly int					toAnchorIndex;
+		public readonly string				fromAnchorFieldName;
+		public readonly string				toAnchorFieldName;
+
+		public readonly string				graphFieldName;
+		public readonly object				graphFieldValue;
 
 		//New node constructor
 		public BaseGraphCommand(Type nodeType, string name, string attributes = null)

@@ -10,7 +10,7 @@ using System;
 
 namespace ProceduralWorlds.Tests.CLI
 {
-	public class RegexParserTests
+	public static class RegexParserTests
 	{
 	
 		#region NewNode command tests
@@ -117,7 +117,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithDataCommand()
 		{
-			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new BaseGraphCLIAttributes() {{"persistence", 2.4f}, {"octaves", 3}});
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new BaseGraphCLIAttributes {{"persistence", 2.4f}, {"octaves", 3}});
 			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
 			var parsedAttrs = Jsonizer.Parse(cmd.attributes);
@@ -133,7 +133,7 @@ namespace ProceduralWorlds.Tests.CLI
 		[Test]
 		public static void WellFormatedNewNodeWithPositionAndDataCommand()
 		{
-			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new BaseGraphCLIAttributes() {{"persistence", 1.4f}, {"octaves", 2}});
+			string s = BaseGraphCLI.GenerateNewNodeCommand(typeof(NodePerlinNoise2D), "perlin noise", new Vector2(21, 84), new BaseGraphCLIAttributes {{"persistence", 1.4f}, {"octaves", 2}});
 			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 
 			var parsedAttrs = Jsonizer.Parse(cmd.attributes);
@@ -247,8 +247,6 @@ namespace ProceduralWorlds.Tests.CLI
 		public static void WellFormatedGraphAttributeCommand()
 		{
 			string s = BaseGraphCLI.GenerateGraphAttributeCommand("field", 12.5f);
-
-			Debug.Log("cmd: " + s);
 
 			BaseGraphCommand cmd = BaseGraphCLI.Parse(s);
 

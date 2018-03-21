@@ -9,7 +9,7 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Tests.CLI
 {
-	public class BasicLexerParserTest
+	public static class BasicLexerParserTest
 	{
 	
 		[Test]

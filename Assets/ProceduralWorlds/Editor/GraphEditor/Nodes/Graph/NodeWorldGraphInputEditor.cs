@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 	{
 		NodeWorldGraphInput	node;
 	
-		string propUpdateKey = "NodeWorldGraphInput";
+		readonly string propUpdateKey = "NodeWorldGraphInput";
 
 		public override void OnNodeEnable()
 		{

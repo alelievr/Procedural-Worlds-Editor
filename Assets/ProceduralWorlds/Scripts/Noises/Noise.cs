@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Noises
 		public int				seed;
 		public Vector3			position;
 	
-		public Noise()
+		protected Noise()
 		{
 			hasComputeShaders = SystemInfo.graphicsShaderLevel >= 45;
 		}

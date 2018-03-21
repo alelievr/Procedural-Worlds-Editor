@@ -8,7 +8,7 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphParameterToNodesTests
+	public static class BaseGraphParameterToNodesTests
 	{
 
 		static WorldGraph CreateTestGraph(out NodePerlinNoise2D perlinNode, out NodeDebugInfo debugNode)

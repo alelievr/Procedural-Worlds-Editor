@@ -26,6 +26,7 @@ namespace ProceduralWorlds.Editor
 			internHandlerPosition = (int)layoutSetting.separatorPosition;
 			if (vertical)
 			{
+				//TODO
 			}
 			else
 			{

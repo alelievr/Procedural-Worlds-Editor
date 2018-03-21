@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace ProceduralWorlds.Tests.CLI
 {
-	public class ExecuterTests
+	public static class ExecuterTests
 	{
 	
 		[Test]
@@ -40,7 +40,7 @@ namespace ProceduralWorlds.Tests.CLI
 		public static void PerlinNoiseWithAttributesToDebugNodeExecution()
 		{
 			string	perlinNodeName = "perlin";
-			var perlinAttributes = new BaseGraphCLIAttributes() {
+			var perlinAttributes = new BaseGraphCLIAttributes {
 				{"persistence", 2.4f}, {"octaves", 6}
 			};
 

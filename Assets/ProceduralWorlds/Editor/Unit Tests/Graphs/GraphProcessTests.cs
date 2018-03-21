@@ -10,7 +10,7 @@ using ProceduralWorlds.Biomator;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class GraphProcessTests
+	public static class GraphProcessTests
 	{
 		
 		//test main graph

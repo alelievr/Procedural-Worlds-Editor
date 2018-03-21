@@ -69,6 +69,8 @@ namespace ProceduralWorlds.Core
 
 		public Visibility					defaultVisibility = Visibility.Visible;
 		
+		readonly List< string >	deserializedAnchors = new List< string >();
+		
 		//called only when the anchorField is created
 		public void Initialize(BaseNode node)
 		{
@@ -112,8 +114,6 @@ namespace ProceduralWorlds.Core
 		{
 			return anchors.FirstOrDefault(a => a.GUID == anchorGUID);
 		}
-
-		List< string >	deserializedAnchors = new List< string >();
 
 		public void		OnAfterDeserialize(BaseNode node)
 		{

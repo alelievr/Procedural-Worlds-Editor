@@ -9,7 +9,7 @@ using ProceduralWorlds.Editor;
 
 namespace ProceduralWorlds.Tests.Nodes
 {
-	public class BaseGraphNodesTests
+	public static class BaseGraphNodesTests
 	{
 	
 		[Test]

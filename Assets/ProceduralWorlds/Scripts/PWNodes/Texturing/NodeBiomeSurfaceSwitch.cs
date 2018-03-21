@@ -56,6 +56,8 @@ namespace ProceduralWorlds.Node
 					SetAnchorVisibility("inputColor", Visibility.Gone);
 					SetAnchorVisibility("inputMaterial", Visibility.Visible);
 					break ;
+				default:
+					break ;
 			}
 		}
 	}

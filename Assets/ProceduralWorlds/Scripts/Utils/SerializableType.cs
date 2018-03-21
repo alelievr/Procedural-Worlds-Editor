@@ -10,11 +10,12 @@ namespace ProceduralWorlds
 	{
 	
 		[SerializeField]
-		public string	typeString;
+		public readonly string	typeString;
 	
-		public SerializableType(Type t)
+		public SerializableType(Type type)
 		{
-			SetType(t);
+			if (type != null)
+				typeString = type.FullName + ", " + type.Assembly.GetName().Name;
 		}
 		
 		public new Type GetType()
@@ -23,12 +24,6 @@ namespace ProceduralWorlds
 				return null;
 			
 			return Type.GetType(typeString);
-		}
-	
-		public void SetType(Type type)
-		{
-			if (type != null)
-				typeString = type.FullName + ", " + type.Assembly.GetName().Name;
 		}
 	
 		public static implicit operator Type(SerializableType st)

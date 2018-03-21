@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class BaseGraphImportExportTests
+	public static class BaseGraphImportExportTests
 	{
 
 		//TestUtils.GenerateTestWorldGraph():
@@ -149,7 +149,7 @@ namespace ProceduralWorlds.Tests.Graphs
 						for (int l = 0; l < exLinks.Count; l++)
 						{
 							Assert.That(exLinks[l].fromNode.GetType() == newLinks[l].fromNode.GetType());
-							Assert.That(newLinks[l].toNode.GetType() == newLinks[l].toNode.GetType());
+							Assert.That(exLinks[l].toNode.GetType() == newLinks[l].toNode.GetType());
 						}
 					}
 				}

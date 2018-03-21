@@ -8,9 +8,6 @@ namespace ProceduralWorlds.Editor
 {
 	public static class GUIScaleUtility
 	{
-		// cache the reflected methods
-		private static FieldInfo currentGUILayoutCache;
-
 		// Delegates to the reflected methods
 		private static Func<Rect> GetTopRectDelegate;
 		private static Func<Rect> topmostRectDelegate;
@@ -33,15 +30,21 @@ namespace ProceduralWorlds.Editor
 			// Fetch rect acessors using Reflection
 			Assembly UnityEngine = Assembly.GetAssembly (typeof (UnityEngine.GUI));
 			Type GUIClipType = UnityEngine.GetType ("UnityEngine.GUIClip", true);
+		
+			if (GUIClipType == null)
+			{
+				Debug.LogWarning("GUIClipType is Null");
+				return ;
+			}
 
 			PropertyInfo topmostRect = GUIClipType.GetProperty ("topmostRect", BindingFlags.Static | BindingFlags.Public);
 			MethodInfo GetTopRect = GUIClipType.GetMethod ("GetTopRect", BindingFlags.Static | BindingFlags.NonPublic);
-			MethodInfo ClipRect = GUIClipType.GetMethod ("Clip", BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, new Type[] { typeof(Rect) }, new ParameterModifier[] {});
+			MethodInfo ClipRect = GUIClipType.GetMethod ("Clip", BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, new Type[] { typeof(Rect) }, new ParameterModifier[]{});
 
 			if (topmostRect == null || GetTopRect == null || ClipRect == null) 
 			{
 				Debug.LogWarning ("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!");
-				Debug.LogWarning ((GUIClipType == null? "GUIClipType is Null, " : "") + (topmostRect == null? "topmostRect is Null, " : "") + (GetTopRect == null? "GetTopRect is Null, " : "") + (ClipRect == null? "ClipRect is Null, " : ""));
+				Debug.LogWarning ((topmostRect == null? "topmostRect is Null, " : "") + (GetTopRect == null? "GetTopRect is Null, " : "") + (ClipRect == null? "ClipRect is Null, " : ""));
 				return;
 			}
 
@@ -52,7 +55,7 @@ namespace ProceduralWorlds.Editor
 			if (GetTopRectDelegate == null || topmostRectDelegate == null)
 			{
 				Debug.LogWarning ("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!");
-				Debug.LogWarning ((GUIClipType == null? "GUIClipType is Null, " : "") + (topmostRect == null? "topmostRect is Null, " : "") + (GetTopRect == null? "GetTopRect is Null, " : "") + (ClipRect == null? "ClipRect is Null, " : ""));
+				Debug.LogWarning ((topmostRect == null? "topmostRect is Null, " : "") + (GetTopRect == null? "GetTopRect is Null, " : "") + (ClipRect == null? "ClipRect is Null, " : ""));
 				return;
 			}
 

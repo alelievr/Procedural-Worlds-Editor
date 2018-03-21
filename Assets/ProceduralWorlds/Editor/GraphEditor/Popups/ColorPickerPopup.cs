@@ -9,15 +9,15 @@ namespace ProceduralWorlds.Editor
 {
 	public class ColorPickerPopup : Popup
 	{
-		Texture2D		colorPickerTexture;
-		Texture2D		colorPickerThumb;
+		readonly Vector2	colorPickerPadding = new Vector2(10, 10);
 
-		Vector2			colorPickerPadding = new Vector2(10, 10);
+		Texture2D			colorPickerTexture;
+		Texture2D			colorPickerThumb;
 
-		bool			colorPicking;
+		bool				colorPicking;
 
-		Color	currentColor;
-		Vector2	thumbPosition;
+		Color				currentColor;
+		Vector2				thumbPosition;
 
 		public static void OpenPopup(Color color, PWGUISettings guiSettings)
 		{

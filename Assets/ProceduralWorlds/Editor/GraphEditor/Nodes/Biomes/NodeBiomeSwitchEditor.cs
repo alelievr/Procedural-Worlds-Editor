@@ -9,11 +9,11 @@ namespace ProceduralWorlds.Editor
 	[CustomEditor(typeof(NodeBiomeSwitch))]
 	public class NodeBiomeSwitchEditor : BaseNodeEditor
 	{
-		public NodeBiomeSwitch	node;
+		public NodeBiomeSwitch			node;
 
-		BiomeSwitchListDrawer		switchListDrawer = new BiomeSwitchListDrawer();
+		readonly BiomeSwitchListDrawer	switchListDrawer = new BiomeSwitchListDrawer();
 
-		const string				delayedUpdateKey = "BiomeSwitchListUpdate";
+		const string					delayedUpdateKey = "BiomeSwitchListUpdate";
 
 		public override void OnNodeEnable()
 		{

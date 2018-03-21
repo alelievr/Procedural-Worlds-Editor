@@ -18,7 +18,7 @@ namespace ProceduralWorlds.Core
 	*/
 	public abstract class Sampler : IPWCloneable< Sampler >
 	{
-		public const int	maxStep = 1024;
+		public static readonly int	maxStep = 1024;
 
 		public int			size;
 		public float		step;

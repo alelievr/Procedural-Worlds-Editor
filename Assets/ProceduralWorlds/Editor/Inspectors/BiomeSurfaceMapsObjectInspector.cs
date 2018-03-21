@@ -72,7 +72,7 @@ namespace ProceduralWorlds.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		List< string > albedoLikeNames = new List< string >()
+		readonly List< string > albedoLikeNames = new List< string >()
 		{
 			"albedo", "diffuse", "_BC", "_D", "_CO"
 		};

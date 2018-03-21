@@ -10,7 +10,7 @@ using ProceduralWorlds.Node;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
-	public class GraphBuilderTests
+	public static class GraphBuilderTests
 	{
 	
 		[Test]

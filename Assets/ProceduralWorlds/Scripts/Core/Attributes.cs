@@ -23,7 +23,10 @@ namespace ProceduralWorlds.Core
 	{
 		public string	name = null;
 
-		public OutputAttribute() {}
+		public OutputAttribute()
+		{
+			name = "";
+		}
 		
 		public OutputAttribute(string fieldName)
 		{

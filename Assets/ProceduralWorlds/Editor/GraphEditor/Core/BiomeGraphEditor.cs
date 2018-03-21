@@ -35,8 +35,6 @@ namespace ProceduralWorlds.Editor
 			
 			expectedGraphType = typeof(BiomeGraph);
 
-			OnGraphChanged += GraphLoadedCallback;
-
 			OnResetLayout += ResetLayoutCallback;
 	
 			biomeGraphList = new ReorderableList(biomeGraphs, typeof(BiomeGraph), false, true, false, false);
@@ -91,12 +89,6 @@ namespace ProceduralWorlds.Editor
 			};
 		}
 	
-		void GraphLoadedCallback(BaseGraph graph)
-		{
-			if (graph == null)
-				return ;
-		}
-		
 		void ResetLayoutCallback()
 		{
 			LoadGUI();
@@ -151,8 +143,6 @@ namespace ProceduralWorlds.Editor
 		public override void OnDisable()
 		{
 			base.OnDisable();
-			
-			OnGraphChanged -= GraphLoadedCallback;
 			
 			OnResetLayout -= ResetLayoutCallback;
 		}

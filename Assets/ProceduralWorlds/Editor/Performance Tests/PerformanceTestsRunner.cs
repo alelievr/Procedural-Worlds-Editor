@@ -17,16 +17,26 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Debug = UnityEngine.Debug;
 
+namespace ProceduralWorlds.Editor
+{
+	public static class PerformanceTestsRunner
+	{
+
 		[Serializable]
-		public struct NodeProcessTime
+		public struct NodeProcessTime : IEquatable<NodeProcessTime>
 		{
-			public string	name;
-			public float	time;
+			public string name;
+			public float time;
 
 			public NodeProcessTime(string nodeName, float time)
 			{
 				this.name = nodeName;
 				this.time = time;
+			}
+
+			public bool Equals(NodeProcessTime other)
+			{
+				return time == other.time && name == other.name;
 			}
 		}
 
@@ -65,7 +75,7 @@ using Debug = UnityEngine.Debug;
 		}
 
 		[Serializable]
-		public struct PerformanceResultMulti
+		public struct PerformanceResultMulti : IEquatable< PerformanceResultMulti >
 		{
 			public PerformanceResult[] results;
 
@@ -73,12 +83,12 @@ using Debug = UnityEngine.Debug;
 			{
 				results = new PerformanceResult[count];
 			}
-		}
 
-namespace ProceduralWorlds.Editor
-{
-	public static class PerformanceTestsRunner
-	{
+			public bool Equals(PerformanceResultMulti other)
+			{
+				return results == other.results;
+			}
+		}
 
 		public static readonly string	logFilePath = Path.GetFullPath("performance.log");
 		public static readonly string	profilerDataFile = Path.GetFullPath("performance_profiler.data");

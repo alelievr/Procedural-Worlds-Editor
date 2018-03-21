@@ -13,7 +13,7 @@ namespace ProceduralWorlds.Editor
 	{
 		Gradient		gradient;
 		FilterMode		filterMode;
-		Texture			texture;
+		Texture			texture = null;
 		bool			debug;
 		public bool		update { get; private set; }
 		
