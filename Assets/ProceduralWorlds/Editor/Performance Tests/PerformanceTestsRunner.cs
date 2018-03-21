@@ -17,79 +17,78 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Debug = UnityEngine.Debug;
 
+[Serializable]
+public struct NodeProcessTime : IEquatable<NodeProcessTime>
+{
+	public string name;
+	public float time;
+
+	public NodeProcessTime(string nodeName, float time)
+	{
+		this.name = nodeName;
+		this.time = time;
+	}
+
+	public bool Equals(NodeProcessTime other)
+	{
+		return time == other.time && name == other.name;
+	}
+}
+
+[Serializable]
+public struct PerformanceResult : IEquatable< PerformanceResult >
+{
+	public string	name;
+
+	public double	processOnceTime;
+	public double	processTime;
+
+	public NodeProcessTime[] nodeProcessTime;
+
+	public long		totalAllocatedMemory;
+	public long		totalReservedMemory;
+	public long		totalUnusedReservedMemory;
+
+	public bool Equals(PerformanceResult other)
+	{
+		return name == other.name;
+	}
+
+	public override string ToString()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.Append("name: " + name);
+		sb.Append(", processOnceTime: " + processOnceTime);
+		sb.Append(", processTime: " + processTime);
+		sb.Append(", totalAllocatedMemory: " + totalAllocatedMemory);
+		sb.Append(", rotalReservedMemory: " + totalReservedMemory);
+		sb.Append(", totalUnusedReservedMemory: " + totalUnusedReservedMemory);
+
+		return sb.ToString();
+	}
+}
+
+[Serializable]
+public struct PerformanceResultMulti : IEquatable< PerformanceResultMulti >
+{
+	public PerformanceResult[] results;
+
+	public PerformanceResultMulti(int count)
+	{
+		results = new PerformanceResult[count];
+	}
+
+	public bool Equals(PerformanceResultMulti other)
+	{
+		return results == other.results;
+	}
+}
+
 namespace ProceduralWorlds.Editor
 {
 	public static class PerformanceTestsRunner
 	{
-
-		[Serializable]
-		public struct NodeProcessTime : IEquatable<NodeProcessTime>
-		{
-			public string name;
-			public float time;
-
-			public NodeProcessTime(string nodeName, float time)
-			{
-				this.name = nodeName;
-				this.time = time;
-			}
-
-			public bool Equals(NodeProcessTime other)
-			{
-				return time == other.time && name == other.name;
-			}
-		}
-
-		[Serializable]
-		public struct PerformanceResult : IEquatable< PerformanceResult >
-		{
-			public string	name;
-
-			public double	processOnceTime;
-			public double	processTime;
-
-			public NodeProcessTime[] nodeProcessTime;
-
-			public long		totalAllocatedMemory;
-			public long		totalReservedMemory;
-			public long		totalUnusedReservedMemory;
-
-			public bool Equals(PerformanceResult other)
-			{
-				return name == other.name;
-			}
-
-			public override string ToString()
-			{
-				StringBuilder sb = new StringBuilder();
-
-				sb.Append("name: " + name);
-				sb.Append(", processOnceTime: " + processOnceTime);
-				sb.Append(", processTime: " + processTime);
-				sb.Append(", totalAllocatedMemory: " + totalAllocatedMemory);
-				sb.Append(", rotalReservedMemory: " + totalReservedMemory);
-				sb.Append(", totalUnusedReservedMemory: " + totalUnusedReservedMemory);
-
-				return sb.ToString();
-			}
-		}
-
-		[Serializable]
-		public struct PerformanceResultMulti : IEquatable< PerformanceResultMulti >
-		{
-			public PerformanceResult[] results;
-
-			public PerformanceResultMulti(int count)
-			{
-				results = new PerformanceResult[count];
-			}
-
-			public bool Equals(PerformanceResultMulti other)
-			{
-				return results == other.results;
-			}
-		}
-
 		public static readonly string	logFilePath = Path.GetFullPath("performance.log");
 		public static readonly string	profilerDataFile = Path.GetFullPath("performance_profiler.data");
 		public static readonly string	tmpProfilerLogFile = Path.GetFullPath("performance.tmp");
