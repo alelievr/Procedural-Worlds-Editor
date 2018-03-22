@@ -93,7 +93,6 @@ namespace ProceduralWorlds
 			terrainRoot = GameObject.Find(realModeRootObjectName);
 			if (terrainRoot == null)
 			{
-				Debug.Log("new terrain root !");
 				terrainRoot = new GameObject(realModeRootObjectName);
 				terrainRoot.transform.position = Vector3.zero;
 			}
@@ -160,8 +159,8 @@ namespace ProceduralWorlds
 			Vector3 currentPos = transform.position;
 			Vector3 currentChunkPos = RoundPositionToChunk(currentPos);
 			
-			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
-				return ;
+			// if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
+				// return ;
 
 			foreach (var pos in GenerateChunkPositions(currentPos))
 			{

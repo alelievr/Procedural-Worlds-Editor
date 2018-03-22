@@ -35,14 +35,6 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 			}
 		mesh.SetUVs(1, blendInfos);
 	}
-
-	public override TopDownChunkData CreateChunkData(FinalTerrain terrain)
-	{
-		TopDownChunkData chunk = new TopDownChunkData();
-
-		FillChunkData(chunk as ChunkData, terrain);
-		return chunk;
-	}
 	
 	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
@@ -90,13 +82,11 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 	{
 		if (chunk == null)
 			return ;
+		
 		GameObject		g = chunkGameObject as GameObject;
 
 		if (g == null) //if gameobject have been destroyed by user and reference was lost.
-		{
-			chunkGameObject = RequestCreate(chunk, pos);
-			g = chunkGameObject as GameObject;
-		}
+			RequestCreate(chunk, pos);
 	}
 	
 	public override Vector3 GetChunkPosition(Vector3 pos)

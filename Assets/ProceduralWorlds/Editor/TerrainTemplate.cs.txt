@@ -1,0 +1,36 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using ProceduralWorlds.Core;
+using ProceduralWorlds.IsoSurfaces;
+
+namespace ProceduralWorlds
+{
+	//Put your custom ChunkData type in the TerrainBase template
+	public class TerrainTemplate : TerrainBase< ChunkData >
+	{
+		//Your custom isosurface
+		public IsoSurface isoSurface = new IsoSurface();
+
+		protected override void OnTerrainEnable()
+		{
+			isoSurface.generateUvs = true;
+		}
+
+		public override object OnChunkCreate(ChunkData terrainData, Vector3 pos)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public override void OnChunkRender(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public override void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		{
+			throw new System.NotImplementedException();
+		}
+
+	}
+}

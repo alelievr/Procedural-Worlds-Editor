@@ -74,12 +74,6 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 			}
 		topDownTerrainMesh.SetUVs(1, blendInfos);
 	}
-
-	public override TopDownChunkData CreateChunkData(FinalTerrain terrain)
-	{
-		Debug.Log("TODO !");
-		return null;
-	}
 	
 	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{

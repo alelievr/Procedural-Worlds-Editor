@@ -136,7 +136,6 @@ namespace ProceduralWorlds.Noises
 			}
 			else
 			{
-                // Debug.Log("Generating perlin chunk at: " + position);
                 samp.Foreach((x, y) => {
                     return GenerateNoise(position.x + x, position.z + y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });

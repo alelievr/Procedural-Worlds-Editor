@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds
 {
 	[System.Serializable]
-	public abstract class TerrainBase< T > : TerrainGenericBase  where T : ChunkData
+	public abstract class TerrainBase< T > : TerrainGenericBase  where T : ChunkData, new()
 	{
 
 		//Generic to specif bindings:
@@ -37,28 +37,19 @@ namespace ProceduralWorlds
 			return CreateChunkData(finalTerrain);
 		}
 
-		public abstract T CreateChunkData(FinalTerrain terrain);
-
-		public virtual object OnChunkCreate(T terrainData, Vector3 pos)
+		public virtual T CreateChunkData(FinalTerrain terrain)
 		{
-			//do nothing here, the inherited function will render it.
-			return null;
+			T chunk = new T();
+
+			FillChunkData(chunk, terrain);
+			return chunk;
 		}
 
-		public virtual void OnChunkRender(T terrainData, object userStoredObject, Vector3 pos)
-		{
-			//do nothing here, the inherited function will update render.
-		}
+		public abstract object OnChunkCreate(T terrainData, Vector3 pos);
+		public abstract void OnChunkRender(T terrainData, object userStoredObject, Vector3 pos);
+		public abstract void OnChunkDestroy(T terrainData, object userStoredObject, Vector3 pos);
 
-		public virtual void OnChunkDestroy(T terrainData, object userStoredObject, Vector3 pos)
-		{
-
-		}
-
-		public virtual void OnChunkHide(T terrainData, object userStoredObject, Vector3 pos)
-		{
-
-		}
+		public virtual void OnChunkHide(T terrainData, object userStoredObject, Vector3 pos) {}
 
 		public object RequestCreate(T terrainData, Vector3 pos)
 		{
@@ -76,7 +67,7 @@ namespace ProceduralWorlds
 		{
 			chunk.size = finalTerrain.mergedTerrain.size;
 			chunk.materializerType = finalTerrain.materializerType;
-			chunk.terrain = finalTerrain.mergedTerrain;
+			chunk.terrain = finalTerrain.mergedTerrain.Clone(null);
 			chunk.biomeMap = finalTerrain.biomeData.biomeMap;
 			chunk.biomeMap3D = null;
 		}

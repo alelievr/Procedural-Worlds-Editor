@@ -28,7 +28,7 @@ namespace ProceduralWorlds
 	public class TerrainStorage : ScriptableObject
 	{
 		
-		[System.SerializableAttribute]
+		[System.Serializable]
 		public class Chunk
 		{
 			public ChunkData		terrainData;
@@ -46,10 +46,10 @@ namespace ProceduralWorlds
 		}
 
 		public StorageMode	storeMode = StorageMode.File;
-		public string			storageFolder = null;
-		public bool				editorMode;
+		public string		storageFolder = null;
+		public bool			editorMode;
 
-		[NonSerializedAttribute]
+		[NonSerialized]
 		Dictionary< Vector3i, Chunk > chunks = new Dictionary< Vector3i, Chunk >();
 
 		public void OnEnable()
@@ -57,7 +57,7 @@ namespace ProceduralWorlds
 			storageFolder = Application.dataPath + "/Levels/";
 		}
 
-		public int Count {get {return chunks.Count;} }
+		public int Count { get {return chunks.Count;} }
 
 		public bool isLoaded(Vector3i pos)
 		{
@@ -69,7 +69,7 @@ namespace ProceduralWorlds
 			chunks[pos] = new Chunk(chunk, userChunkDatas);
 			if (storeMode == StorageMode.File)
 			{
-				//TODO: asyn save chunkData and pos to a file.
+				//TODO: async save chunkData and pos to a file.
 			}
 			return chunk;
 		}
@@ -94,7 +94,8 @@ namespace ProceduralWorlds
 
 		public Chunk this[Vector3i pos]
 		{
-			get {
+			get
+			{
 				return chunks[pos];
 			}
 		}
