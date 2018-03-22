@@ -16,7 +16,7 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 
 	Square2DIsoSurface	isoSurface = new Square2DIsoSurface();
 
-	public override void OnTerrainEnable()
+	protected override void OnTerrainEnable()
 	{
 		//global settings, not depending from the editor
 		generateBorders = true;
@@ -51,8 +51,10 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 		
 		if (rainbow == null)
 			rainbow = Utils.CreateRainbowGradient();
+
+		pos = GetChunkWorldPosition(pos);
 		
-		GameObject g = CreateChunkObject(pos * terrainScale);
+		GameObject g = CreateChunkObject(pos);
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
 		MeshFilter mf = g.AddComponent< MeshFilter >();

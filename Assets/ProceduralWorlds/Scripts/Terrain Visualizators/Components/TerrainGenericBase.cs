@@ -73,7 +73,13 @@ namespace ProceduralWorlds
 			this.graph = graphAsset.Clone() as WorldGraph;
 
 			graph.SetRealMode(true);
-			chunkSize = graph.chunkSize;
+
+			//we add this to generate borders
+			if (generateBorders)
+			{
+				graph.chunkSize += 1;
+				chunkSize = graph.chunkSize;
+			}
 
 			if (terrainRoot == null)
 				UpdateTerrainRoot();
@@ -93,12 +99,12 @@ namespace ProceduralWorlds
 			}
 		}
 
-		Vector3 RoundPositionToChunk(Vector3 position)
+		Vector3 RoundPositionToChunk(Vector3 position, bool borders = true)
 		{
 			int cs = chunkSize;
 			
 			if (generateBorders)
-				position -= VectorUtils.Floor(position / chunkSize);
+				cs -= 1;
 			
 			if (cs > 0 && terrainScale > 0)
 				position = Utils.Round((position * (1 / terrainScale)) / cs) * cs;
@@ -107,24 +113,22 @@ namespace ProceduralWorlds
 			
 			return position;
 		}
-		
+
 		//Generate 2D positions
 		IEnumerable< Vector3 > GenerateChunkPositions(Vector3 position)
 		{
 			//snap position to the nearest chunk:
 			position = RoundPositionToChunk(position);
 
+			int cs = (generateBorders) ? chunkSize - 1 : chunkSize;
+
 			switch (loadPatternMode)
 			{
 				case ChunkLoadPatternMode.CUBIC:
-					Vector3 pos = position;
 					for (int x = -renderDistance; x <= renderDistance; x++)
 						for (int z = -renderDistance; z <= renderDistance; z++)
 						{
-							Vector3 chunkPos = pos + new Vector3(x * chunkSize, 0, z * chunkSize);
-
-							if (generateBorders)
-								chunkPos += chunkPos / chunkSize;
+							Vector3 chunkPos = position + new Vector3(x * cs, 0, z * cs);
 
 							yield return GetChunkPosition(chunkPos);
 						}
@@ -133,7 +137,16 @@ namespace ProceduralWorlds
 					Debug.Log("TODO: " + loadPatternMode + " load mode");
 					break ;
 			}
-			yield return position;
+		}
+		
+		protected Vector3 GetChunkWorldPosition(Vector3 pos)
+		{
+			if (generateBorders)
+			{
+				return pos * terrainScale + (pos * terrainScale / (chunkSize - 1));
+			}
+			else
+				return pos * terrainScale;
 		}
 
 		public virtual Vector3 GetChunkPosition(Vector3 pos) { return pos; }
@@ -170,9 +183,6 @@ namespace ProceduralWorlds
 
 		void OnDrawGizmos()
 		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawSphere(oldChunkPosition, 4);
-
 			Gizmos.color = Color.blue;
 			Gizmos.DrawSphere(RoundPositionToChunk(transform.position), 4);
 		}
@@ -202,16 +212,16 @@ namespace ProceduralWorlds
 		}
 		
 		//Chunk abstract methods
-		public abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);
-		public abstract object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos);
-		public abstract void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
-		public abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
+		protected abstract ChunkData RequestChunkGeneric(Vector3 pos, int seed);
+		protected abstract object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos);
+		protected abstract void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		protected abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		protected abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
+		protected abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
 
 		//Terrain abstract methods
-		public virtual void OnTerrainEnable() {}
-		public virtual void OnTerrainDisable() {}
+		protected virtual void OnTerrainEnable() {}
+		protected virtual void OnTerrainDisable() {}
 
 		#region Utils
 		/* Utils function to simplify the downstream scripting: */

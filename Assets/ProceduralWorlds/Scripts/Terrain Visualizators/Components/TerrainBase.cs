@@ -10,12 +10,12 @@ namespace ProceduralWorlds
 	{
 
 		//Generic to specif bindings:
-		public override ChunkData RequestChunkGeneric(Vector3 pos, int seed) { return RequestChunk(pos, seed); }
-		public override object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos) { return OnChunkCreate(terrainData as T, pos); } 
-		public override void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkRender(terrainData as T, userStoredObject, pos); } 
-		public override void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkDestroy(terrainData as T, userStoredObject, pos); } 
-		public override void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkHide(terrainData as T, userStoredObject, pos); }
-		public override object RequestCreateGeneric(ChunkData terrainData, Vector3 pos) { return RequestCreate(terrainData as T, pos); }
+		protected override ChunkData RequestChunkGeneric(Vector3 pos, int seed) { return RequestChunk(pos, seed); }
+		protected override object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos) { return OnChunkCreate(terrainData as T, pos); } 
+		protected override void OnChunkRenderGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkRender(terrainData as T, userStoredObject, pos); } 
+		protected override void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkDestroy(terrainData as T, userStoredObject, pos); } 
+		protected override void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkHide(terrainData as T, userStoredObject, pos); }
+		protected override object RequestCreateGeneric(ChunkData terrainData, Vector3 pos) { return RequestCreate(terrainData as T, pos); }
 
 		public T RequestChunk(Vector3 pos, int seed)
 		{
@@ -23,7 +23,6 @@ namespace ProceduralWorlds
 				graph.seed = seed;
 
 			graph.chunkPosition = pos;
-			
 			graph.Process();
 
 			oldSeed = seed;

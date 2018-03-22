@@ -74,6 +74,7 @@ namespace ProceduralWorlds.Noises
                 float persistence = 1,
                 int seed = -1)
         {
+            // Debug.Log("generating perlin at: " + x + "/" + y);
             float ret = 0;
             x *= frequency * noiseScale;
             y *= frequency * noiseScale;
@@ -135,6 +136,7 @@ namespace ProceduralWorlds.Noises
 			}
 			else
 			{
+                // Debug.Log("Generating perlin chunk at: " + position);
                 samp.Foreach((x, y) => {
                     return GenerateNoise(position.x + x, position.z + y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });

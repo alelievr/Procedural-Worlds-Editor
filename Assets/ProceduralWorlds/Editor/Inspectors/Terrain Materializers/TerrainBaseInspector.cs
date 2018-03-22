@@ -7,23 +7,24 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.Editor
 {
+	[CustomEditor(typeof(TerrainGenericBase))]
 	public abstract class TerrainBaseInspector : UnityEditor.Editor
 	{
-		TerrainGenericBase terrain;
+		TerrainGenericBase baseTerrain;
 
 		public void OnEnable()
 		{
-			terrain = target as TerrainGenericBase;
+			baseTerrain = target as TerrainGenericBase;
 			OnEditorEnable();
 		}
 
 		public override void OnInspectorGUI()
 		{
-			terrain.renderDistance = EditorGUILayout.IntSlider("Render distance", terrain.renderDistance, 0, 24);
-			terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
-			terrain.terrainStorage = EditorGUILayout.ObjectField("Chunk storage", terrain.terrainStorage, typeof(TerrainStorage), false) as TerrainStorage;
-			terrain.terrainScale = EditorGUILayout.Slider("Terrain scale", terrain.terrainScale, 0.01f, 10f);
-			terrain.graphAsset = EditorGUILayout.ObjectField("World Graph", terrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
+			baseTerrain.renderDistance = EditorGUILayout.IntSlider("Render distance", baseTerrain.renderDistance, 0, 24);
+			baseTerrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", baseTerrain.loadPatternMode);
+			baseTerrain.terrainStorage = EditorGUILayout.ObjectField("Chunk storage", baseTerrain.terrainStorage, typeof(TerrainStorage), false) as TerrainStorage;
+			baseTerrain.terrainScale = EditorGUILayout.Slider("Terrain scale", baseTerrain.terrainScale, 0.01f, 10f);
+			baseTerrain.graphAsset = EditorGUILayout.ObjectField("World Graph", baseTerrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
 
 			OnEditorGUI();
 		}
