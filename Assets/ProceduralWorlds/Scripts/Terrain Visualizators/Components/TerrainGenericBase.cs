@@ -33,6 +33,8 @@ namespace ProceduralWorlds
 		
 		public GameObject				terrainRoot;
 		public bool						initialized { get { return graph != null && terrainRoot != null; } }
+
+		protected bool					generateBorders = true;
 		
 		protected int					oldSeed = 0;
 		
@@ -93,8 +95,13 @@ namespace ProceduralWorlds
 
 		Vector3 RoundPositionToChunk(Vector3 position)
 		{
-			if (chunkSize > 0 && terrainScale > 0)
-				position = Utils.Round((position * (1 / terrainScale)) / chunkSize) * chunkSize;
+			int cs = chunkSize;
+			
+			if (generateBorders)
+				position -= VectorUtils.Floor(position / chunkSize);
+			
+			if (cs > 0 && terrainScale > 0)
+				position = Utils.Round((position * (1 / terrainScale)) / cs) * cs;
 			else
 				position = Vector3.zero;
 			
@@ -115,6 +122,10 @@ namespace ProceduralWorlds
 						for (int z = -renderDistance; z <= renderDistance; z++)
 						{
 							Vector3 chunkPos = pos + new Vector3(x * chunkSize, 0, z * chunkSize);
+
+							if (generateBorders)
+								chunkPos += chunkPos / chunkSize;
+
 							yield return GetChunkPosition(chunkPos);
 						}
 					yield break ;
@@ -205,7 +216,7 @@ namespace ProceduralWorlds
 		#region Utils
 		/* Utils function to simplify the downstream scripting: */
 
-		string				PositionToChunkName(Vector3i pos)
+		string				PositionToChunkName(Vector3 pos)
 		{
 			return "chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 		}

@@ -131,16 +131,16 @@ namespace ProceduralWorlds.Core
 
 		public Vector3i(float x, float y, float z)
 		{
-			this.x = (int)x;
-			this.y = (int)y;
-			this.z = (int)z;
+			this.x = Mathf.FloorToInt(x);
+			this.y = Mathf.FloorToInt(y);
+			this.z = Mathf.FloorToInt(z);
 		}
 
 		public Vector3i(float a)
 		{
-			this.x = (int)a;
-			this.y = (int)a;
-			this.z = (int)a;
+			this.x = Mathf.FloorToInt(a);
+			this.y = Mathf.FloorToInt(a);
+			this.z = Mathf.FloorToInt(a);
 		}
 
 		public static explicit operator Vector3(Vector3i v)

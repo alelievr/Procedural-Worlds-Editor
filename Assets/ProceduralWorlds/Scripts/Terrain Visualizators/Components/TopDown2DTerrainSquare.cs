@@ -19,6 +19,7 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 	public override void OnTerrainEnable()
 	{
 		//global settings, not depending from the editor
+		generateBorders = true;
 		isoSurface.generateUvs = true;
 	}
 
@@ -51,10 +52,6 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 		if (rainbow == null)
 			rainbow = Utils.CreateRainbowGradient();
 		
-		//create the terrain texture:
-		//TODO: bind the blendMap with biome maps to the terrain shader
-		//TODO: bind all vertex datas from the mesh
-
 		GameObject g = CreateChunkObject(pos * terrainScale);
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();

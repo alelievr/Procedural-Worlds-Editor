@@ -11,6 +11,8 @@ namespace ProceduralWorlds.Noises
     {
 		public int octaves;
 
+        Vector2[] octaveOffsets;
+
 		static int[] p = {151,160,137,91,90,15,
            131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
            190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -67,7 +69,7 @@ namespace ProceduralWorlds.Noises
         public static float GenerateNoise(float x,
                 float y,
                 int octaves = 2,
-                float frequency = 2, //scale
+                float frequency = 1,
                 float lacunarity = 1,
                 float persistence = 1,
                 int seed = -1)
@@ -78,13 +80,14 @@ namespace ProceduralWorlds.Noises
 
             for (int i = 0; i < octaves; i++)
             {
-                float val = PerlinValue(x, y, seed);
+                float val = PerlinValue(x * frequency, y * frequency, seed);
                 ret += val * persistence;
                 x *= lacunarity;
                 y *= lacunarity;
                 persistence *= persistence;
+                frequency *= lacunarity;
             }
-            return (Mathf.Clamp((ret + 1f) / 2f, 0, 1));
+            return (ret + 1f) / 2f;
         }
 		#if NET_4_6
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
