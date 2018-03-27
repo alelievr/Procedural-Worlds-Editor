@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Core;
 using UnityEditor;
 using ProceduralWorlds.Biomator;

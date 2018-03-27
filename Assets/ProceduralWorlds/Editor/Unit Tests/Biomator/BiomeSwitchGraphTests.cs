@@ -6,7 +6,7 @@ using System.Collections;
 using System.Linq;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Biomator.SwitchGraph;
 
 namespace ProceduralWorlds.Tests.Biomator

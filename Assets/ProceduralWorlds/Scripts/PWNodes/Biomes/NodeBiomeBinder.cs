@@ -5,7 +5,7 @@ using UnityEngine;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeBiomeBinder : BaseNode
 	{

@@ -6,7 +6,7 @@ using System.Linq;
 using ProceduralWorlds.Biomator;
 using System;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeBiomeMerger : BaseNode
 	{

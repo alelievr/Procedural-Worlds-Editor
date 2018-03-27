@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using ProceduralWorlds.Core;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeSlider : BaseNode
 	{

@@ -6,7 +6,7 @@ using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System;
 using System.Reflection.Emit;
 

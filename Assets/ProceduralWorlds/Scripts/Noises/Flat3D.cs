@@ -9,7 +9,7 @@ namespace ProceduralWorlds.Noises
 	{
 		float flatValue;
 
-		public Flat3D(float flatValue)
+		public Flat3D(float flatValue = 0)
 		{
 			UpdateParams(flatValue);
 		}

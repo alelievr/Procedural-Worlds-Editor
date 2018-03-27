@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System.Reflection;
 
 namespace ProceduralWorlds.Core

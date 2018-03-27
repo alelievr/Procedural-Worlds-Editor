@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 //Utils for BaseNode class
 namespace ProceduralWorlds

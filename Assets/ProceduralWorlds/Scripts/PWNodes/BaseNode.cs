@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds
 {

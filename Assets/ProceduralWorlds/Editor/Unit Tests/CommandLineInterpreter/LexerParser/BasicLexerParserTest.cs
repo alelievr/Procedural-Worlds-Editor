@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using System.Collections;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Tests.CLI
 {

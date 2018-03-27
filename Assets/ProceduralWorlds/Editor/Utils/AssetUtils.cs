@@ -7,12 +7,13 @@ namespace ProceduralWorlds.Editor
 {
 	public static class AssetUtils
 	{
-		static string _proceduralWorldsEditorPath = "/ProceduralWorlds/Editor/";
+		static string _proceduralWorldsEditorPath = null;//"/ProceduralWorlds/Editor/";
 		public static string proceduralWorldsEditorPath
 		{
 			get
 			{
-				if (_proceduralWorldsEditorPath == null || !File.Exists(Path.GetFullPath(_proceduralWorldsEditorPath)))
+				string path =  Application.dataPath + _proceduralWorldsEditorPath;
+				if (_proceduralWorldsEditorPath == null || !Directory.Exists(path))
 					TryFindEditorPath();
 				return _proceduralWorldsEditorPath;
 			}
@@ -20,17 +21,19 @@ namespace ProceduralWorlds.Editor
 
 		static void TryFindEditorPath()
 		{
-			var dirs = Directory.GetDirectories(Application.dataPath, "ProceduralWorlds/Editor", SearchOption.AllDirectories);
+			string[] dirs = Directory.GetDirectories(Application.dataPath, "ProceduralWorlds", SearchOption.AllDirectories);
+			string editorDir = null;
 
 			foreach (var dir in dirs)
 			{
-				Debug.Log("Procedural Worlds Editor dir: " + dir);
+				if (Directory.Exists(dir + "/Editor"))
+					editorDir = dir + "/Editor";
 			}
 
-			if (dirs.Length == 0)
+			if (editorDir == null)
 				_proceduralWorldsEditorPath = null;
-
-			_proceduralWorldsEditorPath = dirs.First().Substring(Application.dataPath.Length + 1);
+			else
+				_proceduralWorldsEditorPath = editorDir.Substring(Application.dataPath.Length);
 		}
 		
 		public static string GetCurrentPath()

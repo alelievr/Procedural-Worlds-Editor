@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Editor;
 using Object = UnityEngine.Object;
 

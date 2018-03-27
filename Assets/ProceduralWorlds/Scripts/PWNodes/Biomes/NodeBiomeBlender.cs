@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 using System;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeBiomeBlender : BaseNode
 	{

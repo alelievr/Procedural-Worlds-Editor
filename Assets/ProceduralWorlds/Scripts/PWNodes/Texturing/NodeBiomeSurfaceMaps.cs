@@ -5,7 +5,7 @@ using System.Linq;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeBiomeSurfaceMaps : BaseNode
 	{

@@ -4,7 +4,7 @@ using UnityEngine;
 using ProceduralWorlds.Core;
 using System;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeTerrainDetail : BaseNode
 	{

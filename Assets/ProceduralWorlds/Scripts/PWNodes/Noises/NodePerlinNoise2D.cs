@@ -2,7 +2,7 @@
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Noises;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodePerlinNoise2D : BaseNode
 	{

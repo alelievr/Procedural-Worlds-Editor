@@ -270,7 +270,7 @@ namespace ProceduralWorlds.Core
 			//try to parse the node type:
 			nodeType = Type.GetType(type);
 			if (nodeType == null)
-				nodeType = Type.GetType("ProceduralWorlds.Node." + type);
+				nodeType = Type.GetType("ProceduralWorlds.Nodes." + type);
 			if (nodeType == null)
 				nodeType = Type.GetType("ProceduralWorlds.Core." + type);
 

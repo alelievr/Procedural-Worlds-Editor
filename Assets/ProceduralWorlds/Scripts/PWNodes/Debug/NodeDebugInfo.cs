@@ -3,7 +3,7 @@ using System;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeDebugInfo : BaseNode
 	{

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Linq;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Biomator;
 
 namespace ProceduralWorlds.Tests.Graphs

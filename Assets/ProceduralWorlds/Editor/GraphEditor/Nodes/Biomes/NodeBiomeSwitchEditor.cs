@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Editor
 {

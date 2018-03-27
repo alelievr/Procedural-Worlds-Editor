@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine.Profiling;
 using ProceduralWorlds.Core;
 using ProceduralWorlds;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System.IO;
 using System;
 

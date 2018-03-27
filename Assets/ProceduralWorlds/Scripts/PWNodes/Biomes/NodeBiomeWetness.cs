@@ -4,7 +4,7 @@ using UnityEngine;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.Core;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeBiomeWetness : BaseNode
 	{

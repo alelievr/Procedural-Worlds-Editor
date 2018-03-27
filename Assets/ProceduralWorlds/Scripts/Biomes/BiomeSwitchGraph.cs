@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System;
 using System.Linq;
 using System.Diagnostics;

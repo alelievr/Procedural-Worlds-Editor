@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Editor
 {

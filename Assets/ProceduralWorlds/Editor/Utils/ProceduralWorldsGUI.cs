@@ -10,7 +10,7 @@ using ProceduralWorlds.Core;
 using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Editor
 {

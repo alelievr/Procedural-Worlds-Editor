@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds.Core;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeWorldGraphOutput : BaseNode
 	{

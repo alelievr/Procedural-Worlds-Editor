@@ -6,10 +6,10 @@ using UnityEngine;
 using System.Linq;
 using System;
 using Debug = UnityEngine.Debug;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Core
 {
-	using Node;
 
 	[System.SerializableAttribute]
 	public class WorldGraph : BaseGraph

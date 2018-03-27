@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 using ProceduralWorlds.Core;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeAdd : BaseNode
 	{

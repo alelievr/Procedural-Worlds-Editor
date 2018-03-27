@@ -6,7 +6,7 @@ using System;
 using System.Reflection;
 using ProceduralWorlds.Core;
 
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 //Initialization and data baking for BaseNode
 namespace ProceduralWorlds
