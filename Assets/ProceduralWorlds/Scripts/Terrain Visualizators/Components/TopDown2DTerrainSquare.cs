@@ -52,9 +52,9 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 		MeshFilter mf = g.AddComponent< MeshFilter >();
 
 		if (heightDisplacement)
-		{
 			isoSurface.SetHeightDisplacement(chunk.terrain as Sampler2D, heightScale);
-		}
+		else
+			isoSurface.SetHeightDisplacement(null, 0);
 	
 		Mesh m = isoSurface.Generate(chunkSize);
 			

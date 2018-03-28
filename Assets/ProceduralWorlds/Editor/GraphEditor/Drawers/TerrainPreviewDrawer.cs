@@ -97,6 +97,8 @@ namespace ProceduralWorlds.Editor
 				case TerrainPreviewType.TopDownPlanarView:
 					TopDownCameraControls(previewRect, previewCamera);
 					break ;
+				default:
+					break ;
 			}
 			
 			//move the terrain materializer so it generate terrain around the camera

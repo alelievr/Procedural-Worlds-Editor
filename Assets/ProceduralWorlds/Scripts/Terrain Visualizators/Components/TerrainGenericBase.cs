@@ -76,10 +76,9 @@ namespace ProceduralWorlds
 
 			//we add this to generate borders
 			if (generateBorders)
-			{
 				graph.chunkSize += 1;
-				chunkSize = graph.chunkSize;
-			}
+			
+			chunkSize = graph.chunkSize;
 
 			if (terrainRoot == null)
 				UpdateTerrainRoot();
@@ -159,8 +158,8 @@ namespace ProceduralWorlds
 			Vector3 currentPos = transform.position;
 			Vector3 currentChunkPos = RoundPositionToChunk(currentPos);
 			
-			// if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
-				// return ;
+			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
+				return ;
 
 			foreach (var pos in GenerateChunkPositions(currentPos))
 			{

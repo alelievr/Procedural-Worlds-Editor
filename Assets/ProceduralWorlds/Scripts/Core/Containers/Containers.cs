@@ -92,12 +92,13 @@ namespace ProceduralWorlds.Core
 
 		//TODO: other geologic datas (for geologic update :)
 	}
+	
 
 	public enum MaterializerType
 	{
 		//2D materializers:
 		SquareTileMap,
-		// HexTileMap,
+		HexTileMap,
 		// MarchingSquare,
 
 		//3D:

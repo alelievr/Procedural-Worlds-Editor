@@ -90,8 +90,7 @@ namespace ProceduralWorlds.Nodes
 			localTemperatureMap.min = minTemperature;
 			localTemperatureMap.max = maxTemperature;
 
-			if (inputBiomeData != null)
-				inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
+			inputBiomeData.UpdateSamplerValue(BiomeSamplerName.temperature, localTemperatureMap);
 		}
 
 		void CreateTemperatureMapIfNotExists()

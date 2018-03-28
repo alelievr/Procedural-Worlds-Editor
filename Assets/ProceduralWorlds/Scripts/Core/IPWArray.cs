@@ -21,6 +21,4 @@ public interface IPWArray
 	bool RemoveAt(int index);
 
 	void Clear();
-
-	object this[int index] { get; set; }
 }

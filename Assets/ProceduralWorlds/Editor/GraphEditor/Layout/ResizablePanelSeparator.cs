@@ -64,18 +64,18 @@ namespace ProceduralWorlds.Editor
 
 		void DrawHandleBar()
 		{
-			Rect separatorRect = EditorGUILayout.BeginHorizontal(GUILayout.Width(layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
+			Rect sepRect = EditorGUILayout.BeginHorizontal(GUILayout.Width(layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
 			GUILayout.Space(layoutSetting.separatorWidth);
-			EditorGUI.DrawRect(separatorRect, Color.white);
+			EditorGUI.DrawRect(sepRect, Color.white);
 			EditorGUILayout.EndHorizontal();
 
 			if (e.type == EventType.Repaint)
-				this.separatorRect = separatorRect;
+				this.separatorRect = sepRect;
 
-			EditorGUIUtility.AddCursorRect(separatorRect, MouseCursor.ResizeHorizontal);
+			EditorGUIUtility.AddCursorRect(sepRect, MouseCursor.ResizeHorizontal);
 
 			if (e.type == EventType.MouseDown && e.button == 0)
-				if (separatorRect.Contains(e.mousePosition))
+				if (sepRect.Contains(e.mousePosition))
 					draggingHandler = true;
 				
 			if (e.type == EventType.MouseDrag && e.button == 0 && draggingHandler)

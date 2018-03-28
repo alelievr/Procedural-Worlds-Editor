@@ -120,12 +120,6 @@ namespace ProceduralWorlds.Core
 			set { values.Insert(index, value); }  
 		}
 
-		object IPWArray.this[int index]
-		{
-			get { return this[index]; }
-			set { this[index] = (T)value; }
-		}
-	
 		public IEnumerator< T > GetEnumerator()
 		{
 			return values.GetEnumerator();

@@ -14,11 +14,14 @@ namespace ProceduralWorlds.Editor
 
 		UnityEditor.Editor	terrainEditor;
 
+		TerrainGenericBase	oldTerrain;
+
 		public override void OnEnable()
 		{
 			worldGraph =  target as WorldGraph;
 
 			var terrain = TerrainPreviewManager.instance.terrainBase;
+			oldTerrain = terrain;
 
 			if (terrain != null)
 				ReloadChunks(terrain);
@@ -39,7 +42,7 @@ namespace ProceduralWorlds.Editor
 				return ;
 			}
 
-			if (terrainEditor == null)
+			if (terrainEditor == null || oldTerrain != terrain)
 			{
 				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
 			}
@@ -62,6 +65,8 @@ namespace ProceduralWorlds.Editor
 					terrain.DestroyAllChunks();
 			}
 			EditorGUILayout.EndHorizontal();
+
+			oldTerrain = terrain;
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them

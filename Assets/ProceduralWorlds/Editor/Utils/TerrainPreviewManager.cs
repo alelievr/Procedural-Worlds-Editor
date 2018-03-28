@@ -25,10 +25,12 @@ namespace ProceduralWorlds.Editor
 		public Camera				previewCamera {get; private set; }
 		public RenderTexture		previewTexture { get; private set; }
 		public TerrainGenericBase	terrainBase { get; private set; }
+		public GameObject			terrainBaseGameObject { get; private set; }
 		
-		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
+		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >
 		{
 			{MaterializerType.SquareTileMap, typeof(TopDown2DTerrainSquare)},
+			{MaterializerType.HexTileMap, typeof(TopDown2DTerrainHex)},
 		};
 	
 		static TerrainPreviewManager()
@@ -75,8 +77,13 @@ namespace ProceduralWorlds.Editor
 			terrainBase = GameObject.FindObjectOfType< TerrainGenericBase >();
 
 			//Store chunks into memory
-			if (terrainBase != null && terrainBase.terrainStorage == null)
-				terrainBase.terrainStorage = Resources.Load< TerrainStorage >(memoryTerrainStorageAsset);
+			if (terrainBase != null)
+		 	{
+				terrainBaseGameObject = terrainBase.gameObject;
+				
+				 if (terrainBase.terrainStorage == null)
+					terrainBase.terrainStorage = Resources.Load< TerrainStorage >(memoryTerrainStorageAsset);
+			}
 		}
 
 		public void UpdatePreviewPrefab(string newPrefabName)
@@ -97,13 +104,15 @@ namespace ProceduralWorlds.Editor
 
 		public void UpdateTerrainMaterializer(MaterializerType materializerType)
 		{
-			if (terrainBase == null)
-				return ;
-			
-			terrainBase.DestroyAllChunks();
-			var go = terrainBase.gameObject;
-			GameObject.DestroyImmediate(terrainBase);
-			terrainBase = go.AddComponent(materializerTypes[materializerType]) as TerrainGenericBase;
+			if (terrainBase != null)
+			{
+				terrainBase.DestroyAllChunks();
+				GameObject.DestroyImmediate(terrainBase);
+			}
+			if (terrainBaseGameObject != null)
+				terrainBase = terrainBaseGameObject.AddComponent(materializerTypes[materializerType]) as TerrainGenericBase;
+
+			UpdateSceneObjects();
 		}
 
 		public void UpdateChunkLoaderPosition(Vector3 position)

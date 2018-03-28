@@ -28,7 +28,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			graph.chunkPosition = new Vector3(10, 42, -7);
 			graph.seed = 123456789;
 
-			return graph as WorldGraph;
+			return graph;
 		}
 	
 		[Test]
