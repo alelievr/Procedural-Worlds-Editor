@@ -13,10 +13,12 @@ namespace ProceduralWorlds.IsoSurfaces
 		float		oldHexSize;
 
 		Vector3[]	hexPositions;
-		Vector2[]	hexNearCoords;
+		Vector2[]	evenHexNeighbourCoords;
+		Vector2[]	oddHexNeighbourCoords;
 
 		public Hex2DIsoSurface()
 		{
+			useDynamicTriangleCount = true;
 			UpdateHexNearCoords();
 		}
 
@@ -40,7 +42,6 @@ namespace ProceduralWorlds.IsoSurfaces
 			float hexDecal = hexMinRadius * hexMinRadius;
 			float f = 1f / chunkSize * hexMinRadius;
 
-			int t = 0;
 			for (int x = 0; x < chunkSize; x++)
 			{
 				for (int z = 0; z < chunkSize; z++)
@@ -72,30 +73,36 @@ namespace ProceduralWorlds.IsoSurfaces
 		{
 			int hexVertexIndex = (x + z * chunkSize) * (6 + 1) + 1;
 			int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
+
 			if (x != 0 && z != 0 && z != chunkSize - 1 && x != chunkSize - 1)
 			{
-
-				//This vertex generation is totally wrong, you're assigning an hex vertex to a neighbour height which is not possible cauz each vertex have two neighbour height.
 				for (int i = 0; i < 6; i++)
 				{
-					var nearCoord = hexNearCoords[i];
-					Vector3 hexPos = pos + hexPositions[i + 1];
-					float nearHeight = heightMap[x + (int)nearCoord.x, z + (int)nearCoord.y];
+					//Yeah i know, it seems to be black magic, but it actually works !
+					int i1 = (-i + 6) % 6;
+					int i2 = (-i + 11) % 6;
+					var neighbourCoord1 = (x % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
+					var neighbourCoord2 = (x % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
+					float neighbourHeight1 = heightMap[x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y];
+					float neighbourHeight2 = heightMap[x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y];
+					float neighbourHeight = Mathf.Min(neighbourHeight1, neighbourHeight2);
 					float height = heightMap[x, z];
+					
+					Vector3 hexPos = pos + hexPositions[i + 1];
 
-					// if (nearHeight < height)
-						hexPos.y = nearHeight * heightScale;
-					// else
-						// hexPos.y = height * heightScale;
+					if (neighbourHeight < height)
+						hexPos.y = neighbourHeight * heightScale;
+					else
+						hexPos.y = height * heightScale;
 					
 					vertices[borderVertexIndex + i] = hexPos;
 				}
 
 				for (int i = 0; i < 6; i++)
 				{
-					int nbv = (i == 5) ? 0 : i + 1;
-					AddTriangle(hexVertexIndex + i, borderVertexIndex + i, hexVertexIndex + nbv);
-					// AddTriangle(hexVertexIndex + i, borderVertexIndex + i, borderVertexIndex + nbv);
+					int nbv = (i + 1) % 6;
+					AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
+					AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
 				}
 			}
 		}
@@ -128,7 +135,8 @@ namespace ProceduralWorlds.IsoSurfaces
 		void UpdateHexNearCoords()
 		{
 			//register neighbours coords
-			hexNearCoords = new Vector2[6];
+			evenHexNeighbourCoords = new Vector2[6];
+			oddHexNeighbourCoords = new Vector2[6];
 
 			//    / \ / \
 			//   | 2 | 1 |
@@ -138,12 +146,19 @@ namespace ProceduralWorlds.IsoSurfaces
 			//   | 4 | 5 |
 			//    \ / \ /
 
-			hexNearCoords[0] = new Vector2(1, 0);
-			hexNearCoords[1] = new Vector2(1, -1);
-			hexNearCoords[2] = new Vector2(0, -1);
-			hexNearCoords[3] = new Vector2(-1, 0);
-			hexNearCoords[4] = new Vector2(0, 1);
-			hexNearCoords[5] = new Vector2(1, 1);
+			evenHexNeighbourCoords[0] = new Vector2(1, 0);
+			evenHexNeighbourCoords[1] = new Vector2(1, -1);
+			evenHexNeighbourCoords[2] = new Vector2(0, -1);
+			evenHexNeighbourCoords[3] = new Vector2(-1, 0);
+			evenHexNeighbourCoords[4] = new Vector2(0, 1);
+			evenHexNeighbourCoords[5] = new Vector2(1, 1);
+			
+			oddHexNeighbourCoords[0] = new Vector2(1, 0);
+			oddHexNeighbourCoords[1] = new Vector2(0, -1);
+			oddHexNeighbourCoords[2] = new Vector2(-1, -1);
+			oddHexNeighbourCoords[3] = new Vector2(-1, 0);
+			oddHexNeighbourCoords[4] = new Vector2(-1, 1);
+			oddHexNeighbourCoords[5] = new Vector2(0, 1);
 		}
 
         public void SetHeightDisplacement(Sampler2D heightMap, float heightScale)

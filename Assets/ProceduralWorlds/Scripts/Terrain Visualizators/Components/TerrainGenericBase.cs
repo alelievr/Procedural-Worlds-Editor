@@ -177,12 +177,6 @@ namespace ProceduralWorlds
 			oldChunkPosition = currentChunkPos;
 		}
 
-		void OnDrawGizmos()
-		{
-			Gizmos.color = Color.blue;
-			Gizmos.DrawSphere(RoundPositionToChunk(transform.position), 4);
-		}
-
 		public void	DestroyAllChunks()
 		{
 			if (terrainStorage == null)
