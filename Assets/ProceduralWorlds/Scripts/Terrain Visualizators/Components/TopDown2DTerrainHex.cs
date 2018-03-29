@@ -24,6 +24,11 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 	{
 		if (chunk == null)
 			return null;
+		
+		//turn 2d grid position to 2d hex position:
+		float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
+		pos.x *= hexMinRadius;
+		pos.z *= hexMinRadius * hexMinRadius;
 
 		GameObject g = CreateChunkObject(pos);
 		

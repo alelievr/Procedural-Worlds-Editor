@@ -140,9 +140,7 @@ namespace ProceduralWorlds
 		protected Vector3 GetChunkWorldPosition(Vector3 pos)
 		{
 			if (generateBorders)
-			{
 				return pos * terrainScale + (pos * terrainScale / (chunkSize - 1));
-			}
 			else
 				return pos * terrainScale;
 		}

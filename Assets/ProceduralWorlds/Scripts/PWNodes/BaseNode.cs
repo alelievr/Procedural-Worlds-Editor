@@ -192,8 +192,6 @@ namespace ProceduralWorlds
 
 		public virtual void OnNodeDisable() {}
 
-		public virtual void OnNodeDelete() {}
-
 		public virtual void OnNodeProcessOnce() {}
 
 		public virtual void OnNodeAnchorLink(string propName, int index) {}

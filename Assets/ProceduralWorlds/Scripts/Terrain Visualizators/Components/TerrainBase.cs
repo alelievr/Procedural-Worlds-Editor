@@ -34,14 +34,14 @@ namespace ProceduralWorlds
 				return null;
 			}
 			
-			return CreateChunkData(finalTerrain);
+			return CreateChunkData(finalTerrain, pos);
 		}
 
-		public virtual T CreateChunkData(FinalTerrain terrain)
+		public virtual T CreateChunkData(FinalTerrain terrain, Vector3 pos)
 		{
 			T chunk = new T();
 
-			FillChunkData(chunk, terrain);
+			FillChunkData(chunk, terrain, pos);
 			return chunk;
 		}
 
@@ -63,12 +63,13 @@ namespace ProceduralWorlds
 			return userData;
 		}
 
-		public void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain)
+		public void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain, Vector3 pos)
 		{
 			chunk.size = finalTerrain.mergedTerrain.size;
 			chunk.materializerType = finalTerrain.materializerType;
 			chunk.terrain = finalTerrain.mergedTerrain.Clone(null);
 			chunk.biomeMap = finalTerrain.biomeData.biomeMap;
+			chunk.position = pos;
 			chunk.biomeMap3D = null;
 		}
 	}

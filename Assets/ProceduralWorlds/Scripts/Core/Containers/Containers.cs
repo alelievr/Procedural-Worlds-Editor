@@ -13,6 +13,7 @@ namespace ProceduralWorlds.Core
 	[Serializable]
 	public abstract class ChunkData
 	{
+		public Vector3i				position;
 		public int					size;
 		public MaterializerType		materializerType;
 

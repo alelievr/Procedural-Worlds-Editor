@@ -100,3 +100,28 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  - m_Name: 
+    m_Curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 2
+        time: 0
+        value: 0
+        inSlope: 0.025087103
+        outSlope: 0.025087103
+        tangentMode: 0
+      - serializedVersion: 2
+        time: 0.6873596
+        value: 0.297795
+        inSlope: 0.9781242
+        outSlope: 0.9781242
+        tangentMode: 0
+      - serializedVersion: 2
+        time: 1
+        value: 1
+        inSlope: 2.90606
+        outSlope: 2.90606
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -37,7 +37,7 @@ namespace ProceduralWorlds.Core
 			#if UNITY_EDITOR
 				return UnityEditor.EditorApplication.timeSinceStartup;
 			#else
-				return Time.timeSinceStartup;
+				return Time.time;
 			#endif
 		}
 	
