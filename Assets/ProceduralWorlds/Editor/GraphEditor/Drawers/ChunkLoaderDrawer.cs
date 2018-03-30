@@ -47,15 +47,8 @@ namespace ProceduralWorlds.Editor
 				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
 			}
 			
-			EditorGUI.BeginChangeCheck();
-			{
-				terrainEditor.OnInspectorGUI();
-				// terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
-				// terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
-				// terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
-			}
-			if (EditorGUI.EndChangeCheck())
-				ReloadChunks(terrain);
+			if (GUILayout.Button("Focus"))
+				Selection.activeObject = terrain;
 
 			EditorGUILayout.BeginHorizontal();
 			{

@@ -24,6 +24,8 @@ namespace ProceduralWorlds.IsoSurfaces
 		protected List< int >		traingleList = new List< int >();
 
 		protected int				triangleIndex;
+
+		public IsoSurfaceDebug		isoDebug = new IsoSurfaceDebug();
 		
 		[System.NonSerialized]
 		int							oldVertexCount = -1;
@@ -43,11 +45,15 @@ namespace ProceduralWorlds.IsoSurfaces
 
 				oldVertexCount = vertexCount;
 			}
+			
+			triangleIndex = 0;
 		}
 
 		protected Mesh GenerateMesh(bool recalculateNormals = false)
 		{
 			Mesh mesh = new Mesh();
+
+			triangleIndex = 0;
 
 			mesh.vertices = vertices;
 			if (useDynamicTriangleCount)
@@ -61,8 +67,6 @@ namespace ProceduralWorlds.IsoSurfaces
 				mesh.RecalculateNormals();
 			
 			mesh.RecalculateBounds();
-
-			triangleIndex = 0;
 
 			return mesh;
 		}

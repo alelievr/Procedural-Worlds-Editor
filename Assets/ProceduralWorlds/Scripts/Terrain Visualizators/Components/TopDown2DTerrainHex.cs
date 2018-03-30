@@ -77,4 +77,9 @@ public class TopDown2DTerrainHex : TerrainBase< TopDownChunkData >
 
 		return pos;
 	}
+
+	public override IsoSurfaceDebug GetIsoSurfaceDebug()
+	{
+		return isoSurface.isoDebug;
+	}
 }

@@ -1,3 +1,5 @@
+#define DEBUG
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,6 +40,10 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			UpdateHexPositions(chunkSize);
 
+			#if DEBUG
+				isoDebug.Initialize();
+			#endif
+
 			float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
 			float hexDecal = hexMinRadius * hexMinRadius;
 			float f = 1f / chunkSize * hexMinRadius;
@@ -51,15 +57,30 @@ namespace ProceduralWorlds.IsoSurfaces
 					float xPos = ((float)x * hexMinRadius / chunkSize) - ((z % 2 == 1) ? f / 2 : 0);
 
 					Vector3 pos = new Vector3(xPos, 0, zPos);
+					
+					#if DEBUG
+						isoDebug.BeginFrame("Hex " + x + " / " + z);
+					#endif
 
 					for (int j = 0; j < 7; j++)
 					{
 						vertices[i + j] = hexPositions[j] + pos;
 						if (heightMap != null)
 							vertices[i + j].y = heightMap[x, z] * heightScale;
+						
+						#if DEBUG
+							isoDebug.DrawVertex(vertices[i + j], i + j, chunkSize);
+						#endif
 					}
 					for (int j = 1; j < 6 + 1; j++)
-						AddTriangle(i, (j == 6) ? i + 1 : i + j + 1, i + j);
+					{
+						int i2 = (j == 6) ? i + 1 : i + j + 1;
+						AddTriangle(i, i2, i + j);
+
+						#if DEBUG
+							isoDebug.DrawTriangle(i, i2, i + j);
+						#endif
+					}
 
 					if (heightMap != null)
 						GenerateHexBorders(x, z, chunkSize, pos);
@@ -74,11 +95,15 @@ namespace ProceduralWorlds.IsoSurfaces
 			int hexVertexIndex = (x + z * chunkSize) * (6 + 1) + 1;
 			int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
 
+			#if DEBUG
+				isoDebug.BeginFrame("Hex border of " + x + " / " + z);
+			#endif
+
 			if (x != 0 && z != 0 && z != chunkSize - 1 && x != chunkSize - 1)
 			{
 				for (int i = 0; i < 6; i++)
 				{
-					//Yeah i know, it seems to be black magic, but it actually works !
+					//Yeah i know, it seems to be black magic, but trust me it works !
 					int i1 = (-i + 6) % 6;
 					int i2 = (-i + 11) % 6;
 					var neighbourCoord1 = (x % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
@@ -96,6 +121,10 @@ namespace ProceduralWorlds.IsoSurfaces
 						hexPos.y = height * heightScale;
 					
 					vertices[borderVertexIndex + i] = hexPos;
+
+					#if DEBUG
+						isoDebug.DrawVertex(vertices[borderVertexIndex + i], borderVertexIndex + i, chunkSize);
+					#endif
 				}
 
 				for (int i = 0; i < 6; i++)
@@ -103,6 +132,11 @@ namespace ProceduralWorlds.IsoSurfaces
 					int nbv = (i + 1) % 6;
 					AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
 					AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
+
+					#if DEBUG
+						isoDebug.DrawTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i, Color.red);
+						isoDebug.DrawTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i, Color.blue);
+					#endif
 				}
 			}
 		}

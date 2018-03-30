@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using ProceduralWorlds.Core;
+using ProceduralWorlds.IsoSurfaces;
 
 namespace ProceduralWorlds
 {
@@ -209,9 +210,12 @@ namespace ProceduralWorlds
 		protected abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		protected abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
 
-		//Terrain abstract methods
+		//Terrain overridable methods
 		protected virtual void OnTerrainEnable() {}
 		protected virtual void OnTerrainDisable() {}
+		
+		//Others
+		public virtual IsoSurfaceDebug GetIsoSurfaceDebug() { return null; }
 
 		#region Utils
 		/* Utils function to simplify the downstream scripting: */

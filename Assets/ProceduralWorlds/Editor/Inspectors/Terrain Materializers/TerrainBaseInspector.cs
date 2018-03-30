@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
+using ProceduralWorlds.IsoSurfaces;
 
 namespace ProceduralWorlds.Editor
 {
@@ -11,6 +12,8 @@ namespace ProceduralWorlds.Editor
 	public abstract class TerrainBaseInspector : UnityEditor.Editor
 	{
 		TerrainGenericBase baseTerrain;
+
+		VisualDebugEditor	visualDebug = new VisualDebugEditor();
 
 		public void OnEnable()
 		{
@@ -27,9 +30,25 @@ namespace ProceduralWorlds.Editor
 			baseTerrain.graphAsset = EditorGUILayout.ObjectField("World Graph", baseTerrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
 
 			OnEditorGUI();
+
+			var isoDebug = baseTerrain.GetIsoSurfaceDebug();
+
+			if (isoDebug != null)
+			{
+				visualDebug.SetVisualDebugDatas(isoDebug);
+			}
+			
+			visualDebug.DrawInspector();
+		}
+
+		public void OnSceneGUI()
+		{
+			visualDebug.DrawScene();
+			OnEditorSceneGUI();
 		}
 
 		public abstract void OnEditorGUI();
 		public abstract void OnEditorEnable();
+		public virtual void OnEditorSceneGUI() {}
 	}
 }
