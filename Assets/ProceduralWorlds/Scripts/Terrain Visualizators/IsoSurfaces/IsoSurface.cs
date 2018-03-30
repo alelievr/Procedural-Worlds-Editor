@@ -47,6 +47,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			}
 			
 			triangleIndex = 0;
+			traingleList.Clear();
 		}
 
 		protected Mesh GenerateMesh(bool recalculateNormals = false)

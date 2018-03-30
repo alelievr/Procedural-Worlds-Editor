@@ -40,13 +40,21 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			UpdateHexPositions(chunkSize);
 
-			#if DEBUG
-				isoDebug.Initialize();
-			#endif
-
 			float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
 			float hexDecal = hexMinRadius * hexMinRadius;
 			float f = 1f / chunkSize * hexMinRadius;
+
+			#if DEBUG
+				isoDebug.Initialize();
+				for (int x = 0; x < chunkSize; x++)
+					for (int z = 0; z < chunkSize; z++)
+					{
+						float zPos = ((float)z * hexDecal / chunkSize);
+						float xPos = ((float)x * hexMinRadius / chunkSize) - ((z % 2 == 1) ? f / 2 : 0);
+						float height = (heightMap != null) ? heightMap[x, z] * heightScale : 0;
+						isoDebug.DrawLabel(new Vector3(xPos * chunkSize, height * chunkSize + .1f, zPos * chunkSize), x + " / " + z);
+					}
+			#endif
 
 			for (int x = 0; x < chunkSize; x++)
 			{
@@ -106,8 +114,8 @@ namespace ProceduralWorlds.IsoSurfaces
 					//Yeah i know, it seems to be black magic, but trust me it works !
 					int i1 = (-i + 6) % 6;
 					int i2 = (-i + 11) % 6;
-					var neighbourCoord1 = (x % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
-					var neighbourCoord2 = (x % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
+					var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
+					var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
 					float neighbourHeight1 = heightMap[x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y];
 					float neighbourHeight2 = heightMap[x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y];
 					float neighbourHeight = Mathf.Min(neighbourHeight1, neighbourHeight2);
@@ -123,6 +131,9 @@ namespace ProceduralWorlds.IsoSurfaces
 					vertices[borderVertexIndex + i] = hexPos;
 
 					#if DEBUG
+						isoDebug.DrawLabel(vertices[borderVertexIndex + i] * chunkSize, "check "
+							+ (x + (int)neighbourCoord1.x) + " / " + (z + (int)neighbourCoord1.y) + "(" + neighbourCoord1 + ")"
+							+ " and " + (x + (int)neighbourCoord2.x) + " / " + (z + (int)neighbourCoord2.y) + "(" + neighbourCoord2 + ")" + " | " + i);
 						isoDebug.DrawVertex(vertices[borderVertexIndex + i], borderVertexIndex + i, chunkSize);
 					#endif
 				}

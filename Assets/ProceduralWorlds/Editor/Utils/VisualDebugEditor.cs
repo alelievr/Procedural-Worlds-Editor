@@ -77,10 +77,15 @@ namespace ProceduralWorlds.Editor
 			if (visualDebug == null)
 				return ;
 			
-			if (visualDebug.frames.Count == 0)
+			if (visualDebug.frames.Count == 0 || !foldout)
 				return ;
 			
 			int f = 0;
+
+			//draw the initial state
+			if (currentFrame != 0)
+				foreach (var view in visualDebug.frames[0].infos)
+					viewDrawers[view.GetType()](view);
 
 			foreach (var view in visualDebug.frames[currentFrame].infos)
 			{
