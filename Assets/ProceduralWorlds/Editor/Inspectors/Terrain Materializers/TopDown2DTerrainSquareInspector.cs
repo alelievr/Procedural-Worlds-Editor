@@ -5,14 +5,14 @@ using UnityEditor;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(TopDown2DTerrainSquare))]
-	public class TopDown2DTerrainSquareInspector : TerrainBaseInspector
+	[CustomEditor(typeof(TopDownNaive2DTerrain))]
+	public class TopDownNaive2DTerrainInspector : TerrainBaseInspector
 	{
-		TopDown2DTerrainSquare	terrain;
+		TopDownNaive2DTerrain	terrain;
 
 		public override void OnEditorEnable()
 		{
-			terrain = target as TopDown2DTerrainSquare;
+			terrain = target as TopDownNaive2DTerrain;
 		}
 
 		public override void OnEditorGUI()

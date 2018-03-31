@@ -1,4 +1,4 @@
-#define DEBUG
+// #define DEBUG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -98,6 +98,26 @@ namespace ProceduralWorlds.IsoSurfaces
             return GenerateMesh(true);
         }
 
+		float SafeGetHeight(int x, int z, int chunkSize, int defaultX = 0, int defaultZ = 0)
+		{
+			if (x < 0 || x >= chunkSize || z < 0 || z >= chunkSize)
+				return heightMap[defaultX, defaultZ];
+			return heightMap[x, z];
+		}
+
+		float GetNeighbourHeight(int x, int z, int index, int chunkSize)
+		{
+			//Yeah i know, it seems to be black magic, but trust me it works !
+			int i1 = (-index + 6) % 6;
+			int i2 = (-index + 11) % 6;
+			var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
+			var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
+			float neighbourHeight1 = SafeGetHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, chunkSize, x, z);
+			float neighbourHeight2 = SafeGetHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, chunkSize, x, z);
+
+			return Mathf.Min(neighbourHeight1, neighbourHeight2);
+		}
+
 		void GenerateHexBorders(int x, int z, int chunkSize, Vector3 pos)
 		{
 			int hexVertexIndex = (x + z * chunkSize) * (6 + 1) + 1;
@@ -107,48 +127,35 @@ namespace ProceduralWorlds.IsoSurfaces
 				isoDebug.BeginFrame("Hex border of " + x + " / " + z);
 			#endif
 
-			if (x != 0 && z != 0 && z != chunkSize - 1 && x != chunkSize - 1)
+			for (int i = 0; i < 6; i++)
 			{
-				for (int i = 0; i < 6; i++)
-				{
-					//Yeah i know, it seems to be black magic, but trust me it works !
-					int i1 = (-i + 6) % 6;
-					int i2 = (-i + 11) % 6;
-					var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
-					var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
-					float neighbourHeight1 = heightMap[x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y];
-					float neighbourHeight2 = heightMap[x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y];
-					float neighbourHeight = Mathf.Min(neighbourHeight1, neighbourHeight2);
-					float height = heightMap[x, z];
-					
-					Vector3 hexPos = pos + hexPositions[i + 1];
+				float height = heightMap[x, z];
+				float neighbourHeight = GetNeighbourHeight(x, z, i, chunkSize);
+				
+				Vector3 hexPos = pos + hexPositions[i + 1];
 
-					if (neighbourHeight < height)
-						hexPos.y = neighbourHeight * heightScale;
-					else
-						hexPos.y = height * heightScale;
-					
-					vertices[borderVertexIndex + i] = hexPos;
+				if (neighbourHeight < height)
+					hexPos.y = neighbourHeight * heightScale;
+				else
+					hexPos.y = height * heightScale;
+				
+				vertices[borderVertexIndex + i] = hexPos;
 
-					#if DEBUG
-						isoDebug.DrawLabel(vertices[borderVertexIndex + i] * chunkSize, "check "
-							+ (x + (int)neighbourCoord1.x) + " / " + (z + (int)neighbourCoord1.y) + "(" + neighbourCoord1 + ")"
-							+ " and " + (x + (int)neighbourCoord2.x) + " / " + (z + (int)neighbourCoord2.y) + "(" + neighbourCoord2 + ")" + " | " + i);
-						isoDebug.DrawVertex(vertices[borderVertexIndex + i], borderVertexIndex + i, chunkSize);
-					#endif
-				}
+				#if DEBUG
+					isoDebug.DrawVertex(vertices[borderVertexIndex + i], borderVertexIndex + i, chunkSize);
+				#endif
+			}
 
-				for (int i = 0; i < 6; i++)
-				{
-					int nbv = (i + 1) % 6;
-					AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
-					AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
+			for (int i = 0; i < 6; i++)
+			{
+				int nbv = (i + 1) % 6;
+				AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
+				AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
 
-					#if DEBUG
-						isoDebug.DrawTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i, Color.red);
-						isoDebug.DrawTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i, Color.blue);
-					#endif
-				}
+				#if DEBUG
+					isoDebug.DrawTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i, Color.red);
+					isoDebug.DrawTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i, Color.blue);
+				#endif
 			}
 		}
 

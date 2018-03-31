@@ -29,8 +29,8 @@ namespace ProceduralWorlds.Editor
 		
 		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >
 		{
-			{MaterializerType.SquareTileMap, typeof(TopDown2DTerrainSquare)},
-			{MaterializerType.HexTileMap, typeof(TopDown2DTerrainHex)},
+			{MaterializerType.SquareTileMap, typeof(TopDownNaive2DTerrain)},
+			{MaterializerType.HexTileMap, typeof(TopDownHex2DTerrain)},
 		};
 	
 		static TerrainPreviewManager()

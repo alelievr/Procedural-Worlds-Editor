@@ -5,14 +5,14 @@ using UnityEditor;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(TopDown2DTerrainHex))]
-	public class TopDown2DTerrainHexInspector : TerrainBaseInspector
+	[CustomEditor(typeof(TopDownHex2DTerrain))]
+	public class TopDownHex2DTerrainInspector : TerrainBaseInspector
 	{
-		TopDown2DTerrainHex		terrain;
+		TopDownHex2DTerrain		terrain;
 
 		public override void OnEditorEnable()
 		{
-			terrain = target as TopDown2DTerrainHex;
+			terrain = target as TopDownHex2DTerrain;
 		}
 
 		public override void OnEditorGUI()

@@ -5,12 +5,12 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
-    public class Square2DIsoSurface : IsoSurface
+    public class Naive2DIsoSurface : IsoSurface
     {
 		Sampler2D	heightDisplacementMap = null;
 		float		heightScale;
 
-		//TODO: implement shared vertices normals
+		//TODO: implement flat shaded normals
 
         public override Mesh Generate(int chunkSize)
         {

@@ -6,46 +6,30 @@ using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.IsoSurfaces;
 
-public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
+public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 {
 	public float	yPosition;
 	public bool		heightDisplacement;
 	public float	heightScale = .1f;
 
-	Gradient		rainbow;
-
-	Square2DIsoSurface	isoSurface = new Square2DIsoSurface();
+	Hex2DIsoSurface	isoSurface = new Hex2DIsoSurface();
 
 	protected override void OnTerrainEnable()
 	{
-		//global settings, not depending from the editor
-		generateBorders = true;
+		generateBorders = false;
 		isoSurface.generateUvs = true;
 	}
 
-	void	UpdateMeshDatas(Mesh mesh, BiomeMap2D biomes)
-	{
-		List< Vector4 >		blendInfos = new List< Vector4 >();
-
-		for (int x = 0; x < chunkSize; x++)
-			for (int z = 0; z < chunkSize; z++)
-			{
-				Vector4 biomeInfo = Vector4.zero;
-				blendInfos.Add(biomeInfo);
-			}
-		mesh.SetUVs(1, blendInfos);
-	}
-	
 	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
 		if (chunk == null)
 			return null;
 		
-		if (rainbow == null)
-			rainbow = Utils.CreateRainbowGradient();
+		//turn 2d grid position to 2d hex position:
+		float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
+		pos.x *= hexMinRadius;
+		pos.z *= hexMinRadius * hexMinRadius;
 
-		pos = GetChunkWorldPosition(pos);
-		
 		GameObject g = CreateChunkObject(pos);
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
@@ -55,16 +39,12 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 			isoSurface.SetHeightDisplacement(chunk.terrain as Sampler2D, heightScale);
 		else
 			isoSurface.SetHeightDisplacement(null, 0);
-	
+
 		Mesh m = isoSurface.Generate(chunkSize);
-			
-		UpdateMeshDatas(m, chunk.biomeMap);
 
 		mf.sharedMesh = m;
 
-		Shader topDown2DBasicTerrainShader = Shader.Find("ProceduralWorlds/Basic terrain");
-		if (topDown2DBasicTerrainShader == null)
-			topDown2DBasicTerrainShader = Shader.Find("Standard");
+		Shader topDown2DBasicTerrainShader = Shader.Find("Standard");
 		Material mat = new Material(topDown2DBasicTerrainShader);
 		mr.sharedMaterial = mat;
 		return g;
@@ -88,11 +68,16 @@ public class TopDown2DTerrainSquare : TerrainBase< TopDownChunkData >
 		if (g == null) //if gameobject have been destroyed by user and reference was lost.
 			RequestCreate(chunk, pos);
 	}
-	
+
 	public override Vector3 GetChunkPosition(Vector3 pos)
 	{
 		pos.y = yPosition;
 
 		return pos;
+	}
+
+	public override IsoSurfaceDebug GetIsoSurfaceDebug()
+	{
+		return isoSurface.isoDebug;
 	}
 }
