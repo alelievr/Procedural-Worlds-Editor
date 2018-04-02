@@ -4,12 +4,6 @@ using UnityEngine;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
-	public enum NormalGenerationMode
-	{
-		Flat,
-		Smooth,
-	}
-
 	public abstract class IsoSurface
 	{
 		public bool					generateUvs = true;
@@ -30,9 +24,7 @@ namespace ProceduralWorlds.IsoSurfaces
 		[System.NonSerialized]
 		int							oldVertexCount = -1;
 
-		public NormalGenerationMode	normalGenerationMode;
-
-		public abstract Mesh Generate(int chunkSize);
+		public abstract Mesh Generate(int chunkSize, Vector3 chunkPosition = default(Vector3));
 
 		protected void UpdateVerticesSize(int vertexCount, int faceCount)
 		{

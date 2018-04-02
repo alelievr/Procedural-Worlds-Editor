@@ -36,7 +36,7 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 		mesh.SetUVs(1, blendInfos);
 	}
 	
-	public override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
+	protected override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
 		if (chunk == null)
 			return null;
@@ -68,7 +68,7 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 		return g;
 	}
 
-	public override void 	OnChunkDestroy(TopDownChunkData terrainData, object userStoredObject, Vector3 pos)
+	protected override void 	OnChunkDestroy(TopDownChunkData terrainData, object userStoredObject, Vector3 pos)
 	{
 		GameObject g = userStoredObject as GameObject;
 
@@ -76,7 +76,7 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 			DestroyImmediate(g);
 	}
 
-	public override void	OnChunkRender(TopDownChunkData chunk, object chunkGameObject, Vector3 pos)
+	protected override void	OnChunkRender(TopDownChunkData chunk, object chunkGameObject, Vector3 pos)
 	{
 		if (chunk == null)
 			return ;

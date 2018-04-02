@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.IsoSurfaces;
+using System.Diagnostics;
+
+using Debug = UnityEngine.Debug;
 
 namespace ProceduralWorlds
 {
@@ -38,6 +41,16 @@ namespace ProceduralWorlds
 		protected bool					generateBorders = true;
 		
 		protected int					oldSeed = 0;
+		
+		Vector3[] neighbourDirections = new Vector3[]
+		{
+			Vector3.up,
+			Vector3.down,
+			Vector3.right,
+			Vector3.left,
+			Vector3.forward,
+			Vector3.back,
+		};
 		
 		public virtual void Start ()
 		{
@@ -136,6 +149,17 @@ namespace ProceduralWorlds
 					Debug.Log("TODO: " + loadPatternMode + " load mode");
 					break ;
 			}
+		}
+
+		public IEnumerable< Vector3 > GetChunkNeighbourPositions(Vector3 position)
+		{
+			//snap position to the nearest chunk:
+			position = RoundPositionToChunk(position);
+
+			float chunkUnit = (1 / terrainScale);
+
+			for (int i = 0; i < 6; i++)
+				yield return chunkUnit * neighbourDirections[i];
 		}
 		
 		protected Vector3 GetChunkWorldPosition(Vector3 pos)

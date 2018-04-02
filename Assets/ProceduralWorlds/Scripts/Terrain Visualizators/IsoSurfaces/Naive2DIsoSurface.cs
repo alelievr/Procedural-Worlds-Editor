@@ -10,15 +10,13 @@ namespace ProceduralWorlds.IsoSurfaces
 		Sampler2D	heightDisplacementMap = null;
 		float		heightScale;
 
-		//TODO: implement flat shaded normals
-
-        public override Mesh Generate(int chunkSize)
+        public override Mesh Generate(int chunkSize, Vector3 chunkPositiont = default(Vector3))
         {
 			int		vertexCount = chunkSize * chunkSize;
 			int		faceCount = (chunkSize - 1) * (chunkSize - 1);
 
 			UpdateVerticesSize(vertexCount, faceCount * 2);
-
+			
 			for (int x = 0; x < chunkSize; x++)
 			{
 				float xPos = ((float)x / (chunkSize - 1) - .5f);
@@ -45,10 +43,15 @@ namespace ProceduralWorlds.IsoSurfaces
 				triangles[t++] = i + 1;
 				triangles[t++] = i + chunkSize;
 			}
+
 	
 			if (heightDisplacementMap == null)
+			{
 				for (int i = 0; i < chunkSize * chunkSize; i++)
 					normals[i] = Vector3.up;
+
+				return GenerateMesh(false);
+			}
 
 			return GenerateMesh(true);
         }

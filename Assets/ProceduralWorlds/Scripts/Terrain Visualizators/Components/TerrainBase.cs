@@ -17,7 +17,7 @@ namespace ProceduralWorlds
 		protected override void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkHide(terrainData as T, userStoredObject, pos); }
 		protected override object RequestCreateGeneric(ChunkData terrainData, Vector3 pos) { return RequestCreate(terrainData as T, pos); }
 
-		public T RequestChunk(Vector3 pos, int seed)
+		protected T RequestChunk(Vector3 pos, int seed)
 		{
 			if (seed != oldSeed)
 				graph.seed = seed;
@@ -37,7 +37,7 @@ namespace ProceduralWorlds
 			return CreateChunkData(finalTerrain, pos);
 		}
 
-		public virtual T CreateChunkData(FinalTerrain terrain, Vector3 pos)
+		protected virtual T CreateChunkData(FinalTerrain terrain, Vector3 pos)
 		{
 			T chunk = new T();
 
@@ -45,13 +45,13 @@ namespace ProceduralWorlds
 			return chunk;
 		}
 
-		public abstract object OnChunkCreate(T terrainData, Vector3 pos);
-		public abstract void OnChunkRender(T terrainData, object userStoredObject, Vector3 pos);
-		public abstract void OnChunkDestroy(T terrainData, object userStoredObject, Vector3 pos);
+		protected abstract object OnChunkCreate(T terrainData, Vector3 pos);
+		protected abstract void OnChunkRender(T terrainData, object userStoredObject, Vector3 pos);
+		protected abstract void OnChunkDestroy(T terrainData, object userStoredObject, Vector3 pos);
 
-		public virtual void OnChunkHide(T terrainData, object userStoredObject, Vector3 pos) {}
+		protected virtual void OnChunkHide(T terrainData, object userStoredObject, Vector3 pos) {}
 
-		public object RequestCreate(T terrainData, Vector3 pos)
+		protected object RequestCreate(T terrainData, Vector3 pos)
 		{
 			var userData = OnChunkCreate(terrainData, pos);
 			if (terrainStorage == null)
@@ -63,7 +63,7 @@ namespace ProceduralWorlds
 			return userData;
 		}
 
-		public void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain, Vector3 pos)
+		protected void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain, Vector3 pos)
 		{
 			chunk.size = finalTerrain.mergedTerrain.size;
 			chunk.materializerType = finalTerrain.materializerType;

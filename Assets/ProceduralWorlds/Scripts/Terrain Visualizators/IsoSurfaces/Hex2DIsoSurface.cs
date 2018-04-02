@@ -18,16 +18,28 @@ namespace ProceduralWorlds.IsoSurfaces
 		Vector2[]	evenHexNeighbourCoords;
 		Vector2[]	oddHexNeighbourCoords;
 
+		float[]		neighbourHeights = new float[6];
+
+		TerrainStorage	terrainStorage;
+		Vector3			currentChunkPosition;
+
 		public Hex2DIsoSurface()
 		{
 			useDynamicTriangleCount = true;
 			UpdateHexNearCoords();
 		}
 
-        public override Mesh Generate(int chunkSize)
+		public void UpdateTerrainStorage(TerrainStorage terrainStorage)
+		{
+			this.terrainStorage = terrainStorage;
+		}
+
+        public override Mesh Generate(int chunkSize, Vector3 chunkPosition = default(Vector3))
         {
             int vertexCount = chunkSize * chunkSize * (6 + 1);
 			int faceCount = chunkSize * chunkSize * 6;
+
+			currentChunkPosition = chunkPosition;
 
 			if (heightMap != null)
 			{
@@ -94,13 +106,21 @@ namespace ProceduralWorlds.IsoSurfaces
 						GenerateHexBorders(x, z, chunkSize, pos);
 				}
 			}
+			
+			for (int i = 0; i < vertexCount; i++)
+				normals[i] = Vector3.up;
 
-            return GenerateMesh(true);
+            return GenerateMesh(false);
         }
 
 		float SafeGetHeight(int x, int z, int chunkSize, int defaultX = 0, int defaultZ = 0)
 		{
-			if (x < 0 || x >= chunkSize || z < 0 || z >= chunkSize)
+			if (x < 0 && z < 0)
+			{
+				var chunkData = terrainStorage.GetChunkDatas(currentChunkPosition);
+				//TODO: get the neighbour chunk datas and access them to generate polys
+			}
+			else if (x < 0 || x >= chunkSize || z < 0 || z >= chunkSize)
 				return heightMap[defaultX, defaultZ];
 			return heightMap[x, z];
 		}
@@ -122,6 +142,7 @@ namespace ProceduralWorlds.IsoSurfaces
 		{
 			int hexVertexIndex = (x + z * chunkSize) * (6 + 1) + 1;
 			int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
+			float height = heightMap[x, z];
 
 			#if DEBUG
 				isoDebug.BeginFrame("Hex border of " + x + " / " + z);
@@ -129,8 +150,8 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			for (int i = 0; i < 6; i++)
 			{
-				float height = heightMap[x, z];
 				float neighbourHeight = GetNeighbourHeight(x, z, i, chunkSize);
+				neighbourHeights[i] = neighbourHeight;
 				
 				Vector3 hexPos = pos + hexPositions[i + 1];
 
@@ -149,6 +170,11 @@ namespace ProceduralWorlds.IsoSurfaces
 			for (int i = 0; i < 6; i++)
 			{
 				int nbv = (i + 1) % 6;
+
+				//we remove useless flat triangles
+				if (height == neighbourHeights[i])
+					continue ;
+				
 				AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
 				AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
 
