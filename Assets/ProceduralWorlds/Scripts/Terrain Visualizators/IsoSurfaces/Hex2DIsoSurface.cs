@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds.Core;
+using System.Linq;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
@@ -22,16 +23,12 @@ namespace ProceduralWorlds.IsoSurfaces
 
 		TerrainStorage	terrainStorage;
 		Vector3			currentChunkPosition;
+		int				currentChunkSize;
 
 		public Hex2DIsoSurface()
 		{
 			useDynamicTriangleCount = true;
 			UpdateHexNearCoords();
-		}
-
-		public void UpdateTerrainStorage(TerrainStorage terrainStorage)
-		{
-			this.terrainStorage = terrainStorage;
 		}
 
         public override Mesh Generate(int chunkSize, Vector3 chunkPosition = default(Vector3))
@@ -40,6 +37,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			int faceCount = chunkSize * chunkSize * 6;
 
 			currentChunkPosition = chunkPosition;
+			currentChunkSize = chunkSize;
 
 			if (heightMap != null)
 			{
@@ -183,6 +181,67 @@ namespace ProceduralWorlds.IsoSurfaces
 					isoDebug.DrawTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i, Color.blue);
 				#endif
 			}
+		}
+
+		IEnumerable< Vector2 > GetBorderPositions(Vector3 currentChunk, Vector3 neighbourPosition)
+		{
+			Vector3 d = neighbourPosition - currentChunk;
+
+			if (d.x > 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(currentChunkSize - 1, i);
+			if (d.x < 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(0, i);
+			if (d.z > 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(i, 0);
+			if (d.z < 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(i, currentChunkSize - 1);
+		}
+
+		public void UpdateMeshBorder(TerrainStorage terrainStorage, Vector3 position, Vector3 neighbourPosition)
+		{
+			this.terrainStorage = terrainStorage;
+
+			var chunk = terrainStorage[position];
+			var neighbourChunk = terrainStorage[neighbourPosition];
+
+			Sampler2D terrain = chunk.terrainData.terrain as Sampler2D;
+			Sampler2D neighbourTerrain = neighbourChunk.terrainData.terrain as Sampler2D;
+
+			var borderPos = GetBorderPositions(position, neighbourPosition).ToList();
+
+			Mesh terrainMesh = (chunk.userData as GameObject).GetComponent< MeshFilter >().sharedMesh;
+			Mesh neighbourMesh = (neighbourChunk.userData as GameObject).GetComponent< MeshFilter >().sharedMesh;
+
+			var triangles = terrainMesh.GetTriangles(0).ToList();
+			var vertices = terrainMesh.vertices;
+			var neighbourVertices = neighbourMesh.vertices;
+			var neighbourTriangles = neighbourMesh.GetTriangles(0).ToList();
+
+			for (int i = 0; i < borderPos.Count; i++)
+			{
+				int x = (int)borderPos[i].x;
+				int z = (int)borderPos[i].y;
+				float h = terrain[x, z];
+				float nh = GetNeighbourHeight(x, z, i, currentChunkSize);
+
+				int hexVertexIndex = (x + z * currentChunkSize) * (6 + 1) + 1;
+				int borderVertexIndex = currentChunkSize * currentChunkSize * (6 + 1) + (x + z * currentChunkSize) * 6;
+
+				if (nh > h)
+				{
+					vertices[borderVertexIndex + i].y = 0;
+					traingleList.Add(borderVertexIndex + i);
+					traingleList.Add(hexVertexIndex);
+					traingleList.Add(hexVertexIndex + 1);
+				}
+			}
+
+			terrainMesh.vertices = vertices;
+			terrainMesh.SetTriangles(triangles, 0);
 		}
 
 		void UpdateHexPositions(int chunkSize)

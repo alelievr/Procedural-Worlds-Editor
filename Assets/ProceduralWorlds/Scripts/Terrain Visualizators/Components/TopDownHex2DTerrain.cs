@@ -17,6 +17,7 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 	protected override void OnTerrainEnable()
 	{
 		generateBorders = false;
+		neighbourMessageMode = NeighbourMessageMode.Mode2DXZCorner;
 		isoSurface.generateUvs = true;
 	}
 
@@ -58,6 +59,11 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 
 		if (g != null)
 			DestroyImmediate(g);
+	}
+
+	protected override void OnNeighbourUpdate(Vector3 pos, Vector3 nPos)
+	{
+		isoSurface.UpdateMeshBorder(terrainStorage, pos, nPos);
 	}
 
 	protected override void	OnChunkRender(TopDownChunkData chunk, object chunkGameObject, Vector3 pos)

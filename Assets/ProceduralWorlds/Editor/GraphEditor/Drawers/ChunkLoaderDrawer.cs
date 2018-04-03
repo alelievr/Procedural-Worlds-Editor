@@ -72,7 +72,13 @@ namespace ProceduralWorlds.Editor
 			}
 
 			if (worldGraph != null)
-				terrain.ReloadChunks(worldGraph);
+			{
+				try {
+					terrain.ReloadChunks(worldGraph);
+				} catch (Exception e) {
+					Debug.LogError(e);
+				}
+			}
 		}
 	}
 }

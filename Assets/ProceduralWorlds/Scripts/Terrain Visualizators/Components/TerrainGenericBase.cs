@@ -17,6 +17,17 @@ namespace ProceduralWorlds
 		PRIORITY_CIRCLE,
 	}
 
+	public enum NeighbourMessageMode
+	{
+		None,
+		Mode2DXZ,
+		Mode2DXZCorner,
+		Mode2DXY,
+		Mode2DXYCorner,
+		Mode3D,
+		Mode3DCorner,
+	}
+
 	[ExecuteInEditMode]
 	public abstract class TerrainGenericBase : MonoBehaviour
 	{
@@ -39,20 +50,87 @@ namespace ProceduralWorlds
 		public bool						initialized { get { return graph != null && terrainRoot != null; } }
 
 		protected bool					generateBorders = true;
+		protected NeighbourMessageMode	neighbourMessageMode = NeighbourMessageMode.None;
 		
 		protected int					oldSeed = 0;
 		
-		Vector3[] neighbourDirections = new Vector3[]
+		Dictionary< NeighbourMessageMode, Vector3[] > neighbourChunkPositions = new Dictionary< NeighbourMessageMode, Vector3[] >
 		{
-			Vector3.up,
-			Vector3.down,
-			Vector3.right,
-			Vector3.left,
-			Vector3.forward,
-			Vector3.back,
+			{
+				NeighbourMessageMode.Mode2DXZ,
+				new Vector3[] {
+					Vector3.right,
+					Vector3.left,
+					Vector3.forward,
+					Vector3.back,
+				}
+			},
+			{
+				NeighbourMessageMode.Mode2DXZCorner,
+				new Vector3[] {
+					Vector3.right,
+					Vector3.left,
+					Vector3.forward,
+					Vector3.back,
+					new Vector3(1, 0, 1),
+					new Vector3(1, 0, -1),
+					new Vector3(-1, 0, 1),
+					new Vector3(-1, 0, -1),
+				}
+			},
+			{
+				NeighbourMessageMode.Mode2DXY,
+				new Vector3[] {
+					Vector3.up,
+					Vector3.down,
+					Vector3.right,
+					Vector3.left,
+				}
+			},
+			{
+				NeighbourMessageMode.Mode2DXYCorner,
+				new Vector3[] {
+					Vector3.up,
+					Vector3.down,
+					Vector3.right,
+					Vector3.left,
+					new Vector3(1, -1, 0),
+					new Vector3(-1, 1, 0),
+				}
+			},
+			{
+				NeighbourMessageMode.Mode3D,
+				new Vector3[] {
+					Vector3.up,
+					Vector3.down,
+					Vector3.right,
+					Vector3.left,
+					Vector3.forward,
+					Vector3.back,
+				}
+			},
+			{
+				NeighbourMessageMode.Mode3DCorner,
+				new Vector3[] {
+					Vector3.up,
+					Vector3.down,
+					Vector3.right,
+					Vector3.left,
+					Vector3.forward,
+					Vector3.back,
+					Vector3.one,
+					-Vector3.one,
+					new Vector3(-1, 1, 1),
+					new Vector3(1, 1, -1),
+					new Vector3(-1, 1, -1),
+					new Vector3(-1, -1, 1),
+					new Vector3(1, -1, -1),
+					new Vector3(1, -1, 1),
+				}
+			},
 		};
 		
-		public virtual void Start ()
+		public virtual void Start()
 		{
 			if (graphAsset != null)
 				InitGraph(graphAsset);
@@ -151,17 +229,6 @@ namespace ProceduralWorlds
 			}
 		}
 
-		public IEnumerable< Vector3 > GetChunkNeighbourPositions(Vector3 position)
-		{
-			//snap position to the nearest chunk:
-			position = RoundPositionToChunk(position);
-
-			float chunkUnit = (1 / terrainScale);
-
-			for (int i = 0; i < 6; i++)
-				yield return chunkUnit * neighbourDirections[i];
-		}
-		
 		protected Vector3 GetChunkWorldPosition(Vector3 pos)
 		{
 			if (generateBorders)
@@ -188,9 +255,17 @@ namespace ProceduralWorlds
 			{
 				if (!terrainStorage.isLoaded(pos))
 				{
+					Stopwatch sw = new Stopwatch();
+					sw.Start();
 					var data = RequestChunkGeneric(pos, graph.seed);
 					var userChunkData = OnChunkCreateGeneric(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
+
+					if (neighbourMessageMode != NeighbourMessageMode.None)
+						SendNeighbourMessages(pos);
+
+					sw.Stop();
+					Debug.Log("chunk ms: " + sw.Elapsed.TotalMilliseconds);
 				}
 				else
 				{
@@ -200,6 +275,20 @@ namespace ProceduralWorlds
 			}
 
 			oldChunkPosition = currentChunkPos;
+		}
+
+		void SendNeighbourMessages(Vector3 currentPos)
+		{
+			Vector3[] positions = neighbourChunkPositions[neighbourMessageMode];
+
+			float chunkUnit = chunkSize;
+
+			foreach (var pos in positions)
+			{
+				Vector3 neighbourPos = pos * chunkUnit + currentPos;
+				if (terrainStorage.isLoaded(neighbourPos))
+					OnNeighbourUpdate(currentPos, neighbourPos);
+			}
 		}
 
 		public void	DestroyAllChunks()
@@ -233,6 +322,8 @@ namespace ProceduralWorlds
 		protected abstract void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		protected abstract void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos);
 		protected abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
+
+		protected virtual void OnNeighbourUpdate(Vector3 chunkPosition, Vector3 neighbourPosition) {}
 
 		//Terrain overridable methods
 		protected virtual void OnTerrainEnable() {}

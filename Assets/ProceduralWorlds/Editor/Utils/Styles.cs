@@ -153,6 +153,50 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
+		static Texture2D Colorize(Texture2D original, Color filter)
+		{
+			Texture2D result = new Texture2D(original.width, original.height, original.format, original.mipmapCount > 1);
+			Graphics.CopyTexture(original, result);
+			for (int x = 0; x < result.width; x++)
+				for (int y = 0; y < result.height; y++)
+					result.SetPixel(x, y, result.GetPixel(x, y) * filter);
+			result.Apply();
+			
+			return result;
+		}
+
+		static GUIStyle _redButton;
+		public static GUIStyle redButton
+		{
+			get
+			{
+				if (_redButton == null)
+				{
+					_redButton = new GUIStyle("Button");
+					Texture2D redButtonTexture = Colorize(_redButton.normal.background, Color.red);
+					_redButton.normal.background = redButtonTexture;
+				}
+
+				return _redButton;
+			}
+		}
+
+		static GUIStyle _yellowButton;
+		public static GUIStyle yellowButton
+		{
+			get
+			{
+				if (_yellowButton == null)
+				{
+					_yellowButton = new GUIStyle("Button");
+					Texture2D yellowButtontexture = Colorize(_yellowButton.normal.background, Color.yellow);
+					_yellowButton.normal.background = yellowButtontexture;
+				}
+
+				return _yellowButton;
+			}
+		}
+
 		public static GUIStyle ColorizeText(GUIStyle text, Color color)
 		{
 			text.normal.textColor = color;

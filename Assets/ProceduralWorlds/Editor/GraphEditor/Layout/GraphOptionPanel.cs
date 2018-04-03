@@ -66,15 +66,17 @@ namespace ProceduralWorlds.Editor
 
 					if (GUILayout.Button(saveGraphContent, GUILayout.Width(30), GUILayout.Height(30)))
 						saveGraph = true;
-					
+
 					if (GUILayout.Button(resetLayoutContent, GUILayout.Width(30), GUILayout.Height(30)))
 						graphEditor.ResetLayout();
 					
-					if (GUILayout.Button(tryFixContent, GUILayout.Width(30), GUILayout.Height(30)))
-						TryFix();
+					GUILayout.FlexibleSpace();
 
-					if (GUILayout.Button(bugReportContent, GUILayout.Width(30), GUILayout.Height(30)))
+					if (GUILayout.Button(bugReportContent, Styles.yellowButton, GUILayout.Width(30), GUILayout.Height(30)))
 						Application.OpenURL("https://github.com/alelievr/Procedural-Worlds-Editor/issues/new");
+					
+					if (GUILayout.Button(tryFixContent, Styles.redButton, GUILayout.Width(30), GUILayout.Height(30)))
+						TryFix();
 				}
 				EditorGUILayout.EndHorizontal();
 		
