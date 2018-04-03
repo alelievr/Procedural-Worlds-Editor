@@ -1,4 +1,4 @@
-// #define DEBUG
+#define DEBUG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -111,27 +111,27 @@ namespace ProceduralWorlds.IsoSurfaces
             return GenerateMesh(false);
         }
 
-		float SafeGetHeight(int x, int z, int chunkSize, int defaultX = 0, int defaultZ = 0)
+		#region Hexagon borders Borders
+
+		float SafeGetHeight(int x, int z, float defaultValue, Sampler2D terrain = null)
 		{
-			if (x < 0 && z < 0)
-			{
-				var chunkData = terrainStorage.GetChunkDatas(currentChunkPosition);
-				//TODO: get the neighbour chunk datas and access them to generate polys
-			}
-			else if (x < 0 || x >= chunkSize || z < 0 || z >= chunkSize)
-				return heightMap[defaultX, defaultZ];
-			return heightMap[x, z];
+			if (terrain == null)
+				terrain = heightMap;
+			
+			if (x < 0 || x >= currentChunkSize || z < 0 || z >= currentChunkSize)
+				return defaultValue;
+			return terrain[x, z];
 		}
 
-		float GetNeighbourHeight(int x, int z, int index, int chunkSize)
+		float GetNeighbourHeight(int x, int z, int index)
 		{
 			//Yeah i know, it seems to be black magic, but trust me it works !
 			int i1 = (-index + 6) % 6;
 			int i2 = (-index + 11) % 6;
 			var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
 			var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
-			float neighbourHeight1 = SafeGetHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, chunkSize, x, z);
-			float neighbourHeight2 = SafeGetHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, chunkSize, x, z);
+			float neighbourHeight1 = SafeGetHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, heightMap[x, z]);
+			float neighbourHeight2 = SafeGetHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, heightMap[x, z]);
 
 			return Mathf.Min(neighbourHeight1, neighbourHeight2);
 		}
@@ -148,7 +148,7 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			for (int i = 0; i < 6; i++)
 			{
-				float neighbourHeight = GetNeighbourHeight(x, z, i, chunkSize);
+				float neighbourHeight = GetNeighbourHeight(x, z, i);
 				neighbourHeights[i] = neighbourHeight;
 				
 				Vector3 hexPos = pos + hexPositions[i + 1];
@@ -169,10 +169,6 @@ namespace ProceduralWorlds.IsoSurfaces
 			{
 				int nbv = (i + 1) % 6;
 
-				//we remove useless flat triangles
-				if (height == neighbourHeights[i])
-					continue ;
-				
 				AddTriangle(hexVertexIndex + i, hexVertexIndex + nbv, borderVertexIndex + i);
 				AddTriangle(hexVertexIndex + nbv, borderVertexIndex + nbv, borderVertexIndex + i);
 
@@ -183,22 +179,67 @@ namespace ProceduralWorlds.IsoSurfaces
 			}
 		}
 
-		IEnumerable< Vector2 > GetBorderPositions(Vector3 currentChunk, Vector3 neighbourPosition)
+		float SafeGetNeighbourChunkHeight(int x, int z, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D terrain)
 		{
-			Vector3 d = neighbourPosition - currentChunk;
+			#if DEBUG
+				isoDebug.DrawLabel(new Vector3(x, 0, z), "check: " + x + "/" + z);
+			#endif
+			if (x >= currentChunkSize && chunkDirection.x > 0 && z >= 0 && z < currentChunkSize)
+				return terrain[x - currentChunkSize, z];
+			else if (x < 0 && chunkDirection.x < 0 && z >= 0 && z < currentChunkSize)
+				return terrain[x + currentChunkSize, z];
+			else if (z >= currentChunkSize && chunkDirection.z > 0 && x >= 0 && x < currentChunkSize)
+				return terrain[x, z - currentChunkSize];
+			else if (z < 0 && chunkDirection.z < 0 && x >= 0 && x < currentChunkSize)
+				return terrain[x, z + currentChunkSize];
+		
+			return SafeGetHeight(x, z, defaultValue, currentTerrain);
+		}
 
-			if (d.x > 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(currentChunkSize - 1, i);
-			if (d.x < 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(0, i);
-			if (d.z > 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(i, 0);
-			if (d.z < 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(i, currentChunkSize - 1);
+		float GetNeighbourChunkHeight(int x, int z, int index, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D chunkTerrain)
+		{
+			//Yeah i know, it seems to be black magic, but trust me it works !
+			int i1 = (-index + 6) % 6;
+			int i2 = (-index + 11) % 6;
+			var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
+			var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
+			float neighbourHeight1 = SafeGetNeighbourChunkHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, defaultValue, chunkDirection, chunkTerrain, currentTerrain);
+			float neighbourHeight2 = SafeGetNeighbourChunkHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, defaultValue, chunkDirection, chunkTerrain, currentTerrain);
+
+			return Mathf.Min(neighbourHeight1, neighbourHeight2);
+		}
+
+		void UpdateBorderForChunk(Vector3 chunkDirection, Sampler2D chunk, Mesh chunkMesh, Sampler2D neighbourChunk, Mesh neighbourMesh)
+		{
+			var vertices = chunkMesh.vertices;
+			var neighbourVertices = neighbourMesh.vertices;
+
+			var borderPos = GetBorderPositions(chunkDirection).ToList();
+
+			for (int b = 0; b < borderPos.Count; b++)
+			{
+				int x = (int)borderPos[b].x;
+				int z = (int)borderPos[b].y;
+				int hexVertexIndex = (x + z * currentChunkSize) * (6 + 1) + 1;
+				int borderVertexIndex = currentChunkSize * currentChunkSize * (6 + 1) + (x + z * currentChunkSize) * 6;
+				float h = chunk[x, z];
+
+				for (int i = 0; i < 6; i++)
+				{
+					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk);
+
+					if (neighbourHeight >= h)
+						continue ;
+	
+					float newHeight = (neighbourHeight < h) ? neighbourHeight * heightScale : h * heightScale;
+					
+					vertices[borderVertexIndex + i].y = newHeight;
+				}
+			}
+
+			chunkMesh.vertices = vertices;
+
+			chunkMesh.RecalculateBounds();
 		}
 
 		public void UpdateMeshBorder(TerrainStorage terrainStorage, Vector3 position, Vector3 neighbourPosition)
@@ -211,38 +252,18 @@ namespace ProceduralWorlds.IsoSurfaces
 			Sampler2D terrain = chunk.terrainData.terrain as Sampler2D;
 			Sampler2D neighbourTerrain = neighbourChunk.terrainData.terrain as Sampler2D;
 
-			var borderPos = GetBorderPositions(position, neighbourPosition).ToList();
-
 			Mesh terrainMesh = (chunk.userData as GameObject).GetComponent< MeshFilter >().sharedMesh;
 			Mesh neighbourMesh = (neighbourChunk.userData as GameObject).GetComponent< MeshFilter >().sharedMesh;
+			
+			Vector3 chunkDirection = neighbourPosition - position;
 
-			var triangles = terrainMesh.GetTriangles(0).ToList();
-			var vertices = terrainMesh.vertices;
-			var neighbourVertices = neighbourMesh.vertices;
-			var neighbourTriangles = neighbourMesh.GetTriangles(0).ToList();
-
-			for (int i = 0; i < borderPos.Count; i++)
-			{
-				int x = (int)borderPos[i].x;
-				int z = (int)borderPos[i].y;
-				float h = terrain[x, z];
-				float nh = GetNeighbourHeight(x, z, i, currentChunkSize);
-
-				int hexVertexIndex = (x + z * currentChunkSize) * (6 + 1) + 1;
-				int borderVertexIndex = currentChunkSize * currentChunkSize * (6 + 1) + (x + z * currentChunkSize) * 6;
-
-				if (nh > h)
-				{
-					vertices[borderVertexIndex + i].y = 0;
-					traingleList.Add(borderVertexIndex + i);
-					traingleList.Add(hexVertexIndex);
-					traingleList.Add(hexVertexIndex + 1);
-				}
-			}
-
-			terrainMesh.vertices = vertices;
-			terrainMesh.SetTriangles(triangles, 0);
+			UpdateBorderForChunk(chunkDirection, terrain, terrainMesh, neighbourTerrain, neighbourMesh);
+			// UpdateBorderForChunk(-chunkDirection, neighbourTerrain, neighbourMesh, terrain, terrainMesh);
 		}
+
+		#endregion
+
+		#region Utils
 
 		void UpdateHexPositions(int chunkSize)
 		{
@@ -303,5 +324,24 @@ namespace ProceduralWorlds.IsoSurfaces
             this.heightMap = heightMap;
             this.heightScale = heightScale;
         }
+		
+		IEnumerable< Vector2 > GetBorderPositions(Vector3 chunkDirection)
+		{
+			if (chunkDirection.x > 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(currentChunkSize - 1, i);
+			if (chunkDirection.x < 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(0, i);
+			if (chunkDirection.z < 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(i, 0);
+			if (chunkDirection.z > 0)
+				for (int i = 0; i < currentChunkSize; i++)
+					yield return new Vector2(i, currentChunkSize - 1);
+		}
+
+		#endregion
+
     }
 }

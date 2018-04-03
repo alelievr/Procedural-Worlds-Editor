@@ -17,7 +17,7 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 	protected override void OnTerrainEnable()
 	{
 		generateBorders = false;
-		neighbourMessageMode = NeighbourMessageMode.Mode2DXZCorner;
+		neighbourMessageMode = NeighbourMessageMode.Mode2DXZ;
 		isoSurface.generateUvs = true;
 	}
 
