@@ -6,7 +6,6 @@ namespace ProceduralWorlds.Editor
 {
 	public class ResizablePanelSeparator : LayoutSeparator
 	{
-		int					internHandlerPosition;
 		readonly bool		vertical;
 
 		[SerializeField]
@@ -23,7 +22,7 @@ namespace ProceduralWorlds.Editor
 	
 		public override Rect Begin()
 		{
-			internHandlerPosition = (int)layoutSetting.separatorPosition;
+			int internHandlerPosition = (int)layoutSetting.separatorPosition;
 			if (vertical)
 			{
 				//TODO

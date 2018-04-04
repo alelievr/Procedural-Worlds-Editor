@@ -14,7 +14,7 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 
 	Gradient		rainbow;
 
-	Naive2DIsoSurface	isoSurface = new Naive2DIsoSurface();
+	readonly Naive2DIsoSurface	isoSurface = new Naive2DIsoSurface();
 
 	protected override void OnTerrainEnable()
 	{
@@ -87,7 +87,7 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 			RequestCreate(chunk, pos);
 	}
 	
-	public override Vector3 GetChunkPosition(Vector3 pos)
+	protected override Vector3 GetChunkPosition(Vector3 pos)
 	{
 		pos.y = yPosition;
 

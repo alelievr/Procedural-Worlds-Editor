@@ -9,11 +9,9 @@ namespace ProceduralWorlds.Editor
 	[CustomEditor(typeof(NodeBiomeSurfaceModifiers))]
 	public class NodeBiomeSurfaceModifierEditor : BaseNodeEditor
 	{
-		// public NodeBiomeSurfaceModifiers node;
-
 		public override void OnNodeGUI()
 		{
-
+			//TODO
 		}
 	}
 }

@@ -238,7 +238,7 @@ namespace ProceduralWorlds
 				return pos * terrainScale;
 		}
 
-		public virtual Vector3 GetChunkPosition(Vector3 pos) { return pos; }
+		protected virtual Vector3 GetChunkPosition(Vector3 pos) { return pos; }
 		
 		//Instanciate / update ALL chunks (must be called to refresh a whole terrain)
 		public void	UpdateChunks(bool ignorePositionCheck = false)
@@ -247,7 +247,7 @@ namespace ProceduralWorlds
 				return ;
 			
 			Vector3 currentPos = transform.position;
-			Vector3 currentChunkPos = RoundPositionToChunk(currentPos);
+			Vector3 currentChunkPos = RoundPositionToChunk(ApplyWorldPositionModifier(currentPos));
 			
 			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
 				return ;
@@ -325,6 +325,7 @@ namespace ProceduralWorlds
 		protected abstract object RequestCreateGeneric(ChunkData terrainData, Vector3 pos);
 
 		protected virtual void OnNeighbourUpdate(Vector3 chunkPosition, Vector3 neighbourPosition) {}
+		protected virtual Vector3 ApplyWorldPositionModifier(Vector3 worldPosition) { return worldPosition; }
 
 		//Terrain overridable methods
 		protected virtual void OnTerrainEnable() {}

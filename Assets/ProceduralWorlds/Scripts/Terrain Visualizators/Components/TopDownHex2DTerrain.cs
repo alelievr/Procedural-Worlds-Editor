@@ -81,7 +81,7 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 			RequestCreate(chunk, pos);
 	}
 
-	public override Vector3 GetChunkPosition(Vector3 pos)
+	protected override Vector3 GetChunkPosition(Vector3 pos)
 	{
 		pos.y = yPosition;
 

@@ -198,8 +198,7 @@ namespace ProceduralWorlds.Editor
 	
 		void PlayModeChangeCallback(PlayModeStateChange mode)
 		{
-			// if (mode == PlayModeStateChange.EnteredEditMode)
-				// graph.Process();
+			//Maybe reload the graph if needed
 		}
 	
 		void UndoRedoCallback()

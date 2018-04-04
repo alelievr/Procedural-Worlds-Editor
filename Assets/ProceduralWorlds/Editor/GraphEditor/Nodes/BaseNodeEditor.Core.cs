@@ -22,9 +22,6 @@ namespace ProceduralWorlds.Editor
 		[System.NonSerialized]
 		bool						styleLoaded;
 
-		List< object >				propertiesBeforeGUI;
-		List< object >				propertiesAfterGUI;
-
 		readonly Dictionary< string, ReflectionUtils.GenericField > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericField >();
 
 		void LoadCoreResources()

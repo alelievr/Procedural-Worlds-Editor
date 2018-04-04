@@ -29,12 +29,12 @@ namespace ProceduralWorlds.Core
 			public Vector3	position;
 			public Color	color;
 	
-			public View(Vector3 position)
+			protected View(Vector3 position)
 			{
 				this.position = position;
 			}
 
-			public View() {}
+			protected View() {}
 		}
 		
 		public class PointView : View

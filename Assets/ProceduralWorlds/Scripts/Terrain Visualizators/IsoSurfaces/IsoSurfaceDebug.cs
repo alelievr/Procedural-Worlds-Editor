@@ -7,7 +7,7 @@ namespace ProceduralWorlds.IsoSurfaces
 {
 	public class IsoSurfaceDebug : VisualDebug
 	{
-		Dictionary< int, Vector3 > vertices = new Dictionary< int, Vector3 >();
+		readonly Dictionary< int, Vector3 > vertices = new Dictionary< int, Vector3 >();
 
 		public void DrawVertex(Vector3 pos, int index, int chunkSize)
 		{
@@ -22,7 +22,6 @@ namespace ProceduralWorlds.IsoSurfaces
 		
 		public void DrawTriangle(int i1, int i2, int i3)
 		{
-			// Debug.Log("Added traingle: " + vertices[i1] + " / " +  vertices[i2] + " / " + vertices[i3]);
 			DrawTriangle(vertices[i1], vertices[i2], vertices[i3]);
 		}
 	}

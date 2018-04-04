@@ -171,9 +171,9 @@ namespace ProceduralWorlds.IsoSurfaces
 		float SafeGetNeighbourChunkHeight(int x, int z, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D terrain)
 		{
 			//Corner:
-			if (x >= currentChunkSize && z < 0 && chunkDirection.x > 0)
+			if (x >= currentChunkSize && z < 0)
 				return terrain[x - currentChunkSize, z + currentChunkSize];
-			else if (x < 0 && z >= currentChunkSize && chunkDirection.x > 0)
+			else if (x < 0 && z >= currentChunkSize)
 				return terrain[x + currentChunkSize, z - currentChunkSize];
 
 			//Edges:
@@ -210,7 +210,6 @@ namespace ProceduralWorlds.IsoSurfaces
 		void UpdateBorderForChunk(Vector3 chunkDirection, Sampler2D chunk, Mesh chunkMesh, Sampler2D neighbourChunk, Mesh neighbourMesh)
 		{
 			var vertices = chunkMesh.vertices;
-			var neighbourVertices = neighbourMesh.vertices;
 
 			var borderPos = GetBorderPositions(chunkDirection).ToList();
 

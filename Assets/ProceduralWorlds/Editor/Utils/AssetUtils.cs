@@ -7,7 +7,7 @@ namespace ProceduralWorlds.Editor
 {
 	public static class AssetUtils
 	{
-		static string _proceduralWorldsEditorPath = null;//"/ProceduralWorlds/Editor/";
+		static string _proceduralWorldsEditorPath = null;
 		public static string proceduralWorldsEditorPath
 		{
 			get

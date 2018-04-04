@@ -560,24 +560,24 @@ namespace ProceduralWorlds.Core
 			return RemoveNode(nodesDictionary[nodeId], raiseEvents);
 		}
 
-		public bool		RemoveNode(BaseNode removeNode, bool raiseEvents = true)
+		public bool		RemoveNode(BaseNode node, bool raiseEvents = true)
 		{
 			//can't delete an input/output node
-			if (removeNode == inputNode || removeNode == outputNode)
+			if (node == inputNode || node == outputNode)
 				return false;
 			
 			if (OnNodePreRemoved != null)
-				OnNodePreRemoved(removeNode);
+				OnNodePreRemoved(node);
 			
-			int id = removeNode.id;
-			nodes.Remove(removeNode);
+			int id = node.id;
+			nodes.Remove(node);
 			
 			bool success = nodesDictionary.Remove(id);
 
-			removeNode.RemoveSelf();
+			node.RemoveSelf();
 
 			if (OnNodeRemoved != null && raiseEvents)
-				OnNodeRemoved(removeNode);
+				OnNodeRemoved(node);
 
 			return success;
 		}
