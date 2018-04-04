@@ -48,6 +48,7 @@ namespace ProceduralWorlds
 		
 		public GameObject				terrainRoot;
 		public bool						initialized { get { return graph != null && terrainRoot != null; } }
+		public bool						debug = false;
 
 		protected bool					generateBorders = true;
 		protected NeighbourMessageMode	neighbourMessageMode = NeighbourMessageMode.None;
@@ -360,11 +361,29 @@ namespace ProceduralWorlds
 				GameObject.DestroyImmediate(ret);
 			
 			ret = new GameObject(name);
+
+			if (debug)
+				ret.AddComponent< ChunkDebug >();
+
 			ret.transform.parent = terrainRoot.transform;
 			ret.transform.position = pos;
 			ret.transform.localScale = Vector3.one * chunkSize * terrainScale;
 
 			return ret;
+		}
+
+		protected void ProvideDebugInfo(GameObject gameObject, VisualDebug visualDebug, ChunkData chunkData)
+		{
+			if (!debug)
+				return ;
+			
+			ChunkDebug chunkDebug = gameObject.GetComponent< ChunkDebug >();
+
+			if (chunkDebug == null)
+				return ;
+			
+			chunkDebug.visualDebug = visualDebug.Clone(null);
+			chunkDebug.chunkData = chunkData;
 		}
 
 		#endregion

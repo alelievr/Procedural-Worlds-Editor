@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace ProceduralWorlds.Core
 {
-	public class VisualDebug
+	public class VisualDebug : IPWCloneable< VisualDebug >
 	{
-		public List < Frame >	frames = new List< Frame >();
+		public List < Frame >	frames;
+		public bool				enabled = true;
 
 		Frame					currentFrame;
 		Color					currentColor;
@@ -93,7 +95,7 @@ namespace ProceduralWorlds.Core
 
 		public void Initialize()
 		{
-			frames.Clear();
+			frames = new List< Frame >();
 			BeginFrame("Initial state");
 			currentColor = Color.white;
 		}
@@ -147,6 +149,17 @@ namespace ProceduralWorlds.Core
 		public void EndFrame()
 		{
 			currentFrame = null;
+		}
+
+		public VisualDebug Clone(VisualDebug reuseExisting)
+		{
+			if (reuseExisting == null)
+				reuseExisting = new VisualDebug();
+
+			reuseExisting.enabled = enabled;
+			reuseExisting.frames = frames;
+
+			return reuseExisting;
 		}
 	}
 }

@@ -5,7 +5,7 @@ using ProceduralWorlds;
 namespace ProceduralWorlds.Editor
 {
 	[CustomEditor(typeof(TerrainStorage))]
-	public class TerrainStorageCustomInspector : UnityEditor.Editor
+	public class TerrainStorageInspector : UnityEditor.Editor
 	{
 	
 		TerrainStorage 	terrain;

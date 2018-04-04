@@ -45,6 +45,10 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 
 		Mesh m = isoSurface.Generate(chunkSize);
 
+		//if debug is enabled, we give to the chunk debug component all infos it needs
+		if (debug)
+			ProvideDebugInfo(g, isoSurface.isoDebug, chunk);
+
 		mf.sharedMesh = m;
 
 		Shader topDown2DBasicTerrainShader = Shader.Find("Standard");

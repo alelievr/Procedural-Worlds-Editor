@@ -13,8 +13,6 @@ namespace ProceduralWorlds.Editor
 	{
 		TerrainGenericBase baseTerrain;
 
-		VisualDebugEditor	visualDebug = new VisualDebugEditor();
-
 		public void OnEnable()
 		{
 			baseTerrain = target as TerrainGenericBase;
@@ -23,6 +21,7 @@ namespace ProceduralWorlds.Editor
 
 		public override void OnInspectorGUI()
 		{
+			baseTerrain.debug = EditorGUILayout.Toggle("Debug", baseTerrain.debug);
 			baseTerrain.renderDistance = EditorGUILayout.IntSlider("Render distance", baseTerrain.renderDistance, 0, 24);
 			baseTerrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", baseTerrain.loadPatternMode);
 			baseTerrain.terrainStorage = EditorGUILayout.ObjectField("Chunk storage", baseTerrain.terrainStorage, typeof(TerrainStorage), false) as TerrainStorage;
@@ -30,20 +29,10 @@ namespace ProceduralWorlds.Editor
 			baseTerrain.graphAsset = EditorGUILayout.ObjectField("World Graph", baseTerrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
 
 			OnEditorGUI();
-
-			var isoDebug = baseTerrain.GetIsoSurfaceDebug();
-
-			if (isoDebug != null)
-			{
-				visualDebug.SetVisualDebugDatas(isoDebug);
-			}
-			
-			visualDebug.DrawInspector();
 		}
 
 		public void OnSceneGUI()
 		{
-			visualDebug.DrawScene();
 			OnEditorSceneGUI();
 		}
 

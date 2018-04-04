@@ -12,17 +12,24 @@ namespace ProceduralWorlds.Editor
 		int		currentStep;
 		int		currentFrame;
 
-		bool	foldout;
+		string	name;
+
+		Vector3	position;
 
 		VisualDebug	visualDebug;
 
-		Dictionary< Type, Action< VisualDebug.View > > viewDrawers = new Dictionary< Type, Action< VisualDebug.View > >
+		Dictionary< Type, Action< VisualDebug.View, Vector3 > > viewDrawers = new Dictionary< Type, Action< VisualDebug.View, Vector3 > >
 		{
 			{typeof(VisualDebug.LabelView), DrawLabel},
 			{typeof(VisualDebug.LineView), DrawLine},
 			{typeof(VisualDebug.PointView), DrawPoint},
 			{typeof(VisualDebug.TriangleView), DrawTriangle},
 		};
+
+		public VisualDebugEditor(string name)
+		{
+			this.name = name;
+		}
 
 		public void SetVisualDebugDatas(VisualDebug vd)
 		{
@@ -37,36 +44,33 @@ namespace ProceduralWorlds.Editor
 			EditorGUI.indentLevel++;
 			EditorGUILayout.BeginVertical(Styles.box);
 			{
-				foldout = EditorGUILayout.Foldout(foldout, "Debug");
+				EditorGUILayout.LabelField(name);
 
-				if (foldout)
+				EditorGUI.BeginChangeCheck();
 				{
-					EditorGUI.BeginChangeCheck();
-					{
-						currentFrame = EditorGUILayout.IntSlider("Frame", currentFrame, 0, visualDebug.frames.Count - 1);
+					currentFrame = EditorGUILayout.IntSlider("Frame", currentFrame, 0, visualDebug.frames.Count - 1);
 
-						var frames = visualDebug.frames;
+					var frames = visualDebug.frames;
 
-						EditorGUILayout.BeginHorizontal();
-						if (GUILayout.Button("First"))
-							currentFrame = 0;
-						if (GUILayout.Button("-10"))
-							currentFrame = Mathf.Max(0, currentFrame - 10);
-						if (GUILayout.Button("-1"))
-							currentFrame = Mathf.Max(0, currentFrame - 1);
-						if (GUILayout.Button("+1"))
-							currentFrame = Mathf.Min(frames.Count - 1, currentFrame + 1);
-						if (GUILayout.Button("+10"))
-							currentFrame = Mathf.Min(frames.Count - 1, currentFrame + 10);
-						if (GUILayout.Button("Last"))
-							currentFrame = frames.Count - 1;
-						EditorGUILayout.EndHorizontal();
-						EditorGUILayout.LabelField("Current frame: " + frames[currentFrame].name);
-						currentStep = EditorGUILayout.IntSlider(currentStep, 0, frames[currentFrame].infos.Count);
-					}
-					if (EditorGUI.EndChangeCheck())
-						SceneView.RepaintAll();
+					EditorGUILayout.BeginHorizontal();
+					if (GUILayout.Button("First"))
+						currentFrame = 0;
+					if (GUILayout.Button("-10"))
+						currentFrame = Mathf.Max(0, currentFrame - 10);
+					if (GUILayout.Button("-1"))
+						currentFrame = Mathf.Max(0, currentFrame - 1);
+					if (GUILayout.Button("+1"))
+						currentFrame = Mathf.Min(frames.Count - 1, currentFrame + 1);
+					if (GUILayout.Button("+10"))
+						currentFrame = Mathf.Min(frames.Count - 1, currentFrame + 10);
+					if (GUILayout.Button("Last"))
+						currentFrame = frames.Count - 1;
+					EditorGUILayout.EndHorizontal();
+					EditorGUILayout.LabelField("Current frame: " + frames[currentFrame].name);
+					currentStep = EditorGUILayout.IntSlider(currentStep, 0, frames[currentFrame].infos.Count);
 				}
+				if (EditorGUI.EndChangeCheck())
+					SceneView.RepaintAll();
 			}
 			EditorGUILayout.EndVertical();
 			EditorGUI.indentLevel--;
@@ -77,7 +81,7 @@ namespace ProceduralWorlds.Editor
 			if (visualDebug == null)
 				return ;
 			
-			if (visualDebug.frames.Count == 0 || !foldout)
+			if (visualDebug.frames.Count == 0 || !visualDebug.enabled)
 				return ;
 			
 			int f = 0;
@@ -85,7 +89,7 @@ namespace ProceduralWorlds.Editor
 			//draw the initial state
 			if (currentFrame != 0)
 				foreach (var view in visualDebug.frames[0].infos)
-					viewDrawers[view.GetType()](view);
+					viewDrawers[view.GetType()](view, position);
 
 			foreach (var view in visualDebug.frames[currentFrame].infos)
 			{
@@ -93,12 +97,17 @@ namespace ProceduralWorlds.Editor
 					break ;
 
 				Handles.color = view.color;
-				viewDrawers[view.GetType()](view);
+				viewDrawers[view.GetType()](view, position);
 				f++;
 			}
 		}
 
-		static void DrawLabel(VisualDebug.View view)
+		public void SetPosition(Vector3 position)
+		{
+			this.position = position;
+		}
+
+		static void DrawLabel(VisualDebug.View view, Vector3 position)
 		{
 			var labelView = view as VisualDebug.LabelView;
 
@@ -106,28 +115,28 @@ namespace ProceduralWorlds.Editor
 			if (style == null)
 				style = EditorStyles.label;
 			
-			Handles.Label(labelView.position, labelView.text, style);
+			Handles.Label(labelView.position + position, labelView.text, style);
 		}
 		
-		static void DrawLine(VisualDebug.View view)
+		static void DrawLine(VisualDebug.View view, Vector3 position)
 		{
 			var lineView = view as VisualDebug.LineView;
 
-			Handles.DrawLine(lineView.p1, lineView.p2);
+			Handles.DrawLine(lineView.p1 + position, lineView.p2 + position);
 		}
 
-		static void DrawPoint(VisualDebug.View view)
+		static void DrawPoint(VisualDebug.View view, Vector3 position)
 		{
 			var pointView = view as VisualDebug.PointView;
 
-			Handles.SphereHandleCap(0, pointView.position, Quaternion.identity, pointView.size, EventType.Repaint);
+			Handles.SphereHandleCap(0, pointView.position + position, Quaternion.identity, pointView.size, EventType.Repaint);
 		}
 		
-		static void DrawTriangle(VisualDebug.View view)
+		static void DrawTriangle(VisualDebug.View view, Vector3 position)
 		{
 			var triangleView = view as VisualDebug.TriangleView;
 
-			Handles.DrawAAConvexPolygon(triangleView.p1, triangleView.p2, triangleView.p3);
+			Handles.DrawAAConvexPolygon(triangleView.p1 + position, triangleView.p2 + position, triangleView.p3 + position);
 		}
 	}
 }
