@@ -8,14 +8,14 @@ using ProceduralWorlds.IsoSurfaces;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(TerrainGenericBase))]
-	public abstract class TerrainBaseInspector : UnityEditor.Editor
+	[CustomEditor(typeof(GenericBaseTerrain))]
+	public abstract class BaseTerrainInspector : UnityEditor.Editor
 	{
-		TerrainGenericBase baseTerrain;
+		GenericBaseTerrain baseTerrain;
 
 		public void OnEnable()
 		{
-			baseTerrain = target as TerrainGenericBase;
+			baseTerrain = target as GenericBaseTerrain;
 			OnEditorEnable();
 		}
 

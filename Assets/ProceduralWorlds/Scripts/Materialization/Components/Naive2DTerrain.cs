@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.IsoSurfaces;
 
-public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
+public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 {
 	public float	yPosition;
 	public bool		heightDisplacement;
@@ -38,9 +38,6 @@ public class TopDownNaive2DTerrain : TerrainBase< TopDownChunkData >
 	
 	protected override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
-		if (chunk == null)
-			return null;
-		
 		if (rainbow == null)
 			rainbow = Utils.CreateRainbowGradient();
 

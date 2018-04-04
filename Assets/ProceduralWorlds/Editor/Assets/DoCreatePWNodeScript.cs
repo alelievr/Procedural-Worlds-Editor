@@ -13,12 +13,12 @@ namespace ProceduralWorlds.Editor
 		
 		public static string nodeTemplate
 		{
-			get { return Application.dataPath + AssetUtils.proceduralWorldsEditorPath + "/Templates/NodeTemplate.cs.txt"; }
+			get { return Application.dataPath + AssetUtils.proceduralWorldsTemplatePath + "/NodeTemplate.cs.txt"; }
 		}
 		
 		public static string nodeEditorTemplate
 		{
-			get { return Application.dataPath + AssetUtils.proceduralWorldsEditorPath + "/Templates/NodeEditorTemplate.cs.txt"; }
+			get { return Application.dataPath + AssetUtils.proceduralWorldsTemplatePath + "/NodeEditorTemplate.cs.txt"; }
 		}
 
 		static MethodInfo	createScriptAsset = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetFromTemplate", BindingFlags.Static | BindingFlags.NonPublic);

@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds
 {
 	[System.Serializable]
-	public abstract class TerrainBase< T > : TerrainGenericBase  where T : ChunkData, new()
+	public abstract class BaseTerrain< T > : GenericBaseTerrain  where T : ChunkData, new()
 	{
 
 		//Generic to specif bindings:
@@ -30,7 +30,7 @@ namespace ProceduralWorlds
 
 			if (finalTerrain == null)
 			{
-				Debug.LogWarning("[TerrainBase] Graph output terrain is null !");
+				Debug.LogWarning("[BaseTerrain] Graph output terrain is null !");
 				return null;
 			}
 			

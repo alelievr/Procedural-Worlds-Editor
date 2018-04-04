@@ -19,6 +19,14 @@ namespace ProceduralWorlds.Editor
 			}
 		}
 
+		public static string proceduralWorldsTemplatePath
+		{
+			get
+			{
+				return proceduralWorldsEditorPath + "/Templates";
+			}
+		}
+
 		static void TryFindEditorPath()
 		{
 			string[] dirs = Directory.GetDirectories(Application.dataPath, "ProceduralWorlds", SearchOption.AllDirectories);

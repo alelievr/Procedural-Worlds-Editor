@@ -13,10 +13,10 @@ namespace ProceduralWorlds.Editor
 		static string		terrainFileName = "Terrain.cs";
 		static string		terrainTemplateFile
 		{
-			get { return Application.dataPath + AssetUtils.proceduralWorldsEditorPath + "TerrainTemplate.cs.txt"; }
+			get { return Application.dataPath + AssetUtils.proceduralWorldsTemplatePath + "/TerrainTemplate.cs.txt"; }
 		}
 		
-		static MethodInfo	createScriptAsset = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetFromTemplate", BindingFlags.Static | BindingFlags.NonPublic);
+		static MethodInfo	createScriptAsset = typeof(ProjectWindowUtil).GetMethod("CreateScriptAsset", BindingFlags.Static | BindingFlags.NonPublic);
 
 		[MenuItem("Assets/Create/ProceduralWorlds/Node C# Script", false, 200)]
 		private static void CreateNodeCSharpScritpt()
@@ -41,7 +41,7 @@ namespace ProceduralWorlds.Editor
 			string path = AssetUtils.GetCurrentPath();
 			path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + terrainFileName);
 
-			createScriptAsset.Invoke(null, new object[] { path, terrainTemplateFile});
+			createScriptAsset.Invoke(null, new object[] { terrainTemplateFile, path });
 		}
 	}
 }

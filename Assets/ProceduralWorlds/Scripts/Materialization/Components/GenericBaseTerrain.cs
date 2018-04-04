@@ -29,7 +29,7 @@ namespace ProceduralWorlds
 	}
 
 	[ExecuteInEditMode]
-	public abstract class TerrainGenericBase : MonoBehaviour
+	public abstract class GenericBaseTerrain : MonoBehaviour
 	{
 		public static readonly string	realModeRootObjectName = "PWWorldRoot";
 
@@ -256,17 +256,12 @@ namespace ProceduralWorlds
 			{
 				if (!terrainStorage.isLoaded(pos))
 				{
-					Stopwatch sw = new Stopwatch();
-					sw.Start();
 					var data = RequestChunkGeneric(pos, graph.seed);
 					var userChunkData = OnChunkCreateGeneric(data, pos);
 					terrainStorage.AddChunk(pos, data, userChunkData);
 
 					if (neighbourMessageMode != NeighbourMessageMode.None)
 						SendNeighbourMessages(pos);
-
-					sw.Stop();
-					Debug.Log("chunk ms: " + sw.Elapsed.TotalMilliseconds);
 				}
 				else
 				{

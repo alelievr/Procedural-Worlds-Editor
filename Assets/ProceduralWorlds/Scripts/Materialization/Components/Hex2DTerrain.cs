@@ -6,7 +6,7 @@ using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.IsoSurfaces;
 
-public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
+public class Hex2DTerrain : BaseTerrain< TopDownChunkData >
 {
 	public float	yPosition;
 	public bool		heightDisplacement;
@@ -23,9 +23,6 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 
 	protected override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
 	{
-		if (chunk == null)
-			return null;
-		
 		pos = GetChunkWorldPosition(pos);
 
 		//turn 2d grid position to 2d hex position:
@@ -77,7 +74,8 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 		
 		GameObject		g = chunkGameObject as GameObject;
 
-		if (g == null) //if gameobject have been destroyed by user and reference was lost.
+		//if gameobject have been destroyed by user and reference was lost.
+		if (g == null)
 			RequestCreate(chunk, pos);
 	}
 

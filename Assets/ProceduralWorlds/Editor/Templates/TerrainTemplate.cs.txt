@@ -6,30 +6,45 @@ using ProceduralWorlds.IsoSurfaces;
 
 namespace ProceduralWorlds
 {
-	//Put your custom ChunkData type in the TerrainBase template
-	public class TerrainTemplate : TerrainBase< ChunkData >
+	//Put your custom ChunkData type in the BaseTerrain template
+	public class #SCRIPTNAME# : BaseTerrain< ChunkData >
 	{
 		//Your custom isosurface
 		public IsoSurface isoSurface = new IsoSurface();
 
 		protected override void OnTerrainEnable()
 		{
+			//if you're making a seamless chunk terrain set it to true
+			generateBorders = false;
 			isoSurface.generateUvs = true;
+
+			//The message you will receive in OnNeighbourUpdate when a neighbour chunk is generated
+			neighbourMessageMode = NeighbourMessageMode.None;
 		}
 
-		public override object OnChunkCreate(ChunkData terrainData, Vector3 pos)
+		protected override object OnChunkCreate(ChunkData terrainData, Vector3 pos)
+		{
+			//get the chunk position in world space
+			pos = GetChunkWorldPosition(pos);
+
+			//create or reuse an object placed and scaled with terrainScale.
+			GameObject chunkObject = CreateChunkObject(pos);
+
+			//we return our gameobject so we can get it back as `userStoredObject` in other functions
+			return chunkObject;
+		}
+
+		protected override void OnChunkRender(ChunkData terrainData, object userStoredObject, Vector3 pos)
 		{
 			throw new System.NotImplementedException();
 		}
 
-		public override void OnChunkRender(ChunkData terrainData, object userStoredObject, Vector3 pos)
+		protected override void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
 		{
-			throw new System.NotImplementedException();
-		}
+			GameObject g = userStoredObject as GameObject;
 
-		public override void OnChunkDestroy(ChunkData terrainData, object userStoredObject, Vector3 pos)
-		{
-			throw new System.NotImplementedException();
+			if (g != null)
+				DestroyImmediate(g);
 		}
 
 	}

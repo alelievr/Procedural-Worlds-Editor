@@ -14,13 +14,13 @@ namespace ProceduralWorlds.Editor
 
 		UnityEditor.Editor	terrainEditor;
 
-		TerrainGenericBase	oldTerrain;
+		GenericBaseTerrain	oldTerrain;
 
 		public override void OnEnable()
 		{
 			worldGraph =  target as WorldGraph;
 
-			var terrain = TerrainPreviewManager.instance.terrainBase;
+			var terrain = TerrainPreviewManager.instance.BaseTerrain;
 			oldTerrain = terrain;
 
 			if (terrain != null)
@@ -31,7 +31,7 @@ namespace ProceduralWorlds.Editor
 		{
 			base.OnGUI(r);
 
-			var terrain = TerrainPreviewManager.instance.terrainBase;
+			var terrain = TerrainPreviewManager.instance.BaseTerrain;
 
 			if (terrain == null)
 			{
@@ -64,7 +64,7 @@ namespace ProceduralWorlds.Editor
 		}
 
 		//Warning: this will destroy all loaded chunks and regenerate them
-		public void ReloadChunks(TerrainGenericBase terrain)
+		public void ReloadChunks(GenericBaseTerrain terrain)
 		{
 			if (EditorApplication.isPlaying || EditorApplication.isPaused)
 			{
