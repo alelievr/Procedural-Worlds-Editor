@@ -21,7 +21,7 @@ namespace ProceduralWorlds.Tests.CLI
 				.Link("perlin", "debug");
 	
 			//list of the expected created commands
-			List< BaseGraphCommand > expectedCommands = new List< BaseGraphCommand >()
+			List< BaseGraphCommand > expectedCommands = new List< BaseGraphCommand >
 			{
 				new BaseGraphCommand(typeof(NodePerlinNoise2D), "perlin"),
 				new BaseGraphCommand(typeof(NodeDebugInfo), "debug"),
@@ -54,7 +54,7 @@ namespace ProceduralWorlds.Tests.CLI
 				.Link("s3", 1, "add", 1)
 				.Link("s4", 1, "add", 1);
 
-			var expectedCommands = new List< BaseGraphCommand >()
+			var expectedCommands = new List< BaseGraphCommand >
 			{
 				new BaseGraphCommand(typeof(NodeSlider), "s1"),
 				new BaseGraphCommand(typeof(NodeSlider), "s2"),

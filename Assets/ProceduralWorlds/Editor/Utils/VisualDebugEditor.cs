@@ -18,7 +18,7 @@ namespace ProceduralWorlds.Editor
 
 		VisualDebug	visualDebug;
 
-		Dictionary< Type, Action< VisualDebug.View, Vector3 > > viewDrawers = new Dictionary< Type, Action< VisualDebug.View, Vector3 > >
+		readonly Dictionary< Type, Action< VisualDebug.View, Vector3 > > viewDrawers = new Dictionary< Type, Action< VisualDebug.View, Vector3 > >
 		{
 			{typeof(VisualDebug.LabelView), DrawLabel},
 			{typeof(VisualDebug.LineView), DrawLine},

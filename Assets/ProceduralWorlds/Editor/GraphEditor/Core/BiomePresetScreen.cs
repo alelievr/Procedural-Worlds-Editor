@@ -21,7 +21,7 @@ namespace ProceduralWorlds.Editor
 			Texture2D mesaTexture = Resources.Load< Texture2D >("");
 			Texture2D swamplandTexture = Resources.Load< Texture2D >("");
 			
-			PresetCellList	earthLikePresets = new PresetCellList()
+			PresetCellList	earthLikePresets = new PresetCellList
 			{
 				{"Biome preset"},
 				{"Plains / Prairies", plainTexture, "Earth/Plain"},

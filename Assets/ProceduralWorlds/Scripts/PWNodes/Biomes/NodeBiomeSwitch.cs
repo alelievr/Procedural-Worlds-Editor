@@ -168,8 +168,6 @@ namespace ProceduralWorlds.Nodes
 				errorString = "can't switch on field " + samplerName + ",\ndata not provided !";
 				error = true;
 			}
-			else
-				currentSampler = ((field == null) ? field3D : field);
 			
 			currentSampler = inputBiome.GetSampler(samplerName);
 

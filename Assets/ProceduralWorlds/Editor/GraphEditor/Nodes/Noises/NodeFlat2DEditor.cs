@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 	{
 		NodeFlat2D	node;
 
-		string propUpdateKey = "NodeFlat2D";
+		readonly string propUpdateKey = "NodeFlat2D";
 
 		public override void OnNodeEnable()
 		{

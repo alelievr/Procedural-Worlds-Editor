@@ -46,12 +46,13 @@ namespace ProceduralWorlds.Editor
 			{
 				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
 			}
-			
-			if (GUILayout.Button("Focus"))
-				Selection.activeObject = terrain;
+
+			terrainEditor.OnInspectorGUI();
 
 			EditorGUILayout.BeginHorizontal();
 			{
+				if (GUILayout.Button("Focus"))
+					Selection.activeObject = terrain;
 				if (GUILayout.Button("Generate terrain"))
 					ReloadChunks(terrain);
 				if (GUILayout.Button("Cleanup terrain"))

@@ -12,7 +12,7 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 	public bool		heightDisplacement;
 	public float	heightScale = .1f;
 
-	Hex2DIsoSurface	isoSurface = new Hex2DIsoSurface();
+	readonly Hex2DIsoSurface	isoSurface = new Hex2DIsoSurface();
 
 	protected override void OnTerrainEnable()
 	{
@@ -79,6 +79,16 @@ public class TopDownHex2DTerrain : TerrainBase< TopDownChunkData >
 
 		if (g == null) //if gameobject have been destroyed by user and reference was lost.
 			RequestCreate(chunk, pos);
+	}
+
+	protected override Vector3 ApplyWorldPositionModifier(Vector3 worldPosition)
+	{
+		float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
+		
+		worldPosition.x *= 1 / hexMinRadius;
+		worldPosition.z *= hexMinRadius + hexMinRadius / 2;
+
+		return worldPosition;
 	}
 
 	protected override Vector3 GetChunkPosition(Vector3 pos)

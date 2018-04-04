@@ -18,7 +18,8 @@ namespace ProceduralWorlds.Editor
 		bool						isPanning;
 
 		float						zoom = 1;
-		float						defaultDistance;
+		
+		readonly float				defaultDistance;
 
 		Event						e { get { return Event.current; } }
 	

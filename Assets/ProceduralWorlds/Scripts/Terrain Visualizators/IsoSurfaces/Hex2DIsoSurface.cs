@@ -19,9 +19,9 @@ namespace ProceduralWorlds.IsoSurfaces
 		Vector2[]	evenHexNeighbourCoords;
 		Vector2[]	oddHexNeighbourCoords;
 
-		float[]		neighbourHeights = new float[6];
+		int			currentChunkSize;
 
-		int				currentChunkSize;
+		readonly float[]	neighbourHeights = new float[6];
 
 		public Hex2DIsoSurface()
 		{

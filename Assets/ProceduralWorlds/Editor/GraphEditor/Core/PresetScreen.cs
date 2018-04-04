@@ -57,8 +57,6 @@ namespace ProceduralWorlds.Editor
 		
 		//scroll position on the preset screen
 		Vector2							presetScrollPos;
-		
-		int								columns;
 	
 		GUIStyle						buttonStyle;
 		GUIStyle						selectedButtonStyle;
@@ -87,7 +85,7 @@ namespace ProceduralWorlds.Editor
 
 		void UpdateColumnCount()
 		{
-			columns = 0;
+			int columns = 0;
 			Stack< PresetCellList > currentPresetLists = new Stack< PresetCellList >();
 
 			currentPresetLists.Push(presetList);

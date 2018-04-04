@@ -55,7 +55,7 @@ namespace ProceduralWorlds
 		
 		protected int					oldSeed = 0;
 		
-		Dictionary< NeighbourMessageMode, Vector3[] > neighbourChunkPositions = new Dictionary< NeighbourMessageMode, Vector3[] >
+		readonly Dictionary< NeighbourMessageMode, Vector3[] > neighbourChunkPositions = new Dictionary< NeighbourMessageMode, Vector3[] >
 		{
 			{
 				NeighbourMessageMode.Mode2DXZ,
@@ -246,9 +246,9 @@ namespace ProceduralWorlds
 			if (terrainStorage == null || graph == null)
 				return ;
 			
-			Vector3 currentPos = transform.position;
-			Vector3 currentChunkPos = RoundPositionToChunk(ApplyWorldPositionModifier(currentPos));
-			
+			Vector3 currentPos = ApplyWorldPositionModifier(transform.position);
+			Vector3 currentChunkPos = RoundPositionToChunk(currentPos);
+
 			if (!ignorePositionCheck && oldChunkPosition == currentChunkPos)
 				return ;
 

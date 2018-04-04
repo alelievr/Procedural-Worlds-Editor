@@ -33,7 +33,8 @@ namespace ProceduralWorlds.Nodes
 
 		public ConstantType		selectedConstantType = ConstantType.Float;
 
-		static Dictionary< ConstantType, string > properties = new Dictionary< ConstantType, string >() {
+		static Dictionary< ConstantType, string > properties = new Dictionary< ConstantType, string >
+		{
 			{ConstantType.Int, "outi"},
 			{ConstantType.Float, "outf"},
 			{ConstantType.Vector2, "outv2"},

@@ -15,8 +15,8 @@ namespace ProceduralWorlds.Tests.Graphs
 	public class BaseGraphPresetTests
 	{
 
-		static string worldGraphPresetPath = "GraphPresets/World/Full";
-		string biomeGraphPresetPath = "GraphPresets/Biome/Full";
+		static readonly string worldGraphPresetPath = "GraphPresets/World/Full";
+		static readonly string biomeGraphPresetPath = "GraphPresets/Biome/Full";
 	
 		[Test]
 		public static void WorldGraphPresets()

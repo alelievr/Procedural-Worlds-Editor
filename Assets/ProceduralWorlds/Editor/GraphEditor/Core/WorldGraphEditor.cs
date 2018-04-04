@@ -40,7 +40,7 @@ namespace ProceduralWorlds.Editor
 	
 		const string			graphProcessKey = "WorldGraphEditor";
 	
-		ChunkLoaderDrawer		chunkLoaderDrawer = new ChunkLoaderDrawer();
+		readonly ChunkLoaderDrawer	chunkLoaderDrawer = new ChunkLoaderDrawer();
 	
 		#region Initialization and data baking
 	

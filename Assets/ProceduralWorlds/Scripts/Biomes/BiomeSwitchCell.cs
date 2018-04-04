@@ -33,7 +33,7 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 
 		public float	GetWeight(BiomeParamRange paramRanges)
 		{
-			float	weight = 0;
+			float	retWeight = 0;
 
 			int length = switchParams.switchParams.Length;
 			for (int i = 0; i < length; i++)
@@ -41,12 +41,12 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 				BiomeSwitchCellParam	param = switchParams.switchParams[i];
 
 				if (param.enabled && paramRanges.ranges[i].magnitude != 0)
-					weight += param.max - param.min / paramRanges.ranges[i].magnitude;
+					retWeight += param.max - param.min / paramRanges.ranges[i].magnitude;
 				else
-					weight += 1;
+					retWeight += 1;
 			}
 
-			return weight;
+			return retWeight;
 		}
 
 		public float ComputeBlend(BiomeBlendList blendMatrix, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)

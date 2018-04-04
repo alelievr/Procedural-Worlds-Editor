@@ -233,7 +233,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 			var surfinputAnchorField = surf.inputAnchorFields.First();
 
-			var expectedConnectedAnchors = new List< Anchor >()
+			var expectedConnectedAnchors = new List< Anchor >
 			{
 				s1.outputAnchors.First(),
 				s2.outputAnchors.First(),

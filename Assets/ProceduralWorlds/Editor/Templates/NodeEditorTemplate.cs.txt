@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 	{
 		#SCRIPTNAME#	node;
 
-		string propUpdateKey = "#NAME#";
+		readonly string propUpdateKey = "#NAME#";
 
 		public override void OnNodeEnable()
 		{
