@@ -170,27 +170,22 @@ namespace ProceduralWorlds.IsoSurfaces
 
 		float SafeGetNeighbourChunkHeight(int x, int z, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D terrain)
 		{
+			//Corner:
+			if (x >= currentChunkSize && z < 0 && chunkDirection.x > 0)
+				return terrain[x - currentChunkSize, z + currentChunkSize];
+			else if (x < 0 && z >= currentChunkSize && chunkDirection.x > 0)
+				return terrain[x + currentChunkSize, z - currentChunkSize];
+
+			//Edges:
 			if (x >= currentChunkSize && chunkDirection.x > 0 && z >= 0 && z < currentChunkSize)
-			{
-				isoDebug.DrawLabel(GetPositionFromCoords(x, z, defaultValue * heightScale) * currentChunkSize, "check: " + (x - currentChunkSize) + "/" + z + ": " + terrain[x - currentChunkSize, z]);
 				return terrain[x - currentChunkSize, z];
-			}
 			else if (x < 0 && chunkDirection.x < 0 && z >= 0 && z < currentChunkSize)
-			{
-				isoDebug.DrawLabel(GetPositionFromCoords(x, z, defaultValue * heightScale) * currentChunkSize, "check: " + (x + currentChunkSize) + "/" + z + ": " + terrain[x + currentChunkSize, z]);
 				return terrain[x + currentChunkSize, z];
-			}
 			else if (z >= currentChunkSize && chunkDirection.z > 0 && x >= 0 && x < currentChunkSize)
-			{
-				isoDebug.DrawLabel(GetPositionFromCoords(x, z, defaultValue * heightScale) * currentChunkSize, "check: " + x + "/" + (z - currentChunkSize) + ": " + terrain[x, z - currentChunkSize]);
 				return terrain[x, z - currentChunkSize];
-			}
 			else if (z < 0 && chunkDirection.z < 0 && x >= 0 && x < currentChunkSize)
-			{
-				isoDebug.DrawLabel(GetPositionFromCoords(x, z, defaultValue * heightScale) * currentChunkSize, "check: " + x + "/" + (z + currentChunkSize) + ": " + terrain[x, z + currentChunkSize]);
 				return terrain[x, z + currentChunkSize];
-			}
-		
+			
 			return SafeGetHeight(x, z, defaultValue, currentTerrain);
 		}
 
@@ -205,7 +200,8 @@ namespace ProceduralWorlds.IsoSurfaces
 			float neighbourHeight2 = SafeGetNeighbourChunkHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, defaultValue, chunkDirection, currentTerrain, chunkTerrain);
 			
 			#if DEBUG
-				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, neighbourHeight1 * heightScale) * currentChunkSize, "nheight: " + neighbourHeight1);
+				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, neighbourHeight1 * heightScale + .01f) * currentChunkSize, "nheight1: " + neighbourHeight1);
+				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, neighbourHeight2 * heightScale - .01f) * currentChunkSize, "nheight2: " + neighbourHeight2);
 			#endif
 
 			return Mathf.Min(neighbourHeight1, neighbourHeight2);
@@ -226,17 +222,17 @@ namespace ProceduralWorlds.IsoSurfaces
 				float h = chunk[x, z];
 
 				#if DEBUG
-					isoDebug.BeginFrame("Chunk border updated");
+					isoDebug.BeginFrame("Chunk border update");
 				#endif
 
 				for (int i = 0; i < 6; i++)
 				{
 					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk);
-
-					if (neighbourHeight >= h)
-						continue ;
 	
-					float newHeight = (neighbourHeight < h) ? neighbourHeight * heightScale : h * heightScale;
+					float newHeight = neighbourHeight * heightScale;
+
+					if (newHeight >= vertices[borderVertexIndex + i].y)
+						continue ;
 					
 					vertices[borderVertexIndex + i].y = newHeight;
 				}
