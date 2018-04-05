@@ -97,8 +97,7 @@ namespace ProceduralWorlds.Core
 		
 		//useful variables:
 		public bool								initialized = false;
-		[NonSerialized]
-		public bool								readyToProcess = false;
+		public bool								isReadyToProcess { get; private set; }
 		public bool								hasProcessed { get { return graphProcessor.hasProcessed; } }
 
 
@@ -206,7 +205,7 @@ namespace ProceduralWorlds.Core
 			//Build compute order list
 			UpdateComputeOrder();
 
-			readyToProcess = true;
+			isReadyToProcess = true;
 		}
 
 		//must be called after a Process() to get back datas
@@ -276,7 +275,7 @@ namespace ProceduralWorlds.Core
 
 		public float Process()
 		{
-			if (!readyToProcess)
+			if (!isReadyToProcess)
 				return -1;
 			
 			processMode = GraphProcessMode.Normal;
@@ -295,7 +294,7 @@ namespace ProceduralWorlds.Core
 
 		public void	ProcessOnce()
 		{
-			if (!readyToProcess)
+			if (!isReadyToProcess)
 				return ;
 				
 			processMode = GraphProcessMode.Once;

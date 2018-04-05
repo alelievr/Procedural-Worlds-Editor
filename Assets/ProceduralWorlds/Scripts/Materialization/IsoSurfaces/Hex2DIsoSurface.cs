@@ -1,4 +1,4 @@
-#define DEBUG
+// #define DEBUG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -207,7 +207,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			return Mathf.Min(neighbourHeight1, neighbourHeight2);
 		}
 
-		void UpdateBorderForChunk(Vector3 chunkDirection, Sampler2D chunk, Mesh chunkMesh, Sampler2D neighbourChunk, Mesh neighbourMesh)
+		void UpdateBorderForChunk(Vector3 chunkDirection, Sampler2D chunk, Mesh chunkMesh, Sampler2D neighbourChunk)
 		{
 			var vertices = chunkMesh.vertices;
 
@@ -255,8 +255,8 @@ namespace ProceduralWorlds.IsoSurfaces
 			
 			Vector3 chunkDirection = neighbourPosition - position;
 
-			UpdateBorderForChunk(chunkDirection, terrain, terrainMesh, neighbourTerrain, neighbourMesh);
-			UpdateBorderForChunk(-chunkDirection, neighbourTerrain, neighbourMesh, terrain, terrainMesh);
+			UpdateBorderForChunk(chunkDirection, terrain, terrainMesh, neighbourTerrain);
+			UpdateBorderForChunk(-chunkDirection, neighbourTerrain, neighbourMesh, terrain);
 		}
 
 		#endregion

@@ -27,12 +27,6 @@ namespace ProceduralWorlds.Nodes
 			name = "Biome blender";
 		}
 
-		public override void OnNodeEnable()
-		{
-			if (inputBiomes.GetValues().Count == 0)
-				return ;
-		}
-
 		public BiomeData GetBiomeData()
 		{
 			var partialbiomes = inputBiomes.GetValues();

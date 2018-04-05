@@ -20,11 +20,7 @@ namespace ProceduralWorlds.Editor
 		{
 			worldGraph =  target as WorldGraph;
 
-			var terrain = TerrainPreviewManager.instance.BaseTerrain;
-			oldTerrain = terrain;
-
-			if (terrain != null)
-				ReloadChunks(terrain);
+			oldTerrain = TerrainPreviewManager.instance.BaseTerrain;
 		}
 
 		new public void OnGUI(Rect r)
@@ -43,43 +39,14 @@ namespace ProceduralWorlds.Editor
 			}
 
 			if (terrainEditor == null || oldTerrain != terrain)
-			{
 				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
-			}
 
 			terrainEditor.OnInspectorGUI();
-
-			EditorGUILayout.BeginHorizontal();
-			{
-				if (GUILayout.Button("Focus"))
-					Selection.activeObject = terrain;
-				if (GUILayout.Button("Generate terrain"))
-					ReloadChunks(terrain);
-				if (GUILayout.Button("Cleanup terrain"))
-					terrain.DestroyAllChunks();
-			}
-			EditorGUILayout.EndHorizontal();
+			
+			if (GUILayout.Button("Focus"))
+				Selection.activeObject = terrain;
 
 			oldTerrain = terrain;
-		}
-
-		//Warning: this will destroy all loaded chunks and regenerate them
-		public void ReloadChunks(GenericBaseTerrain terrain)
-		{
-			if (EditorApplication.isPlaying || EditorApplication.isPaused)
-			{
-				Debug.LogError("[ChunkLoader] can't reload chunks in play mode");
-				return ;
-			}
-
-			if (worldGraph != null)
-			{
-				try {
-					terrain.ReloadChunks(worldGraph);
-				} catch (Exception e) {
-					Debug.LogError(e);
-				}
-			}
 		}
 	}
 }

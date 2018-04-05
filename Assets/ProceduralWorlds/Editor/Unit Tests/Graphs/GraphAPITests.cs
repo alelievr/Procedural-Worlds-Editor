@@ -287,7 +287,7 @@ namespace ProceduralWorlds.Tests.Graphs
 						}
 			}
 
-			Assert.That(clonedGraph.readyToProcess == true);
+			Assert.That(clonedGraph.isReadyToProcess == true);
 		
 			clonedGraph.Process();
 		}
@@ -302,7 +302,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			Assert.That(biomeGraph.allNodes.Count() == clonedGraph.allNodes.Count());
 			Assert.That(biomeGraph.nodeLinkTable.GetLinks().Count() == clonedGraph.nodeLinkTable.GetLinks().Count());
 
-			Assert.That(clonedGraph.readyToProcess == true);
+			Assert.That(clonedGraph.isReadyToProcess == true);
 			
 			foreach (var node in clonedGraph.allNodes)
 				Assert.That(biomeGraph.allNodes.Contains(node) == false);

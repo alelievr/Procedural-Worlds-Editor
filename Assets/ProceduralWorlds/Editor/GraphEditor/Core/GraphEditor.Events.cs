@@ -207,6 +207,8 @@ namespace ProceduralWorlds.Editor
 					foreach (var node in graph.allNodes)
 						node.isSelected = true;
 					break ;
+				default:
+					break ;
 			}
 		}
 	

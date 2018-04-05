@@ -59,8 +59,8 @@ public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 
 		mf.sharedMesh = m;
 
-		Shader topDown2DBasicTerrainShader = Shader.Find("Standard");
-		Material mat = new Material(topDown2DBasicTerrainShader);
+		Shader standardShader = Shader.Find("Standard");
+		Material mat = new Material(standardShader);
 		mr.sharedMaterial = mat;
 		return g;
 	}

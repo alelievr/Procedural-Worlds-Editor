@@ -49,11 +49,15 @@ namespace ProceduralWorlds
 		public GameObject				terrainRoot;
 		public bool						initialized { get { return graph != null && terrainRoot != null; } }
 		public bool						debug = false;
+		public bool						generateChunksOnLoad = true;
 
 		protected bool					generateBorders = true;
 		protected NeighbourMessageMode	neighbourMessageMode = NeighbourMessageMode.None;
 		
 		protected int					oldSeed = 0;
+
+		[System.NonSerialized]
+		bool							generatedOnLoad = false;
 		
 		readonly Dictionary< NeighbourMessageMode, Vector3[] > neighbourChunkPositions = new Dictionary< NeighbourMessageMode, Vector3[] >
 		{
@@ -157,6 +161,16 @@ namespace ProceduralWorlds
 
 		public virtual void Update()
 		{
+			if (generateChunksOnLoad && !generatedOnLoad)
+			{
+				if (graphAsset != null)
+					InitGraph(graphAsset);
+				
+				UpdateChunks(true);
+
+				generatedOnLoad = true;
+			}
+
 			UpdateChunks();
 		}
 		
@@ -225,7 +239,7 @@ namespace ProceduralWorlds
 						}
 					yield break ;
 				default:
-					Debug.Log("TODO: " + loadPatternMode + " load mode");
+					Debug.Log("[ChunkLoader] TODO: " + loadPatternMode + " load mode");
 					break ;
 			}
 		}
@@ -302,9 +316,19 @@ namespace ProceduralWorlds
 				DestroyImmediate(terrainRoot.transform.GetChild(0).gameObject);
 		}
 
-		public void ReloadChunks(WorldGraph graphAsset)
+		public void ReloadChunks(WorldGraph newGraphAsset = null)
 		{
-			InitGraph(graphAsset);
+			if (newGraphAsset != null)
+				InitGraph(newGraphAsset);
+
+			if (graphAsset != null && graph == null)
+				InitGraph(graphAsset);
+			
+			if (graph == null)
+			{
+				Debug.LogError("[ChunkLoader] Can't reload chunks without a graph reference");
+				return ;
+			}
 
 			DestroyAllChunks();
 			
