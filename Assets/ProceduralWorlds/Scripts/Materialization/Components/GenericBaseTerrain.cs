@@ -63,7 +63,7 @@ namespace ProceduralWorlds
 		{
 			{
 				NeighbourMessageMode.Mode2DXZ,
-				new Vector3[] {
+				new[] {
 					Vector3.right,
 					Vector3.left,
 					Vector3.forward,
@@ -72,7 +72,7 @@ namespace ProceduralWorlds
 			},
 			{
 				NeighbourMessageMode.Mode2DXZCorner,
-				new Vector3[] {
+				new[] {
 					Vector3.right,
 					Vector3.left,
 					Vector3.forward,
@@ -85,7 +85,7 @@ namespace ProceduralWorlds
 			},
 			{
 				NeighbourMessageMode.Mode2DXY,
-				new Vector3[] {
+				new[] {
 					Vector3.up,
 					Vector3.down,
 					Vector3.right,
@@ -94,7 +94,7 @@ namespace ProceduralWorlds
 			},
 			{
 				NeighbourMessageMode.Mode2DXYCorner,
-				new Vector3[] {
+				new[] {
 					Vector3.up,
 					Vector3.down,
 					Vector3.right,
@@ -105,7 +105,7 @@ namespace ProceduralWorlds
 			},
 			{
 				NeighbourMessageMode.Mode3D,
-				new Vector3[] {
+				new[] {
 					Vector3.up,
 					Vector3.down,
 					Vector3.right,
@@ -116,7 +116,7 @@ namespace ProceduralWorlds
 			},
 			{
 				NeighbourMessageMode.Mode3DCorner,
-				new Vector3[] {
+				new[] {
 					Vector3.up,
 					Vector3.down,
 					Vector3.right,

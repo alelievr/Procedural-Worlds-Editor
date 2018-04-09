@@ -8,18 +8,29 @@ using System.Linq;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
+	[System.Serializable]
+	public class Hex2DIsoSurfaceSettings : IsoSurfaceSettings
+	{
+		public bool			heightDisplacement;
+        public float		heightScale;
+        public Sampler2D	heightMap;
+
+		public void Update(int chunkSize, Sampler2D heightMap = null)
+		{
+			this.heightMap = (heightDisplacement) ? heightMap : null;
+			base.chunkSize = chunkSize;
+		}
+	}
+
     public class Hex2DIsoSurface : IsoSurface
     {
-        float       heightScale;
-        Sampler2D   heightMap;
-
 		float		oldHexSize;
+		float		heightScale;
+		int			chunkSize;
 
 		Vector3[]	hexPositions;
 		Vector2[]	evenHexNeighbourCoords;
 		Vector2[]	oddHexNeighbourCoords;
-
-		int			currentChunkSize;
 
 		readonly float[]	neighbourHeights = new float[6];
 
@@ -29,12 +40,16 @@ namespace ProceduralWorlds.IsoSurfaces
 			UpdateHexNearCoords();
 		}
 
-        public override Mesh Generate(int chunkSize, Vector3 chunkPosition = default(Vector3))
+        public override Mesh Generate(IsoSurfaceSettings settings)
         {
-            int vertexCount = chunkSize * chunkSize * (6 + 1);
-			int faceCount = chunkSize * chunkSize * 6;
+			var			hexSettings = settings as Hex2DIsoSurfaceSettings;
 
-			currentChunkSize = chunkSize;
+			Sampler2D	heightMap = hexSettings.heightMap;
+            int			vertexCount = chunkSize * chunkSize * (6 + 1);
+			int			faceCount = chunkSize * chunkSize * 6;
+
+			chunkSize = settings.chunkSize;
+			heightScale = hexSettings.heightScale;
 
 			if (heightMap != null)
 			{
@@ -90,7 +105,7 @@ namespace ProceduralWorlds.IsoSurfaces
 					}
 
 					if (heightMap != null)
-						GenerateHexBorders(x, z, chunkSize, pos);
+						GenerateHexBorders(x, z, chunkSize, pos, heightMap);
 				}
 			}
 			
@@ -102,30 +117,27 @@ namespace ProceduralWorlds.IsoSurfaces
 
 		#region Hexagon borders Borders
 
-		float SafeGetHeight(int x, int z, float defaultValue, Sampler2D terrain = null)
+		float SafeGetHeight(int x, int z, float defaultValue, Sampler2D terrain)
 		{
-			if (terrain == null)
-				terrain = heightMap;
-			
-			if (x < 0 || x >= currentChunkSize || z < 0 || z >= currentChunkSize)
+			if (x < 0 || x >= chunkSize || z < 0 || z >= chunkSize)
 				return defaultValue;
 			return terrain[x, z];
 		}
 
-		float GetNeighbourHeight(int x, int z, int index)
+		float GetNeighbourHeight(int x, int z, int index, Sampler2D heightMap)
 		{
 			//Yeah i know, it seems to be black magic, but trust me it works !
 			int i1 = (-index + 6) % 6;
 			int i2 = (-index + 11) % 6;
 			var neighbourCoord1 = (z % 2 == 0) ? evenHexNeighbourCoords[i1] : oddHexNeighbourCoords[i1];
 			var neighbourCoord2 = (z % 2 == 0) ? evenHexNeighbourCoords[i2] : oddHexNeighbourCoords[i2];
-			float neighbourHeight1 = SafeGetHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, heightMap[x, z]);
-			float neighbourHeight2 = SafeGetHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, heightMap[x, z]);
+			float neighbourHeight1 = SafeGetHeight(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, heightMap[x, z], heightMap);
+			float neighbourHeight2 = SafeGetHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, heightMap[x, z], heightMap);
 
 			return Mathf.Min(neighbourHeight1, neighbourHeight2);
 		}
 
-		void GenerateHexBorders(int x, int z, int chunkSize, Vector3 pos)
+		void GenerateHexBorders(int x, int z, int chunkSize, Vector3 pos, Sampler2D heightMap)
 		{
 			int hexVertexIndex = (x + z * chunkSize) * (6 + 1) + 1;
 			int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
@@ -137,7 +149,7 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			for (int i = 0; i < 6; i++)
 			{
-				float neighbourHeight = GetNeighbourHeight(x, z, i);
+				float neighbourHeight = GetNeighbourHeight(x, z, i, heightMap);
 				neighbourHeights[i] = neighbourHeight;
 				
 				Vector3 hexPos = pos + hexPositions[i + 1];
@@ -171,25 +183,25 @@ namespace ProceduralWorlds.IsoSurfaces
 		float SafeGetNeighbourChunkHeight(int x, int z, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D terrain)
 		{
 			//Corner:
-			if (x >= currentChunkSize && z < 0)
-				return terrain[x - currentChunkSize, z + currentChunkSize];
-			else if (x < 0 && z >= currentChunkSize)
-				return terrain[x + currentChunkSize, z - currentChunkSize];
+			if (x >= chunkSize && z < 0)
+				return terrain[x - chunkSize, z + chunkSize];
+			else if (x < 0 && z >= chunkSize)
+				return terrain[x + chunkSize, z - chunkSize];
 
 			//Edges:
-			if (x >= currentChunkSize && chunkDirection.x > 0 && z >= 0 && z < currentChunkSize)
-				return terrain[x - currentChunkSize, z];
-			else if (x < 0 && chunkDirection.x < 0 && z >= 0 && z < currentChunkSize)
-				return terrain[x + currentChunkSize, z];
-			else if (z >= currentChunkSize && chunkDirection.z > 0 && x >= 0 && x < currentChunkSize)
-				return terrain[x, z - currentChunkSize];
-			else if (z < 0 && chunkDirection.z < 0 && x >= 0 && x < currentChunkSize)
-				return terrain[x, z + currentChunkSize];
+			if (x >= chunkSize && chunkDirection.x > 0 && z >= 0 && z < chunkSize)
+				return terrain[x - chunkSize, z];
+			else if (x < 0 && chunkDirection.x < 0 && z >= 0 && z < chunkSize)
+				return terrain[x + chunkSize, z];
+			else if (z >= chunkSize && chunkDirection.z > 0 && x >= 0 && x < chunkSize)
+				return terrain[x, z - chunkSize];
+			else if (z < 0 && chunkDirection.z < 0 && x >= 0 && x < chunkSize)
+				return terrain[x, z + chunkSize];
 			
 			return SafeGetHeight(x, z, defaultValue, currentTerrain);
 		}
 
-		float GetNeighbourChunkHeight(int x, int z, int index, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D chunkTerrain)
+		float GetNeighbourChunkHeight(int x, int z, int index, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D chunkTerrain, float heightScale)
 		{
 			//Yeah i know, it seems to be black magic, but trust me it works !
 			int i1 = (-index + 6) % 6;
@@ -200,8 +212,8 @@ namespace ProceduralWorlds.IsoSurfaces
 			float neighbourHeight2 = SafeGetNeighbourChunkHeight(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, defaultValue, chunkDirection, currentTerrain, chunkTerrain);
 			
 			#if DEBUG
-				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, neighbourHeight1 * heightScale + .01f) * currentChunkSize, "nheight1: " + neighbourHeight1);
-				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, neighbourHeight2 * heightScale - .01f) * currentChunkSize, "nheight2: " + neighbourHeight2);
+				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord1.x, z + (int)neighbourCoord1.y, neighbourHeight1 * heightScale + .01f) * chunkSize, "nheight1: " + neighbourHeight1);
+				isoDebug.DrawLabel(GetPositionFromCoords(x + (int)neighbourCoord2.x, z + (int)neighbourCoord2.y, neighbourHeight2 * heightScale - .01f) * chunkSize, "nheight2: " + neighbourHeight2);
 			#endif
 
 			return Mathf.Min(neighbourHeight1, neighbourHeight2);
@@ -217,7 +229,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			{
 				int x = (int)borderPos[b].x;
 				int z = (int)borderPos[b].y;
-				int borderVertexIndex = currentChunkSize * currentChunkSize * (6 + 1) + (x + z * currentChunkSize) * 6;
+				int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
 				float h = chunk[x, z];
 
 				#if DEBUG
@@ -226,7 +238,7 @@ namespace ProceduralWorlds.IsoSurfaces
 
 				for (int i = 0; i < 6; i++)
 				{
-					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk);
+					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk, heightScale);
 	
 					float newHeight = neighbourHeight * heightScale;
 
@@ -317,36 +329,30 @@ namespace ProceduralWorlds.IsoSurfaces
 			oddHexNeighbourCoords[5] = new Vector2(0, 1);
 		}
 
-        public void SetHeightDisplacement(Sampler2D heightMap, float heightScale)
-        {
-            this.heightMap = heightMap;
-            this.heightScale = heightScale;
-        }
-		
 		IEnumerable< Vector2 > GetBorderPositions(Vector3 chunkDirection)
 		{
 			if (chunkDirection.x > 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(currentChunkSize - 1, i);
+				for (int i = 0; i < chunkSize; i++)
+					yield return new Vector2(chunkSize - 1, i);
 			if (chunkDirection.x < 0)
-				for (int i = 0; i < currentChunkSize; i++)
+				for (int i = 0; i < chunkSize; i++)
 					yield return new Vector2(0, i);
 			if (chunkDirection.z < 0)
-				for (int i = 0; i < currentChunkSize; i++)
+				for (int i = 0; i < chunkSize; i++)
 					yield return new Vector2(i, 0);
 			if (chunkDirection.z > 0)
-				for (int i = 0; i < currentChunkSize; i++)
-					yield return new Vector2(i, currentChunkSize - 1);
+				for (int i = 0; i < chunkSize; i++)
+					yield return new Vector2(i, chunkSize - 1);
 		}
 
 		Vector3 GetPositionFromCoords(int x, int z, float height = 0)
 		{
 			float hexMinRadius = Mathf.Cos(Mathf.Deg2Rad * 30);
 			float hexDecal = hexMinRadius * hexMinRadius;
-			float f = 1f / currentChunkSize * hexMinRadius;
+			float f = 1f / chunkSize * hexMinRadius;
 
-			float zPos = ((float)z * hexDecal / currentChunkSize);
-			float xPos = ((float)x * hexMinRadius / currentChunkSize) - ((Mathf.Abs(z) % 2 == 1) ? f / 2 : 0);
+			float zPos = ((float)z * hexDecal / chunkSize);
+			float xPos = ((float)x * hexMinRadius / chunkSize) - ((Mathf.Abs(z) % 2 == 1) ? f / 2 : 0);
 
 			return new Vector3(xPos, height, zPos);
 		}

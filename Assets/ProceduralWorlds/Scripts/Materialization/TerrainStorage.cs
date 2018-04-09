@@ -80,7 +80,7 @@ namespace ProceduralWorlds
 				return chunks[pos].terrainData;
 			else if (storeMode == StorageMode.File)
 			{
-				//TODO: check if file at pos exists and load it if exists.
+				//TODO: check if file at pos exists and async load it if exists.
 			}
 			return null;
 		}
@@ -121,15 +121,10 @@ namespace ProceduralWorlds
 
 		public bool	RemoveAt(Vector3i pos)
 		{
-			if (chunks.ContainsKey(pos))
-			{
-				chunks.Remove(pos);
-				return true;
-			}
-			return false;
+			return chunks.Remove(pos);
 		}
 
-		public List< Vector3i > GetLoadedChunks()
+		public List< Vector3i > GetLoadedChunkPositions()
 		{
 			return chunks.Keys.ToList();
 		}

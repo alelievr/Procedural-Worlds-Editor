@@ -210,7 +210,7 @@ namespace ProceduralWorlds.Core
 			processedFromBiome = false;
 		}
 
-		public FinalTerrain GetOutputTerrain()
+		public WorldChunk GetOutputTerrain()
 		{
 			return (outputNode as NodeWorldGraphOutput).finalTerrain;
 		}

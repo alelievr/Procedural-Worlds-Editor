@@ -9,8 +9,7 @@ using ProceduralWorlds.IsoSurfaces;
 public class Hex2DTerrain : BaseTerrain< TopDownChunkData >
 {
 	public float	yPosition;
-	public bool		heightDisplacement;
-	public float	heightScale = .1f;
+	public Hex2DIsoSurfaceSettings isoSettings = new Hex2DIsoSurfaceSettings();
 
 	readonly Hex2DIsoSurface	isoSurface = new Hex2DIsoSurface();
 
@@ -18,7 +17,8 @@ public class Hex2DTerrain : BaseTerrain< TopDownChunkData >
 	{
 		generateBorders = false;
 		neighbourMessageMode = NeighbourMessageMode.Mode2DXZCorner;
-		isoSurface.generateUvs = true;
+		isoSettings.generateUvs = true;
+		isoSettings.normalMode = NormalGenerationMode.Shared;
 	}
 
 	protected override object	OnChunkCreate(TopDownChunkData chunk, Vector3 pos)
@@ -35,12 +35,9 @@ public class Hex2DTerrain : BaseTerrain< TopDownChunkData >
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
 		MeshFilter mf = g.AddComponent< MeshFilter >();
 
-		if (heightDisplacement)
-			isoSurface.SetHeightDisplacement(chunk.terrain as Sampler2D, heightScale);
-		else
-			isoSurface.SetHeightDisplacement(null, 0);
+		isoSettings.Update(chunk.size, chunk.terrain as Sampler2D);
 
-		Mesh m = isoSurface.Generate(chunkSize);
+		Mesh m = isoSurface.Generate(isoSettings);
 
 		//if debug is enabled, we give to the chunk debug component all infos it needs
 		if (debug)

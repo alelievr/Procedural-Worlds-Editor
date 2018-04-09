@@ -5,49 +5,62 @@ using ProceduralWorlds.Core;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
+	[System.Serializable]
+	public class Naive2DIsoSurfaceSettings : IsoSurfaceSettings
+	{
+		public bool			heightDisplacement;
+		public Sampler2D	heightMap;
+		public float		heightScale;
+
+		public void Update(int chunkSize, Sampler2D heightMap = null)
+		{
+			this.heightMap = (heightDisplacement) ? heightMap : null;
+			base.chunkSize = chunkSize;
+		}
+	}
+	
     public class Naive2DIsoSurface : IsoSurface
     {
-		Sampler2D	heightDisplacementMap = null;
-		float		heightScale;
 
-        public override Mesh Generate(int chunkSize, Vector3 chunkPositiont = default(Vector3))
+        public override Mesh Generate(IsoSurfaceSettings settings)
         {
-			int		vertexCount = chunkSize * chunkSize;
-			int		faceCount = (chunkSize - 1) * (chunkSize - 1);
+			int		cs = settings.chunkSize;
+			int		vertexCount = cs * cs;
+			int		faceCount = (cs - 1) * (cs - 1);
+			var		ns = settings as Naive2DIsoSurfaceSettings;
 
 			UpdateVerticesSize(vertexCount, faceCount * 2);
 			
-			for (int x = 0; x < chunkSize; x++)
+			for (int x = 0; x < cs; x++)
 			{
-				float xPos = ((float)x / (chunkSize - 1) - .5f);
-				for (int z = 0; z < chunkSize; z++)
+				float xPos = ((float)x / (cs - 1) - .5f);
+				for (int z = 0; z < cs; z++)
 				{
-					float height = (heightDisplacementMap != null) ? heightDisplacementMap[x, z] : 0;
-					float zPos = ((float)z / (chunkSize - 1) - .5f);
-					vertices[z + x * chunkSize] = new Vector3(xPos, height * heightScale, zPos);
-					if (generateUvs)
-						uvs[z + x * chunkSize] = new Vector2((float)x / (chunkSize - 1), (float)z / (chunkSize - 1));
+					float height = (ns.heightMap != null) ? ns.heightMap[x, z] : 0;
+					float zPos = ((float)z / (cs - 1) - .5f);
+					vertices[z + x * cs] = new Vector3(xPos, height * ns.heightScale, zPos);
+					if (ns.generateUvs)
+						uvs[z + x * cs] = new Vector2((float)x / (cs - 1), (float)z / (cs - 1));
 				}
 			}
 	
 			int t = 0;
 			for (int face = 0; face < faceCount; face++)
 			{
-				int i = face % (chunkSize - 1) + (face / (chunkSize - 1) * chunkSize);
+				int i = face % (cs - 1) + (face / (cs - 1) * cs);
 	
 				triangles[t++] = i + 1;
-				triangles[t++] = i + chunkSize + 1;
-				triangles[t++] = i + chunkSize;
+				triangles[t++] = i + cs + 1;
+				triangles[t++] = i + cs;
 	
 				triangles[t++] = i;
 				triangles[t++] = i + 1;
-				triangles[t++] = i + chunkSize;
+				triangles[t++] = i + cs;
 			}
-
 	
-			if (heightDisplacementMap == null)
+			if (ns.heightMap == null)
 			{
-				for (int i = 0; i < chunkSize * chunkSize; i++)
+				for (int i = 0; i < cs * cs; i++)
 					normals[i] = Vector3.up;
 
 				return GenerateMesh(false);
@@ -55,11 +68,5 @@ namespace ProceduralWorlds.IsoSurfaces
 
 			return GenerateMesh(true);
         }
-
-		public void SetHeightDisplacement(Sampler2D heightMap, float heigthScale)
-		{
-			heightDisplacementMap = heightMap;
-			this.heightScale = heigthScale;
-		}
     }
 }

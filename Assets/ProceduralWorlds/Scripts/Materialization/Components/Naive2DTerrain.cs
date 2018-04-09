@@ -8,11 +8,10 @@ using ProceduralWorlds.IsoSurfaces;
 
 public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 {
-	public float	yPosition;
-	public bool		heightDisplacement;
-	public float	heightScale = .1f;
+	public float						yPosition;
+	public Naive2DIsoSurfaceSettings	naive2DSettings = new Naive2DIsoSurfaceSettings();
 
-	Gradient		rainbow;
+	Gradient	rainbow;
 
 	readonly Naive2DIsoSurface	isoSurface = new Naive2DIsoSurface();
 
@@ -20,7 +19,8 @@ public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 	{
 		//global settings, not depending from the editor
 		generateBorders = true;
-		isoSurface.generateUvs = true;
+		neighbourMessageMode = NeighbourMessageMode.Mode2DXY;
+		naive2DSettings.normalMode = NormalGenerationMode.Shared;
 	}
 
 	void	UpdateMeshDatas(Mesh mesh, BiomeMap2D biomes)
@@ -47,13 +47,10 @@ public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 		
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
 		MeshFilter mf = g.AddComponent< MeshFilter >();
+		
+		naive2DSettings.Update(chunk.size, chunk.terrain as Sampler2D);
 
-		if (heightDisplacement)
-			isoSurface.SetHeightDisplacement(chunk.terrain as Sampler2D, heightScale);
-		else
-			isoSurface.SetHeightDisplacement(null, 0);
-	
-		Mesh m = isoSurface.Generate(chunkSize);
+		Mesh m = isoSurface.Generate(naive2DSettings);
 			
 		UpdateMeshDatas(m, chunk.biomeMap);
 

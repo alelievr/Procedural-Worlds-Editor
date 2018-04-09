@@ -10,7 +10,6 @@ namespace ProceduralWorlds.Core
 	/*
 	**	Parent class to store everything needed to render a chunk
 	*/
-	[Serializable]
 	public abstract class ChunkData
 	{
 		public Vector3i				position;
@@ -28,7 +27,6 @@ namespace ProceduralWorlds.Core
 		}
 	}
 
-	[Serializable]
 	public class TopDownChunkData : ChunkData
 	{
 		
@@ -111,7 +109,7 @@ namespace ProceduralWorlds.Core
 		// MonotoneMeshing,
 	}
 	
-	public class FinalTerrain
+	public class WorldChunk
 	{
 		public BiomeData				biomeData;
 		public Sampler					mergedTerrain;

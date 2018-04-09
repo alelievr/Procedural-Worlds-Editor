@@ -40,7 +40,7 @@ namespace ProceduralWorlds.Editor
 				"GradientField",
 				BindingFlags.NonPublic | BindingFlags.Static,
 				null,
-				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
+				new[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
 				null
 			);
 		}

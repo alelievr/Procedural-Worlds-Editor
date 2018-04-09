@@ -90,7 +90,7 @@ namespace ProceduralWorlds.Core
 			}, {
 				ColorSchemeName.Pumpkin, new List< Type >{ typeof(BlendedBiomeTerrain) }
 			}, {
-				ColorSchemeName.SunFlower, new List< Type > { typeof(FinalTerrain),
+				ColorSchemeName.SunFlower, new List< Type > { typeof(WorldChunk),
 				typeof(BiomeSurfaceMaps), typeof(BiomeSurfaceColor),
 				typeof(BiomeSurfaceMaterial), typeof(BiomeSurfaceSwitch),
 				typeof(BiomeDetails), typeof(BiomeDetail) }

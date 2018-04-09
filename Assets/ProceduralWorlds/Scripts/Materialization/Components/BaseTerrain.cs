@@ -8,6 +8,7 @@ namespace ProceduralWorlds
 	[System.Serializable]
 	public abstract class BaseTerrain< T > : GenericBaseTerrain  where T : ChunkData, new()
 	{
+		protected SeamlessTerrain seamlessTerrain = new SeamlessTerrain();
 
 		//Generic to specif bindings:
 		protected override ChunkData RequestChunkGeneric(Vector3 pos, int seed) { return RequestChunk(pos, seed); }
@@ -16,6 +17,7 @@ namespace ProceduralWorlds
 		protected override void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkDestroy(terrainData as T, userStoredObject, pos); } 
 		protected override void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkHide(terrainData as T, userStoredObject, pos); }
 		protected override object RequestCreateGeneric(ChunkData terrainData, Vector3 pos) { return RequestCreate(terrainData as T, pos); }
+
 
 		protected T RequestChunk(Vector3 pos, int seed)
 		{
@@ -26,7 +28,7 @@ namespace ProceduralWorlds
 			graph.Process();
 
 			oldSeed = seed;
-			FinalTerrain finalTerrain = graph.GetOutputTerrain();
+			WorldChunk finalTerrain = graph.GetOutputTerrain();
 
 			if (finalTerrain == null)
 			{
@@ -37,7 +39,7 @@ namespace ProceduralWorlds
 			return CreateChunkData(finalTerrain, pos);
 		}
 
-		protected virtual T CreateChunkData(FinalTerrain terrain, Vector3 pos)
+		protected virtual T CreateChunkData(WorldChunk terrain, Vector3 pos)
 		{
 			T chunk = new T();
 
@@ -63,7 +65,7 @@ namespace ProceduralWorlds
 			return userData;
 		}
 
-		protected void FillChunkData(ChunkData chunk, FinalTerrain finalTerrain, Vector3 pos)
+		protected void FillChunkData(ChunkData chunk, WorldChunk finalTerrain, Vector3 pos)
 		{
 			chunk.size = finalTerrain.mergedTerrain.size;
 			chunk.materializerType = finalTerrain.materializerType;

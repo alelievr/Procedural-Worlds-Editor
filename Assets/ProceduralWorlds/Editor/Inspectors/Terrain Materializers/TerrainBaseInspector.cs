@@ -65,7 +65,7 @@ namespace ProceduralWorlds.Editor
 			}
 
 			try {
-				baseTerrain.ReloadChunks();
+				baseTerrain.ReloadChunks(baseTerrain.graphAsset);
 			} catch (Exception e) {
 				Debug.LogError(e);
 			}

@@ -4,11 +4,22 @@ using UnityEngine;
 
 namespace ProceduralWorlds.IsoSurfaces
 {
+	public enum NormalGenerationMode
+	{
+		Shared,
+		Flat,
+	}
+
+	[System.Serializable]
+	public class IsoSurfaceSettings
+	{
+		public bool						generateUvs = true;
+		public NormalGenerationMode		normalMode;
+		public int						chunkSize;
+	}
+
 	public abstract class IsoSurface
 	{
-		public bool					generateUvs = true;
-		public bool					generateSharedVertices = true;
-
 		protected bool				useDynamicTriangleCount = false;
 
         protected Vector2[]			uvs;
@@ -24,7 +35,7 @@ namespace ProceduralWorlds.IsoSurfaces
 		[System.NonSerialized]
 		int							oldVertexCount = -1;
 
-		public abstract Mesh Generate(int chunkSize, Vector3 chunkPosition = default(Vector3));
+		public abstract Mesh Generate(IsoSurfaceSettings settings);
 
 		protected void UpdateVerticesSize(int vertexCount, int faceCount)
 		{
@@ -42,7 +53,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			traingleList.Clear();
 		}
 
-		protected Mesh GenerateMesh(bool recalculateNormals = false)
+		protected Mesh GenerateMesh(bool recalculateNormals)
 		{
 			Mesh mesh = new Mesh();
 

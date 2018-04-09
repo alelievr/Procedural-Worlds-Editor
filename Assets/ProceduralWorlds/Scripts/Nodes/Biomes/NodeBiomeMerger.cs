@@ -15,7 +15,7 @@ namespace ProceduralWorlds.Nodes
 		public BlendedBiomeTerrain	inputBlendedTerrain;
 
 		[Output("Merged terrain")]
-		public FinalTerrain			mergedBiomeTerrain;
+		public WorldChunk			mergedBiomeTerrain;
 		
 		public MaterializerType		materializerType;
 
@@ -36,7 +36,7 @@ namespace ProceduralWorlds.Nodes
 		public override void OnNodeProcess()
 		{
 			if (mergedBiomeTerrain == null)
-				mergedBiomeTerrain = new FinalTerrain();
+				mergedBiomeTerrain = new WorldChunk();
 			
 			if (inputBlendedTerrain.biomeData == null)
 			{

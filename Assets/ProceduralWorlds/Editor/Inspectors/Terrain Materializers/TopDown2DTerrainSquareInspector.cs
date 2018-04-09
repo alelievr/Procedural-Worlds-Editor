@@ -18,10 +18,10 @@ namespace ProceduralWorlds.Editor
 		public override void OnEditorGUI()
 		{
 			terrain.yPosition = EditorGUILayout.FloatField("Y position", terrain.yPosition);
-			terrain.heightDisplacement = EditorGUILayout.Toggle("Height displacement", terrain.heightDisplacement);
-			if (terrain.heightDisplacement)
+			terrain.naive2DSettings.heightDisplacement = EditorGUILayout.Toggle("Height displacement", terrain.naive2DSettings.heightDisplacement);
+			if (terrain.naive2DSettings.heightDisplacement)
 			{
-				terrain.heightScale = EditorGUILayout.Slider("Height scale", terrain.heightScale, 0.0001f, 1);
+				terrain.naive2DSettings.heightScale = EditorGUILayout.Slider("Height scale", terrain.naive2DSettings.heightScale, 0.0001f, 1);
 			}
 		}
 	}

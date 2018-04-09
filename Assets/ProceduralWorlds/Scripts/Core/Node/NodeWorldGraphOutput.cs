@@ -8,7 +8,7 @@ namespace ProceduralWorlds.Nodes
 	public class NodeWorldGraphOutput : BaseNode
 	{
 		[Input("Final terrain")]
-		public FinalTerrain			finalTerrain;
+		public WorldChunk			finalTerrain;
 
 		[Input]
 		public PWArray< object >	inputValues = new PWArray< object >();
