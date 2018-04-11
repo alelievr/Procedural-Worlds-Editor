@@ -7,8 +7,8 @@ namespace ProceduralWorlds.Editor
 {
 	public class ProceduralWorldsEditorWindow : EditorWindow
 	{
-	
 		[System.NonSerialized] bool firstGUILoop = true;
+		protected Event				e { get { return Event.current; } }
 	
 		public virtual void OnEnable()
 		{

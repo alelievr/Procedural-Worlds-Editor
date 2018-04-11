@@ -33,8 +33,6 @@ namespace ProceduralWorlds.Editor
 	
 		readonly GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
 	
-		protected Event e { get { return Event.current; } }
-	
 		void ContextMenu()
 		{
 			if (e.type == EventType.ContextClick)

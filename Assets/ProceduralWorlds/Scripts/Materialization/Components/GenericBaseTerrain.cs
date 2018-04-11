@@ -311,6 +311,8 @@ namespace ProceduralWorlds
 				OnChunkDestroyGeneric(terrainData, userData, (Vector3)pos);
 			});
 			terrainStorage.Clear();
+			
+			seamlessTerrain.Clear();
 
 			//manually cleanup remaining GOs:
 			while (terrainRoot.transform.childCount > 0)

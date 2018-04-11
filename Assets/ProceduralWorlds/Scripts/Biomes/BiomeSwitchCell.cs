@@ -49,7 +49,7 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 			return retWeight;
 		}
 
-		public float ComputeBlend(BiomeBlendList blendMatrix, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
+		public float ComputeBlend(BiomeBlendList blendList, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
 		{
 			float	blend = 0;
 			float	blendParamCount = 0;
@@ -57,7 +57,7 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 			int length = values.length;
 			for (int i = 0; i < length; i++)
 			{
-				if (!blendMatrix.blendEnabled[i] || !switchParams.switchParams[i].enabled || !values.enabled[i])
+				if (!blendList.blendEnabled[i] || !switchParams.switchParams[i].enabled || !values.enabled[i])
 					continue ;
 				
 				//Compute biome blend using blendPercent

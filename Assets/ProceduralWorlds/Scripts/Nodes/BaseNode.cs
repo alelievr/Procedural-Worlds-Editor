@@ -17,6 +17,7 @@ namespace ProceduralWorlds
 		public Rect					rect = defaultNodeSize;
 		public Rect					visualRect;
 		public int					id;
+		public bool					foldout = true;
 		public bool					renamable;
 		public int					computeOrder;
 		public float				processTime;

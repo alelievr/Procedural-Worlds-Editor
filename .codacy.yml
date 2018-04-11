@@ -9,4 +9,5 @@ exclude_paths:
     - 'Assets/MicroSplat/**'
     - 'Assets/Builtin skin/**'
     - 'Assets/ProceduralWorlds/Editor/Tests/**'
+    - 'Assets/ProceduralWorlds/Editor/Debug/**'
     - 'Assets/Tests_TMP'

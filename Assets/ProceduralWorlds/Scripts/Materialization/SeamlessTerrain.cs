@@ -26,6 +26,21 @@ namespace ProceduralWorlds
 			chunks.Add(new Vector3Int((int)pos.x, (int)pos.y, (int)pos.z), chunk);
 		}
 
+		public bool			RemoveChunk(Vector3Int pos)
+		{
+			return chunks.Remove(pos);
+		}
+
+		public void			Clear()
+		{
+			chunks.Clear();
+		}
+
+		public bool			RemoveChunk(Vector3 pos)
+		{
+			return chunks.Remove(new Vector3Int((int)pos.x, (int)pos.y, (int)pos.z));
+		}
+
 		public T			SampleChunkAt< T >(Vector3Int pos, int chunkX, int chunkY, ChunkSampleDelegate< T > callback)
 		{
 			if (oldPosition != pos)

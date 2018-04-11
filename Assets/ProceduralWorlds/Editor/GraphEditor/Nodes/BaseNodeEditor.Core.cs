@@ -55,15 +55,10 @@ namespace ProceduralWorlds.Editor
 			PWGUI.StartFrame(nodeRef.rect);
 
 			// set the header of the window as draggable:
-			int width = (int) nodeRef.rect.width;
+			int width = (int)nodeRef.rect.width;
 			int padding = 8;
 			Rect dragRect = new Rect(padding, 0, width - padding * 2, 20);
 			
-			Rect debugIconRect = dragRect;
-			int	debugIconSize = 16;
-			debugIconRect.position += new Vector2(width - debugIconSize, 0);
-			GUI.DrawTexture(debugIconRect, debugIcon);
-
 			if (e.type == EventType.MouseDown && e.button == 0 && dragRect.Contains(e.mousePosition))
 			{
 				selectedNodeToDrag = graphRef.allNodes.Where(n => n.isSelected);
@@ -84,6 +79,8 @@ namespace ProceduralWorlds.Editor
 
 			if (nodeRef.isDragged)
 				Undo.RecordObject(nodeRef, "Node " + nodeRef.name + " dragged");
+				
+			RenderHeader();
 			
 			//Drag window
 			if (e.button == 0 && !windowNameEdit)
@@ -96,7 +93,10 @@ namespace ProceduralWorlds.Editor
 			{
 				DrawNullInputGUI();
 
-				OnNodeGUI();
+				if (nodeRef.foldout)
+					OnNodeGUI();
+				else
+					GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 				EditorGUIUtility.labelWidth = 0;
 			}
