@@ -6,28 +6,30 @@ using ProceduralWorlds.Core;
 namespace ProceduralWorlds.IsoSurfaces
 {
 	[System.Serializable]
-	public class Naive2DIsoSurfaceSettings : IsoSurfaceSettings
+	public class Naive2DIsoSurfaceSettings
 	{
-		public bool			heightDisplacement;
-		public Sampler2D	heightMap;
-		public float		heightScale;
+		public bool						heightDisplacement;
+		public Sampler2D				heightMap;
+		public float					heightScale;
+		public int						chunkSize;
+		public bool						generateUvs = true;
+		public NormalGenerationMode		normalMode;
 
 		public void Update(int chunkSize, Sampler2D heightMap = null)
 		{
 			this.heightMap = (heightDisplacement) ? heightMap : null;
-			base.chunkSize = chunkSize;
+			this.chunkSize = chunkSize;
 		}
 	}
 	
-    public class Naive2DIsoSurface : IsoSurface
+    public class Naive2DIsoSurface : IsoSurface< Naive2DIsoSurfaceSettings >
     {
 
-        public override Mesh Generate(IsoSurfaceSettings settings)
+        public override Mesh Generate(Naive2DIsoSurfaceSettings settings)
         {
 			int		cs = settings.chunkSize;
 			int		vertexCount = cs * cs;
 			int		faceCount = (cs - 1) * (cs - 1);
-			var		ns = settings as Naive2DIsoSurfaceSettings;
 
 			UpdateVerticesSize(vertexCount, faceCount * 2);
 			
@@ -36,10 +38,10 @@ namespace ProceduralWorlds.IsoSurfaces
 				float xPos = ((float)x / (cs - 1) - .5f);
 				for (int z = 0; z < cs; z++)
 				{
-					float height = (ns.heightMap != null) ? ns.heightMap[x, z] : 0;
+					float height = (settings.heightMap != null) ? settings.heightMap[x, z] : 0;
 					float zPos = ((float)z / (cs - 1) - .5f);
-					vertices[z + x * cs] = new Vector3(xPos, height * ns.heightScale, zPos);
-					if (ns.generateUvs)
+					vertices[z + x * cs] = new Vector3(xPos, height * settings.heightScale, zPos);
+					if (settings.generateUvs)
 						uvs[z + x * cs] = new Vector2((float)x / (cs - 1), (float)z / (cs - 1));
 				}
 			}
@@ -58,7 +60,7 @@ namespace ProceduralWorlds.IsoSurfaces
 				triangles[t++] = i + cs;
 			}
 	
-			if (ns.heightMap == null)
+			if (settings.heightMap == null)
 			{
 				for (int i = 0; i < cs * cs; i++)
 					normals[i] = Vector3.up;

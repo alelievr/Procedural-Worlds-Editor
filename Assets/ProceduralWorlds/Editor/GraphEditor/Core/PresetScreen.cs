@@ -160,7 +160,7 @@ namespace ProceduralWorlds.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		bool DefaultDrawCell(PresetCell cell, bool selected, int columnIndex)
+		bool DefaultDrawCell(PresetCell cell, bool selected)
 		{
 			bool pressed = false;
 
@@ -201,7 +201,7 @@ namespace ProceduralWorlds.Editor
 				int i = 0;
 				foreach (var preset in presetList)
 				{
-					if (DefaultDrawCell(preset, i == newSelectedIndex, columnIndex))
+					if (DefaultDrawCell(preset, i == newSelectedIndex))
 						newSelectedIndex = i;
 					i++;
 				}
@@ -250,8 +250,6 @@ namespace ProceduralWorlds.Editor
 	
 			presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos, GUILayout.ExpandHeight(true));
 			{
-				// EditorGUILayout.LabelField("Procedural Worlds");
-				
 				EditorGUILayout.BeginHorizontal();
 				{
 					DrawBoard();

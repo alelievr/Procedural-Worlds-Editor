@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 		int		currentStep;
 		int		currentFrame;
 
-		string	name;
+		readonly string	name;
 
 		Vector3	position;
 

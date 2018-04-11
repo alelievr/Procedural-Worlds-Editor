@@ -10,15 +10,7 @@ namespace ProceduralWorlds.IsoSurfaces
 		Flat,
 	}
 
-	[System.Serializable]
-	public class IsoSurfaceSettings
-	{
-		public bool						generateUvs = true;
-		public NormalGenerationMode		normalMode;
-		public int						chunkSize;
-	}
-
-	public abstract class IsoSurface
+	public abstract class IsoSurface< T >
 	{
 		protected bool				useDynamicTriangleCount = false;
 
@@ -35,7 +27,7 @@ namespace ProceduralWorlds.IsoSurfaces
 		[System.NonSerialized]
 		int							oldVertexCount = -1;
 
-		public abstract Mesh Generate(IsoSurfaceSettings settings);
+		public abstract Mesh Generate(T settings);
 
 		protected void UpdateVerticesSize(int vertexCount, int faceCount)
 		{

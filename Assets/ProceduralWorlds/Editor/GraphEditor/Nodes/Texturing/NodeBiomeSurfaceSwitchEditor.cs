@@ -48,7 +48,6 @@ namespace ProceduralWorlds.Editor
 			if (PWGUI.BeginFade("Param limit", Styles.box, ref outputSwitch.paramEnabled))
 			{
 				//TODO: modular input from BiomeSamplerName
-				// outputSwitch.paramType = (BiomeSwitchMode)EditorGUILayout.EnumPopup(outputSwitch.paramType);
 				EditorGUIUtility.labelWidth = 60;
 				outputSwitch.minParam = EditorGUILayout.FloatField("Min", outputSwitch.minParam);
 				outputSwitch.maxParam = EditorGUILayout.FloatField("Max", outputSwitch.maxParam);

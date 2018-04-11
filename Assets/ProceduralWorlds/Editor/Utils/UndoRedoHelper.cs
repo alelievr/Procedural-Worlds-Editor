@@ -22,9 +22,10 @@ namespace ProceduralWorlds.Editor
 			target = targetToUndo;
 		}
 
-		public void LoadUndoableFields()
+		public void LoadUndoableFields(bool declaredOnly = true)
 		{
-			System.Reflection.FieldInfo[] fInfos = target.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+			var bindings = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | ((declaredOnly) ? BindingFlags.DeclaredOnly : 0);
+			System.Reflection.FieldInfo[] fInfos = target.GetType().GetFields(bindings);
 
 			undoableFields.Clear();
 			
@@ -58,8 +59,7 @@ namespace ProceduralWorlds.Editor
 				
 				undoableFields.Add(ReflectionUtils.CreateGenericField(target.GetType(), fInfo.Name));
 
-				skipThisField:
-				continue ;
+				skipThisField:;
 			}
 		}
 

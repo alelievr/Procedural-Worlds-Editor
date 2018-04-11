@@ -8,8 +8,6 @@ namespace ProceduralWorlds
 	[System.Serializable]
 	public abstract class BaseTerrain< T > : GenericBaseTerrain  where T : ChunkData, new()
 	{
-		protected SeamlessTerrain seamlessTerrain = new SeamlessTerrain();
-
 		//Generic to specif bindings:
 		protected override ChunkData RequestChunkGeneric(Vector3 pos, int seed) { return RequestChunk(pos, seed); }
 		protected override object OnChunkCreateGeneric(ChunkData terrainData, Vector3 pos) { return OnChunkCreate(terrainData as T, pos); } 
@@ -17,7 +15,6 @@ namespace ProceduralWorlds
 		protected override void OnChunkDestroyGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkDestroy(terrainData as T, userStoredObject, pos); } 
 		protected override void OnChunkHideGeneric(ChunkData terrainData, object userStoredObject, Vector3 pos) { OnChunkHide(terrainData as T, userStoredObject, pos); }
 		protected override object RequestCreateGeneric(ChunkData terrainData, Vector3 pos) { return RequestCreate(terrainData as T, pos); }
-
 
 		protected T RequestChunk(Vector3 pos, int seed)
 		{
@@ -28,15 +25,17 @@ namespace ProceduralWorlds
 			graph.Process();
 
 			oldSeed = seed;
-			WorldChunk finalTerrain = graph.GetOutputTerrain();
+			WorldChunk worldChunk = graph.GetOutputTerrain();
 
-			if (finalTerrain == null)
+			if (worldChunk == null)
 			{
 				Debug.LogWarning("[BaseTerrain] Graph output terrain is null !");
 				return null;
 			}
+
+			seamlessTerrain.AddChunk(pos, worldChunk);
 			
-			return CreateChunkData(finalTerrain, pos);
+			return CreateChunkData(worldChunk, pos);
 		}
 
 		protected virtual T CreateChunkData(WorldChunk terrain, Vector3 pos)
@@ -65,12 +64,12 @@ namespace ProceduralWorlds
 			return userData;
 		}
 
-		protected void FillChunkData(ChunkData chunk, WorldChunk finalTerrain, Vector3 pos)
+		protected void FillChunkData(ChunkData chunk, WorldChunk worldChunk, Vector3 pos)
 		{
-			chunk.size = finalTerrain.mergedTerrain.size;
-			chunk.materializerType = finalTerrain.materializerType;
-			chunk.terrain = finalTerrain.mergedTerrain.Clone(null);
-			chunk.biomeMap = finalTerrain.biomeData.biomeMap;
+			chunk.size = worldChunk.mergedTerrain.size;
+			chunk.materializerType = worldChunk.materializerType;
+			chunk.terrain = worldChunk.mergedTerrain.Clone(null);
+			chunk.biomeMap = worldChunk.biomeData.biomeMap;
 			chunk.position = pos;
 			chunk.biomeMap3D = null;
 		}

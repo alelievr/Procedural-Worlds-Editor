@@ -65,7 +65,7 @@ namespace ProceduralWorlds.Core
 
 		public static GenericField CreateGenericField(Type childType, string fieldName)
 		{
-			FieldInfo fi = childType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+			FieldInfo fi = childType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
 			//Create a specific type from Field which will cast the generic type to a specific one to call the generated delegate
 			var callerType = typeof(Field<,>).MakeGenericType(new[] { childType, fi.FieldType });

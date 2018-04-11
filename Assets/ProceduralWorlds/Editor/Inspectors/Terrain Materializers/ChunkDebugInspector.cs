@@ -12,7 +12,7 @@ namespace ProceduralWorlds.Editor
 	{
 		List< ChunkDebug >	chunkDebugs = new List< ChunkDebug >();
 
-		List< VisualDebugEditor >	visualDebugEditors = new List< VisualDebugEditor >();
+		readonly List< VisualDebugEditor >	visualDebugEditors = new List< VisualDebugEditor >();
 
 		private void OnEnable()
 		{

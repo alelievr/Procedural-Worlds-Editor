@@ -9,7 +9,7 @@ using ProceduralWorlds.IsoSurfaces;
 public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 {
 	public float						yPosition;
-	public Naive2DIsoSurfaceSettings	naive2DSettings = new Naive2DIsoSurfaceSettings();
+	public Naive2DIsoSurfaceSettings	isoSettings = new Naive2DIsoSurfaceSettings();
 
 	Gradient	rainbow;
 
@@ -20,7 +20,7 @@ public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 		//global settings, not depending from the editor
 		generateBorders = true;
 		neighbourMessageMode = NeighbourMessageMode.Mode2DXY;
-		naive2DSettings.normalMode = NormalGenerationMode.Shared;
+		isoSettings.normalMode = NormalGenerationMode.Shared;
 	}
 
 	void	UpdateMeshDatas(Mesh mesh, BiomeMap2D biomes)
@@ -48,9 +48,9 @@ public class Naive2DTerrain : BaseTerrain< TopDownChunkData >
 		MeshRenderer mr = g.AddComponent< MeshRenderer >();
 		MeshFilter mf = g.AddComponent< MeshFilter >();
 		
-		naive2DSettings.Update(chunk.size, chunk.terrain as Sampler2D);
+		isoSettings.Update(chunk.size, chunk.terrain as Sampler2D);
 
-		Mesh m = isoSurface.Generate(naive2DSettings);
+		Mesh m = isoSurface.Generate(isoSettings);
 			
 		UpdateMeshDatas(m, chunk.biomeMap);
 

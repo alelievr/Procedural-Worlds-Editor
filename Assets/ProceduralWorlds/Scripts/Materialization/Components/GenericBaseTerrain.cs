@@ -53,6 +53,7 @@ namespace ProceduralWorlds
 
 		protected bool					generateBorders = true;
 		protected NeighbourMessageMode	neighbourMessageMode = NeighbourMessageMode.None;
+		protected SeamlessTerrain		seamlessTerrain = new SeamlessTerrain();
 		
 		protected int					oldSeed = 0;
 

@@ -14,14 +14,19 @@ namespace ProceduralWorlds.Editor
 	{
 		GenericBaseTerrain baseTerrain;
 
+		UndoRedoHelper	undoRedoHelper;
+
 		public void OnEnable()
 		{
 			baseTerrain = target as GenericBaseTerrain;
 			OnEditorEnable();
+			undoRedoHelper = new UndoRedoHelper(baseTerrain);
+			undoRedoHelper.LoadUndoableFields(false);
 		}
 
 		public override void OnInspectorGUI()
 		{
+			undoRedoHelper.Beign();
 			baseTerrain.debug = EditorGUILayout.Toggle("Debug", baseTerrain.debug);
 			baseTerrain.generateChunksOnLoad = EditorGUILayout.Toggle("Generate on load", baseTerrain.generateChunksOnLoad);
 
@@ -36,6 +41,8 @@ namespace ProceduralWorlds.Editor
 			EditorGUILayout.Space();
 
 			OnEditorGUI();
+
+			undoRedoHelper.End();
 			
 			EditorGUILayout.Space();
 			

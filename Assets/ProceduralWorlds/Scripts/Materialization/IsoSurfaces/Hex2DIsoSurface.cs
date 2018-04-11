@@ -9,20 +9,23 @@ using System.Linq;
 namespace ProceduralWorlds.IsoSurfaces
 {
 	[System.Serializable]
-	public class Hex2DIsoSurfaceSettings : IsoSurfaceSettings
+	public class Hex2DIsoSurfaceSettings
 	{
-		public bool			heightDisplacement;
-        public float		heightScale;
-        public Sampler2D	heightMap;
+		public bool						heightDisplacement;
+        public float					heightScale;
+        public Sampler2D				heightMap;
+		public bool						generateUvs = true;
+		public NormalGenerationMode		normalMode;
+		public int						chunkSize;
 
 		public void Update(int chunkSize, Sampler2D heightMap = null)
 		{
 			this.heightMap = (heightDisplacement) ? heightMap : null;
-			base.chunkSize = chunkSize;
+			this.chunkSize = chunkSize;
 		}
 	}
 
-    public class Hex2DIsoSurface : IsoSurface
+    public class Hex2DIsoSurface : IsoSurface< Hex2DIsoSurfaceSettings >
     {
 		float		oldHexSize;
 		float		heightScale;
@@ -40,15 +43,13 @@ namespace ProceduralWorlds.IsoSurfaces
 			UpdateHexNearCoords();
 		}
 
-        public override Mesh Generate(IsoSurfaceSettings settings)
+        public override Mesh Generate(Hex2DIsoSurfaceSettings hexSettings)
         {
-			var			hexSettings = settings as Hex2DIsoSurfaceSettings;
-
 			Sampler2D	heightMap = hexSettings.heightMap;
             int			vertexCount = chunkSize * chunkSize * (6 + 1);
 			int			faceCount = chunkSize * chunkSize * 6;
 
-			chunkSize = settings.chunkSize;
+			chunkSize = hexSettings.chunkSize;
 			heightScale = hexSettings.heightScale;
 
 			if (heightMap != null)
@@ -201,7 +202,7 @@ namespace ProceduralWorlds.IsoSurfaces
 			return SafeGetHeight(x, z, defaultValue, currentTerrain);
 		}
 
-		float GetNeighbourChunkHeight(int x, int z, int index, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D chunkTerrain, float heightScale)
+		float GetNeighbourChunkHeight(int x, int z, int index, float defaultValue, Vector3 chunkDirection, Sampler2D currentTerrain, Sampler2D chunkTerrain)
 		{
 			//Yeah i know, it seems to be black magic, but trust me it works !
 			int i1 = (-index + 6) % 6;
@@ -231,14 +232,14 @@ namespace ProceduralWorlds.IsoSurfaces
 				int z = (int)borderPos[b].y;
 				int borderVertexIndex = chunkSize * chunkSize * (6 + 1) + (x + z * chunkSize) * 6;
 				float h = chunk[x, z];
-
+	
 				#if DEBUG
 					isoDebug.BeginFrame("Chunk border update");
 				#endif
 
 				for (int i = 0; i < 6; i++)
 				{
-					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk, heightScale);
+					float neighbourHeight = GetNeighbourChunkHeight(x, z, i, h, chunkDirection, chunk, neighbourChunk);
 	
 					float newHeight = neighbourHeight * heightScale;
 
