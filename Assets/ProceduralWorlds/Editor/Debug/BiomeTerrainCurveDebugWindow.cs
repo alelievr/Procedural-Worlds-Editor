@@ -15,8 +15,16 @@ namespace ProceduralWorlds.Editor.DebugWindows
 	{
 		float			blendPercent = 0.05f;
 
-		float			inputWetness = 0;
-		float			inputTemperature = 0;
+		[SerializeField]
+		float			inputMinWetness = 0;
+		[SerializeField]
+		float			inputMaxWetness = 0;
+		[SerializeField]
+		float			inputMinTemperature = 0;
+		[SerializeField]
+		float			inputMaxTemperature = 0;
+		[SerializeField]
+		float			step = 0.1f;
 
 		float			minGlobalHeight = 0;
 		float			maxGlobalHeight = 100;
@@ -24,6 +32,11 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		float			maxGlobalWetness = 100;
 		float			minGlobalTemperature = -20;
 		float			maxGlobalTemperature = 40;
+
+		int				stepIndex;
+
+		Texture2D			heightTexture;
+		List< StepInfo >	stepinfos = new List< StepInfo >();
 
 		ReorderableList	reorderableBiomeList;
 
@@ -41,6 +54,16 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			public float			maxWetness;
 			public float			minTemperature;
 			public float			maxTemperature;
+		}
+
+		class StepInfo
+		{
+			public float			height;
+			public float			wetness;
+			public float			temperature;
+
+			public List< string >	biomeNames = new List< string >();
+			public List< float >	blendPercents = new List< float >();
 		}
 
 		[MenuItem("Window/Procedural Worlds/Debug/BiomeTerrainCurve")]
@@ -128,12 +151,29 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			EditorGUILayout.Space();
 
 			blendPercent = EditorGUILayout.Slider("Blend percent", blendPercent, 0, 0.5f);
-			inputWetness = EditorGUILayout.FloatField("Wetness", inputWetness);
-			inputTemperature = EditorGUILayout.FloatField("Temperature", inputTemperature);
+			step = EditorGUILayout.Slider("Step", step, 0.01f, 1f);
+			
+			EditorGUIUtility.labelWidth = 50;
+			using (new EditorGUILayout.HorizontalScope())
+			{
+				EditorGUILayout.LabelField("Wetness");
+				inputMinWetness = EditorGUILayout.FloatField("Min", inputMinWetness);
+				inputMaxWetness = EditorGUILayout.FloatField("Max", inputMaxWetness);
+			}
+			
+			using (new EditorGUILayout.HorizontalScope())
+			{
+				EditorGUILayout.LabelField("Temperature");
+				inputMinTemperature = EditorGUILayout.FloatField("Min", inputMinTemperature);
+				inputMaxTemperature = EditorGUILayout.FloatField("Max", inputMaxTemperature);
+			}
+			EditorGUIUtility.labelWidth = 0;
 
 			if (GUILayout.Button("Evaluate"))
 				Evaluate();
 
+			DrawStepInfos();
+			
 			EditorGUILayout.Space();
 		}
 
@@ -142,39 +182,34 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			if (!switchGraph.isBuilt)
 				return ;
 
-			var blendParams = new BiomeSwitchCellParams();
-			var blendList = new BiomeBlendList();
-			var bsw = new BiomeSwitchValues();
+			stepinfos.Clear();
 
-			//height
-			//nope
-			//wetness
-			bsw[1] = inputWetness;
-			//temperature
-			bsw[2] = inputTemperature;
-			
-			var bsc = switchGraph.FindBiome(bsw);
+			for (float i = inputMinWetness; i < inputMaxWetness; i += step)
+				for (float j = inputMinTemperature; j < inputMaxTemperature; j += step)
+					EvaluateStep(i, j);
+		}
 
-			Debug.Log("biome found: " + bsc.name);
+		void DrawStepInfos()
+		{
+			stepIndex = EditorGUILayout.IntSlider("Step", stepIndex, 0, stepinfos.Count - 1);
 
-			blendList.blendEnabled = new bool[3];
-			blendList.blendEnabled[0] = false;	//height
-			blendList.blendEnabled[1] = true;	//wetness
-			blendList.blendEnabled[2] = true;	//temperature
-			
-			//add biome that can be blended with the primary biome,
-			if (blendPercent > 0)
-				foreach (var link in bsc.links)
+			if (stepIndex < stepinfos.Count)
+			{
+				var step = stepinfos[stepIndex];
+
+				EditorGUILayout.LabelField("Temperature: " + step.temperature);
+				EditorGUILayout.LabelField("Wetness: " + step.wetness);
+
+				for (int i = 0; i < step.biomeNames.Count; i++)
 				{
-					if (link.Overlaps(blendParams))
-					{
-						float blend = link.ComputeBlend(blendList, switchGraph.paramRanges, bsw, blendPercent);
-						if (blend > 0.001f)
-						{
-							Debug.Log("+ blend with " + link.name + " (" + blend + ")");
-						}
-					}
+					EditorGUILayout.LabelField("Biome " + step.biomeNames[i] + ": " + (step.blendPercents[i] * 100) + "%");
 				}
+
+				if (step.biomeNames.Count == 0)
+				{
+					EditorGUILayout.LabelField("No biome found for t: " + step.temperature + " / " + step.wetness);
+				}
+			}
 		}
 
 		void DrawGlobalRange()
@@ -203,6 +238,50 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			}
 
 			EditorGUIUtility.labelWidth = 0;
+		}
+
+		void EvaluateStep(float wetness, float temperature)
+		{
+			var bsw = new BiomeSwitchValues();
+			var bsc = switchGraph.FindBiome(bsw);
+			var blendList = new BiomeBlendList();
+			var blendParams = new BiomeSwitchCellParams();
+			
+			bsw[1] = wetness;
+			bsw[2] = temperature;
+
+			var step = new StepInfo();
+			step.temperature = temperature;
+			step.wetness = wetness;
+
+			stepinfos.Add(step);
+
+			if (bsc == null)
+				return;
+
+			step.biomeNames.Add(bsc.name);
+			step.blendPercents.Add(1);
+
+			blendList.blendEnabled = new bool[3];
+			blendList.blendEnabled[0] = false;	//height
+			blendList.blendEnabled[1] = true;	//wetness
+			blendList.blendEnabled[2] = true;	//temperature
+			
+			//add biome that can be blended with the primary biome,
+			if (blendPercent > 0)
+				foreach (var link in bsc.links)
+				{
+					if (link.Overlaps(blendParams))
+					{
+						float blend = link.ComputeBlend(blendList, switchGraph.paramRanges, bsw, blendPercent, true);
+						
+						if (blend > 0.001f)
+						{
+							step.biomeNames.Add(link.name);
+							step.blendPercents.Add(blend);
+						}
+					}
+				}
 		}
 
 		#region Utils
