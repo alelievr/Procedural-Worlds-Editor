@@ -20,6 +20,20 @@ namespace ProceduralWorlds.Editor
 				return _redLabel;
 			}
 		}
+		
+		static GUIStyle _greenLabel;
+		public static GUIStyle greenLabel
+		{
+			get
+			{
+				if (_greenLabel == null)
+				{
+					_greenLabel = EditorStyles.whiteLabel;
+					_greenLabel.normal.textColor = Color.green;
+				}
+				return _greenLabel;
+			}
+		}
 
 		public static GUIStyle errorLabel { get { return redLabel; } }
 
