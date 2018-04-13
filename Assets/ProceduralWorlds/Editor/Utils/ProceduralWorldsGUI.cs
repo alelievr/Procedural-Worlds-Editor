@@ -865,7 +865,6 @@ namespace ProceduralWorlds.Editor
 					EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
 					EditorGUI.indentLevel--;
 				}
-				EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
 			}
 			EditorGUILayout.EndVertical();
 		}

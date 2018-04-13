@@ -47,7 +47,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		int				textureIndex;
 
 		Texture2D			heightTexture;
-		List< StepInfo >	stepinfos = new List< StepInfo >();
+		List< StepInfo >	stepInfos = new List< StepInfo >();
 
 		ReorderableList		reorderableBiomeList;
 
@@ -60,6 +60,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		[System.Serializable]
 		public class Biome
 		{
+			public short			id;
 			public string			name;
 			public AnimationCurve	terrainCurve = AnimationCurve.Linear(0, 0, 1, 1);
 			public float			minWetness;
@@ -73,8 +74,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			public float			wetness;
 			public float			temperature;
 
-			public List< string >	biomeNames = new List< string >();
-			public List< float >	blendPercents = new List< float >();
+			public BiomeMap2D		biomeMap;
 			public List< float >	heights = new List< float >();
 		}
 
@@ -224,23 +224,19 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		void DrawStepInfos()
 		{
-			stepIndex = EditorGUILayout.IntSlider("Step", stepIndex, 0, stepinfos.Count - 1);
+			stepIndex = EditorGUILayout.IntSlider("Step", stepIndex, 0, stepInfos.Count - 1);
 
-			if (stepIndex < stepinfos.Count)
+			if (stepIndex < stepInfos.Count)
 			{
-				var step = stepinfos[stepIndex];
+				var step = stepInfos[stepIndex];
+				var point = step.biomeMap.GetBiomeBlendInfo(0, 0);
 
 				EditorGUILayout.LabelField("Temperature: " + step.temperature);
 				EditorGUILayout.LabelField("Wetness: " + step.wetness);
 
-				for (int i = 0; i < step.biomeNames.Count; i++)
+				for (int i = 0; i < point.biomeIds.Length; i++)
 				{
-					EditorGUILayout.LabelField("Biome " + step.biomeNames[i] + ": " + (step.blendPercents[i] * 100) + "%");
-				}
-
-				if (step.biomeNames.Count == 0)
-				{
-					EditorGUILayout.LabelField("No biome found for t: " + step.temperature + " / " + step.wetness);
+					EditorGUILayout.LabelField("Biome " + point.biomeIds[i] + ": " + (point.biomeBlends[i] * 100) + "%");
 				}
 			}
 		}
@@ -299,7 +295,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			if (!switchGraph.isBuilt)
 				return ;
 
-			stepinfos.Clear();
+			stepInfos.Clear();
 
 			for (float i = inputMinWetness; i < inputMaxWetness; i += step)
 				for (float j = inputMinTemperature; j < inputMaxTemperature; j += step)
@@ -317,17 +313,23 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			
 			var bsc = switchGraph.FindBiome(bsw);
 
-			var step = new StepInfo();
-			step.temperature = temperature;
-			step.wetness = wetness;
+			var stepInfo = new StepInfo();
+			stepInfo.temperature = temperature;
+			stepInfo.wetness = wetness;
 
-			stepinfos.Add(step);
+			stepInfos.Add(stepInfo);
 
 			if (bsc == null)
+			{
+				Debug.Log("Biome not found: " + wetness + " | " + temperature);
 				return;
+			}
 
-			step.biomeNames.Add(bsc.name);
-			step.blendPercents.Add(1);
+			stepInfo.biomeMap = new BiomeMap2D((int)(inputMaxWetness - inputMinWetness * (1f / step)), 1);
+			int x = (int)((wetness + inputMinWetness) * (1 / step));
+			int y = 0;
+
+			stepInfo.biomeMap.SetPrimaryBiomeId(x, y, bsc.id);
 
 			blendList.blendEnabled = new bool[3];
 			blendList.blendEnabled[0] = false;	//height
@@ -343,34 +345,29 @@ namespace ProceduralWorlds.Editor.DebugWindows
 						float blend = link.ComputeBlend(blendList, switchGraph.paramRanges, bsw, blendPercent);
 						
 						if (blend > 0.001f)
-						{
-							step.biomeNames.Add(link.name);
-							step.blendPercents.Add(blend);
-						}
+							stepInfo.biomeMap.AddBiome(x, y, link.id, blend);
 					}
 				}
+			
+			stepInfo.biomeMap.NormalizeBlendValues(x, y);
+
+			var point = stepInfo.biomeMap.GetBiomeBlendInfo(x, y);
 
 			//compute terrain height:
+			stepInfo.heights.Clear();
 			for (int h = inputMinHeight; h < inputMaxHeight; h += heightStep)
 			{
 				float height = 0;
 				float normalizedH = Mathf.InverseLerp(inputMinHeight, inputMaxHeight, h);
-				float totalBlend = 0;
 
-				for (int i = 0; i < step.blendPercents.Count; i++)
-					if (step.blendPercents[i] != 1)
-						totalBlend += step.blendPercents[i];
-
-				for (int i = 0; i < step.blendPercents.Count; i++)
+				for (int i = 0; i < point.biomeBlends.Length; i++)
 				{
-					var biome = biomes.Find(b => b.name == step.biomeNames[i]);
-					var blend = step.blendPercents[i];
-					if (blend == 1)
-						blend -= totalBlend;
+					var biome = biomes.Find(b => b.id == point.biomeIds[i]);
+					var blend = point.biomeBlends[i];
 					height += blend * biome.terrainCurve.Evaluate(normalizedH);
 				}
 				
-				step.heights.Add(height);
+				stepInfo.heights.Add(height);
 			}
 		}
 
@@ -384,12 +381,15 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 				hi.height = h;
 				hi.normalizedHeight = Mathf.InverseLerp(inputMinHeight, inputMaxHeight, h);
-				hi.heightTexture = new Texture2D(stepinfos.Count, 1);
+				hi.heightTexture = new Texture2D(stepInfos.Count, 1);
 				hi.heightTexture.filterMode = FilterMode.Point;
 
-				for (int x = 0; x < stepinfos.Count; x++)
+				for (int x = 0; x < stepInfos.Count; x++)
 				{
-					var height = stepinfos[x].heights[h];
+					if (h >= stepInfos[x].heights.Count)
+						continue ;
+					
+					var height = stepInfos[x].heights[h];
 					hi.heightTexture.SetPixel(x, 0, new Color(height, height, height, 1));
 				}
 				hi.heightTexture.Apply();
@@ -423,6 +423,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 				bsp.switchParams[2] = new BiomeSwitchCellParam(true, b.minTemperature, b.maxTemperature);
 
 				bsc.id = biomeId++;
+				b.id = bsc.id;
 				bsc.name = b.name;
 				bsc.switchParams = bsp;
 

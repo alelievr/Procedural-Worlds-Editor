@@ -422,6 +422,7 @@ namespace ProceduralWorlds.Biomator
 									biomeData.biomeMap.AddBiome(x, y, link.id, blend);
 							}
 						}
+					biomeData.biomeMap.NormalizeBlendValues(x, y);
 				}
 
 			Profiler.EndSample();
