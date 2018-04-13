@@ -52,22 +52,40 @@ namespace ProceduralWorlds.Nodes
 				BiomeMap2D biomeMap = inputBlendedTerrain.biomeData.biomeMap;
 
 				(finalTerrain as Sampler2D).Foreach((x, y, val) => {
-					float ret = 0;
+					float	ret = 0;
+					float	totalBlend = 0;
+					
+					var		biomeInfo = biomeMap.GetBiomeBlendInfo(x, y);
 
-					var biomeInfo = biomeMap.GetBiomeBlendInfo(x, y);
 					foreach (var biome in inputBlendedTerrain.biomes)
 					{
 						if (biome == null)
 							throw new InvalidOperationException("Can't access to biome(null) from biome blender inputs");
 
 						var terrain = biome.modifiedTerrain as Sampler2D;
-
 						if (terrain == null)
 							throw new InvalidOperationException("[NodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
+							
+						for (int i = 0; i < biomeInfo.length; i++)
+							if (biomeInfo.biomeIds[i] == biome.id)
+								if (biomeInfo.biomeBlends[i] != 1)
+									totalBlend += biomeInfo.biomeBlends[i];
+					}
+
+					foreach (var biome in inputBlendedTerrain.biomes)
+					{
+						var terrain = biome.modifiedTerrain as Sampler2D;
 
 						for (int i = 0; i < biomeInfo.length; i++)
 							if (biomeInfo.biomeIds[i] == biome.id)
-								ret += terrain[x, y] * biomeInfo.biomeBlends[i] / biomeInfo.totalBlend;
+							{
+								float b = biomeInfo.biomeBlends[i];
+								
+								if (b == 1)
+									b -= totalBlend;
+								
+								ret += terrain[x, y] * b / biomeInfo.totalBlend;
+							}
 					}
 
 					return ret;
