@@ -39,20 +39,18 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		int					stepIndex;
 		int					textureIndex;
 
-		Texture2D			heightTexture;
 		List< StepInfo >	stepInfos = new List< StepInfo >();
 
 		ReorderableList		reorderableBiomeList;
 
 		[SerializeField]
 		List< Biome >		biomes = new List< Biome >();
-		List< HeightTextureInfo > heightTextures = new List< HeightTextureInfo >();
 
 		BiomeSwitchGraph	switchGraph = new BiomeSwitchGraph();
 
-		Sampler				heightSampler;
-		Sampler				wetnessSampler;
-		Sampler				temperatureSampler;
+		Sampler2D			heightSampler;
+		Sampler2D			wetnessSampler;
+		Sampler2D			temperatureSampler;
 
 		[System.Serializable]
 		public class Biome
@@ -72,14 +70,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			public float			temperature;
 
 			public BiomeMap2D		biomeMap;
-			public List< float >	heights = new List< float >();
-		}
-
-		class HeightTextureInfo
-		{
-			public Texture2D		heightTexture;
-			public int				height;
-			public float			normalizedHeight;
+			public Sampler2D		heightSampler;
 		}
 
 		[MenuItem("Window/Procedural Worlds/Debug/BiomeTerrainCurve")]
@@ -179,10 +170,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 				DrawInputValues();
 	
 				if (GUILayout.Button("Evaluate"))
-				{
 					Evaluate();
-					FillHeightTextures();
-				}
 	
 				DrawStepInfos();
 	
@@ -271,17 +259,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		{
 			textureIndex = EditorGUILayout.IntSlider(textureIndex, inputMinHeight, inputMaxHeight - 1);
 
-			if (textureIndex < heightTextures.Count)
-			{
-				var hi = heightTextures[textureIndex];
-
-				if (hi.heightTexture == null)
-					return ;
-				
-				EditorGUILayout.LabelField("Height: " + hi.height + " (" + hi.normalizedHeight + ")");
-				Rect r = EditorGUILayout.GetControlRect(false, 20, GUILayout.ExpandWidth(true));
-				EditorGUI.DrawPreviewTexture(r, hi.heightTexture, null, ScaleMode.StretchToFill);
-			}
+			//TODO: draw biome map in debug mode
 		}
 
 		#endregion
@@ -295,105 +273,43 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 			stepInfos.Clear();
 
-			for (float i = inputMinWetness; i < inputMaxWetness; i += wetnessStep)
-				for (float j = inputMinTemperature; j < inputMaxTemperature; j += temperatureStep)
-					EvaluateStep(i, j);
+			for (float i = inputMinHeight; i < inputMaxHeight; i += heightStep)
+					EvaluateStep(i);
 		}
 		
-		void EvaluateStep(float wetness, float temperature)
+		void EvaluateStep(float h)
 		{
-			var bsw = new BiomeSwitchValues();
 			var blendList = new BiomeBlendList();
-			var blendParams = new BiomeSwitchCellParams();
-			
-			bsw[1] = wetness;
-			bsw[2] = temperature;
-			
-			var bsc = switchGraph.FindBiome(bsw);
-
 			var stepInfo = new StepInfo();
-			stepInfo.temperature = temperature;
-			stepInfo.wetness = wetness;
 
-			stepInfos.Add(stepInfo);
+			int size = (int)Mathf.Max((inputMaxWetness - inputMinWetness) * (1 / wetnessStep), (inputMaxTemperature - inputMinTemperature) * (1 / temperatureStep));
 
-			if (bsc == null)
-			{
-				Debug.Log("Biome not found: " + wetness + " | " + temperature);
-				return;
-			}
+			//initialize samplers
+			stepInfo.heightSampler = new Sampler2D(size, 1);
+			wetnessSampler = new Sampler2D(size, 1);
+			temperatureSampler = new Sampler2D(size, 1);
+			stepInfo.biomeMap = new BiomeMap2D(size, 1);
 
-			stepInfo.biomeMap = new BiomeMap2D((int)(inputMaxWetness - inputMinWetness * (1f / wetnessStep)), 1);
-			int x = (int)((wetness + inputMinWetness) * (1 / wetnessStep));
-			int y = 0;
-
-			stepInfo.biomeMap.SetPrimaryBiomeId(x, y, bsc.id);
-
+			//setup blend list
 			blendList.blendEnabled = new bool[3];
 			blendList.blendEnabled[0] = false;	//height
 			blendList.blendEnabled[1] = true;	//wetness
 			blendList.blendEnabled[2] = true;	//temperature
-			
-			//add biome that can be blended with the primary biome,
-			if (blendPercent > 0)
-				foreach (var link in bsc.links)
+
+			for (float w = inputMinWetness, x = 0; w < inputMaxWetness; w += wetnessStep, x++)
+				for (float t = inputMinTemperature, y = 0; t < inputMaxTemperature; t += temperatureStep, y++)
 				{
-					if (link.Overlaps(blendParams))
-					{
-						float blend = link.ComputeBlend(blendList, switchGraph.paramRanges, bsw, blendPercent);
-						
-						if (blend > 0.001f)
-							stepInfo.biomeMap.AddBiome(x, y, link.id, blend);
-					}
-				}
-			
-			stepInfo.biomeMap.NormalizeBlendValues(x, y);
-
-			var point = stepInfo.biomeMap.GetBiomeBlendInfo(x, y);
-
-			//compute terrain height:
-			stepInfo.heights.Clear();
-			for (int h = inputMinHeight; h < inputMaxHeight; h += heightStep)
-			{
-				float height = 0;
-				float normalizedH = Mathf.InverseLerp(inputMinHeight, inputMaxHeight, h);
-
-				for (int i = 0; i < point.biomeBlends.Length; i++)
-				{
-					var biome = biomes.Find(b => b.id == point.biomeIds[i]);
-					var blend = point.biomeBlends[i];
-					height += blend * biome.terrainCurve.Evaluate(normalizedH);
-				}
-				
-				stepInfo.heights.Add(height);
-			}
-		}
-
-		void FillHeightTextures()
-		{
-			heightTextures.Clear();
-
-			for (int h = inputMinHeight; h < inputMaxHeight; h += heightStep)
-			{
-				var hi = new HeightTextureInfo();
-
-				hi.height = h;
-				hi.normalizedHeight = Mathf.InverseLerp(inputMinHeight, inputMaxHeight, h);
-				hi.heightTexture = new Texture2D(stepInfos.Count, 1);
-				hi.heightTexture.filterMode = FilterMode.Point;
-
-				for (int x = 0; x < stepInfos.Count; x++)
-				{
-					if (h >= stepInfos[x].heights.Count)
-						continue ;
+					wetnessSampler[(int)x, (int)y] = w;
+					temperatureSampler[(int)x, (int)y] = t;
 					
-					var height = stepInfos[x].heights[h];
-					hi.heightTexture.SetPixel(x, 0, new Color(height, height, height, 1));
-				}
-				hi.heightTexture.Apply();
+					switchGraph.FillBiomeMap2D(stepInfo.biomeMap, blendList, blendPercent);
 
-				heightTextures.Add(hi);
-			}
+					stepInfo.heightSampler.Foreach((hx, hy) => {
+						return 0;
+					});
+				}
+			
+			stepInfos.Add(stepInfo);
 		}
 
 		#endregion

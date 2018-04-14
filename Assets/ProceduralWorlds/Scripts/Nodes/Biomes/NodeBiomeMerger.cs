@@ -54,20 +54,30 @@ namespace ProceduralWorlds.Nodes
 				(finalTerrain as Sampler2D).Foreach((x, y, val) => {
 					float	ret = 0;
 					var		biomeInfo = biomeMap.GetBiomeBlendInfo(x, y);
-
-					foreach (var biome in inputBlendedTerrain.biomes)
+					
+					for (int i = 0; i < biomeInfo.length; i++)
 					{
+						if (!inputBlendedTerrain.biomePerIds.ContainsKey(biomeInfo.biomeIds[i]))
+						{
+							Debug.Log("Ids: ");
+							foreach (var kp in inputBlendedTerrain.biomePerIds)
+								Debug.Log(kp.Key + " - " + kp.Value.name);
+							Debug.Log("Point: ");
+							foreach (var id in biomeInfo.biomeIds)
+								Debug.Log(id);
+						}
+						var biome = inputBlendedTerrain.biomePerIds[biomeInfo.biomeIds[i]];
+						
 						if (biome == null)
-							throw new InvalidOperationException("Can't access to biome(null) from biome blender inputs");
+							throw new NullReferenceException("[NodeMerger] Can't access to biome(null) from biome blender inputs");
+
+						Sampler2D modifiedTerrain = biome.modifiedTerrain as Sampler2D;
 						
-						var terrain = biome.modifiedTerrain as Sampler2D;
-						
-						if (terrain == null)
+						if (modifiedTerrain == null)
 							throw new InvalidOperationException("[NodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
 
-						for (int i = 0; i < biomeInfo.length; i++)
-							if (biomeInfo.biomeIds[i] == biome.id)
-								ret += terrain[x, y] * biomeInfo.biomeBlends[i];
+						if (biomeInfo.biomeIds[i] == biome.id)
+							ret += modifiedTerrain[x, y] * biomeInfo.biomeBlends[i];
 					}
 
 					return ret;
@@ -83,11 +93,12 @@ namespace ProceduralWorlds.Nodes
 			mergedBiomeTerrain.materializerType = materializerType;
 
 			mergedBiomeTerrain.biomeSurfacesList.Clear();
-			foreach (var biome in inputBlendedTerrain.biomes)
+			foreach (var biomeKP in inputBlendedTerrain.biomePerIds)
 			{
-				if (biome == null)
+				if (biomeKP.Value == null)
 					continue ;
 				
+				var biome = biomeKP.Value;
 				if (mergedBiomeTerrain.biomeSurfacesList.ContainsKey(biome.id))
 					Debug.LogError("[PWBiomeMerger] Duplicate biome in the biome graph: " + biome.name + ", id: " + biome.id);
 				mergedBiomeTerrain.biomeSurfacesList[biome.id] = biome.biomeSurfaceGraph;

@@ -51,8 +51,8 @@ namespace ProceduralWorlds.Editor
 			node.biomeTerrainsFoldout = EditorGUILayout.Foldout(node.biomeTerrainsFoldout, "Show biome terrains");
 
 			if (node.biomeTerrainsFoldout)
-				foreach (var biome in node.inputBlendedTerrain.biomes)
-					PWGUI.SamplerPreview(biome.name, biome.modifiedTerrain);
+				foreach (var biome in node.inputBlendedTerrain.biomePerIds)
+					PWGUI.SamplerPreview(biome.Value.name, biome.Value.modifiedTerrain);
 		}
 
 		bool ValidateBlendedTerrainIntegrity()
@@ -62,9 +62,9 @@ namespace ProceduralWorlds.Editor
 			if (terrain.biomeData == null || terrain.biomeData.biomeMap == null)
 				return false;
 
-			foreach (var biome in terrain.biomes)
+			foreach (var biome in terrain.biomePerIds)
 			{
-				if (biome == null)
+				if (biome.Value == null)
 					return false;
 			}
 			

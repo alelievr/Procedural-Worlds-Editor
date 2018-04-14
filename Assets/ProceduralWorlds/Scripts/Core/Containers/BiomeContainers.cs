@@ -345,10 +345,10 @@ namespace ProceduralWorlds.Biomator
 
 	public class BlendedBiomeTerrain
 	{
-		public BiomeSwitchGraph		biomeSwitchGraph;
-		public BiomeData			biomeData;
+		public BiomeSwitchGraph				biomeSwitchGraph;
+		public BiomeData					biomeData;
 
-		public List< Biome >		biomes = new List< Biome >();
+		public Dictionary< short, Biome >	biomePerIds = new Dictionary< short, Biome >();
 	}
 	
 }

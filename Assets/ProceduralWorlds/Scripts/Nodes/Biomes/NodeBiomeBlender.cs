@@ -67,7 +67,7 @@ namespace ProceduralWorlds.Nodes
 			
 			FillBiomeMap(biomeData);
 
-			outputBlendedBiomeTerrain.biomes.Clear();
+			outputBlendedBiomeTerrain.biomePerIds.Clear();
 
 			//if the main graph was processed from a biome graph, we process all the available biomes
 			if (worldGraphRef.processedFromBiome)
@@ -108,13 +108,13 @@ namespace ProceduralWorlds.Nodes
 						if (b == null)
 							throw new InvalidOperationException("Biome graph " + partialBiome.biomeGraph + " returns null biome");
 
-						if (outputBlendedBiomeTerrain.biomes.Contains(b))
+						if (outputBlendedBiomeTerrain.biomePerIds.ContainsKey(b.id))
 						{
 							Debug.LogError("[PWBiomeBlender] Duplicate biome in the biome graph: " + b.name + " (" + b.id + ")");
 							continue ;
 						}
 
-						outputBlendedBiomeTerrain.biomes.Add(b);
+						outputBlendedBiomeTerrain.biomePerIds[b.id] = b;
 					}
 				}
 			}
