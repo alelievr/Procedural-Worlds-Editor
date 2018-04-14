@@ -103,7 +103,6 @@ namespace ProceduralWorlds.Editor
 			if (biomeData != null && biomeData.biomeSwitchGraph.isBuilt)
 			{
 				node.BuildBiomeSwitchGraph();
-				node.FillBiomeMap(biomeData);
 			}
 		}
 	}

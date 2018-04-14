@@ -48,10 +48,6 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		BiomeSwitchGraph	switchGraph = new BiomeSwitchGraph();
 
-		Sampler2D			heightSampler;
-		Sampler2D			wetnessSampler;
-		Sampler2D			temperatureSampler;
-
 		[System.Serializable]
 		public class Biome
 		{
@@ -66,11 +62,24 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		class StepInfo
 		{
-			public float			wetness;
-			public float			temperature;
-
 			public BiomeMap2D		biomeMap;
 			public Sampler2D		heightSampler;
+			public Sampler2D		wetnessSampler;
+			public Sampler2D		temperatureSampler;
+
+			public Texture2D		heightTexture;
+			public Texture2D		wetnessTexture;
+			public Texture2D		temperatureTexture;
+
+			public Sampler2D[] GetSamplers()
+			{
+				return new []
+				{
+					heightSampler,
+					wetnessSampler,
+					temperatureSampler
+				};
+			}
 		}
 
 		[MenuItem("Window/Procedural Worlds/Debug/BiomeTerrainCurve")]
@@ -173,8 +182,6 @@ namespace ProceduralWorlds.Editor.DebugWindows
 					Evaluate();
 	
 				DrawStepInfos();
-	
-				DrawHeightTextures();
 				
 				EditorGUILayout.Space();
 			}
@@ -215,10 +222,15 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			if (stepIndex < stepInfos.Count)
 			{
 				var step = stepInfos[stepIndex];
-				var point = step.biomeMap.GetBiomeBlendInfo(0, 0);
 
-				EditorGUILayout.LabelField("Temperature: " + step.temperature);
-				EditorGUILayout.LabelField("Wetness: " + step.wetness);
+				Rect heightTextureRect = EditorGUILayout.GetControlRect(false, 100, GUILayout.ExpandWidth(true));
+				EditorGUI.DrawPreviewTexture(heightTextureRect, step.heightTexture);
+				Rect wetnessTextureRect = EditorGUILayout.GetControlRect(false, 100, GUILayout.ExpandWidth(true));
+				EditorGUI.DrawPreviewTexture(wetnessTextureRect, step.wetnessTexture);
+				Rect temperatureTextureRect = EditorGUILayout.GetControlRect(false, 100, GUILayout.ExpandWidth(true));
+				EditorGUI.DrawPreviewTexture(temperatureTextureRect, step.temperatureTexture);
+
+				var point = step.biomeMap.GetBiomeBlendInfo(0, 0);
 
 				for (int i = 0; i < point.biomeIds.Length; i++)
 				{
@@ -255,13 +267,6 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			EditorGUIUtility.labelWidth = 0;
 		}
 
-		void DrawHeightTextures()
-		{
-			textureIndex = EditorGUILayout.IntSlider(textureIndex, inputMinHeight, inputMaxHeight - 1);
-
-			//TODO: draw biome map in debug mode
-		}
-
 		#endregion
 
 		#region Computing
@@ -286,9 +291,16 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 			//initialize samplers
 			stepInfo.heightSampler = new Sampler2D(size, 1);
-			wetnessSampler = new Sampler2D(size, 1);
-			temperatureSampler = new Sampler2D(size, 1);
+			stepInfo.wetnessSampler = new Sampler2D(size, 1);
+			stepInfo.temperatureSampler = new Sampler2D(size, 1);
 			stepInfo.biomeMap = new BiomeMap2D(size, 1);
+
+			stepInfo.heightSampler.min = minGlobalHeight;
+			stepInfo.heightSampler.max = maxGlobalHeight;
+			stepInfo.wetnessSampler.min = minGlobalWetness;
+			stepInfo.wetnessSampler.max = maxGlobalWetness;
+			stepInfo.temperatureSampler.min = minGlobalTemperature;
+			stepInfo.temperatureSampler.max = maxGlobalTemperature;
 
 			//setup blend list
 			blendList.blendEnabled = new bool[3];
@@ -299,15 +311,32 @@ namespace ProceduralWorlds.Editor.DebugWindows
 			for (float w = inputMinWetness, x = 0; w < inputMaxWetness; w += wetnessStep, x++)
 				for (float t = inputMinTemperature, y = 0; t < inputMaxTemperature; t += temperatureStep, y++)
 				{
-					wetnessSampler[(int)x, (int)y] = w;
-					temperatureSampler[(int)x, (int)y] = t;
-					
-					switchGraph.FillBiomeMap2D(stepInfo.biomeMap, blendList, blendPercent);
-
-					stepInfo.heightSampler.Foreach((hx, hy) => {
-						return 0;
-					});
+					stepInfo.wetnessSampler[(int)x, (int)y] = w;
+					stepInfo.temperatureSampler[(int)x, (int)y] = t;
 				}
+					
+			switchGraph.FillBiomeMap2D(stepInfo.biomeMap, stepInfo.GetSamplers(), blendList, blendPercent);
+
+			//Fill height:
+			stepInfo.heightSampler.Foreach((x, y, val) => {
+				float ret = 0;
+				var biomePoint = stepInfo.biomeMap.GetBiomeBlendInfo(x, y);
+
+				for (int i = 0; i < biomePoint.length; i++)
+				{
+					var biome = biomes.Find(b => b.id == biomePoint.biomeIds[i]);
+					float biomeHeight = biome.terrainCurve.Evaluate(val);
+
+					ret += biomeHeight * biomePoint.biomeBlends[i];
+				}
+
+				return ret;
+			});
+
+			//sampler to textures:
+			stepInfo.heightTexture = Sampler2DUtils.ToTexture2D(stepInfo.heightSampler, Color.black, Color.white);
+			stepInfo.wetnessTexture = Sampler2DUtils.ToTexture2D(stepInfo.wetnessSampler, Color.white, Color.green);
+			stepInfo.temperatureTexture = Sampler2DUtils.ToTexture2D(stepInfo.temperatureSampler, Color.blue, Color.red);
 			
 			stepInfos.Add(stepInfo);
 		}
@@ -316,11 +345,11 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		#region Utils
 
-		IEnumerable< Sampler > GetBiomeSamplers()
+		IEnumerable< Vector2 > GetBiomeRanges()
 		{
-			yield return heightSampler;
-			yield return wetnessSampler;
-			yield return temperatureSampler;
+			yield return new Vector2(inputMinHeight, inputMaxHeight);
+			yield return new Vector2(inputMinWetness, inputMaxWetness);
+			yield return new Vector2(inputMinTemperature, inputMaxTemperature);
 		}
 
 		IEnumerable< BiomeSwitchCell > GetBiomeCells()
@@ -347,7 +376,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		void BuildGraph()
 		{
-			switchGraph.BuildGraph(GetBiomeSamplers(), GetBiomeCells());
+			switchGraph.BuildGraph(GetBiomeRanges(), GetBiomeCells());
 		}
 
 		#endregion

@@ -48,17 +48,15 @@ namespace ProceduralWorlds.Biomator
 		[System.NonSerialized]
 		public BiomeParamRange				paramRanges = new BiomeParamRange();
 
-		Sampler2D[]							biomeParamSamplers;
-
 		bool[]								lastBiomeMapIds;
 
 		#region Switch graph build
 
-		public bool BuildGraph(IEnumerable< Sampler > biomeSamplers, IEnumerable< BiomeSwitchCell > inputCells)
+		public bool BuildGraph(IEnumerable< Vector2 > paramRanges, IEnumerable< BiomeSwitchCell > inputCells)
 		{
 			ResetGraph();
 
-			FillParamRange(biomeSamplers);
+			FillParamRange(paramRanges);
 			
 			AddCells(inputCells);
 
@@ -80,7 +78,7 @@ namespace ProceduralWorlds.Biomator
 
 		public bool BuildGraph(BiomeData biomeData)
 		{
-			return BuildGraph(GetSamplersFromBiomeData(biomeData), GetCellsFromBiomeData(biomeData));
+			return BuildGraph(GetParamRangesFromBiomeData(biomeData), GetCellsFromBiomeData(biomeData));
 		}
 
 		IEnumerable< BiomeSwitchCell > GetCellsFromBiomeData(BiomeData biomeData)
@@ -144,12 +142,6 @@ namespace ProceduralWorlds.Biomator
 			}
 		}
 
-		IEnumerable< Sampler > GetSamplersFromBiomeData(BiomeData biomeData)
-		{
-			for (int i = 0; i < biomeData.length; i++)
-				yield return biomeData.GetDataSampler(i).dataRef;
-		}
-
 		public void AddCells(IEnumerable< BiomeSwitchCell > inputCells)
 		{
 			cells.Clear();
@@ -179,16 +171,13 @@ namespace ProceduralWorlds.Biomator
 				biomeCoverage[i] = 0;
 		}
 
-		void FillParamRange(IEnumerable< Sampler > samplers)
+		void FillParamRange(IEnumerable< Vector2 > ranges)
 		{
 			int		i = 0;
 
-			biomeParamSamplers = new Sampler2D[samplers.Count()];
-
-			foreach (var sampler in samplers)
+			foreach (var range in ranges)
 			{
-				biomeParamSamplers[i] = sampler as Sampler2D;
-				paramRanges.ranges[i] = new Vector2(sampler.min, sampler.max);
+				paramRanges.ranges[i] = range;
 				i++;
 			}
 		}
@@ -361,11 +350,11 @@ namespace ProceduralWorlds.Biomator
 
 		public void FillBiomeMap2D(BiomeData biomeData, BiomeBlendList blendList, float blendPercent = 0.15f)
 		{
-			FillBiomeMap2D(biomeData.biomeMap, blendList, blendPercent);
+			FillBiomeMap2D(biomeData.biomeMap, GetSamplers2DFromBiomeData(biomeData).ToArray(), blendList, blendPercent);
 			biomeData.ids = GetBiomeIdsInLastBiomeMap().ToArray();
 		}
 
-		public void FillBiomeMap2D(BiomeMap2D biomeMap, BiomeBlendList blendList, float blendPercent = .15f)
+		public void FillBiomeMap2D(BiomeMap2D biomeMap, Sampler2D[] biomeParamSamplers, BiomeBlendList blendList, float blendPercent = .15f)
 		{
 			int		size = biomeMap.size;
 			int		paramCount = biomeParamSamplers.Length;
@@ -380,6 +369,14 @@ namespace ProceduralWorlds.Biomator
 			Profiler.BeginSample("FillBiomeMap");
 
 			Array.Clear(lastBiomeMapIds, 0, lastBiomeMapIds.Length);
+			
+			int i2 = 0;
+			foreach (var samp in biomeParamSamplers)
+			{
+				// if (samp.size != size)
+					// Debug.Log("samp " + i2 + " size: " + samp.size);
+				i2++;
+			}
 
 			var blendParams = new BiomeSwitchCellParams();
 
@@ -387,7 +384,7 @@ namespace ProceduralWorlds.Biomator
 			float[] ranges = new float[paramCount];
 			for (int i = 0; i < paramCount; i++)
 				ranges[i] = paramRanges.ranges[i].y - paramRanges.ranges[i].x;
-
+			
 			for (int x = 0; x < size; x++)
 				for (int y = 0; y < size; y++)
 				{
@@ -428,7 +425,10 @@ namespace ProceduralWorlds.Biomator
 							{
 								float blend = link.ComputeBlend(blendList, paramRanges, biomeSwitchValues, blendPercent);
 								if (blend > 0.001f)
+								{
 									biomeMap.AddBiome(x, y, link.id, blend);
+									lastBiomeMapIds[link.id] = true;
+								}
 							}
 						}
 					biomeMap.NormalizeBlendValues(x, y);
@@ -484,6 +484,21 @@ namespace ProceduralWorlds.Biomator
 			for (short i = 0; i < lastBiomeMapIds.Length; i++)
 				if (lastBiomeMapIds[i])
 					yield return i;
+		}
+
+		IEnumerable< Vector2 > GetParamRangesFromBiomeData(BiomeData biomeData)
+		{
+			for (int i = 0; i < biomeData.length; i++)
+			{
+				var s = biomeData.GetDataSampler(i).dataRef;
+				yield return new Vector2(s.min, s.max);
+			}
+		}
+		
+		IEnumerable< Sampler2D > GetSamplers2DFromBiomeData(BiomeData biomeData)
+		{
+			for (int i = 0; i < biomeData.length; i++)
+				yield return biomeData.GetDataSampler(i).data2D;
 		}
 
 		#endregion

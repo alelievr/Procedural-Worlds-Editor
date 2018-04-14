@@ -57,15 +57,6 @@ namespace ProceduralWorlds.Nodes
 					
 					for (int i = 0; i < biomeInfo.length; i++)
 					{
-						if (!inputBlendedTerrain.biomePerIds.ContainsKey(biomeInfo.biomeIds[i]))
-						{
-							Debug.Log("Ids: ");
-							foreach (var kp in inputBlendedTerrain.biomePerIds)
-								Debug.Log(kp.Key + " - " + kp.Value.name);
-							Debug.Log("Point: ");
-							foreach (var id in biomeInfo.biomeIds)
-								Debug.Log(id);
-						}
 						var biome = inputBlendedTerrain.biomePerIds[biomeInfo.biomeIds[i]];
 						
 						if (biome == null)
@@ -76,8 +67,7 @@ namespace ProceduralWorlds.Nodes
 						if (modifiedTerrain == null)
 							throw new InvalidOperationException("[NodeMerger] can't access to the terrain of the biome " + biome.id + "(" + biome.name + ")");
 
-						if (biomeInfo.biomeIds[i] == biome.id)
-							ret += modifiedTerrain[x, y] * biomeInfo.biomeBlends[i];
+						ret += modifiedTerrain[x, y] * biomeInfo.biomeBlends[i];
 					}
 
 					return ret;
