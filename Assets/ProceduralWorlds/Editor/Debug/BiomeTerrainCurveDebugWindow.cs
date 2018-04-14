@@ -6,6 +6,7 @@ using ProceduralWorlds.Editor;
 using UnityEditorInternal;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.Biomator.SwitchGraph;
+using ProceduralWorlds.Core;
 using System.Linq;
 
 namespace ProceduralWorlds.Editor.DebugWindows
@@ -14,37 +15,29 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 	public class BiomeTerrainCurveDebugWindow : ProceduralWorldsEditorWindow
 	{
-		float			blendPercent = 0.05f;
-
-		[SerializeField]
-		int				inputMinHeight;
-		[SerializeField]
-		int				inputMaxHeight;
-		[SerializeField]
-		float			inputMinWetness = 0;
-		[SerializeField]
-		float			inputMaxWetness = 0;
-		[SerializeField]
-		float			inputMinTemperature = 0;
-		[SerializeField]
-		float			inputMaxTemperature = 0;
-		[SerializeField]
-		float			step = 0.1f;
-		[SerializeField]
-		int				heightStep = 1;
-
-		[SerializeField]
-		Vector2			scrollPos;
-
-		float			minGlobalHeight = 0;
-		float			maxGlobalHeight = 100;
-		float			minGlobalWetness = 0;
-		float			maxGlobalWetness = 100;
-		float			minGlobalTemperature = -20;
-		float			maxGlobalTemperature = 40;
-
-		int				stepIndex;
-		int				textureIndex;
+		float				blendPercent = 0.05f;
+	
+		public int			inputMinHeight;
+		public int			inputMaxHeight;
+		public float		inputMinWetness = 0;
+		public float		inputMaxWetness = 0;
+		public float		inputMinTemperature = 0;
+		public float		inputMaxTemperature = 0;
+		public float		wetnessStep = 0.1f;
+		public float		temperatureStep = 0.1f;
+		public int			heightStep = 1;
+	
+		public Vector2		scrollPos;
+	
+		public float		minGlobalHeight = 0;
+		public float		maxGlobalHeight = 100;
+		public float		minGlobalWetness = 0;
+		public float		maxGlobalWetness = 100;
+		public float		minGlobalTemperature = -20;
+		public float		maxGlobalTemperature = 40;
+	
+		int					stepIndex;
+		int					textureIndex;
 
 		Texture2D			heightTexture;
 		List< StepInfo >	stepInfos = new List< StepInfo >();
@@ -56,6 +49,10 @@ namespace ProceduralWorlds.Editor.DebugWindows
 		List< HeightTextureInfo > heightTextures = new List< HeightTextureInfo >();
 
 		BiomeSwitchGraph	switchGraph = new BiomeSwitchGraph();
+
+		Sampler				heightSampler;
+		Sampler				wetnessSampler;
+		Sampler				temperatureSampler;
 
 		[System.Serializable]
 		public class Biome
@@ -176,7 +173,8 @@ namespace ProceduralWorlds.Editor.DebugWindows
 				EditorGUILayout.Space();
 	
 				blendPercent = EditorGUILayout.Slider("Blend percent", blendPercent, 0, 0.5f);
-				step = EditorGUILayout.Slider("Step", step, 0.01f, 1f);
+				wetnessStep = EditorGUILayout.Slider("Wetness step", wetnessStep, 0.01f, 1f);
+				temperatureStep = EditorGUILayout.Slider("Temperature step", temperatureStep, 0.01f, 1f);
 	
 				DrawInputValues();
 	
@@ -297,8 +295,8 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 			stepInfos.Clear();
 
-			for (float i = inputMinWetness; i < inputMaxWetness; i += step)
-				for (float j = inputMinTemperature; j < inputMaxTemperature; j += step)
+			for (float i = inputMinWetness; i < inputMaxWetness; i += wetnessStep)
+				for (float j = inputMinTemperature; j < inputMaxTemperature; j += temperatureStep)
 					EvaluateStep(i, j);
 		}
 		
@@ -325,8 +323,8 @@ namespace ProceduralWorlds.Editor.DebugWindows
 				return;
 			}
 
-			stepInfo.biomeMap = new BiomeMap2D((int)(inputMaxWetness - inputMinWetness * (1f / step)), 1);
-			int x = (int)((wetness + inputMinWetness) * (1 / step));
+			stepInfo.biomeMap = new BiomeMap2D((int)(inputMaxWetness - inputMinWetness * (1f / wetnessStep)), 1);
+			int x = (int)((wetness + inputMinWetness) * (1 / wetnessStep));
 			int y = 0;
 
 			stepInfo.biomeMap.SetPrimaryBiomeId(x, y, bsc.id);
@@ -402,11 +400,11 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		#region Utils
 
-		IEnumerable< Vector2 > GetBiomeRanges()
+		IEnumerable< Sampler > GetBiomeSamplers()
 		{
-			yield return new Vector2(minGlobalHeight, maxGlobalHeight);
-			yield return new Vector2(minGlobalWetness, maxGlobalWetness);
-			yield return new Vector2(minGlobalTemperature, maxGlobalTemperature);
+			yield return heightSampler;
+			yield return wetnessSampler;
+			yield return temperatureSampler;
 		}
 
 		IEnumerable< BiomeSwitchCell > GetBiomeCells()
@@ -433,7 +431,7 @@ namespace ProceduralWorlds.Editor.DebugWindows
 
 		void BuildGraph()
 		{
-			switchGraph.BuildGraph(GetBiomeRanges(), GetBiomeCells());
+			switchGraph.BuildGraph(GetBiomeSamplers(), GetBiomeCells());
 		}
 
 		#endregion

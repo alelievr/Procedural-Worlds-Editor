@@ -131,7 +131,12 @@ namespace ProceduralWorlds.Nodes
 
 		public void FillBiomeMap(BiomeData biomeData)
 		{
-			biomeData.biomeSwitchGraph.FillBiomeMap(biomeData, blendList, biomeBlendPercent);
+			if (biomeData.biomeMap == null)
+				biomeData.biomeMap = new BiomeMap2D(chunkSize, step);
+
+			biomeData.biomeMap.ResizeIfNeeded(chunkSize, step);
+
+			biomeData.biomeSwitchGraph.FillBiomeMap2D(biomeData, blendList, biomeBlendPercent);
 		}
 		
 		public void BuildBiomeSwitchGraph()

@@ -48,7 +48,7 @@ namespace ProceduralWorlds.Biomator
 		public Dictionary< string, BiomeDataSampler > biomeSamplerNameMap = new Dictionary< string, BiomeDataSampler >();
 
 		//list of biome ids
-		public HashSet< short >		ids = new HashSet< short >();
+		public short[]				ids;
 
 		public bool					isWaterless = true;
 		public float				waterLevel;
@@ -70,7 +70,7 @@ namespace ProceduralWorlds.Biomator
 
 		public void Reset()
 		{
-			ids.Clear();
+			ids = null;
 			biomeSamplerNameMap.Clear();
 
 			for (int i = 0; i < length; i++)
