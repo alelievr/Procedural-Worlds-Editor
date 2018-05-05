@@ -9,7 +9,3 @@ script:
 
 after_success:
     - ./.travis/performance_report.sh
-
-cache:
-    directories:
-        - /Application/Unity
