@@ -86,23 +86,26 @@ namespace ProceduralWorlds.Editor
 			if (e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 			
-			//Undo/Redo handling:
-			undoRedoHelper.Beign();
 
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
 				DrawNullInputGUI();
 
 				if (nodeRef.foldout)
+				{
+					//Undo/Redo handling:
+					undoRedoHelper.Beign();
+					
 					OnNodeGUI();
+			
+					undoRedoHelper.End();
+				}
 				else
 					GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 				EditorGUIUtility.labelWidth = 0;
 			}
 			GUILayout.EndVertical();
-			
-			undoRedoHelper.End();
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)

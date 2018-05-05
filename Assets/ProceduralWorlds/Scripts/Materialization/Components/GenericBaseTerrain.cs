@@ -175,7 +175,7 @@ namespace ProceduralWorlds
 			UpdateChunks();
 		}
 		
-		void InitGraph(WorldGraph graphAsset)
+		public void InitGraph(WorldGraph graphAsset)
 		{
 			this.graphAsset = graphAsset;
 			this.graph = graphAsset.Clone() as WorldGraph;
