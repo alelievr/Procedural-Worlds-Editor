@@ -74,6 +74,9 @@ namespace ProceduralWorlds.Editor
 				layoutRects.Add(r);
 				panel.Draw(r);
 				sep.End();
+				if (sep is ResizablePanelSeparator)
+					if (((ResizablePanelSeparator)sep).draggingHandler)
+						graphEditor.Repaint();
 				layoutRects.Add(sep.GetSeparatorRect());
 			});
 			loadedSeparators.Add(sep);

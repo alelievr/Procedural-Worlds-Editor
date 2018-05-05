@@ -52,6 +52,8 @@ namespace ProceduralWorlds.Core
 	
 		public bool isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
 		public bool isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
+
+		public bool				needRepaint;
 	
 		public BaseGraphEditorEventInfo()
 		{

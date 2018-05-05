@@ -76,8 +76,9 @@ namespace ProceduralWorlds.Editor
 			if (e.type == EventType.MouseDown && e.button == 0)
 				if (sepRect.Contains(e.mousePosition))
 					draggingHandler = true;
+
 				
-			if (e.type == EventType.MouseDrag && e.button == 0 && draggingHandler)
+			if (e.type == EventType.MouseDrag && e.button == 0 && draggingHandler && e.delta != Vector2.zero)
 				layoutSetting.separatorPosition += (layoutSetting.leftBar) ? -e.delta.x : e.delta.x;
 			
 			float p = layoutSetting.separatorPosition - lastRect.x;

@@ -42,6 +42,9 @@ namespace ProceduralWorlds.Editor
 				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
 
 			terrainEditor.OnInspectorGUI();
+
+			if (terrain.graphAsset == null || terrain.graphAsset != worldGraph)
+				terrain.InitGraph(worldGraph);
 			
 			if (GUILayout.Button("Focus"))
 				Selection.activeObject = terrain;
