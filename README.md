@@ -13,8 +13,6 @@ Currently under active developement, if you're interseted in contributing / have
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/15c578a373384328b55afadd2c3eeba5)](https://www.codacy.com/app/alelievr/Procedural-Worlds-Editor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=alelievr/Procedural-Worlds-Editor&amp;utm_campaign=Badge_Grade)
 
 The roadmap is on [our public trello](https://trello.com/b/ycMeDDPc/procedural-worlds), you can check it out to see what we're doing, don't forget to click on the colored tags to expand their name, it helps a lot to see the status of the project :)  
-In addition to unit-tests and codacy linter, there is also performance testing [available here](http://pwperfs.tk), it currently displays the process time of a graph for one chunk of 128\*128.
-[![Performance reports](http://pwperfs.tk/render/d-solo/coLIcmzik/proceduralworlds?orgId=1&panelId=2&width=1000&height=500&tz=UTC%2B01%3A00)](http://pwperfs.tk)
 
 ## Wiki
 [github wiki](https://github.com/alelievr/Procedural-Worlds-Editor/wiki)
