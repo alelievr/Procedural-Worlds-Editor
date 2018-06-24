@@ -15,6 +15,7 @@ $unity \
 	-nographics \
 	-silent-crashes \
 	-editorTestsResultFile "$res_file" \
+	-noUpm \
 	-logFile "$log_file" \
 	-runEditorTests \
 	-projectPath "$(pwd)"
