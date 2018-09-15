@@ -6,10 +6,10 @@ using UnityEngine;
 using System.Linq;
 using System;
 using Debug = UnityEngine.Debug;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Core
 {
-	using Node;
 
 	[System.SerializableAttribute]
 	public class WorldGraph : BaseGraph
@@ -210,7 +210,7 @@ namespace ProceduralWorlds.Core
 			processedFromBiome = false;
 		}
 
-		public FinalTerrain GetOutputTerrain()
+		public WorldChunk GetOutputTerrain()
 		{
 			return (outputNode as NodeWorldGraphOutput).finalTerrain;
 		}

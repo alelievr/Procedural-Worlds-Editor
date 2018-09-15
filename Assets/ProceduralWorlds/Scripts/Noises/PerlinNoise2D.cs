@@ -67,24 +67,26 @@ namespace ProceduralWorlds.Noises
         public static float GenerateNoise(float x,
                 float y,
                 int octaves = 2,
-                float frequency = 2, //scale
+                float frequency = 1,
                 float lacunarity = 1,
                 float persistence = 1,
                 int seed = -1)
         {
+            // Debug.Log("generating perlin at: " + x + "/" + y);
             float ret = 0;
             x *= frequency * noiseScale;
             y *= frequency * noiseScale;
 
             for (int i = 0; i < octaves; i++)
             {
-                float val = PerlinValue(x, y, seed);
+                float val = PerlinValue(x * frequency, y * frequency, seed);
                 ret += val * persistence;
                 x *= lacunarity;
                 y *= lacunarity;
                 persistence *= persistence;
+                frequency *= lacunarity;
             }
-            return (Mathf.Clamp((ret + 1f) / 2f, 0, 1));
+            return (ret + 1f) / 2f;
         }
 		#if NET_4_6
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,7 +123,7 @@ namespace ProceduralWorlds.Noises
             this.lacunarity = lacunarity;
         }
     
-		public override void ComputeSampler2D(Sampler2D samp)
+		public override void ComputeSampler2D(Sampler2D samp, Vector3 position)
 		{
 			if (samp == null)
 				Debug.LogError("null sampler send to Noise ComputeSampler !");
@@ -133,7 +135,7 @@ namespace ProceduralWorlds.Noises
 			else
 			{
                 samp.Foreach((x, y) => {
-                    return GenerateNoise(x, y, octaves, samp.step * scale, lacunarity, persistence, seed);
+                    return GenerateNoise(position.x + x, position.z + y, octaves, samp.step * scale, lacunarity, persistence, seed);
                 });
 			}
 		}

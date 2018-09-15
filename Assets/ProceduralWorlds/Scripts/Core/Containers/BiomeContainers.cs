@@ -59,7 +59,6 @@ namespace ProceduralWorlds.Biomator
 	public struct BiomeBlendPoint : IEquatable< BiomeBlendPoint >
 	{
 		public int		length;
-		public float	totalBlend;
 
 		public short[]	biomeIds;
 		public float[]	biomeBlends;
@@ -70,7 +69,6 @@ namespace ProceduralWorlds.Biomator
 		public bool Equals(BiomeBlendPoint other)
 		{
 			return length == other.length
-				&& totalBlend == other.totalBlend
 				&& firstBiomeId == other.firstBiomeId
 				&& firstBiomePercent == other.firstBiomePercent
 				&& biomeIds.SequenceEqual(other.biomeIds)
@@ -85,7 +83,6 @@ namespace ProceduralWorlds.Biomator
 			if (index == 0)
 			{
 				length = 0;
-				totalBlend = 0;
 			}
 			
 			//if there is too many biome to blend, discard
@@ -94,8 +91,6 @@ namespace ProceduralWorlds.Biomator
 			
 			biomeIds[index] = id;
 			biomeBlends[index] = blend;
-
-			totalBlend += blend;
 			
 			length++;
 		}
@@ -132,6 +127,30 @@ namespace ProceduralWorlds.Biomator
 			int		i = x + y * size;
 
 			blendMap[i].SetBlendPoint(id, 1, 0);
+		}
+
+		public void NormalizeBlendValues(int x, int y)
+		{
+			//compute first blend percent (the others are already calculated):
+			var biomePoint = blendMap[x + y * size];
+
+			if (biomePoint.length == 1)
+				return ;
+
+			float a = 0;
+			float total = 0;
+			for (int i = 1; i < biomePoint.length - 1; i++)
+				total += a += biomePoint.biomeBlends[i];
+			
+			a /= biomePoint.length - 1;
+
+			biomePoint.biomeBlends[0] = 1 - a;
+
+			total += biomePoint.biomeBlends[0];
+
+			//Normalize all values:
+			for (int i = 0; i < biomePoint.length; i++)
+				biomePoint.biomeBlends[i] /= total;
 		}
 
 		public void AddBiome(int x, int y, short id, float blend)
@@ -326,10 +345,10 @@ namespace ProceduralWorlds.Biomator
 
 	public class BlendedBiomeTerrain
 	{
-		public BiomeSwitchGraph		biomeSwitchGraph;
-		public BiomeData			biomeData;
+		public BiomeSwitchGraph				biomeSwitchGraph;
+		public BiomeData					biomeData;
 
-		public List< Biome >		biomes = new List< Biome >();
+		public Dictionary< short, Biome >	biomePerIds = new Dictionary< short, Biome >();
 	}
 	
 }

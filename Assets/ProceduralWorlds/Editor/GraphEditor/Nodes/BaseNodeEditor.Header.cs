@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using ProceduralWorlds.Core;
 
 //Header rendering and processing for nodes
@@ -9,12 +10,10 @@ namespace ProceduralWorlds.Editor
 	public partial class BaseNodeEditor
 	{
 		static Texture2D			editIcon;
-		static Texture2D			debugIcon;
 		
 		void LoadHeaderResouces()
 		{
 			editIcon = Resources.Load< Texture2D >("Icons/ic_edit");
-			debugIcon = Resources.Load< Texture2D >("Icons/ic_settings");
 			
 			nodeRef.colorSchemeName = NodeTypeProvider.GetNodeColor(nodeRef.GetType());
 		}
@@ -74,6 +73,16 @@ namespace ProceduralWorlds.Editor
 					else if (e.type == EventType.MouseDown)
 						windowNameEdit = false;
 				}
+			}
+
+			//foldout rendering:
+			Rect foldoutRect = new Rect(14, 2, rect.width, rect.height);
+			foldoutRect.size = Vector2.one * EditorGUIUtility.singleLineHeight;
+			using (var sc = new EditorGUI.ChangeCheckScope())
+			{
+				nodeRef.foldout = EditorGUI.Foldout(foldoutRect, nodeRef.foldout, GUIContent.none);
+				if (sc.changed)
+					GUI.FocusControl(null);
 			}
 		}
 	}

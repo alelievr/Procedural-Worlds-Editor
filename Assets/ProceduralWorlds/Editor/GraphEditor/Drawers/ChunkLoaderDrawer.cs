@@ -10,23 +10,24 @@ namespace ProceduralWorlds.Editor
 {
 	public class ChunkLoaderDrawer : Drawer
 	{
-		WorldGraph		worldGraph;
+		WorldGraph			worldGraph;
+
+		UnityEditor.Editor	terrainEditor;
+
+		GenericBaseTerrain	oldTerrain;
 
 		public override void OnEnable()
 		{
 			worldGraph =  target as WorldGraph;
 
-			var terrain = TerrainPreviewManager.instance.terrainBase;
-
-			if (terrain != null)
-				ReloadChunks(terrain);
+			oldTerrain = TerrainPreviewManager.instance.BaseTerrain;
 		}
 
 		new public void OnGUI(Rect r)
 		{
 			base.OnGUI(r);
 
-			var terrain = TerrainPreviewManager.instance.terrainBase;
+			var terrain = TerrainPreviewManager.instance.BaseTerrain;
 
 			if (terrain == null)
 			{
@@ -36,37 +37,19 @@ namespace ProceduralWorlds.Editor
 					EditorGUILayout.HelpBox("Terrain materializer type not supported (" + worldGraph.terrainPreviewType + ")", MessageType.Warning);
 				return ;
 			}
+
+			if (terrainEditor == null || oldTerrain != terrain)
+				terrainEditor = UnityEditor.Editor.CreateEditor(terrain);
+
+			terrainEditor.OnInspectorGUI();
+
+			if (terrain.graphAsset == null || terrain.graphAsset != worldGraph)
+				terrain.InitGraph(worldGraph);
 			
-			EditorGUI.BeginChangeCheck();
-			{
-				terrain.renderDistance = EditorGUILayout.IntSlider("chunk Render distance", terrain.renderDistance, 0, 24);
-				terrain.terrainScale = EditorGUILayout.Slider("Scale", terrain.terrainScale, 0.01f, 10);
-				terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
-			}
-			if (EditorGUI.EndChangeCheck())
-				ReloadChunks(terrain);
+			if (GUILayout.Button("Focus"))
+				Selection.activeObject = terrain;
 
-			EditorGUILayout.BeginHorizontal();
-			{
-				if (GUILayout.Button("Generate terrain"))
-					ReloadChunks(terrain);
-				if (GUILayout.Button("Cleanup terrain"))
-					terrain.DestroyAllChunks();
-			}
-			EditorGUILayout.EndHorizontal();
-		}
-
-		//Warning: this will destroy all loaded chunks and regenerate them
-		public void ReloadChunks(TerrainGenericBase terrain)
-		{
-			if (EditorApplication.isPlaying || EditorApplication.isPaused)
-			{
-				Debug.LogError("[ChunkLoader] can't reload chunks in play mode");
-				return ;
-			}
-
-			if (worldGraph != null)
-				terrain.ReloadChunks(worldGraph);
+			oldTerrain = terrain;
 		}
 	}
 }

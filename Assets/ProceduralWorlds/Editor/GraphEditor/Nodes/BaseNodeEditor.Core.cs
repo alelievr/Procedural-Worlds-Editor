@@ -6,7 +6,7 @@ using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System;
 using System.Reflection.Emit;
 
@@ -21,9 +21,6 @@ namespace ProceduralWorlds.Editor
 		static bool					styleLoadedStatic;
 		[System.NonSerialized]
 		bool						styleLoaded;
-
-		List< object >				propertiesBeforeGUI;
-		List< object >				propertiesAfterGUI;
 
 		readonly Dictionary< string, ReflectionUtils.GenericField > bakedChildFieldGetters = new Dictionary< string, ReflectionUtils.GenericField >();
 
@@ -58,15 +55,10 @@ namespace ProceduralWorlds.Editor
 			PWGUI.StartFrame(nodeRef.rect);
 
 			// set the header of the window as draggable:
-			int width = (int) nodeRef.rect.width;
+			int width = (int)nodeRef.rect.width;
 			int padding = 8;
 			Rect dragRect = new Rect(padding, 0, width - padding * 2, 20);
 			
-			Rect debugIconRect = dragRect;
-			int	debugIconSize = 16;
-			debugIconRect.position += new Vector2(width - debugIconSize, 0);
-			GUI.DrawTexture(debugIconRect, debugIcon);
-
 			if (e.type == EventType.MouseDown && e.button == 0 && dragRect.Contains(e.mousePosition))
 			{
 				selectedNodeToDrag = graphRef.allNodes.Where(n => n.isSelected);
@@ -87,25 +79,33 @@ namespace ProceduralWorlds.Editor
 
 			if (nodeRef.isDragged)
 				Undo.RecordObject(nodeRef, "Node " + nodeRef.name + " dragged");
+				
+			RenderHeader();
 			
 			//Drag window
 			if (e.button == 0 && !windowNameEdit)
 				GUI.DragWindow(dragRect);
 			
-			//Undo/Redo handling:
-			undoRedoHelper.Beign();
 
 			GUILayout.BeginVertical(innerNodePaddingStyle);
 			{
 				DrawNullInputGUI();
 
-				OnNodeGUI();
+				if (nodeRef.foldout)
+				{
+					//Undo/Redo handling:
+					undoRedoHelper.Beign();
+					
+					OnNodeGUI();
+			
+					undoRedoHelper.End();
+				}
+				else
+					GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 				EditorGUIUtility.labelWidth = 0;
 			}
 			GUILayout.EndVertical();
-			
-			undoRedoHelper.End();
 
 			int viewH = (int)GUILayoutUtility.GetLastRect().height;
 			if (e.type == EventType.Repaint)

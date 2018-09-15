@@ -193,5 +193,17 @@ namespace ProceduralWorlds
 			
 			return ret;
 		}
+
+		public static float PositiveMod(float x, float mod)
+		{
+			float m = x % mod;
+			return (m < 0) ? m + mod : m;
+		}
+		
+		public static int PositiveMod(int x, int mod)
+		{
+			int m = x % mod;
+			return (m < 0) ? m + mod : m;
+		}
     }
 }

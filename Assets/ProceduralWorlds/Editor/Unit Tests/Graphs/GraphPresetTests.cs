@@ -5,7 +5,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Linq;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Editor;
 using ProceduralWorlds.Biomator;
 using System.IO;
@@ -15,8 +15,8 @@ namespace ProceduralWorlds.Tests.Graphs
 	public class BaseGraphPresetTests
 	{
 
-		static string worldGraphPresetPath = "GraphPresets/World/Full";
-		string biomeGraphPresetPath = "GraphPresets/Biome/Full";
+		static readonly string worldGraphPresetPath = "GraphPresets/World/Full";
+		static readonly string biomeGraphPresetPath = "GraphPresets/Biome/Full";
 	
 		[Test]
 		public static void WorldGraphPresets()

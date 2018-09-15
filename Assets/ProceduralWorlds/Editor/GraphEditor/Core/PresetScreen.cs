@@ -57,8 +57,6 @@ namespace ProceduralWorlds.Editor
 		
 		//scroll position on the preset screen
 		Vector2							presetScrollPos;
-		
-		int								columns;
 	
 		GUIStyle						buttonStyle;
 		GUIStyle						selectedButtonStyle;
@@ -87,7 +85,7 @@ namespace ProceduralWorlds.Editor
 
 		void UpdateColumnCount()
 		{
-			columns = 0;
+			int columns = 0;
 			Stack< PresetCellList > currentPresetLists = new Stack< PresetCellList >();
 
 			currentPresetLists.Push(presetList);
@@ -162,7 +160,7 @@ namespace ProceduralWorlds.Editor
 			EditorGUILayout.EndVertical();
 		}
 	
-		bool DefaultDrawCell(PresetCell cell, bool selected, int columnIndex)
+		bool DefaultDrawCell(PresetCell cell, bool selected)
 		{
 			bool pressed = false;
 
@@ -203,7 +201,7 @@ namespace ProceduralWorlds.Editor
 				int i = 0;
 				foreach (var preset in presetList)
 				{
-					if (DefaultDrawCell(preset, i == newSelectedIndex, columnIndex))
+					if (DefaultDrawCell(preset, i == newSelectedIndex))
 						newSelectedIndex = i;
 					i++;
 				}
@@ -252,8 +250,6 @@ namespace ProceduralWorlds.Editor
 	
 			presetScrollPos = EditorGUILayout.BeginScrollView(presetScrollPos, GUILayout.ExpandHeight(true));
 			{
-				// EditorGUILayout.LabelField("Procedural Worlds");
-				
 				EditorGUILayout.BeginHorizontal();
 				{
 					DrawBoard();

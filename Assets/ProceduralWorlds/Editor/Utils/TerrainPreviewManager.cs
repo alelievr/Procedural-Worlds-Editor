@@ -24,11 +24,13 @@ namespace ProceduralWorlds.Editor
 		public GameObject			previewRoot { get; private set; }
 		public Camera				previewCamera {get; private set; }
 		public RenderTexture		previewTexture { get; private set; }
-		public TerrainGenericBase	terrainBase { get; private set; }
+		public GenericBaseTerrain	BaseTerrain { get; private set; }
+		public GameObject			BaseTerrainGameObject { get; private set; }
 		
-		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >()
+		readonly Dictionary< MaterializerType, Type > materializerTypes = new Dictionary< MaterializerType, Type >
 		{
-			{MaterializerType.SquareTileMap, typeof(TopDown2DTerrainSquare)},
+			{MaterializerType.SquareTileMap, typeof(Naive2DTerrain)},
+			{MaterializerType.HexTileMap, typeof(Hex2DTerrain)},
 		};
 	
 		static TerrainPreviewManager()
@@ -72,11 +74,16 @@ namespace ProceduralWorlds.Editor
 			if (previewCamera != null)
 				previewCamera.targetTexture = previewTexture;
 
-			terrainBase = GameObject.FindObjectOfType< TerrainGenericBase >();
+			BaseTerrain = GameObject.FindObjectOfType< GenericBaseTerrain >();
 
 			//Store chunks into memory
-			if (terrainBase != null && terrainBase.terrainStorage == null)
-				terrainBase.terrainStorage = Resources.Load< TerrainStorage >(memoryTerrainStorageAsset);
+			if (BaseTerrain != null)
+		 	{
+				BaseTerrainGameObject = BaseTerrain.gameObject;
+				
+				 if (BaseTerrain.terrainStorage == null)
+					BaseTerrain.terrainStorage = Resources.Load< TerrainStorage >(memoryTerrainStorageAsset);
+			}
 		}
 
 		public void UpdatePreviewPrefab(string newPrefabName)
@@ -97,21 +104,23 @@ namespace ProceduralWorlds.Editor
 
 		public void UpdateTerrainMaterializer(MaterializerType materializerType)
 		{
-			if (terrainBase == null)
-				return ;
-			
-			terrainBase.DestroyAllChunks();
-			var go = terrainBase.gameObject;
-			GameObject.DestroyImmediate(terrainBase);
-			terrainBase = go.AddComponent(materializerTypes[materializerType]) as TerrainGenericBase;
+			if (BaseTerrain != null)
+			{
+				BaseTerrain.DestroyAllChunks();
+				GameObject.DestroyImmediate(BaseTerrain);
+			}
+			if (BaseTerrainGameObject != null)
+				BaseTerrain = BaseTerrainGameObject.AddComponent(materializerTypes[materializerType]) as GenericBaseTerrain;
+
+			UpdateSceneObjects();
 		}
 
 		public void UpdateChunkLoaderPosition(Vector3 position)
 		{
-			if (terrainBase != null)
+			if (BaseTerrain != null)
 			{
-				terrainBase.transform.position = position;
-				terrainBase.UpdateChunks();
+				BaseTerrain.transform.position = position;
+				BaseTerrain.UpdateChunks();
 			}
 		}
 

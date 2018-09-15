@@ -4,32 +4,87 @@ using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
+using ProceduralWorlds.IsoSurfaces;
+using System;
 
 namespace ProceduralWorlds.Editor
 {
-	[CustomEditor(typeof(TerrainGenericBase))]
-	public abstract class TerrainBaseInspector : UnityEditor.Editor
+	[CustomEditor(typeof(GenericBaseTerrain))]
+	public abstract class BaseTerrainInspector : UnityEditor.Editor
 	{
-		TerrainGenericBase terrain;
+		GenericBaseTerrain baseTerrain;
+
+		UndoRedoHelper	undoRedoHelper;
 
 		public void OnEnable()
 		{
-			terrain = target as TerrainGenericBase;
+			baseTerrain = target as GenericBaseTerrain;
 			OnEditorEnable();
+			undoRedoHelper = new UndoRedoHelper(baseTerrain);
+			undoRedoHelper.LoadUndoableFields(false);
 		}
 
 		public override void OnInspectorGUI()
 		{
-			terrain.renderDistance = EditorGUILayout.IntSlider("Render distance", terrain.renderDistance, 0, 24);
-			terrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", terrain.loadPatternMode);
-			terrain.terrainStorage = EditorGUILayout.ObjectField("Chunk storage", terrain.terrainStorage, typeof(TerrainStorage), false) as TerrainStorage;
-			terrain.terrainScale = EditorGUILayout.Slider("Terrain scale", terrain.terrainScale, 0.01f, 10f);
-			terrain.graphAsset = EditorGUILayout.ObjectField("World Graph", terrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
+			undoRedoHelper.Beign();
+			baseTerrain.debug = EditorGUILayout.Toggle("Debug", baseTerrain.debug);
+			baseTerrain.generateChunksOnLoad = EditorGUILayout.Toggle("Generate on load", baseTerrain.generateChunksOnLoad);
+
+			EditorGUILayout.Space();
+
+			baseTerrain.renderDistance = EditorGUILayout.IntSlider("Render distance", baseTerrain.renderDistance, 0, 24);
+			baseTerrain.loadPatternMode = (ChunkLoadPatternMode)EditorGUILayout.EnumPopup("Load pattern mode", baseTerrain.loadPatternMode);
+			baseTerrain.terrainStorage = EditorGUILayout.ObjectField("Chunk storage", baseTerrain.terrainStorage, typeof(TerrainStorage), false) as TerrainStorage;
+			baseTerrain.terrainScale = EditorGUILayout.Slider("Terrain scale", baseTerrain.terrainScale, 0.01f, 10f);
+			baseTerrain.graphAsset = EditorGUILayout.ObjectField("World Graph", baseTerrain.graphAsset, typeof(WorldGraph), false) as WorldGraph;
+			
+			EditorGUILayout.Space();
 
 			OnEditorGUI();
+
+			undoRedoHelper.End();
+			
+			EditorGUILayout.Space();
+			
+			EditorGUILayout.BeginHorizontal();
+			{
+				if (GUILayout.Button("Generate terrain"))
+					ReloadChunks();
+				if (GUILayout.Button("Cleanup terrain"))
+					baseTerrain.DestroyAllChunks();
+			}
+			EditorGUILayout.EndHorizontal();
+		}
+		
+		//Warning: this will destroy all loaded chunks and regenerate them
+		public void ReloadChunks()
+		{
+			if (EditorApplication.isPlaying || EditorApplication.isPaused)
+			{
+				Debug.LogError("[ChunkLoader] can't reload chunks in play mode");
+				return ;
+			}
+
+			if (baseTerrain.graph == null || baseTerrain.terrainStorage == null)
+			{
+				Debug.LogError("[ChunkLoader] World graph or terrain storage is null in terrain materializer");
+				return ;
+			}
+
+			try {
+				baseTerrain.ReloadChunks(baseTerrain.graphAsset);
+			} catch (Exception e) {
+				Debug.LogError(e);
+			}
+		}
+
+		public void OnSceneGUI()
+		{
+			OnEditorSceneGUI();
 		}
 
 		public abstract void OnEditorGUI();
 		public abstract void OnEditorEnable();
+		public virtual void OnEditorSceneGUI() {}
 	}
 }

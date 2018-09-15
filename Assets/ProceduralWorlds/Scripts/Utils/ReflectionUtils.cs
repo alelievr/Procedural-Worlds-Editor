@@ -11,10 +11,14 @@ namespace ProceduralWorlds.Core
 {
 	public static class ReflectionUtils
 	{
-		public delegate object ChildFieldGetter< in T >(T node);
-		public delegate object ChildFieldSetter< in T, U >(T node, U value);
+		public delegate U ChildFieldGetter< in T, U >(T node);
+		public delegate void ChildFieldSetter< in T, in U >(T node, U value);
 
-		static readonly bool	fastReflection = false;
+		#if NET_4_6
+			static readonly bool	fastReflection = true;
+		#else
+			static readonly bool	fastReflection = false;
+		#endif
 
 		public interface GenericField
 		{
@@ -27,7 +31,7 @@ namespace ProceduralWorlds.Core
 
 		public class Field< T, U > : GenericField where T : Object
 		{
-			ChildFieldGetter< T > getter;
+			ChildFieldGetter< T, U > getter;
 			ChildFieldSetter< T, U > setter;
 			FieldInfo		field;
 
@@ -43,7 +47,7 @@ namespace ProceduralWorlds.Core
 			
 			public void SetGetterDelegate(Delegate d)
 			{
-					getter = (ChildFieldGetter< T >)d;
+				getter = (ChildFieldGetter< T, U >)d;
 			}
 
 			public object GetValue(Object node)
@@ -65,17 +69,20 @@ namespace ProceduralWorlds.Core
 
 		public static GenericField CreateGenericField(Type childType, string fieldName)
 		{
-			FieldInfo fi = childType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+			FieldInfo fi = childType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
 			//Create a specific type from Field which will cast the generic type to a specific one to call the generated delegate
-			var callerType = typeof(Field<,>).MakeGenericType(new Type[] { childType, fi.FieldType });
+			var callerType = typeof(Field<,>).MakeGenericType(new[] { childType, fi.FieldType });
 
 			//Instantiate this type and bind the delegate
 			var genericField = Activator.CreateInstance(callerType) as GenericField;
 
 			genericField.SetField(fi);
-			// genericField.SetGetterDelegate(CreateGenericGetterDelegate(childType, fi));
-			// genericField.SetSetterDelegate(CreateGenericSetterDelegate(childType, fi));
+			if (fastReflection)
+			{
+				genericField.SetGetterDelegate(CreateGenericGetterDelegate(childType, fi));
+				genericField.SetSetterDelegate(CreateGenericSetterDelegate(childType, fi));
+			}
 
 			return genericField;
 		}
@@ -83,29 +90,26 @@ namespace ProceduralWorlds.Core
 		public static Delegate CreateGenericGetterDelegate(Type childType, FieldInfo field)
 		{
 			//Create the delegate type that takes our node type in parameter
-			var delegateType = typeof(ChildFieldGetter<>).MakeGenericType(new Type[] { childType });
-
-			//Get the child field from base class
-			FieldInfo fi = childType.GetField(field.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+			var delegateType = typeof(ChildFieldGetter<,>).MakeGenericType(new[] { childType, field.FieldType });
 
 			#if NET_4_6
 				ParameterExpression targetExp = Expression.Parameter(childType, "target");
 
 				// Expression.Property can be used here as well
-				MemberExpression fieldExp = Expression.Field(targetExp, fi);
+				MemberExpression fieldExp = Expression.Field(targetExp, field);
+				Expression convert = Expression.Convert(fieldExp, field.FieldType);
 
-				var l = Expression.Lambda(delegateType, fieldExp, targetExp).Compile();
-				Debug.Log("here: " + l);
+				var l = Expression.Lambda(delegateType, convert, targetExp).Compile();
 				return l;
 			#else
 	
-				//Create a new method which return the field fi
-				DynamicMethod dm = new DynamicMethod("Get" + fi.Name, typeof(object), new Type[] { childType }, childType);
+				//Create a new method which return the field field
+				DynamicMethod dm = new DynamicMethod("Get" + field.Name, typeof(object), new[] { childType }, childType);
 				ILGenerator il = dm.GetILGenerator();
 				// Load the instance of the object (argument 0) onto the stack
 				il.Emit(OpCodes.Ldarg_0);
-				// Load the value of the object's field (fi) onto the stack
-				il.Emit(OpCodes.Ldfld, fi);
+				// Load the value of the object's field (field) onto the stack
+				il.Emit(OpCodes.Ldfld, field);
 				// return the value on the top of the stack
 				il.Emit(OpCodes.Ret);
 	
@@ -116,23 +120,19 @@ namespace ProceduralWorlds.Core
 		public static Delegate CreateGenericSetterDelegate(Type childType, FieldInfo field)
 		{
 			//Create the delegate type that takes our node type in parameter
-			var delegateType = typeof(ChildFieldSetter<,>).MakeGenericType(new Type[] { childType, field.FieldType });
-
-			//Get the child field from base class
-			FieldInfo fi = childType.GetField(field.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.Instance);
+			var delegateType = typeof(ChildFieldSetter<,>).MakeGenericType(new[] { childType, field.FieldType });
 
 			#if NET_4_6
 				ParameterExpression targetExp = Expression.Parameter(childType, "target");
-				ParameterExpression valueExp = Expression.Parameter(fi.FieldType, "value");
+				ParameterExpression valueExp = Expression.Parameter(field.FieldType, "value");
 
-				// Expression.Property can be used here as well
-				MemberExpression fieldExp = Expression.Field(targetExp, fi);
+				MemberExpression fieldExp = Expression.Field(targetExp, field);
 				BinaryExpression assignExp = Expression.Assign(fieldExp, valueExp);
 
 				return Expression.Lambda(delegateType, assignExp, targetExp, valueExp).Compile();
 			#else
-				//Create a new method which return the field fi
-				DynamicMethod dm = new DynamicMethod("Set" + fi.Name, typeof(object), new Type[] { childType, typeof(object) }, true);
+				//Create a new method which return the field field
+				DynamicMethod dm = new DynamicMethod("Set" + field.Name, typeof(object), new[] { childType, typeof(object) }, true);
 				ILGenerator il = dm.GetILGenerator();
 				// Load the instance of the object (argument 0) and the replacing value onto the stack
 				il.Emit(OpCodes.Ldarg_0);

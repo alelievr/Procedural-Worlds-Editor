@@ -1,21 +1,31 @@
 #!/bin/sh
 
-log_file=$(pwd)/unit_test.xml
+res_file=$(pwd)/unit_test.xml
+log_file=$(pwd)/unit_test.log
+unity=/Applications/Unity/Unity.app/Contents/MacOS/Unity
 
-touch $log_file
+touch "$log_file"
+
+ls -l $unity
+ls -l "$log_file"
 
 echo "Running unit tests"
-/Applications/Unity/Unity.app/Contents/MacOS/Unity \
+$unity \
 	-batchmode \
 	-nographics \
 	-silent-crashes \
-	-editorTestsResultFile $log_file \
+	-editorTestsResultFile "$res_file" \
+	-noUpm \
+	-logFile "$log_file" \
 	-runEditorTests \
-	-projectPath $(pwd)
+	-projectPath "$(pwd)"
 
 res=$?
 
 echo "Unit tests:"
-cat $log_file
+cat "$res_file"
+
+echo "\nEditor logs:"
+cat "$log_file"
 
 exit $res

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Editor
 {
@@ -24,21 +24,21 @@ namespace ProceduralWorlds.Editor
 			node.switchList.OnBiomeDataAdded = (unused) => {
 				UpdateAnchorCount();
 				UpdateSwitchList();
-				delayedChanges.UpdateValue(delayedUpdateKey, null);
+				delayedChanges.UpdateValue(delayedUpdateKey);
 			};
 			node.switchList.OnBiomeDataModified = (unused) => {
 				node.alreadyModified = true;
 				UpdateSwitchList();
-				delayedChanges.UpdateValue(delayedUpdateKey, null);
+				delayedChanges.UpdateValue(delayedUpdateKey);
 			};
 			node.switchList.OnBiomeDataRemoved = () => {
 				UpdateAnchorCount();
 				UpdateSwitchList();
-				delayedChanges.UpdateValue(delayedUpdateKey, null);
+				delayedChanges.UpdateValue(delayedUpdateKey);
 			};
 			node.switchList.OnBiomeDataReordered = () => {
 				UpdateSwitchList();
-				delayedChanges.UpdateValue(delayedUpdateKey, null);
+				delayedChanges.UpdateValue(delayedUpdateKey);
 			};
 
 			switchListDrawer.OnEnable(node.switchList);
@@ -78,6 +78,7 @@ namespace ProceduralWorlds.Editor
 			{
 				node.CheckForBiomeSwitchErrors();
 				node.UpdateSwitchMode();
+				delayedChanges.UpdateValue(delayedUpdateKey);
 			}
 
 			EditorGUILayout.LabelField((node.currentSampler != null) ? "min: " + node.relativeMin + ", max: " + node.relativeMax : "");

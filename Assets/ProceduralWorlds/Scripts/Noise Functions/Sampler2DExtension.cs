@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ProceduralWorlds.Core;
 using System;
 
-namespace ProceduralWorlds
+namespace ProceduralWorlds.Core
 {
 	public static class Sampler2DExtension
 	{

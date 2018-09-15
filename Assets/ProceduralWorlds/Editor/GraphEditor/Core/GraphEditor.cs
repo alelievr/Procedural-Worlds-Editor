@@ -6,9 +6,10 @@ using UnityEditor;
 using System.Linq;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Editor;
 using UnityEngine.Profiling;
+using System.Diagnostics;
 
 using Debug = UnityEngine.Debug;
 
@@ -182,8 +183,7 @@ namespace ProceduralWorlds.Editor
 				//reset events for the next frame
 				editorEvents.Reset();
 		
-				if (e.type == EventType.Repaint)
-					Repaint();
+				RepaintIfNeeded();
 			}
 			GUIScaleUtility.EndScale();
 	
@@ -198,8 +198,24 @@ namespace ProceduralWorlds.Editor
 	
 		void PlayModeChangeCallback(PlayModeStateChange mode)
 		{
-			// if (mode == PlayModeStateChange.EnteredEditMode)
-				// graph.Process();
+			//Maybe reload the graph if needed
+		}
+
+		void RepaintIfNeeded()
+		{
+			//Repaint if we're dragging something
+			if (editorEvents.isDraggingSomething && e.delta != Vector2.zero)
+				editorEvents.needRepaint = true;
+
+			//Repaint if we're panning / selecting in the graph
+			if (editorEvents.isSelecting || editorEvents.isPanning ||  editorEvents.isZooming)
+				editorEvents.needRepaint = true;
+
+			if (editorEvents.needRepaint)
+			{
+				Repaint();
+				editorEvents.needRepaint = false;
+			}
 		}
 	
 		void UndoRedoCallback()

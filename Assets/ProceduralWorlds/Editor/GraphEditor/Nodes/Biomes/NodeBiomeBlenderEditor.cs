@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using UnityEditor;
 using ProceduralWorlds.Biomator;
 using ProceduralWorlds.Core;
@@ -103,7 +103,6 @@ namespace ProceduralWorlds.Editor
 			if (biomeData != null && biomeData.biomeSwitchGraph.isBuilt)
 			{
 				node.BuildBiomeSwitchGraph();
-				node.FillBiomeMap(biomeData);
 			}
 		}
 	}

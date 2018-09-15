@@ -158,7 +158,7 @@ namespace ProceduralWorlds.Editor
 			Rect movePadRect = new Rect(orderGroupWorldRect.position + new Vector2(10, 10), new Vector2(50, 30));
 			GUI.DrawTextureWithTexCoords(movePadRect, movepadTexture, new Rect(0, 0, 5, 4));
 			EditorGUIUtility.AddCursorRect(movePadRect, MouseCursor.MoveArrow);
-			if (e.type == EventType.MouseDown && e.button == 0)
+			if (!editorEvents.isMouseOverNode && !editorEvents.isMouseOverLink && e.type == EventType.MouseDown && e.button == 0)
 				if (movePadRect.Contains(e.mousePosition))
 				{
 					orderingGroup.innerNodes = graph.allNodes.Where(n => n.rect.Overlaps(orderingGroup.orderGroupRect)).ToList();

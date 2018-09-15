@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Noises
 			this.flatValue = flatValue;
 		}
 
-		public override void ComputeSampler2D(Sampler2D samp)
+		public override void ComputeSampler2D(Sampler2D samp, Vector3 position)
 		{
 			if (samp == null)
 			{

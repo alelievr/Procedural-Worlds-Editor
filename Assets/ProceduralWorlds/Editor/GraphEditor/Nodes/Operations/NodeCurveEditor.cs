@@ -1,6 +1,6 @@
 using UnityEditor;
 using UnityEngine;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Editor;
 
 namespace ProceduralWorlds.Editor

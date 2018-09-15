@@ -44,7 +44,7 @@ namespace ProceduralWorlds.Core
 		
 		public float ProcessFrom(WorldGraph graph)
 		{
-			if (!readyToProcess)
+			if (!isReadyToProcess)
 				return -1;
 			
 			var iNode = (inputNode as NodeBiomeGraphInput);

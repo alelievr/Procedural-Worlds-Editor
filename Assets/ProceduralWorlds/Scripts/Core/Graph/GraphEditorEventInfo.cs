@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System.Reflection;
 
 namespace ProceduralWorlds.Core
@@ -52,6 +52,8 @@ namespace ProceduralWorlds.Core
 	
 		public bool isDraggingSomething { get { return isDraggingLink || isDraggingNewLink || isDraggingNode || isDraggingOrderingGroup || isDraggingSelectedNodes; } }
 		public bool isMouseOverSomething { get { return isMouseOverAnchor || isMouseOverLink || isMouseOverNode || isMouseOverOrderingGroup; } }
+
+		public bool				needRepaint;
 	
 		public BaseGraphEditorEventInfo()
 		{

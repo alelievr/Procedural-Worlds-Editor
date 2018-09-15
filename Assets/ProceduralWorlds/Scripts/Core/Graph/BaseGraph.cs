@@ -97,8 +97,7 @@ namespace ProceduralWorlds.Core
 		
 		//useful variables:
 		public bool								initialized = false;
-		[NonSerialized]
-		public bool								readyToProcess = false;
+		public bool								isReadyToProcess { get; private set; }
 		public bool								hasProcessed { get { return graphProcessor.hasProcessed; } }
 
 
@@ -206,7 +205,7 @@ namespace ProceduralWorlds.Core
 			//Build compute order list
 			UpdateComputeOrder();
 
-			readyToProcess = true;
+			isReadyToProcess = true;
 		}
 
 		//must be called after a Process() to get back datas
@@ -276,7 +275,7 @@ namespace ProceduralWorlds.Core
 
 		public float Process()
 		{
-			if (!readyToProcess)
+			if (!isReadyToProcess)
 				return -1;
 			
 			processMode = GraphProcessMode.Normal;
@@ -295,7 +294,7 @@ namespace ProceduralWorlds.Core
 
 		public void	ProcessOnce()
 		{
-			if (!readyToProcess)
+			if (!isReadyToProcess)
 				return ;
 				
 			processMode = GraphProcessMode.Once;
@@ -560,24 +559,24 @@ namespace ProceduralWorlds.Core
 			return RemoveNode(nodesDictionary[nodeId], raiseEvents);
 		}
 
-		public bool		RemoveNode(BaseNode removeNode, bool raiseEvents = true)
+		public bool		RemoveNode(BaseNode node, bool raiseEvents = true)
 		{
 			//can't delete an input/output node
-			if (removeNode == inputNode || removeNode == outputNode)
+			if (node == inputNode || node == outputNode)
 				return false;
 			
 			if (OnNodePreRemoved != null)
-				OnNodePreRemoved(removeNode);
+				OnNodePreRemoved(node);
 			
-			int id = removeNode.id;
-			nodes.Remove(removeNode);
+			int id = node.id;
+			nodes.Remove(node);
 			
 			bool success = nodesDictionary.Remove(id);
 
-			removeNode.RemoveSelf();
+			node.RemoveSelf();
 
 			if (OnNodeRemoved != null && raiseEvents)
-				OnNodeRemoved(removeNode);
+				OnNodeRemoved(node);
 
 			return success;
 		}

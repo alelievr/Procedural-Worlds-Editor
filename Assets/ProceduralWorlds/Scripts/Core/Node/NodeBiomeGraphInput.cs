@@ -4,7 +4,7 @@ using UnityEngine;
 using ProceduralWorlds.Biomator;
 using System;
 using System.Linq;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Core
 {

@@ -10,9 +10,9 @@ namespace ProceduralWorlds.Core
 	/*
 	**	Parent class to store everything needed to render a chunk
 	*/
-	[Serializable]
 	public abstract class ChunkData
 	{
+		public Vector3i				position;
 		public int					size;
 		public MaterializerType		materializerType;
 
@@ -27,7 +27,6 @@ namespace ProceduralWorlds.Core
 		}
 	}
 
-	[Serializable]
 	public class TopDownChunkData : ChunkData
 	{
 		
@@ -92,12 +91,13 @@ namespace ProceduralWorlds.Core
 
 		//TODO: other geologic datas (for geologic update :)
 	}
+	
 
 	public enum MaterializerType
 	{
 		//2D materializers:
 		SquareTileMap,
-		// HexTileMap,
+		HexTileMap,
 		// MarchingSquare,
 
 		//3D:
@@ -109,7 +109,7 @@ namespace ProceduralWorlds.Core
 		// MonotoneMeshing,
 	}
 	
-	public class FinalTerrain
+	public class WorldChunk
 	{
 		public BiomeData				biomeData;
 		public Sampler					mergedTerrain;
@@ -131,16 +131,16 @@ namespace ProceduralWorlds.Core
 
 		public Vector3i(float x, float y, float z)
 		{
-			this.x = (int)x;
-			this.y = (int)y;
-			this.z = (int)z;
+			this.x = Mathf.FloorToInt(x);
+			this.y = Mathf.FloorToInt(y);
+			this.z = Mathf.FloorToInt(z);
 		}
 
 		public Vector3i(float a)
 		{
-			this.x = (int)a;
-			this.y = (int)a;
-			this.z = (int)a;
+			this.x = Mathf.FloorToInt(a);
+			this.y = Mathf.FloorToInt(a);
+			this.z = Mathf.FloorToInt(a);
 		}
 
 		public static explicit operator Vector3(Vector3i v)

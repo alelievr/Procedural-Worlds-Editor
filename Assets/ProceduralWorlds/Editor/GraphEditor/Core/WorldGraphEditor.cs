@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 using ProceduralWorlds;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using ProceduralWorlds.Editor;
 using Object = UnityEngine.Object;
 
@@ -40,7 +40,7 @@ namespace ProceduralWorlds.Editor
 	
 		const string			graphProcessKey = "WorldGraphEditor";
 	
-		ChunkLoaderDrawer		chunkLoaderDrawer = new ChunkLoaderDrawer();
+		readonly ChunkLoaderDrawer	chunkLoaderDrawer = new ChunkLoaderDrawer();
 	
 		#region Initialization and data baking
 	
@@ -190,6 +190,9 @@ namespace ProceduralWorlds.Editor
 						EditorGUILayout.PrefixLabel("step", Styles.prefixLabel);
 						worldGraph.step = PWGUI.Slider(worldGraph.step, ref min, ref worldGraph.maxStep, 0.01f, false, true);
 						EditorGUILayout.EndHorizontal();
+
+						//position:
+						worldGraph.chunkPosition = EditorGUILayout.Vector3Field("Chunk position (editor only)", worldGraph.chunkPosition);
 					}
 					EditorGUI.EndDisabledGroup();
 				}

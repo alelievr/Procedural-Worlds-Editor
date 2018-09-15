@@ -15,7 +15,7 @@ namespace ProceduralWorlds.Tests.Graphs
 		{
 			var worldGraph = TestUtils.GenerateTestWorldGraph();
 
-			Assert.That(worldGraph.readyToProcess == true, "Graph is not ready to process");
+			Assert.That(worldGraph.isReadyToProcess == true, "Graph is not ready to process");
 		}
 	}
 }

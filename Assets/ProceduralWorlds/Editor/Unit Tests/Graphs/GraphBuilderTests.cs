@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
@@ -233,7 +233,7 @@ namespace ProceduralWorlds.Tests.Graphs
 
 			var surfinputAnchorField = surf.inputAnchorFields.First();
 
-			var expectedConnectedAnchors = new List< Anchor >()
+			var expectedConnectedAnchors = new List< Anchor >
 			{
 				s1.outputAnchors.First(),
 				s2.outputAnchors.First(),

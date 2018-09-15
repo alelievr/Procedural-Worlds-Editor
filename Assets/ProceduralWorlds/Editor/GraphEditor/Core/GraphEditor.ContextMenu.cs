@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine.Profiling;
 using ProceduralWorlds.Core;
 using ProceduralWorlds;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System.IO;
 using System;
 
@@ -32,8 +32,6 @@ namespace ProceduralWorlds.Editor
 		readonly GUIContent	debugAnchorContent = new GUIContent("Debug/Anchor");
 	
 		readonly GUIContent	recenterGraphContent = new GUIContent("Recenter the graph");
-	
-		protected Event e { get { return Event.current; } }
 	
 		void ContextMenu()
 		{

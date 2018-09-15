@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 using ProceduralWorlds.Core;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Tests.Graphs
 {
@@ -28,7 +28,7 @@ namespace ProceduralWorlds.Tests.Graphs
 			graph.chunkPosition = new Vector3(10, 42, -7);
 			graph.seed = 123456789;
 
-			return graph as WorldGraph;
+			return graph;
 		}
 	
 		[Test]

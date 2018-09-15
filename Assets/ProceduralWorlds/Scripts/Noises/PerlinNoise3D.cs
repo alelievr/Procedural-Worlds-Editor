@@ -96,7 +96,7 @@ namespace ProceduralWorlds.Noises
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
         
-		public override void ComputeSampler3D(Sampler3D samp)
+		public override void ComputeSampler3D(Sampler3D samp, Vector3 position)
         {
             throw new System.NotImplementedException();
         }

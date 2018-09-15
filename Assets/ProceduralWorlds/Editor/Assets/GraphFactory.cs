@@ -59,30 +59,10 @@ namespace ProceduralWorlds.Editor
             return mg;
         }
 
-		public static string GetCurrentPath()
-		{
-			var path = "";
-			var obj = Selection.activeObject;
-
-			if (obj == null)
-                return null;
-			else
-				path = AssetDatabase.GetAssetPath(obj.GetInstanceID());
-			
-			if (path.Length > 0)
-			{
-				if (Directory.Exists(path))
-					return path;
-				else
-					return new FileInfo(path).Directory.FullName;
-			}
-			return null;
-		}
-
     	public static string GetBiomeGraphCreateLocation(string currentPath = null)
 		{
 			if (String.IsNullOrEmpty(currentPath))
-				currentPath = GetCurrentPath();
+				currentPath = AssetUtils.GetCurrentPath();
 
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;
@@ -107,7 +87,7 @@ namespace ProceduralWorlds.Editor
 		public static string GetWorldGraphCreateLocation(string currentPath = null)
 		{
 			if (String.IsNullOrEmpty(currentPath))
-				currentPath = GetCurrentPath();
+				currentPath = AssetUtils.GetCurrentPath();
 			
 			if (String.IsNullOrEmpty(currentPath))
 				return currentPath;

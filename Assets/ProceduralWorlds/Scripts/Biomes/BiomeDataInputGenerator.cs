@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Noises;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Biomator
 {
@@ -51,7 +51,7 @@ namespace ProceduralWorlds.Biomator
 
 			perlin.UpdateParams(seed, step, octaves, persistance, lacunarity);
 
-			perlin.ComputeSampler2D(terrainHeight);
+			perlin.ComputeSampler2D(terrainHeight, Vector3.zero);
 
 			terrainHeight = NoiseFunctions.Map(terrainHeight, 0, maxTerrainHeight);
 

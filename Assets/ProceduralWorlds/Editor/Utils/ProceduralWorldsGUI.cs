@@ -10,7 +10,7 @@ using ProceduralWorlds.Core;
 using UnityEditor.AnimatedValues;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 
 namespace ProceduralWorlds.Editor
 {
@@ -236,7 +236,7 @@ namespace ProceduralWorlds.Editor
 				"GradientField",
 				BindingFlags.NonPublic | BindingFlags.Static,
 				null,
-				new Type[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
+				new[] { typeof(string), typeof(Gradient), typeof(GUILayoutOption[]) },
 				null
 			);
 		}
@@ -865,7 +865,6 @@ namespace ProceduralWorlds.Editor
 					EditorGUILayout.LabelField("blend: " + (biomeBlend * 100).ToString("F1") + "%");
 					EditorGUI.indentLevel--;
 				}
-				EditorGUILayout.LabelField("Total blend: " + point.totalBlend);
 			}
 			EditorGUILayout.EndVertical();
 		}

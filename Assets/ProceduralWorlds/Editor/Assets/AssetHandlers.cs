@@ -14,7 +14,7 @@ namespace ProceduralWorlds.Editor
 		public static readonly string worldGraphFileName = "New ProceduralWorld";
 		public static readonly string biomeGraphFileName = "New ProceduralBiome";
 	
-		static Dictionary< Type, Type > editorTypeTable = new Dictionary< Type, Type >()
+		static Dictionary< Type, Type > editorTypeTable = new Dictionary< Type, Type >
 		{
 			{ typeof(WorldGraph), typeof(WorldGraphEditor)},
 			{ typeof(BiomeGraph), typeof(BiomeGraphEditor)},

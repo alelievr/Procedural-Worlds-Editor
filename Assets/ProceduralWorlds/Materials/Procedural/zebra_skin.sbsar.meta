@@ -1,8 +1,9 @@
 fileFormatVersion: 2
 guid: de5eba349e5104b5bacf26da2de80169
-timeCreated: 1505169434
+timeCreated: 1521675844
 licenseType: Free
 SubstanceImporter:
+  externalObjects: {}
   serializedVersion: 5
   materialInstances:
   - serializedVersion: 16
@@ -10,9 +11,9 @@ SubstanceImporter:
     prototypeName: zebra_skin
     shaderName: 
     shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-    shaderKeywords: 
+    shaderKeywords: _EMISSION _METALLICGLOSSMAP _NORMALMAP _PARALLAXMAP
     renderQueue: -1
-    lightmapFlags: 5
+    lightmapFlags: 1
     inputs:
     - name: Hue_Shift
       value:
@@ -21,6 +22,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: Saturation
       value:
         scalar[0]: 0.5
@@ -28,6 +30,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: skin_color_1
       value:
         scalar[0]: 0.8890024
@@ -35,6 +38,7 @@ SubstanceImporter:
         scalar[2]: 0.85153544
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: skin_color_2
       value:
         scalar[0]: 0
@@ -42,6 +46,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: $outputsize
       value:
         scalar[0]: 8
@@ -49,13 +54,15 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: $randomseed
       value:
-        scalar[0]: 2804
+        scalar[0]: 5034
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: Luminosity
       value:
         scalar[0]: 0.5
@@ -63,6 +70,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: Contrast
       value:
         scalar[0]: 0
@@ -70,6 +78,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: Normal_Intensity
       value:
         scalar[0]: 0.5
@@ -77,6 +86,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: normal_format
       value:
         scalar[0]: 0
@@ -84,6 +94,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: height_range
       value:
         scalar[0]: 0.5
@@ -91,6 +102,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: height_position
       value:
         scalar[0]: 0.5
@@ -98,6 +110,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: stripes_number
       value:
         scalar[0]: 7
@@ -105,6 +118,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: stripes_width
       value:
         scalar[0]: 0.541
@@ -112,6 +126,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: stripes_softness
       value:
         scalar[0]: 0.156
@@ -119,6 +134,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: stripes_distortion
       value:
         scalar[0]: 1
@@ -126,6 +142,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     - name: fur_length
       value:
         scalar[0]: 0
@@ -133,6 +150,7 @@ SubstanceImporter:
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
+        stringvalue: 
     materialInformation:
       serializedVersion: 5
       offset: {x: 0, y: 0}

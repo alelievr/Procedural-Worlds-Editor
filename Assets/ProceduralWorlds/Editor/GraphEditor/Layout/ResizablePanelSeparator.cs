@@ -6,7 +6,6 @@ namespace ProceduralWorlds.Editor
 {
 	public class ResizablePanelSeparator : LayoutSeparator
 	{
-		int					internHandlerPosition;
 		readonly bool		vertical;
 
 		[SerializeField]
@@ -23,7 +22,7 @@ namespace ProceduralWorlds.Editor
 	
 		public override Rect Begin()
 		{
-			internHandlerPosition = (int)layoutSetting.separatorPosition;
+			int internHandlerPosition = (int)layoutSetting.separatorPosition;
 			if (vertical)
 			{
 				//TODO
@@ -64,21 +63,22 @@ namespace ProceduralWorlds.Editor
 
 		void DrawHandleBar()
 		{
-			Rect separatorRect = EditorGUILayout.BeginHorizontal(GUILayout.Width(layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
+			Rect sepRect = EditorGUILayout.BeginHorizontal(GUILayout.Width(layoutSetting.separatorWidth), GUILayout.ExpandHeight(true));
 			GUILayout.Space(layoutSetting.separatorWidth);
-			EditorGUI.DrawRect(separatorRect, Color.white);
+			EditorGUI.DrawRect(sepRect, Color.white);
 			EditorGUILayout.EndHorizontal();
 
 			if (e.type == EventType.Repaint)
-				this.separatorRect = separatorRect;
+				this.separatorRect = sepRect;
 
-			EditorGUIUtility.AddCursorRect(separatorRect, MouseCursor.ResizeHorizontal);
+			EditorGUIUtility.AddCursorRect(sepRect, MouseCursor.ResizeHorizontal);
 
 			if (e.type == EventType.MouseDown && e.button == 0)
-				if (separatorRect.Contains(e.mousePosition))
+				if (sepRect.Contains(e.mousePosition))
 					draggingHandler = true;
+
 				
-			if (e.type == EventType.MouseDrag && e.button == 0 && draggingHandler)
+			if (e.type == EventType.MouseDrag && e.button == 0 && draggingHandler && e.delta != Vector2.zero)
 				layoutSetting.separatorPosition += (layoutSetting.leftBar) ? -e.delta.x : e.delta.x;
 			
 			float p = layoutSetting.separatorPosition - lastRect.x;

@@ -7,8 +7,6 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 {
 	public class BiomeSwitchCell
 	{
-		static readonly bool			debug = false;
-
 		public List< BiomeSwitchCell >	links = new List< BiomeSwitchCell >();
 		public float					weight;
 		public string					name;
@@ -33,7 +31,7 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 
 		public float	GetWeight(BiomeParamRange paramRanges)
 		{
-			float	weight = 0;
+			float	retWeight = 0;
 
 			int length = switchParams.switchParams.Length;
 			for (int i = 0; i < length; i++)
@@ -41,15 +39,15 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 				BiomeSwitchCellParam	param = switchParams.switchParams[i];
 
 				if (param.enabled && paramRanges.ranges[i].magnitude != 0)
-					weight += param.max - param.min / paramRanges.ranges[i].magnitude;
+					retWeight += param.max - param.min / paramRanges.ranges[i].magnitude;
 				else
-					weight += 1;
+					retWeight += 1;
 			}
 
-			return weight;
+			return retWeight;
 		}
 
-		public float ComputeBlend(BiomeBlendList blendMatrix, BiomeParamRange param, BiomeSwitchValues values, float blendPercent)
+		public float ComputeBlend(BiomeBlendList blendList, BiomeParamRange param, BiomeSwitchValues values, float blendPercent, bool debug = false)
 		{
 			float	blend = 0;
 			float	blendParamCount = 0;
@@ -57,7 +55,7 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 			int length = values.length;
 			for (int i = 0; i < length; i++)
 			{
-				if (!blendMatrix.blendEnabled[i] || !switchParams.switchParams[i].enabled || !values.enabled[i])
+				if (!blendList.blendEnabled[i] || !switchParams.switchParams[i].enabled || !values.enabled[i])
 					continue ;
 				
 				//Compute biome blend using blendPercent
@@ -72,9 +70,9 @@ namespace ProceduralWorlds.Biomator.SwitchGraph
 				
 				float b = 0;
 				
-				if (v < min && v > min - p)
+				if (v <= min && v > min - p)
 					b = .5f + (((v - min) / p) / 2);
-				if (v > max && v < max + p)
+				if (v >= max && v < max + p)
 					b = .5f - (((v - max) / p) / 2);
 
 				blend += b;

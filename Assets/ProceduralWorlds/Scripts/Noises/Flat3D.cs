@@ -9,7 +9,7 @@ namespace ProceduralWorlds.Noises
 	{
 		float flatValue;
 
-		public Flat3D(float flatValue)
+		public Flat3D(float flatValue = 0)
 		{
 			UpdateParams(flatValue);
 		}
@@ -19,7 +19,7 @@ namespace ProceduralWorlds.Noises
 			this.flatValue = flatValue;
 		}
 
-		public override void ComputeSampler3D(Sampler3D samp)
+		public override void ComputeSampler3D(Sampler3D samp, Vector3 position)
 		{
 			if (samp == null)
 			{

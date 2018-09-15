@@ -18,7 +18,8 @@ namespace ProceduralWorlds.Editor
 		bool						isPanning;
 
 		float						zoom = 1;
-		float						defaultDistance;
+		
+		readonly float				defaultDistance;
 
 		Event						e { get { return Event.current; } }
 	
@@ -29,8 +30,8 @@ namespace ProceduralWorlds.Editor
 				cam = previewUtility.camera;
 				previewUtility.cameraFieldOfView = cameraFieldOfView;
 			#else
-				cam = previewUtility.m_Camera;
-				previewUtility.m_CameraFieldOfView = cameraFieldOfView;
+				cam = previewUtility.camera;
+				previewUtility.cameraFieldOfView = cameraFieldOfView;
 			#endif
 			cam.farClipPlane = 10000;
 			cam.nearClipPlane = 0.001f;

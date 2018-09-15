@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using ProceduralWorlds.Core;
 using ProceduralWorlds.Biomator;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System;
 using System.Linq;
 using System.Diagnostics;
@@ -31,7 +31,6 @@ namespace ProceduralWorlds.Biomator
 		public BiomeSwitchCell				rootCell;
 		public BiomeSwitchCell				lastCell;
 		public List< BiomeSwitchCell >		cells = new List< BiomeSwitchCell >();
-		public List< Sampler >				builtSamplers = new List< Sampler >();
 
 		[System.NonSerialized]
 		public bool							isBuilt = false;
@@ -49,20 +48,46 @@ namespace ProceduralWorlds.Biomator
 		[System.NonSerialized]
 		public BiomeParamRange				paramRanges = new BiomeParamRange();
 
-		public bool BuildGraph(BiomeData biomeData)
+		bool[]								lastBiomeMapIds;
+
+		#region Switch graph build
+
+		public bool BuildGraph(IEnumerable< Vector2 > paramRanges, IEnumerable< BiomeSwitchCell > inputCells)
 		{
 			ResetGraph();
 
-			BaseNode rootNode = biomeData.biomeSwitchGraphStartPoint;
+			FillParamRange(paramRanges);
+			
+			AddCells(inputCells);
 
-			Stack< BaseNode > biomeNodes = new Stack< BaseNode >();
+			//Generate links between all linkable nodes
+			BuildLinks();
+			
+			if (cells.Count != 0)
+				rootCell = cells.First();
+
+			if (!CheckValid())
+				return false;
+			
+			lastBiomeMapIds = new bool[cells.Count];
+
+			isBuilt = true;
+
+			return true;
+		}
+
+		public bool BuildGraph(BiomeData biomeData)
+		{
+			return BuildGraph(GetParamRangesFromBiomeData(biomeData), GetCellsFromBiomeData(biomeData));
+		}
+
+		IEnumerable< BiomeSwitchCell > GetCellsFromBiomeData(BiomeData biomeData)
+		{
+			BaseNode			rootNode = biomeData.biomeSwitchGraphStartPoint;
+			Stack< BaseNode >	biomeNodes = new Stack< BaseNode >();
+			BiomeSwitchCell		currentCell = null;
 
 			biomeNodes.Push(rootNode);
-
-			BiomeSwitchCell currentCell = null;
-
-			//fill param range dictionary (used to compute weights)
-			FillParamRange(biomeData);
 
 			while (biomeNodes.Count > 0)
 			{
@@ -85,7 +110,6 @@ namespace ProceduralWorlds.Biomator
 					currentCell.id = biomeNode.outputBiome.id;
 					biomeNode.outputBiome.previewColor = lastSwitch.color;
 					currentCell.color = lastSwitch.color;
-					currentCell.weight = currentCell.GetWeight(paramRanges);
 
 					//add the partial biome to utility dictionary accessors:
 					partialBiomePerName[currentCell.name] = biomeNode.outputBiome;
@@ -109,36 +133,26 @@ namespace ProceduralWorlds.Biomator
 						throw new InvalidOperationException("[PWBiomeSwitchGraph] idk what happened but this is really bad");
 					
 					//if the flow reaches the biomeblender everything is OK and add the current cell to the graph
-					cells.Add(currentCell);
+					yield return currentCell;
 					continue ;
 				}
 
 				foreach (var outputNode in currentNode.GetOutputNodes())
 					biomeNodes.Push(outputNode);
 			}
-
-			//Generate links between all linkable nodes
-			BuildLinks();
-			
-			if (cells.Count != 0)
-				rootCell = cells.First();
-
-			if (!CheckValid())
-				return false;
-
-			isBuilt = true;
-
-			return true;
 		}
 
-		//Create a switchGraph that always return this biome Id
-		public void BuildTestGraph(short biomeId)
+		public void AddCells(IEnumerable< BiomeSwitchCell > inputCells)
 		{
-			BiomeSwitchCell bsc = new BiomeSwitchCell();
+			cells.Clear();
 
-			bsc.id = biomeId;
-			rootCell = bsc;
-			cells.Add(bsc);
+			foreach (var cell in inputCells)
+			{
+				//update cell weight:
+				cell.weight = cell.GetWeight(paramRanges);
+
+				cells.Add(cell);
+			}
 		}
 
 		void ResetGraph()
@@ -157,16 +171,14 @@ namespace ProceduralWorlds.Biomator
 				biomeCoverage[i] = 0;
 		}
 
-		void FillParamRange(BiomeData biomeData)
+		void FillParamRange(IEnumerable< Vector2 > ranges)
 		{
-			builtSamplers.Clear();
+			int		i = 0;
 
-			for (int i = 0; i < biomeData.length; i++)
+			foreach (var range in ranges)
 			{
-				var dataSampler = biomeData.GetDataSampler(i);
-
-				paramRanges.ranges[i] = new Vector2(dataSampler.dataRef.min, dataSampler.dataRef.max);
-				builtSamplers.Add(dataSampler.dataRef);
+				paramRanges.ranges[i] = range;
+				i++;
 			}
 		}
 
@@ -251,6 +263,10 @@ namespace ProceduralWorlds.Biomator
 			return false;
 		}
 
+		#endregion
+
+		#region switch graph search algorithm
+
 		BiomeSwitchCell		CheckForBetterCell(BiomeSwitchCell cell, BiomeSwitchValues values)
 		{
 			//check the current node links and find if there is a better solution than the current
@@ -332,9 +348,16 @@ namespace ProceduralWorlds.Biomator
 			}
 		}
 
-		public void FillBiomeMap(BiomeData biomeData, BiomeBlendList blendMatrix, float blendPercent = .15f)
+		public void FillBiomeMap2D(BiomeData biomeData, BiomeBlendList blendList, float blendPercent = 0.15f)
 		{
-			Sampler	terrain = biomeData.GetSampler(BiomeSamplerName.terrainHeight);
+			FillBiomeMap2D(biomeData.biomeMap, GetSamplers2DFromBiomeData(biomeData).ToArray(), blendList, blendPercent);
+			biomeData.ids = GetBiomeIdsInLastBiomeMap().ToArray();
+		}
+
+		public void FillBiomeMap2D(BiomeMap2D biomeMap, Sampler2D[] biomeParamSamplers, BiomeBlendList blendList, float blendPercent = .15f)
+		{
+			int		size = biomeMap.size;
+			int		paramCount = biomeParamSamplers.Length;
 			var		biomeSwitchValues = new BiomeSwitchValues();
 
 			if (!isBuilt)
@@ -342,28 +365,33 @@ namespace ProceduralWorlds.Biomator
 				Debug.LogError("Biome switch graph is not built, you can't fill the biome map !");
 				return ;
 			}
-
-			//TODO: 3D Biome fill map
 			
-			if (biomeData.biomeMap == null || biomeData.biomeMap.NeedResize(terrain.size, terrain.step))
-				biomeData.biomeMap = new BiomeMap2D(terrain.size, terrain.step);
-
 			Profiler.BeginSample("FillBiomeMap");
+
+			Array.Clear(lastBiomeMapIds, 0, lastBiomeMapIds.Length);
+			
+			int i2 = 0;
+			foreach (var samp in biomeParamSamplers)
+			{
+				// if (samp.size != size)
+					// Debug.Log("samp " + i2 + " size: " + samp.size);
+				i2++;
+			}
 
 			var blendParams = new BiomeSwitchCellParams();
 
 			//getter for range (faster than dictionary)
-			float[] ranges = new float[biomeData.length];
-			for (int i = 0; i < biomeData.length; i++)
+			float[] ranges = new float[paramCount];
+			for (int i = 0; i < paramCount; i++)
 				ranges[i] = paramRanges.ranges[i].y - paramRanges.ranges[i].x;
-
-			for (int x = 0; x < terrain.size; x++)
-				for (int y = 0; y < terrain.size; y++)
+			
+			for (int x = 0; x < size; x++)
+				for (int y = 0; y < size; y++)
 				{
 					//fill biomeSwitchValue and blendParams with the current biomeData sampler values
-					for (int i = 0; i < biomeData.length; i++)
+					for (int i = 0; i < paramCount; i++)
 					{
-						biomeSwitchValues[i] = biomeData.biomeSamplers[i].data2D[x, y];
+						biomeSwitchValues[i] = biomeParamSamplers[i][x, y];
 						var val = biomeSwitchValues[i];
 						var r = ranges[i];
 						var spc = blendParams.switchParams[i];
@@ -385,9 +413,9 @@ namespace ProceduralWorlds.Biomator
 
 					short	biomeId = biomeSwitchCell.id;
 					
-					biomeData.ids.Add(biomeId);
+					lastBiomeMapIds[biomeId] = true;
 					
-					biomeData.biomeMap.SetPrimaryBiomeId(x, y, biomeId);
+					biomeMap.SetPrimaryBiomeId(x, y, biomeId);
 
 					//add biome that can be blended with the primary biome,
 					if (blendPercent > 0)
@@ -395,15 +423,23 @@ namespace ProceduralWorlds.Biomator
 						{
 							if (link.Overlaps(blendParams))
 							{
-								float blend = link.ComputeBlend(blendMatrix, paramRanges, biomeSwitchValues, blendPercent);
+								float blend = link.ComputeBlend(blendList, paramRanges, biomeSwitchValues, blendPercent);
 								if (blend > 0.001f)
-									biomeData.biomeMap.AddBiome(x, y, link.id, blend);
+								{
+									biomeMap.AddBiome(x, y, link.id, blend);
+									lastBiomeMapIds[link.id] = true;
+								}
 							}
 						}
+					biomeMap.NormalizeBlendValues(x, y);
 				}
 
 			Profiler.EndSample();
 		}
+
+		#endregion
+
+		#region Utils
 
 		public int GetBiomeCount()
 		{
@@ -432,6 +468,40 @@ namespace ProceduralWorlds.Biomator
 		{
 			return biomeCoverage;
 		}
+
+		//Create a switchGraph that always return this biome Id
+		public void BuildTestGraph(short biomeId)
+		{
+			BiomeSwitchCell bsc = new BiomeSwitchCell();
+
+			bsc.id = biomeId;
+			rootCell = bsc;
+			cells.Add(bsc);
+		}
+
+		public IEnumerable< short > GetBiomeIdsInLastBiomeMap()
+		{
+			for (short i = 0; i < lastBiomeMapIds.Length; i++)
+				if (lastBiomeMapIds[i])
+					yield return i;
+		}
+
+		IEnumerable< Vector2 > GetParamRangesFromBiomeData(BiomeData biomeData)
+		{
+			for (int i = 0; i < biomeData.length; i++)
+			{
+				var s = biomeData.GetDataSampler(i).dataRef;
+				yield return new Vector2(s.min, s.max);
+			}
+		}
+		
+		IEnumerable< Sampler2D > GetSamplers2DFromBiomeData(BiomeData biomeData)
+		{
+			for (int i = 0; i < biomeData.length; i++)
+				yield return biomeData.GetDataSampler(i).data2D;
+		}
+
+		#endregion
 	
 	}
 }

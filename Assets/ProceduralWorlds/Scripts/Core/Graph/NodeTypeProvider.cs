@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using ProceduralWorlds.Node;
+using ProceduralWorlds.Nodes;
 using System.Linq;
 
 namespace ProceduralWorlds.Core
@@ -60,7 +60,8 @@ namespace ProceduralWorlds.Core
             typeof(NodeDebugInfo),
 
 			//Noises and masks:
-            typeof(NodeCircleNoiseMask), typeof(NodePerlinNoise2D),
+            typeof(NodeCircleNoiseMask), typeof(NodePerlinNoise2D), typeof(NodeFlat2D),
+			typeof(NodeFlat3D),
 
 			//Graph specific:
 			typeof(NodeGraphInput), typeof(NodeGraphOutput), typeof(NodeBiomeGraphInput),
@@ -102,6 +103,8 @@ namespace ProceduralWorlds.Core
 			),
 			new NodeTypeInfoList(WorldGraph | BiomeGraph, "Noises and Masks", ColorSchemeName.Emerald,
 				"Perlin noise 2D", typeof(NodePerlinNoise2D),
+				"Flat 2D", typeof(NodeFlat2D),
+				"Flat 3D", typeof(NodeFlat3D),
 				"Circle Noise Mask", typeof(NodeCircleNoiseMask)
 			),
 			new NodeTypeInfoList(WorldGraph, "Biomes", ColorSchemeName.Carrot,

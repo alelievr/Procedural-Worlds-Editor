@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProceduralWorlds.Core;
 
-namespace ProceduralWorlds.Node
+namespace ProceduralWorlds.Nodes
 {
 	public class NodeWorldGraphOutput : BaseNode
 	{
 		[Input("Final terrain")]
-		public FinalTerrain			finalTerrain;
+		public WorldChunk			finalTerrain;
 
 		[Input]
 		public PWArray< object >	inputValues = new PWArray< object >();
