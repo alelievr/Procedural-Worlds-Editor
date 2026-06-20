@@ -2,7 +2,7 @@
 
 PWE is a node based procedural terrain generator which aims to support a complex biome system, multiple surface generation algorithms and an easy and powerful API to add anything you want to the generation.  
 This asset generate fully procedurally worlds as standalone (like in minecraft), only scripts will generate the terrain and so manual terrain editing tool are not planed to be implemented.  
-Currently under active developement, if you're interseted in contributing / have question about this project, feel free to contact me on [Unity connect](https://connect.unity.com/u/58ffd32232b3060022d79f99)
+Currently under active development, if you're interseted in contributing / have question about this project, feel free to contact me on [Unity connect](https://connect.unity.com/u/58ffd32232b3060022d79f99)
 
 ## Status of the project:
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/alelievr/Procedural-Worlds-Editor.svg)](http://isitmaintained.com/project/alelievr/Procedural-Worlds-Editor "Average time to resolve an issue")
